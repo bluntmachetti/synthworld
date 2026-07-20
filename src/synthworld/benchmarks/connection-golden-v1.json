@@ -1,0 +1,636 @@
+{
+  "synthetic": true,
+  "schema_version": "1.0.0",
+  "seed": 20260719,
+  "public": {
+    "synthetic": true,
+    "schema_version": "1.0.0",
+    "seed": 20260719,
+    "identity_records": [
+      {
+        "synthetic": true,
+        "id": "0101af0f-882e-551e-a253-d488d2922512",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/0101af0f-882e-551e-a253-d488d2922512",
+        "display_name": "Katherin Oconor",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Lantern Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "707|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "139bf5e8-454a-55a1-ab24-43e4dc5a178f",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/139bf5e8-454a-55a1-ab24-43e4dc5a178f",
+        "display_name": "Amina Okafor",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Harbor Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "606|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "phone",
+            "value": "+1-212-555-0101",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "2bbb8bc4-fe31-5432-a9be-2395004bb907",
+        "source_type": "social",
+        "source_url": "https://records.example.test/identity/2bbb8bc4-fe31-5432-a9be-2395004bb907",
+        "display_name": "Katherine O'Connor",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Lantern Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "707|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "synth_koconnor",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "4025ca09-daaf-5d80-9270-57d02ad3e303",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/4025ca09-daaf-5d80-9270-57d02ad3e303",
+        "display_name": "Amina Mensah",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Indigo Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "606|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "phone",
+            "value": "+1-212-555-0102",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "412077d7-794d-5b96-98fc-bb1baf628e49",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/412077d7-794d-5b96-98fc-bb1baf628e49",
+        "display_name": "Katie Oconnor",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "707|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "synth_koconnor",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "451ffc3d-9b9b-5754-b742-624b9f696073",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/451ffc3d-9b9b-5754-b742-624b9f696073",
+        "display_name": "Kathryn O'Connor",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Lantern Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "808|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "4f847f95-4169-5188-84dd-f400667a3514",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/4f847f95-4169-5188-84dd-f400667a3514",
+        "display_name": "Zoe Garcia",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "zoe.delta@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Delta Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "404|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "4fd0628f-f4ca-5ed3-be0b-a971d32a1208",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/4fd0628f-f4ca-5ed3-be0b-a971d32a1208",
+        "display_name": "Lina Mercer",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "2000-01-01",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "lina.mercer@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "505|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "52f843b9-e7be-5ac2-9a0f-2829eea9b513",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/52f843b9-e7be-5ac2-9a0f-2829eea9b513",
+        "display_name": "Mina Mercer",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "2000-01-01",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "mina.mercer@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "505|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "5bd1a8a8-3006-5e27-a606-886a926253e4",
+        "source_type": "broker",
+        "source_url": "https://records.example.test/identity/5bd1a8a8-3006-5e27-a606-886a926253e4",
+        "display_name": "Lina Mercer",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "lina.mercer@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "505|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "60de941c-fe4d-5f2f-8780-ffaa09b0e219",
+        "source_type": "alumni",
+        "source_url": "https://records.example.test/identity/60de941c-fe4d-5f2f-8780-ffaa09b0e219",
+        "display_name": "Zoë García",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Gamma Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "303|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "666e17ee-1137-56e7-9125-10d117a76210",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/666e17ee-1137-56e7-9125-10d117a76210",
+        "display_name": "Jordan Smith",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Atlas Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "101|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "synth_jordan_atlas",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "998faf26-dcfc-5d8c-b081-c69162e9f6ec",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/998faf26-dcfc-5d8c-b081-c69162e9f6ec",
+        "display_name": "Jordan Smith",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "jordan.atlas@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Atlas Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "101|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "c5dc4367-fd7e-5470-9733-c4cb80da0d4f",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/c5dc4367-fd7e-5470-9733-c4cb80da0d4f",
+        "display_name": "Jordan Smith",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Birch Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "202|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "synth_jordan_birch",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "cfef98b8-92f9-5fee-95c8-b6266291c94a",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/cfef98b8-92f9-5fee-95c8-b6266291c94a",
+        "display_name": "Zoe Garcia",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Gamma Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "303|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "f6aab04b-225c-538f-84c1-52d17aa7c7b7",
+        "source_type": "broker",
+        "source_url": "https://records.example.test/identity/f6aab04b-225c-538f-84c1-52d17aa7c7b7",
+        "display_name": "Mina Mercer",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "mina.mercer@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "505|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "fba9c8e9-41b3-50b9-b2de-5b8835e04261",
+        "source_type": "alumni",
+        "source_url": "https://records.example.test/identity/fba9c8e9-41b3-50b9-b2de-5b8835e04261",
+        "display_name": "Amina Mensah",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Harbor Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "phone",
+            "value": "+1-212-555-0101",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "fcfda595-9b0a-5392-a151-10f67500df5e",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/fcfda595-9b0a-5392-a151-10f67500df5e",
+        "display_name": "Jordan Smith",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "jordan.birch@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Birch Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "202|Adversarial Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      }
+    ],
+    "association_records": []
+  },
+  "answer_key": {
+    "synthetic": true,
+    "record_memberships": [
+      {
+        "synthetic": true,
+        "record_id": "0101af0f-882e-551e-a253-d488d2922512",
+        "entity_id": "entity-0009"
+      },
+      {
+        "synthetic": true,
+        "record_id": "139bf5e8-454a-55a1-ab24-43e4dc5a178f",
+        "entity_id": "entity-0007"
+      },
+      {
+        "synthetic": true,
+        "record_id": "2bbb8bc4-fe31-5432-a9be-2395004bb907",
+        "entity_id": "entity-0009"
+      },
+      {
+        "synthetic": true,
+        "record_id": "4025ca09-daaf-5d80-9270-57d02ad3e303",
+        "entity_id": "entity-0008"
+      },
+      {
+        "synthetic": true,
+        "record_id": "412077d7-794d-5b96-98fc-bb1baf628e49",
+        "entity_id": "entity-0009"
+      },
+      {
+        "synthetic": true,
+        "record_id": "451ffc3d-9b9b-5754-b742-624b9f696073",
+        "entity_id": "entity-0010"
+      },
+      {
+        "synthetic": true,
+        "record_id": "4f847f95-4169-5188-84dd-f400667a3514",
+        "entity_id": "entity-0004"
+      },
+      {
+        "synthetic": true,
+        "record_id": "4fd0628f-f4ca-5ed3-be0b-a971d32a1208",
+        "entity_id": "entity-0005"
+      },
+      {
+        "synthetic": true,
+        "record_id": "52f843b9-e7be-5ac2-9a0f-2829eea9b513",
+        "entity_id": "entity-0006"
+      },
+      {
+        "synthetic": true,
+        "record_id": "5bd1a8a8-3006-5e27-a606-886a926253e4",
+        "entity_id": "entity-0005"
+      },
+      {
+        "synthetic": true,
+        "record_id": "60de941c-fe4d-5f2f-8780-ffaa09b0e219",
+        "entity_id": "entity-0003"
+      },
+      {
+        "synthetic": true,
+        "record_id": "666e17ee-1137-56e7-9125-10d117a76210",
+        "entity_id": "entity-0001"
+      },
+      {
+        "synthetic": true,
+        "record_id": "998faf26-dcfc-5d8c-b081-c69162e9f6ec",
+        "entity_id": "entity-0001"
+      },
+      {
+        "synthetic": true,
+        "record_id": "c5dc4367-fd7e-5470-9733-c4cb80da0d4f",
+        "entity_id": "entity-0002"
+      },
+      {
+        "synthetic": true,
+        "record_id": "cfef98b8-92f9-5fee-95c8-b6266291c94a",
+        "entity_id": "entity-0003"
+      },
+      {
+        "synthetic": true,
+        "record_id": "f6aab04b-225c-538f-84c1-52d17aa7c7b7",
+        "entity_id": "entity-0006"
+      },
+      {
+        "synthetic": true,
+        "record_id": "fba9c8e9-41b3-50b9-b2de-5b8835e04261",
+        "entity_id": "entity-0007"
+      },
+      {
+        "synthetic": true,
+        "record_id": "fcfda595-9b0a-5392-a151-10f67500df5e",
+        "entity_id": "entity-0002"
+      }
+    ],
+    "adversarial_cases": [
+      {
+        "synthetic": true,
+        "pack": "common_name",
+        "record_ids": [
+          "666e17ee-1137-56e7-9125-10d117a76210",
+          "998faf26-dcfc-5d8c-b081-c69162e9f6ec",
+          "c5dc4367-fd7e-5470-9733-c4cb80da0d4f",
+          "fcfda595-9b0a-5392-a151-10f67500df5e"
+        ],
+        "entity_ids": [
+          "entity-0001",
+          "entity-0002"
+        ]
+      },
+      {
+        "synthetic": true,
+        "pack": "maiden_name",
+        "record_ids": [
+          "139bf5e8-454a-55a1-ab24-43e4dc5a178f",
+          "4025ca09-daaf-5d80-9270-57d02ad3e303",
+          "fba9c8e9-41b3-50b9-b2de-5b8835e04261"
+        ],
+        "entity_ids": [
+          "entity-0007",
+          "entity-0008"
+        ]
+      },
+      {
+        "synthetic": true,
+        "pack": "misspelling_alias",
+        "record_ids": [
+          "0101af0f-882e-551e-a253-d488d2922512",
+          "2bbb8bc4-fe31-5432-a9be-2395004bb907",
+          "412077d7-794d-5b96-98fc-bb1baf628e49",
+          "451ffc3d-9b9b-5754-b742-624b9f696073"
+        ],
+        "entity_ids": [
+          "entity-0009",
+          "entity-0010"
+        ]
+      },
+      {
+        "synthetic": true,
+        "pack": "twins_shared_address",
+        "record_ids": [
+          "4fd0628f-f4ca-5ed3-be0b-a971d32a1208",
+          "52f843b9-e7be-5ac2-9a0f-2829eea9b513",
+          "5bd1a8a8-3006-5e27-a606-886a926253e4",
+          "f6aab04b-225c-538f-84c1-52d17aa7c7b7"
+        ],
+        "entity_ids": [
+          "entity-0005",
+          "entity-0006"
+        ]
+      },
+      {
+        "synthetic": true,
+        "pack": "unicode_diacritics",
+        "record_ids": [
+          "4f847f95-4169-5188-84dd-f400667a3514",
+          "60de941c-fe4d-5f2f-8780-ffaa09b0e219",
+          "cfef98b8-92f9-5fee-95c8-b6266291c94a"
+        ],
+        "entity_ids": [
+          "entity-0003",
+          "entity-0004"
+        ]
+      }
+    ],
+    "relationships": [],
+    "unilateral_controls": []
+  }
+}

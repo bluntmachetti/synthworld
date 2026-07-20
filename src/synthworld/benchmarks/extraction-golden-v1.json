@@ -1,0 +1,2110 @@
+{
+  "synthetic": true,
+  "schema_version": "1.0.0",
+  "seed": 20260719,
+  "pages": [
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0001-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0001-01",
+        "content": "Synthetic breach record\nIncident date: 2022-01-01\nAccount email: synth_joel_fisher_0001@example.test\nCredential status: exposed; value intentionally absent.\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0001",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 100,
+            "text": "synth_joel_fisher_0001@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0001-01",
+        "purpose": "exposure",
+        "title": "Example name-collision result 0001-01",
+        "content": "Synthetic search result\nEmail: synth_leslie_begum_0002@example.test\nEmployer: Example Works 0002\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 67,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 78,
+            "end": 96,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0001-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_joel_fisher_0001",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_joel_fisher_0001\nEmployer: Example Works 0001\nEducation: Test University 0001\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0001",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 81,
+            "text": "synth_joel_fisher_0001"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 92,
+            "end": 110,
+            "text": "Example Works 0001"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 122,
+            "end": 142,
+            "text": "Test University 0001"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0002-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0002-01",
+        "content": "Synthetic breach record\nIncident date: 2023-03-02\nAccount email: synth_leslie_begum_0002@example.test\nTelephone: +1-200-555-0101\nPostal address: 100 1 Example Avenue, Testville 00000\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 113,
+            "end": 128,
+            "text": "+1-200-555-0101"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 145,
+            "end": 182,
+            "text": "100 1 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0002-02",
+        "purpose": "exposure",
+        "title": "Example Breach 0002-02",
+        "content": "Synthetic breach record\nIncident date: 2024-04-05\nAccount email: synth_leslie_begum_0002@example.test\nNational ID: SYN-202607207\nDate of birth: 1975-04-24\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 115,
+            "end": 128,
+            "text": "SYN-202607207"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 144,
+            "end": 154,
+            "text": "1975-04-24"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0002-01",
+        "purpose": "exposure",
+        "title": "Example Broker 0002-01",
+        "content": "Synthetic broker listing\nEmail: synth_leslie_begum_0002@example.test\nAddress: 100 1 Example Avenue, Testville 00000\nPhone: +1-200-555-0101\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "100 1 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0101"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0002-01",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0002-01",
+        "content": "Synthetic search result\nEmail: synth_leslie_begum_0002@example.test\nEmployer: Example Works 0002\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 67,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 78,
+            "end": 96,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0002-02",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0002-02",
+        "content": "Synthetic search result\nEmail: synth_leslie_begum_0002@example.test\nEmployer: Example Works 0002\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 67,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 78,
+            "end": 96,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0002-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_leslie_begum_0002",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_leslie_begum_0002\nEmployer: Example Works 0002\nEducation: Test University 0002\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_leslie_begum_0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0002-02",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_leslie_begum_0002",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_leslie_begum_0002\nEmployer: Example Works 0002\nEducation: Test University 0002\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_leslie_begum_0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0003-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0003-01",
+        "content": "Synthetic breach record\nIncident date: 2024-05-03\nAccount email: synth_bradley_fletcher_0003@example.test\nNational ID: SYN-202607215\nDate of birth: 2004-03-30\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 105,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 119,
+            "end": 132,
+            "text": "SYN-202607215"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 148,
+            "end": 158,
+            "text": "2004-03-30"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0003-02",
+        "purpose": "exposure",
+        "title": "Example Breach 0003-02",
+        "content": "Synthetic breach record\nIncident date: 2025-06-06\nAccount email: synth_bradley_fletcher_0003@example.test\nCredential status: exposed; value intentionally absent.\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 105,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0003-03",
+        "purpose": "exposure",
+        "title": "Example Breach 0003-03",
+        "content": "Synthetic breach record\nIncident date: 2022-07-09\nAccount email: synth_bradley_fletcher_0003@example.test\nTelephone: +1-200-555-0102\nPostal address: 102 3 Example Avenue, Testville 00000\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 105,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 117,
+            "end": 132,
+            "text": "+1-200-555-0102"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 149,
+            "end": 186,
+            "text": "102 3 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0003-01",
+        "purpose": "exposure",
+        "title": "Example Broker 0003-01",
+        "content": "Synthetic broker listing\nEmail: synth_bradley_fletcher_0003@example.test\nAddress: 102 3 Example Avenue, Testville 00000\nPhone: +1-200-555-0102\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 72,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 82,
+            "end": 119,
+            "text": "102 3 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 127,
+            "end": 142,
+            "text": "+1-200-555-0102"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0003-02",
+        "purpose": "exposure",
+        "title": "Example Broker 0003-02",
+        "content": "Synthetic broker listing\nEmail: synth_bradley_fletcher_0003@example.test\nAddress: 102 3 Example Avenue, Testville 00000\nPhone: +1-200-555-0102\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 72,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 82,
+            "end": 119,
+            "text": "102 3 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 127,
+            "end": 142,
+            "text": "+1-200-555-0102"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0003-01",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0003-01",
+        "content": "Synthetic search result\nEmail: synth_bradley_fletcher_0003@example.test\nEmployer: Example Works 0002\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 71,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 82,
+            "end": 100,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0003-02",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0003-02",
+        "content": "Synthetic search result\nEmail: synth_bradley_fletcher_0003@example.test\nEmployer: Example Works 0002\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 71,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 82,
+            "end": 100,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0003-03",
+        "purpose": "exposure",
+        "title": "Example name-collision result 0003-03",
+        "content": "Synthetic search result\nEmail: synth_jacob_sullivan_0004@example.test\nEmployer: Example Works 0004\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0003-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_bradley_fletcher_0003",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_bradley_fletcher_0003\nEmployer: Example Works 0002\nEducation: Test University 0003\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 86,
+            "text": "synth_bradley_fletcher_0003"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 97,
+            "end": 115,
+            "text": "Example Works 0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 127,
+            "end": 147,
+            "text": "Test University 0003"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0004-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0004-01",
+        "content": "Synthetic breach record\nIncident date: 2025-07-04\nAccount email: synth_jacob_sullivan_0004@example.test\nCredential status: exposed; value intentionally absent.\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 103,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0004-01",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0004-01",
+        "content": "Synthetic search result\nEmail: synth_jacob_sullivan_0004@example.test\nEmployer: Example Works 0004\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0004-02",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0004-02",
+        "content": "Synthetic search result\nEmail: synth_jacob_sullivan_0004@example.test\nEmployer: Example Works 0004\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0004-03",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0004-03",
+        "content": "Synthetic search result\nEmail: synth_jacob_sullivan_0004@example.test\nEmployer: Example Works 0004\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0004-04",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0004-04",
+        "content": "Synthetic search result\nEmail: synth_jacob_sullivan_0004@example.test\nEmployer: Example Works 0004\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0004-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_jacob_sullivan_0004",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_jacob_sullivan_0004\nEmployer: Example Works 0004\nEducation: Test University 0003\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 84,
+            "text": "synth_jacob_sullivan_0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 95,
+            "end": 113,
+            "text": "Example Works 0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 125,
+            "end": 145,
+            "text": "Test University 0003"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0004-02",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_jacob_sullivan_0004",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_jacob_sullivan_0004\nEmployer: Example Works 0004\nEducation: Test University 0003\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 84,
+            "text": "synth_jacob_sullivan_0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 95,
+            "end": 113,
+            "text": "Example Works 0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 125,
+            "end": 145,
+            "text": "Test University 0003"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0005-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0005-01",
+        "content": "Synthetic breach record\nIncident date: 2022-09-05\nAccount email: synth_denis_lawson_0005@example.test\nTelephone: +1-200-555-0104\nPostal address: 104 4 Example Avenue, Testville 00000\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_denis_lawson_0005@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 113,
+            "end": 128,
+            "text": "+1-200-555-0104"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 145,
+            "end": 182,
+            "text": "104 4 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0005-02",
+        "purpose": "exposure",
+        "title": "Example Breach 0005-02",
+        "content": "Synthetic breach record\nIncident date: 2023-10-08\nAccount email: synth_denis_lawson_0005@example.test\nNational ID: SYN-202607231\nDate of birth: 1965-06-07\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_denis_lawson_0005@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 115,
+            "end": 128,
+            "text": "SYN-202607231"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 144,
+            "end": 154,
+            "text": "1965-06-07"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0005-01",
+        "purpose": "exposure",
+        "title": "Example Broker 0005-01",
+        "content": "Synthetic broker listing\nEmail: synth_denis_lawson_0005@example.test\nAddress: 104 4 Example Avenue, Testville 00000\nPhone: +1-200-555-0104\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_denis_lawson_0005@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "104 4 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0104"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0005-01",
+        "purpose": "exposure",
+        "title": "Example name-collision result 0005-01",
+        "content": "Synthetic search result\nEmail: synth_samuel_fuller_0006@example.test\nEmployer: Example Works 0006\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0005-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_denis_lawson_0005",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_denis_lawson_0005\nEmployer: Example Works 0005\nEducation: Test University 0005\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_denis_lawson_0005"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0005"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0005"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0006-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0006-01",
+        "content": "Synthetic breach record\nIncident date: 2023-11-06\nAccount email: synth_samuel_fuller_0006@example.test\nNational ID: SYN-202607249\nDate of birth: 1958-08-15\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 116,
+            "end": 129,
+            "text": "SYN-202607249"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 145,
+            "end": 155,
+            "text": "1958-08-15"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0006-02",
+        "purpose": "exposure",
+        "title": "Example Breach 0006-02",
+        "content": "Synthetic breach record\nIncident date: 2024-12-09\nAccount email: synth_samuel_fuller_0006@example.test\nCredential status: exposed; value intentionally absent.\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_samuel_fuller_0006@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0006-03",
+        "purpose": "exposure",
+        "title": "Example Breach 0006-03",
+        "content": "Synthetic breach record\nIncident date: 2025-01-12\nAccount email: synth_samuel_fuller_0006@example.test\nTelephone: +1-200-555-0105\nPostal address: 105 6 Example Avenue, Testville 00000\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 114,
+            "end": 129,
+            "text": "+1-200-555-0105"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 146,
+            "end": 183,
+            "text": "105 6 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0006-01",
+        "purpose": "exposure",
+        "title": "Example Broker 0006-01",
+        "content": "Synthetic broker listing\nEmail: synth_samuel_fuller_0006@example.test\nAddress: 105 6 Example Avenue, Testville 00000\nPhone: +1-200-555-0105\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 69,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 79,
+            "end": 116,
+            "text": "105 6 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 124,
+            "end": 139,
+            "text": "+1-200-555-0105"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0006-02",
+        "purpose": "exposure",
+        "title": "Example Broker 0006-02",
+        "content": "Synthetic broker listing\nEmail: synth_samuel_fuller_0006@example.test\nAddress: 105 6 Example Avenue, Testville 00000\nPhone: +1-200-555-0105\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 69,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 79,
+            "end": 116,
+            "text": "105 6 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 124,
+            "end": 139,
+            "text": "+1-200-555-0105"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0006-01",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0006-01",
+        "content": "Synthetic search result\nEmail: synth_samuel_fuller_0006@example.test\nEmployer: Example Works 0006\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0006-02",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0006-02",
+        "content": "Synthetic search result\nEmail: synth_samuel_fuller_0006@example.test\nEmployer: Example Works 0006\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0006-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_samuel_fuller_0006",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_samuel_fuller_0006\nEmployer: Example Works 0006\nEducation: Test University 0006\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_samuel_fuller_0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0006-02",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_samuel_fuller_0006",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_samuel_fuller_0006\nEmployer: Example Works 0006\nEducation: Test University 0006\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_samuel_fuller_0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0007-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0007-01",
+        "content": "Synthetic breach record\nIncident date: 2024-01-07\nAccount email: synth_susan_smith_0007@example.test\nCredential status: exposed; value intentionally absent.\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 100,
+            "text": "synth_susan_smith_0007@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0007-01",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0007-01",
+        "content": "Synthetic search result\nEmail: synth_susan_smith_0007@example.test\nEmployer: Example Works 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 66,
+            "text": "synth_susan_smith_0007@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 77,
+            "end": 95,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0007-02",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0007-02",
+        "content": "Synthetic search result\nEmail: synth_susan_smith_0007@example.test\nEmployer: Example Works 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 66,
+            "text": "synth_susan_smith_0007@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 77,
+            "end": 95,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0007-03",
+        "purpose": "exposure",
+        "title": "Example name-collision result 0007-03",
+        "content": "Synthetic search result\nEmail: synth_annette_jones_0008@example.test\nEmployer: Example Works 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0007-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_susan_smith_0007",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_susan_smith_0007\nEmployer: Example Works 0007\nEducation: Test University 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 81,
+            "text": "synth_susan_smith_0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 92,
+            "end": 110,
+            "text": "Example Works 0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 122,
+            "end": 142,
+            "text": "Test University 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0008-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0008-01",
+        "content": "Synthetic breach record\nIncident date: 2025-03-08\nAccount email: synth_annette_jones_0008@example.test\nTelephone: +1-200-555-0107\nPostal address: 107 8 Example Avenue, Testville 00000\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 114,
+            "end": 129,
+            "text": "+1-200-555-0107"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 146,
+            "end": 183,
+            "text": "107 8 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0008-02",
+        "purpose": "exposure",
+        "title": "Example Breach 0008-02",
+        "content": "Synthetic breach record\nIncident date: 2022-04-11\nAccount email: synth_annette_jones_0008@example.test\nNational ID: SYN-202607264\nDate of birth: 1965-01-16\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 116,
+            "end": 129,
+            "text": "SYN-202607264"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 145,
+            "end": 155,
+            "text": "1965-01-16"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0008-01",
+        "purpose": "exposure",
+        "title": "Example Broker 0008-01",
+        "content": "Synthetic broker listing\nEmail: synth_annette_jones_0008@example.test\nAddress: 107 8 Example Avenue, Testville 00000\nPhone: +1-200-555-0107\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 69,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 79,
+            "end": 116,
+            "text": "107 8 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 124,
+            "end": 139,
+            "text": "+1-200-555-0107"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0008-01",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0008-01",
+        "content": "Synthetic search result\nEmail: synth_annette_jones_0008@example.test\nEmployer: Example Works 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0008-02",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0008-02",
+        "content": "Synthetic search result\nEmail: synth_annette_jones_0008@example.test\nEmployer: Example Works 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0008-03",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0008-03",
+        "content": "Synthetic search result\nEmail: synth_annette_jones_0008@example.test\nEmployer: Example Works 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0008-04",
+        "purpose": "exposure",
+        "title": "Synthetic profile result 0008-04",
+        "content": "Synthetic search result\nEmail: synth_annette_jones_0008@example.test\nEmployer: Example Works 0007\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0008-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_annette_jones_0008",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_annette_jones_0008\nEmployer: Example Works 0007\nEducation: Test University 0008\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_annette_jones_0008"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0008"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0008-02",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_annette_jones_0008",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_annette_jones_0008\nEmployer: Example Works 0007\nEducation: Test University 0008\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_annette_jones_0008"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0008"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0009-01",
+        "purpose": "exposure",
+        "title": "Example Breach 0009-01",
+        "content": "Synthetic breach record\nIncident date: 2022-05-09\nAccount email: synth_paula_robson_0009@example.test\nNational ID: SYN-202607272\nDate of birth: 1991-10-14\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 115,
+            "end": 128,
+            "text": "SYN-202607272"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 144,
+            "end": 154,
+            "text": "1991-10-14"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0009-02",
+        "purpose": "exposure",
+        "title": "Example Breach 0009-02",
+        "content": "Synthetic breach record\nIncident date: 2023-06-12\nAccount email: synth_paula_robson_0009@example.test\nCredential status: exposed; value intentionally absent.\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_paula_robson_0009@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "breach",
+        "source_record_id": "breach-0009-03",
+        "purpose": "exposure",
+        "title": "Example Breach 0009-03",
+        "content": "Synthetic breach record\nIncident date: 2024-07-15\nAccount email: synth_paula_robson_0009@example.test\nTelephone: +1-200-555-0108\nPostal address: 108 9 Example Avenue, Testville 00000\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 113,
+            "end": 128,
+            "text": "+1-200-555-0108"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 145,
+            "end": 182,
+            "text": "108 9 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0009-01",
+        "purpose": "exposure",
+        "title": "Example Broker 0009-01",
+        "content": "Synthetic broker listing\nEmail: synth_paula_robson_0009@example.test\nAddress: 108 9 Example Avenue, Testville 00000\nPhone: +1-200-555-0108\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "108 9 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0108"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "broker",
+        "source_record_id": "broker-0009-02",
+        "purpose": "exposure",
+        "title": "Example Broker 0009-02",
+        "content": "Synthetic broker listing\nEmail: synth_paula_robson_0009@example.test\nAddress: 108 9 Example Avenue, Testville 00000\nPhone: +1-200-555-0108\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "108 9 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0108"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "search-0009-01",
+        "purpose": "exposure",
+        "title": "Example name-collision result 0009-01",
+        "content": "Synthetic search result\nEmail: synth_kathryn_rhodes_0010@example.test\nEmployer: Example Works 0010\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0010",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_kathryn_rhodes_0010@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0010"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "social",
+        "source_record_id": "social-0009-01",
+        "purpose": "exposure",
+        "title": "Example Social profile @synth_paula_robson_0009",
+        "content": "Synthetic social profile\nPlatform: Example Social\nHandle: @synth_paula_robson_0009\nEmployer: Example Works 0009\nEducation: Test University 0008\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_paula_robson_0009"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0009"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0008"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "page": {
+        "synthetic": true,
+        "source_type": "search",
+        "source_record_id": "negative-control-0001",
+        "purpose": "negative_control",
+        "title": "Synthetic no-result page",
+        "content": "Synthetic no-result page\nNo email address, telephone number, postal address, date of birth, username, employer, school, or national identifier is published.\n"
+      },
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0010",
+        "spans": []
+      }
+    }
+  ]
+}

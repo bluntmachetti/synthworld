@@ -1,0 +1,77 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "idcognito-synthworld"
+version = "0.6.0"
+description = "Deterministic synthetic identity graphs for privacy-system evaluation"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{ name = "Idcognito contributors" }]
+dependencies = [
+  "Faker==40.31.0",
+  "pydantic==2.13.4",
+]
+
+[dependency-groups]
+dev = [
+  "mypy>=1.20,<2",
+  "pytest>=9,<10",
+  "pytest-cov>=7,<8",
+  "ruff>=0.15,<0.16",
+]
+
+[project.scripts]
+synthworld = "synthworld.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/synthworld"]
+
+[tool.hatch.build.targets.sdist.force-include]
+"LICENSE" = "LICENSE"
+
+[tool.uv]
+required-version = "==0.9.18"
+
+[tool.pytest.ini_options]
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--cov=src/synthworld",
+  "--cov-branch",
+  "--cov-report=term-missing",
+  "--cov-report=xml",
+  "--cov-fail-under=100",
+]
+filterwarnings = ["error"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["src/synthworld"]
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+]
+fail_under = 100
+show_missing = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["A", "ANN", "B", "E", "F", "I", "N", "RUF", "S", "SIM", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/synthworld", "tests", "conftest.py"]
+mypy_path = ["src"]

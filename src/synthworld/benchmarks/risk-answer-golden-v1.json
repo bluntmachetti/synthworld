@@ -1,0 +1,314 @@
+{
+  "synthetic": true,
+  "schema_version": "1.0.0",
+  "seed": 20260719,
+  "cases": [
+    {
+      "synthetic": true,
+      "case_id": "108129a2-dc91-598c-8e1f-eac6cf1122fd",
+      "score": 75,
+      "band": "critical",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "33daed85-8f8d-5146-94fb-e7168a5f14d3",
+          "severity": "low",
+          "exposed_data": [
+            "address",
+            "email",
+            "phone"
+          ],
+          "severity_points": 5,
+          "data_points": 8,
+          "points": 13
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "833b39d0-9985-5a06-b317-0f2e10a7e5b5",
+          "severity": "critical",
+          "exposed_data": [
+            "email",
+            "password"
+          ],
+          "severity_points": 20,
+          "data_points": 11,
+          "points": 31
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "a634e890-ed19-5e22-86ab-97700e452015",
+          "severity": "high",
+          "exposed_data": [
+            "date_of_birth",
+            "email",
+            "national_id"
+          ],
+          "severity_points": 15,
+          "data_points": 16,
+          "points": 31
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "338256c0-4452-5dbc-90ab-74080b2bf9d6",
+      "score": 0,
+      "band": "none",
+      "factors": []
+    },
+    {
+      "synthetic": true,
+      "case_id": "393ac1d2-754d-5597-954e-d4f427172129",
+      "score": 31,
+      "band": "moderate",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "e4f7a539-37b1-5324-ada8-0aa7d561c29a",
+          "severity": "critical",
+          "exposed_data": [
+            "email",
+            "password"
+          ],
+          "severity_points": 20,
+          "data_points": 11,
+          "points": 31
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "416edb06-e523-5ac0-b776-3134cde63a67",
+      "score": 49,
+      "band": "moderate",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "158f796c-3028-54ed-85e6-905f155e1806",
+          "severity": "critical",
+          "exposed_data": [
+            "address",
+            "email",
+            "phone"
+          ],
+          "severity_points": 20,
+          "data_points": 8,
+          "points": 28
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "cd78cae0-12be-50dc-b4da-cc6ca4d4522a",
+          "severity": "low",
+          "exposed_data": [
+            "date_of_birth",
+            "email",
+            "national_id"
+          ],
+          "severity_points": 5,
+          "data_points": 16,
+          "points": 21
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "5721db10-031a-5a52-a6b5-d6f70dca4656",
+      "score": 65,
+      "band": "high",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "3fc5c18b-93e6-5d34-9a7f-02fb31e785eb",
+          "severity": "medium",
+          "exposed_data": [
+            "email",
+            "password"
+          ],
+          "severity_points": 10,
+          "data_points": 11,
+          "points": 21
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "ded328d0-9d90-5e91-aac1-f75189e1ffdf",
+          "severity": "low",
+          "exposed_data": [
+            "date_of_birth",
+            "email",
+            "national_id"
+          ],
+          "severity_points": 5,
+          "data_points": 16,
+          "points": 21
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "ee63d5ff-c058-5d18-8df5-09adf65c4af1",
+          "severity": "high",
+          "exposed_data": [
+            "address",
+            "email",
+            "phone"
+          ],
+          "severity_points": 15,
+          "data_points": 8,
+          "points": 23
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "7c79a1d9-3cf7-5b2b-8b32-3e0558c5606a",
+      "score": 80,
+      "band": "critical",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "540af101-8f2a-547a-883d-abf60400990f",
+          "severity": "medium",
+          "exposed_data": [
+            "date_of_birth",
+            "email",
+            "national_id"
+          ],
+          "severity_points": 10,
+          "data_points": 16,
+          "points": 26
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "6687d823-49d4-5ba0-8bf6-f23e872ea597",
+          "severity": "high",
+          "exposed_data": [
+            "email",
+            "password"
+          ],
+          "severity_points": 15,
+          "data_points": 11,
+          "points": 26
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "b095c325-eaae-50e0-82de-b477c24f3e40",
+          "severity": "critical",
+          "exposed_data": [
+            "address",
+            "email",
+            "phone"
+          ],
+          "severity_points": 20,
+          "data_points": 8,
+          "points": 28
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "892b968e-121d-5ccc-a06c-caa772074dc0",
+      "score": 26,
+      "band": "moderate",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "e0338fe2-5979-5f26-b105-3ac2ded00d08",
+          "severity": "high",
+          "exposed_data": [
+            "email",
+            "password"
+          ],
+          "severity_points": 15,
+          "data_points": 11,
+          "points": 26
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "bb9c4338-5e49-5fa6-bf1c-ea056832b67a",
+      "score": 39,
+      "band": "moderate",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "2b61c3a2-f5b1-5ad0-9509-8b1ba2740d74",
+          "severity": "low",
+          "exposed_data": [
+            "address",
+            "email",
+            "phone"
+          ],
+          "severity_points": 5,
+          "data_points": 8,
+          "points": 13
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "f6024734-eeca-5e18-b08d-c40d98651d01",
+          "severity": "medium",
+          "exposed_data": [
+            "date_of_birth",
+            "email",
+            "national_id"
+          ],
+          "severity_points": 10,
+          "data_points": 16,
+          "points": 26
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "c8e56b00-64c9-59ff-bf9b-ee5d2782ad95",
+      "score": 16,
+      "band": "low",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "8476dc86-f9a4-54ea-b8e3-3e4cd49134c8",
+          "severity": "low",
+          "exposed_data": [
+            "email",
+            "password"
+          ],
+          "severity_points": 5,
+          "data_points": 11,
+          "points": 16
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "case_id": "f12a742f-309b-5bb7-9355-e6d9bd03b00b",
+      "score": 49,
+      "band": "moderate",
+      "factors": [
+        {
+          "synthetic": true,
+          "source_record_id": "18697802-b832-576a-b2ef-f95d552a60a9",
+          "severity": "medium",
+          "exposed_data": [
+            "address",
+            "email",
+            "phone"
+          ],
+          "severity_points": 10,
+          "data_points": 8,
+          "points": 18
+        },
+        {
+          "synthetic": true,
+          "source_record_id": "af9e8d3c-c3d5-51f3-85f1-4e2d3cae997f",
+          "severity": "high",
+          "exposed_data": [
+            "date_of_birth",
+            "email",
+            "national_id"
+          ],
+          "severity_points": 15,
+          "data_points": 16,
+          "points": 31
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1741 @@
+{
+  "synthetic": true,
+  "schema_version": "1.0.0",
+  "seed": 20260719,
+  "world": {
+    "synthetic": true,
+    "schema_version": "1.0.0",
+    "seed": 20260719,
+    "personas": [
+      {
+        "synthetic": true,
+        "id": "persona-0001",
+        "given_name": "Joel",
+        "family_name": "Fisher",
+        "date_of_birth": "2003-03-04",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_joel_fisher_0001@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_joel_fisher_0001"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0100"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 100,
+            "street_name": "1 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0001",
+            "role": "Synthetic Researcher"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0001",
+            "graduation_year": 2025
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607199",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0002",
+        "given_name": "Leslie",
+        "family_name": "Fisher",
+        "date_of_birth": "1975-04-24",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_leslie_begum_0002@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_leslie_begum_0002"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0101"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 100,
+            "street_name": "1 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0002",
+            "role": "Synthetic Researcher"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0002",
+            "graduation_year": 1997
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607207",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0003",
+        "given_name": "Bradley",
+        "family_name": "Fletcher",
+        "date_of_birth": "2004-03-30",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_bradley_fletcher_0003@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_bradley_fletcher_0003"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0102"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 102,
+            "street_name": "3 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0002",
+            "role": "Synthetic Researcher"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0003",
+            "graduation_year": 2026
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607215",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0004",
+        "given_name": "Jacob",
+        "family_name": "Sullivan",
+        "date_of_birth": "1981-01-13",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_jacob_sullivan_0004@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_jacob_sullivan_0004"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0103"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 103,
+            "street_name": "4 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0004",
+            "role": "Fixture Designer"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0003",
+            "graduation_year": 2026
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607223",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0005",
+        "given_name": "Denis",
+        "family_name": "Lawson",
+        "date_of_birth": "1965-06-07",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_denis_lawson_0005@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_denis_lawson_0005"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0104"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 104,
+            "street_name": "4 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0005",
+            "role": "Synthetic Researcher"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0005",
+            "graduation_year": 1987
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607231",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0006",
+        "given_name": "Samuel",
+        "family_name": "Fuller",
+        "date_of_birth": "1958-08-15",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_samuel_fuller_0006@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_samuel_fuller_0006"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0105"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 105,
+            "street_name": "6 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0006",
+            "role": "Test Engineer"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0006",
+            "graduation_year": 1980
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607249",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0007",
+        "given_name": "Susan",
+        "family_name": "Fuller",
+        "date_of_birth": "1973-09-26",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_susan_smith_0007@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_susan_smith_0007"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0106"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 105,
+            "street_name": "6 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0007",
+            "role": "Fixture Designer"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0007",
+            "graduation_year": 1995
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607256",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0008",
+        "given_name": "Annette",
+        "family_name": "Jones",
+        "date_of_birth": "1965-01-16",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_annette_jones_0008@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_annette_jones_0008"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0107"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 107,
+            "street_name": "8 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0007",
+            "role": "Fixture Designer"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0008",
+            "graduation_year": 1987
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607264",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0009",
+        "given_name": "Paula",
+        "family_name": "Robson",
+        "date_of_birth": "1991-10-14",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_paula_robson_0009@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_paula_robson_0009"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0108"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 108,
+            "street_name": "9 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0009",
+            "role": "Synthetic Researcher"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0008",
+            "graduation_year": 1987
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607272",
+            "checksum_valid": false
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "persona-0010",
+        "given_name": "Kathryn",
+        "family_name": "Rhodes",
+        "date_of_birth": "1957-02-27",
+        "emails": [
+          {
+            "synthetic": true,
+            "value": "synth_kathryn_rhodes_0010@example.test",
+            "kind": "primary"
+          }
+        ],
+        "usernames": [
+          {
+            "synthetic": true,
+            "value": "synth_kathryn_rhodes_0010"
+          }
+        ],
+        "phones": [
+          {
+            "synthetic": true,
+            "value": "+1-200-555-0109"
+          }
+        ],
+        "addresses": [
+          {
+            "synthetic": true,
+            "house_number": 109,
+            "street_name": "9 Example Avenue",
+            "city": "Testville",
+            "postal_code": "00000",
+            "country_code": "ZZ"
+          }
+        ],
+        "employment": [
+          {
+            "synthetic": true,
+            "organization": "Example Works 0010",
+            "role": "Test Engineer"
+          }
+        ],
+        "education": [
+          {
+            "synthetic": true,
+            "institution": "Test University 0010",
+            "graduation_year": 1979
+          }
+        ],
+        "national_ids": [
+          {
+            "synthetic": true,
+            "value": "SYN-202607280",
+            "checksum_valid": false
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "synthetic": true,
+        "id": "relationship-0001",
+        "source_person_id": "persona-0001",
+        "target_person_id": "persona-0002",
+        "kind": "family",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_surname",
+            "value": "Fisher"
+          },
+          {
+            "synthetic": true,
+            "signal": "shared_address",
+            "value": "100|1 Example Avenue|Testville|00000"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0002",
+        "source_person_id": "persona-0002",
+        "target_person_id": "persona-0003",
+        "kind": "colleague",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_employer",
+            "value": "Example Works 0002"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0003",
+        "source_person_id": "persona-0003",
+        "target_person_id": "persona-0004",
+        "kind": "classmate",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_school_year",
+            "value": "Test University 0003|2026"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0004",
+        "source_person_id": "persona-0004",
+        "target_person_id": "persona-0005",
+        "kind": "neighbor",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_street",
+            "value": "4 Example Avenue|Testville|00000"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0005",
+        "source_person_id": "persona-0005",
+        "target_person_id": "persona-0006",
+        "kind": "social",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "mutual_profile_link",
+            "value": "synth://profiles/persona-0005/persona-0006"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0006",
+        "source_person_id": "persona-0006",
+        "target_person_id": "persona-0007",
+        "kind": "family",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_surname",
+            "value": "Fuller"
+          },
+          {
+            "synthetic": true,
+            "signal": "shared_address",
+            "value": "105|6 Example Avenue|Testville|00000"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0007",
+        "source_person_id": "persona-0007",
+        "target_person_id": "persona-0008",
+        "kind": "colleague",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_employer",
+            "value": "Example Works 0007"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0008",
+        "source_person_id": "persona-0008",
+        "target_person_id": "persona-0009",
+        "kind": "classmate",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_school_year",
+            "value": "Test University 0008|1987"
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "relationship-0009",
+        "source_person_id": "persona-0009",
+        "target_person_id": "persona-0010",
+        "kind": "neighbor",
+        "evidence": [
+          {
+            "synthetic": true,
+            "signal": "shared_street",
+            "value": "9 Example Avenue|Testville|00000"
+          }
+        ]
+      }
+    ]
+  },
+  "exposure_scripts": [
+    {
+      "synthetic": true,
+      "persona_id": "persona-0001",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0001-01",
+          "breach_name": "Example Breach 0001-01",
+          "occurred_on": "2022-01-01",
+          "severity": "low",
+          "exposed_data": [
+            "email",
+            "password"
+          ]
+        }
+      ],
+      "brokers": [],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0001-01",
+          "result_kind": "conference",
+          "title": "Example name-collision result 0001-01",
+          "locator": "https://search.example.test/results/persona-0001/01",
+          "match_kind": "name_collision",
+          "actual_persona_id": "persona-0002",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0001-01",
+          "platform": "Example Social",
+          "username": "synth_joel_fisher_0001",
+          "locator": "https://social.example.test/profiles/synth_joel_fisher_0001/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0002"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0002",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0002-01",
+          "breach_name": "Example Breach 0002-01",
+          "occurred_on": "2023-03-02",
+          "severity": "medium",
+          "exposed_data": [
+            "email",
+            "phone",
+            "address"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0002-02",
+          "breach_name": "Example Breach 0002-02",
+          "occurred_on": "2024-04-05",
+          "severity": "high",
+          "exposed_data": [
+            "email",
+            "national_id",
+            "date_of_birth"
+          ]
+        }
+      ],
+      "brokers": [
+        {
+          "synthetic": true,
+          "id": "broker-0002-01",
+          "broker_name": "Example Broker 0002-01",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-01-11"
+            }
+          ]
+        }
+      ],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0002-01",
+          "result_kind": "directory",
+          "title": "Synthetic profile result 0002-01",
+          "locator": "https://search.example.test/results/persona-0002/01",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0002",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0002-02",
+          "result_kind": "community",
+          "title": "Synthetic profile result 0002-02",
+          "locator": "https://search.example.test/results/persona-0002/02",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0002",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0002-01",
+          "platform": "Example Social",
+          "username": "synth_leslie_begum_0002",
+          "locator": "https://social.example.test/profiles/synth_leslie_begum_0002/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0003"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "social-0002-02",
+          "platform": "Example Social",
+          "username": "synth_leslie_begum_0002",
+          "locator": "https://social.example.test/profiles/synth_leslie_begum_0002/02",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0004"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0003",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0003-01",
+          "breach_name": "Example Breach 0003-01",
+          "occurred_on": "2024-05-03",
+          "severity": "high",
+          "exposed_data": [
+            "email",
+            "national_id",
+            "date_of_birth"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0003-02",
+          "breach_name": "Example Breach 0003-02",
+          "occurred_on": "2025-06-06",
+          "severity": "critical",
+          "exposed_data": [
+            "email",
+            "password"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0003-03",
+          "breach_name": "Example Breach 0003-03",
+          "occurred_on": "2022-07-09",
+          "severity": "low",
+          "exposed_data": [
+            "email",
+            "phone",
+            "address"
+          ]
+        }
+      ],
+      "brokers": [
+        {
+          "synthetic": true,
+          "id": "broker-0003-01",
+          "broker_name": "Example Broker 0003-01",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-01-21"
+            },
+            {
+              "synthetic": true,
+              "state": "removal_requested",
+              "at": "2026-01-26"
+            },
+            {
+              "synthetic": true,
+              "state": "confirmed_removed",
+              "at": "2026-02-25"
+            }
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "broker-0003-02",
+          "broker_name": "Example Broker 0003-02",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-01-22"
+            },
+            {
+              "synthetic": true,
+              "state": "removal_requested",
+              "at": "2026-01-27"
+            },
+            {
+              "synthetic": true,
+              "state": "confirmed_removed",
+              "at": "2026-02-26"
+            },
+            {
+              "synthetic": true,
+              "state": "reappeared",
+              "at": "2026-04-12"
+            }
+          ]
+        }
+      ],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0003-01",
+          "result_kind": "community",
+          "title": "Synthetic profile result 0003-01",
+          "locator": "https://search.example.test/results/persona-0003/01",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0003",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0003-02",
+          "result_kind": "conference",
+          "title": "Synthetic profile result 0003-02",
+          "locator": "https://search.example.test/results/persona-0003/02",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0003",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0003-03",
+          "result_kind": "directory",
+          "title": "Example name-collision result 0003-03",
+          "locator": "https://search.example.test/results/persona-0003/03",
+          "match_kind": "name_collision",
+          "actual_persona_id": "persona-0004",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0003-01",
+          "platform": "Example Social",
+          "username": "synth_bradley_fletcher_0003",
+          "locator": "https://social.example.test/profiles/synth_bradley_fletcher_0003/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0004"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0004",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0004-01",
+          "breach_name": "Example Breach 0004-01",
+          "occurred_on": "2025-07-04",
+          "severity": "critical",
+          "exposed_data": [
+            "email",
+            "password"
+          ]
+        }
+      ],
+      "brokers": [],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0004-01",
+          "result_kind": "conference",
+          "title": "Synthetic profile result 0004-01",
+          "locator": "https://search.example.test/results/persona-0004/01",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0004",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0004-02",
+          "result_kind": "directory",
+          "title": "Synthetic profile result 0004-02",
+          "locator": "https://search.example.test/results/persona-0004/02",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0004",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0004-03",
+          "result_kind": "community",
+          "title": "Synthetic profile result 0004-03",
+          "locator": "https://search.example.test/results/persona-0004/03",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0004",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0004-04",
+          "result_kind": "conference",
+          "title": "Synthetic profile result 0004-04",
+          "locator": "https://search.example.test/results/persona-0004/04",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0004",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0004-01",
+          "platform": "Example Social",
+          "username": "synth_jacob_sullivan_0004",
+          "locator": "https://social.example.test/profiles/synth_jacob_sullivan_0004/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0005"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "social-0004-02",
+          "platform": "Example Social",
+          "username": "synth_jacob_sullivan_0004",
+          "locator": "https://social.example.test/profiles/synth_jacob_sullivan_0004/02",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0006"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0005",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0005-01",
+          "breach_name": "Example Breach 0005-01",
+          "occurred_on": "2022-09-05",
+          "severity": "low",
+          "exposed_data": [
+            "email",
+            "phone",
+            "address"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0005-02",
+          "breach_name": "Example Breach 0005-02",
+          "occurred_on": "2023-10-08",
+          "severity": "medium",
+          "exposed_data": [
+            "email",
+            "national_id",
+            "date_of_birth"
+          ]
+        }
+      ],
+      "brokers": [
+        {
+          "synthetic": true,
+          "id": "broker-0005-01",
+          "broker_name": "Example Broker 0005-01",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-02-10"
+            }
+          ]
+        }
+      ],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0005-01",
+          "result_kind": "directory",
+          "title": "Example name-collision result 0005-01",
+          "locator": "https://search.example.test/results/persona-0005/01",
+          "match_kind": "name_collision",
+          "actual_persona_id": "persona-0006",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0005-01",
+          "platform": "Example Social",
+          "username": "synth_denis_lawson_0005",
+          "locator": "https://social.example.test/profiles/synth_denis_lawson_0005/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0006"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0006",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0006-01",
+          "breach_name": "Example Breach 0006-01",
+          "occurred_on": "2023-11-06",
+          "severity": "medium",
+          "exposed_data": [
+            "email",
+            "national_id",
+            "date_of_birth"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0006-02",
+          "breach_name": "Example Breach 0006-02",
+          "occurred_on": "2024-12-09",
+          "severity": "high",
+          "exposed_data": [
+            "email",
+            "password"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0006-03",
+          "breach_name": "Example Breach 0006-03",
+          "occurred_on": "2025-01-12",
+          "severity": "critical",
+          "exposed_data": [
+            "email",
+            "phone",
+            "address"
+          ]
+        }
+      ],
+      "brokers": [
+        {
+          "synthetic": true,
+          "id": "broker-0006-01",
+          "broker_name": "Example Broker 0006-01",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-02-20"
+            },
+            {
+              "synthetic": true,
+              "state": "removal_requested",
+              "at": "2026-02-25"
+            },
+            {
+              "synthetic": true,
+              "state": "confirmed_removed",
+              "at": "2026-03-27"
+            }
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "broker-0006-02",
+          "broker_name": "Example Broker 0006-02",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-02-21"
+            },
+            {
+              "synthetic": true,
+              "state": "removal_requested",
+              "at": "2026-02-26"
+            },
+            {
+              "synthetic": true,
+              "state": "confirmed_removed",
+              "at": "2026-03-28"
+            },
+            {
+              "synthetic": true,
+              "state": "reappeared",
+              "at": "2026-05-12"
+            }
+          ]
+        }
+      ],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0006-01",
+          "result_kind": "community",
+          "title": "Synthetic profile result 0006-01",
+          "locator": "https://search.example.test/results/persona-0006/01",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0006",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0006-02",
+          "result_kind": "conference",
+          "title": "Synthetic profile result 0006-02",
+          "locator": "https://search.example.test/results/persona-0006/02",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0006",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0006-01",
+          "platform": "Example Social",
+          "username": "synth_samuel_fuller_0006",
+          "locator": "https://social.example.test/profiles/synth_samuel_fuller_0006/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0007"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "social-0006-02",
+          "platform": "Example Social",
+          "username": "synth_samuel_fuller_0006",
+          "locator": "https://social.example.test/profiles/synth_samuel_fuller_0006/02",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0008"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0007",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0007-01",
+          "breach_name": "Example Breach 0007-01",
+          "occurred_on": "2024-01-07",
+          "severity": "high",
+          "exposed_data": [
+            "email",
+            "password"
+          ]
+        }
+      ],
+      "brokers": [],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0007-01",
+          "result_kind": "conference",
+          "title": "Synthetic profile result 0007-01",
+          "locator": "https://search.example.test/results/persona-0007/01",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0007",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0007-02",
+          "result_kind": "directory",
+          "title": "Synthetic profile result 0007-02",
+          "locator": "https://search.example.test/results/persona-0007/02",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0007",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0007-03",
+          "result_kind": "community",
+          "title": "Example name-collision result 0007-03",
+          "locator": "https://search.example.test/results/persona-0007/03",
+          "match_kind": "name_collision",
+          "actual_persona_id": "persona-0008",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0007-01",
+          "platform": "Example Social",
+          "username": "synth_susan_smith_0007",
+          "locator": "https://social.example.test/profiles/synth_susan_smith_0007/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0008"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0008",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0008-01",
+          "breach_name": "Example Breach 0008-01",
+          "occurred_on": "2025-03-08",
+          "severity": "critical",
+          "exposed_data": [
+            "email",
+            "phone",
+            "address"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0008-02",
+          "breach_name": "Example Breach 0008-02",
+          "occurred_on": "2022-04-11",
+          "severity": "low",
+          "exposed_data": [
+            "email",
+            "national_id",
+            "date_of_birth"
+          ]
+        }
+      ],
+      "brokers": [
+        {
+          "synthetic": true,
+          "id": "broker-0008-01",
+          "broker_name": "Example Broker 0008-01",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-03-12"
+            }
+          ]
+        }
+      ],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0008-01",
+          "result_kind": "directory",
+          "title": "Synthetic profile result 0008-01",
+          "locator": "https://search.example.test/results/persona-0008/01",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0008",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0008-02",
+          "result_kind": "community",
+          "title": "Synthetic profile result 0008-02",
+          "locator": "https://search.example.test/results/persona-0008/02",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0008",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0008-03",
+          "result_kind": "conference",
+          "title": "Synthetic profile result 0008-03",
+          "locator": "https://search.example.test/results/persona-0008/03",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0008",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "search-0008-04",
+          "result_kind": "directory",
+          "title": "Synthetic profile result 0008-04",
+          "locator": "https://search.example.test/results/persona-0008/04",
+          "match_kind": "true_match",
+          "actual_persona_id": "persona-0008",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0008-01",
+          "platform": "Example Social",
+          "username": "synth_annette_jones_0008",
+          "locator": "https://social.example.test/profiles/synth_annette_jones_0008/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0009"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "social-0008-02",
+          "platform": "Example Social",
+          "username": "synth_annette_jones_0008",
+          "locator": "https://social.example.test/profiles/synth_annette_jones_0008/02",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0010"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0009",
+      "breaches": [
+        {
+          "synthetic": true,
+          "id": "breach-0009-01",
+          "breach_name": "Example Breach 0009-01",
+          "occurred_on": "2022-05-09",
+          "severity": "low",
+          "exposed_data": [
+            "email",
+            "national_id",
+            "date_of_birth"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0009-02",
+          "breach_name": "Example Breach 0009-02",
+          "occurred_on": "2023-06-12",
+          "severity": "medium",
+          "exposed_data": [
+            "email",
+            "password"
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "breach-0009-03",
+          "breach_name": "Example Breach 0009-03",
+          "occurred_on": "2024-07-15",
+          "severity": "high",
+          "exposed_data": [
+            "email",
+            "phone",
+            "address"
+          ]
+        }
+      ],
+      "brokers": [
+        {
+          "synthetic": true,
+          "id": "broker-0009-01",
+          "broker_name": "Example Broker 0009-01",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-03-22"
+            },
+            {
+              "synthetic": true,
+              "state": "removal_requested",
+              "at": "2026-03-27"
+            },
+            {
+              "synthetic": true,
+              "state": "confirmed_removed",
+              "at": "2026-04-26"
+            }
+          ]
+        },
+        {
+          "synthetic": true,
+          "id": "broker-0009-02",
+          "broker_name": "Example Broker 0009-02",
+          "exposed_data": [
+            "email",
+            "address",
+            "phone"
+          ],
+          "lifecycle": [
+            {
+              "synthetic": true,
+              "state": "found",
+              "at": "2026-03-23"
+            },
+            {
+              "synthetic": true,
+              "state": "removal_requested",
+              "at": "2026-03-28"
+            },
+            {
+              "synthetic": true,
+              "state": "confirmed_removed",
+              "at": "2026-04-27"
+            },
+            {
+              "synthetic": true,
+              "state": "reappeared",
+              "at": "2026-06-11"
+            }
+          ]
+        }
+      ],
+      "searches": [
+        {
+          "synthetic": true,
+          "id": "search-0009-01",
+          "result_kind": "community",
+          "title": "Example name-collision result 0009-01",
+          "locator": "https://search.example.test/results/persona-0009/01",
+          "match_kind": "name_collision",
+          "actual_persona_id": "persona-0010",
+          "exposed_data": [
+            "email",
+            "employer"
+          ]
+        }
+      ],
+      "social_profiles": [
+        {
+          "synthetic": true,
+          "id": "social-0009-01",
+          "platform": "Example Social",
+          "username": "synth_paula_robson_0009",
+          "locator": "https://social.example.test/profiles/synth_paula_robson_0009/01",
+          "exposed_data": [
+            "username",
+            "employer",
+            "education"
+          ],
+          "connected_person_ids": [
+            "persona-0010"
+          ]
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "persona_id": "persona-0010",
+      "breaches": [],
+      "brokers": [],
+      "searches": [],
+      "social_profiles": []
+    }
+  ]
+}
