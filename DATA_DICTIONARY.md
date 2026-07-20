@@ -27,7 +27,7 @@ Relationship kinds are `family`, `colleague`, `classmate`, `neighbor`, and `soci
 | `education` | `Education[]` | `Test University` institution and a graduation year. |
 | `national_ids` | `NationalId[]` | `SYN-` prefix, invalid Luhn checksum, and `checksum_valid: false`. |
 
-`managed_alias` is reserved now as a first-class email kind for the M5 identity-migration and deferred M6 enquiry-agent seams; tranche 001 does not generate or operate aliases.
+`managed_alias` is reserved as a first-class email kind for planned identity-migration and enquiry workflows; the current generator does not create or operate aliases.
 
 ## Exposure corpus
 

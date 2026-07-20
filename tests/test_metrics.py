@@ -3,7 +3,7 @@ from __future__ import annotations
 from synthworld import RelationshipKind, evaluate_world, generate_world
 
 
-def test_tranche_ground_truth_metrics_are_perfect() -> None:
+def test_ground_truth_metrics_are_perfect() -> None:
     metrics = evaluate_world(generate_world(seed=20_260_719, persona_count=10))
 
     assert metrics.safely_fake_record_rate == 1.0

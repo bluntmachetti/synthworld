@@ -14,6 +14,35 @@ dependencies = [
   "Faker==40.31.0",
   "pydantic==2.13.4",
 ]
+keywords = [
+  "synthetic-data",
+  "identity",
+  "privacy",
+  "pii",
+  "entity-resolution",
+  "benchmark",
+  "deterministic",
+  "testing",
+  "fixtures",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Security",
+  "Topic :: Software Development :: Testing",
+  "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/bluntmachetti/synthworld"
+Repository = "https://github.com/bluntmachetti/synthworld"
+Issues = "https://github.com/bluntmachetti/synthworld/issues"
+Changelog = "https://github.com/bluntmachetti/synthworld/blob/main/CHANGELOG.md"
+Security = "https://github.com/bluntmachetti/synthworld/security/policy"
 
 [dependency-groups]
 dev = [
@@ -73,5 +102,5 @@ select = ["A", "ANN", "B", "E", "F", "I", "N", "RUF", "S", "SIM", "UP"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["src/synthworld", "tests", "conftest.py"]
+files = ["src/synthworld", "tests", "examples", "conftest.py"]
 mypy_path = ["src"]

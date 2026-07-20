@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a defect with a deterministic synthetic reproduction
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do not include real personal data. If the bug involves real data, a
+        secret, or a plausibly real identifier, use the private reporting form
+        in the **Security** tab instead.
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: The exact command(s), including seed and persona count.
+      placeholder: >-
+        uv run synthworld generate --seed 20260719 --persona-count 10
+        --output world.json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include output, tracebacks, or mismatching checksums.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package and Python versions
+      placeholder: idcognito-synthworld 0.6.0, Python 3.12.8
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Synthetic-data boundary
+      options:
+        - label: >-
+            This report contains no real personal data and no plausibly real
+            identifiers.
+          required: true

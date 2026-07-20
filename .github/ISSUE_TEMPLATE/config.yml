@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Private safety or security report
+    url: https://github.com/bluntmachetti/synthworld/security/advisories/new
+    about: >-
+      Use GitHub's private vulnerability-reporting form for real personal
+      data, secrets, or identifiers that could be mistaken for a real
+      person's. See SECURITY.md.

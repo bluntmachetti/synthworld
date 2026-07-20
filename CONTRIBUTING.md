@@ -2,7 +2,8 @@
 
 Thank you for helping make privacy-system evaluation more honest and
 reproducible. Open an issue before a large change so its intended benchmark or
-schema impact can be agreed first.
+schema impact can be agreed first. Participation in this project is governed
+by the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Development
 
@@ -16,7 +17,8 @@ make ci
 Changes to analytical behavior must begin with a ground-truth assertion. The
 full suite must retain 100% branch coverage, zero unexplained skips, deterministic
 output for a fixed seed, and unchanged benchmark checksums unless a deliberately
-reviewed benchmark version is being introduced.
+reviewed benchmark version is being introduced. User-visible changes should add
+an entry to the Unreleased section of [CHANGELOG.md](CHANGELOG.md).
 
 ## Synthetic-data boundary
 
