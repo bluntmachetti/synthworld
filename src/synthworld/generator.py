@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import UTC, date, datetime, time, timedelta
 from random import Random
 
 from faker import Faker
@@ -33,6 +33,18 @@ _ROLES = (
 )
 _EARLIEST_BIRTH_DATE = date(1956, 7, 20)
 _LATEST_BIRTH_DATE = date(2005, 7, 19)
+_UNIX_EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+_EARLIEST_BIRTH_SECOND = int(
+    (
+        datetime.combine(_EARLIEST_BIRTH_DATE, time.min, tzinfo=UTC) - _UNIX_EPOCH
+    ).total_seconds()
+)
+_LATEST_BIRTH_SECOND = int(
+    (
+        datetime.combine(_LATEST_BIRTH_DATE, time.min, tzinfo=UTC) - _UNIX_EPOCH
+    ).total_seconds()
+)
+_CANONICAL_PRE_EPOCH_OFFSET = timedelta(hours=1)
 
 
 def generate_world(*, seed: int, persona_count: int = 10) -> SynthWorld:
@@ -81,10 +93,7 @@ def _base_persona(*, faker: Faker, rng: Random, seed: int, index: int) -> Person
     given_name = faker.first_name()
     family_name = faker.last_name()
     username = _safe_username(given_name, family_name, index)
-    birth_date = faker.date_between_dates(
-        date_start=_EARLIEST_BIRTH_DATE,
-        date_end=_LATEST_BIRTH_DATE,
-    )
+    birth_date = _deterministic_birth_date(faker)
 
     return Persona(
         id=f"persona-{index + 1:04d}",
@@ -116,6 +125,21 @@ def _base_persona(*, faker: Faker, rng: Random, seed: int, index: int) -> Person
         ),
         national_ids=(NationalId(value=_invalid_national_id(seed, index)),),
     )
+
+
+def _deterministic_birth_date(faker: Faker) -> date:
+    """Project Faker's draw through one fixed, host-independent timestamp rule."""
+
+    timestamp = faker.random.uniform(
+        _EARLIEST_BIRTH_SECOND,
+        _LATEST_BIRTH_SECOND,
+    )
+    if timestamp < 0:
+        instant = _UNIX_EPOCH + timedelta(seconds=int(timestamp))
+        instant -= _CANONICAL_PRE_EPOCH_OFFSET
+    else:
+        instant = _UNIX_EPOCH + timedelta(seconds=timestamp)
+    return instant.date()
 
 
 def _safe_username(given_name: str, family_name: str, index: int) -> str:

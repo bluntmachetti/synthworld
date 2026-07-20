@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
 from collections import defaultdict, deque
+from pathlib import Path
 
 import pytest
 
@@ -14,6 +18,29 @@ def test_generation_is_byte_deterministic_for_a_fixed_seed() -> None:
     second = world_to_json(generate_world(seed=TRANCHE_SEED, persona_count=10))
 
     assert first == second
+
+
+def test_generation_is_byte_deterministic_across_host_timezones() -> None:
+    project_root = Path(__file__).parents[1]
+    command = (
+        "from synthworld import generate_world, world_to_json; "
+        "print(world_to_json(generate_world(seed=20260719, persona_count=10)))"
+    )
+    outputs = []
+    for timezone_name in ("UTC", "Europe/London", "America/New_York"):
+        environment = os.environ.copy()
+        environment["TZ"] = timezone_name
+        result = subprocess.run(  # noqa: S603 - fixed interpreter and arguments
+            [sys.executable, "-c", command],
+            cwd=project_root,
+            env=environment,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        outputs.append(result.stdout)
+
+    assert len(set(outputs)) == 1
 
 
 def test_changing_the_seed_changes_the_serialized_world() -> None:
