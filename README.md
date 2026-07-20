@@ -45,6 +45,10 @@ pip install idcognito-synthworld
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
+The frozen golden benchmarks are also browsable as tables on
+[Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks),
+byte-identical to the artifacts shipped in this package.
+
 ## Develop from source
 
 Install [uv](https://docs.astral.sh/uv/), clone the repository, and run:

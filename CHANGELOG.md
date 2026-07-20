@@ -9,6 +9,13 @@ schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+### Added
+
+- The frozen golden benchmarks are published as a browsable Hugging Face
+  dataset
+  ([Bluntmachetti7/synthworld-benchmarks](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks)),
+  linked from the README.
+
 ## [0.7.0] - 2026-07-20
 
 ### Added
