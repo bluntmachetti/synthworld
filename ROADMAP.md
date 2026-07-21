@@ -14,8 +14,9 @@ change without an explicit benchmark-version transition.
 
 1. **Ground truth first.** Every generated ambiguity, relationship, lifecycle
    event, and policy violation must have independently checkable truth.
-2. **No oracle leakage.** Product-safe observations and evaluator-only truth stay
-   physically and structurally separate.
+2. **No oracle leakage in public adapters.** Public-facing schemas must keep
+   product-safe observations physically and structurally separate from
+   evaluator-only truth.
 3. **Safely fictional by construction.** Reserved domains, fictional phone
    ranges, obvious example addresses, invalid identifiers, and recursive
    `synthetic: true` markers remain non-negotiable.
@@ -75,11 +76,13 @@ understand before expanding their scope.
 
 - [#1 — Build a unified evaluation SDK and `synthworld evaluate` CLI](https://github.com/bluntmachetti/synthworld/issues/1)
 - [#11 — Publish baseline benchmark results and visual demonstrations](https://github.com/bluntmachetti/synthworld/issues/11)
+- [#13 — Add a public-only exact-span extraction corpus](https://github.com/bluntmachetti/synthworld/issues/13)
 
 Expected outcomes:
 
 - versioned prediction and evaluation-report schemas;
 - extraction, entity-resolution, relationship, and calibration metrics;
+- separately serialized public extraction pages and exact-span truth;
 - reproducible naive baselines that run in CI;
 - a clear visual explanation of public input versus evaluator truth;
 - benchmark cards that state size, limits, seed, schema versions, and checksums.
