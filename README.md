@@ -11,9 +11,9 @@ adversarial evidence and an answer key.**
 
 SynthWorld creates deterministic, safely fictional populations for evaluating
 privacy, PII-extraction, entity-resolution, relationship-inference, and
-exposure-analysis systems. It lets a product operate on realistic-looking but
-explicitly synthetic observations while evaluators retain physically separate
-ground truth.
+exposure-analysis systems. Selected benchmark families expose separately
+serialized product-safe observations; other artifacts are evaluator bundles
+that retain answer keys for scoring.
 
 SynthWorld began as the ground-truth harness for Idcognito and is deliberately
 usable as an independent Apache-2.0 Python package. It is not an anonymisation
@@ -26,15 +26,14 @@ tool and does not transform sensitive real-world data into a safe dataset.
 | Repeatable evaluation | Seeded generation, canonical ordering, frozen fixtures, and checksums |
 | Connected identities | Personas share planted family, colleague, classmate, neighbour, and social evidence |
 | Measurable ambiguity | Adversarial identity records include common names, Unicode, twins, maiden names, aliases, and misspellings |
-| No label leakage | Product-safe public inputs are physically separated from evaluator-only answer keys |
+| Controlled oracle exposure | Connection and risk provide separate public corpora; extraction currently ships an annotated evaluator bundle |
 | Safe fixtures | Reserved domains, fictional phones, example addresses, invalid identifiers, and recursive `synthetic: true` markers |
 | Honest scoring | Versioned formulas and benchmark integrity metrics make every published claim reproducible |
 
 A generated row can test whether a field accepts an email address. A SynthWorld
-benchmark can test whether a system extracts that address from a document,
+benchmark can measure whether a system extracts that address from a document,
 links several conflicting records to the correct entity, infers only supported
-relationships, and assigns the expected exposure score without seeing the
-answer key.
+relationships, and assigns the expected exposure score.
 
 ## Current benchmark families
 
@@ -43,8 +42,9 @@ answer key.
 - **Exposure corpus:** breach, broker, search, and social observations,
   including zero-exposure controls, search collisions, and broker
   reappearance.
-- **Exact-span extraction:** product-safe pages paired with evaluator-only
-  occurrence-level PII labels.
+- **Exact-span extraction:** an annotated evaluator corpus pairing product-safe
+  page content with evaluator-only occurrence labels. A separately serialized
+  public-only projection is tracked in [#13](https://github.com/bluntmachetti/synthworld/issues/13).
 - **Entity resolution:** opaque records and adversarial cases with separate
   entity-membership truth.
 - **Relationship inference:** public association evidence, reciprocal positive
@@ -58,9 +58,18 @@ risk-benchmark schemas are independently versioned `1.0.0` contracts. See
 public/oracle boundary. See [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md) for the frozen
 benchmark review record.
 
-## Public input and hidden truth
+## Public input and evaluator truth
 
-SynthWorld keeps the two sides of an evaluation distinct:
+SynthWorld currently uses two packaging patterns:
+
+- **Connection and risk** provide separately serialized public corpora and
+  evaluator-only answer keys.
+- **Extraction** currently provides an `ExtractionCorpus` evaluator bundle in
+  which every `AnnotatedExtractionPage` contains both the safe page and its
+  `answer_key`. The page content is safe, but the complete artifact is not a
+  product-safe input.
+
+The intended separated evaluation flow is:
 
 ```text
 product or model                    evaluator
@@ -75,9 +84,9 @@ public observations  ---------->  system predictions
                                   scored results
 ```
 
-Public constructors accept only oracle-free corpus types. Commands that emit
-answer keys are intended for evaluation infrastructure, not product or demo
-data paths.
+Only corpus types and CLI commands explicitly described as public should be
+passed to product adapters. Do not pass the annotated extraction corpus into a
+product or model without first projecting only its page fields.
 
 ## Install
 
@@ -116,9 +125,11 @@ uv run synthworld generate-risk-public --seed 20260719 --persona-count 10 --outp
 See [examples/](examples/) for a worked exact-span extraction evaluation and
 annotated sample output.
 
-The `generate-connection-benchmark` and `generate-risk-answer` commands include
-or emit evaluator-only truth. Keep those artifacts outside product and demo data
-paths. The public commands emit only product-safe observations.
+The `generate-extraction`, `generate-connection-benchmark`, and
+`generate-risk-answer` commands include or emit evaluator-only truth. Keep those
+artifacts outside product and demo data paths. Today,
+`generate-public-connections` and `generate-risk-public` emit the separately
+serialized product-safe observations.
 
 ## Roadmap and integrations
 
@@ -148,10 +159,12 @@ history for secrets.
 make ci
 ```
 
-Generated JSON is safe for fixtures, demos, tutorials, and evaluation when its
-synthetic markers remain intact. SynthWorld is not a source of real identity
-data and must never be used to impersonate, target, or investigate a person.
-Do not replace the safeguards with plausible real-world identifiers.
+Generated JSON is safely fictional for fixtures, demos, tutorials, and
+evaluation when its synthetic markers remain intact. That safety property does
+not make every artifact oracle-free product input; use only explicitly public
+corpora for product adapters. SynthWorld is not a source of real identity data
+and must never be used to impersonate, target, or investigate a person. Do not
+replace the safeguards with plausible real-world identifiers.
 
 ## License
 
