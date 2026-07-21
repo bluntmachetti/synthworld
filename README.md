@@ -155,5 +155,5 @@ Do not replace the safeguards with plausible real-world identifiers.
 
 ## License
 
-Copyright 2026 Idcognito contributors. Licensed under the
+Copyright 2026 Redoubt Labs ltd. Licensed under the
 [Apache License 2.0](LICENSE).
