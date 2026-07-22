@@ -160,14 +160,22 @@ records, and safe inter-agency matching.
 
 ## Use-case map
 
-| Use case | SynthWorld responsibility | Consumer or adapter |
-|---|---|---|
-| Privacy exposure and broker removal | Synthetic identities, observations, lifecycle truth | Idcognito |
-| Agent and workload identity | Principals, credentials, grants, delegation and revocation truth | ZeroID, Arena, EADS |
-| Enterprise IAM and governance | Accounts, entitlements, ownership and policy truth | EADS, Arena |
-| LLM and RAG privacy | Fact ownership, sensitivity, authorisation and current-state truth | Model, RAG or agent harness |
-| Digital wallets and credentials | Issuers, holders, claims, presentations and validity truth | Wallet or verifier adapter |
-| Disaster identity continuity | Households, records, matching and status truth | Aftershock |
+Availability describes the packaged `0.8.x` model, not the eventual scope of
+the roadmap.
+
+| Availability | Use case | SynthWorld responsibility | Consumer or adapter |
+|---|---|---|---|
+| Available | Connected identity fixtures | Fictional personas, attributes, relationships, and evidence | Tests, demos, graph imports |
+| Available | Exact-span PII extraction | Public pages, separate spans, extraction scorer, and failure slices | Regex, NLP, LLM, or document pipeline |
+| Available | Entity resolution | Conflicting public records, separate membership truth, and merge/split scoring | Matcher or identity-resolution system |
+| Available | Relationship inference | Public associations, reciprocal truth, unilateral controls, and evidence scoring | Graph or inference system |
+| Available | Breach-risk calibration | Public breach observations, separate score/band truth, and calibration scoring | Risk model or rules engine |
+| Partial | Privacy exposure and broker removal | Breach, broker, search, and social fixtures including basic reappearance; full deletion-action evaluation is planned | Idcognito or privacy product |
+| Planned | Agent and workload identity | Principals, credentials, grants, delegation, and revocation truth | ZeroID, Arena, EADS |
+| Planned | Enterprise IAM and governance | Accounts, entitlements, ownership, and policy truth | EADS, Arena |
+| Planned | LLM and RAG privacy | Fact ownership, sensitivity, authorisation, and current-state truth | Model, RAG, or agent harness |
+| Planned | Digital wallets and credentials | Issuers, holders, claims, presentations, and validity truth | Wallet or verifier adapter |
+| Planned | Disaster identity continuity | Households, records, matching, and status truth | Aftershock |
 
 ## Explicit non-goals
 

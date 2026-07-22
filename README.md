@@ -19,6 +19,20 @@ SynthWorld began as the ground-truth harness for Idcognito and is deliberately
 usable as an independent Apache-2.0 Python package. It is not an anonymisation
 tool and does not transform sensitive real-world data into a safe dataset.
 
+## Choose what you want to do
+
+| Your goal | Start here | Availability |
+|---|---|---|
+| Inspect the data without installing anything | [Browse the frozen benchmarks on Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks) | Available |
+| Create safe connected identities for tests or demos | Run `synthworld generate` | Available |
+| Evaluate PII extraction, entity matching, relationship inference, or risk scoring | Follow the [user guide](USER_GUIDE.md) | Available |
+| Explore breach, search, broker, and social exposure scenarios | Generate an exposure corpus | Partial: generation and integrity metrics |
+| Test agent identity, IAM, RAG privacy, wallets, or disaster identity | See the [roadmap](ROADMAP.md) | Planned |
+
+New to benchmark evaluation? The [user guide](USER_GUIDE.md) explains the
+workflow in plain language, provides a five-minute walkthrough, and shows where
+your own system plugs into each current use case.
+
 ## Why SynthWorld
 
 | Requirement | SynthWorld approach |
@@ -120,9 +134,10 @@ uv run synthworld generate-public-connections --seed 20260719 --persona-count 10
 uv run synthworld generate-risk-public --seed 20260719 --persona-count 10 --output risk.json
 ```
 
-See [examples/](examples/) for a worked exact-span extraction evaluation and
-annotated sample output, and [BENCHMARKS.md](BENCHMARKS.md) for reference
-baseline results and visual demonstrations.
+See the [user guide](USER_GUIDE.md) for goal-led walkthroughs,
+[examples/](examples/) for runnable adapters and annotated sample output, and
+[BENCHMARKS.md](BENCHMARKS.md) for reference baseline results and visual
+demonstrations.
 
 The `generate-extraction`, `generate-extraction-answers`,
 `generate-connection-benchmark`, and `generate-risk-answer` commands include or
@@ -151,7 +166,9 @@ Example:
 synthworld evaluate extraction --predictions predictions.json --seed 20260719 --summary
 ```
 
-See [DATA_DICTIONARY.md](DATA_DICTIONARY.md) for full prediction and report schemas, and [examples/](examples/) for worked code examples.
+Start with the [user guide](USER_GUIDE.md) for runnable examples and score
+interpretation. See [DATA_DICTIONARY.md](DATA_DICTIONARY.md) for the full
+prediction and report schemas.
 
 ## Roadmap and integrations
 
