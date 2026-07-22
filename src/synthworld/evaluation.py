@@ -4,13 +4,25 @@ A system consumes only product-safe public input, emits predictions in a
 versioned oracle-free schema, and `evaluate_*` scores those predictions
 against the physically separate answer key it loads itself. Every scorer
 returns one `EvaluationReport` — task metrics plus failure slices, tied to the
-exact benchmark bytes by checksum — so scores are comparable across systems
-and across time.
+scored benchmark bytes by content digest.
+
+Threat model: SynthWorld's golden benchmark is committed in this repository, so
+its answers are public. The public/oracle split is an **API-hygiene** guarantee
+— it stops a pipeline from accidentally scoring against leaked labels — not an
+anti-cheating measure. A benchmark-aware system can regenerate the answers, so
+adversarial or leaderboard use requires held-out private seeds. These scores
+are for honest, reproducible regression measurement.
+
+Schema note: these evaluation schemas debut at `0.1.0` and may still change;
+the generated-benchmark contracts they score against are the frozen `1.0.0`
+ones. `scoring_version` versions the metric definitions independently of the
+wire schema, so a change to (say) relaxed matching is visible in the report.
 """
 
 from __future__ import annotations
 
 import hashlib
+import math
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -24,32 +36,47 @@ from synthworld.extraction_serialization import (
 )
 from synthworld.models import SyntheticModel
 
-EVALUATION_SCHEMA_VERSION = "1.0.0"
+EVALUATION_SCHEMA_VERSION = "0.1.0"
+SCORING_PROTOCOL_VERSION = "0.1.0"
+CHECKSUM_SCHEME = "synthworld-json-v1"
+
+_RELAXED_IOU_THRESHOLD = 0.5
 
 
 class TaskMetric(SyntheticModel):
-    """One named scalar metric in an evaluation report."""
+    """One named scalar metric. A null value marks the metric undefined here."""
 
     name: str
-    value: float
+    value: float | None
+    support: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def reject_non_finite(self) -> TaskMetric:
+        if self.value is not None and not math.isfinite(self.value):
+            raise ValueError("metric value must be finite")
+        return self
 
 
 class FailureSlice(SyntheticModel):
     """A counted slice of where a system failed, for error analysis."""
 
-    label: str
+    regime: Literal["exact", "relaxed"]
+    dimension: str
+    value: str
     count: int = Field(ge=0)
-    note: str
+    support: int = Field(ge=0)
 
 
 class EvaluationReport(SyntheticModel):
     """The uniform result of scoring one task's predictions against truth."""
 
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["0.1.0"] = "0.1.0"
+    scoring_version: str
     task: str
     seed: int
     persona_count: int = Field(ge=0)
     benchmark_version: str
+    checksum_scheme: str
     artifact_checksums: tuple[tuple[str, str], ...]
     metrics: tuple[TaskMetric, ...]
     slices: tuple[FailureSlice, ...]
@@ -63,9 +90,11 @@ class PredictedSpan(SyntheticModel):
     end: int = Field(ge=0)
 
     @model_validator(mode="after")
-    def require_forward_range(self) -> PredictedSpan:
+    def require_forward_non_password_range(self) -> PredictedSpan:
         if self.end <= self.start:
             raise ValueError("predicted span end must follow start")
+        if self.data_class is DataClass.PASSWORD:
+            raise ValueError("password is outside the extraction label space")
         return self
 
 
@@ -80,12 +109,13 @@ class ExtractionPagePrediction(SyntheticModel):
 class ExtractionPredictionSet(SyntheticModel):
     """Oracle-free extraction predictions submitted for scoring."""
 
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["0.1.0"] = "0.1.0"
     predictions: tuple[ExtractionPagePrediction, ...]
 
 
 _PageKey = tuple[str, str]
 _Span = tuple[_PageKey, DataClass, int, int]
+_Group = tuple[_PageKey, DataClass]
 
 
 def evaluate_extraction(
@@ -97,7 +127,7 @@ def evaluate_extraction(
     """Score exact-span PII predictions against the separate answer key."""
 
     benchmark = generate_extraction_benchmark(seed=seed, persona_count=persona_count)
-    gold: set[_Span] = {
+    gold = {
         (
             (answer.source_type.value, answer.source_record_id),
             span.data_class,
@@ -107,7 +137,7 @@ def evaluate_extraction(
         for answer in benchmark.answers.answers
         for span in answer.answer_key.spans
     }
-    predicted: set[_Span] = {
+    predicted = {
         (
             (page.source_type.value, page.source_record_id),
             span.data_class,
@@ -119,26 +149,30 @@ def evaluate_extraction(
     }
 
     exact_precision, exact_recall, exact_f1 = _prf(predicted, gold)
-    relaxed_matched_predictions, relaxed_recalled_gold = _relaxed_overlap(
-        predicted, gold
-    )
-    relaxed_precision = _rate(relaxed_matched_predictions, len(predicted))
-    relaxed_recall = _rate(relaxed_recalled_gold, len(gold))
+    relaxed_matches = _relaxed_match_count(predicted, gold)
+    relaxed_precision = _rate(relaxed_matches, len(predicted))
+    relaxed_recall = _rate(relaxed_matches, len(gold))
     relaxed_f1 = _harmonic_mean(relaxed_precision, relaxed_recall)
 
     metrics = (
-        TaskMetric(name="exact_precision", value=exact_precision),
-        TaskMetric(name="exact_recall", value=exact_recall),
-        TaskMetric(name="exact_f1", value=exact_f1),
-        TaskMetric(name="relaxed_precision", value=relaxed_precision),
-        TaskMetric(name="relaxed_recall", value=relaxed_recall),
-        TaskMetric(name="relaxed_f1", value=relaxed_f1),
+        TaskMetric(
+            name="exact_precision", value=exact_precision, support=len(predicted)
+        ),
+        TaskMetric(name="exact_recall", value=exact_recall, support=len(gold)),
+        TaskMetric(name="exact_f1", value=exact_f1, support=len(gold)),
+        TaskMetric(
+            name="relaxed_precision", value=relaxed_precision, support=len(predicted)
+        ),
+        TaskMetric(name="relaxed_recall", value=relaxed_recall, support=len(gold)),
+        TaskMetric(name="relaxed_f1", value=relaxed_f1, support=len(gold)),
     )
     return EvaluationReport(
+        scoring_version=SCORING_PROTOCOL_VERSION,
         task="extraction",
         seed=seed,
         persona_count=persona_count,
         benchmark_version=benchmark.schema_version,
+        checksum_scheme=CHECKSUM_SCHEME,
         artifact_checksums=(
             ("public", _sha256(public_extraction_corpus_to_json(benchmark.public))),
             ("answers", _sha256(extraction_answers_to_json(benchmark.answers))),
@@ -148,22 +182,73 @@ def evaluate_extraction(
     )
 
 
-def _relaxed_overlap(predicted: set[_Span], gold: set[_Span]) -> tuple[int, int]:
-    matched_predictions = sum(
-        any(_overlaps(prediction, truth) for truth in gold) for prediction in predicted
-    )
-    recalled_gold = sum(
-        any(_overlaps(prediction, truth) for prediction in predicted) for truth in gold
-    )
-    return matched_predictions, recalled_gold
+def _relaxed_match_count(predicted: set[_Span], gold: set[_Span]) -> int:
+    """Count one-to-one prediction/gold matches with IoU above the threshold.
+
+    A prediction and a gold span are eligible only if they share a page and
+    class and their intersection-over-union clears the threshold. Within each
+    group a maximum-cardinality bipartite matching enforces one-to-one credit,
+    so a single blanket span cannot claim several gold spans at once.
+    """
+
+    predicted_by_group = _group_spans(predicted)
+    gold_by_group = _group_spans(gold)
+    total = 0
+    for group, predictions in predicted_by_group.items():
+        golds = gold_by_group.get(group, [])
+        if not golds:
+            continue
+        eligibility = [
+            [
+                index
+                for index, truth in enumerate(golds)
+                if _iou(span, truth) >= _RELAXED_IOU_THRESHOLD
+            ]
+            for span in predictions
+        ]
+        total += _max_bipartite_matching(eligibility, len(golds))
+    return total
 
 
-def _overlaps(left: _Span, right: _Span) -> bool:
-    left_key, left_class, left_start, left_end = left
-    right_key, right_class, right_start, right_end = right
-    if left_key != right_key or left_class is not right_class:
-        return False
-    return left_start < right_end and right_start < left_end
+def _group_spans(spans: set[_Span]) -> dict[_Group, list[_Span]]:
+    grouped: dict[_Group, list[_Span]] = {}
+    for span in spans:
+        grouped.setdefault((span[0], span[1]), []).append(span)
+    for members in grouped.values():
+        members.sort(key=lambda item: (item[2], item[3]))
+    return grouped
+
+
+def _iou(left: _Span, right: _Span) -> float:
+    overlap = max(0, min(left[3], right[3]) - max(left[2], right[2]))
+    union = (left[3] - left[2]) + (right[3] - right[2]) - overlap
+    return overlap / union
+
+
+def _max_bipartite_matching(adjacency: list[list[int]], right_size: int) -> int:
+    match_right: list[int | None] = [None] * right_size
+    matched = 0
+    for left in range(len(adjacency)):
+        if _augment(left, adjacency, match_right, [False] * right_size):
+            matched += 1
+    return matched
+
+
+def _augment(
+    left: int,
+    adjacency: list[list[int]],
+    match_right: list[int | None],
+    seen: list[bool],
+) -> bool:
+    for right in adjacency[left]:
+        if seen[right]:
+            continue
+        seen[right] = True
+        current = match_right[right]
+        if current is None or _augment(current, adjacency, match_right, seen):
+            match_right[right] = left
+            return True
+    return False
 
 
 def _extraction_slices(
@@ -172,21 +257,28 @@ def _extraction_slices(
 ) -> tuple[FailureSlice, ...]:
     missed = gold - predicted
     spurious = predicted - gold
-    by_class: dict[DataClass, int] = {}
+    gold_by_class: dict[DataClass, int] = {}
+    for _key, data_class, _start, _end in gold:
+        gold_by_class[data_class] = gold_by_class.get(data_class, 0) + 1
+    missed_by_class: dict[DataClass, int] = {}
     for _key, data_class, _start, _end in missed:
-        by_class[data_class] = by_class.get(data_class, 0) + 1
+        missed_by_class[data_class] = missed_by_class.get(data_class, 0) + 1
     class_slices = tuple(
         FailureSlice(
-            label=f"missed:{data_class.value}",
-            count=by_class[data_class],
-            note="gold spans of this class with no exact prediction",
+            regime="exact",
+            dimension="data_class",
+            value=data_class.value,
+            count=missed_by_class[data_class],
+            support=gold_by_class[data_class],
         )
-        for data_class in sorted(by_class, key=lambda item: item.value)
+        for data_class in sorted(missed_by_class, key=lambda item: item.value)
     )
     spurious_slice = FailureSlice(
-        label="spurious",
+        regime="exact",
+        dimension="spurious",
+        value="any",
         count=len(spurious),
-        note="predicted spans that match no gold span exactly",
+        support=len(predicted),
     )
     return (*class_slices, spurious_slice)
 
@@ -212,7 +304,9 @@ def _sha256(text: str) -> str:
 
 
 __all__ = [
+    "CHECKSUM_SCHEME",
     "EVALUATION_SCHEMA_VERSION",
+    "SCORING_PROTOCOL_VERSION",
     "EvaluationReport",
     "ExtractionPagePrediction",
     "ExtractionPredictionSet",

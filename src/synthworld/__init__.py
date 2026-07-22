@@ -47,7 +47,9 @@ from synthworld.connection_serialization import (
 from synthworld.corpus_metrics import evaluate_corpus
 from synthworld.corpus_serialization import corpus_to_json, load_golden_corpus
 from synthworld.evaluation import (
+    CHECKSUM_SCHEME,
     EVALUATION_SCHEMA_VERSION,
+    SCORING_PROTOCOL_VERSION,
     EvaluationReport,
     ExtractionPagePrediction,
     ExtractionPredictionSet,
@@ -147,8 +149,10 @@ from synthworld.serialization import world_to_json
 __all__ = [
     "BASELINE_PERSONA_COUNT",
     "BASELINE_SEED",
+    "CHECKSUM_SCHEME",
     "EVALUATION_SCHEMA_VERSION",
     "RISK_FORMULA_VERSION",
+    "SCORING_PROTOCOL_VERSION",
     "Address",
     "AdversarialCase",
     "AdversarialPackKind",
