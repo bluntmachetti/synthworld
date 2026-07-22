@@ -151,6 +151,13 @@ class ExtractionPredictionSet(SyntheticModel):
     schema_version: Literal["0.1.0"] = "0.1.0"
     predictions: tuple[ExtractionPagePrediction, ...]
 
+    @model_validator(mode="after")
+    def reject_duplicate_pages(self) -> ExtractionPredictionSet:
+        keys = [(page.source_type, page.source_record_id) for page in self.predictions]
+        if len(keys) != len(set(keys)):
+            raise ValueError("duplicate predicted pages")
+        return self
+
 
 class EntityResolutionPrediction(SyntheticModel):
     """A complete predicted partition of the public identity records.
@@ -281,6 +288,18 @@ def evaluate_extraction(
     """Score exact-span PII predictions against the separate answer key."""
 
     benchmark = generate_extraction_benchmark(seed=seed, persona_count=persona_count)
+    page_keys = {
+        (page.source_type.value, page.source_record_id)
+        for page in benchmark.public.pages
+    }
+    predicted_keys = {
+        (page.source_type.value, page.source_record_id)
+        for page in predictions.predictions
+    }
+    if not predicted_keys <= page_keys:
+        raise EvaluationInputError(
+            "extraction prediction references pages not in the public corpus"
+        )
     gold = {
         (
             (answer.source_type.value, answer.source_record_id),

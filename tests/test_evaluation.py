@@ -162,6 +162,33 @@ def test_predicted_span_rejects_bad_ranges_and_password() -> None:
         PredictedSpan(data_class=DataClass.PASSWORD, start=0, end=8)
 
 
+def test_extraction_rejects_predictions_for_unknown_pages() -> None:
+    benchmark = generate_extraction_benchmark(seed=_SEED, persona_count=10)
+    unknown = ExtractionPagePrediction(
+        source_type=benchmark.public.pages[0].source_type,
+        source_record_id="breach-9999-99",
+        spans=(PredictedSpan(data_class=DataClass.EMAIL, start=0, end=5),),
+    )
+    with pytest.raises(EvaluationInputError, match="not in the public corpus"):
+        evaluate_extraction(
+            ExtractionPredictionSet(predictions=(unknown,)),
+            seed=_SEED,
+            persona_count=10,
+        )
+
+
+def test_extraction_prediction_rejects_duplicate_pages() -> None:
+    benchmark = generate_extraction_benchmark(seed=_SEED, persona_count=10)
+    sample = benchmark.public.pages[0]
+    page = ExtractionPagePrediction(
+        source_type=sample.source_type,
+        source_record_id=sample.source_record_id,
+        spans=(),
+    )
+    with pytest.raises(ValidationError, match="duplicate predicted pages"):
+        ExtractionPredictionSet(predictions=(page, page))
+
+
 def test_iou_and_matching_close_the_blanket_span_exploit() -> None:
     key = ("breach", "breach-0001-01")
     gold = {(key, DataClass.EMAIL, 0, 10), (key, DataClass.EMAIL, 20, 30)}
