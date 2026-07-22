@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 836 120" width="836" height="120" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L7,3 L0,6 Z" fill="#64748b"/></marker></defs>
+<rect x="20" y="30" width="160" height="60" rx="8" ry="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+<text x="100" y="54" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#0f172a">2026-01-22</text>
+<text x="100" y="73" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="400" fill="#0f172a">found</text>
+<line x1="180" y1="60" x2="224" y2="60" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="224" y="30" width="160" height="60" rx="8" ry="8" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+<text x="304" y="54" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#0f172a">2026-01-27</text>
+<text x="304" y="73" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="400" fill="#0f172a">removal_requested</text>
+<line x1="384" y1="60" x2="428" y2="60" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="428" y="30" width="160" height="60" rx="8" ry="8" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+<text x="508" y="54" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#0f172a">2026-02-26</text>
+<text x="508" y="73" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="400" fill="#0f172a">confirmed_removed</text>
+<line x1="588" y1="60" x2="632" y2="60" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="632" y="30" width="160" height="60" rx="8" ry="8" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="712" y="54" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="600" fill="#0f172a">2026-04-12</text>
+<text x="712" y="73" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="400" fill="#0f172a">reappeared</text>
+</svg>

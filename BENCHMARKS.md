@@ -8,7 +8,7 @@ These are deliberately naive reference baselines: each score illustrates what it
 uv run python examples/generate_benchmarks_doc.py
 ```
 
-`make baselines` checks this file for drift in CI.
+This regenerates the results table and the SVG visuals under `assets/`. `make baselines` checks the document and its assets for drift in CI.
 
 ## Baseline results
 
@@ -32,35 +32,19 @@ uv run python examples/generate_benchmarks_doc.py
 
 ### A. One persona, conflicting public records
 
-```mermaid
-flowchart LR
-    entity["One entity"]
-    entity --> record0["conference: Katherin Oconor"]
-    entity --> record1["social: Katherine O'Connor"]
-    entity --> record2["directory: Katie Oconnor"]
-```
+![One entity linked to three identity records with different name spellings](assets/benchmark-conflicting-records.svg)
 
 *One real person surfaces under three spellings across three sources; the answer key knows they are one entity.*
 
 ### B. Broker removal and reappearance timeline
 
-```mermaid
-flowchart LR
-    state0["2026-01-22<br/>found"] --> state1["2026-01-27<br/>removal_requested"] --> state2["2026-02-26<br/>confirmed_removed"] --> state3["2026-04-12<br/>reappeared"]
-```
+![A broker listing moving from found to removal requested to confirmed removed to reappeared](assets/benchmark-broker-timeline.svg)
 
 *A listing confirmed removed can reappear at a later virtual date; the benchmark plants this so removal-tracking systems can be tested.*
 
 ### C. Public input vs evaluator truth
 
-```mermaid
-flowchart TD
-    public["Public corpus"] --> sut["System under test"]
-    sut --> predictions["Predictions"]
-    answers["Separately serialized answer key"] --> scorer["Scorer"]
-    predictions --> scorer
-    scorer --> results["Scored results"]
-```
+![Public corpus feeding a system under test whose predictions are scored against a separate answer key](assets/benchmark-public-oracle-split.svg)
 
 *Products consume only the public projection; evaluators join the separately serialized truth to score.*
 
