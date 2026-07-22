@@ -9,6 +9,13 @@ schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+### Changed
+
+- The extraction evaluator now rejects predictions that reference pages outside
+  the public corpus (for example, from a mismatched seed or persona count) with
+  `EvaluationInputError`, and `ExtractionPredictionSet` rejects duplicate pages
+  — consistent with the malformed-submission handling of the other scorers.
+
 ## [0.8.0] - 2026-07-22
 
 ### Added
