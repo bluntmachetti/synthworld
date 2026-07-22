@@ -1,5 +1,16 @@
 """Public API for the standalone SynthWorld package."""
 
+from synthworld.baselines import (
+    BASELINE_PERSONA_COUNT,
+    BASELINE_SEED,
+    BaselineResult,
+    run_all_baselines,
+    run_breach_risk_baseline,
+    run_exact_entity_resolution_baseline,
+    run_fuzzy_entity_resolution_baseline,
+    run_regex_extraction_baseline,
+    run_relationship_heuristic_baseline,
+)
 from synthworld.connection import (
     AdversarialCase,
     AdversarialPackKind,
@@ -124,12 +135,15 @@ from synthworld.risk_serialization import (
 from synthworld.serialization import world_to_json
 
 __all__ = [
+    "BASELINE_PERSONA_COUNT",
+    "BASELINE_SEED",
     "RISK_FORMULA_VERSION",
     "Address",
     "AdversarialCase",
     "AdversarialPackKind",
     "AdversarialPackMetrics",
     "AnnotatedExtractionPage",
+    "BaselineResult",
     "BreachExposure",
     "BreachRiskFactorTruth",
     "BrokerExposure",
@@ -224,6 +238,12 @@ __all__ = [
     "public_extraction_corpus_to_json",
     "public_risk_corpus_to_json",
     "risk_answer_key_to_json",
+    "run_all_baselines",
+    "run_breach_risk_baseline",
+    "run_exact_entity_resolution_baseline",
+    "run_fuzzy_entity_resolution_baseline",
+    "run_regex_extraction_baseline",
+    "run_relationship_heuristic_baseline",
     "severity_points",
     "world_to_json",
 ]

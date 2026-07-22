@@ -121,7 +121,8 @@ uv run synthworld generate-risk-public --seed 20260719 --persona-count 10 --outp
 ```
 
 See [examples/](examples/) for a worked exact-span extraction evaluation and
-annotated sample output.
+annotated sample output, and [BENCHMARKS.md](BENCHMARKS.md) for reference
+baseline results and visual demonstrations.
 
 The `generate-extraction`, `generate-extraction-answers`,
 `generate-connection-benchmark`, and `generate-risk-answer` commands include or

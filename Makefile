@@ -1,4 +1,4 @@
-.PHONY: ci examples install lint metrics package test typecheck
+.PHONY: baselines ci examples install lint metrics package test typecheck
 
 UV := uv
 SEED := 20260719
@@ -37,4 +37,7 @@ metrics:
 examples:
 	$(UV) run python examples/evaluate_extraction.py --seed $(SEED) --persona-count $(PERSONAS)
 
-ci: lint typecheck package test metrics examples
+baselines:
+	$(UV) run python examples/generate_benchmarks_doc.py --check
+
+ci: lint typecheck package test metrics examples baselines
