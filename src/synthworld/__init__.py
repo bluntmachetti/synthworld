@@ -56,10 +56,13 @@ from synthworld.evaluation import (
     ExtractionPagePrediction,
     ExtractionPredictionSet,
     FailureSlice,
+    PredictedRelationship,
     PredictedSpan,
+    RelationshipPrediction,
     TaskMetric,
     evaluate_entity_resolution,
     evaluate_extraction,
+    evaluate_relationship_inference,
 )
 from synthworld.exposure_generator import generate_exposure_corpus
 from synthworld.exposures import (
@@ -199,6 +202,7 @@ __all__ = [
     "NationalId",
     "Persona",
     "PhoneNumber",
+    "PredictedRelationship",
     "PredictedSpan",
     "PublicAssociationKind",
     "PublicAssociationRecord",
@@ -217,6 +221,7 @@ __all__ = [
     "RelationshipEdge",
     "RelationshipEvidence",
     "RelationshipKind",
+    "RelationshipPrediction",
     "RiskAnswerKey",
     "RiskBand",
     "RiskBenchmark",
@@ -240,6 +245,7 @@ __all__ = [
     "evaluate_corpus",
     "evaluate_entity_resolution",
     "evaluate_extraction",
+    "evaluate_relationship_inference",
     "evaluate_risk_benchmark",
     "evaluate_world",
     "extraction_answers_to_json",

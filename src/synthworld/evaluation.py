@@ -30,8 +30,18 @@ from uuid import UUID
 
 from pydantic import Field, model_validator
 
-from synthworld.connection import AdversarialCase
-from synthworld.connection_generator import generate_adversarial_connection_benchmark
+from synthworld.connection import (
+    AdversarialCase,
+    PublicAssociationRecord,
+    PublicIdentityAttributeKind,
+    PublicIdentityRecord,
+    PublicTruthRelationshipKind,
+    UnilateralAssociationControl,
+)
+from synthworld.connection_generator import (
+    generate_adversarial_connection_benchmark,
+    generate_relationship_connection_benchmark,
+)
 from synthworld.connection_serialization import (
     connection_benchmark_to_json,
     public_connection_corpus_to_json,
@@ -160,9 +170,43 @@ class EntityResolutionPrediction(SyntheticModel):
         return self
 
 
+class PredictedRelationship(SyntheticModel):
+    """One predicted undirected typed edge between two public records."""
+
+    source_record_id: UUID
+    target_record_id: UUID
+    kind: PublicTruthRelationshipKind
+    evidence_association_ids: tuple[UUID, ...] = ()
+
+    @model_validator(mode="after")
+    def require_distinct_endpoints(self) -> PredictedRelationship:
+        if self.source_record_id == self.target_record_id:
+            raise ValueError("a relationship needs two distinct records")
+        return self
+
+
+class RelationshipPrediction(SyntheticModel):
+    """Oracle-free predicted relationships submitted for scoring."""
+
+    schema_version: Literal["0.1.0"] = "0.1.0"
+    edges: tuple[PredictedRelationship, ...]
+
+    @model_validator(mode="after")
+    def reject_duplicate_edges(self) -> RelationshipPrediction:
+        keys = [
+            (_canonical_pair(edge.source_record_id, edge.target_record_id), edge.kind)
+            for edge in self.edges
+        ]
+        if len(keys) != len(set(keys)):
+            raise ValueError("duplicate predicted relationships")
+        return self
+
+
 _PageKey = tuple[str, str]
 _Span = tuple[_PageKey, DataClass, int, int]
 _Group = tuple[_PageKey, DataClass]
+_Endpoints = tuple[UUID, UUID]
+_Edge = tuple[_Endpoints, PublicTruthRelationshipKind]
 
 
 def evaluate_extraction(
@@ -465,6 +509,178 @@ def _entity_resolution_slices(
     return tuple(slices)
 
 
+def evaluate_relationship_inference(
+    prediction: RelationshipPrediction,
+    *,
+    seed: int,
+    persona_count: int = 10,
+) -> EvaluationReport:
+    """Score predicted undirected typed relationship edges against truth.
+
+    Scoring is record-level, which is unambiguous because the relationship
+    benchmark carries exactly one identity record per persona.
+    """
+
+    benchmark = generate_relationship_connection_benchmark(
+        seed=seed, persona_count=persona_count
+    )
+    record_ids = {record.id for record in benchmark.public.identity_records}
+    association_ids = {item.id for item in benchmark.public.association_records}
+    for edge in prediction.edges:
+        if edge.source_record_id not in record_ids or (
+            edge.target_record_id not in record_ids
+        ):
+            raise EvaluationInputError("relationship endpoints must be public records")
+
+    predicted_edges = {
+        (_canonical_pair(edge.source_record_id, edge.target_record_id), edge.kind)
+        for edge in prediction.edges
+    }
+    truth_edges: set[_Edge] = {
+        ((item.source_record_id, item.target_record_id), item.kind)
+        for item in benchmark.answer_key.relationships
+    }
+    true_positive = len(predicted_edges & truth_edges)
+    edge_precision = _ratio_or_none(true_positive, len(predicted_edges))
+    edge_recall = _ratio_or_none(true_positive, len(truth_edges))
+
+    cited = [
+        cited_id
+        for edge in prediction.edges
+        for cited_id in edge.evidence_association_ids
+    ]
+    valid_cited = sum(cited_id in association_ids for cited_id in cited)
+    citations_by_edge: dict[_Edge, set[UUID]] = {}
+    for edge in prediction.edges:
+        key = (_canonical_pair(edge.source_record_id, edge.target_record_id), edge.kind)
+        citations_by_edge.setdefault(key, set()).update(edge.evidence_association_ids)
+    evidence_backed = sum(
+        (
+            (item.source_record_id, item.target_record_id),
+            item.kind,
+        )
+        in predicted_edges
+        and bool(
+            citations_by_edge.get(
+                ((item.source_record_id, item.target_record_id), item.kind), set()
+            )
+            & set(item.reciprocal_association_ids)
+        )
+        for item in benchmark.answer_key.relationships
+    )
+
+    metrics = (
+        TaskMetric(
+            name="edge_precision", value=edge_precision, support=len(predicted_edges)
+        ),
+        TaskMetric(name="edge_recall", value=edge_recall, support=len(truth_edges)),
+        TaskMetric(
+            name="edge_f1",
+            value=_f1_or_none(edge_precision, edge_recall),
+            support=len(truth_edges),
+        ),
+        TaskMetric(
+            name="citation_validity",
+            value=_ratio_or_none(valid_cited, len(cited)),
+            support=len(cited),
+        ),
+        TaskMetric(
+            name="evidence_backed_recall",
+            value=_rate(evidence_backed, len(truth_edges)),
+            support=len(truth_edges),
+        ),
+    )
+    return EvaluationReport(
+        scoring_version=SCORING_PROTOCOL_VERSION,
+        task="relationship_inference",
+        seed=seed,
+        persona_count=persona_count,
+        benchmark_version=benchmark.schema_version,
+        checksum_scheme=CHECKSUM_SCHEME,
+        artifact_checksums=(
+            ("public", _sha256(public_connection_corpus_to_json(benchmark.public))),
+            ("benchmark", _sha256(connection_benchmark_to_json(benchmark))),
+        ),
+        metrics=metrics,
+        slices=_relationship_slices(
+            prediction,
+            benchmark.public.identity_records,
+            benchmark.public.association_records,
+            benchmark.answer_key.unilateral_controls,
+            predicted_edges,
+            truth_edges,
+        ),
+    )
+
+
+def _relationship_slices(
+    prediction: RelationshipPrediction,
+    records: tuple[PublicIdentityRecord, ...],
+    associations: tuple[PublicAssociationRecord, ...],
+    controls: tuple[UnilateralAssociationControl, ...],
+    predicted_edges: set[_Edge],
+    truth_edges: set[_Edge],
+) -> tuple[FailureSlice, ...]:
+    reference_to_record = _reference_to_record(records)
+    association_by_id = {item.id: item for item in associations}
+    control_pairs = _control_endpoint_pairs(
+        controls, association_by_id, reference_to_record
+    )
+    predicted_pairs = {
+        _canonical_pair(edge.source_record_id, edge.target_record_id)
+        for edge in prediction.edges
+    }
+    return (
+        FailureSlice(
+            dimension="overall",
+            value="all",
+            outcome="false_edge",
+            count=len(predicted_edges - truth_edges),
+            support=len(predicted_edges),
+        ),
+        FailureSlice(
+            dimension="unilateral_control",
+            value="all",
+            outcome="false_edge",
+            count=len(control_pairs & predicted_pairs),
+            support=len(control_pairs),
+        ),
+    )
+
+
+def _reference_to_record(
+    records: tuple[PublicIdentityRecord, ...],
+) -> dict[str, UUID]:
+    index: dict[str, UUID] = {}
+    for record in records:
+        for attribute in record.attributes:
+            if attribute.kind in (
+                PublicIdentityAttributeKind.FULL_ADDRESS,
+                PublicIdentityAttributeKind.SOCIAL_PROFILE,
+            ):
+                index[attribute.value] = record.id
+    return index
+
+
+def _control_endpoint_pairs(
+    controls: tuple[UnilateralAssociationControl, ...],
+    association_by_id: dict[UUID, PublicAssociationRecord],
+    reference_to_record: dict[str, UUID],
+) -> set[_Endpoints]:
+    pairs: set[_Endpoints] = set()
+    for control in controls:
+        association = association_by_id[control.association_id]
+        source = reference_to_record.get(association.source_reference)
+        target = reference_to_record.get(association.target_reference)
+        if source is not None and target is not None:
+            pairs.add(_canonical_pair(source, target))
+    return pairs
+
+
+def _canonical_pair(first: UUID, second: UUID) -> _Endpoints:
+    return (first, second) if first.int <= second.int else (second, first)
+
+
 def _ratio_or_none(numerator: int, denominator: int) -> float | None:
     return numerator / denominator if denominator else None
 
@@ -505,8 +721,11 @@ __all__ = [
     "ExtractionPagePrediction",
     "ExtractionPredictionSet",
     "FailureSlice",
+    "PredictedRelationship",
     "PredictedSpan",
+    "RelationshipPrediction",
     "TaskMetric",
     "evaluate_entity_resolution",
     "evaluate_extraction",
+    "evaluate_relationship_inference",
 ]

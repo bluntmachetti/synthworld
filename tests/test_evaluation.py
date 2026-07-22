@@ -7,21 +7,34 @@ import pytest
 from pydantic import ValidationError
 
 from synthworld import DataClass, generate_extraction_benchmark
-from synthworld.connection import ConnectionBenchmark
-from synthworld.connection_generator import generate_adversarial_connection_benchmark
+from synthworld.connection import (
+    ConnectionBenchmark,
+    PublicAssociationKind,
+    PublicAssociationRecord,
+    PublicTruthRelationshipKind,
+    UnilateralAssociationControl,
+)
+from synthworld.connection_generator import (
+    generate_adversarial_connection_benchmark,
+    generate_relationship_connection_benchmark,
+)
 from synthworld.evaluation import (
     EntityResolutionPrediction,
     EvaluationInputError,
     EvaluationReport,
     ExtractionPagePrediction,
     ExtractionPredictionSet,
+    PredictedRelationship,
     PredictedSpan,
+    RelationshipPrediction,
     TaskMetric,
+    _control_endpoint_pairs,
     _iou,
     _max_bipartite_matching,
     _relaxed_match_count,
     evaluate_entity_resolution,
     evaluate_extraction,
+    evaluate_relationship_inference,
 )
 
 _SEED = 20_260_719
@@ -248,3 +261,127 @@ def test_entity_resolution_prediction_rejects_empty_and_duplicate_clusters() -> 
         EntityResolutionPrediction(clusters=((),))
     with pytest.raises(ValidationError, match="only one cluster"):
         EntityResolutionPrediction(clusters=((record,), (record,)))
+
+
+def _flip(kind: PublicTruthRelationshipKind) -> PublicTruthRelationshipKind:
+    return (
+        PublicTruthRelationshipKind.SOCIAL
+        if kind is PublicTruthRelationshipKind.NEIGHBOR
+        else PublicTruthRelationshipKind.NEIGHBOR
+    )
+
+
+def _perfect_relationships(benchmark: ConnectionBenchmark) -> RelationshipPrediction:
+    return RelationshipPrediction(
+        edges=tuple(
+            PredictedRelationship(
+                source_record_id=item.source_record_id,
+                target_record_id=item.target_record_id,
+                kind=item.kind,
+                evidence_association_ids=item.reciprocal_association_ids,
+            )
+            for item in benchmark.answer_key.relationships
+        )
+    )
+
+
+def _rel_metric(report: EvaluationReport, name: str) -> float | None:
+    return next(metric.value for metric in report.metrics if metric.name == name)
+
+
+def test_relationship_perfect_prediction_scores_one() -> None:
+    benchmark = generate_relationship_connection_benchmark(seed=_SEED, persona_count=10)
+    report = evaluate_relationship_inference(
+        _perfect_relationships(benchmark), seed=_SEED, persona_count=10
+    )
+
+    assert report.task == "relationship_inference"
+    assert all(metric.value == 1.0 for metric in report.metrics)
+    assert all(s.count == 0 for s in report.slices)
+    assert {s.dimension for s in report.slices} == {"overall", "unilateral_control"}
+
+
+def test_relationship_empty_prediction_reports_null_precision() -> None:
+    report = evaluate_relationship_inference(
+        RelationshipPrediction(edges=()), seed=_SEED, persona_count=10
+    )
+
+    assert _rel_metric(report, "edge_precision") is None
+    assert _rel_metric(report, "edge_f1") is None
+    assert _rel_metric(report, "citation_validity") is None
+    assert _rel_metric(report, "edge_recall") == 0.0
+    assert _rel_metric(report, "evidence_backed_recall") == 0.0
+
+
+def test_relationship_counts_false_edges_and_canonicalises_endpoints() -> None:
+    benchmark = generate_relationship_connection_benchmark(seed=_SEED, persona_count=10)
+    truth = benchmark.answer_key.relationships[0]
+    # A wrong-kind edge with reversed endpoints is a false edge and exercises
+    # canonical-pair ordering (source int > target int).
+    spurious = PredictedRelationship(
+        source_record_id=truth.target_record_id,
+        target_record_id=truth.source_record_id,
+        kind=_flip(truth.kind),
+    )
+    prediction = RelationshipPrediction(
+        edges=(*_perfect_relationships(benchmark).edges, spurious)
+    )
+    report = evaluate_relationship_inference(prediction, seed=_SEED, persona_count=10)
+
+    assert _rel_metric(report, "edge_recall") == 1.0
+    assert round(_rel_metric(report, "edge_precision") or 0.0, 4) == 0.75
+    false_edges = next(s.count for s in report.slices if s.dimension == "overall")
+    assert false_edges == 1
+
+
+def test_relationship_rejects_unknown_endpoints() -> None:
+    benchmark = generate_relationship_connection_benchmark(seed=_SEED, persona_count=10)
+    real = benchmark.public.identity_records[0].id
+    ghost = uuid5(NAMESPACE_DNS, "ghost-record")
+    prediction = RelationshipPrediction(
+        edges=(
+            PredictedRelationship(
+                source_record_id=ghost,
+                target_record_id=real,
+                kind=PublicTruthRelationshipKind.NEIGHBOR,
+            ),
+        )
+    )
+    with pytest.raises(EvaluationInputError, match="must be public records"):
+        evaluate_relationship_inference(prediction, seed=_SEED, persona_count=10)
+
+
+def test_relationship_prediction_rejects_self_and_duplicate_edges() -> None:
+    record = uuid5(NAMESPACE_DNS, "a")
+    other = uuid5(NAMESPACE_DNS, "b")
+    with pytest.raises(ValidationError, match="two distinct records"):
+        PredictedRelationship(
+            source_record_id=record,
+            target_record_id=record,
+            kind=PublicTruthRelationshipKind.SOCIAL,
+        )
+    edge = PredictedRelationship(
+        source_record_id=record,
+        target_record_id=other,
+        kind=PublicTruthRelationshipKind.SOCIAL,
+    )
+    with pytest.raises(ValidationError, match="duplicate predicted relationships"):
+        RelationshipPrediction(edges=(edge, edge))
+
+
+def test_control_endpoint_pairs_skips_unmapped_references() -> None:
+    association = PublicAssociationRecord(
+        id=uuid5(NAMESPACE_DNS, "assoc"),
+        kind=PublicAssociationKind.PROFILE_LINK,
+        source_url="https://associations.example.test/records/1",
+        source_reference="unmapped-a",
+        target_reference="unmapped-b",
+        confidence=1.0,
+    )
+    control = UnilateralAssociationControl(
+        association_id=association.id, kind=association.kind
+    )
+
+    assert (
+        _control_endpoint_pairs((control,), {association.id: association}, {}) == set()
+    )
