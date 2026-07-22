@@ -11,7 +11,11 @@ from synthworld.cli import main
 from synthworld.connection import ConnectionBenchmark, PublicConnectionCorpus
 from synthworld.connection_metrics import ConnectionBenchmarkMetrics
 from synthworld.exposures import CorpusMetrics, ExposureCorpus
-from synthworld.extraction import ExtractionCorpus
+from synthworld.extraction import (
+    ExtractionAnswerKeyCorpus,
+    ExtractionCorpus,
+    PublicExtractionCorpus,
+)
 from synthworld.models import SynthWorld, WorldMetrics
 from synthworld.risk import PublicRiskCorpus, RiskAnswerKey
 from synthworld.risk_metrics import RiskBenchmarkMetrics
@@ -113,6 +117,63 @@ def test_generate_extraction_command_writes_span_ground_truth(
     assert len(corpus.pages) == 62
     assert sum(len(item.answer_key.spans) for item in corpus.pages) == 150
     assert "Extraction corpus ready" in capsys.readouterr().out
+
+
+def test_generate_public_extraction_command_writes_no_answer_key(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "public-extraction.json"
+
+    exit_code = main(
+        [
+            "generate-public-extraction",
+            "--seed",
+            "20260719",
+            "--persona-count",
+            "10",
+            "--output",
+            str(output),
+        ]
+    )
+
+    public = PublicExtractionCorpus.model_validate_json(
+        output.read_text(encoding="utf-8")
+    )
+    written = output.read_text(encoding="utf-8")
+    assert exit_code == 0
+    assert len(public.pages) == 62
+    assert "Public extraction corpus ready" in capsys.readouterr().out
+    assert "answer_key" not in written
+    assert '"spans"' not in written
+    assert "content_persona_id" not in written
+
+
+def test_generate_extraction_answers_command_writes_separate_spans(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "extraction-answers.json"
+
+    exit_code = main(
+        [
+            "generate-extraction-answers",
+            "--seed",
+            "20260719",
+            "--persona-count",
+            "10",
+            "--output",
+            str(output),
+        ]
+    )
+
+    answers = ExtractionAnswerKeyCorpus.model_validate_json(
+        output.read_text(encoding="utf-8")
+    )
+    assert exit_code == 0
+    assert len(answers.answers) == 62
+    assert sum(len(item.answer_key.spans) for item in answers.answers) == 150
+    assert "Extraction answer key ready" in capsys.readouterr().out
 
 
 def test_generate_connection_benchmark_command_writes_separate_truth(

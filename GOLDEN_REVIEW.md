@@ -30,3 +30,27 @@ The canonical SHA-256 is
 `044b52650039059b5841e0af9c512e2bbc7dbb089d43e465d43fda06889a8fe4`.
 Automated tests regenerate it byte-for-byte and independently verify its
 manifest on every run.
+
+## Extraction public and answer review record
+
+Reviewed: 2026-07-21. Seed: `20260719`. Extraction schema: `1.0.0`.
+
+The separated extraction benchmark projects the annotated bundle into a
+product-safe `extraction-public-golden-v1.json` and a physically separate
+`extraction-answer-golden-v1.json`. The public corpus holds 62 pages (61
+exposure pages and one negative control) and the answer key holds 62 answers
+carrying 150 exact spans.
+
+The review checked recursive `synthetic: true` markers; that the public pages
+are byte-identical to the annotated bundle's pages; that the public corpus is
+recursively free of answer keys, ownership IDs, and spans; that every answer
+keys back to a public page by `(source_type, source_record_id)`; and that
+every span sits exactly on its public page content when the two halves are
+joined.
+
+The canonical SHA-256 of the public corpus is
+`10632f000f8aeb8ccd8557476b18b940cfd35b91f7cb38dcf209269de987160e` and of the
+answer key is
+`ffc6503df8cbb9d8f99161ee29324e8d0a0187901118e8eeaa590b49e7598f78`. Automated
+tests regenerate both byte-for-byte and independently verify their manifests on
+every run.

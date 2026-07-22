@@ -16,8 +16,15 @@ from synthworld.connection_serialization import (
 from synthworld.corpus_metrics import evaluate_corpus
 from synthworld.corpus_serialization import corpus_to_json
 from synthworld.exposure_generator import generate_exposure_corpus
-from synthworld.extraction_generator import generate_extraction_corpus
-from synthworld.extraction_serialization import extraction_corpus_to_json
+from synthworld.extraction_generator import (
+    generate_extraction_benchmark,
+    generate_extraction_corpus,
+)
+from synthworld.extraction_serialization import (
+    extraction_answers_to_json,
+    extraction_corpus_to_json,
+    public_extraction_corpus_to_json,
+)
 from synthworld.generator import generate_world
 from synthworld.metrics import evaluate_world
 from synthworld.risk_generator import generate_risk_benchmark
@@ -112,6 +119,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(evaluate_risk_benchmark(risk_benchmark).model_dump_json(indent=2))
         return 0
 
+    if args.command in {"generate-public-extraction", "generate-extraction-answers"}:
+        extraction_benchmark = generate_extraction_benchmark(
+            seed=args.seed,
+            persona_count=args.persona_count,
+        )
+        output = args.output
+        output.parent.mkdir(parents=True, exist_ok=True)
+        if args.command == "generate-public-extraction":
+            output.write_text(
+                public_extraction_corpus_to_json(extraction_benchmark.public),
+                encoding="utf-8",
+            )
+            print(
+                "Public extraction corpus ready: "
+                f"{len(extraction_benchmark.public.pages)} pages -> {output}"
+            )
+        else:
+            output.write_text(
+                extraction_answers_to_json(extraction_benchmark.answers),
+                encoding="utf-8",
+            )
+            print(
+                "Extraction answer key ready: "
+                f"{len(extraction_benchmark.answers.answers)} answers -> {output}"
+            )
+        return 0
+
     if args.command in {"generate", "metrics"}:
         world = generate_world(seed=args.seed, persona_count=args.persona_count)
     elif args.command in {"generate-corpus", "corpus-metrics"}:
@@ -194,6 +228,20 @@ def _parser() -> argparse.ArgumentParser:
     )
     _add_world_arguments(generate_extraction)
     generate_extraction.add_argument("--output", type=Path, required=True)
+
+    generate_public_extraction = subparsers.add_parser(
+        "generate-public-extraction",
+        help="write only product-safe extraction pages",
+    )
+    _add_world_arguments(generate_public_extraction)
+    generate_public_extraction.add_argument("--output", type=Path, required=True)
+
+    generate_extraction_answers = subparsers.add_parser(
+        "generate-extraction-answers",
+        help="write the physically separate exact-span answer key",
+    )
+    _add_world_arguments(generate_extraction_answers)
+    generate_extraction_answers.add_argument("--output", type=Path, required=True)
 
     generate_connection_benchmark = subparsers.add_parser(
         "generate-connection-benchmark",

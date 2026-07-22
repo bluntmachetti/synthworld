@@ -47,6 +47,30 @@ Data classes are email, username, phone, address, date of birth, employer, educa
 
 `src/synthworld/benchmarks/golden-v1.json` freezes seed `20260719` at ten personas. `SHA256SUMS` authenticates its exact bytes. Tests regenerate the corpus and require byte equality, so changes to generation, schema, ordering, or dependencies must be treated as an explicit benchmark-version change.
 
+## Exact-span extraction
+
+The extraction benchmark ships in two packaging patterns that share schema `1.0.0`.
+
+The **annotated evaluator bundle** `ExtractionCorpus` pairs each page with its answer key in one artifact, convenient for offline evaluators. It embeds labels, so it is not a product-safe input.
+
+| Record | Required fields | Meaning |
+|---|---|---|
+| `ExtractionPage` | `source_type`, `source_record_id`, `purpose`, `title`, `content` | One product-safe synthetic source document. `purpose` is `exposure` or `negative_control`. Fields reject blanks and any `persona-####` routing key. |
+| `ExtractionSpan` | `data_class`, `start`, `end`, `text` | One exact character occurrence in the answer key. `end` must follow `start`, `text` must equal `content[start:end]`, and password values are forbidden. |
+| `ExtractionAnswerKey` | `content_persona_id`, `spans` | Evaluator-only ownership and the sorted, non-overlapping spans for one page. |
+| `AnnotatedExtractionPage` | `page`, `answer_key` | The bundled pair; validates that spans sit exactly on the page content. |
+
+The **separated benchmark** splits the same data across two artifacts so products consume only the public projection:
+
+| Record | Required fields | Meaning |
+|---|---|---|
+| `PublicExtractionCorpus` | `schema_version`, `seed`, `pages` | The product-safe input: `ExtractionPage` objects only, with unique keys and exactly one negative control. Recursively free of answer keys, ownership, and spans. |
+| `ExtractionPageAnswer` | `source_type`, `source_record_id`, `answer_key` | One page's evaluator truth, keyed back to its public page by `(source_type, source_record_id)`. |
+| `ExtractionAnswerKeyCorpus` | `schema_version`, `seed`, `answers` | The evaluator-only side: `ExtractionPageAnswer` objects with unique keys. |
+| `ExtractionBenchmark` | `schema_version`, `seed`, `public`, `answers` | The join. It requires matching seeds, an exact page-key match between public and answers (no missing or extra pages), and that every span sits exactly on its public page content. |
+
+`extraction-golden-v1.json` freezes the annotated bundle. The separately checksummed `extraction-public-golden-v1.json` and `extraction-answer-golden-v1.json` freeze the public projection and its answer key; `EXTRACTION_PUBLIC_SHA256SUMS` and `EXTRACTION_ANSWER_SHA256SUMS` authenticate their exact bytes. Product adapters should load only the public corpus and join truth afterwards.
+
 ## Public connection corpus
 
 `PublicConnectionCorpus` schema `1.0.0` is the only connection input intended

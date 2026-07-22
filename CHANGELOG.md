@@ -11,10 +11,25 @@ schemas) are versioned independently of the package; see
 
 ### Added
 
+- Separated exact-span extraction benchmark (issue #13): a product-safe
+  `PublicExtractionCorpus` and a physically separate `ExtractionAnswerKeyCorpus`,
+  joined and integrity-checked by `ExtractionBenchmark`. New
+  `generate-public-extraction` and `generate-extraction-answers` CLI commands,
+  `generate_extraction_benchmark`, and separately checksummed
+  `extraction-public-golden-v1.json` / `extraction-answer-golden-v1.json`
+  frozen artifacts. The existing annotated `ExtractionCorpus` bundle is
+  unchanged.
+- A DATA_DICTIONARY.md section for the extraction schema, distinguishing the
+  annotated evaluator bundle from the product-safe projection.
 - The frozen golden benchmarks are published as a browsable Hugging Face
   dataset
   ([Bluntmachetti7/synthworld-benchmarks](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks)),
   linked from the README.
+
+### Changed
+
+- The extraction example now feeds the system under test only the public pages
+  and loads the answer key separately to score.
 
 ## [0.7.0] - 2026-07-20
 
