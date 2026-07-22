@@ -1,8 +1,8 @@
 # SynthWorld
 
 [![CI](https://github.com/bluntmachetti/synthworld/actions/workflows/ci.yml/badge.svg)](https://github.com/bluntmachetti/synthworld/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/idcognito-synthworld)](https://pypi.org/project/idcognito-synthworld/)
-[![Python versions](https://img.shields.io/pypi/pyversions/idcognito-synthworld)](https://pypi.org/project/idcognito-synthworld/)
+[![PyPI](https://img.shields.io/pypi/v/idcognito-synthworld?cacheSeconds=3600)](https://pypi.org/project/idcognito-synthworld/)
+[![Python versions](https://img.shields.io/pypi/pyversions/idcognito-synthworld?cacheSeconds=3600)](https://pypi.org/project/idcognito-synthworld/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![Coverage: 100% enforced](https://img.shields.io/badge/coverage-100%25_enforced-brightgreen)](Makefile)
 
