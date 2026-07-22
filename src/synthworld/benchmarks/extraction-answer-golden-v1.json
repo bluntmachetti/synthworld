@@ -1,0 +1,1738 @@
+{
+  "synthetic": true,
+  "schema_version": "1.0.0",
+  "seed": 20260719,
+  "answers": [
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0001-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0001",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 100,
+            "text": "synth_joel_fisher_0001@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0001-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 67,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 78,
+            "end": 96,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0001-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0001",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 81,
+            "text": "synth_joel_fisher_0001"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 92,
+            "end": 110,
+            "text": "Example Works 0001"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 122,
+            "end": 142,
+            "text": "Test University 0001"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0002-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 113,
+            "end": 128,
+            "text": "+1-200-555-0101"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 145,
+            "end": 182,
+            "text": "100 1 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0002-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 115,
+            "end": 128,
+            "text": "SYN-202607207"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 144,
+            "end": 154,
+            "text": "1975-04-24"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0002-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "100 1 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0101"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0002-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 67,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 78,
+            "end": 96,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0002-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 67,
+            "text": "synth_leslie_begum_0002@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 78,
+            "end": 96,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0002-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_leslie_begum_0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0002-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0002",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_leslie_begum_0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0003-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 105,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 119,
+            "end": 132,
+            "text": "SYN-202607215"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 148,
+            "end": 158,
+            "text": "2004-03-30"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0003-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 105,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0003-03",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 105,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 117,
+            "end": 132,
+            "text": "+1-200-555-0102"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 149,
+            "end": 186,
+            "text": "102 3 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0003-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 72,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 82,
+            "end": 119,
+            "text": "102 3 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 127,
+            "end": 142,
+            "text": "+1-200-555-0102"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0003-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 72,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 82,
+            "end": 119,
+            "text": "102 3 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 127,
+            "end": 142,
+            "text": "+1-200-555-0102"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0003-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 71,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 82,
+            "end": 100,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0003-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 71,
+            "text": "synth_bradley_fletcher_0003@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 82,
+            "end": 100,
+            "text": "Example Works 0002"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0003-03",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0003-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0003",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 86,
+            "text": "synth_bradley_fletcher_0003"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 97,
+            "end": 115,
+            "text": "Example Works 0002"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 127,
+            "end": 147,
+            "text": "Test University 0003"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0004-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 103,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0004-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0004-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0004-03",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0004-04",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_jacob_sullivan_0004@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0004"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0004-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 84,
+            "text": "synth_jacob_sullivan_0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 95,
+            "end": 113,
+            "text": "Example Works 0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 125,
+            "end": 145,
+            "text": "Test University 0003"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0004-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0004",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 84,
+            "text": "synth_jacob_sullivan_0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 95,
+            "end": 113,
+            "text": "Example Works 0004"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 125,
+            "end": 145,
+            "text": "Test University 0003"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0005-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_denis_lawson_0005@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 113,
+            "end": 128,
+            "text": "+1-200-555-0104"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 145,
+            "end": 182,
+            "text": "104 4 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0005-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_denis_lawson_0005@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 115,
+            "end": 128,
+            "text": "SYN-202607231"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 144,
+            "end": 154,
+            "text": "1965-06-07"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0005-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_denis_lawson_0005@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "104 4 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0104"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0005-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0005-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0005",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_denis_lawson_0005"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0005"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0005"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0006-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 116,
+            "end": 129,
+            "text": "SYN-202607249"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 145,
+            "end": 155,
+            "text": "1958-08-15"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0006-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_samuel_fuller_0006@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0006-03",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 114,
+            "end": 129,
+            "text": "+1-200-555-0105"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 146,
+            "end": 183,
+            "text": "105 6 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0006-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 69,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 79,
+            "end": 116,
+            "text": "105 6 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 124,
+            "end": 139,
+            "text": "+1-200-555-0105"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0006-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 69,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 79,
+            "end": 116,
+            "text": "105 6 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 124,
+            "end": 139,
+            "text": "+1-200-555-0105"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0006-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0006-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_samuel_fuller_0006@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0006-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_samuel_fuller_0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0006-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0006",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_samuel_fuller_0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0006"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0006"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0007-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 100,
+            "text": "synth_susan_smith_0007@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0007-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 66,
+            "text": "synth_susan_smith_0007@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 77,
+            "end": 95,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0007-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 66,
+            "text": "synth_susan_smith_0007@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 77,
+            "end": 95,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0007-03",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0007-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0007",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 81,
+            "text": "synth_susan_smith_0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 92,
+            "end": 110,
+            "text": "Example Works 0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 122,
+            "end": 142,
+            "text": "Test University 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0008-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 114,
+            "end": 129,
+            "text": "+1-200-555-0107"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 146,
+            "end": 183,
+            "text": "107 8 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0008-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 102,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 116,
+            "end": 129,
+            "text": "SYN-202607264"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 145,
+            "end": 155,
+            "text": "1965-01-16"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0008-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 69,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 79,
+            "end": 116,
+            "text": "107 8 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 124,
+            "end": 139,
+            "text": "+1-200-555-0107"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0008-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0008-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0008-03",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0008-04",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 68,
+            "text": "synth_annette_jones_0008@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 79,
+            "end": 97,
+            "text": "Example Works 0007"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0008-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_annette_jones_0008"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0008"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0008-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0008",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 83,
+            "text": "synth_annette_jones_0008"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 94,
+            "end": 112,
+            "text": "Example Works 0007"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 124,
+            "end": 144,
+            "text": "Test University 0008"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0009-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "national_id",
+            "start": 115,
+            "end": 128,
+            "text": "SYN-202607272"
+          },
+          {
+            "synthetic": true,
+            "data_class": "date_of_birth",
+            "start": 144,
+            "end": 154,
+            "text": "1991-10-14"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0009-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_paula_robson_0009@example.test"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "breach",
+      "source_record_id": "breach-0009-03",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 65,
+            "end": 101,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 113,
+            "end": 128,
+            "text": "+1-200-555-0108"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 145,
+            "end": 182,
+            "text": "108 9 Example Avenue, Testville 00000"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0009-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "108 9 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0108"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "broker",
+      "source_record_id": "broker-0009-02",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 32,
+            "end": 68,
+            "text": "synth_paula_robson_0009@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "address",
+            "start": 78,
+            "end": 115,
+            "text": "108 9 Example Avenue, Testville 00000"
+          },
+          {
+            "synthetic": true,
+            "data_class": "phone",
+            "start": 123,
+            "end": 138,
+            "text": "+1-200-555-0108"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "search-0009-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0010",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "email",
+            "start": 31,
+            "end": 69,
+            "text": "synth_kathryn_rhodes_0010@example.test"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 80,
+            "end": 98,
+            "text": "Example Works 0010"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "social",
+      "source_record_id": "social-0009-01",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0009",
+        "spans": [
+          {
+            "synthetic": true,
+            "data_class": "username",
+            "start": 59,
+            "end": 82,
+            "text": "synth_paula_robson_0009"
+          },
+          {
+            "synthetic": true,
+            "data_class": "employer",
+            "start": 93,
+            "end": 111,
+            "text": "Example Works 0009"
+          },
+          {
+            "synthetic": true,
+            "data_class": "education",
+            "start": 123,
+            "end": 143,
+            "text": "Test University 0008"
+          }
+        ]
+      }
+    },
+    {
+      "synthetic": true,
+      "source_type": "search",
+      "source_record_id": "negative-control-0001",
+      "answer_key": {
+        "synthetic": true,
+        "content_persona_id": "persona-0010",
+        "spans": []
+      }
+    }
+  ]
+}

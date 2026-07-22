@@ -12,6 +12,7 @@ from synthworld.exposures import (
 from synthworld.extraction import (
     AnnotatedExtractionPage,
     ExtractionAnswerKey,
+    ExtractionBenchmark,
     ExtractionCorpus,
     ExtractionPage,
     ExtractionPagePurpose,
@@ -100,6 +101,21 @@ def generate_extraction_corpus(
 
     pages.append(_negative_page(exposure_corpus))
     return ExtractionCorpus(seed=seed, pages=tuple(pages))
+
+
+def generate_extraction_benchmark(
+    *,
+    seed: int,
+    persona_count: int = 10,
+) -> ExtractionBenchmark:
+    """Render the extraction benchmark as physically separate public and truth."""
+
+    corpus = generate_extraction_corpus(seed=seed, persona_count=persona_count)
+    return ExtractionBenchmark(
+        seed=seed,
+        public=corpus.to_public(),
+        answers=corpus.to_answer_key(),
+    )
 
 
 def _breach_page(
@@ -266,4 +282,4 @@ def _negative_page(corpus: ExposureCorpus) -> AnnotatedExtractionPage:
     )
 
 
-__all__ = ["generate_extraction_corpus"]
+__all__ = ["generate_extraction_benchmark", "generate_extraction_corpus"]

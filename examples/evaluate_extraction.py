@@ -1,10 +1,11 @@
-"""Evaluate a naive email extractor against SynthWorld's exact-span answer keys.
+"""Evaluate a naive email extractor against SynthWorld's exact-span answer key.
 
-SynthWorld's extraction corpus pairs product-safe source pages with
-evaluator-only answer keys listing the exact character spans of each planted
-identifier. This example runs a deliberately simple regex extractor over the
-public page content and scores it against the ground truth, demonstrating the
-scoring loop a real PII-extraction system would plug into.
+SynthWorld's extraction benchmark keeps the two sides of an evaluation
+physically separate: a product-safe ``PublicExtractionCorpus`` of pages, and an
+``ExtractionAnswerKeyCorpus`` of exact character spans. This example feeds a
+deliberately simple regex extractor only the public page fields, then loads the
+answer key afterwards to score it — the honest flow a real PII-extraction
+system would plug into.
 
 Run with:
 
@@ -19,9 +20,12 @@ import re
 from collections.abc import Sequence
 
 from synthworld.exposures import DataClass
-from synthworld.extraction_generator import generate_extraction_corpus
+from synthworld.extraction_generator import generate_extraction_benchmark
 
 _EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+
+_PageKey = tuple[str, str]
+_Span = tuple[_PageKey, int, int]
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -30,20 +34,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--persona-count", type=int, default=10)
     args = parser.parse_args(argv)
 
-    corpus = generate_extraction_corpus(
+    benchmark = generate_extraction_benchmark(
         seed=args.seed,
         persona_count=args.persona_count,
     )
 
-    gold: set[tuple[str, int, int]] = set()
-    predicted: set[tuple[str, int, int]] = set()
-    for annotated in corpus.pages:
-        page_key = f"{annotated.page.source_type}:{annotated.page.source_record_id}"
-        for span in annotated.answer_key.spans:
+    # Product side: only the public pages are visible to the system under test.
+    predicted: set[_Span] = set()
+    for page in benchmark.public.pages:
+        key = (page.source_type, page.source_record_id)
+        for match in _EMAIL_PATTERN.finditer(page.content):
+            predicted.add((key, match.start(), match.end()))
+
+    # Evaluator side: reveal the separately serialized answer key to score.
+    gold: set[_Span] = set()
+    for answer in benchmark.answers.answers:
+        key = (answer.source_type, answer.source_record_id)
+        for span in answer.answer_key.spans:
             if span.data_class is DataClass.EMAIL:
-                gold.add((page_key, span.start, span.end))
-        for match in _EMAIL_PATTERN.finditer(annotated.page.content):
-            predicted.add((page_key, match.start(), match.end()))
+                gold.add((key, span.start, span.end))
 
     true_positives = len(gold & predicted)
     precision = true_positives / len(predicted) if predicted else 0.0
@@ -55,7 +64,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             {
                 "synthetic": True,
                 "seed": args.seed,
-                "pages": len(corpus.pages),
+                "pages": len(benchmark.public.pages),
                 "gold_email_spans": len(gold),
                 "predicted_email_spans": len(predicted),
                 "true_positives": true_positives,

@@ -6,9 +6,9 @@ safeguards described in the top-level README apply to every artifact below.
 ## Worked evaluation: exact-span extraction
 
 [`evaluate_extraction.py`](evaluate_extraction.py) generates the extraction
-corpus for a seed, runs a deliberately naive regex email extractor over the
-product-safe page content, and scores it against the evaluator-only answer
-keys using exact character spans:
+benchmark for a seed, feeds a deliberately naive regex email extractor only the
+product-safe public pages, then loads the physically separate answer key and
+scores the predictions against its exact character spans:
 
 ```bash
 uv run python examples/evaluate_extraction.py --seed 20260719 --persona-count 10

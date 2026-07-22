@@ -26,7 +26,7 @@ tool and does not transform sensitive real-world data into a safe dataset.
 | Repeatable evaluation | Seeded generation, canonical ordering, frozen fixtures, and checksums |
 | Connected identities | Personas share planted family, colleague, classmate, neighbour, and social evidence |
 | Measurable ambiguity | Adversarial identity records include common names, Unicode, twins, maiden names, aliases, and misspellings |
-| Controlled oracle exposure | Connection and risk provide separate public corpora; extraction currently ships an annotated evaluator bundle |
+| Controlled oracle exposure | Extraction, connection, and risk each provide a separately serialized product-safe corpus and physically separate evaluator truth |
 | Safe fixtures | Reserved domains, fictional phones, example addresses, invalid identifiers, and recursive `synthetic: true` markers |
 | Honest scoring | Versioned formulas and benchmark integrity metrics make every published claim reproducible |
 
@@ -42,9 +42,9 @@ relationships, and assigns the expected exposure score.
 - **Exposure corpus:** breach, broker, search, and social observations,
   including zero-exposure controls, search collisions, and broker
   reappearance.
-- **Exact-span extraction:** an annotated evaluator corpus pairing product-safe
-  page content with evaluator-only occurrence labels. A separately serialized
-  public-only projection is tracked in [#13](https://github.com/bluntmachetti/synthworld/issues/13).
+- **Exact-span extraction:** a product-safe public page corpus and a physically
+  separate exact-span answer key, plus an annotated evaluator bundle that
+  pairs the two for offline scoring.
 - **Entity resolution:** opaque records and adversarial cases with separate
   entity-membership truth.
 - **Relationship inference:** public association evidence, reciprocal positive
@@ -60,16 +60,14 @@ benchmark review record.
 
 ## Public input and evaluator truth
 
-SynthWorld currently uses two packaging patterns:
+Extraction, connection, and risk each provide a separately serialized
+product-safe corpus (`PublicExtractionCorpus`, `PublicConnectionCorpus`,
+`PublicRiskCorpus`) and physically separate evaluator truth. Extraction also
+ships an `ExtractionCorpus` annotated bundle, in which every
+`AnnotatedExtractionPage` embeds both the safe page and its `answer_key`, for
+offline evaluators; that bundle is convenient but is not a product-safe input.
 
-- **Connection and risk** provide separately serialized public corpora and
-  evaluator-only answer keys.
-- **Extraction** currently provides an `ExtractionCorpus` evaluator bundle in
-  which every `AnnotatedExtractionPage` contains both the safe page and its
-  `answer_key`. The page content is safe, but the complete artifact is not a
-  product-safe input.
-
-The intended separated evaluation flow is:
+The separated evaluation flow is:
 
 ```text
 product or model                    evaluator
@@ -117,7 +115,7 @@ Useful corpus commands include:
 
 ```bash
 uv run synthworld generate-corpus --seed 20260719 --persona-count 10 --output exposures.json
-uv run synthworld generate-extraction --seed 20260719 --persona-count 10 --output extraction.json
+uv run synthworld generate-public-extraction --seed 20260719 --persona-count 10 --output extraction.json
 uv run synthworld generate-public-connections --seed 20260719 --persona-count 10 --output connections.json
 uv run synthworld generate-risk-public --seed 20260719 --persona-count 10 --output risk.json
 ```
@@ -125,11 +123,12 @@ uv run synthworld generate-risk-public --seed 20260719 --persona-count 10 --outp
 See [examples/](examples/) for a worked exact-span extraction evaluation and
 annotated sample output.
 
-The `generate-extraction`, `generate-connection-benchmark`, and
-`generate-risk-answer` commands include or emit evaluator-only truth. Keep those
-artifacts outside product and demo data paths. Today,
-`generate-public-connections` and `generate-risk-public` emit the separately
-serialized product-safe observations.
+The `generate-extraction`, `generate-extraction-answers`,
+`generate-connection-benchmark`, and `generate-risk-answer` commands include or
+emit evaluator-only truth. Keep those artifacts outside product and demo data
+paths. The `generate-public-extraction`, `generate-public-connections`, and
+`generate-risk-public` commands emit the separately serialized product-safe
+observations.
 
 ## Roadmap and integrations
 
