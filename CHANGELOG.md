@@ -18,6 +18,13 @@ schemas) are versioned independently of the package; see
 - BENCHMARKS.md renders its three visuals as native Mermaid diagrams again,
   dropping the committed `assets/*.svg` files. GitHub renders Mermaid inline, so
   the document no longer depends on the image proxy.
+- The README now starts with a goal-led use-case chooser, and a new
+  `USER_GUIDE.md` explains the public-input-to-score workflow, current use
+  cases, runnable commands, metric interpretation, and the safety boundary in
+  plain language.
+- The all-task example now derives every prediction from public observations
+  only and can write four CLI-ready prediction JSON files. The roadmap use-case
+  map now labels packaged, partial, and planned capabilities explicitly.
 
 ## [0.8.0] - 2026-07-22
 

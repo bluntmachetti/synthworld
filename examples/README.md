@@ -18,13 +18,20 @@ It prints corpus-level precision, recall, and F1. Swap the naive extractor for
 a real PII-extraction system to reuse the same scoring loop. `make examples`
 runs this script and is part of `make ci`, so the example cannot rot.
 
-## Worked evaluation: all tasks sweep
+## Worked evaluation: public-only baseline walkthrough
 
-[`evaluate_all.py`](evaluate_all.py) demonstrates how to run evaluation and score predictions for all four tasks supported by SynthWorld (PII extraction, entity resolution, relationship inference, and risk calibration):
+[`evaluate_all.py`](evaluate_all.py) creates deliberately simple predictions
+from public observations only, then scores all four supported tasks: PII
+extraction, entity resolution, relationship inference, and risk calibration.
+No prediction rule reads an answer key.
 
 ```bash
 uv run python examples/evaluate_all.py --seed 20260719 --persona-count 10
 ```
+
+Add `--predictions-dir predictions` to write one valid prediction JSON file per
+task. You can pass those files to `synthworld evaluate`, or replace each naive
+rule with an adapter for your own system.
 
 ## Sample output
 
