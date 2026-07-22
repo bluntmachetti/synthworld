@@ -4,20 +4,37 @@ import json
 import runpy
 import sys
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 
 from synthworld.cli import main
 from synthworld.connection import ConnectionBenchmark, PublicConnectionCorpus
+from synthworld.connection_generator import (
+    generate_adversarial_connection_benchmark,
+    generate_relationship_connection_benchmark,
+)
 from synthworld.connection_metrics import ConnectionBenchmarkMetrics
+from synthworld.evaluation import (
+    EntityResolutionPrediction,
+    ExtractionPagePrediction,
+    ExtractionPredictionSet,
+    PredictedRelationship,
+    PredictedSpan,
+    RelationshipPrediction,
+    RiskCasePrediction,
+    RiskPrediction,
+)
 from synthworld.exposures import CorpusMetrics, ExposureCorpus
 from synthworld.extraction import (
     ExtractionAnswerKeyCorpus,
     ExtractionCorpus,
     PublicExtractionCorpus,
 )
-from synthworld.models import SynthWorld, WorldMetrics
-from synthworld.risk import PublicRiskCorpus, RiskAnswerKey
+from synthworld.extraction_generator import generate_extraction_benchmark
+from synthworld.models import SyntheticModel, SynthWorld, WorldMetrics
+from synthworld.risk import PublicRiskCorpus, RiskAnswerKey, RiskBand
+from synthworld.risk_generator import generate_risk_benchmark
 from synthworld.risk_metrics import RiskBenchmarkMetrics
 
 
@@ -319,3 +336,238 @@ def test_module_entrypoint_runs_the_metrics_command(
 
     metrics = WorldMetrics.model_validate_json(capsys.readouterr().out)
     assert metrics.persona_count == 10
+
+
+def _extraction_predictions() -> ExtractionPredictionSet:
+    benchmark = generate_extraction_benchmark(seed=20260719, persona_count=10)
+    return ExtractionPredictionSet(
+        predictions=tuple(
+            ExtractionPagePrediction(
+                source_type=answer.source_type,
+                source_record_id=answer.source_record_id,
+                spans=tuple(
+                    PredictedSpan(
+                        data_class=span.data_class,
+                        start=span.start,
+                        end=span.end,
+                    )
+                    for span in answer.answer_key.spans
+                ),
+            )
+            for answer in benchmark.answers.answers
+        )
+    )
+
+
+def _write_prediction(tmp_path: Path, prediction: SyntheticModel) -> str:
+    path = tmp_path / "predictions.json"
+    path.write_text(prediction.model_dump_json(), encoding="utf-8")
+    return str(path)
+
+
+def test_evaluate_extraction_command_scores_predictions(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    predictions = _write_prediction(tmp_path, _extraction_predictions())
+
+    exit_code = main(
+        ["evaluate", "extraction", "--predictions", predictions, "--seed", "20260719"]
+    )
+
+    report = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert report["task"] == "extraction"
+    assert report["seed"] == 20260719
+
+
+def test_evaluate_command_summary_prints_a_metric_table(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    predictions = _write_prediction(tmp_path, _extraction_predictions())
+
+    exit_code = main(
+        ["evaluate", "extraction", "--predictions", predictions, "--summary"]
+    )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Metric" in out
+    assert "exact_precision" in out
+
+
+def test_evaluate_entity_resolution_command_scores_predictions(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    benchmark = generate_adversarial_connection_benchmark(seed=20260719)
+    by_entity: dict[str, list[UUID]] = {}
+    for item in benchmark.answer_key.record_memberships:
+        by_entity.setdefault(item.entity_id, []).append(item.record_id)
+    prediction = EntityResolutionPrediction(
+        clusters=tuple(tuple(records) for records in by_entity.values())
+    )
+
+    exit_code = main(
+        [
+            "evaluate",
+            "entity-resolution",
+            "--predictions",
+            _write_prediction(tmp_path, prediction),
+            "--seed",
+            "20260719",
+        ]
+    )
+
+    report = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert report["task"] == "entity_resolution"
+
+
+def test_evaluate_summary_prints_null_for_undefined_metrics(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    benchmark = generate_adversarial_connection_benchmark(seed=20260719)
+    singletons = EntityResolutionPrediction(
+        clusters=tuple(
+            (item.record_id,) for item in benchmark.answer_key.record_memberships
+        )
+    )
+
+    exit_code = main(
+        [
+            "evaluate",
+            "entity-resolution",
+            "--predictions",
+            _write_prediction(tmp_path, singletons),
+            "--summary",
+        ]
+    )
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "pairwise_precision" in out
+    assert "None" in out
+
+
+def test_evaluate_relationship_command_scores_predictions(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    benchmark = generate_relationship_connection_benchmark(
+        seed=20260719, persona_count=10
+    )
+    prediction = RelationshipPrediction(
+        edges=tuple(
+            PredictedRelationship(
+                source_record_id=item.source_record_id,
+                target_record_id=item.target_record_id,
+                kind=item.kind,
+                evidence_association_ids=item.reciprocal_association_ids,
+            )
+            for item in benchmark.answer_key.relationships
+        )
+    )
+
+    exit_code = main(
+        [
+            "evaluate",
+            "relationship",
+            "--predictions",
+            _write_prediction(tmp_path, prediction),
+            "--seed",
+            "20260719",
+        ]
+    )
+
+    report = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert report["task"] == "relationship_inference"
+
+
+def test_evaluate_risk_command_scores_predictions(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    benchmark = generate_risk_benchmark(seed=20260719, persona_count=10)
+    prediction = RiskPrediction(
+        cases=tuple(
+            RiskCasePrediction(
+                case_id=case.case_id,
+                band=case.band,
+                score=case.score,
+                band_probabilities=tuple(
+                    (band, 1.0 if band is case.band else 0.0) for band in RiskBand
+                ),
+            )
+            for case in benchmark.answer_key.cases
+        )
+    )
+
+    exit_code = main(
+        [
+            "evaluate",
+            "risk",
+            "--predictions",
+            _write_prediction(tmp_path, prediction),
+            "--seed",
+            "20260719",
+        ]
+    )
+
+    report = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert report["task"] == "risk_calibration"
+
+
+def test_evaluate_reports_input_error_as_exit_code_one(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    incomplete = RiskPrediction(cases=())
+
+    exit_code = main(
+        [
+            "evaluate",
+            "risk",
+            "--predictions",
+            _write_prediction(tmp_path, incomplete),
+            "--seed",
+            "20260719",
+        ]
+    )
+
+    assert exit_code == 1
+    assert "must cover exactly the public cases" in capsys.readouterr().err
+
+
+def test_evaluate_reports_a_missing_file_as_exit_code_one(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(
+        [
+            "evaluate",
+            "extraction",
+            "--predictions",
+            str(tmp_path / "does-not-exist.json"),
+        ]
+    )
+
+    assert exit_code == 1
+    assert capsys.readouterr().err.strip()
+
+
+def test_evaluate_reports_malformed_predictions_as_exit_code_one(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    predictions = tmp_path / "malformed.json"
+    predictions.write_text("{not valid json", encoding="utf-8")
+
+    exit_code = main(["evaluate", "extraction", "--predictions", str(predictions)])
+
+    assert exit_code == 1
+    assert capsys.readouterr().err.strip()

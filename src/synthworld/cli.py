@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from collections.abc import Sequence
 from pathlib import Path
+
+from pydantic import ValidationError
 
 from synthworld.connection_generator import (
     generate_adversarial_connection_benchmark,
@@ -15,6 +18,18 @@ from synthworld.connection_serialization import (
 )
 from synthworld.corpus_metrics import evaluate_corpus
 from synthworld.corpus_serialization import corpus_to_json
+from synthworld.evaluation import (
+    EntityResolutionPrediction,
+    EvaluationInputError,
+    EvaluationReport,
+    ExtractionPredictionSet,
+    RelationshipPrediction,
+    RiskPrediction,
+    evaluate_entity_resolution,
+    evaluate_extraction,
+    evaluate_relationship_inference,
+    evaluate_risk_calibration,
+)
 from synthworld.exposure_generator import generate_exposure_corpus
 from synthworld.extraction_generator import (
     generate_extraction_benchmark,
@@ -39,6 +54,42 @@ from synthworld.serialization import world_to_json
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
+
+    if args.command == "evaluate":
+        try:
+            text = args.predictions.read_text(encoding="utf-8")
+            if args.task == "extraction":
+                report = evaluate_extraction(
+                    ExtractionPredictionSet.model_validate_json(text),
+                    seed=args.seed,
+                    persona_count=args.persona_count,
+                )
+            elif args.task == "entity-resolution":
+                report = evaluate_entity_resolution(
+                    EntityResolutionPrediction.model_validate_json(text),
+                    seed=args.seed,
+                )
+            elif args.task == "relationship":
+                report = evaluate_relationship_inference(
+                    RelationshipPrediction.model_validate_json(text),
+                    seed=args.seed,
+                    persona_count=args.persona_count,
+                )
+            else:
+                report = evaluate_risk_calibration(
+                    RiskPrediction.model_validate_json(text),
+                    seed=args.seed,
+                    persona_count=args.persona_count,
+                )
+        except (OSError, ValidationError, EvaluationInputError) as error:
+            print(str(error), file=sys.stderr)
+            return 1
+
+        if args.summary:
+            print(_metric_table(report))
+        else:
+            print(report.model_dump_json(indent=2))
+        return 0
 
     if args.command == "generate-connection-benchmark":
         benchmark = generate_adversarial_connection_benchmark(seed=args.seed)
@@ -282,6 +333,39 @@ def _parser() -> argparse.ArgumentParser:
         help="print public/truth risk benchmark integrity metrics",
     )
     _add_world_arguments(risk_metrics)
+
+    evaluate = subparsers.add_parser(
+        "evaluate",
+        help="evaluate system predictions against separate truth",
+    )
+    evaluate.add_argument(
+        "task",
+        choices=["extraction", "entity-resolution", "relationship", "risk"],
+        help="evaluation task to run",
+    )
+    evaluate.add_argument(
+        "--predictions",
+        type=Path,
+        required=True,
+        help="path to predictions JSON file",
+    )
+    evaluate.add_argument(
+        "--seed",
+        type=int,
+        default=20_260_719,
+        help="benchmark seed",
+    )
+    evaluate.add_argument(
+        "--persona-count",
+        type=int,
+        default=10,
+        help="benchmark persona count",
+    )
+    evaluate.add_argument(
+        "--summary",
+        action="store_true",
+        help="print compact human table of metrics instead of JSON",
+    )
     return parser
 
 
@@ -292,3 +376,22 @@ def _add_world_arguments(parser: argparse.ArgumentParser) -> None:
 
 def _add_seed_argument(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--seed", type=int, default=20_260_719)
+
+
+def _metric_table(report: EvaluationReport) -> str:
+    header = ("Metric", "Value", "Support")
+    rows = [
+        (
+            metric.name,
+            "None" if metric.value is None else f"{metric.value:.4f}",
+            str(metric.support),
+        )
+        for metric in report.metrics
+    ]
+    widths = [
+        max(len(cell) for cell in column) for column in zip(header, *rows, strict=True)
+    ]
+    return "\n".join(
+        "  ".join(cell.ljust(width) for cell, width in zip(row, widths, strict=True))
+        for row in (header, *rows)
+    )

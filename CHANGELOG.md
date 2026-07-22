@@ -11,6 +11,16 @@ schemas) are versioned independently of the package; see
 
 ### Added
 
+- Unified evaluation SDK (issue #1): versioned, oracle-free prediction schemas
+  and four scorers — `evaluate_extraction`, `evaluate_entity_resolution`,
+  `evaluate_relationship_inference`, `evaluate_risk_calibration` — that load
+  truth themselves and return a uniform `EvaluationReport` of metrics and
+  failure slices, with undefined metrics reported as `null` and malformed
+  submissions rejected via `EvaluationInputError`. Metric definitions are
+  versioned by `scoring_version`; the evaluation schemas are provisional
+  `0.1.0` while the package is pre-1.0. A `synthworld evaluate <task>` CLI
+  scores a predictions file (with an optional `--summary` table), and
+  `examples/evaluate_all.py` demonstrates every task.
 - Separated exact-span extraction benchmark (issue #13): a product-safe
   `PublicExtractionCorpus` and a physically separate `ExtractionAnswerKeyCorpus`,
   joined and integrity-checked by `ExtractionBenchmark`. New
