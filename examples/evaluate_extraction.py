@@ -1,4 +1,4 @@
-"""Evaluate a naive email extractor against SynthWorld's exact-span answer key.
+"""Evaluate a naive PII extractor against SynthWorld's exact-span answer key.
 
 SynthWorld's extraction benchmark keeps the two sides of an evaluation
 physically separate: a product-safe ``PublicExtractionCorpus`` of pages, and an
@@ -15,17 +15,21 @@ Run with:
 from __future__ import annotations
 
 import argparse
-import json
 import re
 from collections.abc import Sequence
 
+from synthworld.evaluation import (
+    ExtractionPagePrediction,
+    ExtractionPredictionSet,
+    PredictedSpan,
+    evaluate_extraction,
+)
 from synthworld.exposures import DataClass
 from synthworld.extraction_generator import generate_extraction_benchmark
 
-_EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-
-_PageKey = tuple[str, str]
-_Span = tuple[_PageKey, int, int]
+_EMAIL = re.compile(r"[a-z0-9][a-z0-9._%+-]*@example\.test")
+_PHONE = re.compile(r"\+1-[0-9]{3}-555-01[0-9]{2}")
+_NATIONAL_ID = re.compile(r"SYN-[0-9]+")
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -40,41 +44,40 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     # Product side: only the public pages are visible to the system under test.
-    predicted: set[_Span] = set()
+    pages: list[ExtractionPagePrediction] = []
     for page in benchmark.public.pages:
-        key = (page.source_type, page.source_record_id)
-        for match in _EMAIL_PATTERN.finditer(page.content):
-            predicted.add((key, match.start(), match.end()))
-
-    # Evaluator side: reveal the separately serialized answer key to score.
-    gold: set[_Span] = set()
-    for answer in benchmark.answers.answers:
-        key = (answer.source_type, answer.source_record_id)
-        for span in answer.answer_key.spans:
-            if span.data_class is DataClass.EMAIL:
-                gold.add((key, span.start, span.end))
-
-    true_positives = len(gold & predicted)
-    precision = true_positives / len(predicted) if predicted else 0.0
-    recall = true_positives / len(gold) if gold else 0.0
-    denominator = precision + recall
-    f1 = 2 * precision * recall / denominator if denominator else 0.0
-    print(
-        json.dumps(
-            {
-                "synthetic": True,
-                "seed": args.seed,
-                "pages": len(benchmark.public.pages),
-                "gold_email_spans": len(gold),
-                "predicted_email_spans": len(predicted),
-                "true_positives": true_positives,
-                "precision": round(precision, 4),
-                "recall": round(recall, 4),
-                "f1": round(f1, 4),
-            },
-            indent=2,
+        spans: list[PredictedSpan] = []
+        for pattern, data_class in (
+            (_EMAIL, DataClass.EMAIL),
+            (_PHONE, DataClass.PHONE),
+            (_NATIONAL_ID, DataClass.NATIONAL_ID),
+        ):
+            for match in pattern.finditer(page.content):
+                spans.append(
+                    PredictedSpan(
+                        data_class=data_class,
+                        start=match.start(),
+                        end=match.end(),
+                    )
+                )
+        pages.append(
+            ExtractionPagePrediction(
+                source_type=page.source_type,
+                source_record_id=page.source_record_id,
+                spans=tuple(spans),
+            )
         )
+
+    preds = ExtractionPredictionSet(predictions=tuple(pages))
+
+    # Score predictions
+    report = evaluate_extraction(
+        preds,
+        seed=args.seed,
+        persona_count=args.persona_count,
     )
+
+    print(report.model_dump_json(indent=2))
     return 0
 
 

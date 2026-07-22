@@ -131,6 +131,28 @@ paths. The `generate-public-extraction`, `generate-public-connections`, and
 `generate-risk-public` commands emit the separately serialized product-safe
 observations.
 
+## Evaluate a system
+
+SynthWorld provides a unified command line tool to score predictions against separately serialized ground-truth answer keys:
+
+```bash
+synthworld evaluate <task> --predictions PATH [--seed S] [--persona-count N] [--summary]
+```
+
+Where `task` is one of `extraction`, `entity-resolution`, `relationship`, or `risk`.
+
+- `--predictions`: Path to the system predictions JSON file (conforming to task-specific prediction schemas).
+- `--seed`: The benchmark seed used to load/generate matching ground-truth.
+- `--persona-count`: The benchmark persona count (ignored for `entity-resolution`).
+- `--summary`: If provided, outputs a clean, compact terminal table summarizing the metrics instead of the raw JSON report.
+
+Example:
+```bash
+synthworld evaluate extraction --predictions predictions.json --seed 20260719 --summary
+```
+
+See [DATA_DICTIONARY.md](DATA_DICTIONARY.md) for full prediction and report schemas, and [examples/](examples/) for worked code examples.
+
 ## Roadmap and integrations
 
 SynthWorld is intended to remain a focused ground-truth identity layer rather

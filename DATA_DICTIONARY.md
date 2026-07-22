@@ -128,3 +128,41 @@ The frozen `risk-public-golden-v1.json` and `risk-answer-golden-v1.json` are
 authenticated independently by `RISK_PUBLIC_SHA256SUMS` and
 `RISK_ANSWER_SHA256SUMS`. Loaders verify each checksum before parsing and then
 reject cross-file seed, case, factor, arithmetic, score, or band drift.
+
+## Evaluation
+
+The evaluation SDK debuts provisional schema version `0.1.0`. A system submits
+an oracle-free prediction to the matching evaluator function or the `synthworld
+evaluate` CLI; the evaluator loads truth itself and returns an
+`EvaluationReport`.
+
+### Threat model
+
+The public/oracle split is an **API-hygiene** guarantee that stops a pipeline
+from accidentally scoring against leaked labels — not an anti-cheating measure.
+SynthWorld's golden answer keys are committed in this repository, so they are
+public; adversarial or competitive evaluation requires benchmarks generated
+from held-out private seeds.
+
+### Scorer inputs (Prediction schemas)
+
+| Task | Prediction schema | Required fields | Meaning |
+|---|---|---|---|
+| Exact-span extraction | `ExtractionPredictionSet` | `schema_version`, `predictions` | A list of `ExtractionPagePrediction` each containing `source_type`, `source_record_id`, and a list of `PredictedSpan` (`data_class`, `start`, `end`). |
+| Entity resolution | `EntityResolutionPrediction` | `schema_version`, `clusters` | A list of partition clusters where each cluster is a list of public identity record UUIDs. All public records must be partitioned exactly. |
+| Relationship inference | `RelationshipPrediction` | `schema_version`, `edges` | A list of `PredictedRelationship` (`source_record_id`, `target_record_id`, `kind`, `evidence_association_ids`). |
+| Risk calibration | `RiskPrediction` | `schema_version`, `cases` | A list of `RiskCasePrediction` (`case_id`, `band`, and optional `score`, `band_probabilities`). Score and probabilities must be provided for either every case or none. |
+
+All prediction schemas are Pydantic models supporting `.model_validate_json(text)` for parsing and validation.
+
+### Evaluation outputs
+
+| Model | Required fields | Meaning |
+|---|---|---|
+| `EvaluationReport` | `schema_version`, `scoring_version`, `task`, `seed`, `persona_count`, `benchmark_version`, `checksum_scheme`, `artifact_checksums`, `metrics`, `slices` | The uniform scored result of a task prediction set against separate truth. |
+| `TaskMetric` | `name`, `value`, `support` | One named scalar metric. A `null` value marks the metric undefined for that score. |
+| `FailureSlice` | `dimension`, `value`, `outcome`, `count`, `support` | A counted slice of where the system failed (e.g. `data_class` missed, or `adversarial_pack` false merge/split) for error analysis. |
+
+### Error handling
+- `EvaluationInputError`: Raised (inheriting from `ValueError`) if the submission is malformed or invalid for the benchmark (e.g. partitioning incorrect records, or missing case IDs), rather than merely scoring poorly.
+- Pydantic's `ValidationError` is raised if predictions violate the schema.
