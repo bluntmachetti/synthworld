@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import re
+from uuid import NAMESPACE_DNS, UUID, uuid5
 
 import pytest
 from pydantic import ValidationError
 
 from synthworld import DataClass, generate_extraction_benchmark
+from synthworld.connection import ConnectionBenchmark
+from synthworld.connection_generator import generate_adversarial_connection_benchmark
 from synthworld.evaluation import (
+    EntityResolutionPrediction,
+    EvaluationInputError,
     EvaluationReport,
     ExtractionPagePrediction,
     ExtractionPredictionSet,
@@ -15,6 +20,7 @@ from synthworld.evaluation import (
     _iou,
     _max_bipartite_matching,
     _relaxed_match_count,
+    evaluate_entity_resolution,
     evaluate_extraction,
 )
 
@@ -99,7 +105,7 @@ def test_regex_prediction_reproduces_the_reference_extraction_score() -> None:
         "employer": 34,
         "username": 13,
     }
-    assert next(s.count for s in report.slices if s.dimension == "spurious") == 0
+    assert next(s.count for s in report.slices if s.outcome == "spurious") == 0
 
 
 def test_perfect_prediction_scores_one_with_no_missed_slices() -> None:
@@ -108,7 +114,7 @@ def test_perfect_prediction_scores_one_with_no_missed_slices() -> None:
     for name in ("exact_f1", "relaxed_f1", "exact_precision", "exact_recall"):
         assert _metric(report, name) == 1.0
     assert not [s for s in report.slices if s.dimension == "data_class"]
-    assert next(s.count for s in report.slices if s.dimension == "spurious") == 0
+    assert next(s.count for s in report.slices if s.outcome == "spurious") == 0
 
 
 def test_empty_prediction_scores_zero_across_every_metric() -> None:
@@ -119,7 +125,7 @@ def test_empty_prediction_scores_zero_across_every_metric() -> None:
     )
 
     assert {metric.value for metric in report.metrics} == {0.0}
-    assert next(s.count for s in report.slices if s.dimension == "spurious") == 0
+    assert next(s.count for s in report.slices if s.outcome == "spurious") == 0
 
 
 def test_predicted_span_rejects_bad_ranges_and_password() -> None:
@@ -155,3 +161,90 @@ def test_task_metric_rejects_non_finite_and_allows_null() -> None:
     assert TaskMetric(name="undefined", value=None, support=0).value is None
     with pytest.raises(ValidationError, match="must be finite"):
         TaskMetric(name="broken", value=float("nan"), support=1)
+
+
+def _truth_partition(benchmark: ConnectionBenchmark) -> EntityResolutionPrediction:
+    by_entity: dict[str, list[UUID]] = {}
+    for item in benchmark.answer_key.record_memberships:
+        by_entity.setdefault(item.entity_id, []).append(item.record_id)
+    return EntityResolutionPrediction(
+        clusters=tuple(tuple(records) for records in by_entity.values())
+    )
+
+
+def _er_metric(report: EvaluationReport, name: str) -> float | None:
+    return next(metric.value for metric in report.metrics if metric.name == name)
+
+
+def test_entity_resolution_perfect_partition_scores_one() -> None:
+    benchmark = generate_adversarial_connection_benchmark(seed=_SEED)
+    report = evaluate_entity_resolution(_truth_partition(benchmark), seed=_SEED)
+
+    assert report.task == "entity_resolution"
+    assert report.persona_count == 10
+    assert all(metric.value == 1.0 for metric in report.metrics)
+    assert sum(s.count for s in report.slices) == 0
+    assert {s.value for s in report.slices} == {
+        "common_name",
+        "unicode_diacritics",
+        "twins_shared_address",
+        "maiden_name",
+        "misspelling_alias",
+    }
+
+
+def test_entity_resolution_singletons_report_null_pairwise() -> None:
+    benchmark = generate_adversarial_connection_benchmark(seed=_SEED)
+    singletons = EntityResolutionPrediction(
+        clusters=tuple(
+            (item.record_id,) for item in benchmark.answer_key.record_memberships
+        )
+    )
+    report = evaluate_entity_resolution(singletons, seed=_SEED)
+
+    assert _er_metric(report, "pairwise_precision") is None
+    assert _er_metric(report, "pairwise_f1") is None
+    assert _er_metric(report, "pairwise_recall") == 0.0
+    assert _er_metric(report, "bcubed_precision") == 1.0
+    assert round(_er_metric(report, "bcubed_recall") or 0.0, 4) == 0.5556
+    assert round(_er_metric(report, "bcubed_f1") or 0.0, 4) == 0.7143
+
+
+def test_entity_resolution_all_one_cluster_counts_false_merges() -> None:
+    benchmark = generate_adversarial_connection_benchmark(seed=_SEED)
+    one_cluster = EntityResolutionPrediction(
+        clusters=(
+            tuple(item.record_id for item in benchmark.answer_key.record_memberships),
+        )
+    )
+    report = evaluate_entity_resolution(one_cluster, seed=_SEED)
+
+    assert round(_er_metric(report, "pairwise_precision") or 0.0, 4) == 0.0588
+    assert _er_metric(report, "pairwise_recall") == 1.0
+    assert _er_metric(report, "bcubed_recall") == 1.0
+    false_merges = sum(s.count for s in report.slices if s.outcome == "false_merge")
+    assert false_merges == 15
+    assert sum(s.count for s in report.slices if s.outcome == "false_split") == 0
+
+
+def test_entity_resolution_rejects_incomplete_partitions() -> None:
+    benchmark = generate_adversarial_connection_benchmark(seed=_SEED)
+    complete = _truth_partition(benchmark)
+
+    dropped = EntityResolutionPrediction(clusters=complete.clusters[1:])
+    with pytest.raises(EvaluationInputError, match="partition exactly"):
+        evaluate_entity_resolution(dropped, seed=_SEED)
+
+    with_unknown = EntityResolutionPrediction(
+        clusters=(*complete.clusters, (uuid5(NAMESPACE_DNS, "not-a-record"),))
+    )
+    with pytest.raises(EvaluationInputError, match="partition exactly"):
+        evaluate_entity_resolution(with_unknown, seed=_SEED)
+
+
+def test_entity_resolution_prediction_rejects_empty_and_duplicate_clusters() -> None:
+    record = uuid5(NAMESPACE_DNS, "record")
+    with pytest.raises(ValidationError, match="clusters must be non-empty"):
+        EntityResolutionPrediction(clusters=((),))
+    with pytest.raises(ValidationError, match="only one cluster"):
+        EntityResolutionPrediction(clusters=((record,), (record,)))

@@ -23,10 +23,19 @@ from __future__ import annotations
 
 import hashlib
 import math
+from collections.abc import Iterable
+from itertools import combinations
 from typing import Literal
+from uuid import UUID
 
 from pydantic import Field, model_validator
 
+from synthworld.connection import AdversarialCase
+from synthworld.connection_generator import generate_adversarial_connection_benchmark
+from synthworld.connection_serialization import (
+    connection_benchmark_to_json,
+    public_connection_corpus_to_json,
+)
 from synthworld.exposures import DataClass
 from synthworld.extraction import ExtractionSourceType
 from synthworld.extraction_generator import generate_extraction_benchmark
@@ -41,6 +50,14 @@ SCORING_PROTOCOL_VERSION = "0.1.0"
 CHECKSUM_SCHEME = "synthworld-json-v1"
 
 _RELAXED_IOU_THRESHOLD = 0.5
+
+
+class EvaluationInputError(ValueError):
+    """Raised when a submission is malformed for a benchmark, not merely wrong.
+
+    This separates an invalid submission (unknown or missing IDs, a partition
+    that is not complete) from a valid submission that simply scores poorly.
+    """
 
 
 class TaskMetric(SyntheticModel):
@@ -58,11 +75,17 @@ class TaskMetric(SyntheticModel):
 
 
 class FailureSlice(SyntheticModel):
-    """A counted slice of where a system failed, for error analysis."""
+    """A counted slice of where a system failed, for error analysis.
 
-    regime: Literal["exact", "relaxed"]
+    `dimension`/`value` name the slice (e.g. data_class=address, or
+    adversarial_pack=twins_shared_address); `outcome` names the error type
+    (missed, spurious, false_merge, false_split); `count` is the errors and
+    `support` the denominator they are drawn from.
+    """
+
     dimension: str
     value: str
+    outcome: str
     count: int = Field(ge=0)
     support: int = Field(ge=0)
 
@@ -111,6 +134,30 @@ class ExtractionPredictionSet(SyntheticModel):
 
     schema_version: Literal["0.1.0"] = "0.1.0"
     predictions: tuple[ExtractionPagePrediction, ...]
+
+
+class EntityResolutionPrediction(SyntheticModel):
+    """A complete predicted partition of the public identity records.
+
+    Every record must appear in exactly one non-empty cluster; singletons are
+    explicit. The scorer additionally requires the members to cover the public
+    record set exactly. Cluster and member order do not affect scoring.
+    """
+
+    schema_version: Literal["0.1.0"] = "0.1.0"
+    clusters: tuple[tuple[UUID, ...], ...]
+
+    @model_validator(mode="after")
+    def validate_partition(self) -> EntityResolutionPrediction:
+        seen: set[UUID] = set()
+        for cluster in self.clusters:
+            if not cluster:
+                raise ValueError("clusters must be non-empty")
+            for record_id in cluster:
+                if record_id in seen:
+                    raise ValueError("a record may appear in only one cluster")
+                seen.add(record_id)
+        return self
 
 
 _PageKey = tuple[str, str]
@@ -265,22 +312,167 @@ def _extraction_slices(
         missed_by_class[data_class] = missed_by_class.get(data_class, 0) + 1
     class_slices = tuple(
         FailureSlice(
-            regime="exact",
             dimension="data_class",
             value=data_class.value,
+            outcome="missed",
             count=missed_by_class[data_class],
             support=gold_by_class[data_class],
         )
         for data_class in sorted(missed_by_class, key=lambda item: item.value)
     )
     spurious_slice = FailureSlice(
-        regime="exact",
-        dimension="spurious",
-        value="any",
+        dimension="overall",
+        value="all",
+        outcome="spurious",
         count=len(spurious),
         support=len(predicted),
     )
     return (*class_slices, spurious_slice)
+
+
+def evaluate_entity_resolution(
+    prediction: EntityResolutionPrediction,
+    *,
+    seed: int,
+) -> EvaluationReport:
+    """Score a predicted record partition against entity-membership truth."""
+
+    benchmark = generate_adversarial_connection_benchmark(seed=seed)
+    public_ids = {record.id for record in benchmark.public.identity_records}
+    predicted_ids = {rid for cluster in prediction.clusters for rid in cluster}
+    if predicted_ids != public_ids:
+        raise EvaluationInputError(
+            "entity-resolution prediction must partition exactly the public records"
+        )
+
+    truth_entity = {
+        item.record_id: item.entity_id
+        for item in benchmark.answer_key.record_memberships
+    }
+    pred_cluster = {
+        rid: index
+        for index, cluster in enumerate(prediction.clusters)
+        for rid in cluster
+    }
+    truth_members = _members_by_key(truth_entity)
+    pred_members = _members_by_key(pred_cluster)
+    truth_pairs = _same_group_pairs(truth_members.values())
+    pred_pairs = _same_group_pairs(pred_members.values())
+    true_positive = len(pred_pairs & truth_pairs)
+
+    pairwise_precision = _ratio_or_none(true_positive, len(pred_pairs))
+    pairwise_recall = _ratio_or_none(true_positive, len(truth_pairs))
+    bcubed_precision, bcubed_recall, bcubed_f1 = _bcubed(
+        public_ids, pred_members, truth_members, pred_cluster, truth_entity
+    )
+
+    metrics = (
+        TaskMetric(
+            name="pairwise_precision", value=pairwise_precision, support=len(pred_pairs)
+        ),
+        TaskMetric(
+            name="pairwise_recall", value=pairwise_recall, support=len(truth_pairs)
+        ),
+        TaskMetric(
+            name="pairwise_f1",
+            value=_f1_or_none(pairwise_precision, pairwise_recall),
+            support=len(truth_pairs),
+        ),
+        TaskMetric(
+            name="bcubed_precision", value=bcubed_precision, support=len(public_ids)
+        ),
+        TaskMetric(name="bcubed_recall", value=bcubed_recall, support=len(public_ids)),
+        TaskMetric(name="bcubed_f1", value=bcubed_f1, support=len(public_ids)),
+    )
+    return EvaluationReport(
+        scoring_version=SCORING_PROTOCOL_VERSION,
+        task="entity_resolution",
+        seed=seed,
+        persona_count=len(truth_members),
+        benchmark_version=benchmark.schema_version,
+        checksum_scheme=CHECKSUM_SCHEME,
+        artifact_checksums=(
+            ("public", _sha256(public_connection_corpus_to_json(benchmark.public))),
+            ("benchmark", _sha256(connection_benchmark_to_json(benchmark))),
+        ),
+        metrics=metrics,
+        slices=_entity_resolution_slices(
+            benchmark.answer_key.adversarial_cases, pred_pairs, truth_pairs
+        ),
+    )
+
+
+def _members_by_key[Key](assignment: dict[UUID, Key]) -> dict[Key, set[UUID]]:
+    members: dict[Key, set[UUID]] = {}
+    for record_id, key in assignment.items():
+        members.setdefault(key, set()).add(record_id)
+    return members
+
+
+def _same_group_pairs(groups: Iterable[set[UUID]]) -> set[frozenset[UUID]]:
+    return {frozenset(pair) for group in groups for pair in combinations(group, 2)}
+
+
+def _bcubed(
+    records: set[UUID],
+    pred_members: dict[int, set[UUID]],
+    truth_members: dict[str, set[UUID]],
+    pred_cluster: dict[UUID, int],
+    truth_entity: dict[UUID, str],
+) -> tuple[float, float, float]:
+    precision_sum = 0.0
+    recall_sum = 0.0
+    for record_id in records:
+        predicted = pred_members[pred_cluster[record_id]]
+        truth = truth_members[truth_entity[record_id]]
+        shared = len(predicted & truth)
+        precision_sum += shared / len(predicted)
+        recall_sum += shared / len(truth)
+    count = len(records)
+    precision = precision_sum / count
+    recall = recall_sum / count
+    return precision, recall, _harmonic_mean(precision, recall)
+
+
+def _entity_resolution_slices(
+    cases: tuple[AdversarialCase, ...],
+    pred_pairs: set[frozenset[UUID]],
+    truth_pairs: set[frozenset[UUID]],
+) -> tuple[FailureSlice, ...]:
+    slices: list[FailureSlice] = []
+    for case in cases:
+        pack_pairs = {frozenset(pair) for pair in combinations(case.record_ids, 2)}
+        pack_truth = pack_pairs & truth_pairs
+        pack_different = pack_pairs - truth_pairs
+        slices.append(
+            FailureSlice(
+                dimension="adversarial_pack",
+                value=case.pack.value,
+                outcome="false_merge",
+                count=len(pred_pairs & pack_different),
+                support=len(pack_different),
+            )
+        )
+        slices.append(
+            FailureSlice(
+                dimension="adversarial_pack",
+                value=case.pack.value,
+                outcome="false_split",
+                count=len(pack_truth - pred_pairs),
+                support=len(pack_truth),
+            )
+        )
+    return tuple(slices)
+
+
+def _ratio_or_none(numerator: int, denominator: int) -> float | None:
+    return numerator / denominator if denominator else None
+
+
+def _f1_or_none(precision: float | None, recall: float | None) -> float | None:
+    if precision is None or recall is None:
+        return None
+    return _harmonic_mean(precision, recall)
 
 
 def _prf[Item](predicted: set[Item], gold: set[Item]) -> tuple[float, float, float]:
@@ -307,11 +499,14 @@ __all__ = [
     "CHECKSUM_SCHEME",
     "EVALUATION_SCHEMA_VERSION",
     "SCORING_PROTOCOL_VERSION",
+    "EntityResolutionPrediction",
+    "EvaluationInputError",
     "EvaluationReport",
     "ExtractionPagePrediction",
     "ExtractionPredictionSet",
     "FailureSlice",
     "PredictedSpan",
     "TaskMetric",
+    "evaluate_entity_resolution",
     "evaluate_extraction",
 ]
