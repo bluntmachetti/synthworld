@@ -15,6 +15,9 @@ schemas) are versioned independently of the package; see
   the public corpus (for example, from a mismatched seed or persona count) with
   `EvaluationInputError`, and `ExtractionPredictionSet` rejects duplicate pages
   — consistent with the malformed-submission handling of the other scorers.
+- BENCHMARKS.md renders its three visuals as native Mermaid diagrams again,
+  dropping the committed `assets/*.svg` files. GitHub renders Mermaid inline, so
+  the document no longer depends on the image proxy.
 
 ## [0.8.0] - 2026-07-22
 
