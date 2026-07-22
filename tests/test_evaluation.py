@@ -141,14 +141,17 @@ def test_perfect_prediction_scores_one_with_no_missed_slices() -> None:
     assert next(s.count for s in report.slices if s.outcome == "spurious") == 0
 
 
-def test_empty_prediction_scores_zero_across_every_metric() -> None:
+def test_empty_prediction_reports_null_precision_and_zero_recall() -> None:
     report = evaluate_extraction(
         ExtractionPredictionSet(predictions=()),
         seed=_SEED,
         persona_count=10,
     )
 
-    assert {metric.value for metric in report.metrics} == {0.0}
+    # No predictions: precision and F1 are undefined (null), recall is 0.
+    assert {metric.value for metric in report.metrics} == {None, 0.0}
+    assert _metric(report, "exact_precision") is None
+    assert _metric(report, "exact_recall") == 0.0
     assert next(s.count for s in report.slices if s.outcome == "spurious") == 0
 
 
@@ -319,7 +322,7 @@ def test_relationship_empty_prediction_reports_null_precision() -> None:
 
     assert _rel_metric(report, "edge_precision") is None
     assert _rel_metric(report, "edge_f1") is None
-    assert _rel_metric(report, "citation_validity") is None
+    assert _rel_metric(report, "citation_precision") is None
     assert _rel_metric(report, "edge_recall") == 0.0
     assert _rel_metric(report, "evidence_backed_recall") == 0.0
 
@@ -343,6 +346,28 @@ def test_relationship_counts_false_edges_and_canonicalises_endpoints() -> None:
     assert round(_rel_metric(report, "edge_precision") or 0.0, 4) == 0.75
     false_edges = next(s.count for s in report.slices if s.dimension == "overall")
     assert false_edges == 1
+
+
+def test_relationship_citation_precision_defeats_evidence_laundering() -> None:
+    benchmark = generate_relationship_connection_benchmark(seed=_SEED, persona_count=10)
+    every_association = tuple(item.id for item in benchmark.public.association_records)
+    # Citing every association on every correct edge scores full recall but
+    # must not score full citation precision — the citations are not attributed.
+    launder = RelationshipPrediction(
+        edges=tuple(
+            PredictedRelationship(
+                source_record_id=item.source_record_id,
+                target_record_id=item.target_record_id,
+                kind=item.kind,
+                evidence_association_ids=every_association,
+            )
+            for item in benchmark.answer_key.relationships
+        )
+    )
+    report = evaluate_relationship_inference(launder, seed=_SEED, persona_count=10)
+
+    assert _rel_metric(report, "evidence_backed_recall") == 1.0
+    assert (_rel_metric(report, "citation_precision") or 1.0) < 1.0
 
 
 def test_relationship_rejects_unknown_endpoints() -> None:

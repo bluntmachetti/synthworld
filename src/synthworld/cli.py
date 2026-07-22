@@ -5,6 +5,8 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from pydantic import ValidationError
+
 from synthworld.connection_generator import (
     generate_adversarial_connection_benchmark,
     generate_relationship_connection_benchmark,
@@ -54,8 +56,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "evaluate":
-        text = args.predictions.read_text(encoding="utf-8")
         try:
+            text = args.predictions.read_text(encoding="utf-8")
             if args.task == "extraction":
                 report = evaluate_extraction(
                     ExtractionPredictionSet.model_validate_json(text),
@@ -79,7 +81,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     seed=args.seed,
                     persona_count=args.persona_count,
                 )
-        except EvaluationInputError as error:
+        except (OSError, ValidationError, EvaluationInputError) as error:
             print(str(error), file=sys.stderr)
             return 1
 

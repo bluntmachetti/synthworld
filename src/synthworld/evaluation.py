@@ -302,11 +302,14 @@ def evaluate_extraction(
         for span in page.spans
     }
 
-    exact_precision, exact_recall, exact_f1 = _prf(predicted, gold)
+    true_positive = len(predicted & gold)
+    exact_precision = _ratio_or_none(true_positive, len(predicted))
+    exact_recall = _ratio_or_none(true_positive, len(gold))
+    exact_f1 = _f1_or_none(exact_precision, exact_recall)
     relaxed_matches = _relaxed_match_count(predicted, gold)
-    relaxed_precision = _rate(relaxed_matches, len(predicted))
-    relaxed_recall = _rate(relaxed_matches, len(gold))
-    relaxed_f1 = _harmonic_mean(relaxed_precision, relaxed_recall)
+    relaxed_precision = _ratio_or_none(relaxed_matches, len(predicted))
+    relaxed_recall = _ratio_or_none(relaxed_matches, len(gold))
+    relaxed_f1 = _f1_or_none(relaxed_precision, relaxed_recall)
 
     metrics = (
         TaskMetric(
@@ -588,7 +591,6 @@ def evaluate_relationship_inference(
         seed=seed, persona_count=persona_count
     )
     record_ids = {record.id for record in benchmark.public.identity_records}
-    association_ids = {item.id for item in benchmark.public.association_records}
     for edge in prediction.edges:
         if edge.source_record_id not in record_ids or (
             edge.target_record_id not in record_ids
@@ -607,29 +609,27 @@ def evaluate_relationship_inference(
     edge_precision = _ratio_or_none(true_positive, len(predicted_edges))
     edge_recall = _ratio_or_none(true_positive, len(truth_edges))
 
-    cited = [
-        cited_id
-        for edge in prediction.edges
-        for cited_id in edge.evidence_association_ids
-    ]
-    valid_cited = sum(cited_id in association_ids for cited_id in cited)
+    # Citations are attributed per edge: a correct citation is one of the
+    # edge's own reciprocal associations, so spraying every association across
+    # edges lowers citation_precision instead of scoring free credit.
+    truth_evidence = {
+        ((item.source_record_id, item.target_record_id), item.kind): frozenset(
+            item.reciprocal_association_ids
+        )
+        for item in benchmark.answer_key.relationships
+    }
     citations_by_edge: dict[_Edge, set[UUID]] = {}
     for edge in prediction.edges:
         key = (_canonical_pair(edge.source_record_id, edge.target_record_id), edge.kind)
         citations_by_edge.setdefault(key, set()).update(edge.evidence_association_ids)
+    correct_citations = sum(
+        len(cited & truth_evidence.get(key, frozenset()))
+        for key, cited in citations_by_edge.items()
+    )
+    total_citations = sum(len(cited) for cited in citations_by_edge.values())
     evidence_backed = sum(
-        (
-            (item.source_record_id, item.target_record_id),
-            item.kind,
-        )
-        in predicted_edges
-        and bool(
-            citations_by_edge.get(
-                ((item.source_record_id, item.target_record_id), item.kind), set()
-            )
-            & set(item.reciprocal_association_ids)
-        )
-        for item in benchmark.answer_key.relationships
+        key in predicted_edges and bool(citations_by_edge.get(key, set()) & own)
+        for key, own in truth_evidence.items()
     )
 
     metrics = (
@@ -643,13 +643,13 @@ def evaluate_relationship_inference(
             support=len(truth_edges),
         ),
         TaskMetric(
-            name="citation_validity",
-            value=_ratio_or_none(valid_cited, len(cited)),
-            support=len(cited),
+            name="citation_precision",
+            value=_ratio_or_none(correct_citations, total_citations),
+            support=total_citations,
         ),
         TaskMetric(
             name="evidence_backed_recall",
-            value=_rate(evidence_backed, len(truth_edges)),
+            value=_ratio_or_none(evidence_backed, len(truth_edges)),
             support=len(truth_edges),
         ),
     )
@@ -706,7 +706,7 @@ def _relationship_slices(
             value="all",
             outcome="false_edge",
             count=len(control_pairs & predicted_pairs),
-            support=len(control_pairs),
+            support=len(controls),
         ),
     )
 
@@ -814,9 +814,11 @@ def _macro_f1(
     predicted: dict[UUID, RiskCasePrediction],
     truth: dict[UUID, RiskCaseTruth],
 ) -> float:
-    truth_bands = {case.band for case in truth.values()}
+    # Average over every band that appears in the truth or the prediction, so
+    # predicting a band absent from truth is penalised rather than ignored.
+    labels = {predicted[cid].band for cid in truth} | {truth[cid].band for cid in truth}
     scores: list[float] = []
-    for band in truth_bands:
+    for band in labels:
         true_positive = sum(
             predicted[cid].band is band and truth[cid].band is band for cid in truth
         )
@@ -881,13 +883,6 @@ def _risk_slices(
             counts.items(), key=lambda item: _BAND_INDEX[item[0]]
         )
     )
-
-
-def _prf[Item](predicted: set[Item], gold: set[Item]) -> tuple[float, float, float]:
-    true_positive = len(predicted & gold)
-    precision = _rate(true_positive, len(predicted))
-    recall = _rate(true_positive, len(gold))
-    return precision, recall, _harmonic_mean(precision, recall)
 
 
 def _harmonic_mean(precision: float, recall: float) -> float:

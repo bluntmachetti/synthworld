@@ -541,3 +541,33 @@ def test_evaluate_reports_input_error_as_exit_code_one(
 
     assert exit_code == 1
     assert "must cover exactly the public cases" in capsys.readouterr().err
+
+
+def test_evaluate_reports_a_missing_file_as_exit_code_one(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(
+        [
+            "evaluate",
+            "extraction",
+            "--predictions",
+            str(tmp_path / "does-not-exist.json"),
+        ]
+    )
+
+    assert exit_code == 1
+    assert capsys.readouterr().err.strip()
+
+
+def test_evaluate_reports_malformed_predictions_as_exit_code_one(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    predictions = tmp_path / "malformed.json"
+    predictions.write_text("{not valid json", encoding="utf-8")
+
+    exit_code = main(["evaluate", "extraction", "--predictions", str(predictions)])
+
+    assert exit_code == 1
+    assert capsys.readouterr().err.strip()
