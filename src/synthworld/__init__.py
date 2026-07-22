@@ -59,10 +59,13 @@ from synthworld.evaluation import (
     PredictedRelationship,
     PredictedSpan,
     RelationshipPrediction,
+    RiskCasePrediction,
+    RiskPrediction,
     TaskMetric,
     evaluate_entity_resolution,
     evaluate_extraction,
     evaluate_relationship_inference,
+    evaluate_risk_calibration,
 )
 from synthworld.exposure_generator import generate_exposure_corpus
 from synthworld.exposures import (
@@ -227,7 +230,9 @@ __all__ = [
     "RiskBenchmark",
     "RiskBenchmarkIntegrityError",
     "RiskBenchmarkMetrics",
+    "RiskCasePrediction",
     "RiskCaseTruth",
+    "RiskPrediction",
     "SearchExposure",
     "SearchMatchKind",
     "SearchResultKind",
@@ -247,6 +252,7 @@ __all__ = [
     "evaluate_extraction",
     "evaluate_relationship_inference",
     "evaluate_risk_benchmark",
+    "evaluate_risk_calibration",
     "evaluate_world",
     "extraction_answers_to_json",
     "extraction_corpus_to_json",

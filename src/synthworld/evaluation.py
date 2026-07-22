@@ -54,6 +54,12 @@ from synthworld.extraction_serialization import (
     public_extraction_corpus_to_json,
 )
 from synthworld.models import SyntheticModel
+from synthworld.risk import RiskBand, RiskCaseTruth
+from synthworld.risk_generator import generate_risk_benchmark
+from synthworld.risk_serialization import (
+    public_risk_corpus_to_json,
+    risk_answer_key_to_json,
+)
 
 EVALUATION_SCHEMA_VERSION = "0.1.0"
 SCORING_PROTOCOL_VERSION = "0.1.0"
@@ -202,11 +208,68 @@ class RelationshipPrediction(SyntheticModel):
         return self
 
 
+class RiskCasePrediction(SyntheticModel):
+    """One case's predicted breach-risk band, with optional score and vector.
+
+    `band` is always required. `score` and `band_probabilities` are optional,
+    but the prediction set requires each to be provided for every case or for
+    none, so a system cannot report the easy cases only.
+    """
+
+    case_id: UUID
+    band: RiskBand
+    score: int | None = None
+    band_probabilities: tuple[tuple[RiskBand, float], ...] | None = None
+
+    @model_validator(mode="after")
+    def validate_optional_capabilities(self) -> RiskCasePrediction:
+        if self.score is not None and not 0 <= self.score <= 100:
+            raise ValueError("risk score must be between 0 and 100")
+        probabilities = self.band_probabilities
+        if probabilities is not None:
+            bands = [band for band, _ in probabilities]
+            if sorted(bands, key=_BAND_INDEX.__getitem__) != list(_BAND_ORDER):
+                raise ValueError("band probabilities must cover every band once")
+            values = [value for _, value in probabilities]
+            if any(not math.isfinite(value) or not 0 <= value <= 1 for value in values):
+                raise ValueError("band probabilities must be in [0, 1]")
+            if abs(sum(values) - 1.0) > 1e-6:
+                raise ValueError("band probabilities must sum to one")
+        return self
+
+
+class RiskPrediction(SyntheticModel):
+    """Oracle-free predicted breach-risk assessments submitted for scoring."""
+
+    schema_version: Literal["0.1.0"] = "0.1.0"
+    cases: tuple[RiskCasePrediction, ...]
+
+    @model_validator(mode="after")
+    def validate_case_set(self) -> RiskPrediction:
+        if len({case.case_id for case in self.cases}) != len(self.cases):
+            raise ValueError("duplicate risk case predictions")
+        scored = [case.score is not None for case in self.cases]
+        if any(scored) and not all(scored):
+            raise ValueError("score must be given for every case or for none")
+        vectored = [case.band_probabilities is not None for case in self.cases]
+        if any(vectored) and not all(vectored):
+            raise ValueError("probabilities must be given for every case or for none")
+        return self
+
+
 _PageKey = tuple[str, str]
 _Span = tuple[_PageKey, DataClass, int, int]
 _Group = tuple[_PageKey, DataClass]
 _Endpoints = tuple[UUID, UUID]
 _Edge = tuple[_Endpoints, PublicTruthRelationshipKind]
+_BAND_ORDER = (
+    RiskBand.NONE,
+    RiskBand.LOW,
+    RiskBand.MODERATE,
+    RiskBand.HIGH,
+    RiskBand.CRITICAL,
+)
+_BAND_INDEX = {band: index for index, band in enumerate(_BAND_ORDER)}
 
 
 def evaluate_extraction(
@@ -691,6 +754,135 @@ def _f1_or_none(precision: float | None, recall: float | None) -> float | None:
     return _harmonic_mean(precision, recall)
 
 
+def evaluate_risk_calibration(
+    prediction: RiskPrediction,
+    *,
+    seed: int,
+    persona_count: int = 10,
+) -> EvaluationReport:
+    """Score predicted breach-risk bands against the calibration answer key.
+
+    ECE is deliberately omitted as a headline metric: at the frozen ten-case
+    scale it is too sample-starved to be credible. Brier and the ordinal band
+    distance are reported when a system submits probabilities.
+    """
+
+    benchmark = generate_risk_benchmark(seed=seed, persona_count=persona_count)
+    truth = {case.case_id: case for case in benchmark.answer_key.cases}
+    predicted = {case.case_id: case for case in prediction.cases}
+    if set(predicted) != set(truth):
+        raise EvaluationInputError(
+            "risk prediction must cover exactly the public cases"
+        )
+
+    count = len(truth)
+    correct = sum(predicted[cid].band is truth[cid].band for cid in truth)
+    band_distance = (
+        sum(
+            abs(_BAND_INDEX[predicted[cid].band] - _BAND_INDEX[truth[cid].band])
+            for cid in truth
+        )
+        / count
+    )
+
+    metrics = (
+        TaskMetric(name="band_accuracy", value=correct / count, support=count),
+        TaskMetric(name="macro_f1", value=_macro_f1(predicted, truth), support=count),
+        TaskMetric(name="mean_band_distance", value=band_distance, support=count),
+        TaskMetric(
+            name="mean_absolute_error", value=_mae(predicted, truth), support=count
+        ),
+        TaskMetric(name="brier", value=_brier(predicted, truth), support=count),
+    )
+    return EvaluationReport(
+        scoring_version=SCORING_PROTOCOL_VERSION,
+        task="risk_calibration",
+        seed=seed,
+        persona_count=persona_count,
+        benchmark_version=benchmark.schema_version,
+        checksum_scheme=CHECKSUM_SCHEME,
+        artifact_checksums=(
+            ("public", _sha256(public_risk_corpus_to_json(benchmark.public))),
+            ("answers", _sha256(risk_answer_key_to_json(benchmark.answer_key))),
+        ),
+        metrics=metrics,
+        slices=_risk_slices(predicted, truth),
+    )
+
+
+def _macro_f1(
+    predicted: dict[UUID, RiskCasePrediction],
+    truth: dict[UUID, RiskCaseTruth],
+) -> float:
+    truth_bands = {case.band for case in truth.values()}
+    scores: list[float] = []
+    for band in truth_bands:
+        true_positive = sum(
+            predicted[cid].band is band and truth[cid].band is band for cid in truth
+        )
+        predicted_positive = sum(predicted[cid].band is band for cid in truth)
+        actual_positive = sum(truth[cid].band is band for cid in truth)
+        precision = _rate(true_positive, predicted_positive)
+        recall = _rate(true_positive, actual_positive)
+        scores.append(_harmonic_mean(precision, recall))
+    return sum(scores) / len(scores)
+
+
+def _mae(
+    predicted: dict[UUID, RiskCasePrediction],
+    truth: dict[UUID, RiskCaseTruth],
+) -> float | None:
+    total = 0
+    for cid, truth_case in truth.items():
+        score = predicted[cid].score
+        if score is None:
+            return None
+        total += abs(score - truth_case.score)
+    return total / len(truth)
+
+
+def _brier(
+    predicted: dict[UUID, RiskCasePrediction],
+    truth: dict[UUID, RiskCaseTruth],
+) -> float | None:
+    total = 0.0
+    for cid, truth_case in truth.items():
+        probabilities = predicted[cid].band_probabilities
+        if probabilities is None:
+            return None
+        probability_by_band = dict(probabilities)
+        total += sum(
+            (probability_by_band[band] - (1.0 if band is truth_case.band else 0.0)) ** 2
+            for band in _BAND_ORDER
+        )
+    return total / len(truth)
+
+
+def _risk_slices(
+    predicted: dict[UUID, RiskCasePrediction],
+    truth: dict[UUID, RiskCaseTruth],
+) -> tuple[FailureSlice, ...]:
+    counts: dict[RiskBand, tuple[int, int]] = {}
+    for cid, truth_case in truth.items():
+        total, wrong = counts.get(truth_case.band, (0, 0))
+        counts[truth_case.band] = (
+            total + 1,
+            wrong + (predicted[cid].band is not truth_case.band),
+        )
+    return tuple(
+        FailureSlice(
+            dimension="true_band",
+            value=band.value,
+            outcome="misband",
+            count=wrong,
+            support=total,
+        )
+        for band, (total, wrong) in sorted(
+            counts.items(), key=lambda item: _BAND_INDEX[item[0]]
+        )
+    )
+
+
 def _prf[Item](predicted: set[Item], gold: set[Item]) -> tuple[float, float, float]:
     true_positive = len(predicted & gold)
     precision = _rate(true_positive, len(predicted))
@@ -724,8 +916,11 @@ __all__ = [
     "PredictedRelationship",
     "PredictedSpan",
     "RelationshipPrediction",
+    "RiskCasePrediction",
+    "RiskPrediction",
     "TaskMetric",
     "evaluate_entity_resolution",
     "evaluate_extraction",
     "evaluate_relationship_inference",
+    "evaluate_risk_calibration",
 ]

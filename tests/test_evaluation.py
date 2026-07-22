@@ -6,7 +6,14 @@ from uuid import NAMESPACE_DNS, UUID, uuid5
 import pytest
 from pydantic import ValidationError
 
-from synthworld import DataClass, generate_extraction_benchmark
+from synthworld import (
+    DataClass,
+    RiskBand,
+    band_for_score,
+    generate_extraction_benchmark,
+    generate_risk_benchmark,
+    severity_points,
+)
 from synthworld.connection import (
     ConnectionBenchmark,
     PublicAssociationKind,
@@ -27,6 +34,8 @@ from synthworld.evaluation import (
     PredictedRelationship,
     PredictedSpan,
     RelationshipPrediction,
+    RiskCasePrediction,
+    RiskPrediction,
     TaskMetric,
     _control_endpoint_pairs,
     _iou,
@@ -35,7 +44,9 @@ from synthworld.evaluation import (
     evaluate_entity_resolution,
     evaluate_extraction,
     evaluate_relationship_inference,
+    evaluate_risk_calibration,
 )
+from synthworld.risk import RiskBenchmark
 
 _SEED = 20_260_719
 _EMAIL = re.compile(r"[a-z0-9][a-z0-9._%+-]*@example\.test")
@@ -385,3 +396,119 @@ def test_control_endpoint_pairs_skips_unmapped_references() -> None:
     assert (
         _control_endpoint_pairs((control,), {association.id: association}, {}) == set()
     )
+
+
+def _one_hot(band: RiskBand) -> tuple[tuple[RiskBand, float], ...]:
+    return tuple((item, 1.0 if item is band else 0.0) for item in RiskBand)
+
+
+def _perfect_risk(benchmark: RiskBenchmark) -> RiskPrediction:
+    return RiskPrediction(
+        cases=tuple(
+            RiskCasePrediction(
+                case_id=case.case_id,
+                band=case.band,
+                score=case.score,
+                band_probabilities=_one_hot(case.band),
+            )
+            for case in benchmark.answer_key.cases
+        )
+    )
+
+
+def _severity_risk(benchmark: RiskBenchmark) -> RiskPrediction:
+    return RiskPrediction(
+        cases=tuple(
+            RiskCasePrediction(
+                case_id=case.id,
+                band=band_for_score(
+                    min(
+                        100,
+                        sum(severity_points(item.severity) for item in case.breaches),
+                    )
+                ),
+            )
+            for case in benchmark.public.cases
+        )
+    )
+
+
+def _risk_metric(report: EvaluationReport, name: str) -> float | None:
+    return next(metric.value for metric in report.metrics if metric.name == name)
+
+
+def test_risk_perfect_prediction_scores_ideal() -> None:
+    benchmark = generate_risk_benchmark(seed=_SEED, persona_count=10)
+    report = evaluate_risk_calibration(
+        _perfect_risk(benchmark), seed=_SEED, persona_count=10
+    )
+
+    assert report.task == "risk_calibration"
+    assert _risk_metric(report, "band_accuracy") == 1.0
+    assert _risk_metric(report, "macro_f1") == 1.0
+    assert _risk_metric(report, "mean_band_distance") == 0.0
+    assert _risk_metric(report, "mean_absolute_error") == 0.0
+    assert _risk_metric(report, "brier") == 0.0
+    assert sum(s.count for s in report.slices) == 0
+
+
+def test_risk_severity_only_baseline_reports_null_score_metrics() -> None:
+    benchmark = generate_risk_benchmark(seed=_SEED, persona_count=10)
+    report = evaluate_risk_calibration(
+        _severity_risk(benchmark), seed=_SEED, persona_count=10
+    )
+
+    assert _risk_metric(report, "band_accuracy") == 0.4
+    assert round(_risk_metric(report, "macro_f1") or 0.0, 4) == 0.36
+    assert _risk_metric(report, "mean_band_distance") == 0.8
+    assert _risk_metric(report, "mean_absolute_error") is None
+    assert _risk_metric(report, "brier") is None
+    assert next(s.count for s in report.slices if s.value == "moderate") == 3
+
+
+def test_risk_rejects_incomplete_case_sets() -> None:
+    benchmark = generate_risk_benchmark(seed=_SEED, persona_count=10)
+    perfect = _perfect_risk(benchmark)
+    dropped = RiskPrediction(cases=perfect.cases[1:])
+    with pytest.raises(EvaluationInputError, match="exactly the public cases"):
+        evaluate_risk_calibration(dropped, seed=_SEED, persona_count=10)
+
+
+def test_risk_case_prediction_validates_score_and_probabilities() -> None:
+    case_id = uuid5(NAMESPACE_DNS, "case")
+    with pytest.raises(ValidationError, match="between 0 and 100"):
+        RiskCasePrediction(case_id=case_id, band=RiskBand.LOW, score=200)
+    with pytest.raises(ValidationError, match="cover every band once"):
+        RiskCasePrediction(
+            case_id=case_id,
+            band=RiskBand.LOW,
+            band_probabilities=((RiskBand.NONE, 1.0),),
+        )
+    out_of_range = tuple(
+        (band, 1.5 if band is RiskBand.NONE else 0.0) for band in RiskBand
+    )
+    with pytest.raises(ValidationError, match="in \\[0, 1\\]"):
+        RiskCasePrediction(
+            case_id=case_id, band=RiskBand.LOW, band_probabilities=out_of_range
+        )
+    bad_sum = tuple((band, 0.1) for band in RiskBand)
+    with pytest.raises(ValidationError, match="sum to one"):
+        RiskCasePrediction(
+            case_id=case_id, band=RiskBand.LOW, band_probabilities=bad_sum
+        )
+
+
+def test_risk_prediction_enforces_all_or_none_capabilities() -> None:
+    first = uuid5(NAMESPACE_DNS, "c1")
+    second = uuid5(NAMESPACE_DNS, "c2")
+    banded = RiskCasePrediction(case_id=first, band=RiskBand.LOW)
+    scored = RiskCasePrediction(case_id=second, band=RiskBand.HIGH, score=60)
+    with pytest.raises(ValidationError, match="duplicate risk case"):
+        RiskPrediction(cases=(banded, banded))
+    with pytest.raises(ValidationError, match="every case or for none"):
+        RiskPrediction(cases=(banded, scored))
+    vectored = RiskCasePrediction(
+        case_id=second, band=RiskBand.HIGH, band_probabilities=_one_hot(RiskBand.HIGH)
+    )
+    with pytest.raises(ValidationError, match="every case or for none"):
+        RiskPrediction(cases=(banded, vectored))
