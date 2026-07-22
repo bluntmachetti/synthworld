@@ -46,6 +46,16 @@ from synthworld.connection_serialization import (
 )
 from synthworld.corpus_metrics import evaluate_corpus
 from synthworld.corpus_serialization import corpus_to_json, load_golden_corpus
+from synthworld.evaluation import (
+    EVALUATION_SCHEMA_VERSION,
+    EvaluationReport,
+    ExtractionPagePrediction,
+    ExtractionPredictionSet,
+    FailureSlice,
+    PredictedSpan,
+    TaskMetric,
+    evaluate_extraction,
+)
 from synthworld.exposure_generator import generate_exposure_corpus
 from synthworld.exposures import (
     BreachExposure,
@@ -137,6 +147,7 @@ from synthworld.serialization import world_to_json
 __all__ = [
     "BASELINE_PERSONA_COUNT",
     "BASELINE_SEED",
+    "EVALUATION_SCHEMA_VERSION",
     "RISK_FORMULA_VERSION",
     "Address",
     "AdversarialCase",
@@ -157,6 +168,7 @@ __all__ = [
     "EmailAddress",
     "EmailKind",
     "Employment",
+    "EvaluationReport",
     "EvidenceSignal",
     "ExposureCorpus",
     "ExposureScript",
@@ -168,13 +180,17 @@ __all__ = [
     "ExtractionCorpus",
     "ExtractionPage",
     "ExtractionPageAnswer",
+    "ExtractionPagePrediction",
     "ExtractionPagePurpose",
+    "ExtractionPredictionSet",
     "ExtractionSourceType",
     "ExtractionSpan",
+    "FailureSlice",
     "LifecycleState",
     "NationalId",
     "Persona",
     "PhoneNumber",
+    "PredictedSpan",
     "PublicAssociationKind",
     "PublicAssociationRecord",
     "PublicBreachRiskObservation",
@@ -203,6 +219,7 @@ __all__ = [
     "SearchResultKind",
     "SocialExposure",
     "SynthWorld",
+    "TaskMetric",
     "UnilateralAssociationControl",
     "Username",
     "WorldMetrics",
@@ -212,6 +229,7 @@ __all__ = [
     "data_points",
     "evaluate_connection_benchmarks",
     "evaluate_corpus",
+    "evaluate_extraction",
     "evaluate_risk_benchmark",
     "evaluate_world",
     "extraction_answers_to_json",
