@@ -9,6 +9,8 @@ schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-22
+
 ### Added
 
 - Unified evaluation SDK (issue #1): versioned, oracle-free prediction schemas
@@ -91,6 +93,7 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/bluntmachetti/synthworld/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bluntmachetti/synthworld/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bluntmachetti/synthworld/releases/tag/v0.6.0
