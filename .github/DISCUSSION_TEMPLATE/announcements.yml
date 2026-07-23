@@ -1,0 +1,50 @@
+title: "[Announcement] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this category for official SynthWorld project, release, benchmark,
+        and community updates. Only maintainers can start announcements.
+
+  - type: dropdown
+    id: announcement-type
+    attributes:
+      label: Announcement type
+      options:
+        - Release
+        - Project update
+        - Benchmark or schema update
+        - Community update
+        - Maintenance notice
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: State the update and why it matters.
+      placeholder: What changed, and who is affected?
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Include relevant versions, dates, compatibility notes, or migration guidance.
+    validations:
+      required: true
+
+  - type: input
+    id: action
+    attributes:
+      label: Action for readers
+      description: Leave blank when no action is required.
+      placeholder: Upgrade to vX.Y.Z, review the proposal, or no action required
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Link relevant releases, documentation, issues, pull requests, or benchmark artifacts.

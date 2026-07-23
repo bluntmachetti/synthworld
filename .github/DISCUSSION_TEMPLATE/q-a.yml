@@ -1,0 +1,52 @@
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask for help using or understanding SynthWorld. Search existing
+        discussions and documentation first. Reproducible defects belong in
+        [Issues](https://github.com/bluntmachetti/synthworld/issues/new/choose).
+
+        **Never post real personal data, secrets, or identifiers that could be
+        mistaken for a real person's.** Report sensitive safety or security
+        concerns through the
+        [private vulnerability reporting form](https://github.com/bluntmachetti/synthworld/security/advisories/new).
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Ask one focused question and describe the outcome you need.
+      placeholder: What are you trying to understand or accomplish?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Include the benchmark family, command, seed, persona count, or integration involved.
+      placeholder: I am evaluating... using seed... and expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempts
+    attributes:
+      label: What have you tried?
+      description: Share relevant commands, documentation, or approaches already attempted.
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Include the SynthWorld and Python versions when relevant.
+      placeholder: idcognito-synthworld 0.8.0, Python 3.12
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Synthetic-data boundary
+      options:
+        - label: This discussion contains no real personal data, secrets, or plausibly real identifiers.
+          required: true

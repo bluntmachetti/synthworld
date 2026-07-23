@@ -1,0 +1,57 @@
+title: "[Show and tell] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a project, experiment, benchmark result, adapter, tutorial, or
+        other work built with SynthWorld. Reproducible examples and honest
+        descriptions of limitations are especially welcome.
+
+        **Never post real personal data, secrets, or identifiers that could be
+        mistaken for a real person's.** Report sensitive safety or security
+        concerns through the
+        [private vulnerability reporting form](https://github.com/bluntmachetti/synthworld/security/advisories/new).
+
+  - type: textarea
+    id: project
+    attributes:
+      label: What did you build?
+      description: Give readers a concise overview of the project or experiment.
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Project or demo link
+      description: Link source code, a paper, demo, or benchmark artifact when available.
+
+  - type: textarea
+    id: usage
+    attributes:
+      label: How did you use SynthWorld?
+      description: Include the benchmark family, seed, scale, version, adapter, or evaluation workflow.
+    validations:
+      required: true
+
+  - type: textarea
+    id: results
+    attributes:
+      label: Results and lessons
+      description: Share reproducible results, surprising findings, tradeoffs, and known limitations.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How can others reproduce it?
+      description: Provide commands or concise setup instructions when practical.
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Synthetic-data boundary
+      options:
+        - label: Shared artifacts contain only safely fictional data with their synthetic markers intact.
+          required: true
