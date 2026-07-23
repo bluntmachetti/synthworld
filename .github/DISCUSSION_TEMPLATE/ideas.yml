@@ -1,0 +1,68 @@
+title: "[Idea] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use Ideas to explore an evaluation gap or design before it becomes
+        committed work. Once the scope and acceptance criteria are concrete, a
+        maintainer may create an issue for implementation.
+
+        **Never post real personal data, secrets, or identifiers that could be
+        mistaken for a real person's.** Report sensitive safety or security
+        concerns through the
+        [private vulnerability reporting form](https://github.com/bluntmachetti/synthworld/security/advisories/new).
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Benchmark or scenario
+        - Generator or schema
+        - Evaluator or metric
+        - Adapter or integration
+        - Documentation or example
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: gap
+    attributes:
+      label: Evaluation gap
+      description: Describe the missing capability or decision this idea would help evaluate.
+      placeholder: Today it is difficult to measure...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed direction
+      description: Outline the smallest useful version of the idea.
+    validations:
+      required: true
+
+  - type: textarea
+    id: success
+    attributes:
+      label: What would success look like?
+      description: Describe useful outputs, metrics, negative controls, or user outcomes.
+    validations:
+      required: true
+
+  - type: textarea
+    id: contracts
+    attributes:
+      label: Benchmark and schema considerations
+      description: >-
+        Note possible effects on frozen bytes, checksums, schemas, safety
+        invariants, or the public/oracle boundary.
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Synthetic-data boundary
+      options:
+        - label: This idea does not require real personal data or plausibly real identifiers.
+          required: true
