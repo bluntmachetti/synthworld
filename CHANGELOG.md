@@ -9,6 +9,8 @@ agentic schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-07-27
+
 ### Added
 
 - Relational integrity validation for custom agentic worlds, including reusable
@@ -25,6 +27,8 @@ agentic schemas) are versioned independently of the package; see
 - The README and Hugging Face dataset card now state the Python 3.12 minimum
   explicitly, and published copyright notices consistently name Redoubt Labs
   ltd.
+- Package verification now derives the wheel filename from the project version,
+  so release bumps do not leave `make ci` checking a stale distribution.
 
 ## [0.9.0] - 2026-07-27
 
@@ -150,7 +154,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/bluntmachetti/synthworld/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/bluntmachetti/synthworld/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bluntmachetti/synthworld/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bluntmachetti/synthworld/compare/v0.6.0...v0.7.0
