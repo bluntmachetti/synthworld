@@ -12,6 +12,7 @@ from synthworld.agentic.models import (
     Decision,
     ObservedActionTrace,
 )
+from synthworld.agentic.relationships import derive_agent_owner_chain
 from synthworld.agentic.replay import (
     AgenticReplayError,
     evaluate_action_authority,
@@ -86,7 +87,9 @@ def current_state_agentic_trace(
             runtime_principal_id=attempt.runtime_principal_claim,
             credential_subject_id=credential.subject_principal_id,
             attributed_actor_id=attempt.attributed_actor_claim,
-            accountable_owner_chain=_owner_chain(public, attempt.logical_agent_claim),
+            accountable_owner_chain=derive_agent_owner_chain(
+                public.snapshot, attempt.logical_agent_claim
+            ),
         )
         decision = evaluate_action_authority(
             audit_state,
@@ -199,17 +202,6 @@ def _public_row(
         policy_version=attempt.policy_version,
         evidence_refs=attempt.evidence_refs,
     )
-
-
-def _owner_chain(public: AgenticPublicBundle, agent_id: str) -> tuple[str, ...]:
-    agent = next(item for item in public.snapshot.agents if item.id == agent_id)
-    principals = {item.id: item for item in public.snapshot.principals}
-    chain = [agent.owner_principal_id]
-    current = principals[agent.owner_principal_id]
-    while current.owner_principal_id is not None:
-        chain.append(current.owner_principal_id)
-        current = principals[current.owner_principal_id]
-    return tuple(chain)
 
 
 __all__ = [

@@ -157,6 +157,8 @@ def test_credential_event_validation(change: str, message: str) -> None:
         ("owner", "unknown identity"),
         ("organisation", "organisation must match"),
         ("mismatch", "organisation must match"),
+        ("owner_mismatch", "owner must match"),
+        ("owner_path", "does not reach"),
     ),
 )
 def test_runtime_event_validation(change: str, message: str) -> None:
@@ -176,8 +178,14 @@ def test_runtime_event_validation(change: str, message: str) -> None:
         runtime = runtime.model_copy(update={"owner_principal_id": "principal-bad"})
     elif change == "organisation":
         runtime = runtime.model_copy(update={"organisation_id": "org-bad"})
-    else:
+    elif change == "mismatch":
         runtime = runtime.model_copy(update={"organisation_id": "org-orion"})
+    elif change == "owner_mismatch":
+        runtime = runtime.model_copy(update={"owner_principal_id": "principal-asteria"})
+    else:
+        runtime = runtime.model_copy(
+            update={"runtime_principal_id": "principal-payroll-owner"}
+        )
     with pytest.raises(AgenticReplayError, match=message):
         _materialize_replaced(6, RuntimeSpawned(runtime=runtime))
 
@@ -193,6 +201,10 @@ def test_runtime_event_validation(change: str, message: str) -> None:
         ("evidence", "evidence unavailable"),
         ("proposal_agent", "broken references"),
         ("proposal_origin", "broken references"),
+        ("proposal_delegator", "broken references"),
+        ("proposal_parent", "broken references"),
+        ("proposal_resource", "broken references"),
+        ("proposal_policy", "broken references"),
     ),
 )
 def test_action_event_validation(change: str, message: str) -> None:
@@ -219,12 +231,24 @@ def test_action_event_validation(change: str, message: str) -> None:
     else:
         proposal = proposal_event.payload.attempt.proposed_delegation
         assert proposal is not None
-        field = (
-            "grantee_agent_id"
-            if change == "proposal_agent"
-            else "originating_principal_id"
-        )
-        proposal = proposal.model_copy(update={field: "bad"})
+        if change == "proposal_agent":
+            proposal = proposal.model_copy(update={"grantee_agent_id": "bad"})
+        elif change == "proposal_origin":
+            proposal = proposal.model_copy(update={"originating_principal_id": "bad"})
+        elif change == "proposal_delegator":
+            proposal = proposal.model_copy(update={"delegator_principal_id": "bad"})
+        elif change == "proposal_parent":
+            proposal = proposal.model_copy(update={"parent_delegation_id": "bad"})
+        elif change == "proposal_resource":
+            proposal = proposal.model_copy(
+                update={
+                    "capability": proposal.capability.model_copy(
+                        update={"resource_ids": ("bad",)}
+                    )
+                }
+            )
+        else:
+            proposal = proposal.model_copy(update={"policy_version": "bad"})
         attempt = attempt.model_copy(update={"proposed_delegation": proposal})
     with pytest.raises(AgenticReplayError, match=message):
         _materialize_replaced(9, ActionAttempted(attempt=attempt))
@@ -338,26 +362,19 @@ def test_authority_evaluation_classifies_broken_bindings_and_policy() -> None:
 
 def test_authority_rejects_cross_tenant_originating_principal() -> None:
     benchmark = generate_asteria_agentic_v1()
-    events = list(benchmark.public.events)
-    for index in (0, 8):
-        event = events[index]
-        assert isinstance(event.payload, DelegationGranted)
-        delegation = event.payload.delegation.model_copy(
-            update={"originating_principal_id": "principal-orion"}
-        )
-        events[index] = event.model_copy(
-            update={"payload": DelegationGranted(delegation=delegation)}
-        )
-
-    action_event = events[9]
+    action_event = next(
+        event for event in benchmark.public.events if event.id == "evt-018-cross-tenant"
+    )
     assert isinstance(action_event.payload, ActionAttempted)
     state = materialize_agentic_world(
         benchmark.public.snapshot,
-        tuple(events),
-        at_event_index=9,
+        benchmark.public.events,
+        at_event_index=action_event.event_index - 1,
     )
-    binding = benchmark.evaluator.bindings[0].model_copy(
-        update={"originating_principal_id": "principal-orion"}
+    binding = next(
+        item
+        for item in benchmark.evaluator.bindings
+        if item.action_event_id == action_event.id
     )
 
     result = evaluate_action_authority(
@@ -392,6 +409,32 @@ def test_attenuated_proposal_is_not_misclassified_as_overprivileged() -> None:
         decision_time=event.occurred_at,
     )
     assert AuthorityFailureReason.OVERPRIVILEGED_SUBDELEGATION not in (
+        result.failure_reasons
+    )
+
+
+def test_attenuated_proposal_with_unrelated_delegator_is_overprivileged() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    event = benchmark.public.events[11]
+    child_event = benchmark.public.events[8]
+    assert isinstance(event.payload, ActionAttempted)
+    assert isinstance(child_event.payload, DelegationGranted)
+    state = materialize_agentic_world(
+        benchmark.public.snapshot,
+        benchmark.public.events,
+        at_event_index=event.event_index - 1,
+    )
+    proposal = child_event.payload.delegation.model_copy(
+        update={"delegator_principal_id": "principal-comparison-service"}
+    )
+    attempt = event.payload.attempt.model_copy(update={"proposed_delegation": proposal})
+    result = evaluate_action_authority(
+        state,
+        attempt,
+        benchmark.evaluator.bindings[2],
+        decision_time=event.occurred_at,
+    )
+    assert AuthorityFailureReason.OVERPRIVILEGED_SUBDELEGATION in (
         result.failure_reasons
     )
 

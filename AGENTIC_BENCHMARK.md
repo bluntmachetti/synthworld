@@ -42,6 +42,15 @@ must be UTC and strictly increase; timestamps do not break ordering ties.
 returns any requested prefix, so an invalid suffix cannot be hidden by asking
 for an earlier cursor.
 
+Granted delegations also have provenance semantics. A root delegator must be
+the origin or appear in every delegated resource owner's inclusive ownership
+chain, and all involved records must share an organisation. A child delegator
+must be the parent origin/delegator, an accountable owner of the parent agent,
+or a principal on a parent-agent runtime path. The child agent must name the
+parent grantee as its parent. Runtime-based child authority is order-sensitive:
+the parent runtime must be spawned before the child grant. These are bounded v1
+rules, not a general-purpose policy engine.
+
 ```python
 from synthworld.agentic import (
     generate_asteria_agentic_v1,
@@ -185,6 +194,48 @@ hard-coded to Asteria's exact case list. A developer can construct another
 `AgenticWorldSnapshot`, ordered event tuple, scenario, canonical bindings, and
 case labels, then call `build_agentic_benchmark`. Case labels are open strings;
 Asteria's named labels are helpers for this fixture, not a global closed list.
+
+### Custom-world construction trust boundary
+
+`build_agentic_benchmark` fully replays the public stream before deriving any
+truth. It rejects invalid runtime ownership, unrelated grant delegators,
+duplicate/missing evaluator keys, false runtime/agent joins, credential subjects
+that disagree with the credential actually presented, fabricated accountable
+owner chains, and attributed actors unrelated to the runtime or credential
+identity paths. Owner chains are derived from the canonical principal graph;
+the builder does not repair a supplied tuple.
+
+Malformed construction remains separate from a well-formed denied action. A
+real credential used from a runtime it does not permit, a truthful external
+runtime targeting another tenant's resource, or an incorrect public claim stays
+scoreable and produces authority/identity failure truth. "Cross-tenant binding"
+rejection means an intrinsically false join—such as an Orion runtime bound to an
+Asteria logical agent—not a truthful cross-tenant access attempt.
+
+V1 still has explicit limits:
+
+- an action carries a runtime-principal claim but no independently verifiable
+  runtime ID, and its canonical origin may be ambiguous;
+- there is no explicit actor relationship, so when credential and runtime
+  identities differ the builder can constrain the actor to those public paths
+  but cannot select one without evaluator-author input;
+- arbitrary out-of-band authorised delegates are not representable. V1 supports
+  origins, resource owners, accountable owners, parent delegators, and principals
+  attached through already-spawned parent runtimes. A broader delegate relation
+  requires a separately versioned public contract.
+
+Automatic relational integrity enforcement occurs in
+`build_agentic_benchmark`. The packaged golden loader separately verifies every
+artifact checksum. A caller that bypasses both by manually constructing an
+`AgenticBenchmark` and passing it directly to the scorer is responsible for that
+object's evaluator integrity.
+
+The normalized v1 records already retain the full provenance join without
+duplicating it into `AuthorityTruth`: bindings identify origin/runtime/credential
+and owner truth; ordered truth chain IDs resolve public delegation hops and their
+delegators, grantees, parents, policies, and capabilities; credentials retain
+issuer and subject; and the action retains resource, operation, scope, and
+evidence references.
 
 What v1 does not yet provide is a high-level profile/configuration generator or
 world-authoring UI. Adding generated organisations, scale tiers, and custom

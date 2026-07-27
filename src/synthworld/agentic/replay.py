@@ -5,6 +5,7 @@ from datetime import datetime
 from itertools import pairwise
 from typing import Protocol
 
+from synthworld.agentic.errors import AgenticReplayError
 from synthworld.agentic.models import (
     ActionAttempt,
     ActionAttempted,
@@ -24,10 +25,10 @@ from synthworld.agentic.models import (
     Runtime,
     RuntimeSpawned,
 )
-
-
-class AgenticReplayError(ValueError):
-    """Raised when an agentic event stream is structurally invalid."""
+from synthworld.agentic.relationships import (
+    delegator_is_authorised,
+    derive_runtime_principal_path,
+)
 
 
 @dataclass(frozen=True)
@@ -131,8 +132,11 @@ def evaluate_action_authority(
         failures.add(delegation_failure)
     if attempt.proposed_delegation is not None and chain:
         parent = _by_id(state.delegations, chain[-1])
-        if parent is None or not _delegation_is_attenuated(
-            attempt.proposed_delegation, parent
+        proposal = attempt.proposed_delegation
+        if (
+            parent is None
+            or not _delegation_is_attenuated(proposal, parent)
+            or not delegator_is_authorised(state, proposal, parent)
         ):
             failures.add(AuthorityFailureReason.OVERPRIVILEGED_SUBDELEGATION)
 
@@ -271,12 +275,17 @@ def _validate_delegation(
         raise AgenticReplayError("delegation references an unknown policy")
     if not delegation.valid_from <= event_time < delegation.expires_at:
         raise AgenticReplayError("delegation grant event is outside its validity")
+    parent = None
     if delegation.parent_delegation_id is not None:
         parent = _by_id(state.delegations, delegation.parent_delegation_id)
         if parent is None or parent.id in state.revoked_delegation_ids:
             raise AgenticReplayError("child delegation requires an active parent")
         if not _delegation_is_attenuated(delegation, parent):
             raise AgenticReplayError("granted child delegation must be attenuated")
+    if not delegator_is_authorised(state, delegation, parent):
+        raise AgenticReplayError(
+            "delegation delegator is outside the bounded v1 authority chain"
+        )
 
 
 def _validate_credential(
@@ -309,10 +318,9 @@ def _validate_runtime(state: AgenticWorldState, runtime: Runtime) -> None:
         or (runtime.owner_principal_id not in principal_ids)
     ):
         raise AgenticReplayError("runtime references an unknown identity")
-    if runtime.organisation_id not in organisation_ids or (
-        agent.organisation_id != runtime.organisation_id
-    ):
+    if runtime.organisation_id not in organisation_ids:
         raise AgenticReplayError("runtime organisation must match its agent")
+    derive_runtime_principal_path(state.snapshot, runtime)
 
 
 def _validate_action(state: AgenticWorldState, attempt: ActionAttempt) -> None:
@@ -337,11 +345,22 @@ def _validate_action(state: AgenticWorldState, attempt: ActionAttempt) -> None:
     if not set(attempt.evidence_refs) <= set(state.retained_evidence_refs):
         raise AgenticReplayError("action cites evidence unavailable at action time")
     proposed = attempt.proposed_delegation
-    if proposed is not None and (
-        proposed.grantee_agent_id not in agent_ids
-        or proposed.originating_principal_id not in principal_ids
-    ):
-        raise AgenticReplayError("proposed delegation has broken references")
+    if proposed is not None:
+        resource_ids = {item.id for item in state.snapshot.resources}
+        policy_versions = {item.version for item in state.snapshot.policies}
+        parent_ids = {item.id for item in state.delegations}
+        if (
+            proposed.grantee_agent_id not in agent_ids
+            or proposed.originating_principal_id not in principal_ids
+            or proposed.delegator_principal_id not in principal_ids
+            or not set(proposed.capability.resource_ids) <= resource_ids
+            or proposed.policy_version not in policy_versions
+            or (
+                proposed.parent_delegation_id is not None
+                and proposed.parent_delegation_id not in parent_ids
+            )
+        ):
+            raise AgenticReplayError("proposed delegation has broken references")
 
 
 def _effective_chain(
@@ -405,6 +424,7 @@ def _delegation_is_attenuated(child: Delegation, parent: Delegation) -> bool:
         parent.capability.may_delegate
         and child.originating_principal_id == parent.originating_principal_id
         and child.parent_delegation_id == parent.id
+        and child.policy_version == parent.policy_version
         and set(child.capability.resource_ids) <= set(parent.capability.resource_ids)
         and set(child.capability.actions) <= set(parent.capability.actions)
         and set(child.capability.scopes) <= set(parent.capability.scopes)
