@@ -1,6 +1,6 @@
 # SynthWorld baselines and benchmark demonstrations
 
-These are deliberately naive reference baselines: each score illustrates what its benchmark *measures*, not the state of the art. Every number below is reproducible from `uv run python -c "from synthworld import run_all_baselines; ..."` or the command in [Reproduce](#reproduce). All data is safely synthetic.
+These are deliberately naive reference baselines: each score illustrates what its benchmark *measures*, not the state of the art. Every number below is regenerated from the public-only baseline adapters by the command in [Reproduce](#reproduce). All data is safely synthetic.
 
 ## Reproduce
 
@@ -20,13 +20,28 @@ uv run python examples/generate_benchmarks_doc.py
 | Reciprocity relationship heuristic | Relationship inference | edge F1 | 1.0 | P=1.00 R=1.00 over 3 planted edges; 0 false edges — requiring reciprocal evidence correctly rejects the unilateral association controls |
 | Severity-only risk adapter | Breach-risk calibration | band accuracy | 0.4 | 4/10 bands correct, mean absolute score error 21.0; ignoring data-class weight under-calibrates against the documented formula |
 
+## Asteria Agentic v1 baselines
+
+Both baselines consume only the public bundle. Always-deny shows why accuracy alone is misleading on a deny-heavy fixture; the current-state baseline shows why final audit state cannot replace historical replay.
+
+| Baseline | Metric | Score | Support |
+|---|---|---|---|
+| Always deny | authorization_decision_accuracy | 0.6364 | 11 |
+| Always deny | authorization_decision_f1 | undefined | 4 |
+| Always deny | delegation_chain_integrity | 0.0 | 11 |
+| Always deny | provenance_completeness | 0.7273 | 11 |
+| Audit-time current state | authorization_decision_accuracy | 0.6364 | 11 |
+| Audit-time current state | authorization_decision_f1 | 0.3333 | 4 |
+| Audit-time current state | delegation_chain_integrity | 0.4545 | 11 |
+| Audit-time current state | provenance_completeness | 0.5455 | 11 |
+
 ## Why SynthWorld, not a row generator
 
 | | Row-oriented fake data (Faker/SDV) | SynthWorld |
 |---|---|---|
 | Records | Independent rows | Connected personas |
 | Linkage | None | Planted relationship edges and adversarial identity records that resolve to one entity |
-| Answer key | None | Exact-span, entity, relationship, and risk truth, physically separated from public input |
+| Answer key | None | Exact-span, entity, relationship, risk, and agent-authority truth, physically separated from public input |
 
 ## What the visuals show
 
@@ -67,6 +82,7 @@ flowchart TD
 ## Size and limits
 
 - The benchmarks are frozen at seed `20260719`, 10 personas (18 records for the adversarial entity-resolution pack).
+- Asteria Agentic v1 is separately frozen at 24 events and 11 action attempts; it is a conformance fixture, not a statistical leaderboard.
 - Baselines are intentionally simple and are NOT state of the art.
 - Scores illustrate the benchmark's discriminative power, not system quality.
 - Numbers change only through a deliberate benchmark-version transition.

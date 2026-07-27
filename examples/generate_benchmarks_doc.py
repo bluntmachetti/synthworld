@@ -29,10 +29,15 @@ from synthworld import (
     BaselineResult,
     BrokerExposure,
     ConnectionBenchmark,
+    EvaluationReport,
     ExposureCorpus,
     LifecycleState,
     PublicIdentityRecord,
+    always_deny_agentic_trace,
+    current_state_agentic_trace,
+    evaluate_agentic_trace,
     generate_adversarial_connection_benchmark,
+    generate_asteria_agentic_v1,
     generate_exposure_corpus,
     run_all_baselines,
 )
@@ -49,10 +54,28 @@ def render_benchmarks_doc() -> str:
         seed=BASELINE_SEED,
         persona_count=BASELINE_PERSONA_COUNT,
     )
+    agentic_benchmark = generate_asteria_agentic_v1()
+    agentic_results = (
+        (
+            "Always deny",
+            evaluate_agentic_trace(
+                always_deny_agentic_trace(agentic_benchmark.public),
+                benchmark=agentic_benchmark,
+            ),
+        ),
+        (
+            "Audit-time current state",
+            evaluate_agentic_trace(
+                current_state_agentic_trace(agentic_benchmark.public),
+                benchmark=agentic_benchmark,
+            ),
+        ),
+    )
     sections = [
         _render_intro(),
         _render_reproduce_section(),
         _render_baseline_section(baseline_results),
+        _render_agentic_baseline_section(agentic_results),
         _render_comparison_section(),
         _render_visuals_section(connection_benchmark, exposure_corpus),
         _render_limits_section(),
@@ -67,10 +90,9 @@ def _render_intro() -> str:
             "",
             "These are deliberately naive reference baselines: each score "
             "illustrates what its benchmark *measures*, not the state of the "
-            "art. Every number below is reproducible from "
-            '`uv run python -c "from synthworld import run_all_baselines; '
-            '..."` or the command in [Reproduce](#reproduce). All data is '
-            "safely synthetic.",
+            "art. Every number below is regenerated from the public-only "
+            "baseline adapters by the command in [Reproduce](#reproduce). "
+            "All data is safely synthetic.",
         ]
     )
 
@@ -100,6 +122,42 @@ def _render_baseline_section(results: tuple[BaselineResult, ...]) -> str:
     return "\n".join(["## Baseline results", "", header, divider, *rows])
 
 
+def _render_agentic_baseline_section(
+    results: tuple[tuple[str, EvaluationReport], ...],
+) -> str:
+    header = "| Baseline | Metric | Score | Support |"
+    divider = "|---|---|---|---|"
+    metric_names = (
+        "authorization_decision_accuracy",
+        "authorization_decision_f1",
+        "delegation_chain_integrity",
+        "provenance_completeness",
+    )
+    rows = []
+    for baseline_name, report in results:
+        metrics = {metric.name: metric for metric in report.metrics}
+        for metric_name in metric_names:
+            metric = metrics[metric_name]
+            score = "undefined" if metric.value is None else str(round(metric.value, 4))
+            rows.append(
+                f"| {baseline_name} | {metric_name} | {score} | {metric.support} |"
+            )
+    return "\n".join(
+        [
+            "## Asteria Agentic v1 baselines",
+            "",
+            "Both baselines consume only the public bundle. Always-deny shows "
+            "why accuracy alone is misleading on a deny-heavy fixture; the "
+            "current-state baseline shows why final audit state cannot replace "
+            "historical replay.",
+            "",
+            header,
+            divider,
+            *rows,
+        ]
+    )
+
+
 def _render_comparison_section() -> str:
     header = "| | Row-oriented fake data (Faker/SDV) | SynthWorld |"
     divider = "|---|---|---|"
@@ -107,8 +165,8 @@ def _render_comparison_section() -> str:
         "| Records | Independent rows | Connected personas |",
         "| Linkage | None | Planted relationship edges and adversarial "
         "identity records that resolve to one entity |",
-        "| Answer key | None | Exact-span, entity, relationship, and risk "
-        "truth, physically separated from public input |",
+        "| Answer key | None | Exact-span, entity, relationship, risk, and "
+        "agent-authority truth, physically separated from public input |",
     ]
     return "\n".join(
         ["## Why SynthWorld, not a row generator", "", header, divider, *rows]
@@ -229,6 +287,9 @@ def _render_limits_section() -> str:
             f"- The benchmarks are frozen at seed `{BASELINE_SEED}`, "
             f"{BASELINE_PERSONA_COUNT} personas (18 records for the "
             "adversarial entity-resolution pack).",
+            "- Asteria Agentic v1 is separately frozen at 24 events and 11 "
+            "action attempts; it is a conformance fixture, not a statistical "
+            "leaderboard.",
             "- Baselines are intentionally simple and are NOT state of the art.",
             "- Scores illustrate the benchmark's discriminative power, not "
             "system quality.",

@@ -122,6 +122,25 @@ Score it with:
 synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 ```
 
+### Run the public-only example
+
+The repository includes a complete adapter that receives only the public
+bundle, applies a deliberately naive audit-time policy check, and serializes
+the resulting observations:
+
+```bash
+uv run python examples/evaluate_all.py --predictions-dir predictions
+uv run synthworld evaluate agentic \
+  --predictions predictions/agentic.jsonl \
+  --summary
+```
+
+To integrate a real system, replace the call to
+`current_state_agentic_trace(benchmark.public)` in `run_agentic_eval` with a
+call that passes `benchmark.public` to your adapter and returns an
+`AgenticTraceSubmission`. Do not give the adapter `benchmark.evaluator`; that
+object is consumed only by `evaluate_agentic_trace` after the trace exists.
+
 Or use the API:
 
 ```python

@@ -87,3 +87,19 @@ for the public base artifacts and
 for the evaluator base artifacts. `manifest.json` and `checksums.json` are
 excluded from their own root digest. Tests regenerate every file byte-for-byte,
 verify both roots and all per-file checksums, and retain 100% branch coverage.
+
+### 0.9.0 publication staging
+
+On 2026-07-27, the exact frozen Asteria tree and the 0.9.0 dataset card were
+uploaded to the private Hugging Face staging dataset
+`Bluntmachetti7/synthworld-benchmarks-staging`. Commit
+`794b547e10c8623c97c3653e8d7a9ff8c05cd3f9` was downloaded again and compared
+byte-for-byte with the packaged tree; every per-file hash and both artifact-set
+digests matched.
+
+Hugging Face Dataset Viewer returned `501` for the private repository because
+private-dataset processing requires a PRO account or Enterprise organisation.
+Consequently, the raw redownload and checksums are the pre-publication
+authority. Viewer `is-valid`, split, first-row, Parquet, and size checks must run
+against the public dataset commit immediately after publication, followed by a
+second raw redownload and digest comparison.

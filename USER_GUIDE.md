@@ -9,7 +9,7 @@ Start with the outcome you want below.
 
 ## Choose your use case
 
-| I want to... | What SynthWorld provides | Available in 0.8 |
+| I want to... | What SynthWorld provides | Available in 0.9 |
 |---|---|---|
 | Create safe identities for a test, demo, or fixture | Connected fictional people, attributes, and planted relationships | Yes |
 | Test a PII extractor or document model | Synthetic pages and exact character-span scoring | Yes |
@@ -49,8 +49,11 @@ Use the same seed and persona count when generating input and scoring output.
 
 The frozen benchmarks are browsable as tables in the
 [SynthWorld dataset on Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks).
-This is the quickest way to inspect the identities, records, pages, and risk
-cases before deciding whether to integrate the package.
+This is the quickest way to inspect identities, records, pages, risk cases,
+and Asteria principals, resources, delegations, and evaluator truth before
+deciding whether to integrate the package. For Asteria, download
+`frozen/asteria-agentic-v1/public/public_events.jsonl` when you need the
+authoritative ordered trace; Dataset Viewer tables are browsing conveniences.
 
 ## Install and create your first world
 
@@ -66,7 +69,7 @@ supporting evidence. Use it when you need stable identity fixtures for a test,
 demo, graph import, or product prototype. Changing the seed creates a different
 repeatable world.
 
-## Run the four evaluation examples
+## Run the five evaluation examples
 
 From a clone of this repository:
 
@@ -84,6 +87,7 @@ predictions/
   entity-resolution.json
   relationship.json
   risk.json
+  agentic.jsonl
 ```
 
 Each file is valid input to the evaluation CLI. For example:
@@ -257,13 +261,47 @@ Export the frozen public and evaluator trees:
 synthworld generate-agentic --output asteria-agentic-v1
 ```
 
-Give only `asteria-agentic-v1/public/` to the system under test. It must emit
-one nullable observed-action JSON object per public action event in a JSONL
-file. Score that file against the packaged truth:
+Start with these public files:
+
+- `public/manifest.json` identifies the world, schema, seed, files, and public
+  artifact-set digest;
+- `public/organisation.json` and the principal, agent, runtime, resource,
+  credential, and delegation JSONL files describe the starting identities and
+  bindings;
+- `public/public_events.jsonl` is the ordered event stream;
+- `public/scenarios/procurement-delegation.json` identifies the action and audit
+  events to evaluate;
+- `public/tool_schemas/` describes the available procurement operations.
+
+Inspect just the attempted actions with:
+
+```bash
+jq -c 'select(.payload.event_type == "action_attempted") | \
+  {event_id: .id, timestamp: .occurred_at, attempt: .payload.attempt}' \
+  asteria-agentic-v1/public/public_events.jsonl
+```
+
+Give only `asteria-agentic-v1/public/` to the system under test. For every
+action event, the adapter should resolve the claimed identity roles, evaluate
+authority at action time and audit time, and retain the supporting delegation,
+credential, runtime, and policy references. It must emit one nullable
+`ObservedActionTrace` JSON object per action in a JSONL file.
+
+The all-task example contains a deliberately flawed but useful public-only
+adapter. It evaluates every action against the final audit state, making the
+temporal error visible in the resulting metrics:
+
+```bash
+uv run python examples/evaluate_all.py --predictions-dir predictions
+```
+
+Replace `current_state_agentic_trace` in that example with your own system and
+keep the trace serializer. Then score the resulting file against the packaged
+truth:
 
 ```bash
 synthworld evaluate agentic \
-  --predictions observed-actions.jsonl \
+  --predictions predictions/agentic.jsonl \
   --summary
 ```
 
@@ -271,8 +309,10 @@ The report separates identity role resolution, action-time allow/deny quality,
 audit-time temporal validity, delegation-chain integrity, attribution,
 accountable ownership, retained evidence, reconstructability, and side
 effects. Returning the correct decision does not compensate for missing
-provenance. See [AGENTIC_BENCHMARK.md](AGENTIC_BENCHMARK.md) for the JSONL
-contract, replay rules, baselines, and Python API.
+provenance. A score below one is expected for the example baseline: it
+intentionally proves that evaluating historical actions from final state is
+not replay. See [AGENTIC_BENCHMARK.md](AGENTIC_BENCHMARK.md) for the complete
+JSONL contract, replay rules, baselines, Python API, and checksum procedure.
 
 The reusable contracts can assemble additional worlds, but v1 does not yet
 include a high-level custom-world/profile generator or authoring UI.
@@ -290,7 +330,7 @@ synthworld generate-corpus \
 ```
 
 This is currently a scenario-generation path. SynthWorld can report corpus
-integrity metrics, but version 0.8 does not yet provide a unified evaluator for
+integrity metrics, but version 0.9 does not yet provide a unified evaluator for
 broker-removal actions or longitudinal product behaviour.
 
 ## Reading evaluation results

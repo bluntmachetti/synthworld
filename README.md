@@ -120,7 +120,9 @@ synthworld generate --seed 20260719 --persona-count 10 --output world.json
 
 Selected frozen golden benchmarks are also browsable as tables on
 [Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks),
-byte-identical to the artifacts shipped in this package.
+byte-identical to the artifacts shipped in this package. The maintained
+dataset-card source and Asteria download instructions live in
+[`huggingface/README.md`](huggingface/README.md).
 
 ## Develop from source
 
@@ -141,6 +143,34 @@ uv run synthworld generate-public-connections --seed 20260719 --persona-count 10
 uv run synthworld generate-risk-public --seed 20260719 --persona-count 10 --output risk.json
 uv run synthworld generate-agentic --output asteria-agentic-v1
 ```
+
+### Use Asteria Agentic v1
+
+Export the frozen world, then give only its `public/` directory to the system
+under test:
+
+```bash
+synthworld generate-agentic --output asteria-agentic-v1
+jq -c 'select(.payload.event_type == "action_attempted")' \
+  asteria-agentic-v1/public/public_events.jsonl
+```
+
+Your adapter must write one `ObservedActionTrace` JSON object per action event.
+The repository's deliberately imperfect current-state baseline demonstrates the
+public-only integration path and writes a CLI-ready trace:
+
+```bash
+uv run python examples/evaluate_all.py --predictions-dir predictions
+uv run synthworld evaluate agentic \
+  --predictions predictions/agentic.jsonl \
+  --summary
+```
+
+Replace `current_state_agentic_trace` in the example with your own policy,
+agent-observability, or audit system. Keep `asteria-agentic-v1/evaluator/` out of
+that adapter; the SynthWorld scorer joins the answer key only after predictions
+have been produced. See the [Asteria guide](AGENTIC_BENCHMARK.md) for the JSONL
+schema, Python API, replay rules, checksum verification, and metric definitions.
 
 See the [user guide](USER_GUIDE.md) for goal-led walkthroughs,
 [examples/](examples/) for runnable adapters and annotated sample output, and
@@ -174,9 +204,10 @@ JSON.
   `entity-resolution` and Asteria Agentic v1).
 - `--summary`: If provided, outputs a clean, compact terminal table summarizing the metrics instead of the raw JSON report.
 
-Example:
+Examples:
 ```bash
 synthworld evaluate extraction --predictions predictions.json --seed 20260719 --summary
+synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 ```
 
 Start with the [user guide](USER_GUIDE.md) for runnable examples and score
