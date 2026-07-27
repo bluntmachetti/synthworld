@@ -4,7 +4,8 @@ UV := uv
 SEED := 20260719
 PERSONAS := 10
 GENERATED_PERSONAS := 100
-WHEEL := dist/idcognito_synthworld-0.9.0-py3-none-any.whl
+PROJECT_VERSION := $(shell $(UV) version --short)
+WHEEL := dist/idcognito_synthworld-$(PROJECT_VERSION)-py3-none-any.whl
 
 install:
 	$(UV) sync --locked --all-groups
