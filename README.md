@@ -113,6 +113,9 @@ The distribution is published as `idcognito-synthworld`; the import package and
 the CLI are both named `synthworld`, and the package ships typed (`py.typed`).
 Release notes live in [CHANGELOG.md](CHANGELOG.md).
 
+SynthWorld requires Python 3.12 or newer; Python 3.11 and earlier are not
+supported.
+
 ```bash
 pip install idcognito-synthworld
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
