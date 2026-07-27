@@ -137,6 +137,26 @@ def test_snapshot_allows_a_principal_without_optional_organisation() -> None:
     assert validated.principals[0].organisation_id is None
 
 
+@pytest.mark.parametrize(
+    "owner_links",
+    (
+        ((2, 2),),
+        ((2, 3), (3, 2)),
+    ),
+)
+def test_snapshot_rejects_principal_ownership_cycles(
+    owner_links: tuple[tuple[int, int], ...],
+) -> None:
+    data = deepcopy(generate_asteria_agentic_v1().public.snapshot.model_dump())
+    for principal_index, owner_index in owner_links:
+        data["principals"][principal_index]["owner_principal_id"] = data["principals"][
+            owner_index
+        ]["id"]
+
+    with pytest.raises(ValidationError, match="principal ownership must be acyclic"):
+        AgenticWorldSnapshot.model_validate(data)
+
+
 def test_public_evaluator_and_join_models_reject_cross_file_drift() -> None:
     benchmark = generate_asteria_agentic_v1()
     public = benchmark.public

@@ -319,6 +319,7 @@ class AgenticWorldSnapshot(SyntheticModel):
                 principal.owner_principal_id not in principal_ids
             ):
                 raise ValueError("principal references an unknown owner")
+        _require_acyclic_principal_ownership(self.principals)
         for agent in self.agents:
             if agent.organisation_id not in organisation_ids:
                 raise ValueError("agent references an unknown organisation")
@@ -523,6 +524,20 @@ def _sorted_unique_nonblank(value: tuple[str, ...], label: str) -> tuple[str, ..
 def _require_unique_strings(value: tuple[object, ...], label: str) -> None:
     if len(value) != len(set(value)):
         raise ValueError(f"{label} must be unique")
+
+
+def _require_acyclic_principal_ownership(
+    principals: tuple[Principal, ...],
+) -> None:
+    owners = {item.id: item.owner_principal_id for item in principals}
+    for principal_id in owners:
+        seen: set[str] = set()
+        current_id: str | None = principal_id
+        while current_id is not None:
+            if current_id in seen:
+                raise ValueError("principal ownership must be acyclic")
+            seen.add(current_id)
+            current_id = owners[current_id]
 
 
 def _utc_datetime(value: datetime) -> datetime:

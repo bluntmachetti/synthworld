@@ -13,6 +13,7 @@ from synthworld.agentic.models import (
     ActionAttempted,
     AuthorityFailureReason,
     CredentialIssued,
+    Decision,
     DelegationGranted,
     DelegationRevoked,
     EvidenceDiscarded,
@@ -289,6 +290,11 @@ def test_authority_evaluation_classifies_broken_bindings_and_policy() -> None:
             AuthorityFailureReason.NO_ACTIVE_DELEGATION,
         ),
         (
+            event.payload.attempt,
+            binding.model_copy(update={"originating_principal_id": "principal-bad"}),
+            AuthorityFailureReason.NO_ACTIVE_DELEGATION,
+        ),
+        (
             event.payload.attempt.model_copy(update={"policy_version": "policy-bad"}),
             binding,
             AuthorityFailureReason.POLICY_VERSION_MISMATCH,
@@ -328,6 +334,41 @@ def test_authority_evaluation_classifies_broken_bindings_and_policy() -> None:
         decision_time=event.occurred_at,
     )
     assert AuthorityFailureReason.POLICY_VERSION_MISMATCH in v2_result.failure_reasons
+
+
+def test_authority_rejects_cross_tenant_originating_principal() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    events = list(benchmark.public.events)
+    for index in (0, 8):
+        event = events[index]
+        assert isinstance(event.payload, DelegationGranted)
+        delegation = event.payload.delegation.model_copy(
+            update={"originating_principal_id": "principal-orion"}
+        )
+        events[index] = event.model_copy(
+            update={"payload": DelegationGranted(delegation=delegation)}
+        )
+
+    action_event = events[9]
+    assert isinstance(action_event.payload, ActionAttempted)
+    state = materialize_agentic_world(
+        benchmark.public.snapshot,
+        tuple(events),
+        at_event_index=9,
+    )
+    binding = benchmark.evaluator.bindings[0].model_copy(
+        update={"originating_principal_id": "principal-orion"}
+    )
+
+    result = evaluate_action_authority(
+        state,
+        action_event.payload.attempt,
+        binding,
+        decision_time=action_event.occurred_at,
+    )
+
+    assert result.decision is Decision.DENY
+    assert AuthorityFailureReason.TENANT_MISMATCH in result.failure_reasons
 
 
 def test_attenuated_proposal_is_not_misclassified_as_overprivileged() -> None:

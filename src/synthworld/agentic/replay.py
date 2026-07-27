@@ -92,6 +92,9 @@ def evaluate_action_authority(
     failures: set[AuthorityFailureReason] = set()
     runtime = _by_id(state.runtimes, binding.runtime_id)
     credential = _by_id(state.credentials, attempt.presented_credential_id)
+    originating_principal = _by_id(
+        state.snapshot.principals, binding.originating_principal_id
+    )
     agent = _by_id(state.snapshot.agents, binding.logical_agent_id)
     resource = _by_id(state.snapshot.resources, attempt.resource_id)
 
@@ -107,9 +110,13 @@ def evaluate_action_authority(
         failures.add(AuthorityFailureReason.CREDENTIAL_INVALID)
     elif binding.runtime_principal_id not in (credential.allowed_runtime_principal_ids):
         failures.add(AuthorityFailureReason.WRONG_RUNTIME)
-    if agent is None or resource is None:
+    if agent is None or resource is None or originating_principal is None:
         failures.add(AuthorityFailureReason.NO_ACTIVE_DELEGATION)
-    elif agent.organisation_id != resource.organisation_id:
+    elif not (
+        originating_principal.organisation_id
+        == agent.organisation_id
+        == resource.organisation_id
+    ):
         failures.add(AuthorityFailureReason.TENANT_MISMATCH)
     if attempt.policy_version not in {item.version for item in state.snapshot.policies}:
         failures.add(AuthorityFailureReason.POLICY_VERSION_MISMATCH)
