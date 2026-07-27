@@ -5,6 +5,10 @@ from synthworld.agentic.baselines import (
     current_state_agentic_trace,
     reference_agentic_trace,
 )
+from synthworld.agentic.errors import (
+    AgenticBenchmarkIntegrityError,
+    AgenticReplayError,
+)
 from synthworld.agentic.evaluation import (
     evaluate_agentic_trace,
     trace_submission_from_jsonl,
@@ -24,6 +28,15 @@ from synthworld.agentic.models import (
     ObservedActionTrace,
 )
 from synthworld.agentic.projection import build_agentic_benchmark
+from synthworld.agentic.relationships import (
+    delegator_is_authorised,
+    derive_agent_owner_chain,
+    derive_attributed_actor_candidates,
+    derive_authorised_delegator_ids,
+    derive_principal_owner_chain,
+    derive_resource_owner_chain,
+    derive_runtime_principal_path,
+)
 from synthworld.agentic.replay import materialize_agentic_world
 from synthworld.agentic.serialization import (
     export_agentic_benchmark,
@@ -35,8 +48,10 @@ __all__ = [
     "ASTERIA_WORLD_ID",
     "ASTERIA_WORLD_VERSION",
     "AgenticBenchmark",
+    "AgenticBenchmarkIntegrityError",
     "AgenticEvent",
     "AgenticPublicBundle",
+    "AgenticReplayError",
     "AgenticTraceSubmission",
     "AgenticWorldSnapshot",
     "AgenticWorldState",
@@ -44,6 +59,13 @@ __all__ = [
     "always_deny_agentic_trace",
     "build_agentic_benchmark",
     "current_state_agentic_trace",
+    "delegator_is_authorised",
+    "derive_agent_owner_chain",
+    "derive_attributed_actor_candidates",
+    "derive_authorised_delegator_ids",
+    "derive_principal_owner_chain",
+    "derive_resource_owner_chain",
+    "derive_runtime_principal_path",
     "evaluate_agentic_trace",
     "export_agentic_benchmark",
     "generate_asteria_agentic_v1",

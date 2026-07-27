@@ -21,8 +21,10 @@ from synthworld.agentic.models import (
     AgenticEvent,
     AuditPerformed,
     AuthorityFailureReason,
+    CredentialIssued,
     Decision,
     DelegationGranted,
+    RuntimeSpawned,
 )
 from synthworld.agentic.replay import AgenticReplayError
 from synthworld.agentic.serialization import (
@@ -116,6 +118,9 @@ def test_procurement_cases_have_reviewed_action_and_audit_outcomes() -> None:
         AuthorityFailureReason.OVERPRIVILEGED_SUBDELEGATION
         in truth[AgenticCaseKind.OVERPRIVILEGED_SUBDELEGATION].failure_reasons_at_action
     )
+    assert truth[
+        AgenticCaseKind.OVERPRIVILEGED_SUBDELEGATION
+    ].failure_reasons_at_audit == (AuthorityFailureReason.DELEGATION_REVOKED,)
     assert truth[AgenticCaseKind.POST_REVOCATION_ACTION].failure_reasons_at_action == (
         AuthorityFailureReason.DELEGATION_REVOKED,
     )
@@ -123,6 +128,61 @@ def test_procurement_cases_have_reviewed_action_and_audit_outcomes() -> None:
         truth[AgenticCaseKind.MISSING_RETAINED_EVIDENCE].reconstructable_at_audit
         is False
     )
+
+
+def test_normalized_records_resolve_the_full_authority_provenance_join() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    snapshot = benchmark.public.snapshot
+    principals = {item.id for item in snapshot.principals}
+    agents = {item.id for item in snapshot.agents}
+    resources = {item.id: item for item in snapshot.resources}
+    runtimes = {
+        event.payload.runtime.id: event.payload.runtime
+        for event in benchmark.public.events
+        if isinstance(event.payload, RuntimeSpawned)
+    }
+    credentials = {
+        event.payload.credential.id: event.payload.credential
+        for event in benchmark.public.events
+        if isinstance(event.payload, CredentialIssued)
+    }
+    delegations = {
+        event.payload.delegation.id: event.payload.delegation
+        for event in benchmark.public.events
+        if isinstance(event.payload, DelegationGranted)
+    }
+    events = {event.id: event for event in benchmark.public.events}
+
+    for binding, truth in zip(
+        benchmark.evaluator.bindings,
+        benchmark.evaluator.authority_truth,
+        strict=True,
+    ):
+        event = events[binding.action_event_id]
+        assert isinstance(event.payload, ActionAttempted)
+        attempt = event.payload.attempt
+        runtime = runtimes[binding.runtime_id]
+        credential = credentials[attempt.presented_credential_id]
+        chain = tuple(delegations[item] for item in truth.delegation_chain_ids)
+
+        assert binding.originating_principal_id in principals
+        assert binding.logical_agent_id in agents
+        assert runtime.runtime_principal_id == binding.runtime_principal_id
+        assert credential.subject_principal_id == binding.credential_subject_id
+        assert credential.issuer_principal_id in principals
+        assert all(item.delegator_principal_id in principals for item in chain)
+        assert all(item.grantee_agent_id in agents for item in chain)
+        assert tuple(item.parent_delegation_id for item in chain[1:]) == tuple(
+            item.id for item in chain[:-1]
+        )
+        assert truth.expected_policy_version == attempt.policy_version
+        assert attempt.action in resources[attempt.resource_id].actions
+        assert set(truth.required_evidence_refs) == {
+            f"evidence:policy:{attempt.policy_version}",
+            f"evidence:credential:{credential.id}",
+            f"evidence:runtime:{runtime.id}",
+            *(f"evidence:delegation:{item.id}" for item in chain),
+        }
 
 
 def test_replay_uses_one_based_indices_and_action_pre_state() -> None:
