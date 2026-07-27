@@ -129,6 +129,56 @@ authenticated independently by `RISK_PUBLIC_SHA256SUMS` and
 `RISK_ANSWER_SHA256SUMS`. Loaders verify each checksum before parsing and then
 reject cross-file seed, case, factor, arithmetic, score, or band drift.
 
+## Agentic identity and delegated authority
+
+The agentic schema `1.0.0` represents a bounded identity and authority world as
+an immutable `AgenticWorldSnapshot` plus a strictly ordered tuple of
+`AgenticEvent` objects. Event indices are contiguous and one-based; index zero
+is the initial snapshot. Every timestamp is UTC and strictly increases.
+
+| Record | Required fields | Meaning |
+|---|---|---|
+| `Organisation`, `Department` | stable ID, display name, organisation/tenant links | Organisational boundary and Asteria's four departments. |
+| `Principal` | ID, kind, display name, optional organisation/department/owner | Organisation, human, service-account, or workload identity. |
+| `LogicalAgent` | ID, organisation, accountable owner, optional parent agent | Stable named agent, distinct from any execution. |
+| `Runtime` | ID, logical agent, runtime principal, owner, organisation | Concrete executing instance. |
+| `Credential` | issuer, subject, allowed runtime principals, validity interval | Public binding metadata only; no credential material is stored. |
+| `Resource` | organisation, owner, available actions | Application or tool boundary. |
+| `Capability` | resources, actions, scopes, purpose, delegation flag | Task authority. Requested scope must be a subset and purpose must match exactly. |
+| `Delegation` | originator, delegator, grantee agent, capability, policy, interval, optional parent | Authority grant; a child must be attenuated within its active parent. |
+| `AgenticEvent` | ID, one-based index, UTC time, evidence references, typed payload | Grant, credential issue, runtime spawn, action attempt, revocation, evidence discard, or audit. |
+
+`CanonicalBinding` is evaluator-only truth that keeps the originating
+principal, logical agent, runtime ID/principal, credential subject, publicly
+attributed actor, and accountable owner chain separate. `AuthorityTruth`
+records action-time and audit-time decisions, failures, required delegation
+chain and evidence, reconstructability, policy, and expected side effect.
+
+The frozen Asteria package lives under
+`src/synthworld/benchmarks/asteria-agentic-v1/`. Its `public/` tree contains
+only snapshot/event/tool/scenario inputs. Its physically separate `evaluator/`
+tree contains canonical bindings and answers. Both trees have per-file SHA-256
+values and a path-bound artifact-set digest. See
+[AGENTIC_BENCHMARK.md](AGENTIC_BENCHMARK.md) for the complete layout and replay
+semantics.
+
+### Observed action trace
+
+`AgenticTraceSubmission` is serialized as JSONL, one
+`ObservedActionTrace` object for each public action event. The event ID is
+required. Timestamp, five neutral identity roles, resource/action/scope,
+action-time and audit-time decisions, side effect, policy, delegation chain,
+owner chain, evidence, and audit-reconstructability fields are nullable. A
+missing field is scored as missing and is never filled from evaluator truth.
+
+The agentic scorer independently reports identity-role accuracy,
+authorisation precision/recall/F1 and accuracy, temporal validity,
+least-privilege/excess-authority measures, delegation-chain integrity,
+attribution and owner-chain integrity, provenance completeness, audit
+reconstructability, policy version, and side-effect correctness. Case labels
+are open strings so other worlds can reuse the generic contract without being
+forced to reproduce Asteria's exact case set.
+
 ## Evaluation
 
 The evaluation SDK debuts provisional schema version `0.1.0`. A system submits
@@ -152,6 +202,7 @@ from held-out private seeds.
 | Entity resolution | `EntityResolutionPrediction` | `schema_version`, `clusters` | A list of partition clusters where each cluster is a list of public identity record UUIDs. All public records must be partitioned exactly. |
 | Relationship inference | `RelationshipPrediction` | `schema_version`, `edges` | A list of `PredictedRelationship` (`source_record_id`, `target_record_id`, `kind`, `evidence_association_ids`). |
 | Risk calibration | `RiskPrediction` | `schema_version`, `cases` | A list of `RiskCasePrediction` (`case_id`, `band`, and optional `score`, `band_probabilities`). Score and probabilities must be provided for either every case or none. |
+| Agentic authority | `AgenticTraceSubmission` (JSONL rows) | one `ObservedActionTrace` per action event | Nullable identity-role, decision, attribution, owner, delegation, evidence, reconstructability, policy, and side-effect observations. |
 
 All prediction schemas are Pydantic models supporting `.model_validate_json(text)` for parsing and validation.
 

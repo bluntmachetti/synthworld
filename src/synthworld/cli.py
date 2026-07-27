@@ -7,6 +7,12 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from synthworld.agentic.evaluation import (
+    evaluate_agentic_trace,
+    trace_submission_from_jsonl,
+)
+from synthworld.agentic.generator import generate_asteria_agentic_v1
+from synthworld.agentic.serialization import export_agentic_benchmark
 from synthworld.connection_generator import (
     generate_adversarial_connection_benchmark,
     generate_relationship_connection_benchmark,
@@ -58,7 +64,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "evaluate":
         try:
             text = args.predictions.read_text(encoding="utf-8")
-            if args.task == "extraction":
+            if args.task == "agentic":
+                report = evaluate_agentic_trace(trace_submission_from_jsonl(text))
+            elif args.task == "extraction":
                 report = evaluate_extraction(
                     ExtractionPredictionSet.model_validate_json(text),
                     seed=args.seed,
@@ -89,6 +97,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(_metric_table(report))
         else:
             print(report.model_dump_json(indent=2))
+        return 0
+
+    if args.command == "generate-agentic":
+        agentic_benchmark = generate_asteria_agentic_v1()
+        export_agentic_benchmark(args.output, agentic_benchmark)
+        print(
+            "Asteria Agentic v1 ready: "
+            f"{len(agentic_benchmark.public.events)} events, "
+            f"{len(agentic_benchmark.evaluator.authority_truth)} actions "
+            f"-> {args.output}"
+        )
         return 0
 
     if args.command == "generate-connection-benchmark":
@@ -334,20 +353,32 @@ def _parser() -> argparse.ArgumentParser:
     )
     _add_world_arguments(risk_metrics)
 
+    generate_agentic = subparsers.add_parser(
+        "generate-agentic",
+        help="write frozen Asteria public and evaluator artifact trees",
+    )
+    generate_agentic.add_argument("--output", type=Path, required=True)
+
     evaluate = subparsers.add_parser(
         "evaluate",
         help="evaluate system predictions against separate truth",
     )
     evaluate.add_argument(
         "task",
-        choices=["extraction", "entity-resolution", "relationship", "risk"],
+        choices=[
+            "agentic",
+            "extraction",
+            "entity-resolution",
+            "relationship",
+            "risk",
+        ],
         help="evaluation task to run",
     )
     evaluate.add_argument(
         "--predictions",
         type=Path,
         required=True,
-        help="path to predictions JSON file",
+        help="path to predictions JSON file, or JSONL for agentic traces",
     )
     evaluate.add_argument(
         "--seed",

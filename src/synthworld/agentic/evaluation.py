@@ -1,0 +1,248 @@
+"""Independent metrics for vendor-neutral Asteria observed-action traces."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+
+from pydantic import ValidationError
+
+from synthworld.agentic.models import (
+    AgenticBenchmark,
+    AgenticCaseKind,
+    AgenticTraceSubmission,
+    AuthorityTruth,
+    Decision,
+    ObservedActionTrace,
+)
+from synthworld.agentic.serialization import (
+    agentic_artifact_checksums,
+    load_golden_agentic_benchmark,
+)
+from synthworld.evaluation import (
+    SCORING_PROTOCOL_VERSION,
+    EvaluationInputError,
+    EvaluationReport,
+    FailureSlice,
+    TaskMetric,
+)
+
+_TEMPORAL_CASES = {
+    AgenticCaseKind.VALID_THEN_REVOKED,
+    AgenticCaseKind.POST_REVOCATION_ACTION,
+    AgenticCaseKind.INVALID_THEN_LATER_GRANTED,
+}
+
+
+def trace_submission_from_jsonl(serialized: str) -> AgenticTraceSubmission:
+    """Parse one observed action per nonblank JSONL line."""
+
+    rows: list[ObservedActionTrace] = []
+    for line_number, line in enumerate(serialized.splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            rows.append(ObservedActionTrace.model_validate_json(line))
+        except ValidationError as error:
+            raise EvaluationInputError(
+                f"invalid agentic trace row {line_number}: {error}"
+            ) from error
+    return AgenticTraceSubmission(rows=tuple(rows))
+
+
+def trace_submission_to_jsonl(submission: AgenticTraceSubmission) -> str:
+    """Serialize an observed-action trace in stable input order."""
+
+    return "".join(f"{row.model_dump_json()}\n" for row in submission.rows)
+
+
+def evaluate_agentic_trace(
+    submission: AgenticTraceSubmission,
+    *,
+    benchmark: AgenticBenchmark | None = None,
+) -> EvaluationReport:
+    """Score identity, authority, attribution, and provenance independently."""
+
+    selected = benchmark or load_golden_agentic_benchmark()
+    rows = {row.event_id: row for row in submission.rows}
+    expected_ids = set(selected.public.scenario.action_event_ids)
+    if set(rows) != expected_ids:
+        missing = sorted(expected_ids - set(rows))
+        unknown = sorted(set(rows) - expected_ids)
+        raise EvaluationInputError(
+            "agentic trace must cover every action exactly once; "
+            f"missing={missing}, unknown={unknown}"
+        )
+
+    bindings = {item.action_event_id: item for item in selected.evaluator.bindings}
+    truth = {item.action_event_id: item for item in selected.evaluator.authority_truth}
+    cases = {item.action_event_id: item.kind for item in selected.evaluator.cases}
+    ordered_ids = selected.public.scenario.action_event_ids
+    support = len(ordered_ids)
+
+    checks: dict[str, Callable[[str], bool]] = {
+        "principal_resolution_accuracy": lambda event_id: (
+            rows[event_id].originating_principal_id
+            == bindings[event_id].originating_principal_id
+        ),
+        "logical_agent_resolution_accuracy": lambda event_id: (
+            rows[event_id].logical_agent_id == bindings[event_id].logical_agent_id
+        ),
+        "runtime_binding_accuracy": lambda event_id: (
+            rows[event_id].runtime_principal_id
+            == bindings[event_id].runtime_principal_id
+        ),
+        "credential_subject_accuracy": lambda event_id: (
+            rows[event_id].credential_subject_id
+            == bindings[event_id].credential_subject_id
+        ),
+        "authorization_decision_accuracy": lambda event_id: (
+            rows[event_id].decision == truth[event_id].decision_at_action
+        ),
+        "delegation_chain_integrity": lambda event_id: (
+            rows[event_id].delegation_chain_ids == truth[event_id].delegation_chain_ids
+        ),
+        "attribution_integrity": lambda event_id: (
+            rows[event_id].attributed_actor_id == bindings[event_id].attributed_actor_id
+        ),
+        "accountable_owner_chain_integrity": lambda event_id: (
+            rows[event_id].accountable_owner_chain
+            == bindings[event_id].accountable_owner_chain
+        ),
+        "provenance_completeness": lambda event_id: (
+            rows[event_id].evidence_refs is not None
+            and set(truth[event_id].required_evidence_refs).issubset(
+                rows[event_id].evidence_refs or ()
+            )
+        ),
+        "audit_reconstructability_accuracy": lambda event_id: (
+            rows[event_id].reconstructable_from_retained_evidence
+            == truth[event_id].reconstructable_at_audit
+        ),
+        "expected_side_effect_accuracy": lambda event_id: (
+            rows[event_id].side_effect == truth[event_id].expected_side_effect
+        ),
+        "policy_version_accuracy": lambda event_id: (
+            rows[event_id].policy_version == truth[event_id].expected_policy_version
+        ),
+    }
+    metrics = [
+        TaskMetric(
+            name=name,
+            value=sum(check(event_id) for event_id in ordered_ids) / support,
+            support=support,
+        )
+        for name, check in checks.items()
+    ]
+    metrics.extend(_decision_metrics(ordered_ids, rows, truth))
+
+    temporal_ids = tuple(
+        event_id for event_id in ordered_ids if cases[event_id] in _TEMPORAL_CASES
+    )
+    metrics.append(
+        TaskMetric(
+            name="temporal_validity_accuracy",
+            value=(
+                sum(
+                    rows[event_id].decision_at_audit
+                    == truth[event_id].decision_at_audit
+                    for event_id in temporal_ids
+                )
+                / len(temporal_ids)
+                if temporal_ids
+                else None
+            ),
+            support=len(temporal_ids),
+        )
+    )
+    denied_ids = tuple(
+        event_id
+        for event_id in ordered_ids
+        if truth[event_id].decision_at_action is Decision.DENY
+    )
+    false_allows = sum(
+        rows[event_id].decision is Decision.ALLOW for event_id in denied_ids
+    )
+    metrics.extend(
+        (
+            TaskMetric(
+                name="least_privilege_accuracy",
+                value=(1 - (false_allows / len(denied_ids)) if denied_ids else None),
+                support=len(denied_ids),
+            ),
+            TaskMetric(
+                name="excess_authority_rate",
+                value=false_allows / len(denied_ids) if denied_ids else None,
+                support=len(denied_ids),
+            ),
+        )
+    )
+    slices = tuple(
+        FailureSlice(
+            dimension="case_kind",
+            value=cases[event_id],
+            outcome=name,
+            count=0 if check(event_id) else 1,
+            support=1,
+        )
+        for event_id in ordered_ids
+        for name, check in checks.items()
+    )
+    return EvaluationReport(
+        scoring_version=SCORING_PROTOCOL_VERSION,
+        task="agentic_authority",
+        seed=selected.public.snapshot.seed,
+        persona_count=len(selected.public.snapshot.principals),
+        benchmark_version=selected.public.snapshot.world_version,
+        checksum_scheme="sha256-artifact-set-v1",
+        artifact_checksums=agentic_artifact_checksums(selected),
+        metrics=tuple(metrics),
+        slices=slices,
+    )
+
+
+def _decision_metrics(
+    ordered_ids: tuple[str, ...],
+    rows: dict[str, ObservedActionTrace],
+    truth: dict[str, AuthorityTruth],
+) -> tuple[TaskMetric, ...]:
+    truth_decisions = {
+        event_id: truth[event_id].decision_at_action for event_id in ordered_ids
+    }
+    true_positive = sum(
+        rows[event_id].decision is Decision.ALLOW
+        and truth_decisions[event_id] is Decision.ALLOW
+        for event_id in ordered_ids
+    )
+    predicted_positive = sum(
+        rows[event_id].decision is Decision.ALLOW for event_id in ordered_ids
+    )
+    actual_positive = sum(
+        decision is Decision.ALLOW for decision in truth_decisions.values()
+    )
+    precision = true_positive / predicted_positive if predicted_positive else None
+    recall = true_positive / actual_positive if actual_positive else None
+    f1 = (
+        2 * precision * recall / (precision + recall)
+        if precision is not None and recall is not None and precision + recall
+        else None
+    )
+    return (
+        TaskMetric(
+            name="authorization_decision_precision",
+            value=precision,
+            support=predicted_positive,
+        ),
+        TaskMetric(
+            name="authorization_decision_recall",
+            value=recall,
+            support=actual_positive,
+        ),
+        TaskMetric(name="authorization_decision_f1", value=f1, support=actual_positive),
+    )
+
+
+__all__ = [
+    "evaluate_agentic_trace",
+    "trace_submission_from_jsonl",
+    "trace_submission_to_jsonl",
+]

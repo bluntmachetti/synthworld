@@ -16,8 +16,9 @@ Start with the outcome you want below.
 | Test whether records are matched to the correct person | Conflicting records, known entity membership, and merge/split metrics | Yes |
 | Test relationship inference | Public association evidence, positive relationships, and negative controls | Yes |
 | Test breach-risk scoring | Provider-neutral breach observations and expected score bands | Yes |
+| Test agent identity and delegated authority | Ordered Asteria actions with separate temporal, authority, attribution, and provenance truth | Yes |
 | Explore privacy exposure or broker reappearance | Breach, broker, search, and social scenarios | Partial: generation and integrity metrics only |
-| Test agents, IAM, RAG privacy, wallets, or disaster identity | Future benchmark packs | Planned |
+| Test broader IAM, RAG privacy, wallets, or disaster identity | Future benchmark packs | Planned |
 
 ## The three-part workflow
 
@@ -243,7 +244,40 @@ The scorer reports band accuracy, macro F1, average band distance, and—when
 provided—score error and probability quality. The expected score is a
 documented deterministic index, not a probability or forecast.
 
-## Use case 6: exposure scenarios
+## Use case 6: agent identity and delegated authority
+
+Use Asteria Agentic v1 to test whether a system can distinguish the accountable
+principal, logical agent, concrete runtime, credential subject, and publicly
+attributed actor—and decide whether the action was within delegated authority
+at the time it occurred.
+
+Export the frozen public and evaluator trees:
+
+```bash
+synthworld generate-agentic --output asteria-agentic-v1
+```
+
+Give only `asteria-agentic-v1/public/` to the system under test. It must emit
+one nullable observed-action JSON object per public action event in a JSONL
+file. Score that file against the packaged truth:
+
+```bash
+synthworld evaluate agentic \
+  --predictions observed-actions.jsonl \
+  --summary
+```
+
+The report separates identity role resolution, action-time allow/deny quality,
+audit-time temporal validity, delegation-chain integrity, attribution,
+accountable ownership, retained evidence, reconstructability, and side
+effects. Returning the correct decision does not compensate for missing
+provenance. See [AGENTIC_BENCHMARK.md](AGENTIC_BENCHMARK.md) for the JSONL
+contract, replay rules, baselines, and Python API.
+
+The reusable contracts can assemble additional worlds, but v1 does not yet
+include a high-level custom-world/profile generator or authoring UI.
+
+## Use case 7: exposure scenarios
 
 Use the exposure corpus for product fixtures involving breaches, search
 collisions, broker listings, removal requests, and reappearance:
@@ -277,7 +311,7 @@ positive result was predicted.
 ## Safety boundary
 
 Only inputs explicitly named `public` should be sent to a product or model.
-Commands containing `answer`, and bundled evaluator artifacts such as
+Commands containing `answer`, the Asteria `evaluator/` tree, and bundled evaluator artifacts such as
 `generate-extraction` or `generate-connection-benchmark`, contain expected
 answers. Keep them on the evaluator side.
 

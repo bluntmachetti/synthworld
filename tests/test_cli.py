@@ -8,6 +8,11 @@ from uuid import UUID
 
 import pytest
 
+from synthworld.agentic import (
+    generate_asteria_agentic_v1,
+    reference_agentic_trace,
+    trace_submission_to_jsonl,
+)
 from synthworld.cli import main
 from synthworld.connection import ConnectionBenchmark, PublicConnectionCorpus
 from synthworld.connection_generator import (
@@ -323,6 +328,42 @@ def test_risk_metrics_command_prints_strict_benchmark_integrity(
     assert metrics.factor_count == 18
     assert metrics.frozen_artifact_checked is True
     assert metrics.frozen_artifact_integrity == 1.0
+
+
+def test_generate_agentic_command_writes_separate_artifact_trees(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = tmp_path / "asteria"
+
+    exit_code = main(["generate-agentic", "--output", str(output)])
+
+    assert exit_code == 0
+    assert (output / "public/manifest.json").is_file()
+    assert (output / "public/public_events.jsonl").is_file()
+    assert (output / "evaluator/authority_truth.jsonl").is_file()
+    assert "24 events, 11 actions" in capsys.readouterr().out
+
+
+def test_evaluate_agentic_command_scores_jsonl_trace(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    benchmark = generate_asteria_agentic_v1()
+    predictions = tmp_path / "agentic-trace.jsonl"
+    predictions.write_text(
+        trace_submission_to_jsonl(reference_agentic_trace(benchmark)),
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        ["evaluate", "agentic", "--predictions", str(predictions), "--summary"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "principal_resolution_accuracy" in output
+    assert "authorization_decision_f1" in output
 
 
 def test_module_entrypoint_runs_the_metrics_command(

@@ -54,3 +54,36 @@ answer key is
 `ffc6503df8cbb9d8f99161ee29324e8d0a0187901118e8eeaa590b49e7598f78`. Automated
 tests regenerate both byte-for-byte and independently verify their manifests on
 every run.
+
+## Asteria Agentic v1 review record
+
+Reviewed: 2026-07-27. Seed: `20260719`. Agentic schema and world version:
+`1.0.0`.
+
+The frozen reference world contains Asteria and one external confusion-control
+tenant, four Asteria departments, ten principals, three logical agents, three
+runtimes, three credentials, four grants, nine resources, eleven tool schemas,
+24 events, and 11 scored actions. The reviewed timeline includes a valid
+two-level attenuated delegation, an authorised child-agent comparison,
+capability excess, overprivileged sub-delegation, wrong-runtime and shared
+credential use, cross-tenant confusion, incorrect public attribution,
+revocation while active, a post-revocation attempt, a later grant that changes
+the apparent current-state answer, and declared loss of required delegation
+evidence.
+
+The review checked contiguous one-based indices, strictly increasing UTC
+timestamps, referential integrity, credential and delegation validity,
+revocation cascade, action-time pre-state evaluation, audit-time replay,
+field-by-field public projection, absence of verdicts and canonical bindings
+from every public artifact, and absence of reusable credential material. A
+perfect trace must score identity, authority, attribution, owner, temporal,
+provenance, and side-effect dimensions independently; decision correctness
+alone is insufficient.
+
+The path-bound SHA-256 artifact-set digest is
+`9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594`
+for the public base artifacts and
+`3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f`
+for the evaluator base artifacts. `manifest.json` and `checksums.json` are
+excluded from their own root digest. Tests regenerate every file byte-for-byte,
+verify both roots and all per-file checksums, and retain 100% branch coverage.

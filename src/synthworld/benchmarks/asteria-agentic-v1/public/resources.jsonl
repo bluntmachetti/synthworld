@@ -1,0 +1,9 @@
+{"synthetic":true,"id":"resource-supplier-directory","display_name":"Approved supplier directory","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","actions":["read"]}
+{"synthetic":true,"id":"resource-quotation-service","display_name":"Supplier quotation service","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","actions":["request_quotation"]}
+{"synthetic":true,"id":"resource-task-budget","display_name":"Procurement task budget","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","actions":["change","read"]}
+{"synthetic":true,"id":"resource-quotation-comparison","display_name":"Quotation comparison workspace","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","actions":["compare"]}
+{"synthetic":true,"id":"resource-draft-recommendation","display_name":"Draft recommendation workspace","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","actions":["create_draft"]}
+{"synthetic":true,"id":"resource-delegation-registry","display_name":"Delegation registry","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","actions":["create_delegation"]}
+{"synthetic":true,"id":"resource-purchase-order","display_name":"Purchase order service","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","actions":["approve_supplier","create","submit"]}
+{"synthetic":true,"id":"resource-payroll","display_name":"Payroll records","organisation_id":"org-asteria","owner_principal_id":"principal-payroll-owner","actions":["read"]}
+{"synthetic":true,"id":"resource-orion-customer","display_name":"Orion customer records","organisation_id":"org-orion","owner_principal_id":"principal-orion","actions":["read"]}

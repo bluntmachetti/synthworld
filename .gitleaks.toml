@@ -1,0 +1,16 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "Generated SHA-256 digest for public credential metadata"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''^src/synthworld/benchmarks/asteria-agentic-v1/(?:public/manifest|evaluator/checksums)\.json$''',
+]
+regexes = [
+  '''^\s*"public_credentials\.jsonl":\s*"[0-9a-f]{64}",?\s*$''',
+]

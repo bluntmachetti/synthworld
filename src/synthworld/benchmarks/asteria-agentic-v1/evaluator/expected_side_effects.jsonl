@@ -1,0 +1,11 @@
+{"action_event_id":"evt-010-authorised-comparison","expected_side_effect":"comparison_recorded"}
+{"action_event_id":"evt-011-outside-capability","expected_side_effect":"none"}
+{"action_event_id":"evt-012-overprivileged-delegation","expected_side_effect":"none"}
+{"action_event_id":"evt-013-wrong-runtime","expected_side_effect":"none"}
+{"action_event_id":"evt-014-shared-credential","expected_side_effect":"none"}
+{"action_event_id":"evt-015-valid-then-revoked","expected_side_effect":"quotation_requested"}
+{"action_event_id":"evt-016-incorrect-attribution","expected_side_effect":"read_recorded"}
+{"action_event_id":"evt-017-missing-evidence","expected_side_effect":"draft_created"}
+{"action_event_id":"evt-018-cross-tenant","expected_side_effect":"none"}
+{"action_event_id":"evt-020-post-revocation","expected_side_effect":"none"}
+{"action_event_id":"evt-021-invalid-before-grant","expected_side_effect":"none"}
