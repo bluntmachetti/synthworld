@@ -173,7 +173,6 @@ def agentic_evaluator_artifacts(
         "checksum_scheme": "sha256-artifact-set-v1",
         "public_artifact_set_digest": artifact_set_digest(public_base),
         "evaluator_artifact_set_digest": artifact_set_digest(artifacts),
-        "public_artifacts": _hash_manifest(public_base),
         "evaluator_artifacts": _hash_manifest(artifacts),
     }
     return {**artifacts, "checksums.json": _json_bytes(checksums)}
@@ -294,19 +293,17 @@ def _verify_evaluator_artifacts(
     evaluator_root: Traversable, public_root: Traversable
 ) -> None:
     checksums = _read_json(evaluator_root.joinpath("checksums.json"))
+    public_manifest = _read_json(public_root.joinpath("manifest.json"))
     evaluator = {
         path: evaluator_root.joinpath(path).read_bytes()
         for path in _EVALUATOR_BASE_PATHS
     }
-    public = {
-        path: public_root.joinpath(path).read_bytes() for path in _PUBLIC_BASE_PATHS
-    }
     if (
         checksums.get("evaluator_artifacts") != _hash_manifest(evaluator)
-        or checksums.get("public_artifacts") != _hash_manifest(public)
         or checksums.get("evaluator_artifact_set_digest")
         != artifact_set_digest(evaluator)
-        or checksums.get("public_artifact_set_digest") != artifact_set_digest(public)
+        or checksums.get("public_artifact_set_digest")
+        != public_manifest.get("artifact_set_digest")
     ):
         raise AgenticArtifactError("agentic evaluator checksum verification failed")
 

@@ -97,10 +97,12 @@ decision, failure label, canonical binding, side-effect answer, or audit
 reconstructability answer. The evaluator joins those fields only after the
 system under test has emitted a trace.
 
-Each manifest records SHA-256 for every base artifact plus a root artifact-set
-digest that binds both relative paths and file bytes. The public manifest and
-evaluator checksum file are excluded from their own root digest to avoid a
-self-referential checksum.
+The public manifest records SHA-256 for every public base artifact plus a root
+artifact-set digest that binds both relative paths and file bytes. The evaluator
+checksum file records evaluator per-file hashes and binds the evaluator tree to
+the verified public root digest, without creating a second public hash
+authority. Both metadata files are excluded from their own root digest to avoid
+a self-referential checksum.
 
 ## Observed-action JSONL
 
