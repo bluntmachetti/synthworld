@@ -87,12 +87,12 @@ def _snapshot() -> AgenticWorldSnapshot:
     organisations = (
         Organisation(
             id="org-asteria",
-            display_name="Asteria Works Ltd",
+            display_name="Asteria Example Works Ltd",
             tenant_id="tenant-asteria",
         ),
         Organisation(
             id="org-orion",
-            display_name="Orion Partner Services Ltd",
+            display_name="Orion Example Partner Services Ltd",
             tenant_id="tenant-orion",
         ),
     )
@@ -113,19 +113,19 @@ def _snapshot() -> AgenticWorldSnapshot:
         Principal(
             id=_ORG_PRINCIPAL,
             kind=PrincipalKind.ORGANISATION,
-            display_name="Asteria Works Ltd",
+            display_name="Asteria Example Works Ltd",
             organisation_id="org-asteria",
         ),
         Principal(
             id="principal-orion",
             kind=PrincipalKind.ORGANISATION,
-            display_name="Orion Partner Services Ltd",
+            display_name="Orion Example Partner Services Ltd",
             organisation_id="org-orion",
         ),
         Principal(
             id=_MANAGER,
             kind=PrincipalKind.HUMAN,
-            display_name="Morgan Vale",
+            display_name="Asteria Procurement Manager",
             organisation_id="org-asteria",
             department_id="department-procurement",
             owner_principal_id=_ORG_PRINCIPAL,
@@ -133,7 +133,7 @@ def _snapshot() -> AgenticWorldSnapshot:
         Principal(
             id="principal-payroll-owner",
             kind=PrincipalKind.HUMAN,
-            display_name="Riley North",
+            display_name="Asteria Payroll Owner",
             organisation_id="org-asteria",
             department_id="department-people",
             owner_principal_id=_ORG_PRINCIPAL,

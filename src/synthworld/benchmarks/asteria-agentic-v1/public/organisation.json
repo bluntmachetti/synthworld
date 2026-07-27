@@ -30,13 +30,13 @@
   ],
   "organisations": [
     {
-      "display_name": "Asteria Works Ltd",
+      "display_name": "Asteria Example Works Ltd",
       "id": "org-asteria",
       "synthetic": true,
       "tenant_id": "tenant-asteria"
     },
     {
-      "display_name": "Orion Partner Services Ltd",
+      "display_name": "Orion Example Partner Services Ltd",
       "id": "org-orion",
       "synthetic": true,
       "tenant_id": "tenant-orion"

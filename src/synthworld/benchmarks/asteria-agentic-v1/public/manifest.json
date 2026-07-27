@@ -1,9 +1,9 @@
 {
-  "artifact_set_digest": "0d06538b8a2fa3285f65a1bed7e9ae3c8edce9fa5eef09a3dea1c09ea80b4d9e",
+  "artifact_set_digest": "9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594",
   "artifacts": {
     "agents.jsonl": "3e4884bdcde3ec9e2fbdc958c5fcc587c54e733273afeb4df00e64fac4e20279",
-    "organisation.json": "082a0b063ee3881af84097c63cc84e64f2ecf519efa3b723ef30f5c341fc93d4",
-    "principals.jsonl": "3c0b16b4a4298c67979921a908ba451e51ff11556ebf66a279d35a4890fdb0d4",
+    "organisation.json": "bc29c6aa8e342e72c76e9ae58ca5e101beeb2e69f7956bf878890f714af29c08",
+    "principals.jsonl": "58163ce487ec8a0e986cac5380706ecac352819a1706d265518fbb515955874c",
     "public_credentials.jsonl": "59e116652a078eb46b5e3ea1946d3b78a00b3945d2809a4af25c8875a5f42a93",
     "public_delegations.jsonl": "476df49d66e774c0303370739e9e5bc8011e66985652d14664c581535c743957",
     "public_events.jsonl": "ab920f3866aaa86deeadbbe4c5882170205c12d8d2c1a0fa638c0415aa0ec6eb",

@@ -67,7 +67,7 @@ def test_public_agentic_package_is_oracle_free_and_self_describing() -> None:
     assert manifest["oracle_free"] is True
     assert manifest["artifact_set_digest"] == artifact_set_digest(base)
     assert manifest["artifact_set_digest"] == (
-        "0d06538b8a2fa3285f65a1bed7e9ae3c8edce9fa5eef09a3dea1c09ea80b4d9e"
+        "9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594"
     )
     checksums = json.loads(agentic_evaluator_artifacts(benchmark)["checksums.json"])
     assert checksums["evaluator_artifact_set_digest"] == (

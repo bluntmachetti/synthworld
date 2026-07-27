@@ -81,7 +81,7 @@ provenance, and side-effect dimensions independently; decision correctness
 alone is insufficient.
 
 The path-bound SHA-256 artifact-set digest is
-`0d06538b8a2fa3285f65a1bed7e9ae3c8edce9fa5eef09a3dea1c09ea80b4d9e`
+`9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594`
 for the public base artifacts and
 `3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f`
 for the evaluator base artifacts. `manifest.json` and `checksums.json` are

@@ -1,7 +1,7 @@
-{"synthetic":true,"id":"principal-asteria","kind":"organisation","display_name":"Asteria Works Ltd","organisation_id":"org-asteria","department_id":null,"owner_principal_id":null}
-{"synthetic":true,"id":"principal-orion","kind":"organisation","display_name":"Orion Partner Services Ltd","organisation_id":"org-orion","department_id":null,"owner_principal_id":null}
-{"synthetic":true,"id":"principal-procurement-manager","kind":"human","display_name":"Morgan Vale","organisation_id":"org-asteria","department_id":"department-procurement","owner_principal_id":"principal-asteria"}
-{"synthetic":true,"id":"principal-payroll-owner","kind":"human","display_name":"Riley North","organisation_id":"org-asteria","department_id":"department-people","owner_principal_id":"principal-asteria"}
+{"synthetic":true,"id":"principal-asteria","kind":"organisation","display_name":"Asteria Example Works Ltd","organisation_id":"org-asteria","department_id":null,"owner_principal_id":null}
+{"synthetic":true,"id":"principal-orion","kind":"organisation","display_name":"Orion Example Partner Services Ltd","organisation_id":"org-orion","department_id":null,"owner_principal_id":null}
+{"synthetic":true,"id":"principal-procurement-manager","kind":"human","display_name":"Asteria Procurement Manager","organisation_id":"org-asteria","department_id":"department-procurement","owner_principal_id":"principal-asteria"}
+{"synthetic":true,"id":"principal-payroll-owner","kind":"human","display_name":"Asteria Payroll Owner","organisation_id":"org-asteria","department_id":"department-people","owner_principal_id":"principal-asteria"}
 {"synthetic":true,"id":"principal-quotation-service","kind":"service_account","display_name":"Quotation Agent Service","organisation_id":"org-asteria","department_id":"department-procurement","owner_principal_id":"principal-procurement-manager"}
 {"synthetic":true,"id":"principal-comparison-service","kind":"service_account","display_name":"Comparison Agent Service","organisation_id":"org-asteria","department_id":"department-procurement","owner_principal_id":"principal-procurement-manager"}
 {"synthetic":true,"id":"principal-orion-service","kind":"service_account","display_name":"Quotation Agent Service","organisation_id":"org-orion","department_id":null,"owner_principal_id":"principal-orion"}
