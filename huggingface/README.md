@@ -148,6 +148,9 @@ boundary. Competitive evaluation requires held-out private worlds.
 
 Install v0.9.0 or later and export the frozen package:
 
+The SynthWorld Python package requires Python 3.12 or newer; Python 3.11 and
+earlier are not supported.
+
 ```bash
 pip install idcognito-synthworld
 synthworld generate-agentic --output asteria-agentic-v1
@@ -241,4 +244,4 @@ print(events_path)
 - Baseline results:
   <https://github.com/bluntmachetti/synthworld/blob/main/BENCHMARKS.md>
 
-Licensed under Apache-2.0. Copyright 2026 Idcognito contributors.
+Licensed under Apache-2.0. Copyright 2026 Redoubt Labs ltd.

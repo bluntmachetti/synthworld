@@ -22,6 +22,9 @@ agentic schemas) are versioned independently of the package; see
 
 - Agentic reports now use scoring protocol `0.2.0`; other task scoring versions
   and every frozen Asteria Agentic v1 artifact remain unchanged.
+- The README and Hugging Face dataset card now state the Python 3.12 minimum
+  explicitly, and published copyright notices consistently name Redoubt Labs
+  ltd.
 
 ## [0.9.0] - 2026-07-27
 
