@@ -163,7 +163,7 @@ records, and safe inter-agency matching.
 
 ## Use-case map
 
-Availability describes the packaged `0.8.x` model, not the eventual scope of
+Availability describes the packaged `0.9.x` model, not the eventual scope of
 the roadmap.
 
 | Availability | Use case | SynthWorld responsibility | Consumer or adapter |
