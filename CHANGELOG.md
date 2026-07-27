@@ -3,11 +3,13 @@
 All notable changes to this project are documented in this file. The format is
 based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-The data contracts (core-world, exposure, extraction, connection, and risk
-schemas) are versioned independently of the package; see
+The data contracts (core-world, exposure, extraction, connection, risk, and
+agentic schemas) are versioned independently of the package; see
 [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
+
+## [0.9.0] - 2026-07-27
 
 ### Added
 
@@ -23,6 +25,9 @@ schemas) are versioned independently of the package; see
   field-by-field benchmark projection, tamper-checked package loaders, and an
   open-string case label so later custom worlds are not forced to reproduce
   Asteria's canonical case set.
+- A repository-maintained Hugging Face dataset card that documents the Asteria
+  public/evaluator boundary, authoritative artifact digests, and raw-file
+  verification workflow.
 
 ### Changed
 
@@ -38,8 +43,11 @@ schemas) are versioned independently of the package; see
   cases, runnable commands, metric interpretation, and the safety boundary in
   plain language.
 - The all-task example now derives every prediction from public observations
-  only and can write four CLI-ready prediction JSON files. The roadmap use-case
-  map now labels packaged, partial, and planned capabilities explicitly.
+  only and can write five CLI-ready prediction files, including an Asteria
+  observed-action JSONL trace. The README, user guide, examples guide, and
+  Asteria guide now document the complete export, integration, scoring, and
+  metric-interpretation workflow. The roadmap use-case map now labels packaged,
+  partial, and planned capabilities explicitly.
 
 ## [0.8.0] - 2026-07-22
 
@@ -125,7 +133,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/bluntmachetti/synthworld/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bluntmachetti/synthworld/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bluntmachetti/synthworld/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bluntmachetti/synthworld/releases/tag/v0.6.0

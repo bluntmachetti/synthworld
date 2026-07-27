@@ -21,17 +21,34 @@ runs this script and is part of `make ci`, so the example cannot rot.
 ## Worked evaluation: public-only baseline walkthrough
 
 [`evaluate_all.py`](evaluate_all.py) creates deliberately simple predictions
-from public observations only, then scores all four supported tasks: PII
-extraction, entity resolution, relationship inference, and risk calibration.
-No prediction rule reads an answer key.
+from public observations only, then scores all five supported tasks: PII
+extraction, entity resolution, relationship inference, risk calibration, and
+Asteria agent identity/delegated authority. No prediction rule reads an answer
+key.
 
 ```bash
 uv run python examples/evaluate_all.py --seed 20260719 --persona-count 10
 ```
 
-Add `--predictions-dir predictions` to write one valid prediction JSON file per
-task. You can pass those files to `synthworld evaluate`, or replace each naive
+Add `--predictions-dir predictions` to write one valid prediction file per
+task. The Asteria output is `predictions/agentic.jsonl`; the other four are
+JSON. You can pass those files to `synthworld evaluate`, or replace each naive
 rule with an adapter for your own system.
+
+The Asteria example deliberately calls `current_state_agentic_trace` with only
+the public bundle. That baseline makes the realistic mistake of applying final
+audit state to historical actions, so it is useful for learning the trace
+contract but is not an oracle ceiling:
+
+```bash
+uv run synthworld evaluate agentic \
+  --predictions predictions/agentic.jsonl \
+  --summary
+```
+
+See [`AGENTIC_BENCHMARK.md`](../AGENTIC_BENCHMARK.md) for the public package
+layout and the independent identity, authority, temporal, attribution,
+ownership, provenance, and side-effect metrics.
 
 ## Sample output
 

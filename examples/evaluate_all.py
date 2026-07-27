@@ -1,18 +1,19 @@
-"""Run public-only baseline adapters for all four SynthWorld evaluation tasks.
+"""Run public-only baseline adapters for all five SynthWorld evaluation tasks.
 
 This example creates predictions from only the data a real system is allowed to
 see, then lets each evaluator load its separate truth. It demonstrates:
 - Exact-span PII extraction (using naive regex rules over public pages);
 - Entity resolution (using exact shared email or username values);
 - Relationship inference (requiring reciprocal public associations);
-- Risk calibration (using breach severity only).
+- Risk calibration (using breach severity only);
+- Agent identity and authority (incorrectly checking audit-time state).
 
 Run with:
 
     uv run python examples/evaluate_all.py
 
-Add ``--predictions-dir predictions`` to write four JSON files that can be
-passed directly to ``synthworld evaluate``.
+Add ``--predictions-dir predictions`` to write four JSON files and one agentic
+JSONL file that can be passed directly to ``synthworld evaluate``.
 """
 
 from __future__ import annotations
@@ -23,6 +24,13 @@ from collections.abc import Sequence
 from pathlib import Path
 from uuid import UUID
 
+from synthworld.agentic import (
+    AgenticTraceSubmission,
+    current_state_agentic_trace,
+    evaluate_agentic_trace,
+    generate_asteria_agentic_v1,
+    trace_submission_to_jsonl,
+)
 from synthworld.connection import (
     PublicAssociationKind,
     PublicConnectionCorpus,
@@ -148,6 +156,16 @@ def run_risk_eval(seed: int, persona_count: int) -> RiskPrediction:
     return preds
 
 
+def run_agentic_eval() -> AgenticTraceSubmission:
+    print("\n=== Evaluating Agent Identity and Authority ===")
+    benchmark = generate_asteria_agentic_v1()
+
+    preds = current_state_agentic_trace(benchmark.public)
+    report = evaluate_agentic_trace(preds, benchmark=benchmark)
+    print(report.model_dump_json(indent=2))
+    return preds
+
+
 def _exact_identifier_clusters(
     records: tuple[PublicIdentityRecord, ...],
 ) -> tuple[tuple[UUID, ...], ...]:
@@ -250,8 +268,13 @@ def _write_predictions(
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     for name, prediction in predictions:
-        path = directory / f"{name}.json"
-        path.write_text(prediction.model_dump_json(indent=2) + "\n", encoding="utf-8")
+        if isinstance(prediction, AgenticTraceSubmission):
+            path = directory / f"{name}.jsonl"
+            serialized = trace_submission_to_jsonl(prediction)
+        else:
+            path = directory / f"{name}.json"
+            serialized = prediction.model_dump_json(indent=2) + "\n"
+        path.write_text(serialized, encoding="utf-8")
         print(f"Wrote {path}")
 
 
@@ -262,7 +285,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--predictions-dir",
         type=Path,
-        help="optionally write one CLI-ready prediction JSON file per task",
+        help="optionally write one CLI-ready prediction file per task",
     )
     args = parser.parse_args(argv)
 
@@ -271,6 +294,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         ("entity-resolution", run_entity_resolution_eval(args.seed)),
         ("relationship", run_relationship_eval(args.seed, args.persona_count)),
         ("risk", run_risk_eval(args.seed, args.persona_count)),
+        ("agentic", run_agentic_eval()),
     )
     if args.predictions_dir is not None:
         _write_predictions(args.predictions_dir, predictions)
