@@ -10,6 +10,7 @@ from synthworld.agentic.errors import (
     AgenticReplayError,
 )
 from synthworld.agentic.evaluation import (
+    AGENTIC_SCORING_PROTOCOL_VERSION,
     evaluate_agentic_trace,
     trace_submission_from_jsonl,
     trace_submission_to_jsonl,
@@ -45,6 +46,7 @@ from synthworld.agentic.serialization import (
 
 __all__ = [
     "AGENTIC_SCHEMA_VERSION",
+    "AGENTIC_SCORING_PROTOCOL_VERSION",
     "ASTERIA_WORLD_ID",
     "ASTERIA_WORLD_VERSION",
     "AgenticBenchmark",

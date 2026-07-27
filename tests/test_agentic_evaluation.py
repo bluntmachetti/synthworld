@@ -31,6 +31,7 @@ def test_reference_trace_scores_every_independent_dimension() -> None:
     metrics = {item.name: item.value for item in report.metrics}
 
     assert report.task == "agentic_authority"
+    assert report.scoring_version == "0.2.0"
     assert report.checksum_scheme == "sha256-artifact-set-v1"
     assert metrics["excess_authority_rate"] == 0.0
     assert all(
@@ -38,7 +39,7 @@ def test_reference_trace_scores_every_independent_dimension() -> None:
         for name, value in metrics.items()
         if name != "excess_authority_rate"
     )
-    assert len(report.slices) == 11 * 12
+    assert len(report.slices) == 11 * 13
     assert not any(item.count for item in report.slices)
     assert dict(report.artifact_checksums).keys() == {"public", "evaluator"}
 
@@ -86,6 +87,59 @@ def test_missing_provenance_does_not_hide_a_correct_decision() -> None:
     assert metrics["authorization_decision_accuracy"] == 1.0
     provenance = metrics["provenance_completeness"]
     assert provenance is not None and provenance < 1.0
+    exact = metrics["provenance_exact_match"]
+    assert exact is not None and exact < 1.0
+
+
+def test_fabricated_provenance_lowers_exact_match_and_micro_precision() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    perfect = reference_agentic_trace(benchmark)
+    expected_support = sum(len(row.evidence_refs or ()) for row in perfect.rows)
+    first = perfect.rows[0].model_copy(
+        update={
+            "evidence_refs": (
+                *(perfect.rows[0].evidence_refs or ()),
+                "evidence:fabricated",
+            )
+        }
+    )
+    second = perfect.rows[1].model_copy(
+        update={
+            "evidence_refs": (
+                *(perfect.rows[1].evidence_refs or ()),
+                "evidence:fabricated",
+            )
+        }
+    )
+    report = evaluate_agentic_trace(
+        perfect.model_copy(update={"rows": (first, second, *perfect.rows[2:])}),
+        benchmark=benchmark,
+    )
+    metrics = {item.name: item for item in report.metrics}
+    assert metrics["provenance_completeness"].value == 1.0
+    assert metrics["provenance_exact_match"].value == 9 / 11
+    assert metrics["provenance_precision"].value == expected_support / (
+        expected_support + 2
+    )
+    assert metrics["provenance_precision"].support == expected_support + 2
+
+
+def test_empty_provenance_has_zero_precision_support() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    perfect = reference_agentic_trace(benchmark)
+    empty = perfect.model_copy(
+        update={
+            "rows": tuple(
+                row.model_copy(update={"evidence_refs": None}) for row in perfect.rows
+            )
+        }
+    )
+    report = evaluate_agentic_trace(empty, benchmark=benchmark)
+    metrics = {item.name: item for item in report.metrics}
+    assert metrics["provenance_completeness"].value == 0.0
+    assert metrics["provenance_exact_match"].value == 0.0
+    assert metrics["provenance_precision"].value is None
+    assert metrics["provenance_precision"].support == 0
 
 
 def test_custom_case_labels_and_all_allow_world_have_defined_empty_support() -> None:

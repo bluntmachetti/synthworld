@@ -9,6 +9,20 @@ agentic schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+### Added
+
+- Relational integrity validation for custom agentic worlds, including reusable
+  owner/runtime graph helpers, bounded v1 root and child delegator provenance,
+  exact canonical-binding joins, and explicit integrity errors before evaluator
+  truth generation.
+- Agentic provenance exact-match and micro-precision metrics so fabricated
+  evidence is distinguishable from missing evidence.
+
+### Changed
+
+- Agentic reports now use scoring protocol `0.2.0`; other task scoring versions
+  and every frozen Asteria Agentic v1 artifact remain unchanged.
+
 ## [0.9.0] - 2026-07-27
 
 ### Added

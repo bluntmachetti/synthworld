@@ -19,12 +19,13 @@ from synthworld.agentic.serialization import (
     load_golden_agentic_benchmark,
 )
 from synthworld.evaluation import (
-    SCORING_PROTOCOL_VERSION,
     EvaluationInputError,
     EvaluationReport,
     FailureSlice,
     TaskMetric,
 )
+
+AGENTIC_SCORING_PROTOCOL_VERSION = "0.2.0"
 
 _TEMPORAL_CASES = {
     AgenticCaseKind.VALID_THEN_REVOKED,
@@ -114,6 +115,11 @@ def evaluate_agentic_trace(
                 rows[event_id].evidence_refs or ()
             )
         ),
+        "provenance_exact_match": lambda event_id: (
+            rows[event_id].evidence_refs is not None
+            and set(rows[event_id].evidence_refs or ())
+            == set(truth[event_id].required_evidence_refs)
+        ),
         "audit_reconstructability_accuracy": lambda event_id: (
             rows[event_id].reconstructable_from_retained_evidence
             == truth[event_id].reconstructable_at_audit
@@ -133,6 +139,27 @@ def evaluate_agentic_trace(
         )
         for name, check in checks.items()
     ]
+    submitted_reference_count = sum(
+        len(set(rows[event_id].evidence_refs or ())) for event_id in ordered_ids
+    )
+    expected_submitted_reference_count = sum(
+        len(
+            set(rows[event_id].evidence_refs or ())
+            & set(truth[event_id].required_evidence_refs)
+        )
+        for event_id in ordered_ids
+    )
+    metrics.append(
+        TaskMetric(
+            name="provenance_precision",
+            value=(
+                expected_submitted_reference_count / submitted_reference_count
+                if submitted_reference_count
+                else None
+            ),
+            support=submitted_reference_count,
+        )
+    )
     metrics.extend(_decision_metrics(ordered_ids, rows, truth))
 
     temporal_ids = tuple(
@@ -188,7 +215,7 @@ def evaluate_agentic_trace(
         for name, check in checks.items()
     )
     return EvaluationReport(
-        scoring_version=SCORING_PROTOCOL_VERSION,
+        scoring_version=AGENTIC_SCORING_PROTOCOL_VERSION,
         task="agentic_authority",
         seed=selected.public.snapshot.seed,
         persona_count=len(selected.public.snapshot.principals),
@@ -242,6 +269,7 @@ def _decision_metrics(
 
 
 __all__ = [
+    "AGENTIC_SCORING_PROTOCOL_VERSION",
     "evaluate_agentic_trace",
     "trace_submission_from_jsonl",
     "trace_submission_to_jsonl",

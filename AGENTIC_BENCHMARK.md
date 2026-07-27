@@ -165,20 +165,34 @@ report = evaluate_agentic_trace(submission)
 
 ## Metrics and baselines
 
-The report keeps these dimensions independent:
+Agentic reports use scoring protocol `0.2.0`; other SynthWorld tasks remain on
+their existing scoring protocols. The report keeps these dimensions
+independent:
 
 - originating-principal, logical-agent, runtime, and credential-subject
   resolution;
 - action-time authorisation accuracy, allow precision/recall/F1, temporal
   audit validity, least-privilege accuracy, and excess-authority rate;
 - delegation-chain, public attribution, and accountable owner-chain integrity;
-- provenance completeness and audit reconstructability;
+- provenance completeness, exact match, micro precision, and audit
+  reconstructability;
 - expected side effect and policy-version correctness.
 
 Every canonical case also receives a per-dimension failure slice. A correct
 allow/deny with missing evidence can therefore score perfectly on decision
 accuracy while scoring below one on provenance; there is no aggregate score
 that conceals that difference.
+
+`provenance_completeness` is the fraction of actions whose submitted evidence
+contains every required reference. It deliberately retains its original
+subset-based meaning. `provenance_exact_match` is the fraction of actions whose
+distinct submitted and required evidence sets are equal. `provenance_precision`
+is micro precision over distinct `(action, evidence reference)` pairs; its
+support is the number submitted and its value is undefined at zero support.
+Consequently, fabricated extras can leave completeness at one while lowering
+exact match and precision. `delegation_chain_integrity` already compares the
+ordered chain IDs exactly; those IDs resolve to public delegations containing
+each delegator, grantee, parent, policy, and capability.
 
 Two public-only baselines are available in `synthworld.agentic`: an
 `always_deny_agentic_trace` baseline and a `current_state_agentic_trace`

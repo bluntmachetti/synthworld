@@ -30,10 +30,14 @@ Both baselines consume only the public bundle. Always-deny shows why accuracy al
 | Always deny | authorization_decision_f1 | undefined | 4 |
 | Always deny | delegation_chain_integrity | 0.0 | 11 |
 | Always deny | provenance_completeness | 0.7273 | 11 |
+| Always deny | provenance_exact_match | 0.3636 | 11 |
+| Always deny | provenance_precision | 0.8409 | 44 |
 | Audit-time current state | authorization_decision_accuracy | 0.6364 | 11 |
 | Audit-time current state | authorization_decision_f1 | 0.3333 | 4 |
 | Audit-time current state | delegation_chain_integrity | 0.4545 | 11 |
 | Audit-time current state | provenance_completeness | 0.5455 | 11 |
+| Audit-time current state | provenance_exact_match | 0.4545 | 11 |
+| Audit-time current state | provenance_precision | 0.9714 | 35 |
 
 ## Why SynthWorld, not a row generator
 
