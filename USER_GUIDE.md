@@ -307,15 +307,21 @@ synthworld evaluate agentic \
 
 The report separates identity role resolution, action-time allow/deny quality,
 audit-time temporal validity, delegation-chain integrity, attribution,
-accountable ownership, retained evidence, reconstructability, and side
-effects. Returning the correct decision does not compensate for missing
+accountable ownership, retained evidence, reconstructability, and side effects.
+Agentic scoring protocol `0.2.0` reports evidence completeness, exact match, and
+micro precision separately: missing references lower completeness, while
+fabricated extras can preserve completeness but lower exact match and precision.
+Returning the correct decision does not compensate for missing or fabricated
 provenance. A score below one is expected for the example baseline: it
 intentionally proves that evaluating historical actions from final state is
 not replay. See [AGENTIC_BENCHMARK.md](AGENTIC_BENCHMARK.md) for the complete
 JSONL contract, replay rules, baselines, Python API, and checksum procedure.
 
 The reusable contracts can assemble additional worlds, but v1 does not yet
-include a high-level custom-world/profile generator or authoring UI.
+include a high-level custom-world/profile generator or authoring UI. The builder
+rejects malformed runtime, delegation, credential, actor, and accountable-owner
+joins before truth generation while preserving truthful unauthorized actions as
+negative cases.
 
 ## Use case 7: exposure scenarios
 

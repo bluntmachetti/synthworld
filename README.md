@@ -172,6 +172,13 @@ that adapter; the SynthWorld scorer joins the answer key only after predictions
 have been produced. See the [Asteria guide](AGENTIC_BENCHMARK.md) for the JSONL
 schema, Python API, replay rules, checksum verification, and metric definitions.
 
+Custom agentic worlds built with `build_agentic_benchmark` are fully replayed
+and relationally validated before evaluator truth is created. Malformed
+runtime/agent, credential, delegator, actor, and owner-chain joins are rejected;
+truthful unauthorized attempts remain scoreable denials. Agentic scoring
+protocol `0.2.0` also distinguishes missing evidence from fabricated extras with
+completeness, exact-match, and micro-precision metrics.
+
 See the [user guide](USER_GUIDE.md) for goal-led walkthroughs,
 [examples/](examples/) for runnable adapters and annotated sample output, and
 [BENCHMARKS.md](BENCHMARKS.md) for reference baseline results and visual

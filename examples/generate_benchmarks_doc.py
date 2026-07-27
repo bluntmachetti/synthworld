@@ -132,6 +132,8 @@ def _render_agentic_baseline_section(
         "authorization_decision_f1",
         "delegation_chain_integrity",
         "provenance_completeness",
+        "provenance_exact_match",
+        "provenance_precision",
     )
     rows = []
     for baseline_name, report in results:
