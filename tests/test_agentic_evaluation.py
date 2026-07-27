@@ -1,0 +1,170 @@
+from __future__ import annotations
+
+import pytest
+from pydantic import ValidationError
+
+from synthworld.agentic import (
+    always_deny_agentic_trace,
+    baselines,
+    current_state_agentic_trace,
+    evaluate_agentic_trace,
+    generate_asteria_agentic_v1,
+    reference_agentic_trace,
+    trace_submission_from_jsonl,
+    trace_submission_to_jsonl,
+)
+from synthworld.agentic.models import (
+    ActionAttempted,
+    AgenticPublicBundle,
+    AgenticTraceSubmission,
+    Decision,
+    ObservedActionTrace,
+)
+from synthworld.agentic.replay import AgenticReplayError
+from synthworld.evaluation import EvaluationInputError
+
+
+def test_reference_trace_scores_every_independent_dimension() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    submission = reference_agentic_trace(benchmark)
+    report = evaluate_agentic_trace(submission, benchmark=benchmark)
+    metrics = {item.name: item.value for item in report.metrics}
+
+    assert report.task == "agentic_authority"
+    assert report.checksum_scheme == "sha256-artifact-set-v1"
+    assert metrics["excess_authority_rate"] == 0.0
+    assert all(
+        value == 1.0
+        for name, value in metrics.items()
+        if name != "excess_authority_rate"
+    )
+    assert len(report.slices) == 11 * 12
+    assert not any(item.count for item in report.slices)
+    assert dict(report.artifact_checksums).keys() == {"public", "evaluator"}
+
+
+def test_jsonl_round_trip_and_default_frozen_evaluator() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    serialized = trace_submission_to_jsonl(reference_agentic_trace(benchmark))
+    parsed = trace_submission_from_jsonl(f"\n{serialized}\n")
+    assert parsed == reference_agentic_trace(benchmark)
+    assert evaluate_agentic_trace(parsed).task == "agentic_authority"
+
+
+def test_naive_baselines_expose_decision_temporal_and_provenance_failures() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    deny = evaluate_agentic_trace(
+        always_deny_agentic_trace(benchmark.public), benchmark=benchmark
+    )
+    current = evaluate_agentic_trace(
+        current_state_agentic_trace(benchmark.public), benchmark=benchmark
+    )
+    deny_metrics = {item.name: item.value for item in deny.metrics}
+    current_metrics = {item.name: item.value for item in current.metrics}
+
+    assert deny_metrics["authorization_decision_recall"] == 0.0
+    assert deny_metrics["authorization_decision_precision"] is None
+    assert deny_metrics["authorization_decision_f1"] is None
+    assert deny_metrics["accountable_owner_chain_integrity"] == 0.0
+    assert current_metrics["temporal_validity_accuracy"] == 1.0
+    decision_accuracy = current_metrics["authorization_decision_accuracy"]
+    attribution_accuracy = current_metrics["attribution_integrity"]
+    assert decision_accuracy is not None and decision_accuracy < 1.0
+    assert attribution_accuracy is not None and attribution_accuracy < 1.0
+    assert any(item.count for item in current.slices)
+
+
+def test_missing_provenance_does_not_hide_a_correct_decision() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    perfect = reference_agentic_trace(benchmark)
+    first = perfect.rows[0].model_copy(update={"evidence_refs": ()})
+    report = evaluate_agentic_trace(
+        perfect.model_copy(update={"rows": (first, *perfect.rows[1:])}),
+        benchmark=benchmark,
+    )
+    metrics = {item.name: item.value for item in report.metrics}
+    assert metrics["authorization_decision_accuracy"] == 1.0
+    provenance = metrics["provenance_completeness"]
+    assert provenance is not None and provenance < 1.0
+
+
+def test_custom_case_labels_and_all_allow_world_have_defined_empty_support() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    custom_cases = tuple(
+        item.model_copy(update={"kind": "custom_case"})
+        for item in benchmark.evaluator.cases
+    )
+    all_allow_truth = tuple(
+        item.model_copy(
+            update={
+                "decision_at_action": Decision.ALLOW,
+                "decision_at_audit": Decision.ALLOW,
+            }
+        )
+        for item in benchmark.evaluator.authority_truth
+    )
+    custom = benchmark.model_copy(
+        update={
+            "evaluator": benchmark.evaluator.model_copy(
+                update={"cases": custom_cases, "authority_truth": all_allow_truth}
+            )
+        }
+    )
+    report = evaluate_agentic_trace(reference_agentic_trace(custom), benchmark=custom)
+    metrics = {item.name: item for item in report.metrics}
+    assert metrics["temporal_validity_accuracy"].value is None
+    assert metrics["temporal_validity_accuracy"].support == 0
+    assert metrics["least_privilege_accuracy"].value is None
+    assert metrics["excess_authority_rate"].value is None
+
+
+def test_agentic_evaluator_rejects_missing_unknown_and_duplicate_rows() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    perfect = reference_agentic_trace(benchmark)
+    with pytest.raises(EvaluationInputError, match="missing"):
+        evaluate_agentic_trace(
+            perfect.model_copy(update={"rows": perfect.rows[1:]}), benchmark=benchmark
+        )
+    unknown = perfect.rows[0].model_copy(update={"event_id": "evt-unknown"})
+    with pytest.raises(EvaluationInputError, match="unknown"):
+        evaluate_agentic_trace(
+            perfect.model_copy(update={"rows": (unknown, *perfect.rows[1:])}),
+            benchmark=benchmark,
+        )
+    with pytest.raises(ValidationError, match="unique"):
+        AgenticTraceSubmission(rows=(perfect.rows[0], perfect.rows[0]))
+
+
+def test_jsonl_parser_reports_the_bad_line() -> None:
+    with pytest.raises(EvaluationInputError, match="row 2"):
+        trace_submission_from_jsonl('{"event_id":"evt-ok"}\n{"event_id": 12}\n')
+
+
+def test_observed_trace_requires_utc_when_timestamp_is_present() -> None:
+    with pytest.raises(ValidationError, match="UTC"):
+        ObservedActionTrace.model_validate(
+            {"event_id": "evt-test", "timestamp": "2026-01-01T12:00:00"}
+        )
+    assert ObservedActionTrace(event_id="evt-none", timestamp=None).timestamp is None
+
+
+def test_public_baselines_reject_incomplete_claims_and_nonactions() -> None:
+    benchmark = generate_asteria_agentic_v1()
+    events = list(benchmark.public.events)
+    action = events[9]
+    assert isinstance(action.payload, ActionAttempted)
+    attempt = action.payload.attempt.model_copy(update={"logical_agent_claim": None})
+    events[9] = action.model_copy(
+        update={"payload": action.payload.model_copy(update={"attempt": attempt})}
+    )
+    public = AgenticPublicBundle(
+        snapshot=benchmark.public.snapshot,
+        events=tuple(events),
+        scenario=benchmark.public.scenario,
+    )
+    with pytest.raises(AgenticReplayError, match="complete public identity"):
+        current_state_agentic_trace(public)
+    with pytest.raises(AgenticReplayError, match="non-action"):
+        baselines._public_row(
+            benchmark.public.events[0], benchmark.public, decision=Decision.DENY
+        )

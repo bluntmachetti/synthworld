@@ -1,0 +1,58 @@
+{
+  "departments": [
+    {
+      "display_name": "Procurement",
+      "id": "department-procurement",
+      "organisation_id": "org-asteria",
+      "synthetic": true
+    },
+    {
+      "display_name": "Finance",
+      "id": "department-finance",
+      "organisation_id": "org-asteria",
+      "synthetic": true
+    },
+    {
+      "display_name": "People Operations",
+      "id": "department-people",
+      "organisation_id": "org-asteria",
+      "synthetic": true
+    },
+    {
+      "display_name": "Technology",
+      "id": "department-technology",
+      "organisation_id": "org-asteria",
+      "synthetic": true
+    }
+  ],
+  "initial_evidence_refs": [
+    "evidence:policy:asteria-policy-v1"
+  ],
+  "organisations": [
+    {
+      "display_name": "Asteria Works Ltd",
+      "id": "org-asteria",
+      "synthetic": true,
+      "tenant_id": "tenant-asteria"
+    },
+    {
+      "display_name": "Orion Partner Services Ltd",
+      "id": "org-orion",
+      "synthetic": true,
+      "tenant_id": "tenant-orion"
+    }
+  ],
+  "policies": [
+    {
+      "default_decision": "deny",
+      "id": "policy-asteria-v1",
+      "require_active_delegation": true,
+      "synthetic": true,
+      "version": "asteria-policy-v1"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "seed": 20260719,
+  "world_id": "asteria-agentic",
+  "world_version": "1.0.0"
+}

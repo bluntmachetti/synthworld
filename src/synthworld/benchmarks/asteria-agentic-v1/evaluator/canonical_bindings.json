@@ -1,0 +1,157 @@
+{
+  "bindings": [
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-010-authorised-comparison",
+      "attributed_actor_id": "principal-comparison-service",
+      "credential_subject_id": "principal-runtime-comparison-001",
+      "logical_agent_id": "agent-comparison",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-comparison-001",
+      "runtime_principal_id": "principal-runtime-comparison-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-011-outside-capability",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-quotation",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-quotation-001",
+      "runtime_principal_id": "principal-runtime-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-012-overprivileged-delegation",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-quotation",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-quotation-001",
+      "runtime_principal_id": "principal-runtime-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-013-wrong-runtime",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-comparison",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-comparison-001",
+      "runtime_principal_id": "principal-runtime-comparison-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-orion"
+      ],
+      "action_event_id": "evt-014-shared-credential",
+      "attributed_actor_id": "principal-orion-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-orion-quotation",
+      "originating_principal_id": "principal-orion",
+      "runtime_id": "runtime-orion-quotation-001",
+      "runtime_principal_id": "principal-runtime-orion-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-015-valid-then-revoked",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-quotation",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-quotation-001",
+      "runtime_principal_id": "principal-runtime-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-016-incorrect-attribution",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-quotation",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-quotation-001",
+      "runtime_principal_id": "principal-runtime-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-017-missing-evidence",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-quotation",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-quotation-001",
+      "runtime_principal_id": "principal-runtime-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-orion"
+      ],
+      "action_event_id": "evt-018-cross-tenant",
+      "attributed_actor_id": "principal-orion-service",
+      "credential_subject_id": "principal-runtime-orion-quotation-001",
+      "logical_agent_id": "agent-orion-quotation",
+      "originating_principal_id": "principal-orion",
+      "runtime_id": "runtime-orion-quotation-001",
+      "runtime_principal_id": "principal-runtime-orion-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-020-post-revocation",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-quotation",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-quotation-001",
+      "runtime_principal_id": "principal-runtime-quotation-001",
+      "synthetic": true
+    },
+    {
+      "accountable_owner_chain": [
+        "principal-procurement-manager",
+        "principal-asteria"
+      ],
+      "action_event_id": "evt-021-invalid-before-grant",
+      "attributed_actor_id": "principal-quotation-service",
+      "credential_subject_id": "principal-runtime-quotation-001",
+      "logical_agent_id": "agent-quotation",
+      "originating_principal_id": "principal-procurement-manager",
+      "runtime_id": "runtime-quotation-001",
+      "runtime_principal_id": "principal-runtime-quotation-001",
+      "synthetic": true
+    }
+  ],
+  "schema_version": "1.0.0"
+}

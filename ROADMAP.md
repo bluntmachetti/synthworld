@@ -120,12 +120,15 @@ retains definitive lifecycle truth.
 
 ### AI agents and non-human identities
 
+- [#23 — Asteria Agentic v1 reference world and vertical slice](https://github.com/bluntmachetti/synthworld/issues/23)
 - [#6 — Add an AI-agent and non-human identity benchmark pack](https://github.com/bluntmachetti/synthworld/issues/6)
 
-This introduces agents, workloads, service accounts, credentials, scopes,
-delegation chains, expiry, and revocation. ZeroID can enforce runtime identity,
-Arena can exercise agent behaviour, and EADS can supply enterprise resources and
-business impact; SynthWorld remains the benchmark oracle.
+Asteria Agentic v1 now provides the small frozen vertical slice: agents,
+workloads, service accounts, credentials, scopes, delegation chains, temporal
+replay, revocation, evidence loss, a JSONL trace, and independent scoring.
+Issue #6 remains the broader generated pack. ZeroID can enforce runtime
+identity, Arena can exercise agent behaviour, and EADS can supply enterprise
+resources and business impact; SynthWorld remains the benchmark oracle.
 
 ## Phase 4 — Portfolio and AI-system integrations
 
@@ -171,7 +174,8 @@ the roadmap.
 | Available | Relationship inference | Public associations, reciprocal truth, unilateral controls, and evidence scoring | Graph or inference system |
 | Available | Breach-risk calibration | Public breach observations, separate score/band truth, and calibration scoring | Risk model or rules engine |
 | Partial | Privacy exposure and broker removal | Breach, broker, search, and social fixtures including basic reappearance; full deletion-action evaluation is planned | Idcognito or privacy product |
-| Planned | Agent and workload identity | Principals, credentials, grants, delegation, and revocation truth | ZeroID, Arena, EADS |
+| Available | Asteria agent authority conformance | Principals, runtimes, credentials, grants, temporal replay, revocation, evidence, and scoring | Generic JSONL, ZeroID, Arena, EADS |
+| Planned | Generated agent and workload identity profiles | Configurable organisations, graph profiles, and scale tiers | ZeroID, Arena, EADS |
 | Planned | Enterprise IAM and governance | Accounts, entitlements, ownership, and policy truth | EADS, Arena |
 | Planned | LLM and RAG privacy | Fact ownership, sensitivity, authorisation, and current-state truth | Model, RAG, or agent harness |
 | Planned | Digital wallets and credentials | Issuers, holders, claims, presentations, and validity truth | Wallet or verifier adapter |

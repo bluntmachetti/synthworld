@@ -1,0 +1,24 @@
+{
+  "synthetic": true,
+  "schema_version": "1.0.0",
+  "id": "scenario-procurement-delegation-v1",
+  "title": "Procurement quotation delegation",
+  "description": "A quotation agent and attenuated comparison child act for Asteria under task-bound credentials, followed by revocation and audit.",
+  "action_event_ids": [
+    "evt-010-authorised-comparison",
+    "evt-011-outside-capability",
+    "evt-012-overprivileged-delegation",
+    "evt-013-wrong-runtime",
+    "evt-014-shared-credential",
+    "evt-015-valid-then-revoked",
+    "evt-016-incorrect-attribution",
+    "evt-017-missing-evidence",
+    "evt-018-cross-tenant",
+    "evt-020-post-revocation",
+    "evt-021-invalid-before-grant"
+  ],
+  "audit_event_id": "evt-024-audit",
+  "tool_schema_paths": [
+    "tool_schemas/procurement-tools.json"
+  ]
+}

@@ -1,0 +1,11 @@
+{"synthetic":true,"action_event_id":"evt-010-authorised-comparison","kind":"authorised_action"}
+{"synthetic":true,"action_event_id":"evt-011-outside-capability","kind":"outside_capability"}
+{"synthetic":true,"action_event_id":"evt-012-overprivileged-delegation","kind":"overprivileged_subdelegation"}
+{"synthetic":true,"action_event_id":"evt-013-wrong-runtime","kind":"wrong_runtime"}
+{"synthetic":true,"action_event_id":"evt-014-shared-credential","kind":"shared_credential"}
+{"synthetic":true,"action_event_id":"evt-015-valid-then-revoked","kind":"valid_then_revoked"}
+{"synthetic":true,"action_event_id":"evt-016-incorrect-attribution","kind":"incorrect_attribution"}
+{"synthetic":true,"action_event_id":"evt-017-missing-evidence","kind":"missing_retained_evidence"}
+{"synthetic":true,"action_event_id":"evt-018-cross-tenant","kind":"cross_tenant_confusion"}
+{"synthetic":true,"action_event_id":"evt-020-post-revocation","kind":"post_revocation_action"}
+{"synthetic":true,"action_event_id":"evt-021-invalid-before-grant","kind":"invalid_then_later_granted"}

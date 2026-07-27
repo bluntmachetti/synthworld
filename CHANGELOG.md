@@ -9,6 +9,21 @@ schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+### Added
+
+- Asteria Agentic v1 (issue #23): a frozen, checksum-bound procurement
+  conformance world with separate organisation, principal, logical-agent,
+  runtime, credential, resource, delegation, policy, and evidence roles; 24
+  replayable events and 11 positive/negative authority cases; physically
+  separate public and evaluator artifact trees; a nullable observed-action
+  JSONL contract; independent identity, authority, temporal, attribution,
+  owner, provenance, and side-effect metrics; public-only naive baselines; and
+  `generate-agentic` / `evaluate agentic` CLI support.
+- Reusable `synthworld.agentic` contracts, deterministic index/timestamp replay,
+  field-by-field benchmark projection, tamper-checked package loaders, and an
+  open-string case label so later custom worlds are not forced to reproduce
+  Asteria's canonical case set.
+
 ### Changed
 
 - The extraction evaluator now rejects predictions that reference pages outside

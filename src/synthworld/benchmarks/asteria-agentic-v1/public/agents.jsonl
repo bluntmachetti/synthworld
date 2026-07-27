@@ -1,0 +1,3 @@
+{"synthetic":true,"id":"agent-quotation","display_name":"Quotation Agent","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","parent_agent_id":null}
+{"synthetic":true,"id":"agent-comparison","display_name":"Comparison Agent","organisation_id":"org-asteria","owner_principal_id":"principal-procurement-manager","parent_agent_id":"agent-quotation"}
+{"synthetic":true,"id":"agent-orion-quotation","display_name":"Quotation Agent","organisation_id":"org-orion","owner_principal_id":"principal-orion","parent_agent_id":null}

@@ -10,8 +10,9 @@
 adversarial evidence and an answer key.**
 
 SynthWorld creates deterministic, safely fictional populations for evaluating
-privacy, PII-extraction, entity-resolution, relationship-inference, and
-exposure-analysis systems. Selected benchmark families expose separately
+privacy, PII-extraction, entity-resolution, relationship-inference,
+agent-authority, and exposure-analysis systems. Selected benchmark families
+expose separately
 serialized product-safe observations; other artifacts are evaluator bundles
 that retain answer keys for scoring.
 
@@ -27,7 +28,8 @@ tool and does not transform sensitive real-world data into a safe dataset.
 | Create safe connected identities for tests or demos | Run `synthworld generate` | Available |
 | Evaluate PII extraction, entity matching, relationship inference, or risk scoring | Follow the [user guide](USER_GUIDE.md) | Available |
 | Explore breach, search, broker, and social exposure scenarios | Generate an exposure corpus | Partial: generation and integrity metrics |
-| Test agent identity, IAM, RAG privacy, wallets, or disaster identity | See the [roadmap](ROADMAP.md) | Planned |
+| Test agent identity and delegated authority | Use [Asteria Agentic v1](AGENTIC_BENCHMARK.md) | Available |
+| Test broader IAM, RAG privacy, wallets, or disaster identity | See the [roadmap](ROADMAP.md) | Planned |
 
 New to benchmark evaluation? The [user guide](USER_GUIDE.md) explains the
 workflow in plain language, provides a five-minute walkthrough, and shows where
@@ -65,18 +67,23 @@ relationships, and assigns the expected exposure score.
   cases, and unilateral negative controls.
 - **Risk calibration:** provider-neutral breach observations with separately
   checksummed score, band, and factor truth.
+- **Asteria Agentic v1:** ordered agent/runtime/delegation events, an
+  oracle-free observed-action interface, and separate authority, attribution,
+  temporal, and provenance truth.
 
-The core-world, exposure-corpus, extraction-corpus, connection-benchmark, and
-risk-benchmark schemas are independently versioned `1.0.0` contracts. See
+The core-world, exposure-corpus, extraction-corpus, connection-benchmark,
+risk-benchmark, and agentic schemas are independently versioned `1.0.0`
+contracts. See
 [DATA_DICTIONARY.md](DATA_DICTIONARY.md) for field definitions and the strict
 public/oracle boundary. See [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md) for the frozen
 benchmark review record.
 
 ## Public input and evaluator truth
 
-Extraction, connection, and risk each provide a separately serialized
-product-safe corpus (`PublicExtractionCorpus`, `PublicConnectionCorpus`,
-`PublicRiskCorpus`) and physically separate evaluator truth. Extraction also
+Extraction, connection, risk, and Asteria Agentic each provide separately
+serialized product-safe input and physically separate evaluator truth. The
+first three use `PublicExtractionCorpus`, `PublicConnectionCorpus`, and
+`PublicRiskCorpus`; Asteria uses a multi-file public package. Extraction also
 ships an `ExtractionCorpus` annotated bundle, in which every
 `AnnotatedExtractionPage` embeds both the safe page and its `answer_key`, for
 offline evaluators; that bundle is convenient but is not a product-safe input.
@@ -111,7 +118,7 @@ pip install idcognito-synthworld
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
-The frozen golden benchmarks are also browsable as tables on
+Selected frozen golden benchmarks are also browsable as tables on
 [Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks),
 byte-identical to the artifacts shipped in this package.
 
@@ -132,6 +139,7 @@ uv run synthworld generate-corpus --seed 20260719 --persona-count 10 --output ex
 uv run synthworld generate-public-extraction --seed 20260719 --persona-count 10 --output extraction.json
 uv run synthworld generate-public-connections --seed 20260719 --persona-count 10 --output connections.json
 uv run synthworld generate-risk-public --seed 20260719 --persona-count 10 --output risk.json
+uv run synthworld generate-agentic --output asteria-agentic-v1
 ```
 
 See the [user guide](USER_GUIDE.md) for goal-led walkthroughs,
@@ -154,11 +162,16 @@ SynthWorld provides a unified command line tool to score predictions against sep
 synthworld evaluate <task> --predictions PATH [--seed S] [--persona-count N] [--summary]
 ```
 
-Where `task` is one of `extraction`, `entity-resolution`, `relationship`, or `risk`.
+Where `task` is one of `agentic`, `extraction`, `entity-resolution`,
+`relationship`, or `risk`. Agentic predictions use JSONL; the other tasks use
+JSON.
 
-- `--predictions`: Path to the system predictions JSON file (conforming to task-specific prediction schemas).
-- `--seed`: The benchmark seed used to load/generate matching ground-truth.
-- `--persona-count`: The benchmark persona count (ignored for `entity-resolution`).
+- `--predictions`: Path to the system predictions JSON or JSONL file,
+  conforming to the task-specific schema.
+- `--seed`: The benchmark seed used to load/generate matching ground-truth
+  (ignored for frozen Asteria Agentic v1).
+- `--persona-count`: The benchmark persona count (ignored for
+  `entity-resolution` and Asteria Agentic v1).
 - `--summary`: If provided, outputs a clean, compact terminal table summarizing the metrics instead of the raw JSON report.
 
 Example:
@@ -177,7 +190,8 @@ than become a second general-purpose simulator. Planned work is organised as
 packs and adapters:
 
 - data-broker deletion and reappearance for Idcognito;
-- AI-agent and non-human identity graphs for ZeroID, Arena, and EADS;
+- broader AI-agent and non-human identity profiles for ZeroID, Arena, and EADS,
+  building on the available Asteria Agentic v1 conformance fixture;
 - enterprise IAM and identity-governance scenarios;
 - LLM, RAG, and agent-memory privacy evaluation;
 - digital-wallet and verifiable-credential testing;

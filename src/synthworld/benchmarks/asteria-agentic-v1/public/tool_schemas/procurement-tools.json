@@ -1,0 +1,225 @@
+{
+  "schema_version": "1.0.0",
+  "tools": [
+    {
+      "action": "read",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "read_supplier_directory",
+      "resource_id": "resource-supplier-directory"
+    },
+    {
+      "action": "request_quotation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "request_supplier_quotation",
+      "resource_id": "resource-quotation-service"
+    },
+    {
+      "action": "read",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "read_task_budget",
+      "resource_id": "resource-task-budget"
+    },
+    {
+      "action": "compare",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "compare_quotations",
+      "resource_id": "resource-quotation-comparison"
+    },
+    {
+      "action": "create_draft",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "create_draft_recommendation",
+      "resource_id": "resource-draft-recommendation"
+    },
+    {
+      "action": "create_delegation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "create_attenuated_delegation",
+      "resource_id": "resource-delegation-registry"
+    },
+    {
+      "action": "approve_supplier",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "approve_supplier",
+      "resource_id": "resource-purchase-order"
+    },
+    {
+      "action": "create",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "create_purchase_order",
+      "resource_id": "resource-purchase-order"
+    },
+    {
+      "action": "submit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "submit_purchase_order",
+      "resource_id": "resource-purchase-order"
+    },
+    {
+      "action": "read",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "read_payroll",
+      "resource_id": "resource-payroll"
+    },
+    {
+      "action": "read",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "scope"
+        ],
+        "type": "object"
+      },
+      "name": "read_orion_customer",
+      "resource_id": "resource-orion-customer"
+    }
+  ]
+}
