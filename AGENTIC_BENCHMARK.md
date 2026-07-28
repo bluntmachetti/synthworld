@@ -131,6 +131,52 @@ Score it with:
 synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 ```
 
+### Trace conventions
+
+The evaluator grades `delegation_chain_ids`, `evidence_refs`, and
+`side_effect` against deterministic conventions computed by the replay
+engine. For the frozen Asteria Agentic v1 fixture, a public-only
+integration can reproduce them exactly; publishing them here reveals
+nothing beyond the already-public answer key. Custom v1 worlds derive
+their truth with the same replay rules, but exact public reproducibility
+additionally requires that the world's public data map each runtime
+principal to a single runtime, because the required runtime reference
+follows the canonical binding's runtime ID.
+
+`delegation_chain_ids` records the chain the action-time policy check
+selects. Among the delegations granted to the acting logical agent by the
+originating principal that are time-valid, unrevoked, and match the
+attempt's policy version, keep those whose capability covers the resource,
+the action, every requested scope, and the purpose; take the qualifying
+delegation with the lexicographically smallest ID and expand it through its
+parents, root first. The chain is independent of the final decision. An
+action denied for a credential, runtime, tenant, or sub-delegation reason
+still records its covering chain — the fixture's wrong-runtime and
+overprivileged-delegation cases both do — while an action whose covering
+delegation is revoked, expired, or not yet granted records an empty chain,
+as in the post-revocation and invalid-before-grant cases. Null is scored as
+missing capture, not as an empty chain.
+
+`evidence_refs` is the sorted union of exactly four groups: the policy
+(`evidence:policy:<version>`), the presented credential
+(`evidence:credential:<id>`), the runtime bound to the claimed runtime
+principal (`evidence:runtime:<runtime id>`), and one
+`evidence:delegation:<id>` entry per member of `delegation_chain_ids`.
+Denied actions therefore require no delegation references beyond the
+recorded chain and never require revocation references, and the runtime
+reference follows the runtime that executed the action rather than
+whatever references the attempt happened to cite.
+`reconstructable_from_retained_evidence` states whether that required set
+is still retained at the audit event, given every `evidence_discarded`
+event.
+
+`side_effect` is `none` whenever the action-time decision is deny. For
+allowed actions it is a fixed name derived from the action: `read` becomes
+`read_recorded`, `request_quotation` becomes `quotation_requested`,
+`compare` becomes `comparison_recorded`, `create_draft` becomes
+`draft_created`, `create_delegation` becomes `delegation_created`, and any
+other action becomes `action_recorded`.
+
 ### Run the public-only example
 
 The repository includes a complete adapter that receives only the public

@@ -9,6 +9,13 @@ agentic schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+### Added
+
+- An AGENTIC_BENCHMARK.md "Trace conventions" section (issue #34) documenting
+  the deterministic delegation-chain, evidence-reference, and side-effect
+  rules the agentic evaluator grades against for the frozen Asteria Agentic
+  v1 fixture, referenced from DATA_DICTIONARY.md.
+
 ## [0.10.0] - 2026-07-27
 
 ### Added

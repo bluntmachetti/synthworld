@@ -170,6 +170,9 @@ required. Timestamp, five neutral identity roles, resource/action/scope,
 action-time and audit-time decisions, side effect, policy, delegation chain,
 owner chain, evidence, and audit-reconstructability fields are nullable. A
 missing field is scored as missing and is never filled from evaluator truth.
+The deterministic conventions behind the graded delegation-chain,
+evidence-reference, and side-effect values are documented in
+[AGENTIC_BENCHMARK.md](AGENTIC_BENCHMARK.md) under "Trace conventions".
 
 The agentic scorer independently reports identity-role accuracy,
 authorisation precision/recall/F1 and accuracy, temporal validity,
