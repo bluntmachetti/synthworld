@@ -159,13 +159,13 @@ missing capture, not as an empty chain.
 
 `evidence_refs` is the sorted union of exactly four groups: the policy
 (`evidence:policy:<version>`), the presented credential
-(`evidence:credential:<id>`), the runtime bound to the claimed runtime
-principal (`evidence:runtime:<runtime id>`), and one
+(`evidence:credential:<id>`), the canonical runtime mapped from the claimed
+runtime principal (`evidence:runtime:<runtime id>`), and one
 `evidence:delegation:<id>` entry per member of `delegation_chain_ids`.
 Denied actions therefore require no delegation references beyond the
 recorded chain and never require revocation references, and the runtime
-reference follows the runtime that executed the action rather than
-whatever references the attempt happened to cite.
+reference follows that canonical mapping rather than any runtime reference
+the attempt happened to cite.
 `reconstructable_from_retained_evidence` states whether that required set
 is still retained at the audit event, given every `evidence_discarded`
 event.
