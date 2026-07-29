@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/run-manifest.schema.json",
+  "title": "AgentAuthorityRunManifest",
+  "description": "Everything needed to reproduce a run and to know what was actually tested.\n\nA benchmark artifact is reproducible on its own: seeds, checksums and a frozen\nfixture make the *world* recoverable. That is not sufficient for a result. A claim\nlike \"this pattern failed to propagate revocation\" is a claim about a particular\nsystem, at a particular version, under a particular configuration, on a particular\nnetwork topology - and without those recorded, the finding is unreproducible even\nthough the fixture is.\n\nThis manifest exists to make findings attributable. In particular\n`systems_under_test` is an array rather than a single entry, because a finding must\nbe assignable to a specific component or explicitly marked ambiguous. If evidence\ncannot establish which component broke an authority chain, that ambiguity is itself\na reportable evidence failure, not a bookkeeping inconvenience.\n\nUnlike the trace schemas in this directory, this file is hand-authored: no pydantic\nmodel defines it yet. It is a proposal, versioned independently of the benchmark.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_version",
+    "run_id",
+    "created_at",
+    "run_layer",
+    "benchmark_identity",
+    "scoring",
+    "build_provenance",
+    "systems_under_test"
+  ],
+  "properties": {
+    "manifest_version": {
+      "const": "0.1.0-draft",
+      "description": "Version of this manifest schema, not of the run."
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable identifier for this run, unique within the operator's records."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Run start, ISO 8601 with an explicit UTC offset."
+    },
+    "completed_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "default": null
+    },
+    "operator": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Who executed the run. Required in anything published."
+    },
+    "run_layer": {
+      "enum": ["core", "lab", "operational"],
+      "description": "Which control layer this run exercises, matching control-catalogue.yaml.\n\n`core` runs score declared observations offline and need no topology.\n`lab` runs execute against real systems and MUST declare topology and\nauthority-critical dependencies - a bypass or fail-closed finding is\nmeaningless without them."
+    },
+    "controls_exercised": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^SW-AA-[CL][0-9]{2}$" },
+      "default": [],
+      "description": "Control identifiers this run claims to exercise. A run may not claim a control whose asteria_v1_status is `absent`."
+    },
+    "benchmark_identity": {
+      "$ref": "#/$defs/benchmarkIdentity"
+    },
+    "scoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agentic_schema_version", "scoring_protocol_version"],
+      "properties": {
+        "agentic_schema_version": { "type": "string" },
+        "scoring_protocol_version": { "type": "string" }
+      }
+    },
+    "build_provenance": {
+      "$ref": "#/$defs/buildProvenance"
+    },
+    "adapter": {
+      "$ref": "#/$defs/adapter"
+    },
+    "systems_under_test": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/component" },
+      "description": "Every component in the authority path, each separately versioned.\n\nRecord the whole composed stack, not only the component of interest: a finding\nattributed to a gateway that actually originated in its authorization server is\nthe most common way a report becomes unfair."
+    },
+    "topology": {
+      "$ref": "#/$defs/topology"
+    },
+    "authority_critical_dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Components whose failure should deny sensitive actions (see SW-AA-L05).\nDeclared per architecture and before the run, so fail-closed behaviour is\ntestable rather than asserted."
+    },
+    "declared_bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "default": {},
+      "description": "Thresholds fixed BEFORE execution. A bound chosen after seeing the\nmeasurement is not a bound (see SW-AA-L06).",
+      "properties": {
+        "revocation_propagation_ms": { "type": ["integer", "null"], "default": null },
+        "notes": { "type": ["string", "null"], "default": null }
+      }
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    },
+    "conflicts_declared": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Relationships that a reader might reasonably think could bias the result:\nauthorship of an adapter or reference implementation, commercial interest in a\ncomponent, prior engagement with a vendor. Disclose in the manifest rather than\nleaving it to be discovered."
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Known reasons this run understates or overstates behaviour. Anything dropped,\nsampled, capped or skipped belongs here - silent truncation reads as coverage."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "run_layer": { "const": "lab" } }, "required": ["run_layer"] },
+      "then": {
+        "required": ["topology", "authority_critical_dependencies"],
+        "description": "Lab runs cannot be interpreted without reachability and dependency declarations."
+      }
+    }
+  ],
+  "$defs": {
+    "benchmarkIdentity": {
+      "type": "object",
+      "description": "Which world was used. Exactly one of `frozen` or `generated`.",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "benchmark_id", "benchmark_version", "artifact_checksums"],
+          "properties": {
+            "kind": { "const": "frozen" },
+            "benchmark_id": { "type": "string", "examples": ["asteria-agentic-v1"] },
+            "benchmark_version": { "type": "string" },
+            "artifact_checksums": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["scheme", "root_digest"],
+              "properties": {
+                "scheme": { "type": "string", "examples": ["sha256-artifact-set-v1"] },
+                "root_digest": { "type": "string" }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "A generated world. These fields are the benchmark identity: the tuple that\ndetermines the artifacts. Build provenance is recorded separately, because\nthe same identity only reproduces byte-identically inside the same locked\nenvironment - seed and configuration alone do not guarantee it across\nfuture interpreter or serializer releases.",
+          "required": [
+            "kind",
+            "profile",
+            "profile_schema_version",
+            "generator_version",
+            "canonical_serialization_version",
+            "seed",
+            "tier"
+          ],
+          "properties": {
+            "kind": { "const": "generated" },
+            "profile": { "type": "string", "examples": ["enterprise_agentic"] },
+            "profile_schema_version": { "type": "string" },
+            "generator_version": { "type": "string" },
+            "canonical_serialization_version": { "type": "string" },
+            "event_schedule_version": { "type": ["string", "null"], "default": null },
+            "seed": { "type": "integer" },
+            "tier": { "enum": ["smoke", "standard", "stress", "longitudinal", "held-out"] },
+            "configuration": {
+              "type": "object",
+              "description": "The explicit configuration, or a digest of it plus a retrievable location.",
+              "additionalProperties": true
+            },
+            "configuration_digest": { "type": ["string", "null"], "default": null },
+            "artifact_checksums": {
+              "type": ["object", "null"],
+              "default": null,
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    },
+    "buildProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["synthworld_ref"],
+      "description": "What software produced the artifacts. Distinct from benchmark identity: this is\nwhat makes byte-identical reproduction achievable, and it is the part that\nchanges when a dependency is upgraded.",
+      "properties": {
+        "synthworld_ref": {
+          "type": "string",
+          "description": "Exact commit SHA or released version."
+        },
+        "python_version": { "type": ["string", "null"], "default": null },
+        "dependency_lock_digest": {
+          "type": ["string", "null"],
+          "default": null,
+          "description": "Digest of uv.lock or equivalent."
+        },
+        "container_image_digest": { "type": ["string", "null"], "default": null },
+        "platform": { "type": ["string", "null"], "default": null }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "source_url": { "type": ["string", "null"], "default": null },
+        "author": { "type": ["string", "null"], "default": null },
+        "authored_by_benchmark_maintainer": {
+          "type": "boolean",
+          "default": false,
+          "description": "True when the benchmark maintainer wrote the adapter. Not disqualifying -\nsomeone has to write the first one - but it changes what the result can be\ncited for, so it is recorded rather than inferred."
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "name", "version"],
+      "properties": {
+        "role": {
+          "enum": [
+            "agent_runtime",
+            "gateway",
+            "authorization_server",
+            "identity_provider",
+            "policy_decision_point",
+            "credential_store",
+            "target_service",
+            "audit_sink",
+            "other"
+          ]
+        },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "image_digest": { "type": ["string", "null"], "default": null },
+        "configuration_digest": { "type": ["string", "null"], "default": null },
+        "configuration_url": { "type": ["string", "null"], "default": null },
+        "is_reference_implementation": {
+          "type": "boolean",
+          "default": false,
+          "description": "True for a stand-in written for the benchmark rather than a shipped product.\nFindings against a reference implementation are evidence about that\nimplementation, never about the pattern it illustrates."
+        },
+        "notes": { "type": ["string", "null"], "default": null }
+      }
+    },
+    "topology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_can_reach_target_directly", "enforcement_points"],
+      "description": "Network facts the result depends on. Required for lab runs (SW-AA-L03): keeping\na credential away from an agent does not keep authority away from it if the agent\nretains a path to the target, so reachability must be a declared fact rather than\nan assumption.",
+      "properties": {
+        "agent_can_reach_target_directly": {
+          "type": "boolean",
+          "description": "Whether a direct agent-to-target path existed during the run."
+        },
+        "enforcement_points": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Every point at which authority was enforced. More than one is normal."
+        },
+        "isolation_mechanism": { "type": ["string", "null"], "default": null },
+        "notes": { "type": ["string", "null"], "default": null }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Whether the party responsible for a system under test accepts the configuration\nas representative. A comparative or pattern-level claim requires this; a\nconformance case study does not, but should say so.",
+      "properties": {
+        "status": {
+          "enum": [
+            "not_requested",
+            "requested",
+            "accepted_as_representative",
+            "accepted_with_caveats",
+            "disputed"
+          ],
+          "default": "not_requested"
+        },
+        "reviewer": { "type": ["string", "null"], "default": null },
+        "reviewer_affiliation": { "type": ["string", "null"], "default": null },
+        "reviewed_at": { "type": ["string", "null"], "format": "date-time", "default": null },
+        "caveats": { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    }
+  }
+}

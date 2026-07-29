@@ -15,17 +15,68 @@ Skeleton. Only the control catalogue exists so far.
 | Component | State |
 |---|---|
 | `control-catalogue.yaml` | Draft `0.2.0-draft` — revised after adversarial review; statuses re-graded, two controls added, mappings downgraded |
-| `schemas/observed-action-trace.schema.json` | Not started |
-| `schemas/run-manifest.schema.json` | Not started |
+| `schemas/observed-action-trace.schema.json` | Generated from the model |
+| `schemas/agentic-trace-submission.schema.json` | Generated from the model |
+| `schemas/run-manifest.schema.json` | Draft `0.1.0-draft` — hand-authored proposal |
+| `tools/generate_trace_schema.py` | Working, with a `--check` drift gate |
 | `examples/` (design-intent traces) | Not started |
 | `adapter-template/` | Not started |
 | `docs/` | Not started |
 
-The authoritative trace contract today remains the pydantic models in
-`src/synthworld/agentic/models.py` and the documentation in
-[`AGENTIC_BENCHMARK.md`](../AGENTIC_BENCHMARK.md). The JSON Schemas here will be
-generated from those models so the two cannot drift; until they exist, the models
-win.
+The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
+the trace contract. The schemas here are a projection of them, not an independent
+definition — where the two disagree the model is right and the schema is stale.
+
+## Schemas
+
+**The trace schemas are generated.** Regenerate after any model change:
+
+```bash
+uv run python agent-authority-contract/tools/generate_trace_schema.py
+uv run python agent-authority-contract/tools/generate_trace_schema.py --check   # CI gate
+```
+
+`--check` exits non-zero when a committed schema no longer matches the model, which
+is the hook a future CI step should call. Drift between a published contract and the
+scorer that enforces it is the failure mode worth spending a CI job on.
+
+**The run manifest is hand-authored** because no model defines it yet. It is the
+component of this package that makes *findings* reproducible rather than merely
+making *fixtures* reproducible — a distinction worth being explicit about, since a
+seeded world and a checksum already give you the latter. A claim like "revocation did
+not propagate" is a claim about a named system at a version under a configuration on
+a topology, and none of that is recoverable from the benchmark artifacts.
+
+Three design choices in it are deliberate:
+
+- **`systems_under_test` is an array.** Every component in the authority path is
+  recorded separately, so a finding can be attributed to one of them — or explicitly
+  marked ambiguous. Attributing to a gateway something that originated in its
+  authorization server is the most common way a report becomes unfair.
+- **Lab runs must declare topology.** JSON Schema conditionals enforce it: a manifest
+  with `run_layer: lab` and no `topology` or `authority_critical_dependencies` fails
+  validation. A bypass or fail-closed finding is uninterpretable without reachability
+  declared, so this is a schema rule rather than a convention.
+- **Bounds and conflicts are declared up front.** `declared_bounds` exists so a
+  latency threshold is fixed before measurement, and
+  `authored_by_benchmark_maintainer` plus `conflicts_declared` record the things a
+  reader would otherwise have to discover.
+
+To exercise the schemas against real and adversarial instances:
+
+```bash
+uv run --with jsonschema python - <<'PY'
+import json, pathlib
+from jsonschema import Draft202012Validator
+for p in sorted(pathlib.Path("agent-authority-contract/schemas").glob("*.json")):
+    Draft202012Validator.check_schema(json.loads(p.read_text()))
+    print("valid:", p.name)
+PY
+```
+
+`jsonschema` is intentionally not a project dependency — nothing here is imported by
+the package. It becomes one when `synthworld validate agentic-trace` lands, which is
+the right moment to add it deliberately.
 
 ## What the control catalogue is for
 
