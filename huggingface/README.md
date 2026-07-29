@@ -161,6 +161,7 @@ emit one nullable `ObservedActionTrace` JSON object for each action event. Then
 score the JSONL trace locally:
 
 ```bash
+synthworld validate agentic-trace --predictions observed-actions.jsonl
 synthworld evaluate agentic \
   --predictions observed-actions.jsonl \
   --summary

@@ -11,6 +11,40 @@ agentic schemas) are versioned independently of the package; see
 
 ### Added
 
+- A `synthworld validate agentic-trace` command that checks an observed-action
+  JSONL submission for structural and cardinality correctness before scoring,
+  with no access to evaluator truth. It reports every bad row in one pass with
+  line numbers, exits `0` for valid and `1` for invalid, and prints a human
+  summary by default or a machine report with `--json`. The guarantee is
+  one-directional: a valid result means `evaluate agentic` will not raise
+  `EvaluationInputError`. It is deliberately stricter in one case, rejecting a
+  submission in which every row is empty, because the scorer would accept that
+  and award a perfect `least_privilege_accuracy`.
+- `load_public_agentic_bundle`, which loads and checksum-verifies a public-only
+  Asteria tree without reading any evaluator artifact, plus
+  `TraceValidationReport`, `TraceValidationIssue`, and `validate_trace_jsonl`.
+- An asserted `pattern` on the timestamp property of the published trace schemas.
+  `format` is an annotation rather than an assertion in JSON Schema 2020-12, so
+  the schemas previously accepted a naive timestamp, a non-UTC offset, and
+  `"not-a-date"` — all rejected by the model.
+- A `schemas` target in `make ci` running `generate_trace_schema.py --check`, so
+  schema drift fails the build, and an isolated-wheel check exercising the new
+  command's accept and reject paths.
+- `tests/test_trace_schema_agreement.py`, asserting that the models and the
+  published schemas accept the same bytes across a mutation corpus, with the two
+  known pydantic coercion divergences declared explicitly. Adds
+  `jsonschema[format]` and `types-jsonschema` as dev dependencies only.
+
+### Changed
+
+- `agent-authority-contract/README.md` no longer states that `jsonschema` will
+  become a project dependency. The validate command uses the pydantic models
+  instead, because the schemas are generated from those models and the two are
+  not nested — each accepts input the other refuses, so runtime schema
+  validation would enforce a different surface than the scorer.
+
+### Added
+
 - An AGENTIC_BENCHMARK.md "Trace conventions" section (issue #34) documenting
   the deterministic delegation-chain, evidence-reference, and side-effect
   rules the agentic evaluator grades against for the frozen Asteria Agentic

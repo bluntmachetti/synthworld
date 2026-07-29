@@ -10,7 +10,8 @@ read by people and by external tooling, not by the library.
 
 ## Status
 
-Skeleton. Only the control catalogue exists so far.
+Skeleton, with the catalogue and schemas in place and the adapter-facing pieces
+still to come.
 
 | Component | State |
 |---|---|
@@ -18,7 +19,8 @@ Skeleton. Only the control catalogue exists so far.
 | `schemas/observed-action-trace.schema.json` | Generated from the model |
 | `schemas/agentic-trace-submission.schema.json` | Generated from the model |
 | `schemas/run-manifest.schema.json` | Draft `0.1.0-draft` — hand-authored proposal |
-| `tools/generate_trace_schema.py` | Working, with a `--check` drift gate |
+| `tools/generate_trace_schema.py` | Working; `--check` drift gate runs in `make ci` |
+| `synthworld validate agentic-trace` | Shipped — validates a submission with no answer-key access |
 | `examples/` (design-intent traces) | Not started |
 | `adapter-template/` | Not started |
 | `docs/` | Not started |
@@ -36,9 +38,10 @@ uv run python agent-authority-contract/tools/generate_trace_schema.py
 uv run python agent-authority-contract/tools/generate_trace_schema.py --check   # CI gate
 ```
 
-`--check` exits non-zero when a committed schema no longer matches the model, which
-is the hook a future CI step should call. Drift between a published contract and the
-scorer that enforces it is the failure mode worth spending a CI job on.
+`--check` exits non-zero when a committed schema no longer matches the model. It runs
+as the `schemas` target in `make ci`, so a model change that is not reflected here
+fails the build — drift between a published contract and the scorer that enforces it
+is worth a CI job.
 
 **The run manifest is hand-authored** because no model defines it yet. It is the
 component of this package that makes *findings* reproducible rather than merely
@@ -62,21 +65,43 @@ Three design choices in it are deliberate:
   `authored_by_benchmark_maintainer` plus `conflicts_declared` record the things a
   reader would otherwise have to discover.
 
-To exercise the schemas against real and adversarial instances:
+### `format` is decorative — read this before trusting a validator
 
-```bash
-uv run --with jsonschema python - <<'PY'
-import json, pathlib
-from jsonschema import Draft202012Validator
-for p in sorted(pathlib.Path("agent-authority-contract/schemas").glob("*.json")):
-    Draft202012Validator.check_schema(json.loads(p.read_text()))
-    print("valid:", p.name)
-PY
-```
+`format` is an **annotation** in JSON Schema 2020-12, not an assertion. A conformant
+validator may ignore it, and Python's `jsonschema` does not check `date-time` unless
+you both pass a `FormatChecker` and install its `[format]` extra. Measured against an
+earlier revision of these files, that meant the published schema accepted
+`"timestamp": "not-a-date"`, a naive timestamp, and a non-UTC offset — all of which
+the model rejects. An adapter author was being told those were fine and then having
+the scorer reject them.
 
-`jsonschema` is intentionally not a project dependency — nothing here is imported by
-the package. It becomes one when `synthworld validate agentic-trace` lands, which is
-the right moment to add it deliberately.
+The timestamp property therefore carries an asserted `pattern` as well, admitting
+exactly the forms the model accepts (`Z`, `+00:00`, `-00:00`, optional fractional
+seconds). Configure your validator for format assertion anyway, but the contract no
+longer depends on you doing so.
+
+### On `jsonschema` as a dependency
+
+An earlier version of this file said `jsonschema` would become a project dependency
+when `synthworld validate agentic-trace` landed. That command has landed, and it
+validates with the **pydantic models**, not with these schemas. The reason is worth
+recording, because the intuition points the other way:
+
+- The schemas are generated from the models, so validating model-parsed rows against
+  them would be circular — agreement is guaranteed, and disagreement only ever means
+  the projection is stale, which `--check` already catches.
+- The two are not nested. Each accepts input the other refuses, so validating against
+  the schema at runtime would enforce a *different* surface than the scorer, which is
+  precisely the valid-then-rejected failure the command exists to prevent.
+- A non-Python adapter is not helped by a Python dependency. It needs the schema
+  *file*, which is committed here and consumable by `ajv`, `go-jsonschema`, or any
+  other validator in its own toolchain.
+
+`jsonschema[format]` is a **dev** dependency, used by
+`tests/test_trace_schema_agreement.py`, which asserts that the model and these schemas
+accept the same bytes across a mutation corpus and records the two known coercion
+divergences explicitly. A new divergence fails that suite rather than reaching an
+integrator.
 
 ## What the control catalogue is for
 
