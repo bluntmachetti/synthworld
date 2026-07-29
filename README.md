@@ -25,15 +25,35 @@ tool and does not transform sensitive real-world data into a safe dataset.
 | Your goal | Start here | Availability |
 |---|---|---|
 | Inspect the data without installing anything | [Browse the frozen benchmarks on Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks) | Available |
+| Test agent identity and delegated authority | Use [Asteria Agentic v1](AGENTIC_BENCHMARK.md) | Available |
 | Create safe connected identities for tests or demos | Run `synthworld generate` | Available |
 | Evaluate PII extraction, entity matching, relationship inference, or risk scoring | Follow the [user guide](USER_GUIDE.md) | Available |
 | Explore breach, search, broker, and social exposure scenarios | Generate an exposure corpus | Partial: generation and integrity metrics |
-| Test agent identity and delegated authority | Use [Asteria Agentic v1](AGENTIC_BENCHMARK.md) | Available |
 | Test broader IAM, RAG privacy, wallets, or disaster identity | See the [roadmap](ROADMAP.md) | Planned |
 
 New to benchmark evaluation? The [user guide](USER_GUIDE.md) explains the
 workflow in plain language, provides a five-minute walkthrough, and shows where
 your own system plugs into each current use case.
+
+## Featured: agent authority
+
+**Identity tells you which agent acted. SynthWorld evaluates whether your
+system can show that the action was within delegated authority at the time —
+and whether the retained evidence can still prove it later.**
+
+Give your gateway, policy or audit stack a deterministic public identity
+world. Emit an `ObservedActionTrace`; score it against physically separate
+evaluator truth:
+
+```bash
+synthworld generate-agentic --output asteria-agentic-v1
+synthworld evaluate agentic --predictions observed-actions.jsonl --summary
+```
+
+[Asteria Agentic v1](AGENTIC_BENCHMARK.md) is a frozen, manually inspectable
+conformance fixture with separate authority, attribution, temporal, and
+provenance truth. Final audit state cannot replace historical replay; Asteria
+scores the difference.
 
 ## Why SynthWorld
 
