@@ -369,3 +369,51 @@ def test_generator_events_are_strict_and_public_claims_can_diverge() -> None:
         attribution.payload.attempt.attributed_actor_claim
         != binding.attributed_actor_id
     )
+
+
+def test_load_public_agentic_bundle_matches_the_generated_public_tree() -> None:
+    from synthworld.agentic.serialization import load_public_agentic_bundle
+
+    assert load_public_agentic_bundle() == generate_asteria_agentic_v1().public
+
+
+def test_load_public_agentic_bundle_reads_an_exported_tree_and_verifies_it(
+    tmp_path: Path,
+) -> None:
+    from synthworld.agentic.serialization import load_public_agentic_bundle
+
+    benchmark = generate_asteria_agentic_v1()
+    root = tmp_path / "asteria-agentic-v1"
+    export_agentic_benchmark(root, benchmark)
+    public_root = root / "public"
+
+    assert load_public_agentic_bundle(public_root) == benchmark.public
+
+    events = public_root / "public_events.jsonl"
+    events.write_bytes(events.read_bytes() + b"\n")
+    with pytest.raises(AgenticArtifactError, match="checksum"):
+        load_public_agentic_bundle(public_root)
+
+
+def test_golden_loader_rejects_a_forged_public_artifact_set_digest(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The evaluator cross-binding is what makes the packaged tree trustworthy."""
+
+    import json as _json
+
+    from synthworld.agentic import serialization
+
+    benchmark = generate_asteria_agentic_v1()
+    root = tmp_path / "asteria-agentic-v1"
+    export_agentic_benchmark(root, benchmark)
+    monkeypatch.setattr(serialization, "files", lambda _package: tmp_path)
+    assert serialization.load_golden_agentic_benchmark() == benchmark
+
+    checksums_path = root / "evaluator/checksums.json"
+    checksums = _json.loads(checksums_path.read_text(encoding="utf-8"))
+    checksums["public_artifact_set_digest"] = "0" * 64
+    checksums_path.write_text(_json.dumps(checksums), encoding="utf-8")
+    with pytest.raises(AgenticArtifactError):
+        serialization.load_golden_agentic_benchmark()

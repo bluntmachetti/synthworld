@@ -12,7 +12,14 @@ from synthworld.agentic.evaluation import (
     trace_submission_from_jsonl,
 )
 from synthworld.agentic.generator import generate_asteria_agentic_v1
-from synthworld.agentic.serialization import export_agentic_benchmark
+from synthworld.agentic.serialization import (
+    export_agentic_benchmark,
+    load_public_agentic_bundle,
+)
+from synthworld.agentic.trace_validation import (
+    TraceValidationReport,
+    validate_trace_jsonl,
+)
 from synthworld.connection_generator import (
     generate_adversarial_connection_benchmark,
     generate_relationship_connection_benchmark,
@@ -60,6 +67,27 @@ from synthworld.serialization import world_to_json
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
+
+    if args.command == "validate":
+        # Its own try block: the existing evaluate handler below guards a different
+        # set of calls, and this path can raise AgenticArtifactError (a ValueError,
+        # not a ValidationError) from checksum verification and UnicodeDecodeError
+        # from a non-UTF-8 predictions file.
+        try:
+            expected = load_public_agentic_bundle().scenario.action_event_ids
+            validation = validate_trace_jsonl(
+                args.predictions.read_text(encoding="utf-8"),
+                expected_event_ids=expected,
+            )
+        except (OSError, UnicodeDecodeError, ValueError) as error:
+            print(str(error), file=sys.stderr)
+            return 1
+
+        if args.json:
+            print(validation.model_dump_json(indent=2))
+        else:
+            print(_validation_summary(validation))
+        return 0 if validation.valid else 1
 
     if args.command == "evaluate":
         try:
@@ -359,6 +387,27 @@ def _parser() -> argparse.ArgumentParser:
     )
     generate_agentic.add_argument("--output", type=Path, required=True)
 
+    validate = subparsers.add_parser(
+        "validate",
+        help="check a submission's shape before scoring, without answer-key truth",
+    )
+    validate.add_argument(
+        "task",
+        choices=["agentic-trace"],
+        help="artifact to validate",
+    )
+    validate.add_argument(
+        "--predictions",
+        type=Path,
+        required=True,
+        help="path to the observed-action JSONL file to check",
+    )
+    validate.add_argument(
+        "--json",
+        action="store_true",
+        help="print the machine-readable report instead of a human summary",
+    )
+
     evaluate = subparsers.add_parser(
         "evaluate",
         help="evaluate system predictions against separate truth",
@@ -407,6 +456,47 @@ def _add_world_arguments(parser: argparse.ArgumentParser) -> None:
 
 def _add_seed_argument(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--seed", type=int, default=20_260_719)
+
+
+def _validation_summary(report: TraceValidationReport) -> str:
+    """Render a validation report as a terminal diagnostic.
+
+    Human-readable is the default here, inverting ``evaluate``, which prints JSON
+    unless asked for a table. The reasoning is that an evaluation report is a record
+    to keep, whereas this output is read once to find a broken line - and automation
+    should branch on the exit code rather than parse either form.
+    """
+
+    verdict = "valid" if report.valid else "invalid"
+    lines = [
+        f"agentic-trace: {verdict}",
+        (
+            f"rows {report.row_count}, "
+            f"expected actions {report.expected_action_count}, "
+            f"{report.error_count} errors, {report.warning_count} warnings"
+        ),
+    ]
+    if not report.issues:
+        return "\n".join(lines)
+    severities = [item.severity for item in report.issues]
+    locations = [
+        "-" if item.line is None else f"line {item.line}" for item in report.issues
+    ]
+    codes = [item.code for item in report.issues]
+    widths = (
+        max(len(cell) for cell in severities),
+        max(len(cell) for cell in locations),
+        max(len(cell) for cell in codes),
+    )
+    for item, severity, location, code in zip(
+        report.issues, severities, locations, codes, strict=True
+    ):
+        subject = f"{item.event_id}: " if item.event_id is not None else ""
+        lines.append(
+            f"{severity.ljust(widths[0])}  {location.ljust(widths[1])}  "
+            f"{code.ljust(widths[2])}  {subject}{item.message}"
+        )
+    return "\n".join(lines)
 
 
 def _metric_table(report: EvaluationReport) -> str:
