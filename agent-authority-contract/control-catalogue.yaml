@@ -28,26 +28,46 @@
 #   expected_truth         Exact evaluator-side fields the observation is judged
 #                          against. Verbatim.
 #   failure_slices         Exact AgenticCaseKind values that exercise this control
-#                          in the frozen fixture (FailureSlice dimension="case_kind").
+#                          in the frozen fixture. NOTE: the scorer emits a
+#                          FailureSlice only for the 13 per-action `checks` metrics.
+#                          The 7 metrics built with a literal name= - both C12
+#                          metrics, C09's temporal metric, provenance_precision and
+#                          the three decision-rate metrics - produce NO slices, so
+#                          for those controls this list records which cases exercise
+#                          the invariant, not which cases the scorer slices.
 #   authority_failure_reasons  Exact AuthorityFailureReason values in scope.
 #   applicable_patterns    Pattern classes under test. Classes, not products.
 #   external_mappings      Clause-level references, each carrying its own status.
 #   core_limitations       What this control cannot prove without networked execution.
 #   lab_extension          The experiment that completes it.
 #
-# mapping_status vocabulary
+# mapping_status vocabulary - SEMANTIC COVERAGE ONLY
 #   informative  The source discusses the area but states no testable obligation.
 #   partial      The source states an obligation covering part of the invariant.
 #   unresolved   Sources disagree, or no source addresses it. Do not imply consensus.
 #   superseded   The mapped clause has been replaced; re-pin before citing.
 #
+# mapping_status describes how much of the invariant a clause covers. It must NOT
+# be used to encode how mature or authoritative the source is - conflating the two
+# produced a real inconsistency in 0.1.0-draft, where CB4A clauses were forced to
+# `informative` for being an individual draft while KLRC clauses (also an
+# individual draft) were allowed `partial`. Source maturity is recorded separately.
+#
+#   source_maturity  rfc | wg-draft | individual-draft | vendor-spec | agency-pub
+#
+# A clause may be `partial` coverage from an `individual-draft`: that combination
+# says "this text states a real obligation, and the text has no standing yet".
+# Both facts matter and neither substitutes for the other.
+#
 # Sources are pinned by revision and retrieval date so drift is visible. Re-pin
 # every mapping before any external publication that cites it.
 #
 #   CB4A          draft-hartman-credential-broker-4-agents-00, 2026-03-29,
-#                 individual I-D, Informational, no IETF standing.
-#                 EXPIRES 2026-09-30 - every CB4A mapping is `informative` and
-#                 must be re-checked before that date.
+#                 individual-draft, Informational, no IETF standing.
+#                 EXPIRES 2026-09-30. Expiry does not make the pinned -00 revision
+#                 unreadable - archived I-Ds remain retrievable and their contents
+#                 are immutable - but it does end active status, so re-check for a
+#                 -01 or a WG replacement before citing it in anything published.
 #   WIMSE-ARCH    draft-ietf-wimse-arch-08, 2026-07-06. WIMSE WG document.
 #   KLRC          draft-klrc-aiagent-auth-03, 2026-07-06. Individual I-D, not
 #                 IETF-endorsed. Authors: Kasselman (Defakto Security), Lombardo
@@ -70,9 +90,10 @@
 # nothing about a credential distribution point. Do not attribute CDP to NIST.
 
 meta:
-  catalogue_version: "0.1.0-draft"
+  catalogue_version: "0.2.0-draft"
   status: skeleton
   created: 2026-07-29
+  revised: 2026-07-29
   sources_retrieved: 2026-07-29
   repin_before: 2026-09-30          # CB4A expiry; re-verify all mappings by then
   benchmark_under_description: asteria-agentic-v1
@@ -83,10 +104,35 @@ meta:
     action_attempts: 11
     labelled_cases: 11              # one per AgenticCaseKind member
   notes: >-
-    Skeleton. Invariants and layer assignments are settled; external_mappings are
-    first-pass and several are deliberately marked unresolved rather than forced.
-    No control here has been reviewed by an implementation owner yet, and nothing
-    in this file constitutes a comparative or vendor claim.
+    Skeleton. No control here has been reviewed by an implementation owner, and
+    nothing in this file constitutes a comparative or vendor claim.
+  revision_notes: >-
+    0.2.0-draft applies an adversarial review (2026-07-29) whose central finding
+    was that several invariants were written as claims about enforcement or
+    establishment while the attached metric only compared a reported field against
+    truth. Seven statuses moved from supported to partial as a result (C02, C04,
+    C07, C08, C09, C11, C14) and only C06, C10 and C12 remain scored close to what
+    they assert. Two controls were added for gaps with no field to carry them
+    (C15 trusted issuance and credential-to-grant binding, C16 principal intent and
+    parameter integrity), three invariants were rewritten to stop naming a specific
+    architecture (C02, L03, L05), one was de-vacuumed (L06 - the latency bound must
+    now be declared before the run), and L07 lost its security_invariant because
+    reporting performance is not a condition that can be violated. mapping_status
+    was separated from source_maturity after the review showed the two had been
+    conflated. Eleven mappings were downgraded, corrected or removed for claiming
+    more than the cited clause states. Claims asserted by the review but not yet
+    checked at source are marked UNVERIFIED and must be pinned or dropped before
+    any external publication.
+  known_scoring_gaps: >-
+    Verified 2026-07-29 against the running scorer. C11's expected_policy_version is
+    copied from the public attempt, so echoing the requested version scores 1.0.
+    C08's four required evidence refs are derivable from public data, so a system
+    retaining nothing can score 1.0. C09's metric covers three case kinds while
+    four actually diverge between action and audit, and one of its three
+    (post_revocation_action) does not diverge at all - so two diverging cases are
+    unscored. credential_invalid and policy_version_mismatch are reachable in the
+    oracle but fire in no labelled case. These are the concrete acceptance targets
+    for the generated world in issue #27.
 
 controls:
 
@@ -123,14 +169,23 @@ controls:
           justification text for approval decisions"; it exists for post-incident
           reconstruction. Naming convention only, not a binding obligation.
       - source: WIMSE-ARCH
+        source_maturity: wg-draft
         clause: "S3.4.6 originating entity; S3.4.11 autonomous vs delegated"
-        mapping_status: partial
+        mapping_status: informative
+        note: >-
+          Downgraded from partial after review: S3.4.6 describes permissive context
+          propagation, not an obligation that origin be system-established.
       - source: KLRC
+        source_maturity: individual-draft
         clause: "S10.3 principal conveyed in sub"
         mapping_status: partial
       - source: RFC9068
-        clause: "S2.2.2"
+        source_maturity: rfc
+        clause: "S2.2 sub"
         mapping_status: partial
+        note: >-
+          Corrected from S2.2.2, which is the optional identity-claims subsection;
+          sub is defined in S2.2.
     core_limitations: >-
       Cannot prove the principal was cryptographically bound rather than
       self-asserted. In the frozen fixture ActionAttempt.originating_principal_claim
@@ -144,11 +199,13 @@ controls:
   - control_id: SW-AA-C02
     title: Logical-agent and runtime binding
     security_invariant: >-
-      The system distinguishes the stable logical agent from the concrete runtime
-      instance executing it, and authority granted to the agent is exercisable
-      only by a runtime legitimately bound to that agent.
+      An action identifies both the agent that holds the authority and the concrete
+      instance that executed it, and authority is denied to an instance not bound
+      to that agent. Whether those are one identifier or two is a deployment
+      choice; what the invariant requires is that the executing instance be
+      determinable, not that a particular identity scheme be used.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - logical_agent_resolution_accuracy
       - runtime_binding_accuracy
@@ -180,11 +237,22 @@ controls:
           identity separate from the runtime instance. Genuine standards gap -
           report it as such rather than claiming conformance either way.
       - source: WIMSE-ARCH
+        source_maturity: wg-draft
         clause: "S3.1.2, S3.1.3"
-        mapping_status: partial
+        mapping_status: informative
+        note: >-
+          Downgraded from partial: S3.1.2 makes logical-versus-instance semantics
+          deployment-defined rather than obligatory, so it cannot be cited as an
+          obligation supporting this invariant.
     core_limitations: >-
       Runtime identity is a declared principal, never attested. The invariant is
       checked over records; nothing proves the runtime is what it claims to be.
+      The two cited metrics compare reported identifiers against truth - they
+      establish correct reporting, not that authority was withheld from an
+      unbound instance. The denial half of the invariant is carried by the
+      decision (SW-AA-C06) via wrong_runtime, not by these metrics. Status is
+      `partial` for that reason: reporting is scored directly, enforcement only
+      inferred from the decision.
     lab_extension: >-
       Exercise a valid credential from an unauthorised runtime against a live
       enforcement point and confirm rejection, with attestation in the loop.
@@ -221,9 +289,14 @@ controls:
         mapping_status: partial
         note: Sender-constraint mechanism; core can model the binding, not verify the proof.
       - source: WIMSE-ARCH
+        source_maturity: wg-draft
         clause: "S4.3 workload identity binding to tokens"
-        mapping_status: partial
+        mapping_status: informative
+        note: >-
+          Downgraded from partial: S4.3 says binding MAY restrict presenters, which
+          is permissive rather than obligatory.
       - source: CB4A
+        source_maturity: individual-draft
         clause: "S4.5"
         mapping_status: informative
     core_limitations: >-
@@ -247,7 +320,7 @@ controls:
       delegation widens resources, actions, scopes, purpose, or validity window,
       and only a principal itself authorised to delegate may create one.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - delegation_chain_integrity
     required_observations:
@@ -284,12 +357,23 @@ controls:
         clause: "S4.3 PDP output - scope constraints may narrow requested scope"
         mapping_status: informative
       - source: ID-JAG
-        clause: "cross-domain identity assertion grant"
+        source_maturity: wg-draft
+        clause: "S4.1 local narrowing and rejection; S9.7 actor-token processing left to future profiles (UNVERIFIED)"
         mapping_status: informative
+        note: >-
+          Replaced a non-clause-level citation ("cross-domain identity assertion
+          grant") after review. Section numbers asserted by that review and not
+          yet checked at source; S9.7 is cited as an explicit LIMITATION - the
+          draft defers actor-token processing - rather than as support.
     core_limitations: >-
       Attenuation is verified over delegation records, never enforced by an issued
       token. Cannot prove a real authorization server would refuse to mint the
-      widened credential.
+      widened credential. More importantly, the one attached metric scores only
+      whether the chain was REPORTED correctly: the oracle applies the attenuation
+      rule when constructing truth, but a system that reports the right chain and
+      an erroneous allow still passes this metric - the error surfaces via
+      SW-AA-C06 and SW-AA-C12 instead. Status `partial` because the invariant's
+      substance is enforced by the oracle, not tested by this control's metric.
     lab_extension: >-
       Request a credential exceeding the delegated capability from a live issuer
       and confirm refusal; attempt chain-splicing between hops.
@@ -321,16 +405,24 @@ controls:
         clause: "S4.2 target.{service,action,resource,scope}; S4.3 scope granularity"
         mapping_status: informative
       - source: RFC8693
+        source_maturity: rfc
         clause: "S4.2 scope; S2.1"
-        mapping_status: partial
+        mapping_status: informative
+        note: >-
+          Downgraded from partial: S4.2 defines how a scope claim is represented,
+          not an obligation to deny excess resource, action or purpose.
       - source: MCP-AUTHZ
+        source_maturity: vendor-spec
         clause: 'headings "Resource Parameter Implementation" and "Token Handling"'
         mapping_status: partial
         note: >-
           Cite by heading; the 2026-07-28 revision does not render section
           numbers. Requires servers to validate audience per RFC 8707 S2 and
-          MUST NOT accept or transit other tokens.
+          MUST NOT accept or transit other tokens. Applicability limits: the
+          profile is HTTP-specific, authorization is optional in MCP, and it
+          addresses resource and audience only - nothing about action or purpose.
       - source: NIST-ZTA
+        source_maturity: agency-pub
         clause: "S3"
         mapping_status: informative
     core_limitations: >-
@@ -398,7 +490,7 @@ controls:
       Every action names the actor to whom it is attributed and the accountable
       owner chain reaching a responsible human or organisational principal.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - attribution_integrity
       - accountable_owner_chain_integrity
@@ -437,7 +529,11 @@ controls:
     core_limitations: >-
       Attribution is a modelled join, not a signed statement. v1 cannot
       disambiguate the runtime-path actor from the credential-path actor; it
-      constrains the answer to those two candidates.
+      constrains the answer to those two candidates, so attribution_integrity
+      scores agreement with a choice the evaluator made between two equally valid
+      readings rather than a fact about the world. That is why the status is
+      `partial` even though accountable_owner_chain_integrity is a genuinely
+      structural check with derived, acyclicity-validated truth.
     lab_extension: >-
       Confirm the deployed stack emits attribution that survives to the audit
       sink, and that ambiguity between candidate actors is detectable there.
@@ -453,7 +549,7 @@ controls:
       authority decision later, is neither incomplete nor fabricated, and the
       system reports honestly when reconstruction is no longer possible.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - provenance_completeness
       - provenance_exact_match
@@ -483,10 +579,16 @@ controls:
         clause: "S3 - the policy engine makes and logs the decision"
         mapping_status: informative
     core_limitations: >-
-      Evidence is a reference set, not a tamper-evident log. Completeness and
-      fabrication are separable here (subset recall vs micro-precision), but
-      integrity of the log itself is not testable offline. A null evidence_refs
-      is scored as missing capture, never as an empty set.
+      Evidence is a reference set of synthesised identifier strings, not content
+      and not a tamper-evident log. The decisive limitation: the four required refs
+      are derivable from public data alone, so a system that computes the expected
+      identifiers without retaining any evidence scores 1.0 on all four metrics.
+      Completeness and over-claiming are separable (subset recall vs
+      micro-precision), but authenticity, tamper evidence, and genuine
+      reconstructive sufficiency are absent from core entirely - hence `partial`,
+      not `supported`. Note also that required_evidence_refs contains no reference
+      to the revocation event, the decision record, or the action event itself.
+      A null evidence_refs is scored as missing capture, never as an empty set.
     lab_extension: >-
       Verify hash chaining and fail-closed logging in a deployed pipeline; kill
       the audit sink mid-run and confirm the system fails closed rather than
@@ -499,7 +601,7 @@ controls:
       correct at the time of the action, and separately the decision that current
       state would produce, without substituting one for the other.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - temporal_validity_accuracy
     required_observations:
@@ -528,10 +630,19 @@ controls:
           design - the repository's own summary of it is "final audit state cannot
           replace historical replay".
     core_limitations: >-
-      Scored only over cases where state actually changed between action and
-      audit (valid_then_revoked, post_revocation_action,
-      invalid_then_later_granted); a system with no temporal cases is unscored
-      rather than passing.
+      The metric's case scope and the set of genuinely diverging cases do not
+      coincide, which weakens this control more than it first appears. In the
+      frozen fixture four cases diverge between action and audit -
+      authorised_action (allow then deny), valid_then_revoked (allow then deny),
+      incorrect_attribution (allow then deny) and invalid_then_later_granted
+      (deny then allow) - but temporal_validity_accuracy is restricted to
+      valid_then_revoked, post_revocation_action and invalid_then_later_granted.
+      So one of its three cases does not diverge at all (post_revocation_action is
+      deny then deny, trivially passable by echoing the action decision) while two
+      genuinely diverging cases are outside any metric, since decision_at_audit is
+      scored nowhere else. Errors on those two are unscored. Widening the scope, or
+      scoring decision_at_audit across all actions, is a prerequisite before this
+      control may be reported as supported.
     lab_extension: >-
       Mutate policy or revoke mid-run, then ask the deployed audit surface to
       justify an earlier action and compare against replay truth.
@@ -541,12 +652,13 @@ controls:
   # ---------------------------------------------------------------------------
 
   - control_id: SW-AA-C10
-    title: Tenant coherence
+    title: Tenant and organisation coherence
     security_invariant: >-
-      Principal, agent, and resource belong to the same tenant boundary; identical
-      identifiers in another tenant confer no authority.
+      The principal, the agent, and the resource involved in an action fall within
+      one isolation boundary, and an identifier that is valid in one boundary
+      confers no authority in another.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics: []
     required_observations:
       - decision
@@ -559,16 +671,37 @@ controls:
       - tenant_mismatch
     applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
     external_mappings:
-      - source: NONE
-        clause: "n/a"
+      - source: WIMSE-ARCH
+        source_maturity: wg-draft
+        clause: "S3.1.1 trust-domain scoping of workload identifiers (UNVERIFIED)"
         mapping_status: unresolved
         note: >-
-          Multi-tenant confusion is widely acknowledged as a risk but is not a
-          clause-level obligation in the mapped sources.
+          Candidate mapping raised by external review 2026-07-29; the clause number
+          has NOT been checked at source. Pin or drop before citing. Recorded here
+          rather than silently omitted because the previous "no source addresses
+          this" claim was almost certainly too strong - trust-domain scoping is
+          exactly this invariant at the workload-identity layer.
+      - source: ID-JAG
+        source_maturity: wg-draft
+        clause: "S6 tenant-scoped identifiers and same-identifier rules (UNVERIFIED)"
+        mapping_status: unresolved
+        note: Same caveat - asserted by review, not yet verified at source.
     core_limitations: >-
-      Scored indirectly through the decision, since ObservedActionTrace carries no
-      failure-reason field - see SW-AA-C13. A system can be right about the
-      denial while wrong about the tenant reason and lose no points.
+      Two distinct weaknesses, both reasons this is `partial` rather than
+      `supported`. First, scoring: there is no metric for this control. It is
+      observable only through the decision, and since ObservedActionTrace carries no
+      failure-reason field (SW-AA-C13) a system can be right about the denial and
+      wrong about why, losing nothing. Second, granularity: the invariant speaks of
+      an isolation boundary, but the oracle compares organisation_id. Organisation
+      carries a tenant_id field that no authority logic reads - it is set by the
+      generator and otherwise inert. In the frozen fixture organisations and
+      tenants happen to be one-to-one, so the two readings coincide; in a generated
+      world with several organisations per tenant they would not, and same-tenant
+      traffic would be denied as cross-boundary. Additionally, entity identifiers
+      are globally unique within their collections, so the invariant's
+      "same identifier in another boundary" case cannot currently be represented at
+      all. Resolving whether the boundary is the organisation or the tenant is a
+      prerequisite for issue #27.
     lab_extension: >-
       Drive identical identifiers across two live tenants and confirm isolation
       at the enforcement point and in the audit trail.
@@ -579,7 +712,7 @@ controls:
       The action is evaluated against a known policy version, and the version used
       is recorded with the decision.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - policy_version_accuracy
     required_observations:
@@ -592,24 +725,32 @@ controls:
     applicable_patterns: [proxy-injection, short-lived-minting]
     external_mappings:
       - source: KLRC
+        source_maturity: individual-draft
         clause: "S11 audit list includes posture and risk state"
         mapping_status: informative
-      - source: NIST-ZTA
-        clause: "S3 policy engine and policy administrator"
-        mapping_status: informative
+    # A NIST-ZTA S3 mapping was removed after review: S3 describes the policy
+    # engine and policy administrator split and contains no requirement to record
+    # which policy version a decision used.
     core_limitations: >-
-      policy_version_mismatch never fires in the frozen fixture - the reason is
-      reachable in the oracle but unexercised by any labelled case. Fixture gap
-      for issue #27.
+      The metric is close to trivial as it stands: expected_policy_version is
+      copied verbatim from the public attempt's policy_version when truth is
+      built, so a system that echoes the value it was given scores 1.0 without
+      demonstrating that the version was used in the decision. Separately,
+      policy_version_mismatch never fires in the frozen fixture - reachable in the
+      oracle, unexercised by any labelled case. Both are fixture and scoring gaps
+      for issue #27; the control cannot be reported as supported until the
+      reported version is checked against the version actually in force rather
+      than the version requested.
     lab_extension: >-
       Change policy version mid-run and confirm the deployed decision point binds
       the correct version into its record.
 
   - control_id: SW-AA-C12
-    title: No excess authority
+    title: No false allow over attempted denials
     security_invariant: >-
-      No action that should be denied is allowed. Measured as a rate over the deny
-      population rather than folded into overall accuracy.
+      No action that should be denied is allowed. Reported as a rate over the
+      population of actions that should be denied, so that it cannot be diluted by
+      correct allows.
     evaluation_layer: core
     asteria_v1_status: supported
     metrics:
@@ -626,6 +767,7 @@ controls:
       - shared_credential
       - post_revocation_action
       - cross_tenant_confusion
+      - invalid_then_later_granted
     applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
     external_mappings:
       - source: KLRC
@@ -635,8 +777,20 @@ controls:
         clause: "S2 least privilege per-request access"
         mapping_status: informative
     core_limitations: >-
-      A deny-everything system scores perfectly here. This control is only
-      meaningful read alongside SW-AA-C06's recall - never report it alone.
+      A deny-everything system scores perfectly here, so this control is only
+      meaningful read alongside SW-AA-C06's recall - never report it alone. The two
+      cited metrics are exact complements computed from the same false-allow count,
+      so they are one measurement presented two ways, not two pieces of evidence.
+      Renamed from "No excess authority" after review: this control does NOT test
+      least privilege in the usual sense, because it cannot detect authority that
+      was granted but never exercised - over-broad grants and credentials belong to
+      SW-AA-C04, SW-AA-C05 and SW-AA-C15. The scorer's metric name
+      `least_privilege_accuracy` is therefore misleading and should be treated as
+      denial correctness; renaming it would be a scoring-protocol change.
+      SW-AA-C06, SW-AA-C09 and this control are three views on one decision axis
+      rather than independent controls: C06 owns the action-time decision, C09 the
+      audit-time decision, and this control the false-allow rate over denials.
+      Report them together.
     lab_extension: >-
       Confirm the deployed enforcement point actually blocks, rather than logs,
       the actions it denies.
@@ -657,9 +811,13 @@ controls:
     applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
     external_mappings:
       - source: KLRC
+        source_maturity: individual-draft
         clause: "S11 audit list includes action and decision"
-        mapping_status: partial
-        note: Decision is required; a structured reason is not.
+        mapping_status: informative
+        note: >-
+          Downgraded from partial: S11 mandates recording the action and the
+          decision, but says nothing about recording which authority condition
+          failed - which is the whole substance of this control.
     core_limitations: >-
       Evaluator truth already carries ordered failure reasons for every action,
       but ObservedActionTrace has no field to receive them, so nothing is scored.
@@ -677,7 +835,7 @@ controls:
       The recorded effect of an action matches what the action actually did, and a
       denied action records no effect.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - expected_side_effect_accuracy
     required_observations:
@@ -686,17 +844,108 @@ controls:
       - AuthorityTruth.expected_side_effect
     failure_slices: []
     applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
-    external_mappings:
-      - source: CB4A
-        clause: "S4.7 event_type enum"
-        mapping_status: informative
+    external_mappings: []
+    # A CB4A S4.7 event_type mapping was removed after review: an audit event-type
+    # enumeration says nothing about whether a recorded effect matches reality,
+    # which is what this invariant is about. No mapped source addresses it.
     core_limitations: >-
-      The side-effect vocabulary is closed and derived from the action name; deny
-      yields the literal "none". Core proves the system's claim is consistent with
-      the declared model, not that the world actually changed that way.
+      The invariant as written ("matches what the action actually did") is not what
+      is scored, which is why the status is `partial`. Expected truth is a label
+      derived deterministically from the action name, with the literal "none" on
+      deny; nothing observes a real state change. Core establishes only that the
+      system's declared effect is consistent with the declared model. The case that
+      matters operationally - denied but mutated anyway - is invisible here and
+      belongs to the lab extension.
     lab_extension: >-
       Compare the declared side effect against the target service's real state
       change - the deny-but-mutated case is the one that matters.
+
+  # ---------------------------------------------------------------------------
+  # CORE - gaps identified by adversarial review 2026-07-29. Both are `absent`
+  # because the data model has no field to carry them, so both imply a schema
+  # change rather than only a new metric. Listed so the gaps are visible.
+  # ---------------------------------------------------------------------------
+
+  - control_id: SW-AA-C15
+    title: Trusted issuance and credential-to-grant binding
+    security_invariant: >-
+      A credential used to exercise authority was issued by a party entitled to
+      issue it, and conveys no more authority than the grant it derives from -
+      bound to that grant, and to the intended audience, resource, and scope.
+    evaluation_layer: core
+    asteria_v1_status: absent
+    metrics: []
+    required_observations: []
+    expected_truth: []
+    failure_slices: []
+    authority_failure_reasons:
+      - credential_invalid
+    applicable_patterns: [short-lived-minting, proxy-injection, bearer-baseline]
+    external_mappings:
+      - source: RFC8693
+        source_maturity: rfc
+        clause: "S2.1 resource/audience/scope in the exchange request"
+        mapping_status: partial
+      - source: RFC9068
+        source_maturity: rfc
+        clause: "S2.2 aud, iss"
+        mapping_status: partial
+      - source: CB4A
+        source_maturity: individual-draft
+        clause: "S4.3 PDP output constraints"
+        mapping_status: informative
+    core_limitations: >-
+      Nothing in v1 joins the credential to the delegation. Credential carries
+      issuer_principal_id, subject_principal_id, allowed_runtime_principal_ids and
+      a validity window - and no audience, no resource, no scopes, and no
+      delegation reference. Issuance is validated only for referential integrity
+      (the issuer must exist), never for entitlement, so any known principal may
+      issue a credential the oracle then treats as valid. Authorisation selects a
+      delegation independently of the presented credential, so the two are never
+      required to agree: a credential minted for one grant can be presented for an
+      action authorised under a different one. Closing this needs new model fields
+      before any metric, and is the largest single gap in the core layer.
+    lab_extension: >-
+      Request a credential exceeding the grant from a live issuer and confirm
+      refusal; present a correctly-issued credential to the wrong audience.
+
+  - control_id: SW-AA-C16
+    title: Principal intent, approval and parameter integrity
+    security_invariant: >-
+      The action performed is the action the principal actually authorised,
+      including its material parameters. An approval covers one specific action and
+      cannot be replayed against a different resource, amount, or counterparty.
+    evaluation_layer: core
+    asteria_v1_status: absent
+    metrics: []
+    required_observations: []
+    expected_truth: []
+    failure_slices: []
+    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    external_mappings:
+      - source: KLRC
+        source_maturity: individual-draft
+        clause: "S10.7 confirmation distinguished from authorisation, bound to a verifiable grant (UNVERIFIED)"
+        mapping_status: partial
+        note: >-
+          Clause raised by external review 2026-07-29 and not yet checked at
+          source; pin before citing. If accurate it is the closest thing in any
+          mapped source to this invariant.
+    core_limitations: >-
+      Absent by construction: ActionAttempt models action, resource_id,
+      requested_scope and purpose, but carries no transaction parameters and no
+      digest of an approved payload. An action approved as "transfer 10" and
+      executed as "transfer 10,000" is therefore indistinguishable to the oracle,
+      because both share the same action name, resource and scope. Purpose is the
+      nearest existing field and is a single constant across the whole fixture.
+      This is the control most likely to matter to a reviewer from a payments or
+      procurement background, and the honest answer today is that neither the
+      benchmark nor - on the evidence of the mapped sources - the standards work
+      addresses it.
+    lab_extension: >-
+      Approve a low-value operation, then attempt a high-value one under the same
+      approval; confirm the enforcement point rebinds approval to exact parameters
+      and requires reauthorisation after any material change.
 
   # ---------------------------------------------------------------------------
   # LAB - requires networked execution. Nothing below is testable offline, and
@@ -740,7 +989,11 @@ controls:
         mapping_status: informative
     core_limitations: >-
       Core models reuse symbolically through the shared_credential case; it cannot
-      falsify sender-constraint enforcement.
+      falsify sender-constraint enforcement. Note the partial overlap with
+      SW-AA-C03: runtime binding and expiry ARE decided offline there, so only
+      genuine target-side rejection, audience behaviour and proof-of-possession
+      verification need the lab. Keep the split at that line rather than treating
+      the whole of credential validity as lab-only.
     lab_extension: >-
       Replay a captured token from an unbound client and from a different audience
       against a live target.
@@ -748,8 +1001,10 @@ controls:
   - control_id: SW-AA-L03
     title: Direct-path enforcement bypass
     security_invariant: >-
-      The agent cannot reach the protected resource except through the enforcement
-      point.
+      Every path by which the agent can reach the protected resource is subject to
+      authority enforcement. Where enforcement sits - in front of the resource, at
+      the resource itself, or at several points - is a deployment choice; the
+      invariant is that no reachable path escapes it.
     evaluation_layer: lab
     asteria_v1_status: out-of-scope-core
     applicable_patterns: [proxy-injection]
@@ -783,24 +1038,34 @@ controls:
       assumption in the run manifest either way.
 
   - control_id: SW-AA-L05
-    title: Broker compromise and fail-closed behaviour
+    title: Authority-critical dependency failure
     security_invariant: >-
-      Failure or compromise of the decision point, credential distribution point,
-      vault, or audit sink denies sensitive actions rather than permitting them.
+      Failure or compromise of any dependency the authority decision relies on
+      causes sensitive actions to be denied rather than permitted. The set of
+      authority-critical dependencies is declared per architecture and recorded in
+      the run manifest; the invariant is fail-closed behaviour across all of them,
+      not the presence of any particular component.
     evaluation_layer: lab
     asteria_v1_status: out-of-scope-core
-    applicable_patterns: [proxy-injection, short-lived-minting]
+    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
     external_mappings:
       - source: CB4A
+        source_maturity: individual-draft
         clause: "S4.7 log pipeline failures MUST trigger fail-closed behavior"
         mapping_status: informative
-      - source: KLRC
-        clause: "S11"
-        mapping_status: informative
+        note: >-
+          Narrow: covers audit-pipeline failure only, not degradation of the
+          decision path. Review asserts a broader component-degradation table at
+          S4.9; UNVERIFIED, pin before citing.
+    # Renamed from "Broker compromise and fail-closed behaviour" after review: the
+    # previous invariant enumerated a decision point, credential distribution
+    # point, vault and audit sink, which is one specific architecture written into
+    # a control - exactly what this file forbids. A KLRC S11 mapping was also
+    # removed; it has no component-failure rule.
     core_limitations: >-
       PolicyVersion.default_decision = deny and require_active_delegation = True
-      are declared in the model but never exercised - no fixture case removes the
-      decision point.
+      are declared in the model but never exercised - no fixture case removes a
+      dependency.
     lab_extension: >-
       Kill the PDP, the vault, and the audit sink independently mid-run and record
       the resulting decision for each.
@@ -809,7 +1074,8 @@ controls:
     title: Revocation propagation latency
     security_invariant: >-
       Revocation takes effect at every enforcement point, including in-flight
-      requests and child delegations, within a stated bound.
+      requests and child delegations, within a bound declared before the run.
+      A bound chosen after seeing the measurement is not a bound.
     evaluation_layer: lab
     asteria_v1_status: out-of-scope-core
     applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
@@ -830,8 +1096,14 @@ controls:
 
   - control_id: SW-AA-L07
     title: Operational availability and performance
-    security_invariant: >-
-      Added latency, failure rate, and throughput under load are recorded.
+    reporting_obligation: >-
+      Added latency, failure rate, and throughput under load are measured and
+      reported alongside conformance results.
+    # Deliberately has no security_invariant: this is a property to report, not a
+    # condition that can be satisfied or violated. The 0.1.0-draft version stated
+    # an "invariant" that recording happens and then immediately said it was not a
+    # security property - incoherent, so the field is renamed for operational
+    # controls rather than pretending otherwise.
     evaluation_layer: operational
     asteria_v1_status: out-of-scope-core
     applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
@@ -841,16 +1113,25 @@ controls:
 
   - control_id: SW-AA-L08
     title: Target-service compatibility
-    security_invariant: >-
-      The pattern is achievable against the target services as they actually
-      exist, including those that cannot mint narrow credentials.
+    reporting_obligation: >-
+      For each target service, the narrowest authority actually obtainable is
+      recorded, including where a service cannot mint narrow credentials at all.
+      Reported as a compatibility limitation of the deployment, never as a security
+      failure of the pattern.
+    # No security_invariant, for the same reason as SW-AA-L07: what a target service
+    # happens to support is a fact to record, not a condition a system can violate.
     evaluation_layer: operational
     asteria_v1_status: out-of-scope-core
     applicable_patterns: [short-lived-minting, proxy-injection]
     external_mappings:
       - source: MCP-AUTHZ
+        source_maturity: vendor-spec
         clause: 'heading "Token Handling"'
-        mapping_status: partial
+        mapping_status: informative
+        note: >-
+          Downgraded from partial: the heading covers token validation and audience,
+          and says nothing about whether a target can mint narrowly scoped
+          credentials or whether a deployment pattern is achievable against it.
     core_limitations: >-
       Core models resource actions and tool schemas but cannot establish what a
       real API will accept. This is the practical limit of short-lived minting:
