@@ -27,6 +27,45 @@ SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
 
 BASE_ID = "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas"
 
+# Pydantic emits {"format": "date-time"} for tz-aware datetimes, but `format` is an
+# ANNOTATION in JSON Schema 2020-12, not an assertion: a conformant validator is free
+# to ignore it, and `jsonschema`'s FormatChecker still does not check `date-time`
+# unless the optional rfc3339-validator package is installed. Verified consequence:
+# without a pattern, the published schema accepts "not-a-date", a naive timestamp, and
+# a non-UTC offset - all of which the model rejects. An adapter author validating
+# against this file would be told those are fine and then have the scorer reject them,
+# which is exactly the failure this package exists to prevent.
+#
+# `pattern` IS an assertion everywhere, so it is added to close the gap. The regex
+# admits precisely the forms the model accepts (verified): a UTC designator of Z,
+# +00:00 or -00:00, with optional fractional seconds.
+_UTC_TIMESTAMP_PATTERN = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]00:00)$"
+
+
+def _assert_utc_timestamps(schema: dict[str, Any]) -> dict[str, Any]:
+    """Add an asserted UTC pattern to every date-time string branch.
+
+    Narrows the projection so the schema enforces what the model's timezone
+    validator enforces, rather than merely annotating it.
+    """
+    properties = schema.get("properties")
+    if not isinstance(properties, dict):
+        # Reached for enum sub-definitions such as Decision, which have no properties.
+        return schema
+    for definition in properties.values():
+        branches = definition.get("anyOf") if isinstance(definition, dict) else None
+        if not isinstance(branches, list):
+            continue
+        for branch in branches:
+            if (
+                isinstance(branch, dict)
+                and branch.get("type") == "string"
+                and branch.get("format") == "date-time"
+            ):
+                branch["pattern"] = _UTC_TIMESTAMP_PATTERN
+    return schema
+
+
 ROW_DESCRIPTION = """\
 One system-under-test observation of one attempted agent action.
 
@@ -73,14 +112,18 @@ def _decorate(schema: dict[str, Any], name: str, description: str) -> dict[str, 
 
 def build() -> dict[str, dict[str, Any]]:
     """Return the schemas to write, keyed by file stem."""
+    row = _assert_utc_timestamps(ObservedActionTrace.model_json_schema())
+    envelope = AgenticTraceSubmission.model_json_schema()
+    for definition in (envelope.get("$defs") or {}).values():
+        _assert_utc_timestamps(definition)
     return {
         "observed-action-trace": _decorate(
-            ObservedActionTrace.model_json_schema(),
+            row,
             "observed-action-trace",
             ROW_DESCRIPTION,
         ),
         "agentic-trace-submission": _decorate(
-            AgenticTraceSubmission.model_json_schema(),
+            envelope,
             "agentic-trace-submission",
             ENVELOPE_DESCRIPTION,
         ),
