@@ -1,0 +1,142 @@
+# Design-intent assumptions
+
+## What these files are, and what they are not
+
+`examples/idealised-*.jsonl` are **design-intent traces**. Each answers one question:
+if a pattern class were implemented perfectly, what could it make observable?
+
+They are **not measurements**. No software implementing any of these patterns was run.
+No product was tested. No vendor's implementation is represented. Nothing here
+supports a claim that one pattern outperforms another, and any published use of these
+files must say so in the same breath.
+
+What they do support is a **coverage** argument, which is a different and weaker claim
+than performance: patterns differ in what they can observe at all, and a field a
+pattern structurally cannot observe is emitted as `null` — scored as a miss, honestly.
+So the shape of the nulls exposes each pattern's ceiling before anyone builds an
+integration, and it does so at the cost of an afternoon rather than a lab.
+
+They are generated, not hand-authored, by
+`tools/generate_design_intent_traces.py`. Change an assumption below and the files
+change. `--check` fails if a committed trace no longer matches its generator.
+
+## The three pattern classes
+
+Named as classes, never as products or drafts. CB4A's Model A and Model B are
+instances of the first and third; the catalogue's `applicable_patterns` field uses
+these same names.
+
+### `static-bearer` — reusable credential held by the agent
+
+The negative control, and roughly what most deployments do today.
+
+| Assumption | Consequence in the trace |
+|---|---|
+| The credential is a reusable token the agent holds and presents directly | `credential_subject_id` is observable |
+| The target service sees a valid credential and an API call, nothing more | `originating_principal_id`, `logical_agent_id`, `runtime_principal_id`, `attributed_actor_id`, `accountable_owner_chain` are all `null` |
+| A bearer token conveys no delegation | `delegation_chain_ids` is `null` |
+| Authorisation rests on the credential being live | the decision ignores revocation, runtime binding, tenancy and scope attenuation |
+| There is no action-time record to replay | `decision_at_audit` repeats the action-time decision, which is the current-state substitution the benchmark exists to detect |
+
+The decision here is computed from public artifacts only — allow when the presented
+credential was issued before the action — so its divergence from truth is *derived*,
+not copied from the answer key.
+
+### `proxy-injection` — the agent never holds the credential
+
+An enforcement point on the egress path authenticates the workload, holds the
+credential, injects it, and evaluates policy.
+
+| Assumption | Consequence |
+|---|---|
+| The enforcement point authenticates the runtime and knows the session's principal | every identity binding is observable |
+| Its decision point evaluates full delegation state at action time | the decision matches a correct authority evaluation |
+| It logs its own decisions | evidence and reconstructability are observable |
+
+**Read its scores with the caveat below.** This pattern scores 1.000 on everything,
+which is an artifact of the assumption "perfectly implemented, with full state", not
+evidence of superiority.
+
+### `short-lived-minting` — narrow credential minted per task
+
+Policy decision separated from credential issuance; the agent receives a
+short-lived, scoped, sender-constrained credential.
+
+| Assumption | Consequence |
+|---|---|
+| The credential carries subject, audience, scope and lifetime | credential and temporal questions answer well |
+| Sender constraint binds it to the runtime that requested it | `runtime_principal_id` is observable |
+| The target service validates a token; it does not read a directory | `delegation_chain_ids`, `attributed_actor_id` and `accountable_owner_chain` are `null` — those are directory facts, not token claims |
+
+The last row is the substantive finding of this exercise. A token can carry authority
+without carrying accountability, and the fields that go null are exactly the ones an
+auditor needs.
+
+## Coverage, scored
+
+Produced by scoring each file with `synthworld evaluate agentic`. Reproduce with the
+snippet at the end of this document.
+
+| metric | proxy-injection | short-lived-minting | static-bearer |
+|---|---|---|---|
+| `authorization_decision_accuracy` | 1.000 | 1.000 | 0.364 |
+| `temporal_validity_accuracy` | 1.000 | 1.000 | 0.333 |
+| `excess_authority_rate` | 0.000 | 0.000 | **1.000** |
+| `principal_resolution_accuracy` | 1.000 | 1.000 | 0.000 |
+| `runtime_binding_accuracy` | 1.000 | 1.000 | 0.000 |
+| `delegation_chain_integrity` | 1.000 | **0.000** | 0.000 |
+| `attribution_integrity` | 1.000 | **0.000** | 0.000 |
+| `accountable_owner_chain_integrity` | 1.000 | **0.000** | 0.000 |
+| `provenance_completeness` | 1.000 | 1.000 | 0.000 |
+| `audit_reconstructability_accuracy` | 1.000 | 1.000 | 0.091 |
+
+Three readings are worth stating explicitly, because a reader will otherwise draw a
+stronger conclusion than the evidence permits.
+
+**`excess_authority_rate` 1.000 for the bearer baseline** means it allows *every*
+action that should have been denied. Not a marginal weakness: the pattern has no
+mechanism for detecting revocation, a wrong runtime, an over-broad sub-delegation, or
+a cross-tenant request, so a perfect implementation of it still allows all of them.
+That is the control's purpose — it establishes what "no authority layer" scores.
+
+**The three zeros for short-lived minting** are the interesting result. It is
+indistinguishable from proxy injection on decisions and temporal correctness, and
+completely blind on delegation provenance, attribution, and accountable ownership.
+A deployment choosing between the two on decision quality alone would not see this
+difference; it appears only when you ask who is answerable afterwards.
+
+**Proxy injection's clean sweep is not a verdict.** Its real limitation is invisible
+in this format: an agent that reaches the target off-path produces *no row at all*,
+so the pattern's central risk shows up as an absent event rather than a wrong value.
+`synthworld validate agentic-trace` would report that as `missing_event_id` — which
+is the honest place to look for it, and it is why `SW-AA-L03` (direct-path
+enforcement bypass) is a lab control that core cannot settle.
+
+## What would make this empirical
+
+Nothing here substitutes for running an implementation. Converting this into evidence
+requires the pieces the execution plan puts in the lab: a deployed system under test
+at a recorded version and configuration, a run manifest binding the result to that
+deployment and its network topology, and the implementation owner accepting the
+configuration as representative. Until then these files are a hypothesis about
+ceilings, useful for deciding what to test first.
+
+## Reproducing the table
+
+```bash
+uv run python agent-authority-contract/tools/generate_design_intent_traces.py --check
+uv run python - <<'PY'
+from pathlib import Path
+from synthworld.agentic import (
+    evaluate_agentic_trace, generate_asteria_agentic_v1, trace_submission_from_jsonl,
+)
+benchmark = generate_asteria_agentic_v1()
+for path in sorted(Path("agent-authority-contract/examples").glob("idealised-*.jsonl")):
+    report = evaluate_agentic_trace(
+        trace_submission_from_jsonl(path.read_text()), benchmark=benchmark
+    )
+    print(path.stem)
+    for metric in report.metrics:
+        print(f"  {metric.name:36} {metric.value}")
+PY
+```

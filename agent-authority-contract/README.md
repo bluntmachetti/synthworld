@@ -10,8 +10,8 @@ read by people and by external tooling, not by the library.
 
 ## Status
 
-Skeleton, with the catalogue and schemas in place and the adapter-facing pieces
-still to come.
+The catalogue, schemas, adapter template and design-intent traces are in place. The
+remaining docs are the two narrative files listed below.
 
 | Component | State |
 |---|---|
@@ -21,9 +21,10 @@ still to come.
 | `schemas/run-manifest.schema.json` | Draft `0.1.0-draft` — hand-authored proposal |
 | `tools/generate_trace_schema.py` | Working; `--check` drift gate runs in `make ci` |
 | `synthworld validate agentic-trace` | Shipped — validates a submission with no answer-key access |
-| `examples/` (design-intent traces) | Not started |
-| `adapter-template/` | Not started |
-| `docs/` | Not started |
+| `examples/` (design-intent traces) | Generated for three pattern classes |
+| `adapter-template/` | Working; runs and produces a valid trace as shipped |
+| `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
+| `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
 the trace contract. The schemas here are a projection of them, not an independent

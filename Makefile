@@ -46,5 +46,6 @@ baselines:
 
 schemas:
 	$(UV) run python agent-authority-contract/tools/generate_trace_schema.py --check
+	$(UV) run python agent-authority-contract/tools/generate_design_intent_traces.py --check
 
 ci: lint typecheck package test metrics examples baselines schemas
