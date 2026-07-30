@@ -86,9 +86,13 @@ submitted set of `event_id` values to equal the benchmark's action-event set
 exactly - no omissions, no duplicates, no extras.
 
 Every field except `event_id` is nullable, and null carries meaning: it asserts
-that the system did not capture that value. Null is scored as a miss, never
-back-filled or ignored, so emitting null is an honest answer rather than a way to
-avoid being wrong. Do not substitute empty strings or empty arrays for null: an
+that the system did not capture that value. On the equality and recall metrics null
+is scored as a miss, never back-filled or ignored, so emitting null is an honest
+answer rather than a way to avoid being wrong. It is not uniformly penalised: a null
+decision records no false allow, so it scores perfectly on least-privilege accuracy -
+read that metric alongside recall rather than alone.
+
+Do not substitute empty strings or empty arrays for null: an
 empty `evidence_refs` array asserts that capture ran and found nothing, whereas
 null asserts that nothing was captured. Asteria v1 scores the two identically, so
 the distinction is about stating what you mean, not about the number.

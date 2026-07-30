@@ -321,3 +321,45 @@ def test_rows_carrying_only_empty_evidence_are_rejected_like_all_null() -> None:
 
     assert not report.valid
     assert _codes(report) == ["all_rows_null"]
+
+
+def test_request_shaped_rows_warn_rather_than_failing() -> None:
+    """The shipped adapter emits exactly this shape and three docs promise it works.
+
+    A row carrying only unscored fields scores nothing, which is worth a warning, but
+    it is not an empty submission. An earlier all-empty check tested "every scored
+    field is None" and rejected the adapter template outright.
+    """
+
+    document = _document(
+        [
+            _bare_row(
+                event_id, resource_id="r", action="compare", requested_scope=["s"]
+            )
+            for event_id in EXPECTED_IDS
+        ]
+    )
+
+    report = validate_trace_jsonl(document, expected_event_ids=EXPECTED_IDS)
+
+    assert report.valid
+    assert set(_codes(report)) == {"no_scored_fields"}
+
+
+def test_an_empty_delegation_chain_is_signal_not_silence() -> None:
+    """Five of the eleven fixture cases have an empty chain as their correct answer."""
+
+    document = _document(
+        [_bare_row(event_id, delegation_chain_ids=[]) for event_id in EXPECTED_IDS]
+    )
+
+    report = validate_trace_jsonl(document, expected_event_ids=EXPECTED_IDS)
+
+    assert report.valid
+    assert report.issues == ()
+    empty_chain_cases = sum(
+        1
+        for truth in BENCHMARK.evaluator.authority_truth
+        if truth.delegation_chain_ids == ()
+    )
+    assert empty_chain_cases == 5

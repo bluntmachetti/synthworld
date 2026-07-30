@@ -160,8 +160,10 @@ Two gotchas that catch non-Python adapters, both deliberate. `synthetic` must be
 unmistakably fictional. And `evidence_refs: []` is not `null`: the empty list claims
 that evidence was captured and there was none of it, while `null` claims nothing was
 captured. Asteria v1 scores the two identically, so the distinction is about
-stating what you mean; the only mechanical consequence is that
-`synthworld validate agentic-trace` warns on the empty form.
+stating what you mean; the mechanical consequences are that
+`synthworld validate agentic-trace` warns on the empty form, and that a submission
+whose rows carry nothing but an empty `evidence_refs` is rejected as uninformative,
+exactly as an all-null one is.
 
 ### Trace conventions
 
@@ -256,7 +258,10 @@ independent:
   reconstructability;
 - expected side effect and policy-version correctness.
 
-Every canonical case also receives a per-dimension failure slice. A correct
+Each canonical case receives a per-dimension failure slice for the thirteen
+per-action checks. The seven metrics built separately - both least-privilege
+metrics, the temporal metric, provenance precision and the three decision rates -
+emit no slices, so those dimensions have no per-case breakdown. A correct
 allow/deny with missing evidence can therefore score perfectly on decision
 accuracy while scoring below one on provenance; there is no aggregate score
 that conceals that difference.

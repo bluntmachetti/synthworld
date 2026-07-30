@@ -70,6 +70,7 @@ short-lived, scoped, sender-constrained credential.
 | Sender constraint binds it to the runtime that requested it | `runtime_principal_id` is observable |
 | The target service validates a token; it does not read a directory | `delegation_chain_ids`, `attributed_actor_id` and `accountable_owner_chain` are `null` — those are directory facts, not token claims |
 | It cannot cite as evidence what it cannot see | delegation references are filtered from `evidence_refs`, so provenance is incomplete by construction rather than accidentally complete |
+| It cannot claim what it did not retain | where those references are missing, `reconstructable_from_retained_evidence` is `false` — asserting the oracle's answer there would claim a reconstruction the retained evidence does not support |
 
 The last row is the substantive finding of this exercise. A token can carry authority
 without carrying accountability, and the fields that go null are exactly the ones an
@@ -92,7 +93,7 @@ snippet at the end of this document.
 | `accountable_owner_chain_integrity` | 1.000 | **0.000** | 0.000 |
 | `provenance_completeness` | 1.000 | **0.455** | 0.000 |
 | `provenance_exact_match` | 1.000 | **0.455** | 0.000 |
-| `audit_reconstructability_accuracy` | 1.000 | 1.000 | 0.000 |
+| `audit_reconstructability_accuracy` | 1.000 | **0.545** | 0.000 |
 | `expected_side_effect_accuracy` | 1.000 | 1.000 | 0.364 |
 
 Three readings are worth stating explicitly, because a reader will otherwise draw a

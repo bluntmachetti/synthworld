@@ -111,8 +111,8 @@ meta:
     was that several invariants were written as claims about enforcement or
     establishment while the attached metric only compared a reported field against
     truth. Seven statuses moved from supported to partial as a result (C02, C04,
-    C07, C08, C09, C11, C14) and only C06, C10 and C12 remain scored close to what
-    they assert. Two controls were added for gaps with no field to carry them
+    C07, C08, C09, C11, C14). A later round demoted C06 too, on the same reasoning,
+    leaving C12 as the only control scored close to what it asserts. Two controls were added for gaps with no field to carry them
     (C15 trusted issuance and credential-to-grant binding, C16 principal intent and
     parameter integrity), three invariants were rewritten to stop naming a specific
     architecture (C02, L03, L05), one was de-vacuumed (L06 - the latency bound must
@@ -123,6 +123,21 @@ meta:
     more than the cited clause states. Claims asserted by the review but not yet
     checked at source are marked UNVERIFIED and must be pinned or dropped before
     any external publication.
+  known_fixture_leak: >-
+    Five of the eleven action-event identifiers in the frozen public bundle name the
+    case they test - evt-011-outside-capability, evt-013-wrong-runtime,
+    evt-014-shared-credential, evt-015-valid-then-revoked and
+    evt-016-incorrect-attribution. Those identifiers reach an adapter through the
+    public event stream, so a system could in principle branch on the label rather
+    than decide the case. Nothing in the scorer detects that. This weakens the
+    public/evaluator separation the benchmark otherwise maintains, and it means a
+    strong score on the frozen fixture is weaker evidence than it looks. The
+    identifiers cannot be changed without regenerating the frozen artifacts and their
+    published checksums, so v1 keeps them and the limitation is recorded here rather
+    than quietly carried; opaque identifiers belong to the generated worlds of issue
+    #27 and to any v2. Treat frozen-fixture scores as a conformance demonstration,
+    never as a comparative result - which is what AGENTIC_BENCHMARK.md already says
+    for other reasons.
   known_scoring_gaps: >-
     Verified 2026-07-29 against the running scorer. C11's expected_policy_version is
     copied from the public attempt, so echoing the requested version scores 1.0.
@@ -159,7 +174,7 @@ controls:
       - cross_tenant_confusion
     authority_failure_reasons:
       - tenant_mismatch
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: CB4A
         clause: "S4.2 justification.task_id; S4.1 spiffe://trust-domain/agent/{user-id}/{session-id}"
@@ -225,7 +240,7 @@ controls:
       - authorised_action
     authority_failure_reasons:
       - wrong_runtime
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: CB4A
         clause: "S4.1 node and workload attestation; non-renewable SVID; agent MUST re-attest"
@@ -278,7 +293,7 @@ controls:
     authority_failure_reasons:
       - credential_invalid
       - wrong_runtime
-    applicable_patterns: [short-lived-minting, bearer-baseline, proxy-injection]
+    applicable_patterns: [short-lived-minting, static-bearer, proxy-injection]
     external_mappings:
       - source: KLRC
         clause: "S10.3 agent to client_id, principal to sub"
@@ -339,7 +354,7 @@ controls:
       - no_active_delegation
       - delegation_revoked
       - overprivileged_subdelegation
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: RFC8693
         clause: "S1.1 delegation vs impersonation; S4.1 act (nested = chain); S4.4 may_act; S2.1 resource/audience/scope"
@@ -401,7 +416,7 @@ controls:
       - outside_capability
     authority_failure_reasons:
       - capability_exceeded
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: CB4A
         clause: "S4.2 target.{service,action,resource,scope}; S4.3 scope granularity"
@@ -466,7 +481,7 @@ controls:
     authority_failure_reasons:
       - delegation_revoked
       - no_active_delegation
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: CB4A
         clause: "S4.4 lease management - non-renewable by default, re-attest on expiry, CDP revokes on anomaly signal"
@@ -515,7 +530,7 @@ controls:
       - incorrect_attribution
       - shared_credential
       - cross_tenant_confusion
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: RFC8693
         clause: "S4.1 act - current actor; S4.3 client_id"
@@ -574,7 +589,7 @@ controls:
       - AuthorityTruth.reconstructable_at_audit
     failure_slices:
       - missing_retained_evidence
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: CB4A
         clause: "S4.7 - event_type enum, envelope_hash, correlation_id; log pipeline failures MUST fail closed; audit in a separate trust boundary from PDP and CDP; hash chaining"
@@ -591,8 +606,9 @@ controls:
         mapping_status: informative
     core_limitations: >-
       Evidence is a reference set of synthesised identifier strings, not content
-      and not a tamper-evident log. The decisive limitation: the four required refs
-      are derivable from public data alone, so a system that computes the expected
+      and not a tamper-evident log. The decisive limitation: the required refs -
+      three base references plus one per delegation-chain member - are derivable from
+      public data alone, so a system that computes the expected
       identifiers without retaining any evidence scores 1.0 on all four metrics.
       Completeness and over-claiming are separable (subset recall vs
       micro-precision), but authenticity, tamper evidence, and genuine
@@ -625,7 +641,7 @@ controls:
       - valid_then_revoked
       - post_revocation_action
       - invalid_then_later_granted
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: KLRC
         clause: "S11 reconstruct authorization context after execution"
@@ -685,7 +701,7 @@ controls:
       - shared_credential
     authority_failure_reasons:
       - tenant_mismatch
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: WIMSE-ARCH
         source_maturity: wg-draft
@@ -784,7 +800,7 @@ controls:
       - post_revocation_action
       - cross_tenant_confusion
       - invalid_then_later_granted
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: KLRC
         clause: "S10 least privilege for delegated authority"
@@ -824,7 +840,7 @@ controls:
       - AuthorityTruth.failure_reasons_at_action
       - AuthorityTruth.failure_reasons_at_audit
     failure_slices: []
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: KLRC
         source_maturity: individual-draft
@@ -859,7 +875,7 @@ controls:
     expected_truth:
       - AuthorityTruth.expected_side_effect
     failure_slices: []
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings: []
     # A CB4A S4.7 event_type mapping was removed after review: an audit event-type
     # enumeration says nothing about whether a recorded effect matches reality,
@@ -898,7 +914,7 @@ controls:
     # C03's conditions - expiry and subject mismatch - not for the issuer-entitlement
     # and credential-to-grant binding this control is about, which nothing detects.
     authority_failure_reasons: []
-    applicable_patterns: [short-lived-minting, proxy-injection, bearer-baseline]
+    applicable_patterns: [short-lived-minting, proxy-injection, static-bearer]
     external_mappings:
       - source: RFC8693
         source_maturity: rfc
@@ -941,7 +957,7 @@ controls:
     required_observations: []
     expected_truth: []
     failure_slices: []
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: KLRC
         source_maturity: individual-draft
@@ -979,7 +995,7 @@ controls:
       context, its logs, or its memory.
     evaluation_layer: lab
     asteria_v1_status: out-of-scope-core
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: CB4A
         clause: "S2.1 principle 2 - the component that decides yes MUST never touch credential material"
@@ -999,7 +1015,7 @@ controls:
       audience, or after expiry.
     evaluation_layer: lab
     asteria_v1_status: out-of-scope-core
-    applicable_patterns: [short-lived-minting, bearer-baseline]
+    applicable_patterns: [short-lived-minting, static-bearer]
     external_mappings:
       - source: RFC9449
         clause: "S4.3 proof of possession; S11.1 DPoP proof replay"
@@ -1067,7 +1083,7 @@ controls:
       not the presence of any particular component.
     evaluation_layer: lab
     asteria_v1_status: out-of-scope-core
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: CB4A
         source_maturity: individual-draft
@@ -1098,7 +1114,7 @@ controls:
       A bound chosen after seeing the measurement is not a bound.
     evaluation_layer: lab
     asteria_v1_status: out-of-scope-core
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings:
       - source: KLRC
         clause: "S11 without undue delay"
@@ -1126,7 +1142,7 @@ controls:
     # controls rather than pretending otherwise.
     evaluation_layer: operational
     asteria_v1_status: out-of-scope-core
-    applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
+    applicable_patterns: [proxy-injection, short-lived-minting, static-bearer]
     external_mappings: []
     core_limitations: Not a security property. Never blend into a security score.
     lab_extension: Measure and report separately alongside, never inside, conformance results.

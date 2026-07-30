@@ -155,11 +155,13 @@ honest summary of what Asteria v1 does:
 > **Authorisation decisions are well tested. The bindings and evidence around them
 > are reported but not proven.**
 
-`SW-AA-C06` (action-time decision, four metrics) and `SW-AA-C12` (false-allow rate
-over denials) are `supported` — the decision itself is scored directly and
-non-trivially. Identity binding, credential consistency, attribution, evidence and
-policy version are all `partial`: a system must report them correctly, but correct
-reporting is what gets scored, not the underlying enforcement. Anyone using this
+`SW-AA-C12` (false-allow rate over denials) is the one control whose invariant is
+scored directly and non-trivially end to end. Everything else is `partial` or
+weaker: a system must report identity binding, credential consistency, attribution,
+evidence and policy version correctly, but correct *reporting* is what gets scored,
+not the underlying enforcement. `SW-AA-C05` and `SW-AA-C10` are `partial` with no
+metric of their own at all — they are observable only through the decision, which is
+why `partial` here means "partly evidenced", not "partly scored". Anyone using this
 benchmark to make a claim should quote the relevant control's `core_limitations`
 rather than its status alone.
 

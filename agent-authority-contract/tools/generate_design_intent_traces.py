@@ -36,6 +36,7 @@ from synthworld.agentic.models import (
     ActionAttempt,
     AgenticBenchmark,
     AgenticTraceSubmission,
+    AuthorityTruth,
     CanonicalBinding,
     Decision,
     ObservedActionTrace,
@@ -182,6 +183,21 @@ def _event_index(benchmark: AgenticBenchmark, event_id: str) -> int:
     raise KeyError(event_id)
 
 
+def _reconstructable_for(truth: AuthorityTruth, pattern: Visibility) -> bool | None:
+    """What a pattern could honestly assert about later reconstruction."""
+
+    if not pattern.evidence:
+        return None
+    if (
+        not pattern.delegation_chain
+        and _visible_evidence(truth.required_evidence_refs, pattern)
+        != truth.required_evidence_refs
+    ):
+        # It retained strictly less than reconstruction requires, and it knows it.
+        return False
+    return truth.reconstructable_at_audit
+
+
 def _visible_evidence(refs: tuple[str, ...], pattern: Visibility) -> tuple[str, ...]:
     """Drop evidence a pattern could not have observed."""
 
@@ -255,9 +271,11 @@ def _row(
         # established that reconstruction is impossible, it has established nothing.
         # Asserting False would be a claim, and would accidentally match truth on
         # the one case where evidence really was discarded.
-        reconstructable_from_retained_evidence=(
-            truth.reconstructable_at_audit if pattern.evidence else None
-        ),
+        # A pattern that cannot cite the delegation evidence cannot claim the
+        # decision is reconstructable from what it retained. Copying the oracle's
+        # answer here flattered audit_reconstructability_accuracy to a perfect score
+        # while the same rows were omitting the references reconstruction needs.
+        reconstructable_from_retained_evidence=_reconstructable_for(truth, pattern),
     )
 
 

@@ -294,11 +294,23 @@ def _is_all_null(row: ObservedActionTrace) -> bool:
 
 
 def _carries_no_signal(row: ObservedActionTrace) -> bool:
-    """True when a row tells the scorer nothing, however it spells that.
+    """True when a row is a bare row in all but spelling.
 
-    Broader than :func:`_is_all_null` on purpose. An empty tuple is not null, so a
-    submission of rows carrying only ``evidence_refs: []`` would otherwise slip past
-    the all-empty rejection while being exactly as uninformative.
+    Only ``evidence_refs`` is normalised, because an empty list there means the same
+    thing as null - nothing captured - and would otherwise let an uninformative
+    submission slip past the all-empty rejection.
+
+    Nothing else is normalised, and unscored fields still count as signal. An earlier
+    version tested "every scored field is None", which was wrong twice over: it
+    rejected the shipped adapter template, whose rows legitimately carry only the
+    request shape, and it rejected a submission reporting an empty delegation chain
+    on every row - which is the correct answer for five of the frozen fixture's
+    eleven cases.
     """
 
-    return all(getattr(row, name) in (None, ()) for name in _SCORED_FIELDS)
+    normalised = (
+        row.model_copy(update={"evidence_refs": None})
+        if row.evidence_refs == ()
+        else row
+    )
+    return _is_all_null(normalised)
