@@ -69,6 +69,7 @@ short-lived, scoped, sender-constrained credential.
 | The credential carries subject, audience, scope and lifetime | credential and temporal questions answer well |
 | Sender constraint binds it to the runtime that requested it | `runtime_principal_id` is observable |
 | The target service validates a token; it does not read a directory | `delegation_chain_ids`, `attributed_actor_id` and `accountable_owner_chain` are `null` — those are directory facts, not token claims |
+| It cannot cite as evidence what it cannot see | delegation references are filtered from `evidence_refs`, so provenance is incomplete by construction rather than accidentally complete |
 
 The last row is the substantive finding of this exercise. A token can carry authority
 without carrying accountability, and the fields that go null are exactly the ones an
@@ -89,7 +90,8 @@ snippet at the end of this document.
 | `delegation_chain_integrity` | 1.000 | **0.000** | 0.000 |
 | `attribution_integrity` | 1.000 | **0.000** | 0.000 |
 | `accountable_owner_chain_integrity` | 1.000 | **0.000** | 0.000 |
-| `provenance_completeness` | 1.000 | 1.000 | 0.000 |
+| `provenance_completeness` | 1.000 | **0.455** | 0.000 |
+| `provenance_exact_match` | 1.000 | **0.455** | 0.000 |
 | `audit_reconstructability_accuracy` | 1.000 | 1.000 | 0.000 |
 | `expected_side_effect_accuracy` | 1.000 | 1.000 | 0.364 |
 
@@ -102,11 +104,14 @@ mechanism for detecting revocation, a wrong runtime, an over-broad sub-delegatio
 a cross-tenant request, so a perfect implementation of it still allows all of them.
 That is the control's purpose — it establishes what "no authority layer" scores.
 
-**The three zeros for short-lived minting** are the interesting result. It is
+**The zeros for short-lived minting** are the interesting result. It is
 indistinguishable from proxy injection on decisions and temporal correctness, and
-completely blind on delegation provenance, attribution, and accountable ownership.
-A deployment choosing between the two on decision quality alone would not see this
-difference; it appears only when you ask who is answerable afterwards.
+blind on delegation provenance, attribution, and accountable ownership. Provenance
+lands at 0.455 rather than 0 because the credential, policy and runtime references
+it *can* cite are still correct — it is the delegation references that go missing,
+which is precisely the accountability gap. A deployment choosing between the two on
+decision quality alone would not see this difference; it appears only when you ask
+who is answerable afterwards.
 
 **Proxy injection's clean sweep is not a verdict.** Its real limitation is invisible
 in this format: an agent that reaches the target off-path produces *no row at all*,

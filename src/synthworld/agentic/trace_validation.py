@@ -168,7 +168,12 @@ def _recover_event_id(line: str) -> tuple[bool, str | None]:
     if not isinstance(document, dict):
         return True, None
     candidate = document.get("event_id")
-    if isinstance(candidate, str) and candidate.strip():
+    if isinstance(candidate, str):
+        # Blank and whitespace-only identifiers are recovered deliberately. The model
+        # accepts them, so such a row reaches the scorer, which then rejects the
+        # submission for covering an unknown event. Discarding them here would let
+        # this report say "valid" for a document evaluate refuses - breaking the one
+        # guarantee the command makes.
         return True, candidate
     return True, None
 
@@ -237,7 +242,7 @@ def _quality_issues(
     single row never produces two overlapping warnings.
     """
 
-    empty = [row for row in rows if _is_all_null(row)]
+    empty = [row for row in rows if _carries_no_signal(row)]
     if rows and len(empty) == len(rows):
         yield TraceValidationIssue(
             severity="error",
@@ -273,8 +278,10 @@ def _quality_issues(
                 severity="warning",
                 code="empty_evidence_refs",
                 message=(
-                    "evidence_refs is an empty tuple; use null to assert that no "
-                    "evidence was captured, as the two score differently"
+                    "evidence_refs is an empty tuple, which asserts that evidence "
+                    "capture ran and found nothing; use null to assert that nothing "
+                    "was captured. Asteria v1 scores the two identically, so this is "
+                    "about stating what you mean rather than about the score"
                 ),
                 event_id=row.event_id,
             )
@@ -284,3 +291,14 @@ def _is_all_null(row: ObservedActionTrace) -> bool:
     """True when a row carries nothing but its event identifier."""
 
     return row == ObservedActionTrace(event_id=row.event_id)
+
+
+def _carries_no_signal(row: ObservedActionTrace) -> bool:
+    """True when a row tells the scorer nothing, however it spells that.
+
+    Broader than :func:`_is_all_null` on purpose. An empty tuple is not null, so a
+    submission of rows carrying only ``evidence_refs: []`` would otherwise slip past
+    the all-empty rejection while being exactly as uninformative.
+    """
+
+    return all(getattr(row, name) in (None, ()) for name in _SCORED_FIELDS)

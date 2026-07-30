@@ -54,6 +54,15 @@ def _model_accepts(document: dict[str, Any]) -> bool:
     return True
 
 
+def _schema_accepts_without_format(document: dict[str, Any]) -> bool:
+    """Validate with format assertion OFF, which is many consumers' default."""
+
+    schema = json.loads(
+        (SCHEMA_DIR / "observed-action-trace.schema.json").read_text(encoding="utf-8")
+    )
+    return bool(Draft202012Validator(schema).is_valid(document))
+
+
 def _schema_accepts(document: dict[str, Any]) -> bool:
     return bool(_row_validator().is_valid(document))
 
@@ -71,10 +80,46 @@ DECLARED_DIVERGENCES: tuple[tuple[str, dict[str, Any], bool, bool, str], ...] = 
         True,
         False,
         "Pydantic coerces an integer epoch to a datetime; the schema requires the "
-        "serialized string form. Tolerated because the scorer only ever reads "
-        "model-serialized output, so the coercion is unreachable in practice, and "
-        "imitating it in the schema would let a non-Python adapter emit a form the "
-        "published contract calls valid but no serializer produces.",
+        "serialized string form. An earlier version of this note claimed the coercion "
+        "was unreachable because the scorer only reads serialized output - that was "
+        "wrong, since the scorer parses arbitrary adapter JSONL. It is tolerated "
+        "because the schema is the stricter target and imitating pydantic's laxity "
+        "would let an adapter emit forms no serializer produces.",
+    ),
+    (
+        "bool-from-string",
+        _row(reconstructable_from_retained_evidence="false"),
+        True,
+        False,
+        'Pydantic parses the string "false" as a boolean; the schema requires a real '
+        "JSON boolean. Kept as a divergence because the schema is the stricter and "
+        "safer target for an adapter, and narrowing pydantic would change scorer "
+        "behaviour for existing submissions.",
+    ),
+    (
+        "lowercase-timestamp-designators",
+        _row(timestamp="2026-07-29t12:00:00z"),
+        True,
+        False,
+        "RFC 3339 permits lowercase t and z and pydantic accepts them; the generated "
+        "pattern requires the uppercase forms every serializer in this repo emits. "
+        "Tolerated rather than widened: loosening the pattern would also admit forms "
+        "no serializer produces.",
+    ),
+    (
+        "space-separated-timestamp",
+        _row(timestamp="2026-07-29 12:00:00Z"),
+        True,
+        False,
+        "Pydantic accepts a space in place of the T separator; the schema does not.",
+    ),
+    (
+        "numeric-timestamp-string",
+        _row(timestamp="1700000000"),
+        True,
+        False,
+        "Pydantic parses a numeric string as an epoch; the schema requires the "
+        "serialized date-time form.",
     ),
     (
         "int-coerced-boolean",
@@ -194,3 +239,46 @@ def test_format_assertion_is_actually_enabled() -> None:
         "jsonschema is not asserting date-time; install the [format] extra, or this "
         "suite stops testing the timestamp contract"
     )
+
+
+# Component ranges the generated pattern must enforce on its own, since a consumer
+# that does not assert `format` gets nothing else. Without these the range checks
+# could be deleted and the format-asserting suite above would stay green.
+PATTERN_ONLY_REJECTS: tuple[tuple[str, str], ...] = (
+    ("impossible-components", "2026-99-99T99:99:99Z"),
+    ("month-13", "2026-13-01T12:00:00Z"),
+    ("month-00", "2026-00-10T12:00:00Z"),
+    ("day-32", "2026-07-32T12:00:00Z"),
+    ("day-00", "2026-07-00T12:00:00Z"),
+    ("hour-24", "2026-07-29T24:00:00Z"),
+    ("minute-60", "2026-07-29T12:60:00Z"),
+    ("second-60", "2026-07-29T12:00:60Z"),
+    ("naive", "2026-07-29T12:00:00"),
+    ("non-utc-offset", "2026-07-29T12:00:00+02:00"),
+    ("garbage", "not-a-date"),
+)
+
+
+@pytest.mark.parametrize(
+    ("label", "timestamp"),
+    PATTERN_ONLY_REJECTS,
+    ids=[entry[0] for entry in PATTERN_ONLY_REJECTS],
+)
+def test_pattern_alone_rejects_bad_timestamps(label: str, timestamp: str) -> None:
+    document = _row(timestamp=timestamp)
+    assert not _schema_accepts_without_format(document), (
+        f"{label}: accepted with format assertion disabled, so the generated pattern "
+        f"is not carrying its share of the contract"
+    )
+    assert not _model_accepts(document), f"{label}: model unexpectedly accepts"
+
+
+def test_year_zero_needs_format_assertion() -> None:
+    """Documented residue: the pattern cannot express a minimum year."""
+
+    document = _row(timestamp="0000-07-29T12:00:00Z")
+    assert not _model_accepts(document)
+    assert _schema_accepts_without_format(document), (
+        "if this now fails the pattern gained a year constraint - delete this test"
+    )
+    assert not _schema_accepts(document)

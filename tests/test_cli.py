@@ -712,3 +712,23 @@ def test_validate_agentic_trace_reports_a_broken_benchmark_tree(
 
     assert exit_code == 1
     assert "manifest" in capsys.readouterr().err
+
+
+def test_validate_and_evaluate_agree_on_a_byte_order_mark(tmp_path: Path) -> None:
+    """A BOM-prefixed file is common from Windows editors and must not diverge.
+
+    Both commands read with utf-8-sig. If only one did, validate could bless a file
+    the scorer refuses, breaking the one-directional guarantee.
+    """
+
+    predictions = tmp_path / "bom.jsonl"
+    predictions.write_text(
+        trace_submission_to_jsonl(
+            reference_agentic_trace(generate_asteria_agentic_v1())
+        ),
+        encoding="utf-8-sig",
+    )
+    assert predictions.read_bytes()[:3] == b"\xef\xbb\xbf"
+
+    assert main(["validate", "agentic-trace", "--predictions", str(predictions)]) == 0
+    assert main(["evaluate", "agentic", "--predictions", str(predictions)]) == 0

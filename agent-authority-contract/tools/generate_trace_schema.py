@@ -88,8 +88,10 @@ exactly - no omissions, no duplicates, no extras.
 Every field except `event_id` is nullable, and null carries meaning: it asserts
 that the system did not capture that value. Null is scored as a miss, never
 back-filled or ignored, so emitting null is an honest answer rather than a way to
-avoid being wrong. Do not substitute empty strings or empty arrays for null; for
-`evidence_refs` in particular an empty array and null are scored differently.
+avoid being wrong. Do not substitute empty strings or empty arrays for null: an
+empty `evidence_refs` array asserts that capture ran and found nothing, whereas
+null asserts that nothing was captured. Asteria v1 scores the two identically, so
+the distinction is about stating what you mean, not about the number.
 
 This schema is generated from `synthworld.agentic.models.ObservedActionTrace`. It
 is a projection of that model, not an independent definition: where the two

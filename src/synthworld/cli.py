@@ -13,6 +13,7 @@ from synthworld.agentic.evaluation import (
 )
 from synthworld.agentic.generator import generate_asteria_agentic_v1
 from synthworld.agentic.serialization import (
+    AgenticArtifactError,
     export_agentic_benchmark,
     load_public_agentic_bundle,
 )
@@ -69,17 +70,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "validate":
-        # Its own try block: the existing evaluate handler below guards a different
-        # set of calls, and this path can raise AgenticArtifactError (a ValueError,
-        # not a ValidationError) from checksum verification and UnicodeDecodeError
-        # from a non-UTF-8 predictions file.
+        # Its own try block: the evaluate handler below guards a different set of
+        # calls, and this path raises different things. Narrow on purpose - catching
+        # every ValueError would report an internal defect as though the user's file
+        # were at fault. UnicodeDecodeError is itself a ValueError but is listed
+        # explicitly so a non-UTF-8 predictions file stays covered if the tuple
+        # changes.
         try:
             expected = load_public_agentic_bundle().scenario.action_event_ids
             validation = validate_trace_jsonl(
-                args.predictions.read_text(encoding="utf-8"),
+                # utf-8-sig, not utf-8: editors on Windows commonly prepend a BOM, and
+                # decoding it as content yields "Invalid JSON at line 1 column 1" with
+                # no hint that three invisible bytes are the cause. Applied to the
+                # evaluate path too - fixing only one would let this command bless a
+                # file the scorer then refuses.
+                args.predictions.read_text(encoding="utf-8-sig"),
                 expected_event_ids=expected,
             )
-        except (OSError, UnicodeDecodeError, ValueError) as error:
+        except (
+            OSError,
+            UnicodeDecodeError,
+            AgenticArtifactError,
+            ValidationError,
+        ) as error:
             print(str(error), file=sys.stderr)
             return 1
 
@@ -91,7 +104,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "evaluate":
         try:
-            text = args.predictions.read_text(encoding="utf-8")
+            text = args.predictions.read_text(encoding="utf-8-sig")
             if args.task == "agentic":
                 report = evaluate_agentic_trace(trace_submission_from_jsonl(text))
             elif args.task == "extraction":

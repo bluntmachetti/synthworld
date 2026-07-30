@@ -20,6 +20,7 @@ from synthworld.agentic import (
     validate_trace_jsonl,
 )
 from synthworld.agentic.models import ObservedActionTrace
+from synthworld.evaluation import EvaluationInputError
 
 BENCHMARK = generate_asteria_agentic_v1()
 EXPECTED_IDS = BENCHMARK.public.scenario.action_event_ids
@@ -285,3 +286,38 @@ def test_validator_does_not_import_evaluator_or_loader_modules() -> None:
 
     assert not {name for name in imported if "evaluation" in name}
     assert not {name for name in imported if "serialization" in name}
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_blank_event_id_is_reported_not_silently_dropped(blank: str) -> None:
+    """The one-directional promise must hold for identifiers the model accepts.
+
+    ObservedActionTrace accepts a blank event_id, so such a row reaches the scorer,
+    which rejects the submission for covering an unknown event. Discarding it during
+    recovery would let this report say valid for a document evaluate refuses.
+    """
+
+    document = _document([*REFERENCE_LINES, _bare_row(blank, decision="allow")])
+
+    report = validate_trace_jsonl(document, expected_event_ids=EXPECTED_IDS)
+
+    assert not report.valid
+    assert "unexpected_event_id" in _codes(report)
+
+    with pytest.raises(EvaluationInputError):
+        evaluate_agentic_trace(
+            trace_submission_from_jsonl(document), benchmark=BENCHMARK
+        )
+
+
+def test_rows_carrying_only_empty_evidence_are_rejected_like_all_null() -> None:
+    """An empty tuple is not null, but it is just as uninformative."""
+
+    document = _document(
+        [_bare_row(event_id, evidence_refs=[]) for event_id in EXPECTED_IDS]
+    )
+
+    report = validate_trace_jsonl(document, expected_event_ids=EXPECTED_IDS)
+
+    assert not report.valid
+    assert _codes(report) == ["all_rows_null"]

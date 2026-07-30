@@ -12,9 +12,13 @@ synthworld validate agentic-trace --predictions trace.jsonl
 synthworld evaluate agentic --predictions trace.jsonl --summary
 ```
 
-That works before you write anything. The trace is structurally valid, `validate`
-exits `0` with eleven `no_scored_fields` warnings, and the scorer reports zeros. The
-loop closing on an empty integration is the point: you can see the shape of the
+That works before you write anything. The trace is structurally valid and `validate`
+exits `0` with eleven `no_scored_fields` warnings. The scorer reports zeros for the
+resolution and decision metrics, `None` for those it cannot compute without
+predictions, and — counter-intuitively — `least_privilege_accuracy` of `1.0`, because
+only an explicit false allow counts against that metric and an empty trace makes
+none. Read it alongside recall rather than alone. The loop closing on an empty
+integration is the point: you can see the shape of the
 workflow before wiring in a system, and the warnings name exactly what is missing.
 
 ## What to change
@@ -46,8 +50,10 @@ claim-echoing, and a generated world will contain more.
 
 - `synthetic` must be `true` or omitted. `false` is rejected — the marker is what
   makes the artifact unmistakably fictional.
-- `evidence_refs: []` is not `null`. The empty list claims you captured evidence and
-  there was none; `null` claims you captured nothing. They score differently.
+- `evidence_refs: []` is not `null`. The empty list claims capture ran and found
+  nothing; `null` claims nothing was captured. Asteria v1 scores them identically,
+  so this is about saying what you mean — but note a submission whose rows carry
+  only an empty array is rejected as uninformative, exactly as an all-null one is.
 - Timestamps must be timezone-aware UTC. A naive timestamp is rejected, and so is a
   non-UTC offset.
 - Submit exactly one row per action event — no omissions, duplicates, or extras.

@@ -182,6 +182,14 @@ def _event_index(benchmark: AgenticBenchmark, event_id: str) -> int:
     raise KeyError(event_id)
 
 
+def _visible_evidence(refs: tuple[str, ...], pattern: Visibility) -> tuple[str, ...]:
+    """Drop evidence a pattern could not have observed."""
+
+    if pattern.delegation_chain:
+        return refs
+    return tuple(ref for ref in refs if not ref.startswith("evidence:delegation:"))
+
+
 def _row(
     benchmark: AgenticBenchmark,
     binding: CanonicalBinding,
@@ -235,7 +243,14 @@ def _row(
         delegation_chain_ids=(
             truth.delegation_chain_ids if pattern.delegation_chain else None
         ),
-        evidence_refs=truth.required_evidence_refs if pattern.evidence else None,
+        # A pattern that cannot see the delegation chain cannot cite it as evidence
+        # either. Copying the oracle's refs wholesale published the exact chain this
+        # pattern is documented as blind to, contradicting its own trace - and it
+        # inflated provenance completeness, since the missing refs are precisely what
+        # a token-validating service does not learn.
+        evidence_refs=_visible_evidence(truth.required_evidence_refs, pattern)
+        if pattern.evidence
+        else None,
         # None, not False: a pattern that cannot observe retained evidence has not
         # established that reconstruction is impossible, it has established nothing.
         # Asserting False would be a claim, and would accidentally match truth on
