@@ -1,0 +1,183 @@
+"""Generate the ObservedActionTrace JSON Schema from the authoritative model.
+
+The pydantic models in ``synthworld.agentic.models`` are the contract. This script
+projects them into language-neutral JSON Schema so non-Python adapters can validate
+their output, and it exists so the projection is reproducible rather than folklore:
+if the model changes, re-run this and commit the diff.
+
+Usage::
+
+    uv run python agent-authority-contract/tools/generate_trace_schema.py
+
+Add ``--check`` to fail without writing when the committed schema is stale, which is
+what a future CI step should call.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+from synthworld.agentic.models import AgenticTraceSubmission, ObservedActionTrace
+
+SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
+
+BASE_ID = "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas"
+
+# Pydantic emits {"format": "date-time"} for tz-aware datetimes, but `format` is an
+# ANNOTATION in JSON Schema 2020-12, not an assertion: a conformant validator is free
+# to ignore it, and `jsonschema`'s FormatChecker still does not check `date-time`
+# unless the optional rfc3339-validator package is installed. Verified consequence:
+# without a pattern, the published schema accepts "not-a-date", a naive timestamp, and
+# a non-UTC offset - all of which the model rejects. An adapter author validating
+# against this file would be told those are fine and then have the scorer reject them,
+# which is exactly the failure this package exists to prevent.
+#
+# `pattern` IS an assertion everywhere, so it is added to close the gap. The regex
+# admits the forms the model accepts (verified): a UTC designator of Z, +00:00 or
+# -00:00, with optional fractional seconds, and it constrains each component to its
+# real range so an impossible timestamp like 2026-99-99T99:99:99Z is refused.
+#
+# Residual gap, stated rather than hidden: a regex cannot do calendar arithmetic, so
+# 2026-02-30 satisfies the pattern. A consumer that DOES assert format rejects it
+# anyway, so model and schema agree in that configuration; a consumer that does not
+# gets component-range checking without calendar validity. That is a large
+# improvement on the pre-pattern behaviour, which accepted "not-a-date", and the
+# remaining exposure is documented for consumers in ../README.md.
+_UTC_TIMESTAMP_PATTERN = (
+    r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])"
+    r"T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-]00:00)$"
+)
+
+
+def _assert_utc_timestamps(schema: dict[str, Any]) -> dict[str, Any]:
+    """Add an asserted UTC pattern to every date-time string branch.
+
+    Narrows the projection so the schema enforces what the model's timezone
+    validator enforces, rather than merely annotating it.
+    """
+    properties = schema.get("properties")
+    if not isinstance(properties, dict):
+        # Reached for enum sub-definitions such as Decision, which have no properties.
+        return schema
+    for definition in properties.values():
+        branches = definition.get("anyOf") if isinstance(definition, dict) else None
+        if not isinstance(branches, list):
+            continue
+        for branch in branches:
+            if (
+                isinstance(branch, dict)
+                and branch.get("type") == "string"
+                and branch.get("format") == "date-time"
+            ):
+                branch["pattern"] = _UTC_TIMESTAMP_PATTERN
+    return schema
+
+
+ROW_DESCRIPTION = """\
+One system-under-test observation of one attempted agent action.
+
+The wire format is JSON Lines: one object per line, one line per action event in
+the benchmark's public event stream, keyed by `event_id`. The scorer requires the
+submitted set of `event_id` values to equal the benchmark's action-event set
+exactly - no omissions, no duplicates, no extras.
+
+Every field except `event_id` is nullable, and null carries meaning: it asserts
+that the system did not capture that value. On the equality and recall metrics null
+is scored as a miss, never back-filled or ignored, so emitting null is an honest
+answer rather than a way to avoid being wrong. It is not uniformly penalised: a null
+decision records no false allow, so it scores perfectly on least-privilege accuracy -
+read that metric alongside recall rather than alone.
+
+Do not substitute empty strings or empty arrays for null: an
+empty `evidence_refs` array asserts that capture ran and found nothing, whereas
+null asserts that nothing was captured. Asteria v1 scores the two identically, so
+the distinction is about stating what you mean, not about the number.
+
+This schema is generated from `synthworld.agentic.models.ObservedActionTrace`. It
+is a projection of that model, not an independent definition: where the two
+disagree, the model is correct and this file is stale.\
+"""
+
+ENVELOPE_DESCRIPTION = """\
+The batch form of a trace submission, holding many observations as one document.
+
+Provided for tooling that prefers a single JSON object over JSON Lines. The scorer's
+CLI reads JSON Lines; this envelope is the in-memory equivalent and rejects
+duplicate `event_id` values.\
+"""
+
+
+def _decorate(schema: dict[str, Any], name: str, description: str) -> dict[str, Any]:
+    """Prepend JSON Schema metadata that pydantic does not emit."""
+    decorated: dict[str, Any] = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": f"{BASE_ID}/{name}.schema.json",
+        "x-generated-from": f"synthworld.agentic.models.{schema.get('title', name)}",
+        "x-generated-by": "agent-authority-contract/tools/generate_trace_schema.py",
+        "x-regenerate-with": (
+            "uv run python agent-authority-contract/tools/generate_trace_schema.py"
+        ),
+        "description": description,
+    }
+    decorated.update(schema)
+    return decorated
+
+
+def build() -> dict[str, dict[str, Any]]:
+    """Return the schemas to write, keyed by file stem."""
+    row = _assert_utc_timestamps(ObservedActionTrace.model_json_schema())
+    envelope = AgenticTraceSubmission.model_json_schema()
+    for definition in (envelope.get("$defs") or {}).values():
+        _assert_utc_timestamps(definition)
+    return {
+        "observed-action-trace": _decorate(
+            row,
+            "observed-action-trace",
+            ROW_DESCRIPTION,
+        ),
+        "agentic-trace-submission": _decorate(
+            envelope,
+            "agentic-trace-submission",
+            ENVELOPE_DESCRIPTION,
+        ),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="exit non-zero if a committed schema differs from the model",
+    )
+    args = parser.parse_args()
+
+    stale: list[str] = []
+    for stem, schema in build().items():
+        target = SCHEMAS_DIR / f"{stem}.schema.json"
+        rendered = json.dumps(schema, indent=2, sort_keys=False) + "\n"
+        if args.check:
+            current = target.read_text() if target.exists() else ""
+            if current != rendered:
+                stale.append(str(target))
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(rendered)
+        print(f"wrote {target}")
+
+    if stale:
+        for path in stale:
+            print(f"STALE: {path} does not match the model", file=sys.stderr)
+        print("re-run without --check to regenerate", file=sys.stderr)
+        return 1
+    if args.check:
+        print("schemas match the models")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

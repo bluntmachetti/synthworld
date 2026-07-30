@@ -128,8 +128,42 @@ answer key. `decision` is the action-time decision;
 Score it with:
 
 ```bash
+synthworld validate agentic-trace --predictions observed-actions.jsonl
 synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 ```
+
+### Validate before you score
+
+`validate agentic-trace` checks the submission's shape with no access to evaluator
+truth, so an adapter author can iterate without the answer key. It examines every
+line rather than stopping at the first failure.
+
+| code | severity | meaning |
+|---|---|---|
+| `malformed_json` | error | the line is not valid JSON |
+| `invalid_row` | error | the line is JSON but violates the trace model |
+| `duplicate_event_id` | error | the same `event_id` appears on more than one line |
+| `unexpected_event_id` | error | the `event_id` is not an action event in this benchmark |
+| `missing_event_id` | error | an expected action event is absent from the submission |
+| `all_rows_null` | error | every row is empty; a misconfigured adapter, not a submission |
+| `all_null_row` | warning | one row carries nothing but its `event_id` |
+| `no_scored_fields` | warning | only fields the scorer does not read are set |
+| `empty_evidence_refs` | warning | `evidence_refs` is `[]`; use `null` to assert no capture |
+| `cardinality_unchecked` | warning | a line had no recoverable `event_id` to match |
+
+Exit codes are `0` for valid, `1` for invalid or unreadable; warnings never change the
+exit code. A valid result guarantees that `evaluate agentic` will not raise
+`EvaluationInputError` for the same document, and guarantees nothing about the scores.
+
+Two gotchas that catch non-Python adapters, both deliberate. `synthetic` must be
+`true` or omitted — `false` is rejected, because the marker is what makes the artifact
+unmistakably fictional. And `evidence_refs: []` is not `null`: the empty list claims
+that evidence was captured and there was none of it, while `null` claims nothing was
+captured. Asteria v1 scores the two identically, so the distinction is about
+stating what you mean; the mechanical consequences are that
+`synthworld validate agentic-trace` warns on the empty form, and that a submission
+whose rows carry nothing but an empty `evidence_refs` is rejected as uninformative,
+exactly as an all-null one is.
 
 ### Trace conventions
 
@@ -224,7 +258,10 @@ independent:
   reconstructability;
 - expected side effect and policy-version correctness.
 
-Every canonical case also receives a per-dimension failure slice. A correct
+Each canonical case receives a per-dimension failure slice for the thirteen
+per-action checks. The seven metrics built separately - both least-privilege
+metrics, the temporal metric, provenance precision and the three decision rates -
+emit no slices, so those dimensions have no per-case breakdown. A correct
 allow/deny with missing evidence can therefore score perfectly on decision
 accuracy while scoring below one on provenance; there is no aggregate score
 that conceals that difference.

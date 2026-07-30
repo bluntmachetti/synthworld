@@ -300,6 +300,14 @@ keep the trace serializer. Then score the resulting file against the packaged
 truth:
 
 ```bash
+synthworld validate agentic-trace --predictions predictions/agentic.jsonl
+```
+
+Check the shape first. This needs no answer key, reports every bad row at once with
+line numbers, and exits non-zero on anything `evaluate agentic` would reject — so you
+can iterate on an adapter without the evaluator bundle. Then score it:
+
+```bash
 synthworld evaluate agentic \
   --predictions predictions/agentic.jsonl \
   --summary

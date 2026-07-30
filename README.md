@@ -47,6 +47,7 @@ evaluator truth:
 
 ```bash
 synthworld generate-agentic --output asteria-agentic-v1
+synthworld validate agentic-trace --predictions observed-actions.jsonl
 synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 ```
 
@@ -213,6 +214,22 @@ emit evaluator-only truth. Keep those artifacts outside product and demo data
 paths. The `generate-public-extraction`, `generate-public-connections`, and
 `generate-risk-public` commands emit the separately serialized product-safe
 observations.
+
+## Validate before you score
+
+Agentic submissions can be checked for shape before any scoring, without the answer
+key:
+
+```bash
+synthworld validate agentic-trace --predictions PATH [--json]
+```
+
+It reports every malformed row, duplicate, missing and unexpected event in one pass
+with line numbers, and exits `0` when the submission is valid or `1` when it is not.
+A valid result means `evaluate agentic` will not reject the file; it says nothing
+about how well the system scored. Unlike `evaluate`, the default output is a human
+summary and `--json` opts into the machine report — an evaluation report is a record
+to keep, whereas this is read once to find a broken line.
 
 ## Evaluate a system
 

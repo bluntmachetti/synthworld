@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/observed-action-trace.schema.json",
+  "x-generated-from": "synthworld.agentic.models.ObservedActionTrace",
+  "x-generated-by": "agent-authority-contract/tools/generate_trace_schema.py",
+  "x-regenerate-with": "uv run python agent-authority-contract/tools/generate_trace_schema.py",
+  "description": "One system-under-test observation of one attempted agent action.\n\nThe wire format is JSON Lines: one object per line, one line per action event in\nthe benchmark's public event stream, keyed by `event_id`. The scorer requires the\nsubmitted set of `event_id` values to equal the benchmark's action-event set\nexactly - no omissions, no duplicates, no extras.\n\nEvery field except `event_id` is nullable, and null carries meaning: it asserts\nthat the system did not capture that value. On the equality and recall metrics null\nis scored as a miss, never back-filled or ignored, so emitting null is an honest\nanswer rather than a way to avoid being wrong. It is not uniformly penalised: a null\ndecision records no false allow, so it scores perfectly on least-privilege accuracy -\nread that metric alongside recall rather than alone.\n\nDo not substitute empty strings or empty arrays for null: an\nempty `evidence_refs` array asserts that capture ran and found nothing, whereas\nnull asserts that nothing was captured. Asteria v1 scores the two identically, so\nthe distinction is about stating what you mean, not about the number.\n\nThis schema is generated from `synthworld.agentic.models.ObservedActionTrace`. It\nis a projection of that model, not an independent definition: where the two\ndisagree, the model is correct and this file is stale.",
+  "$defs": {
+    "Decision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "Decision",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "timestamp": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string",
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d+)?(Z|[+-]00:00)$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Timestamp"
+    },
+    "originating_principal_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Originating Principal Id"
+    },
+    "logical_agent_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Logical Agent Id"
+    },
+    "runtime_principal_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Runtime Principal Id"
+    },
+    "credential_subject_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Credential Subject Id"
+    },
+    "attributed_actor_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attributed Actor Id"
+    },
+    "resource_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resource Id"
+    },
+    "action": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Action"
+    },
+    "requested_scope": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requested Scope"
+    },
+    "decision": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Decision"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "decision_at_audit": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Decision"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "side_effect": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Side Effect"
+    },
+    "policy_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Policy Version"
+    },
+    "delegation_chain_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Delegation Chain Ids"
+    },
+    "accountable_owner_chain": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Accountable Owner Chain"
+    },
+    "evidence_refs": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evidence Refs"
+    },
+    "reconstructable_from_retained_evidence": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reconstructable From Retained Evidence"
+    }
+  },
+  "required": [
+    "event_id"
+  ],
+  "title": "ObservedActionTrace",
+  "type": "object"
+}

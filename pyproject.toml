@@ -46,7 +46,13 @@ Security = "https://github.com/bluntmachetti/synthworld/security/policy"
 
 [dependency-groups]
 dev = [
+  # Only for the model-vs-published-schema agreement test. Deliberately NOT a
+  # runtime dependency: the schemas are generated from the models, so validating
+  # model-parsed rows against them at runtime would be circular. The [format]
+  # extra matters - jsonschema does not assert date-time without it.
+  "jsonschema[format]>=4.23,<5",
   "mypy>=1.20,<2",
+  "types-jsonschema>=4.23,<5",
   "pytest>=9,<10",
   "pytest-cov>=7,<8",
   "ruff>=0.15,<0.16",

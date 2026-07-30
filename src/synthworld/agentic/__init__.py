@@ -42,6 +42,12 @@ from synthworld.agentic.replay import materialize_agentic_world
 from synthworld.agentic.serialization import (
     export_agentic_benchmark,
     load_golden_agentic_benchmark,
+    load_public_agentic_bundle,
+)
+from synthworld.agentic.trace_validation import (
+    TraceValidationIssue,
+    TraceValidationReport,
+    validate_trace_jsonl,
 )
 
 __all__ = [
@@ -58,6 +64,8 @@ __all__ = [
     "AgenticWorldSnapshot",
     "AgenticWorldState",
     "ObservedActionTrace",
+    "TraceValidationIssue",
+    "TraceValidationReport",
     "always_deny_agentic_trace",
     "build_agentic_benchmark",
     "current_state_agentic_trace",
@@ -72,8 +80,10 @@ __all__ = [
     "export_agentic_benchmark",
     "generate_asteria_agentic_v1",
     "load_golden_agentic_benchmark",
+    "load_public_agentic_bundle",
     "materialize_agentic_world",
     "reference_agentic_trace",
     "trace_submission_from_jsonl",
     "trace_submission_to_jsonl",
+    "validate_trace_jsonl",
 ]

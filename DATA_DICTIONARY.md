@@ -182,6 +182,38 @@ reconstructability, policy version, and side-effect correctness. Case labels
 are open strings so other worlds can reuse the generic contract without being
 forced to reproduce Asteria's exact case set.
 
+## Trace validation report
+
+Emitted by `synthworld validate agentic-trace` and by
+`synthworld.agentic.validate_trace_jsonl`. Independent of the evaluation report:
+validation describes a submission's shape and never reads evaluator truth.
+
+`TraceValidationReport`
+
+| field | type | meaning |
+|---|---|---|
+| `schema_version` | `"1.0.0"` | report contract version |
+| `valid` | bool | true when no issue has `severity == "error"` |
+| `row_count` | int | rows that parsed and were retained |
+| `expected_action_count` | int | action events the benchmark expects |
+| `issues` | tuple[`TraceValidationIssue`] | every finding, in discovery order |
+
+`TraceValidationIssue`
+
+| field | type | meaning |
+|---|---|---|
+| `severity` | `"error"` \| `"warning"` | errors make the report invalid |
+| `code` | str | stable identifier; see AGENTIC_BENCHMARK.md for the table |
+| `message` | str | human-readable detail |
+| `line` | int \| None | 1-based source line, or None for whole-document findings |
+| `event_id` | str \| None | subject event, when one could be determined |
+
+Codes are `malformed_json`, `invalid_row`, `duplicate_event_id`,
+`unexpected_event_id`, `missing_event_id`, `all_rows_null` (errors) and
+`all_null_row`, `no_scored_fields`, `empty_evidence_refs`, `cardinality_unchecked`
+(warnings). `valid` is enforced against `issues` by a model validator, so a report
+cannot claim validity while carrying an error.
+
 ## Evaluation
 
 The evaluation SDK debuts provisional schema version `0.1.0`. A system submits

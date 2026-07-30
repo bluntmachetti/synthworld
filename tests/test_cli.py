@@ -9,10 +9,12 @@ from uuid import UUID
 import pytest
 
 from synthworld.agentic import (
+    TraceValidationReport,
     generate_asteria_agentic_v1,
     reference_agentic_trace,
     trace_submission_to_jsonl,
 )
+from synthworld.agentic.serialization import export_agentic_benchmark
 from synthworld.cli import main
 from synthworld.connection import ConnectionBenchmark, PublicConnectionCorpus
 from synthworld.connection_generator import (
@@ -612,3 +614,149 @@ def test_evaluate_reports_malformed_predictions_as_exit_code_one(
 
     assert exit_code == 1
     assert capsys.readouterr().err.strip()
+
+
+def _write_reference_trace(tmp_path: Path) -> Path:
+    predictions = tmp_path / "agentic-trace.jsonl"
+    predictions.write_text(
+        trace_submission_to_jsonl(
+            reference_agentic_trace(generate_asteria_agentic_v1())
+        ),
+        encoding="utf-8",
+    )
+    return predictions
+
+
+def test_validate_agentic_trace_accepts_the_reference_trace(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    predictions = _write_reference_trace(tmp_path)
+
+    exit_code = main(["validate", "agentic-trace", "--predictions", str(predictions)])
+
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "agentic-trace: valid" in out
+    assert "rows 11, expected actions 11, 0 errors, 0 warnings" in out
+
+
+def test_validate_agentic_trace_reports_every_bad_line_and_exits_one(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    predictions = _write_reference_trace(tmp_path)
+    lines = predictions.read_text(encoding="utf-8").splitlines()
+    predictions.write_text(
+        "\n".join(["{not json", *lines[1:], lines[1]]) + "\n", encoding="utf-8"
+    )
+
+    exit_code = main(["validate", "agentic-trace", "--predictions", str(predictions)])
+
+    out = capsys.readouterr().out
+    assert exit_code == 1
+    assert "agentic-trace: invalid" in out
+    # One pass surfaces the parse failure, the duplicate, and the real missing event.
+    assert "malformed_json" in out
+    assert "duplicate_event_id" in out
+    assert "missing_event_id" in out
+
+
+def test_validate_agentic_trace_emits_a_machine_report_with_json_flag(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    predictions = _write_reference_trace(tmp_path)
+    lines = predictions.read_text(encoding="utf-8").splitlines()
+    predictions.write_text("\n".join(lines[1:]) + "\n", encoding="utf-8")
+
+    exit_code = main(
+        ["validate", "agentic-trace", "--predictions", str(predictions), "--json"]
+    )
+
+    report = TraceValidationReport.model_validate_json(capsys.readouterr().out)
+    assert exit_code == 1
+    assert report.valid is False
+    assert any(issue.code == "missing_event_id" for issue in report.issues)
+
+
+def test_validate_agentic_trace_reports_an_unreadable_file(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main(
+        ["validate", "agentic-trace", "--predictions", str(tmp_path / "absent.jsonl")]
+    )
+
+    assert exit_code == 1
+    assert capsys.readouterr().err.strip()
+
+
+def test_validate_agentic_trace_reports_a_broken_benchmark_tree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """AgenticArtifactError is a ValueError, so it needs explicit handling."""
+
+    from synthworld.agentic import serialization
+
+    predictions = _write_reference_trace(tmp_path)
+    root = tmp_path / "asteria-agentic-v1"
+    export_agentic_benchmark(root, generate_asteria_agentic_v1())
+    manifest = root / "public/manifest.json"
+    manifest.write_text('{"artifacts": {}}', encoding="utf-8")
+    monkeypatch.setattr(serialization, "files", lambda _package: tmp_path)
+
+    exit_code = main(["validate", "agentic-trace", "--predictions", str(predictions)])
+
+    assert exit_code == 1
+    assert "manifest" in capsys.readouterr().err
+
+
+def test_validate_and_evaluate_agree_on_a_byte_order_mark(tmp_path: Path) -> None:
+    """A BOM-prefixed file is common from Windows editors and must not diverge.
+
+    Both commands read with utf-8-sig. If only one did, validate could bless a file
+    the scorer refuses, breaking the one-directional guarantee.
+    """
+
+    predictions = tmp_path / "bom.jsonl"
+    predictions.write_text(
+        trace_submission_to_jsonl(
+            reference_agentic_trace(generate_asteria_agentic_v1())
+        ),
+        encoding="utf-8-sig",
+    )
+    assert predictions.read_bytes()[:3] == b"\xef\xbb\xbf"
+
+    assert main(["validate", "agentic-trace", "--predictions", str(predictions)]) == 0
+    assert main(["evaluate", "agentic", "--predictions", str(predictions)]) == 0
+
+
+@pytest.mark.parametrize("flags", [[], ["--json"]], ids=["human", "json"])
+def test_validate_survives_an_unpaired_surrogate_on_every_output_path(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    flags: list[str],
+) -> None:
+    """Regression: this crashed the human path and --json differently.
+
+    `{"event_id": "\\ud800"}` is valid JSON that decodes to a lone surrogate. The
+    human summary raised UnicodeEncodeError on print and --json raised
+    PydanticSerializationError, so a malformed trace could take down the command
+    whichever output the caller asked for.
+    """
+
+    predictions = _write_reference_trace(tmp_path)
+    lines = predictions.read_text(encoding="utf-8").splitlines()
+    predictions.write_text(
+        "\n".join([*lines, '{"event_id":"\\ud800-bad"}']) + "\n", encoding="utf-8"
+    )
+
+    exit_code = main(
+        ["validate", "agentic-trace", "--predictions", str(predictions), *flags]
+    )
+
+    assert exit_code == 1
+    assert "\\ud800" in capsys.readouterr().out

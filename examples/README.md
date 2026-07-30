@@ -41,6 +41,7 @@ audit state to historical actions, so it is useful for learning the trace
 contract but is not an oracle ceiling:
 
 ```bash
+uv run synthworld validate agentic-trace --predictions predictions/agentic.jsonl
 uv run synthworld evaluate agentic \
   --predictions predictions/agentic.jsonl \
   --summary

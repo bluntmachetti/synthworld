@@ -223,14 +223,61 @@ def export_agentic_benchmark(root: Path, benchmark: AgenticBenchmark) -> None:
             target.write_bytes(content)
 
 
+def load_public_agentic_bundle(root: Traversable | None = None) -> AgenticPublicBundle:
+    """Load and checksum-verify a public-only Asteria tree.
+
+    Reads nothing from the evaluator tree, so callers that must not see answer-key
+    truth - trace validation, adapters, examples - can obtain the expected action
+    events without it. ``root`` defaults to the packaged public fixture.
+
+    Note that verification compares the tree against its own ``manifest.json``, so a
+    caller supplying an untrusted ``root`` gets internal consistency, not
+    provenance; only the packaged tree is cross-bound to evaluator checksums by
+    :func:`load_golden_agentic_benchmark`.
+    """
+
+    public_root = root if root is not None else _packaged_agentic_root() / "public"
+    _verify_artifacts(public_root, "manifest.json", _PUBLIC_BASE_PATHS, "artifacts")
+    return _deserialize_public_agentic_bundle(public_root)
+
+
+def _packaged_agentic_root() -> Traversable:
+    return files("synthworld.benchmarks").joinpath("asteria-agentic-v1")
+
+
 def load_golden_agentic_benchmark() -> AgenticBenchmark:
     """Load and checksum-verify the packaged Asteria Agentic v1 fixture."""
 
-    root = files("synthworld.benchmarks").joinpath("asteria-agentic-v1")
+    root = _packaged_agentic_root()
     public_root = root.joinpath("public")
     evaluator_root = root.joinpath("evaluator")
+    # Both verifications run before any deserialization, and the evaluator check
+    # cross-binds its recorded public digest to the public manifest. Do not reorder
+    # these into load_public_agentic_bundle: that would deserialize the public tree
+    # before the evaluator tree has been verified.
     _verify_artifacts(public_root, "manifest.json", _PUBLIC_BASE_PATHS, "artifacts")
     _verify_evaluator_artifacts(evaluator_root, public_root)
+
+    public = _deserialize_public_agentic_bundle(public_root)
+    bindings_doc = _read_json(evaluator_root.joinpath("canonical_bindings.json"))
+    evaluator = AgenticEvaluatorBundle(
+        world_id=public.snapshot.world_id,
+        world_version=public.snapshot.world_version,
+        seed=public.snapshot.seed,
+        audit_event_id=public.scenario.audit_event_id,
+        bindings=TypeAdapter(tuple[CanonicalBinding, ...]).validate_python(
+            bindings_doc["bindings"]
+        ),
+        authority_truth=_read_jsonl(
+            evaluator_root.joinpath("authority_truth.jsonl"), AuthorityTruth
+        ),
+        cases=_read_jsonl(evaluator_root.joinpath("cases.jsonl"), AgenticCase),
+    )
+    return AgenticBenchmark(public=public, evaluator=evaluator)
+
+
+def _deserialize_public_agentic_bundle(public_root: Traversable) -> AgenticPublicBundle:
+    """Deserialize a public tree that has already been checksum-verified."""
 
     organisation = _read_json(public_root.joinpath("organisation.json"))
     snapshot = AgenticWorldSnapshot(
@@ -246,7 +293,7 @@ def load_golden_agentic_benchmark() -> AgenticBenchmark:
         policies=tuple(organisation["policies"]),
         initial_evidence_refs=tuple(organisation["initial_evidence_refs"]),
     )
-    public = AgenticPublicBundle(
+    return AgenticPublicBundle(
         snapshot=snapshot,
         events=_read_jsonl(public_root.joinpath("public_events.jsonl"), AgenticEvent),
         scenario=PublicScenario.model_validate_json(
@@ -255,21 +302,6 @@ def load_golden_agentic_benchmark() -> AgenticBenchmark:
             )
         ),
     )
-    bindings_doc = _read_json(evaluator_root.joinpath("canonical_bindings.json"))
-    evaluator = AgenticEvaluatorBundle(
-        world_id=snapshot.world_id,
-        world_version=snapshot.world_version,
-        seed=snapshot.seed,
-        audit_event_id=public.scenario.audit_event_id,
-        bindings=TypeAdapter(tuple[CanonicalBinding, ...]).validate_python(
-            bindings_doc["bindings"]
-        ),
-        authority_truth=_read_jsonl(
-            evaluator_root.joinpath("authority_truth.jsonl"), AuthorityTruth
-        ),
-        cases=_read_jsonl(evaluator_root.joinpath("cases.jsonl"), AgenticCase),
-    )
-    return AgenticBenchmark(public=public, evaluator=evaluator)
 
 
 def _verify_artifacts(
