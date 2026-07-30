@@ -64,17 +64,19 @@ def materialize_agentic_world(
 
     _validate_order(events)
     full_state = _reduce(snapshot, events)
-    if at_event_index is None and at_timestamp is None:
-        return full_state
 
+    # The no-cursor case returns from the else arm rather than from an early guard.
+    # Behaviour is identical, but every branch becomes reachable: the previous shape
+    # left an unreachable defensive raise that needed a coverage pragma, which made
+    # "100% branch coverage" true only with an asterisk.
     if at_event_index is not None:
         if at_event_index > len(events):
             raise AgenticReplayError("event index is outside the event stream")
         prefix = tuple(item for item in events if item.event_index <= at_event_index)
     elif at_timestamp is not None:
         prefix = tuple(item for item in events if item.occurred_at <= at_timestamp)
-    else:  # pragma: no cover - guarded by the full-state return above
-        raise AgenticReplayError("missing replay cursor")
+    else:
+        return full_state
     if len(prefix) == len(events):
         return full_state
     return _reduce(snapshot, prefix)
