@@ -223,7 +223,7 @@ The remaining vocabularies come from `synthworld.agentic.models`:
 `ObservedActionTrace.model_fields`, `AgenticCaseKind`, `AuthorityFailureReason`,
 `AuthorityTruth`, `CanonicalBinding`, `Capability`.
 
-As of catalogue `0.1.0-draft` the two sets are in exact correspondence: all 20
+As of catalogue `0.2.0-draft` the two sets are in exact correspondence: all 20
 emitted metrics, all 11 case kinds and all 8 failure reasons are cited by at
 least one control, and every control's identifiers resolve. This check moves into
 `synthworld validate` when the schema work lands.

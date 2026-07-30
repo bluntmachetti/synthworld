@@ -159,7 +159,9 @@ Two gotchas that catch non-Python adapters, both deliberate. `synthetic` must be
 `true` or omitted — `false` is rejected, because the marker is what makes the artifact
 unmistakably fictional. And `evidence_refs: []` is not `null`: the empty list claims
 that evidence was captured and there was none of it, while `null` claims nothing was
-captured, and the two score differently.
+captured. Asteria v1 scores the two identically, so the distinction is about
+stating what you mean; the only mechanical consequence is that
+`synthworld validate agentic-trace` warns on the empty form.
 
 ### Trace conventions
 

@@ -215,7 +215,9 @@ controls:
     expected_truth:
       - CanonicalBinding.logical_agent_id
       - CanonicalBinding.runtime_principal_id
-      - CanonicalBinding.runtime_id
+    # CanonicalBinding.runtime_id was listed here and removed on review: no metric
+    # reads it and ObservedActionTrace has no corresponding field, so it judged
+    # nothing. It remains an oracle-internal input, not evaluator-side truth.
     failure_slices:
       - wrong_runtime
       - shared_credential
@@ -446,7 +448,7 @@ controls:
       the moment of the action. Revocation removes authority from the revoked
       grant and everything derived from it.
     evaluation_layer: core
-    asteria_v1_status: supported
+    asteria_v1_status: partial
     metrics:
       - authorization_decision_accuracy
       - authorization_decision_precision
@@ -477,11 +479,20 @@ controls:
         clause: "S4"
         mapping_status: partial
     core_limitations: >-
-      Revocation is instantaneous at its event index. Cascade to descendant
-      delegations is verified, but propagation delay to a live enforcement point
-      is not representable. `timestamp` is required and validated as tz-aware UTC
-      but read by no metric today - a system reporting the right decision at the
-      wrong stated time loses no points.
+      Demoted from `supported` on review, for the same reason C04 was: the
+      invariant's second clause - revocation removing authority from everything
+      derived from the revoked grant - is enforced by the oracle when it builds
+      truth, and scored by nothing. No fixture case attempts an action under a
+      DESCENDANT of a revoked grant; post_revocation_action uses the revoked grant
+      itself. The one place the cascade becomes observable is authorised_action's
+      decision_at_audit, which SW-AA-C09 records as falling outside its metric's
+      case scope. A descendant-of-revoked case is a fixture gap for issue #27, and
+      closing it would make `supported` honest.
+      Two further limits: the four decision metrics are computed over all eleven
+      actions, so this control's numbers move for failures owned by C02, C03, C05
+      and C10 - they are not specific to this invariant. And `timestamp` is
+      required and validated as tz-aware UTC but read by no metric, so a system
+      reporting the right decision at the wrong stated time loses nothing.
     lab_extension: SW-AA-L06 - measure real propagation latency and the in-flight window.
 
   - control_id: SW-AA-C07
@@ -588,7 +599,9 @@ controls:
       reconstructive sufficiency are absent from core entirely - hence `partial`,
       not `supported`. Note also that required_evidence_refs contains no reference
       to the revocation event, the decision record, or the action event itself.
-      A null evidence_refs is scored as missing capture, never as an empty set.
+      A null evidence_refs is scored as missing capture. Note that an empty tuple
+      scores identically to null on every provenance metric - the two differ in
+      what they assert, not in what they score.
     lab_extension: >-
       Verify hash chaining and fail-closed logging in a deployed pipeline; kill
       the audit sink mid-run and confirm the system fails closed rather than
@@ -664,9 +677,12 @@ controls:
       - decision
     expected_truth:
       - AuthorityTruth.decision_at_action
-      - AuthorityTruth.failure_reasons_at_action
+    # failure_reasons_at_action was listed and removed on review: there is no
+    # observation field to judge it against, which is precisely what SW-AA-C13
+    # records as absent.
     failure_slices:
       - cross_tenant_confusion
+      - shared_credential
     authority_failure_reasons:
       - tenant_mismatch
     applicable_patterns: [proxy-injection, short-lived-minting, bearer-baseline]
@@ -878,8 +894,10 @@ controls:
     required_observations: []
     expected_truth: []
     failure_slices: []
-    authority_failure_reasons:
-      - credential_invalid
+    # credential_invalid was listed here and removed on review: that reason fires for
+    # C03's conditions - expiry and subject mismatch - not for the issuer-entitlement
+    # and credential-to-grant binding this control is about, which nothing detects.
+    authority_failure_reasons: []
     applicable_patterns: [short-lived-minting, proxy-injection, bearer-baseline]
     external_mappings:
       - source: RFC8693
@@ -912,9 +930,11 @@ controls:
   - control_id: SW-AA-C16
     title: Principal intent, approval and parameter integrity
     security_invariant: >-
-      The action performed is the action the principal actually authorised,
-      including its material parameters. An approval covers one specific action and
-      cannot be replayed against a different resource, amount, or counterparty.
+      The action performed, including its material parameters, is within what the
+      principal authorised. An authorisation bound to specific parameters cannot be
+      reused for an action whose material parameters differ. Which parameters are
+      material is declared per deployment, as the authority-critical dependency set
+      is for SW-AA-L05.
     evaluation_layer: core
     asteria_v1_status: absent
     metrics: []
