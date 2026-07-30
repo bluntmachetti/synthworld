@@ -732,3 +732,31 @@ def test_validate_and_evaluate_agree_on_a_byte_order_mark(tmp_path: Path) -> Non
 
     assert main(["validate", "agentic-trace", "--predictions", str(predictions)]) == 0
     assert main(["evaluate", "agentic", "--predictions", str(predictions)]) == 0
+
+
+@pytest.mark.parametrize("flags", [[], ["--json"]], ids=["human", "json"])
+def test_validate_survives_an_unpaired_surrogate_on_every_output_path(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    flags: list[str],
+) -> None:
+    """Regression: this crashed the human path and --json differently.
+
+    `{"event_id": "\\ud800"}` is valid JSON that decodes to a lone surrogate. The
+    human summary raised UnicodeEncodeError on print and --json raised
+    PydanticSerializationError, so a malformed trace could take down the command
+    whichever output the caller asked for.
+    """
+
+    predictions = _write_reference_trace(tmp_path)
+    lines = predictions.read_text(encoding="utf-8").splitlines()
+    predictions.write_text(
+        "\n".join([*lines, '{"event_id":"\\ud800-bad"}']) + "\n", encoding="utf-8"
+    )
+
+    exit_code = main(
+        ["validate", "agentic-trace", "--predictions", str(predictions), *flags]
+    )
+
+    assert exit_code == 1
+    assert "\\ud800" in capsys.readouterr().out

@@ -363,3 +363,40 @@ def test_an_empty_delegation_chain_is_signal_not_silence() -> None:
         if truth.delegation_chain_ids == ()
     )
     assert empty_chain_cases == 5
+
+
+def test_report_escapes_characters_that_cannot_be_written_out() -> None:
+    """A trace is untrusted input and may carry an unpaired surrogate.
+
+    JSON permits an escape decoding to a lone surrogate, and the trace model accepts
+    the resulting string. Carrying it into a report crashed both CLI output paths, so
+    the report escapes on construction and stays serialisable by design.
+    """
+
+    issue = TraceValidationIssue(
+        severity="error",
+        code="unexpected_event_id",
+        message="\ud800-bad is not an action event",
+        event_id="\ud800-bad",
+    )
+
+    assert issue.event_id == "\\ud800-bad"
+    assert "\\ud800" in issue.message
+    report = TraceValidationReport(
+        valid=False, row_count=0, expected_action_count=0, issues=(issue,)
+    )
+    # Both output paths: JSON serialisation and plain encoding.
+    assert "\\\\ud800" in report.model_dump_json()
+    assert report.model_dump_json().encode("utf-8")
+
+
+def test_escaping_leaves_ordinary_identifiers_untouched() -> None:
+    issue = TraceValidationIssue(
+        severity="warning",
+        code="all_null_row",
+        message="plain",
+        event_id=EXPECTED_IDS[0],
+    )
+
+    assert issue.event_id == EXPECTED_IDS[0]
+    assert issue.message == "plain"

@@ -25,7 +25,7 @@ from collections import Counter
 from collections.abc import Collection, Iterable
 from typing import Literal, Self
 
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 
 from synthworld.agentic.models import ObservedActionTrace
 from synthworld.models import SyntheticModel
@@ -54,6 +54,24 @@ _SCORED_FIELDS: tuple[str, ...] = (
 )
 
 
+def _printable(value: str) -> str:
+    """Escape anything that cannot survive being written out.
+
+    A trace is untrusted input, and JSON permits escapes that decode to unpaired
+    surrogates - ``{"event_id": "\\ud800"}`` parses fine and the trace model accepts
+    it. Carrying that string into a report made both output paths crash: the human
+    summary raised UnicodeEncodeError on print, and ``--json`` raised
+    PydanticSerializationError. Escaping here rather than at either boundary keeps the
+    report serialisable by construction, so a third output format cannot reintroduce
+    the same defect.
+
+    The escape is also the more useful diagnostic: the author sees the escape sequence
+    their file actually contains. Clean input is returned unchanged.
+    """
+
+    return value.encode("utf-8", "backslashreplace").decode("utf-8")
+
+
 class TraceValidationIssue(SyntheticModel):
     """One finding about a submitted trace."""
 
@@ -62,6 +80,11 @@ class TraceValidationIssue(SyntheticModel):
     message: str
     line: int | None = None
     event_id: str | None = None
+
+    @field_validator("message", "event_id")
+    @classmethod
+    def escape_unprintable(cls, value: str | None) -> str | None:
+        return value if value is None else _printable(value)
 
 
 class TraceValidationReport(SyntheticModel):
