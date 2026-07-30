@@ -37,6 +37,8 @@ The negative control, and roughly what most deployments do today.
 | A bearer token conveys no delegation | `delegation_chain_ids` is `null` |
 | Authorisation rests on the credential being live | the decision ignores revocation, runtime binding, tenancy and scope attenuation |
 | There is no action-time record to replay | `decision_at_audit` repeats the action-time decision, which is the current-state substitution the benchmark exists to detect |
+| It cannot observe retained evidence at all | `evidence_refs` and `reconstructable_from_retained_evidence` are `null` — not `false`, which would assert a fact it never established |
+| An action it allows, it performs | the side effect follows *its own* verdict, so a false allow records the effect it actually causes rather than the oracle's `none` |
 
 The decision here is computed from public artifacts only — allow when the presented
 credential was issued before the action — so its divergence from truth is *derived*,
@@ -88,7 +90,8 @@ snippet at the end of this document.
 | `attribution_integrity` | 1.000 | **0.000** | 0.000 |
 | `accountable_owner_chain_integrity` | 1.000 | **0.000** | 0.000 |
 | `provenance_completeness` | 1.000 | 1.000 | 0.000 |
-| `audit_reconstructability_accuracy` | 1.000 | 1.000 | 0.091 |
+| `audit_reconstructability_accuracy` | 1.000 | 1.000 | 0.000 |
+| `expected_side_effect_accuracy` | 1.000 | 1.000 | 0.364 |
 
 Three readings are worth stating explicitly, because a reader will otherwise draw a
 stronger conclusion than the evidence permits.

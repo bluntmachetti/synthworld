@@ -77,9 +77,14 @@ the model rejects. An adapter author was being told those were fine and then hav
 the scorer reject them.
 
 The timestamp property therefore carries an asserted `pattern` as well, admitting
-exactly the forms the model accepts (`Z`, `+00:00`, `-00:00`, optional fractional
-seconds). Configure your validator for format assertion anyway, but the contract no
-longer depends on you doing so.
+the forms the model accepts (`Z`, `+00:00`, `-00:00`, optional fractional seconds)
+and constraining every component to its real range, so `2026-99-99T99:99:99Z` is
+refused by any conformant validator.
+
+One gap remains and it is worth knowing precisely: a regex cannot do calendar
+arithmetic, so `2026-02-30T12:00:00Z` satisfies the pattern. **Configure format
+assertion and it is rejected**, which is why you should — but if you do not, you
+still get component-range checking rather than the nothing you had before.
 
 ### On `jsonschema` as a dependency
 

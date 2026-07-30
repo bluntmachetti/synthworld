@@ -37,9 +37,20 @@ BASE_ID = "https://github.com/bluntmachetti/synthworld/agent-authority-contract/
 # which is exactly the failure this package exists to prevent.
 #
 # `pattern` IS an assertion everywhere, so it is added to close the gap. The regex
-# admits precisely the forms the model accepts (verified): a UTC designator of Z,
-# +00:00 or -00:00, with optional fractional seconds.
-_UTC_TIMESTAMP_PATTERN = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]00:00)$"
+# admits the forms the model accepts (verified): a UTC designator of Z, +00:00 or
+# -00:00, with optional fractional seconds, and it constrains each component to its
+# real range so an impossible timestamp like 2026-99-99T99:99:99Z is refused.
+#
+# Residual gap, stated rather than hidden: a regex cannot do calendar arithmetic, so
+# 2026-02-30 satisfies the pattern. A consumer that DOES assert format rejects it
+# anyway, so model and schema agree in that configuration; a consumer that does not
+# gets component-range checking without calendar validity. That is a large
+# improvement on the pre-pattern behaviour, which accepted "not-a-date", and the
+# remaining exposure is documented for consumers in ../README.md.
+_UTC_TIMESTAMP_PATTERN = (
+    r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])"
+    r"T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-]00:00)$"
+)
 
 
 def _assert_utc_timestamps(schema: dict[str, Any]) -> dict[str, Any]:

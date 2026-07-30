@@ -97,6 +97,17 @@ MUTATION_CORPUS: tuple[tuple[str, dict[str, Any]], ...] = (
     ("naive-timestamp", _row(timestamp="2026-07-29T12:00:00")),
     ("non-utc-offset", _row(timestamp="2026-07-29T12:00:00+02:00")),
     ("garbage-timestamp", _row(timestamp="not-a-date")),
+    ("impossible-components", _row(timestamp="2026-99-99T99:99:99Z")),
+    ("month-13", _row(timestamp="2026-13-01T12:00:00Z")),
+    ("month-00", _row(timestamp="2026-00-10T12:00:00Z")),
+    ("hour-25", _row(timestamp="2026-07-29T25:00:00Z")),
+    ("second-60", _row(timestamp="2026-07-29T12:00:60Z")),
+    ("day-32", _row(timestamp="2026-07-32T12:00:00Z")),
+    # Agreement here depends on format assertion, which is why this suite enables
+    # it and why the contract README tells consumers to. The pattern constrains
+    # component ranges but cannot do calendar arithmetic, so a consumer validating
+    # WITHOUT a format checker accepts this date while the model rejects it.
+    ("impossible-calendar-date", _row(timestamp="2026-02-30T12:00:00Z")),
     ("unknown-field", _row(bogus=1)),
     ("bad-decision", _row(decision="maybe")),
     ("good-decision", _row(decision="allow")),

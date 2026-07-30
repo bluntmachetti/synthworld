@@ -41,6 +41,11 @@ from synthworld.agentic.models import (
     ObservedActionTrace,
 )
 
+# Private, and imported deliberately: restating the closed side-effect vocabulary
+# here would let it drift from the oracle silently, whereas a rename breaks this
+# generator loudly at the moment someone changes it.
+from synthworld.agentic.replay import _side_effect_for
+
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 
 
@@ -221,14 +226,22 @@ def _row(
         decision_at_audit=(
             truth.decision_at_audit if pattern.replays_history else verdict
         ),
-        side_effect=truth.expected_side_effect if allowed else "none",
+        # Follows the PATTERN's verdict, not the oracle's. A pattern that wrongly
+        # allows an action also performs it, so pairing a false allow with the
+        # oracle's "none" would both contradict the row and flatter the pattern on
+        # expected_side_effect_accuracy.
+        side_effect=_side_effect_for(attempt.action) if allowed else "none",
         policy_version=(attempt.policy_version if pattern.policy_version else None),
         delegation_chain_ids=(
             truth.delegation_chain_ids if pattern.delegation_chain else None
         ),
         evidence_refs=truth.required_evidence_refs if pattern.evidence else None,
+        # None, not False: a pattern that cannot observe retained evidence has not
+        # established that reconstruction is impossible, it has established nothing.
+        # Asserting False would be a claim, and would accidentally match truth on
+        # the one case where evidence really was discarded.
         reconstructable_from_retained_evidence=(
-            truth.reconstructable_at_audit if pattern.evidence else False
+            truth.reconstructable_at_audit if pattern.evidence else None
         ),
     )
 
