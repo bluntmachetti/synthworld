@@ -14,3 +14,23 @@ paths = [
 regexes = [
   '''^\s*"public_credentials\.jsonl":\s*"[0-9a-f]{64}",?\s*$''',
 ]
+
+# Benchmark event identifiers read as high-entropy strings to the generic-api-key
+# heuristic, and one of them contains the word "credential". They are synthetic
+# fixture labels already published in
+# src/synthworld/benchmarks/asteria-agentic-v1/public/, not secrets.
+#
+# Kept deliberately narrow: the line must consist ONLY of evt-NNN-name identifiers,
+# so a real secret sharing a line with one is still reported. Verified against
+# 'api_key = "sk-..."', 'token: ghp_...' and 'evt-014-x AWS_SECRET=abc', none of
+# which match.
+[[rules.allowlists]]
+description = "Synthetic benchmark event identifiers quoted in contract documentation"
+condition = "AND"
+regexTarget = "line"
+paths = [
+  '''^agent-authority-contract/control-catalogue\.yaml$''',
+]
+regexes = [
+  '''^\s*evt-\d{3}-[a-z-]+(?:,\s*evt-\d{3}-[a-z-]+)*(?:,)?(?:\s+and)?\s*$''',
+]
