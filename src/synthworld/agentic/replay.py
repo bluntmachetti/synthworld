@@ -38,6 +38,23 @@ class AuthorityDecision:
     delegation_chain_ids: tuple[str, ...]
     required_evidence_refs: tuple[str, ...]
     expected_side_effect: str
+    #: Version of the delegation that actually covered the action, or the attempted
+    #: version where none did. Derived, not echoed - see :func:`_effective_chain`.
+    effective_policy_version: str
+
+
+@dataclass(frozen=True)
+class _Resolution:
+    """What delegation resolution produced, before it becomes a decision.
+
+    ``effective_version`` is ``None`` exactly when no delegation covered the action.
+    Keeping that distinct from "the attempted version" at the type level is what
+    stops the fallback from being applied silently in two places.
+    """
+
+    chain: tuple[str, ...]
+    failure: AuthorityFailureReason | None
+    effective_version: str | None
 
 
 def materialize_agentic_world(
@@ -124,14 +141,24 @@ def evaluate_action_authority(
     if attempt.policy_version not in {item.version for item in state.snapshot.policies}:
         failures.add(AuthorityFailureReason.POLICY_VERSION_MISMATCH)
 
-    chain, delegation_failure = _effective_chain(
+    resolution = _effective_chain(
         state,
         attempt,
         binding,
         decision_time,
     )
-    if delegation_failure is not None:
-        failures.add(delegation_failure)
+    chain = resolution.chain
+    # The single place the fallback is applied. Where no delegation covered the
+    # action there is no delegation-bound policy to name, so the attempted version
+    # stands - which leaves those rows echoable, and the release notes say so. The
+    # alternative, making the field optional, rewrites five frozen Asteria rows.
+    effective_policy_version = (
+        resolution.effective_version
+        if resolution.effective_version is not None
+        else attempt.policy_version
+    )
+    if resolution.failure is not None:
+        failures.add(resolution.failure)
     if attempt.proposed_delegation is not None and chain:
         parent = _by_id(state.delegations, chain[-1])
         proposal = attempt.proposed_delegation
@@ -143,7 +170,10 @@ def evaluate_action_authority(
             failures.add(AuthorityFailureReason.OVERPRIVILEGED_SUBDELEGATION)
 
     required_evidence = {
-        f"evidence:policy:{attempt.policy_version}",
+        # The governing policy, not the requested one. This re-points
+        # `reconstructable_at_audit` at whether the world retained the policy that
+        # actually applied, instead of at a string the acting agent chose.
+        f"evidence:policy:{effective_policy_version}",
         f"evidence:credential:{attempt.presented_credential_id}",
         f"evidence:runtime:{binding.runtime_id}",
         *(f"evidence:delegation:{item}" for item in chain),
@@ -158,6 +188,7 @@ def evaluate_action_authority(
         expected_side_effect=(
             _side_effect_for(attempt.action) if decision is Decision.ALLOW else "none"
         ),
+        effective_policy_version=effective_policy_version,
     )
 
 
@@ -370,7 +401,21 @@ def _effective_chain(
     attempt: ActionAttempt,
     binding: CanonicalBinding,
     decision_time: datetime,
-) -> tuple[tuple[str, ...], AuthorityFailureReason | None]:
+) -> _Resolution:
+    """Resolve the covering delegation without consulting the attempted version.
+
+    Selection used to filter on ``policy_version == attempt.policy_version``, which
+    made the selected delegation's version equal the attempt's version by
+    construction - so ``expected_policy_version`` was a copy of a public byte and an
+    adapter that echoed the requested version scored a perfect
+    ``policy_version_accuracy``. Resolving version-blind and comparing afterwards is
+    what makes that field derived rather than echoed.
+
+    The comparison in step three is load-bearing: ``evaluate_action_authority``
+    rejects only versions absent from the snapshot, so dropping the filter without
+    re-comparing would turn a known-version mismatch into an ALLOW.
+    """
+
     candidates = tuple(
         item
         for item in state.delegations
@@ -386,30 +431,40 @@ def _effective_chain(
         item for item in time_valid if item.id not in state.revoked_delegation_ids
     )
     capable = tuple(
-        item
-        for item in active
-        if item.policy_version == attempt.policy_version
-        and _capability_allows(item.capability, attempt)
+        item for item in active if _capability_allows(item.capability, attempt)
     )
     if capable:
+        versions = {item.policy_version for item in capable}
+        if len(versions) > 1:
+            # Only a version DISAGREEMENT is under-determined. Overlapping grants
+            # that agree on version - a broad grant plus a narrower one - are
+            # permitted, and the ID tie-break below picks between them exactly as
+            # before. Rejecting those too would fail worlds that have nothing to do
+            # with policy versioning.
+            raise AgenticReplayError(
+                "capability-matching delegations disagree on policy version"
+            )
         selected = sorted(capable, key=lambda item: item.id)[0]
-        return _delegation_chain(selected, state.delegations), None
+        chain = _delegation_chain(selected, state.delegations)
+        effective = selected.policy_version
+        if effective != attempt.policy_version:
+            # The chain is published on this denial. AGENTIC_BENCHMARK.md states
+            # the chain is independent of the final decision, and the caller needs a
+            # non-empty chain for OVERPRIVILEGED_SUBDELEGATION to fire at all -
+            # returning () here would silently disable that check on mismatch rows.
+            return _Resolution(
+                chain, AuthorityFailureReason.POLICY_VERSION_MISMATCH, effective
+            )
+        return _Resolution(chain, None, effective)
     if any(
-        item.policy_version != attempt.policy_version
-        and _capability_allows(item.capability, attempt)
-        for item in active
-    ):
-        return (), AuthorityFailureReason.POLICY_VERSION_MISMATCH
-    if any(
-        item.policy_version == attempt.policy_version
-        and _capability_allows(item.capability, attempt)
+        _capability_allows(item.capability, attempt)
         and item.id in state.revoked_delegation_ids
         for item in time_valid
     ):
-        return (), AuthorityFailureReason.DELEGATION_REVOKED
+        return _Resolution((), AuthorityFailureReason.DELEGATION_REVOKED, None)
     if active:
-        return (), AuthorityFailureReason.CAPABILITY_EXCEEDED
-    return (), AuthorityFailureReason.NO_ACTIVE_DELEGATION
+        return _Resolution((), AuthorityFailureReason.CAPABILITY_EXCEEDED, None)
+    return _Resolution((), AuthorityFailureReason.NO_ACTIVE_DELEGATION, None)
 
 
 def _capability_allows(capability: Capability, attempt: ActionAttempt) -> bool:
