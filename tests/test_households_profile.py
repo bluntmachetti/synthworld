@@ -4,14 +4,17 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from collections.abc import Callable, Mapping
+from datetime import date
 
 import pytest
 from pydantic import ValidationError
 
 from synthworld.leakage import world_recoverability
+from synthworld.metrics import relationship_evidence_matches
 from synthworld.models import Persona, SynthWorld
 from synthworld.profiles.households import (
     HouseholdsConfig,
+    _address_key,
     generate_households_world,
 )
 
@@ -93,7 +96,10 @@ def test_topology_branches_cycles_and_leaves_deliberate_isolates(seed: int) -> N
 
     assert len(components) > 1
     assert edges - len(world.personas) + len(components) > 0  # cycle rank
-    assert degrees[0] == HouseholdsConfig().isolated_person_count
+    # At least the deliberate controls are degree zero. More may be: a person whose
+    # team and cohort are singletons and whose household surname is theirs alone is
+    # incidentally unconnected, which is realistic and must not be asserted away.
+    assert degrees[0] >= HouseholdsConfig().isolated_person_count
     # A path has exactly two distinct degrees. Anything resembling a real social
     # graph has many, which is what makes structure informative.
     assert len(degrees) > 5
@@ -182,14 +188,101 @@ def test_values_stay_safely_fictional(seed: int) -> None:
         assert person.addresses[0].country_code == "ZZ"
 
 
-def test_isolated_controls_have_no_memberships() -> None:
+def test_isolated_controls_have_no_memberships_and_no_shared_address() -> None:
+    """Controls must be clean, which means their addresses cannot collide either.
+
+    An earlier revision drew solo addresses from the household street pool, so at
+    `person_count=2000` with 1998 controls, 382 people shared an address with
+    someone else - destroying the property that makes them controls.
+    """
+
+    world = generate_households_world(seed=42)
+    controls = [item for item in world.personas if item.employment == ()]
+
+    assert len(controls) == HouseholdsConfig().isolated_person_count
+    assert all(item.education == () for item in controls)
+
+    crowded = HouseholdsConfig(
+        person_count=2000, household_count=2, isolated_person_count=1998
+    )
+    at_scale = generate_households_world(seed=42, config=crowded)
+    household_addresses = {
+        _address_key(item.addresses[0])
+        for item in at_scale.personas
+        if item.employment != ()
+    }
+    solo_addresses = [
+        _address_key(item.addresses[0])
+        for item in at_scale.personas
+        if item.employment == ()
+    ]
+
+    assert not household_addresses & set(solo_addresses)
+
+
+def test_every_planted_edge_satisfies_the_shipped_evidence_invariant() -> None:
+    """The check whose absence let 473 of 514 edges ship as invalid ground truth.
+
+    `relationship_evidence_matches` compares whole records, not institutions: a
+    colleague edge needs identical Employment including role, a classmate edge
+    identical Education including graduation year, and a family edge a shared
+    surname alongside the full address key. An earlier revision grouped by
+    organisation and institution alone and emitted family edges between
+    co-residents with different surnames, so the library rejected almost
+    everything this profile planted - and nothing in the suite asked.
+    """
+
+    for seed in _SEEDS:
+        world = generate_households_world(seed=seed)
+        people = {item.id: item for item in world.personas}
+        rejected = [
+            edge
+            for edge in world.relationships
+            if not relationship_evidence_matches(
+                edge, people[edge.source_person_id], people[edge.target_person_id]
+            )
+        ]
+
+        assert rejected == [], [(edge.kind.value, edge.id) for edge in rejected]
+        assert world.relationships
+
+
+def test_sharing_an_address_does_not_imply_a_relationship() -> None:
+    """The negative control #41 needs, produced structurally rather than planted.
+
+    Only a household's surname core is family. The remaining co-residents share an
+    address with people they have no edge to, so a resolver that merges on address
+    is wrong about them.
+    """
+
     world = generate_households_world(seed=42)
     adjacency = _adjacency(world)
-    isolated = [item for item in world.personas if not adjacency[item.id]]
+    by_address: dict[str, list[str]] = defaultdict(list)
+    for person in world.personas:
+        by_address[_address_key(person.addresses[0])].append(person.id)
 
-    assert len(isolated) == HouseholdsConfig().isolated_person_count
-    assert all(item.employment == () for item in isolated)
-    assert all(item.education == () for item in isolated)
+    unrelated_pairs = [
+        (left, right)
+        for occupants in by_address.values()
+        for index, left in enumerate(occupants)
+        for right in occupants[index + 1 :]
+        if right not in adjacency[left]
+    ]
+
+    assert unrelated_pairs
+
+
+def test_birth_dates_do_not_move_when_the_calendar_does() -> None:
+    """Pinned, because the failure mode is invisible to a same-instant comparison.
+
+    Faker's `date_of_birth` anchors its range to `datetime.now()`, so the first
+    revision produced different dates on different days while its byte-identity
+    test - generating both copies in one instant - reported success.
+    """
+
+    assert generate_households_world(seed=42).personas[0].date_of_birth == date(
+        2000, 2, 17
+    )
 
 
 def test_configuration_digest_is_stable_under_key_ordering() -> None:
