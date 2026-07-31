@@ -49,6 +49,13 @@ class AgenticCaseKind(StrEnum):
     MISSING_RETAINED_EVIDENCE = "missing_retained_evidence"
     INCORRECT_ATTRIBUTION = "incorrect_attribution"
     CROSS_TENANT_CONFUSION = "cross_tenant_confusion"
+    # No Asteria v1 case carries either kind below. Both name failure reasons the
+    # oracle already decides - AuthorityFailureReason.CREDENTIAL_INVALID and
+    # .POLICY_VERSION_MISMATCH - but which no frozen fixture action reaches. They
+    # exist so a world that does reach them can be labelled without widening `kind`
+    # back to `str`.
+    CREDENTIAL_INVALID = "credential_invalid"
+    POLICY_VERSION_MISMATCH = "policy_version_mismatch"
 
 
 class Organisation(SyntheticModel):
@@ -400,12 +407,11 @@ class AuthorityTruth(SyntheticModel):
 
 class AgenticCase(SyntheticModel):
     action_event_id: str
-    kind: str
-
-    @field_validator("kind")
-    @classmethod
-    def require_nonblank_kind(cls, value: str) -> str:
-        return _nonblank(value, "agentic case kind")
+    # Closed vocabulary, not a free string. As `str` this field accepted any nonblank
+    # value, so a mislabelled or newly-invented kind flowed silently past every consumer
+    # that branches on it - `_TEMPORAL_CASES` and the failure slices in `evaluation.py`
+    # simply treat an unknown kind as foreign. The enum makes that a load error instead.
+    kind: AgenticCaseKind
 
 
 class AgenticEvaluatorBundle(SyntheticModel):

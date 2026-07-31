@@ -15,6 +15,7 @@ from synthworld.agentic import (
 )
 from synthworld.agentic.models import (
     ActionAttempted,
+    AgenticCaseKind,
     AgenticPublicBundle,
     AgenticTraceSubmission,
     Decision,
@@ -142,10 +143,19 @@ def test_empty_provenance_has_zero_precision_support() -> None:
     assert metrics["provenance_precision"].support == 0
 
 
-def test_custom_case_labels_and_all_allow_world_have_defined_empty_support() -> None:
+def test_non_temporal_and_all_allow_world_have_defined_empty_support() -> None:
+    """A metric with no applicable case must read ``None``/0, never 0.0.
+
+    Relabelling every case to a non-temporal kind empties ``_TEMPORAL_CASES``. An
+    earlier revision used an invented ``"custom_case"`` label for this, which stopped
+    being constructible once ``AgenticCase.kind`` became a closed vocabulary - and an
+    arbitrary string was never what the test needed, only a world with no temporal
+    cases in it.
+    """
+
     benchmark = generate_asteria_agentic_v1()
     custom_cases = tuple(
-        item.model_copy(update={"kind": "custom_case"})
+        item.model_copy(update={"kind": AgenticCaseKind.AUTHORISED_ACTION})
         for item in benchmark.evaluator.cases
     )
     all_allow_truth = tuple(
