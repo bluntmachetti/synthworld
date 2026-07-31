@@ -124,6 +124,15 @@ All records retain `synthetic: true`. Emails use reserved domains, phone
 numbers use a fictional range, addresses are obvious examples, and national
 identifiers are deliberately invalid. Do not remove those safeguards.
 
+**Scope.** This world is a deterministic smoke surface, not a transfer surface.
+Its identifiers embed the persona ordinal — `persona-0003` yields
+`synth_sian_cox_0003@example.test` — its relationship graph is a path, and
+changing the seed changes values but not structure. That is ideal for fixtures,
+demos and CI, and unsuitable for judging whether a system will work on real data.
+It also means that if you build records where several rows describe one persona,
+the ordinal becomes an answer key in a public field. See
+[the scope note in the README](README.md#the-core-identity-world-is-a-smoke-surface).
+
 ## Use case 2: PII extraction
 
 Use this to test whether a regex, NLP model, LLM, or document pipeline finds

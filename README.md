@@ -75,7 +75,8 @@ relationships, and assigns the expected exposure score.
 ## Current benchmark families
 
 - **Core identity world:** seeded personas, identity attributes, and
-  evidence-backed relationships.
+  evidence-backed relationships. A deterministic smoke surface, not a transfer
+  surface — see [the scope note](#the-core-identity-world-is-a-smoke-surface).
 - **Exposure corpus:** breach, broker, search, and social observations,
   including zero-exposure controls, search collisions, and broker
   reappearance.
@@ -91,6 +92,35 @@ relationships, and assigns the expected exposure score.
 - **Asteria Agentic v1:** ordered agent/runtime/delegation events, an
   oracle-free observed-action interface, and separate authority, attribution,
   temporal, and provenance truth.
+
+### The core identity world is a smoke surface
+
+The core world is frozen, and its shape is deliberate rather than realistic. Three
+properties matter if you plan to derive evaluation data from it, all measured on
+100 personas across seeds 7, 11 and 42:
+
+- **Identifiers embed the persona ordinal.** `persona-0003` produces
+  `synth_sian_cox_0003@example.test`, the username `synth_sian_cox_0003`,
+  `Example Works 0003`, and `Test University 0003` — 100% of emails and usernames,
+  80% of employers and schools. If you generate records where several rows describe
+  one persona, that ordinal is an oracle: a matcher can recover the entity partition
+  by reading it out of a public field rather than by resolving anything. The shipped
+  entity-resolution pack is hand-authored and does **not** carry it.
+- **The relationship graph is a path.** 100 personas yield 99 edges in one component
+  with no cycles, no isolated nodes, and a degree distribution of `{1: 2, 2: 98}`.
+  Graph structure therefore carries no signal.
+- **Seeds change values, not structure.** The component count, degree distribution,
+  relationship-kind counts and the 13 distinct exposure signatures are identical on
+  every seed.
+
+That makes it excellent for deterministic tests, demonstrations, and CI: byte-stable,
+tiny, and easy to reason about. It makes it a poor basis for judging whether a system
+will work on real data — a perfect score here is not evidence of transfer.
+
+Realism improvements land in a separate named profile rather than by changing this
+one, so existing fixtures and checksums stay byte-identical. Track that work in
+[issue #43](https://github.com/bluntmachetti/synthworld/issues/43); the adversarial
+identity cases that go with it are [issue #41](https://github.com/bluntmachetti/synthworld/issues/41).
 
 The core-world, exposure-corpus, extraction-corpus, connection-benchmark,
 risk-benchmark, and agentic schemas are independently versioned `1.0.0`
