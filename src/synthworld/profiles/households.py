@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Sequence
+from datetime import date, timedelta
 from hashlib import blake2b
 from typing import Literal, Self
 
@@ -91,6 +92,19 @@ _STREETS = (
 )
 _CITIES = ("Testville", "Sampleton", "Exampleford", "Fictionbury")
 _EMAIL_DOMAINS = ("example.test", "example.invalid", "mail.example.test")
+
+#: Birth dates come from a fixed window, never from Faker's `date_of_birth`, which
+#: anchors its range to `datetime.now()` - the same seed would then produce
+#: different dates tomorrow, and a byte-identity test generating both copies in one
+#: instant cannot see it. The frozen core generator already avoided this; the first
+#: revision of this profile did not.
+_EARLIEST_BIRTH = date(1946, 1, 1)
+_BIRTH_WINDOW_DAYS = (date(2006, 12, 31) - _EARLIEST_BIRTH).days
+
+#: Solo addresses come from their own street pool so an isolated control can never
+#: collide with a household. Sharing the pool made 382 of 2000 people share an
+#: address at person_count=2000, which destroys what makes them controls.
+_SOLO_STREETS = ("Isolated Example Terrace", "Control Test Rise")
 
 #: Handle shapes. Several, so that two people with the same normalised name usually
 #: still differ - collisions must be planted and counted, not accidental.
@@ -193,6 +207,13 @@ def _handle(*, given: str, family: str, seed: int, digest: str, index: int) -> s
     )
 
 
+def _birth_date(*, seed: int, digest: str, index: int) -> date:
+    """A birth date that does not move when the calendar does."""
+
+    offset = _draw(seed=seed, digest=digest, purpose="birth", index=index)
+    return _EARLIEST_BIRTH + timedelta(days=offset % _BIRTH_WINDOW_DAYS)
+
+
 def _national_id(*, seed: int, digest: str, index: int) -> NationalId:
     """Deliberately invalid, and deliberately not an arithmetic progression."""
 
@@ -223,211 +244,239 @@ def generate_households_world(
     workplaces = _registry(settings.workplace_count, kind="workplace")
     schools = _registry(settings.school_count, kind="school")
 
-    # Household addresses first: members share one, which is what makes a household
-    # observable without making it a surname rule.
-    addresses = tuple(
-        Address(
-            house_number=1
-            + _draw(seed=seed, digest=digest, purpose="house", index=index) % 400,
-            street_name=_pick(
-                _STREETS, seed=seed, digest=digest, purpose="street", index=index
+    # Each household has an address and the surname its family core shares. A
+    # household is NOT a surname group: only the core shares the name, so the
+    # remaining co-residents share an address with nobody they are related to.
+    # That pairing is the negative control issue #41 needs - shared address
+    # without a relationship - and it is what a resolver must not merge.
+    households = tuple(
+        _Household(
+            address=Address(
+                house_number=1
+                + _draw(seed=seed, digest=digest, purpose="house", index=index) % 400,
+                street_name=_pick(
+                    _STREETS, seed=seed, digest=digest, purpose="street", index=index
+                ),
+                city=_pick(
+                    _CITIES, seed=seed, digest=digest, purpose="city", index=index
+                ),
+                postal_code="ZZ0 0ZZ",
             ),
-            city=_pick(_CITIES, seed=seed, digest=digest, purpose="city", index=index),
-            postal_code="ZZ0 0ZZ",
+            surname=faker.last_name(),
         )
         for index in range(settings.household_count)
     )
 
     personas: list[Persona] = []
-    household_of: dict[str, int] = {}
-    workplace_of: dict[str, str] = {}
-    school_of: dict[str, str] = {}
+    members: dict[int, list[Persona]] = {}
+    teams: dict[tuple[str, str], list[Persona]] = {}
+    cohorts: dict[tuple[str, int], list[Persona]] = {}
 
     for index in range(count):
-        given = faker.first_name()
-        family = faker.last_name()
-        person_id = (
-            "person-"
-            + f"{_draw(seed=seed, digest=digest, purpose='id', index=index):016x}"
-        )
         isolated = index >= social_count
+        household = (
+            _draw(seed=seed, digest=digest, purpose="household", index=index)
+            % settings.household_count
+        )
+        in_core = (
+            not isolated
+            and _draw(seed=seed, digest=digest, purpose="core", index=index) % 3 != 0
+        )
+        given = faker.first_name()
+        drawn_family = faker.last_name()
+        family = households[household].surname if in_core else drawn_family
+        person_id = "person-" + (
+            f"{_draw(seed=seed, digest=digest, purpose='id', index=index):016x}"
+        )
         handle = _handle(
             given=given, family=family, seed=seed, digest=digest, index=index
         )
         domain = _pick(
             _EMAIL_DOMAINS, seed=seed, digest=digest, purpose="domain", index=index
         )
-        household = (
-            _draw(seed=seed, digest=digest, purpose="household", index=index)
-            % settings.household_count
-        )
-        # Isolated controls are deliberate, not leftovers: no household, no
-        # workplace, no school, so they appear as genuine zero-degree nodes.
         address = (
-            Address(
-                house_number=1
-                + _draw(seed=seed, digest=digest, purpose="solo-house", index=index)
-                % 400,
-                street_name=_pick(
-                    _STREETS,
-                    seed=seed,
-                    digest=digest,
-                    purpose="solo-street",
-                    index=index,
-                ),
-                city=_pick(
-                    _CITIES, seed=seed, digest=digest, purpose="solo-city", index=index
-                ),
-                postal_code="ZZ0 0ZZ",
-            )
+            _solo_address(seed=seed, digest=digest, index=index)
             if isolated
-            else addresses[household]
+            else households[household].address
         )
-        employment: tuple[Employment, ...] = ()
-        education: tuple[Education, ...] = ()
+
+        person = Persona(
+            id=person_id,
+            given_name=given,
+            family_name=family,
+            date_of_birth=_birth_date(seed=seed, digest=digest, index=index),
+            addresses=(address,),
+            emails=(EmailAddress(value=f"{handle}@{domain}", kind=EmailKind.PRIMARY),),
+            phones=(_phone(seed=seed, digest=digest, index=index),),
+            usernames=(Username(value=handle),),
+            national_ids=(_national_id(seed=seed, digest=digest, index=index),),
+            employment=(),
+            education=(),
+        )
         if not isolated:
-            household_of[person_id] = household
-            employer = _pick(
+            # Colleagues and classmates must share a whole Employment/Education
+            # record, not merely an institution: `relationship_evidence_matches`
+            # compares the objects. So the team and the cohort are the unit of
+            # membership - organisation with role, institution with year.
+            organisation = _pick(
                 workplaces, seed=seed, digest=digest, purpose="employer", index=index
             )
-            school = _pick(
+            role = "Example " + _pick(
+                _ROLES, seed=seed, digest=digest, purpose="role", index=index
+            )
+            institution = _pick(
                 schools, seed=seed, digest=digest, purpose="school", index=index
             )
-            workplace_of[person_id] = employer
-            school_of[person_id] = school
-            employment = (
-                Employment(
-                    organization=employer,
-                    role="Example "
-                    + _pick(
-                        _ROLES, seed=seed, digest=digest, purpose="role", index=index
+            year = (
+                1990 + _draw(seed=seed, digest=digest, purpose="year", index=index) % 20
+            )
+            person = person.model_copy(
+                update={
+                    "employment": (Employment(organization=organisation, role=role),),
+                    "education": (
+                        Education(institution=institution, graduation_year=year),
                     ),
-                ),
+                }
             )
-            education = (
-                Education(
-                    institution=school,
-                    graduation_year=1990
-                    + _draw(seed=seed, digest=digest, purpose="year", index=index) % 35,
-                ),
-            )
-        personas.append(
-            Persona(
-                id=person_id,
-                given_name=given,
-                family_name=family,
-                date_of_birth=faker.date_of_birth(minimum_age=19, maximum_age=79),
-                addresses=(address,),
-                emails=(
-                    EmailAddress(value=f"{handle}@{domain}", kind=EmailKind.PRIMARY),
-                ),
-                phones=(_phone(seed=seed, digest=digest, index=index),),
-                usernames=(Username(value=handle),),
-                national_ids=(_national_id(seed=seed, digest=digest, index=index),),
-                employment=employment,
-                education=education,
-            )
-        )
+            members.setdefault(household, []).append(person)
+            teams.setdefault((organisation, role), []).append(person)
+            cohorts.setdefault((institution, year), []).append(person)
+        personas.append(person)
 
     return SynthWorld(
         seed=seed,
         personas=tuple(personas),
         relationships=_relationships(
-            personas=personas,
-            household_of=household_of,
-            workplace_of=workplace_of,
-            school_of=school_of,
-            settings=settings,
-            seed=seed,
-            digest=digest,
+            members=members, teams=teams, cohorts=cohorts, settings=settings
         ),
+    )
+
+
+class _Household(SyntheticModel):
+    address: Address
+    surname: str
+
+
+def _solo_address(*, seed: int, digest: str, index: int) -> Address:
+    """A street pool disjoint from the households', so controls cannot collide."""
+
+    return Address(
+        house_number=1
+        + _draw(seed=seed, digest=digest, purpose="solo-house", index=index) % 400,
+        street_name=_pick(
+            _SOLO_STREETS, seed=seed, digest=digest, purpose="solo-street", index=index
+        ),
+        city=_pick(_CITIES, seed=seed, digest=digest, purpose="solo-city", index=index),
+        postal_code="ZZ0 0ZZ",
+    )
+
+
+def _address_key(address: Address) -> str:
+    """Must match ``synthworld.metrics``: evidence values are compared verbatim."""
+
+    return "|".join(
+        (
+            str(address.house_number),
+            address.street_name,
+            address.city,
+            address.postal_code,
+        )
     )
 
 
 def _relationships(
     *,
-    personas: Sequence[Persona],
-    household_of: dict[str, int],
-    workplace_of: dict[str, str],
-    school_of: dict[str, str],
+    members: dict[int, list[Persona]],
+    teams: dict[tuple[str, str], list[Persona]],
+    cohorts: dict[tuple[str, int], list[Persona]],
     settings: HouseholdsConfig,
-    seed: int,
-    digest: str,
 ) -> tuple[RelationshipEdge, ...]:
-    """Edges follow membership, so branching and cycles are structural.
+    """Edges follow membership, and every one satisfies the shipped invariant.
 
-    A person sharing a household with one group and a workplace with another is
-    what closes a cycle. Nothing here adds an edge to reach a target count.
+    An earlier revision emitted family edges between co-residents with different
+    surnames, colleague edges between people sharing only an organisation, and
+    classmate edges between people sharing only an institution. All three are
+    rejected by ``relationship_evidence_matches``, which compares whole records -
+    473 of 514 edges were unjustified ground truth, and nothing in the suite asked.
     """
 
     edges: list[RelationshipEdge] = []
-    seen: set[tuple[str, str]] = set()
 
-    def add(
+    def edge(
         left: Persona,
         right: Persona,
         kind: RelationshipKind,
-        signal: EvidenceSignal,
-        value: str,
+        evidence: tuple[RelationshipEvidence, ...],
     ) -> None:
-        key = (left.id, right.id) if left.id < right.id else (right.id, left.id)
-        if key in seen:
-            return
-        seen.add(key)
+        first, second = sorted((left.id, right.id))
         edges.append(
             RelationshipEdge(
-                id=f"edge-{blake2b('|'.join(key).encode(), digest_size=8).hexdigest()}",
-                source_person_id=key[0],
-                target_person_id=key[1],
+                id="edge-"
+                + blake2b(f"{first}|{second}".encode(), digest_size=8).hexdigest(),
+                source_person_id=first,
+                target_person_id=second,
                 kind=kind,
-                evidence=(RelationshipEvidence(signal=signal, value=value),),
+                evidence=evidence,
             )
         )
 
-    by_household: dict[int, list[Persona]] = {}
-    by_workplace: dict[str, list[Persona]] = {}
-    by_school: dict[str, list[Persona]] = {}
-    for person in personas:
-        if person.id in household_of:
-            by_household.setdefault(household_of[person.id], []).append(person)
-            by_workplace.setdefault(workplace_of[person.id], []).append(person)
-            by_school.setdefault(school_of[person.id], []).append(person)
-
-    for members in by_household.values():
-        for position, left in enumerate(members):
-            for right in members[position + 1 :]:
-                add(
+    for household in members.values():
+        for position, left in enumerate(household):
+            for right in household[position + 1 :]:
+                # Only the surname core is family. Everyone else in the household
+                # shares an address and gets no edge, which is the point.
+                if left.family_name != right.family_name:
+                    continue
+                edge(
                     left,
                     right,
                     RelationshipKind.FAMILY,
-                    EvidenceSignal.SHARED_ADDRESS,
-                    left.addresses[0].street_name,
+                    (
+                        RelationshipEvidence(
+                            signal=EvidenceSignal.SHARED_SURNAME,
+                            value=left.family_name,
+                        ),
+                        RelationshipEvidence(
+                            signal=EvidenceSignal.SHARED_ADDRESS,
+                            value=_address_key(left.addresses[0]),
+                        ),
+                    ),
                 )
 
-    # Bounded fan-out inside large groups: connecting every pair in a sixteen-person
-    # workplace would swamp the graph and flatten the degree distribution.
-    for group, kind, signal in (
-        (by_workplace, RelationshipKind.COLLEAGUE, EvidenceSignal.SHARED_EMPLOYER),
-        (by_school, RelationshipKind.CLASSMATE, EvidenceSignal.SHARED_SCHOOL_YEAR),
-    ):
-        for key, members in group.items():
-            for position, left in enumerate(members):
-                for offset in range(1, settings.colleagues_per_person + 1):
-                    partner = members[
-                        (
-                            position
-                            + offset
-                            + _draw(
-                                seed=seed, digest=digest, purpose=key, index=position
-                            )
-                            % max(1, len(members) - 1)
-                        )
-                        % len(members)
-                    ]
-                    if partner.id != left.id:
-                        add(left, partner, kind, signal, key)
+    for team, colleagues in teams.items():
+        for position, left in enumerate(colleagues):
+            for right in colleagues[
+                position + 1 : position + 1 + settings.colleagues_per_person
+            ]:
+                edge(
+                    left,
+                    right,
+                    RelationshipKind.COLLEAGUE,
+                    (
+                        RelationshipEvidence(
+                            signal=EvidenceSignal.SHARED_EMPLOYER, value=team[0]
+                        ),
+                    ),
+                )
 
-    return tuple(sorted(edges, key=lambda edge: edge.id))
+    for cohort, classmates in cohorts.items():
+        for position, left in enumerate(classmates):
+            for right in classmates[
+                position + 1 : position + 1 + settings.colleagues_per_person
+            ]:
+                edge(
+                    left,
+                    right,
+                    RelationshipKind.CLASSMATE,
+                    (
+                        RelationshipEvidence(
+                            signal=EvidenceSignal.SHARED_SCHOOL_YEAR,
+                            value=f"{cohort[0]}|{cohort[1]}",
+                        ),
+                    ),
+                )
+
+    return tuple(sorted(edges, key=lambda item: item.id))
 
 
 __all__ = [

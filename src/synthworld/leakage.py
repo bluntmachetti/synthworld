@@ -88,6 +88,7 @@ class FieldRecoverability(SyntheticModel):
     lexical_step_ratio: float
     lexical_rank_correlation: float
     control_step_ratio: float
+    numeric_control_step_ratio: float | None
     verdict: Literal["clean", "suspect", "leaking"]
     reasons: tuple[str, ...]
 
@@ -233,22 +234,38 @@ def field_recoverability(
     permutation = _control_order(support)
     control = [values_in_index_order[index] for index in permutation]
     control_step = step_ratio(lexical_projection(control))
+    # Each projection needs its OWN control. Gating the numeric signal on the
+    # lexical one reports a leak whenever values share an unrelated constant
+    # number - `rec-zx-2026`, `rec-qa-2026`, ... in arbitrary order has a constant
+    # numeric projection and therefore a near-zero step ratio, while its lexical
+    # control is high, so the gate opened and the verdict came back `leaking`.
+    numeric_control: float | None = None
+    if numeric_step is not None:
+        shuffled = [projected[index] for index in permutation]
+        numeric_control = step_ratio([item for item in shuffled if item is not None])
 
     reasons: list[str] = []
     # The control gates every positive. Without it a field whose values are
     # naturally clustered - a dozen shared employers, say - reads as structured no
     # matter how it was assigned, and the detector reports leaks that are not there.
-    if control_step >= _CONTROL_MIN_STEP_RATIO:
-        for label, ratio in (("lexical", lexical_step), ("numeric", numeric_step)):
-            if ratio is not None and ratio <= _STEP_RATIO_LEAKING:
-                reasons.append(f"{label} values advance by a repeating step")
-        for label, value in (("lexical", lexical_rank), ("numeric", numeric_rank)):
-            if value is not None and abs(value) >= _RANK_LEAKING:
-                reasons.append(f"{label} values are ordered by generation index")
+    signals = (
+        ("lexical", lexical_step, lexical_rank, control_step),
+        ("numeric", numeric_step, numeric_rank, numeric_control),
+    )
+    for label, ratio, rank, control_ratio in signals:
+        if control_ratio is None or control_ratio < _CONTROL_MIN_STEP_RATIO:
+            continue
+        if ratio is not None and ratio <= _STEP_RATIO_LEAKING:
+            reasons.append(f"{label} values advance by a repeating step")
+        if rank is not None and abs(rank) >= _RANK_LEAKING:
+            reasons.append(f"{label} values are ordered by generation index")
 
-    suspect = control_step >= _CONTROL_MIN_STEP_RATIO and any(
-        ratio is not None and _STEP_RATIO_LEAKING < ratio < _STEP_RATIO_CLEAN
-        for ratio in (lexical_step, numeric_step)
+    suspect = any(
+        control_ratio is not None
+        and control_ratio >= _CONTROL_MIN_STEP_RATIO
+        and ratio is not None
+        and _STEP_RATIO_LEAKING < ratio < _STEP_RATIO_CLEAN
+        for _, ratio, _, control_ratio in signals
     )
     verdict: Literal["clean", "suspect", "leaking"] = (
         "leaking" if reasons else "suspect" if suspect else "clean"
@@ -262,6 +279,7 @@ def field_recoverability(
         lexical_step_ratio=lexical_step,
         lexical_rank_correlation=lexical_rank,
         control_step_ratio=control_step,
+        numeric_control_step_ratio=numeric_control,
         verdict=verdict,
         reasons=tuple(reasons),
     )
