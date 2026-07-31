@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import UTC, datetime
 from importlib.resources import files
 from itertools import pairwise
@@ -96,7 +97,14 @@ def test_procurement_cases_have_reviewed_action_and_audit_outcomes() -> None:
         )
         for case in benchmark.evaluator.cases
     }
-    assert set(truth) == set(AgenticCaseKind)
+    # Asteria exercises every kind but the two that exist for generated worlds. Naming
+    # them keeps this a guard rather than a tautology: a kind added with no case must be
+    # declared unexercised here, which is the moment to ask why it has no case.
+    unexercised = {
+        AgenticCaseKind.CREDENTIAL_INVALID,
+        AgenticCaseKind.POLICY_VERSION_MISMATCH,
+    }
+    assert set(truth) == set(AgenticCaseKind) - unexercised
     assert truth[AgenticCaseKind.AUTHORISED_ACTION].decision_at_action is Decision.ALLOW
     assert (
         truth[AgenticCaseKind.VALID_THEN_REVOKED].decision_at_action is Decision.ALLOW
@@ -393,6 +401,41 @@ def test_load_public_agentic_bundle_reads_an_exported_tree_and_verifies_it(
     events.write_bytes(events.read_bytes() + b"\n")
     with pytest.raises(AgenticArtifactError, match="checksum"):
         load_public_agentic_bundle(public_root)
+
+
+def test_load_public_agentic_bundle_rejects_files_the_manifest_does_not_name(
+    tmp_path: Path,
+) -> None:
+    """Hashing only the named set leaves the tree open at the other end.
+
+    Every expected path can be present and hash correctly while the directory also
+    holds a stale artifact from an older run, or one smuggled into a caller-supplied
+    ``root``. Nothing enumerated the directory, so such a tree verified clean.
+    """
+
+    from synthworld.agentic.serialization import load_public_agentic_bundle
+
+    benchmark = generate_asteria_agentic_v1()
+    root = tmp_path / "asteria-agentic-v1"
+    export_agentic_benchmark(root, benchmark)
+    public_root = root / "public"
+
+    stray = public_root / "leftover.jsonl"
+    stray.write_text("{}\n", encoding="utf-8")
+    with pytest.raises(AgenticArtifactError, match=re.escape("leftover.jsonl")):
+        load_public_agentic_bundle(public_root)
+    stray.unlink()
+
+    # Nested, because a subdirectory is where an extra file is least visible - and
+    # because a non-recursive check would pass this one.
+    nested = public_root / "tool_schemas" / "extra-tools.json"
+    nested.write_text("{}\n", encoding="utf-8")
+    nested_message = re.escape("tool_schemas/extra-tools.json")
+    with pytest.raises(AgenticArtifactError, match=nested_message):
+        load_public_agentic_bundle(public_root)
+    nested.unlink()
+
+    assert load_public_agentic_bundle(public_root) == benchmark.public
 
 
 def test_golden_loader_rejects_a_forged_public_artifact_set_digest(

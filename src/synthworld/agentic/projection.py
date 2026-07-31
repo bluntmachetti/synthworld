@@ -100,7 +100,11 @@ def build_agentic_benchmark(
                 failure_reasons_at_action=action_decision.failure_reasons,
                 failure_reasons_at_audit=audit_decision.failure_reasons,
                 delegation_chain_ids=action_decision.delegation_chain_ids,
-                expected_policy_version=payload.attempt.policy_version,
+                # Action-time, matching `decision_at_action`. Six of Asteria's eleven
+                # actions resolve a different delegation at audit time, so the two
+                # evaluations genuinely disagree; the audit-time effective version is
+                # deliberately discarded rather than absent by oversight.
+                expected_policy_version=action_decision.effective_policy_version,
                 required_evidence_refs=action_decision.required_evidence_refs,
                 reconstructable_at_audit=set(
                     action_decision.required_evidence_refs

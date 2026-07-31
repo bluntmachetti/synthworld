@@ -11,6 +11,8 @@ from synthworld.agentic import (
 )
 from synthworld.agentic.models import (
     ActionAttempted,
+    AgenticBenchmark,
+    AgenticWorldSnapshot,
     AuthorityFailureReason,
     CredentialIssued,
     Decision,
@@ -20,6 +22,7 @@ from synthworld.agentic.models import (
     PolicyVersion,
     RuntimeSpawned,
 )
+from synthworld.agentic.projection import build_agentic_benchmark
 from synthworld.agentic.replay import AgenticReplayError, evaluate_action_authority
 
 
@@ -467,3 +470,145 @@ def test_timestamp_cursor_at_end_reuses_fully_validated_state() -> None:
         at_timestamp=benchmark.public.events[-1].occurred_at + timedelta(minutes=1),
     )
     assert by_index == by_time
+
+
+def _two_policy_world() -> tuple[AgenticBenchmark, AgenticWorldSnapshot, PolicyVersion]:
+    """Asteria plus a second registered policy version, built in memory only.
+
+    Never serialized, so the frozen fixture is untouched. This is the instrument
+    that makes the ``expected_policy_version`` fix observable: Asteria registers a
+    single policy version, so nothing in the shipped world can distinguish a derived
+    version from an echoed one.
+    """
+
+    benchmark = generate_asteria_agentic_v1()
+    snapshot = benchmark.public.snapshot
+    second = PolicyVersion(id="policy-asteria-v2", version="asteria-policy-v2")
+    return (
+        benchmark,
+        snapshot.model_copy(update={"policies": (*snapshot.policies, second)}),
+        second,
+    )
+
+
+def test_expected_policy_version_is_derived_from_the_delegation_not_the_attempt() -> (
+    None
+):
+    """The attempted version must not be able to decide its own correctness.
+
+    Selection used to filter delegations on the attempted version, so the selected
+    delegation's version equalled the attempt's by construction and an adapter that
+    echoed the requested version scored a perfect ``policy_version_accuracy``.
+    """
+
+    benchmark, snapshot, second = _two_policy_world()
+    events = []
+    for event in benchmark.public.events:
+        if event.id != "evt-010-authorised-comparison":
+            events.append(event)
+            continue
+        assert isinstance(event.payload, ActionAttempted)
+        events.append(
+            event.model_copy(
+                update={
+                    "payload": event.payload.model_copy(
+                        update={
+                            "attempt": event.payload.attempt.model_copy(
+                                update={"policy_version": second.version}
+                            )
+                        }
+                    )
+                }
+            )
+        )
+    rebuilt = build_agentic_benchmark(
+        snapshot,
+        tuple(events),
+        benchmark.public.scenario,
+        benchmark.evaluator.bindings,
+        benchmark.evaluator.cases,
+    )
+    truth = next(
+        item
+        for item in rebuilt.evaluator.authority_truth
+        if item.action_event_id == "evt-010-authorised-comparison"
+    )
+
+    # The delegation is v1; the attempt claims v2. Truth must name the delegation's.
+    assert truth.expected_policy_version == "asteria-policy-v1"
+    assert truth.expected_policy_version != second.version
+
+    # Denial is retained. Resolving version-blind without re-comparing would turn a
+    # known-version mismatch into an ALLOW, and every other assertion here passes
+    # under that regression - this pair is what separates the fix from it.
+    assert truth.decision_at_action is Decision.DENY
+    assert AuthorityFailureReason.POLICY_VERSION_MISMATCH in (
+        truth.failure_reasons_at_action
+    )
+
+    # The covering chain is published on the denial, so the sub-delegation check can
+    # still fire on such a row, and the governing policy - not the requested one - is
+    # what an auditor must have retained.
+    assert truth.delegation_chain_ids
+    assert "evidence:policy:asteria-policy-v1" in truth.required_evidence_refs
+    assert "evidence:policy:asteria-policy-v2" not in truth.required_evidence_refs
+    assert truth.reconstructable_at_audit is True
+
+
+def test_capability_matching_delegations_may_not_disagree_on_policy_version() -> None:
+    """Two covering delegations at different versions leave the version undecided.
+
+    Overlapping grants that *agree* on version stay legal - the ID tie-break picks
+    between them exactly as before - because that ambiguity has nothing to do with
+    policy versioning.
+    """
+
+    benchmark, snapshot, second = _two_policy_world()
+    action = next(
+        event
+        for event in benchmark.public.events
+        if event.id == "evt-010-authorised-comparison"
+    )
+    assert isinstance(action.payload, ActionAttempted)
+    state = materialize_agentic_world(
+        snapshot, benchmark.public.events, at_event_index=action.event_index - 1
+    )
+    binding = next(
+        item
+        for item in benchmark.evaluator.bindings
+        if item.action_event_id == action.id
+    )
+    covering = next(
+        item
+        for item in state.delegations
+        if replay._capability_allows(item.capability, action.payload.attempt)
+        and item.grantee_agent_id == binding.logical_agent_id
+    )
+    rival = covering.model_copy(
+        update={"id": f"{covering.id}-rival", "policy_version": second.version}
+    )
+    contested = state.model_copy(
+        update={"delegations": (*state.delegations, rival), "snapshot": snapshot}
+    )
+
+    with pytest.raises(AgenticReplayError, match="disagree on policy version"):
+        evaluate_action_authority(
+            contested,
+            action.payload.attempt,
+            binding,
+            decision_time=action.occurred_at,
+        )
+
+    agreeing = covering.model_copy(update={"id": f"{covering.id}-twin"})
+    permitted = state.model_copy(
+        update={"delegations": (*state.delegations, agreeing), "snapshot": snapshot}
+    )
+    assert (
+        evaluate_action_authority(
+            permitted,
+            action.payload.attempt,
+            binding,
+            decision_time=action.occurred_at,
+        ).decision
+        is Decision.ALLOW
+    )

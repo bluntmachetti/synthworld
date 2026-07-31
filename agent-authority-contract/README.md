@@ -24,6 +24,7 @@ remaining docs are the two narrative files listed below.
 | `examples/` (design-intent traces) | Generated for three pattern classes |
 | `adapter-template/` | Working; runs and produces a valid trace as shipped |
 | `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
+| `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
@@ -225,10 +226,18 @@ The remaining vocabularies come from `synthworld.agentic.models`:
 `ObservedActionTrace.model_fields`, `AgenticCaseKind`, `AuthorityFailureReason`,
 `AuthorityTruth`, `CanonicalBinding`, `Capability`.
 
-As of catalogue `0.2.0-draft` the two sets are in exact correspondence: all 20
-emitted metrics, all 11 case kinds and all 8 failure reasons are cited by at
-least one control, and every control's identifiers resolve. This check moves into
-`synthworld validate` when the schema work lands.
+The two sets correspond exactly: all 20 emitted metrics and all 8 failure reasons
+are cited by at least one control, every control's identifiers resolve, and every
+`AgenticCaseKind` member is either cited as a failure slice or declared under
+`meta.fixture_shape.unexercised_case_kinds`. Eleven of the thirteen kinds are
+cited; `credential_invalid` and `policy_version_mismatch` name failure reasons the
+oracle decides but that no frozen action reaches, so they label no case here.
+
+That paragraph used to be a hand-checked claim, and it was wrong within a day of
+the enum growing. `tests/test_control_catalogue_vocabulary.py` now enforces it in
+both directions — an uncited metric is an undisclosed capability, and a control
+citing a slice or reason that no longer exists reads as covered while scoring
+nothing.
 
 ## Maintenance
 
