@@ -49,6 +49,14 @@ agentic schemas) are versioned independently of the package; see
 
 ### Changed
 
+- Agentic scoring protocol `0.3.0`. `expected_policy_version` is derived from the
+  delegation that covered the action instead of being copied from the attempt, and
+  a policy-version-mismatch denial now records its covering chain. Every frozen
+  Asteria Agentic v1 artifact is byte-identical under both protocols, because that
+  world registers a single policy version; the number moves because the resolution
+  rule changed, and a consumer scoring a world with more than one version would
+  otherwise have no way to tell which rule produced their truth.
+
 - `agent-authority-contract/README.md` no longer states that `jsonschema` will
   become a project dependency. The validate command uses the pydantic models
   instead, because the schemas are generated from those models and the two are
