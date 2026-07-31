@@ -53,6 +53,24 @@ class ScenarioOutcome(SyntheticModel):
     low_support: bool
 
 
+class ClusterMetrics(SyntheticModel):
+    """Pairwise and B-cubed, computed over clusters induced by merge decisions.
+
+    Issue #41 asks for both from #1, and they disagree in a way that matters here.
+    Pairwise weights a large cluster quadratically, so one over-merge of a busy
+    entity can dominate; B-cubed weights per record, so it reports what an average
+    person's records experienced. A system that merges everything scores well on
+    pairwise recall and badly on B-cubed precision, and seeing both is the point.
+    """
+
+    pairwise_precision: float | None
+    pairwise_recall: float | None
+    pairwise_f1: float | None
+    b_cubed_precision: float
+    b_cubed_recall: float
+    b_cubed_f1: float
+
+
 class AmbiguityMetrics(SyntheticModel):
     """Deliberately without an aggregate score."""
 
@@ -71,6 +89,9 @@ class AmbiguityMetrics(SyntheticModel):
     unwarranted_decisions: int
     scenarios: tuple[ScenarioOutcome, ...]
     low_support_scenarios: tuple[ScenarioKind, ...]
+    #: Cluster-level view of the same submission, so a pair-decision system can be
+    #: compared against the cluster contract without emitting clusters itself.
+    clusters: ClusterMetrics
 
 
 class AmbiguityEvaluationError(ValueError):
@@ -79,6 +100,79 @@ class AmbiguityEvaluationError(ValueError):
 
 def _key(left: UUID, right: UUID) -> tuple[UUID, UUID]:
     return (left, right) if left < right else (right, left)
+
+
+def _induced_clusters(
+    records: Iterable[UUID], merges: Iterable[tuple[UUID, UUID]]
+) -> dict[UUID, frozenset[UUID]]:
+    """Union-find over merge decisions.
+
+    Merges are transitive whether or not a system intends them to be: deciding
+    a~b and b~c asserts a~c, and scoring the pairs independently would let a
+    contradictory submission look consistent.
+    """
+
+    parent: dict[UUID, UUID] = {record: record for record in records}
+
+    def find(item: UUID) -> UUID:
+        while parent[item] != item:
+            parent[item] = parent[parent[item]]
+            item = parent[item]
+        return item
+
+    for left, right in merges:
+        root_left, root_right = find(left), find(right)
+        if root_left != root_right:
+            parent[root_right] = root_left
+
+    grouped: dict[UUID, set[UUID]] = {}
+    for record in parent:
+        grouped.setdefault(find(record), set()).add(record)
+    return {
+        record: frozenset(members) for members in grouped.values() for record in members
+    }
+
+
+def _cluster_metrics(
+    predicted: Mapping[UUID, frozenset[UUID]],
+    truth: Mapping[UUID, frozenset[UUID]],
+) -> ClusterMetrics:
+    def pairs(groups: Mapping[UUID, frozenset[UUID]]) -> set[tuple[UUID, UUID]]:
+        return {
+            _key(left, right)
+            for members in set(groups.values())
+            for left in members
+            for right in members
+            if left < right
+        }
+
+    predicted_pairs, truth_pairs = pairs(predicted), pairs(truth)
+    overlap = len(predicted_pairs & truth_pairs)
+    precision = overlap / len(predicted_pairs) if predicted_pairs else None
+    recall = overlap / len(truth_pairs) if truth_pairs else None
+    f1 = 2 * precision * recall / (precision + recall) if precision and recall else None
+
+    # B-cubed averages over records, so it cannot be dominated by one large cluster.
+    b_precision = sum(
+        len(predicted[record] & truth[record]) / len(predicted[record])
+        for record in truth
+    ) / len(truth)
+    b_recall = sum(
+        len(predicted[record] & truth[record]) / len(truth[record]) for record in truth
+    ) / len(truth)
+    b_f1 = (
+        2 * b_precision * b_recall / (b_precision + b_recall)
+        if b_precision + b_recall
+        else 0.0
+    )
+    return ClusterMetrics(
+        pairwise_precision=precision,
+        pairwise_recall=recall,
+        pairwise_f1=f1,
+        b_cubed_precision=b_precision,
+        b_cubed_recall=b_recall,
+        b_cubed_f1=b_f1,
+    )
 
 
 def evaluate_ambiguity_predictions(
@@ -142,6 +236,22 @@ def evaluate_ambiguity_predictions(
         )
         for scenario in sorted(by_scenario, key=lambda item: item.value)
     )
+    record_ids = [item.record_id for item in benchmark.answer_key.record_memberships]
+    entity_of = {
+        item.record_id: item.entity_id
+        for item in benchmark.answer_key.record_memberships
+    }
+    truth_clusters = {
+        record: frozenset(
+            other for other in record_ids if entity_of[other] == entity_of[record]
+        )
+        for record in record_ids
+    }
+    predicted_clusters = _induced_clusters(
+        record_ids,
+        (key for key, value in submitted.items() if value is PairDisposition.MERGE),
+    )
+
     total = len(truth)
     return AmbiguityMetrics(
         pair_count=total,
@@ -157,6 +267,7 @@ def evaluate_ambiguity_predictions(
         low_support_scenarios=tuple(
             item.scenario for item in outcomes if item.low_support
         ),
+        clusters=_cluster_metrics(predicted_clusters, truth_clusters),
     )
 
 
@@ -164,6 +275,7 @@ __all__ = [
     "MINIMUM_SCENARIO_SUPPORT",
     "AmbiguityEvaluationError",
     "AmbiguityMetrics",
+    "ClusterMetrics",
     "ScenarioOutcome",
     "evaluate_ambiguity_predictions",
 ]
