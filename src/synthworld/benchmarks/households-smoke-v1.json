@@ -1,0 +1,1719 @@
+{
+  "synthetic": true,
+  "schema_version": "1.0.0",
+  "seed": 20260731,
+  "personas": [
+    {
+      "synthetic": true,
+      "id": "person-f05d01f659e31175",
+      "given_name": "Jessica",
+      "family_name": "McDonald",
+      "date_of_birth": "1970-02-15",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "jessicamcdonald@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "jessicamcdonald"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0117-6690"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 138,
+          "street_name": "Sample Row",
+          "city": "Exampleford",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Logistics",
+          "role": "Example Engineer"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Institute",
+          "graduation_year": 2003
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-737783974-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-842c9530bb49819f",
+      "given_name": "Norman",
+      "family_name": "Butler",
+      "date_of_birth": "1961-01-15",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "norman_butler@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "norman_butler"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0191-7083"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 138,
+          "street_name": "Sample Row",
+          "city": "Exampleford",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Logistics",
+          "role": "Example Registrar"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Eastmoor Academy",
+          "graduation_year": 2007
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-673274091-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-da61078fdac95d21",
+      "given_name": "Craig",
+      "family_name": "Holmes",
+      "date_of_birth": "1967-12-06",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "holmes.craig@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "holmes.craig"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0112-8785"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 219,
+          "street_name": "Test Lane",
+          "city": "Sampleton",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Foundry",
+          "role": "Example Registrar"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby College",
+          "graduation_year": 2002
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-523250496-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-f7f7c656343b2755",
+      "given_name": "Carolyn",
+      "family_name": "McDonald",
+      "date_of_birth": "1964-11-24",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "mcdonald.carolyn@example.invalid",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "mcdonald.carolyn"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0165-7023"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 138,
+          "street_name": "Sample Row",
+          "city": "Exampleford",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Logistics",
+          "role": "Example Registrar"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Eastmoor Academy",
+          "graduation_year": 2006
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-769300392-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-41fa105f8bb35909",
+      "given_name": "Aimee",
+      "family_name": "Jennings",
+      "date_of_birth": "1992-09-26",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "aimee.jennings@example.invalid",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "aimee.jennings"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0166-5976"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 219,
+          "street_name": "Test Lane",
+          "city": "Sampleton",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Foundry",
+          "role": "Example Analyst"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby College",
+          "graduation_year": 1993
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-228796351-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-8d1152b4db280bbf",
+      "given_name": "Louise",
+      "family_name": "Marshall",
+      "date_of_birth": "1985-07-03",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "lmarshall@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "lmarshall"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0107-4663"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 216,
+          "street_name": "Specimen Street",
+          "city": "Testville",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Analytics",
+          "role": "Example Analyst"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Academy",
+          "graduation_year": 1999
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-203528052-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-cc9b9cf568ca8612",
+      "given_name": "Antony",
+      "family_name": "Marshall",
+      "date_of_birth": "2003-06-08",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "antonymarshall@example.invalid",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "antonymarshall"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0181-0410"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 216,
+          "street_name": "Specimen Street",
+          "city": "Testville",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Foundry",
+          "role": "Example Technician"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Academy",
+          "graduation_year": 2001
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-886242250-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-f2c97d2479f88498",
+      "given_name": "Samantha",
+      "family_name": "Marshall",
+      "date_of_birth": "1969-04-12",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "samanthamarshall@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "samanthamarshall"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0113-3417"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 216,
+          "street_name": "Specimen Street",
+          "city": "Testville",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Analytics",
+          "role": "Example Coordinator"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Academy",
+          "graduation_year": 2002
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-566544519-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-f2d6cc9d8bb8b0f2",
+      "given_name": "Vincent",
+      "family_name": "Marshall",
+      "date_of_birth": "1950-05-23",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "vincent.marshall@example.invalid",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "vincent.marshall"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0150-9556"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 216,
+          "street_name": "Specimen Street",
+          "city": "Testville",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Analytics",
+          "role": "Example Registrar"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Academy",
+          "graduation_year": 2003
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-906479416-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-b6aa122060c0447e",
+      "given_name": "Sheila",
+      "family_name": "Jennings",
+      "date_of_birth": "1952-05-05",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "jennings.sheila@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "jennings.sheila"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0101-2950"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 219,
+          "street_name": "Test Lane",
+          "city": "Sampleton",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Analytics",
+          "role": "Example Engineer"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby College",
+          "graduation_year": 1991
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-161094244-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-acfdee2050534aee",
+      "given_name": "Elliot",
+      "family_name": "Shaw",
+      "date_of_birth": "2002-03-15",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "elliot.shaw@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "elliot.shaw"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0120-5663"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 122,
+          "street_name": "Test Lane",
+          "city": "Exampleford",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Works",
+          "role": "Example Engineer"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Institute",
+          "graduation_year": 2000
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-359955535-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-dad5d1bedddbce96",
+      "given_name": "Geoffrey",
+      "family_name": "Burton",
+      "date_of_birth": "1952-05-22",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "geoffrey.burton@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "geoffrey.burton"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0160-7130"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 138,
+          "street_name": "Sample Row",
+          "city": "Exampleford",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Works",
+          "role": "Example Technician"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Institute",
+          "graduation_year": 2007
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-334488035-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-0243d5f335f9306e",
+      "given_name": "Owen",
+      "family_name": "Nixon",
+      "date_of_birth": "1949-05-02",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "owennixon@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "owennixon"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0139-1355"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 289,
+          "street_name": "Sample Row",
+          "city": "Fictionbury",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Works",
+          "role": "Example Coordinator"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Institute",
+          "graduation_year": 2009
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-555788607-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-ff023d61c1f9bc44",
+      "given_name": "Ricky",
+      "family_name": "Nixon",
+      "date_of_birth": "1994-01-30",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "ricky.nixon@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "ricky.nixon"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0177-4557"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 289,
+          "street_name": "Sample Row",
+          "city": "Fictionbury",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Works",
+          "role": "Example Engineer"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Institute",
+          "graduation_year": 2007
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-483655024-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-bf833bf62fe775f4",
+      "given_name": "Kathleen",
+      "family_name": "Jennings",
+      "date_of_birth": "1959-03-01",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "kjennings@example.invalid",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "kjennings"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0129-0867"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 219,
+          "street_name": "Test Lane",
+          "city": "Sampleton",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Foundry",
+          "role": "Example Engineer"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby College",
+          "graduation_year": 2001
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-143205616-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-91eda54c1ea2239a",
+      "given_name": "Jacob",
+      "family_name": "Griffiths",
+      "date_of_birth": "1984-07-30",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "jacob.griffiths@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "jacob.griffiths"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0157-7642"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 274,
+          "street_name": "Specimen Street",
+          "city": "Testville",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Analytics",
+          "role": "Example Analyst"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Academy",
+          "graduation_year": 2009
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-967908321-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-d6230789df84ea09",
+      "given_name": "Ellie",
+      "family_name": "Hamilton",
+      "date_of_birth": "1953-06-06",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "ellie_hamilton@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "ellie_hamilton"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0101-9026"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 219,
+          "street_name": "Test Lane",
+          "city": "Sampleton",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Foundry",
+          "role": "Example Engineer"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Academy",
+          "graduation_year": 2005
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-165889259-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-d45c414e7b9bc315",
+      "given_name": "Gerard",
+      "family_name": "Brown",
+      "date_of_birth": "1970-04-15",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "gerardbrown@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "gerardbrown"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0189-8981"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 111,
+          "street_name": "Specimen Street",
+          "city": "Fictionbury",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Logistics",
+          "role": "Example Analyst"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Institute",
+          "graduation_year": 1997
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-286926732-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-10bbe598b5137452",
+      "given_name": "Jacob",
+      "family_name": "McDonald",
+      "date_of_birth": "1993-08-12",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "mcdonaldj@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "mcdonaldj"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0135-2188"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 138,
+          "street_name": "Sample Row",
+          "city": "Exampleford",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Works",
+          "role": "Example Technician"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Ashby Institute",
+          "graduation_year": 2006
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-804553906-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-42640aa014e62af5",
+      "given_name": "Bruce",
+      "family_name": "Brown",
+      "date_of_birth": "1978-07-24",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "bbrown@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "bbrown"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0183-0661"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 111,
+          "street_name": "Specimen Street",
+          "city": "Fictionbury",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Logistics",
+          "role": "Example Coordinator"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Eastmoor Academy",
+          "graduation_year": 2002
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-867640662-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-e69db3e8b8986126",
+      "given_name": "Craig",
+      "family_name": "Day",
+      "date_of_birth": "1957-09-01",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "dayc@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "dayc"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0152-5109"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 111,
+          "street_name": "Specimen Street",
+          "city": "Fictionbury",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [
+        {
+          "synthetic": true,
+          "organization": "Example Bramble Works",
+          "role": "Example Technician"
+        }
+      ],
+      "education": [
+        {
+          "synthetic": true,
+          "institution": "Example Eastmoor Academy",
+          "graduation_year": 1993
+        }
+      ],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-600250938-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-79456ebc24a48179",
+      "given_name": "Marcus",
+      "family_name": "Johnson",
+      "date_of_birth": "1949-10-15",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "marcus_johnson@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "marcus_johnson"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0195-6680"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 258,
+          "street_name": "Control Test Rise",
+          "city": "Testville",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [],
+      "education": [],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-088308318-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-a7ac69687808f4fb",
+      "given_name": "William",
+      "family_name": "Wilson",
+      "date_of_birth": "1984-03-06",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "wilsonw@mail.example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "wilsonw"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0115-2812"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 335,
+          "street_name": "Isolated Example Terrace",
+          "city": "Exampleford",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [],
+      "education": [],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-812010246-X",
+          "checksum_valid": false
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "person-b9b418da6ae759d7",
+      "given_name": "Pamela",
+      "family_name": "Moore",
+      "date_of_birth": "1952-10-27",
+      "emails": [
+        {
+          "synthetic": true,
+          "value": "moorep@example.test",
+          "kind": "primary"
+        }
+      ],
+      "usernames": [
+        {
+          "synthetic": true,
+          "value": "moorep"
+        }
+      ],
+      "phones": [
+        {
+          "synthetic": true,
+          "value": "+1-555-0161-1573"
+        }
+      ],
+      "addresses": [
+        {
+          "synthetic": true,
+          "house_number": 283,
+          "street_name": "Control Test Rise",
+          "city": "Sampleton",
+          "postal_code": "ZZ0 0ZZ",
+          "country_code": "ZZ"
+        }
+      ],
+      "employment": [],
+      "education": [],
+      "national_ids": [
+        {
+          "synthetic": true,
+          "value": "SYN-763790998-X",
+          "checksum_valid": false
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "synthetic": true,
+      "id": "edge-01a5a526df0315dc",
+      "source_person_id": "person-dad5d1bedddbce96",
+      "target_person_id": "person-e69db3e8b8986126",
+      "kind": "colleague",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_employer",
+          "value": "Example Bramble Works"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-058caf1669a1db7a",
+      "source_person_id": "person-10bbe598b5137452",
+      "target_person_id": "person-e69db3e8b8986126",
+      "kind": "colleague",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_employer",
+          "value": "Example Bramble Works"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-38fac4d9508004f6",
+      "source_person_id": "person-cc9b9cf568ca8612",
+      "target_person_id": "person-f2d6cc9d8bb8b0f2",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Marshall"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "216|Specimen Street|Testville|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-3f9f75f985e713c9",
+      "source_person_id": "person-41fa105f8bb35909",
+      "target_person_id": "person-bf833bf62fe775f4",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Jennings"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "219|Test Lane|Sampleton|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-4387ea3c7b4d88f5",
+      "source_person_id": "person-bf833bf62fe775f4",
+      "target_person_id": "person-d6230789df84ea09",
+      "kind": "colleague",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_employer",
+          "value": "Example Bramble Foundry"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-45040ca06e854354",
+      "source_person_id": "person-10bbe598b5137452",
+      "target_person_id": "person-f7f7c656343b2755",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "McDonald"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "138|Sample Row|Exampleford|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-491c5c8424890fb6",
+      "source_person_id": "person-acfdee2050534aee",
+      "target_person_id": "person-ff023d61c1f9bc44",
+      "kind": "colleague",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_employer",
+          "value": "Example Bramble Works"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-6b87aae09ec5f9dc",
+      "source_person_id": "person-b6aa122060c0447e",
+      "target_person_id": "person-bf833bf62fe775f4",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Jennings"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "219|Test Lane|Sampleton|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-74d41f8e3083c9e2",
+      "source_person_id": "person-0243d5f335f9306e",
+      "target_person_id": "person-ff023d61c1f9bc44",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Nixon"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "289|Sample Row|Fictionbury|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-78b9c89f6bfc6f1a",
+      "source_person_id": "person-41fa105f8bb35909",
+      "target_person_id": "person-b6aa122060c0447e",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Jennings"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "219|Test Lane|Sampleton|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-92264db3545d1f6c",
+      "source_person_id": "person-f2c97d2479f88498",
+      "target_person_id": "person-f2d6cc9d8bb8b0f2",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Marshall"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "216|Specimen Street|Testville|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-9e48d94e319aa235",
+      "source_person_id": "person-8d1152b4db280bbf",
+      "target_person_id": "person-cc9b9cf568ca8612",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Marshall"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "216|Specimen Street|Testville|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-a7ef032d9b31ce4e",
+      "source_person_id": "person-42640aa014e62af5",
+      "target_person_id": "person-d45c414e7b9bc315",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Brown"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "111|Specimen Street|Fictionbury|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-c0fc2716c4f3f32e",
+      "source_person_id": "person-cc9b9cf568ca8612",
+      "target_person_id": "person-f2c97d2479f88498",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Marshall"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "216|Specimen Street|Testville|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-c3badeb70a21e402",
+      "source_person_id": "person-8d1152b4db280bbf",
+      "target_person_id": "person-f2d6cc9d8bb8b0f2",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Marshall"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "216|Specimen Street|Testville|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-c4a7943ab3cef1cc",
+      "source_person_id": "person-dad5d1bedddbce96",
+      "target_person_id": "person-ff023d61c1f9bc44",
+      "kind": "classmate",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_school_year",
+          "value": "Example Ashby Institute|2007"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-cda7d207f46a8240",
+      "source_person_id": "person-10bbe598b5137452",
+      "target_person_id": "person-dad5d1bedddbce96",
+      "kind": "colleague",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_employer",
+          "value": "Example Bramble Works"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-ce07b9db2967ff43",
+      "source_person_id": "person-f05d01f659e31175",
+      "target_person_id": "person-f7f7c656343b2755",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "McDonald"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "138|Sample Row|Exampleford|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-ce3471ab8bde736c",
+      "source_person_id": "person-8d1152b4db280bbf",
+      "target_person_id": "person-f2c97d2479f88498",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "Marshall"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "216|Specimen Street|Testville|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-d8d2d8358f15b68a",
+      "source_person_id": "person-842c9530bb49819f",
+      "target_person_id": "person-f7f7c656343b2755",
+      "kind": "colleague",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_employer",
+          "value": "Example Bramble Logistics"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-de96f4b290185e17",
+      "source_person_id": "person-10bbe598b5137452",
+      "target_person_id": "person-f05d01f659e31175",
+      "kind": "family",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_surname",
+          "value": "McDonald"
+        },
+        {
+          "synthetic": true,
+          "signal": "shared_address",
+          "value": "138|Sample Row|Exampleford|ZZ0 0ZZ"
+        }
+      ]
+    },
+    {
+      "synthetic": true,
+      "id": "edge-f0d10e724924b517",
+      "source_person_id": "person-8d1152b4db280bbf",
+      "target_person_id": "person-91eda54c1ea2239a",
+      "kind": "colleague",
+      "evidence": [
+        {
+          "synthetic": true,
+          "signal": "shared_employer",
+          "value": "Example Bramble Analytics"
+        }
+      ]
+    }
+  ]
+}
