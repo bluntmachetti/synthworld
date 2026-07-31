@@ -56,6 +56,11 @@ from synthworld.extraction_serialization import (
 )
 from synthworld.generator import generate_world
 from synthworld.metrics import evaluate_world
+from synthworld.profiles.households import (
+    HouseholdsConfig,
+    generate_households_benchmark,
+)
+from synthworld.profiles.realism import RealismError
 from synthworld.risk_generator import generate_risk_benchmark
 from synthworld.risk_metrics import evaluate_risk_benchmark
 from synthworld.risk_serialization import (
@@ -257,6 +262,38 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
         return 0
 
+    if args.command == "generate-households":
+        try:
+            households = generate_households_benchmark(
+                seed=args.seed,
+                config=HouseholdsConfig(
+                    person_count=args.person_count,
+                    community_count=args.community_count,
+                ),
+            )
+        except (RealismError, ValidationError) as error:
+            # A world below its declared shape is a failure, not a warning: every
+            # number reported downstream would describe something nobody asked for.
+            print(str(error), file=sys.stderr)
+            return 1
+        root = args.output
+        root.mkdir(parents=True, exist_ok=True)
+        # The exact bytes the manifest digest was taken over. Re-serializing here
+        # would let the digest describe something the file does not contain.
+        root.joinpath("world.json").write_text(
+            households.world_json(), encoding="utf-8"
+        )
+        root.joinpath("manifest.json").write_text(
+            households.manifest.model_dump_json(indent=2), encoding="utf-8"
+        )
+        realism = households.manifest.realism
+        print(
+            f"households_and_workplaces ready: {realism.person_count} people, "
+            f"{realism.edge_count} relationships, {realism.component_count} "
+            f"components -> {root}"
+        )
+        return 0
+
     if args.command in {"generate", "metrics"}:
         world = generate_world(seed=args.seed, persona_count=args.persona_count)
     elif args.command in {"generate-corpus", "corpus-metrics"}:
@@ -312,6 +349,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="synthworld")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    households = subparsers.add_parser(
+        "generate-households",
+        help="write a households_and_workplaces world and its manifest",
+    )
+    households.add_argument("--seed", type=int, required=True)
+    households.add_argument("--person-count", type=int, default=100)
+    households.add_argument("--community-count", type=int, default=4)
+    households.add_argument("--output", type=Path, required=True)
 
     generate = subparsers.add_parser("generate", help="write a world as JSON")
     _add_world_arguments(generate)
