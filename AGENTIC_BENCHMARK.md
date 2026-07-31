@@ -262,8 +262,13 @@ report = evaluate_agentic_trace(submission)
 
 ## Metrics and baselines
 
-Agentic reports use scoring protocol `0.2.0`; other SynthWorld tasks remain on
-their existing scoring protocols. The report keeps these dimensions
+Agentic reports use scoring protocol `0.3.0`; other SynthWorld tasks remain on
+their existing scoring protocols. `0.3.0` derives `expected_policy_version` from
+the delegation that covered the action rather than echoing the attempt, and
+records the covering chain on a policy-version-mismatch denial. Asteria Agentic
+v1's artifacts are byte-identical under both, because it registers a single
+policy version - the protocol number moves because the rule changed, not because
+the fixture did. The report keeps these dimensions
 independent:
 
 - originating-principal, logical-agent, runtime, and credential-subject

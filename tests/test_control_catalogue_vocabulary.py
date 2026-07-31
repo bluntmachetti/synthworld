@@ -20,9 +20,17 @@ from pathlib import Path
 
 import yaml
 
-from synthworld.agentic import evaluate_agentic_trace, generate_asteria_agentic_v1
+from synthworld.agentic import (
+    AGENTIC_SCORING_PROTOCOL_VERSION,
+    evaluate_agentic_trace,
+    generate_asteria_agentic_v1,
+)
 from synthworld.agentic.baselines import reference_agentic_trace
-from synthworld.agentic.models import AgenticCaseKind, AuthorityFailureReason
+from synthworld.agentic.models import (
+    AGENTIC_SCHEMA_VERSION,
+    AgenticCaseKind,
+    AuthorityFailureReason,
+)
 
 CATALOGUE = Path("agent-authority-contract/control-catalogue.yaml")
 
@@ -121,3 +129,20 @@ def test_every_emitted_metric_is_cited_and_every_cited_metric_exists() -> None:
         f"emitted but cited by no control: {sorted(emitted - cited)}; "
         f"cited but not emitted: {sorted(cited - emitted)}"
     )
+
+
+def test_declared_versions_track_the_code_they_describe() -> None:
+    """The catalogue pins two versions by hand, and nothing was checking them.
+
+    `scoring_protocol_version` is the number a reader uses to know which rule
+    produced their truth. If it drifts from the constant the scorer actually
+    stamps, the catalogue is describing a protocol that no longer exists - the
+    same failure as the case-kind count, which claimed eleven kinds while the
+    enum had thirteen and stayed wrong until an external review caught it.
+    """
+
+    meta = _catalogue()["meta"]
+    assert isinstance(meta, dict)
+
+    assert meta["scoring_protocol_version"] == AGENTIC_SCORING_PROTOCOL_VERSION
+    assert meta["agentic_schema_version"] == AGENTIC_SCHEMA_VERSION

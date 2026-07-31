@@ -32,7 +32,7 @@ def test_reference_trace_scores_every_independent_dimension() -> None:
     metrics = {item.name: item.value for item in report.metrics}
 
     assert report.task == "agentic_authority"
-    assert report.scoring_version == "0.2.0"
+    assert report.scoring_version == "0.3.0"
     assert report.checksum_scheme == "sha256-artifact-set-v1"
     assert metrics["excess_authority_rate"] == 0.0
     assert all(

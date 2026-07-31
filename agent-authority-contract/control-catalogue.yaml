@@ -98,7 +98,7 @@ meta:
   repin_before: 2026-09-30          # CB4A expiry; re-verify all mappings by then
   benchmark_under_description: asteria-agentic-v1
   agentic_schema_version: "1.0.0"
-  scoring_protocol_version: "0.2.0"
+  scoring_protocol_version: "0.3.0"
   fixture_shape:
     events: 24
     action_attempts: 11
