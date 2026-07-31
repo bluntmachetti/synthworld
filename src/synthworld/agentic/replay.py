@@ -496,11 +496,15 @@ def _delegation_chain(
     delegations: tuple[Delegation, ...],
 ) -> tuple[str, ...]:
     chain = [delegation.id]
+    seen = {delegation.id}
     current = delegation
     while current.parent_delegation_id is not None:
         parent = _by_id(delegations, current.parent_delegation_id)
         if parent is None:
             raise AgenticReplayError("delegation chain references a missing parent")
+        if parent.id in seen:
+            raise AgenticReplayError("delegation chain contains a cycle")
+        seen.add(parent.id)
         chain.append(parent.id)
         current = parent
     return tuple(reversed(chain))
