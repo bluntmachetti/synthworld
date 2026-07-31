@@ -30,6 +30,7 @@ their own names, and a shared surname is evidence, never a definition.
 from __future__ import annotations
 
 import json
+import platform as platform_module
 from collections.abc import Sequence
 from datetime import date, timedelta
 from hashlib import blake2b
@@ -55,8 +56,14 @@ from synthworld.models import (
     SynthWorld,
     Username,
 )
+from synthworld.profiles.realism import (
+    RealismMinimums,
+    RealismReport,
+    measure_realism,
+    validate_realism,
+)
 
-PROFILE_NAME = "households_and_workplaces"
+PROFILE_NAME: Literal["households_and_workplaces"] = "households_and_workplaces"
 PROFILE_VERSION: Literal["1.0.0"] = "1.0.0"
 
 #: Enumerated product spaces. Registries are drawn from these without replacement,
@@ -132,6 +139,16 @@ class HouseholdsConfig(SyntheticModel):
     school_count: int = Field(default=9, ge=1)
     isolated_person_count: int = Field(default=6, ge=0)
     colleagues_per_person: int = Field(default=3, ge=1, le=8)
+    #: People, households, workplaces and schools are partitioned into communities,
+    #: and nobody draws membership from outside their own. Without this the
+    #: membership graph mixes freely and everyone with any membership lands in one
+    #: giant component - the profile's first revision produced exactly that, and
+    #: issue #43 asks for weakly connected components of intermediate size.
+    community_count: int = Field(default=4, ge=1)
+    #: Declared floors. Generation fails rather than emitting a world that does not
+    #: meet them, because a world quietly below its own declared shape is worse than
+    #: no world: every number downstream describes something nobody asked for.
+    minimums: RealismMinimums = Field(default_factory=RealismMinimums)
 
     @model_validator(mode="after")
     def require_room_for_structure(self) -> Self:
@@ -145,6 +162,13 @@ class HouseholdsConfig(SyntheticModel):
             _SCHOOL_FORMS
         ):
             raise ValueError("school_count exceeds the enumerated registry")
+        for label, size in (
+            ("household_count", self.household_count),
+            ("workplace_count", self.workplace_count),
+            ("school_count", self.school_count),
+        ):
+            if size < self.community_count:
+                raise ValueError(f"{label} cannot be smaller than community_count")
         return self
 
     def digest(self) -> str:
@@ -167,6 +191,19 @@ def _draw(*, seed: int, digest: str, purpose: str, index: int) -> int:
     return int.from_bytes(
         blake2b(material.encode("utf-8"), digest_size=8).digest(), "big"
     )
+
+
+def _within[T](pool: Sequence[T], community: int, communities: int) -> Sequence[T]:
+    """The slice of a registry belonging to one community.
+
+    Contiguous slices rather than a stride, so that a registry read by a human is
+    obviously partitioned, and so a community's institutions stay together when the
+    list is printed in a manifest.
+    """
+
+    size, remainder = divmod(len(pool), communities)
+    start = community * size + min(community, remainder)
+    return pool[start : start + size + (1 if community < remainder else 0)]
 
 
 def _pick(
@@ -229,6 +266,64 @@ def _phone(*, seed: int, digest: str, index: int) -> PhoneNumber:
     return PhoneNumber(value=f"+1-555-01{drawn % 100:02d}-{drawn // 100 % 10_000:04d}")
 
 
+class HouseholdsManifest(SyntheticModel):
+    """What a generated world is, how it was built, and what it contains.
+
+    Three separable things, kept apart because the #27 reproducibility discussion
+    established that conflating them is what makes a checksum overclaim:
+
+    **benchmark identity** decides the artifact - change any of it and a different
+    world is expected; **build provenance** records the environment that produced
+    it, so byte identity is reproducible rather than merely asserted; **semantic
+    invariants** hold across environments even when bytes do not, which is what a
+    reader needs when a serializer changes underneath them.
+    """
+
+    profile: Literal["households_and_workplaces"] = PROFILE_NAME
+    profile_version: Literal["1.0.0"] = PROFILE_VERSION
+    schema_version: Literal["1.0.0"] = "1.0.0"
+    seed: int
+    config_digest: str
+    config: HouseholdsConfig
+
+    python_version: str
+    platform: str
+
+    realism: RealismReport
+
+
+class HouseholdsBenchmark(SyntheticModel):
+    world: SynthWorld
+    manifest: HouseholdsManifest
+
+
+def generate_households_benchmark(
+    *, seed: int, config: HouseholdsConfig | None = None
+) -> HouseholdsBenchmark:
+    """Generate a world together with its manifest, validating before returning.
+
+    Validation runs on the measured world, not on the configuration that asked for
+    it, so a generator that silently fails to produce the declared shape raises
+    here instead of shipping a manifest that flatters it.
+    """
+
+    settings = config if config is not None else HouseholdsConfig()
+    world = generate_households_world(seed=seed, config=settings)
+    realism = measure_realism(world)
+    validate_realism(realism, settings.minimums)
+    return HouseholdsBenchmark(
+        world=world,
+        manifest=HouseholdsManifest(
+            seed=seed,
+            config_digest=settings.digest(),
+            config=settings,
+            python_version=platform_module.python_version(),
+            platform=platform_module.platform(terse=True),
+            realism=realism,
+        ),
+    )
+
+
 def generate_households_world(
     *, seed: int, config: HouseholdsConfig | None = None
 ) -> SynthWorld:
@@ -274,10 +369,17 @@ def generate_households_world(
 
     for index in range(count):
         isolated = index >= social_count
-        household = (
-            _draw(seed=seed, digest=digest, purpose="household", index=index)
-            % settings.household_count
+        community = (
+            _draw(seed=seed, digest=digest, purpose="community", index=index)
+            % settings.community_count
         )
+        local_households = _within(
+            range(settings.household_count), community, settings.community_count
+        )
+        household = local_households[
+            _draw(seed=seed, digest=digest, purpose="household", index=index)
+            % len(local_households)
+        ]
         in_core = (
             not isolated
             and _draw(seed=seed, digest=digest, purpose="core", index=index) % 3 != 0
@@ -319,13 +421,21 @@ def generate_households_world(
             # compares the objects. So the team and the cohort are the unit of
             # membership - organisation with role, institution with year.
             organisation = _pick(
-                workplaces, seed=seed, digest=digest, purpose="employer", index=index
+                _within(workplaces, community, settings.community_count),
+                seed=seed,
+                digest=digest,
+                purpose="employer",
+                index=index,
             )
             role = "Example " + _pick(
                 _ROLES, seed=seed, digest=digest, purpose="role", index=index
             )
             institution = _pick(
-                schools, seed=seed, digest=digest, purpose="school", index=index
+                _within(schools, community, settings.community_count),
+                seed=seed,
+                digest=digest,
+                purpose="school",
+                index=index,
             )
             year = (
                 1990 + _draw(seed=seed, digest=digest, purpose="year", index=index) % 20
@@ -482,6 +592,9 @@ def _relationships(
 __all__ = [
     "PROFILE_NAME",
     "PROFILE_VERSION",
+    "HouseholdsBenchmark",
     "HouseholdsConfig",
+    "HouseholdsManifest",
+    "generate_households_benchmark",
     "generate_households_world",
 ]

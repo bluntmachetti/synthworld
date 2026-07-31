@@ -760,3 +760,45 @@ def test_validate_survives_an_unpaired_surrogate_on_every_output_path(
 
     assert exit_code == 1
     assert "\\ud800" in capsys.readouterr().out
+
+
+def test_generate_households_writes_a_world_and_its_manifest(tmp_path: Path) -> None:
+    root = tmp_path / "households"
+
+    assert main(["generate-households", "--seed", "42", "--output", str(root)]) == 0
+
+    world = json.loads((root / "world.json").read_text(encoding="utf-8"))
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+
+    assert len(world["personas"]) == manifest["realism"]["person_count"]
+    assert manifest["profile"] == "households_and_workplaces"
+    assert manifest["config_digest"]
+    assert manifest["realism"]["component_count"] > 1
+
+
+def test_generate_households_refuses_a_world_below_its_declared_shape(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A single community reproduces the giant component the profile exists to fix.
+
+    Exiting non-zero matters more than the message: a world quietly below its
+    declared shape would make every number reported downstream describe something
+    nobody asked for.
+    """
+
+    root = tmp_path / "rejected"
+    exit_code = main(
+        [
+            "generate-households",
+            "--seed",
+            "42",
+            "--community-count",
+            "1",
+            "--output",
+            str(root),
+        ]
+    )
+
+    assert exit_code == 1
+    assert "largest component" in capsys.readouterr().err
+    assert not root.exists()

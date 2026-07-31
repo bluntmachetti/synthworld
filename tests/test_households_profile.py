@@ -203,7 +203,10 @@ def test_isolated_controls_have_no_memberships_and_no_shared_address() -> None:
     assert all(item.education == () for item in controls)
 
     crowded = HouseholdsConfig(
-        person_count=2000, household_count=2, isolated_person_count=1998
+        person_count=2000,
+        household_count=2,
+        isolated_person_count=1998,
+        community_count=1,
     )
     at_scale = generate_households_world(seed=42, config=crowded)
     household_addresses = {
@@ -281,7 +284,7 @@ def test_birth_dates_do_not_move_when_the_calendar_does() -> None:
     """
 
     assert generate_households_world(seed=42).personas[0].date_of_birth == date(
-        2000, 2, 17
+        1992, 6, 13
     )
 
 
@@ -307,6 +310,10 @@ def test_configuration_digest_is_stable_under_key_ordering() -> None:
         ),
         (lambda: HouseholdsConfig(workplace_count=500), "workplace_count exceeds"),
         (lambda: HouseholdsConfig(school_count=500), "school_count exceeds"),
+        (
+            lambda: HouseholdsConfig(school_count=2, community_count=4),
+            "school_count cannot be smaller than community_count",
+        ),
     ],
 )
 def test_configuration_rejects_impossible_worlds(
@@ -329,6 +336,7 @@ def test_an_explicit_configuration_is_honoured() -> None:
         school_count=2,
         isolated_person_count=2,
         colleagues_per_person=2,
+        community_count=2,
     )
     world = generate_households_world(seed=42, config=config)
 
