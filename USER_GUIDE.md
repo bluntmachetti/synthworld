@@ -356,6 +356,75 @@ This is currently a scenario-generation path. SynthWorld can report corpus
 integrity metrics, but version 0.9 does not yet provide a unified evaluator for
 broker-removal actions or longitudinal product behaviour.
 
+## Use case 8: households and workplaces
+
+Use this when the core world is too thin to judge a system on — when you need
+overlapping households, shared workplaces and schools, real graph structure, and
+identifiers that do not hand back the answer.
+
+```bash
+synthworld generate-households \
+  --seed 20260731 \
+  --person-count 100 \
+  --community-count 4 \
+  --output households/
+```
+
+It writes `world.json` and `manifest.json`. The manifest keeps three separable
+things apart: **benchmark identity** decides the artifact, **build provenance**
+records the environment that produced it, and **semantic invariants** hold across
+environments even when bytes do not. It also carries a checksum of the world bytes,
+so a manifest cannot be paired with a world it does not describe.
+
+Generation **fails** rather than emitting a world that misses its declared shape.
+The floors are part of the configuration, and they are checked against the measured
+world rather than against the request that produced it:
+
+```bash
+# one community collapses the graph into a single component, so this exits 1
+synthworld generate-households --seed 1 --community-count 1 --output /tmp/rejected
+```
+
+Why it differs from the core world, measured on 100 people across three seeds:
+
+| | core identity world | households_and_workplaces |
+|---|---|---|
+| components | 1 | 20-21 |
+| cycle rank | 0 | 65-77 |
+| isolated controls | 0 | 6 |
+| distinct degrees | 2 | 9-10 |
+| identifiers | embed the persona ordinal | derived from content and a keyed hash |
+| seeds | change values only | change memberships and structure |
+
+Household members share an address but **not** a surname. Only a household's
+surname core is family, so the remaining co-residents share an address with people
+they have no relationship to — a resolver that merges on address is wrong about
+them, which is the negative control that makes address evidence worth testing.
+
+### Generation cost
+
+Measured with `examples/measure_households_cost.py`, which prints the interpreter
+and platform beside the figures so you can tell whether they apply to you. Three
+timed repeats after a discarded warm-up, on Python 3.12.12, Linux x86-64,
+glibc 2.43:
+
+| people | runtime (median) | peak Python allocation |
+|---|---|---|
+| 100 (standard) | 0.046 s | 1.1 MiB |
+| 500 | 0.287 s | 12.3 MiB |
+| 2000 (config ceiling) | 2.003 s | 116.6 MiB |
+
+```bash
+uv run python examples/measure_households_cost.py --person-count 100 --repeats 5
+```
+
+Two caveats. Peak memory is `tracemalloc`, so it counts Python allocations rather
+than resident set size — it understates the real footprint and excludes the
+interpreter. And cost grows faster than the population: memory rises about 100x
+between 100 and 2000 people while the population rises 20x, because relationship
+construction holds membership groups for the whole world. The `person_count`
+ceiling of 2000 is a configuration limit, not a measured cliff.
+
 ## Reading evaluation results
 
 Use `--summary` for the headline metrics and omit it for the complete JSON
