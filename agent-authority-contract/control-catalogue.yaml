@@ -102,7 +102,15 @@ meta:
   fixture_shape:
     events: 24
     action_attempts: 11
-    labelled_cases: 11              # one per AgenticCaseKind member
+    labelled_cases: 11
+    # AgenticCaseKind has 13 members. The two below name failure reasons the
+    # oracle decides but that no frozen action reaches, so they label no case
+    # here and appear in no control's failure_slices. Listed rather than
+    # subtracted silently: a kind added with no case has to be declared here,
+    # which is the moment to ask why it has none.
+    unexercised_case_kinds:
+      - credential_invalid
+      - policy_version_mismatch
   notes: >-
     Skeleton. No control here has been reviewed by an implementation owner, and
     nothing in this file constitutes a comparative or vendor claim.
