@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import unicodedata
 from collections import Counter, defaultdict
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable, Mapping
 
 from synthworld.leakage import FieldRecoverability, world_recoverability
 from synthworld.models import Address, Persona, SyntheticModel, SynthWorld
@@ -48,6 +48,13 @@ class RealismReport(SyntheticModel):
     shared_address_people: int
     distinct_email_domains: int
     non_ascii_name_people: int
+    #: Issue #43 asks for missing and multi-valued attribute prevalence, so sparse
+    #: personas are expected input rather than an edge case. `Persona` puts no
+    #: minimum length on any of these tuples, and an earlier revision indexed [0]
+    #: unconditionally - it raised IndexError on a model-valid world instead of
+    #: measuring it.
+    missing_attribute_people: Mapping[str, int]
+    multi_valued_attribute_people: Mapping[str, int]
     leakage: tuple[FieldRecoverability, ...]
 
 
@@ -76,6 +83,10 @@ def _address_key(address: Address) -> str:
             address.postal_code,
         )
     )
+
+
+def _primary_email(person: Persona) -> str:
+    return person.emails[0].value
 
 
 def _normalised_name(person: Persona) -> str:
@@ -110,6 +121,17 @@ def _group_sizes(values: Iterable[str]) -> tuple[int, ...]:
     return tuple(sorted(Counter(values).values()))
 
 
+_COUNTED_ATTRIBUTES = (
+    "addresses",
+    "emails",
+    "usernames",
+    "phones",
+    "national_ids",
+    "employment",
+    "education",
+)
+
+
 def measure_realism(world: SynthWorld) -> RealismReport:
     """Measure a world. Takes no configuration, so it cannot echo one."""
 
@@ -121,7 +143,13 @@ def measure_realism(world: SynthWorld) -> RealismReport:
     degrees = Counter(len(adjacency[item.id]) for item in world.personas)
     sizes = _component_sizes(world)
     names = Counter(_normalised_name(item) for item in world.personas)
-    addresses = Counter(_address_key(item.addresses[0]) for item in world.personas)
+    address_keys = [
+        _address_key(item.addresses[0]) for item in world.personas if item.addresses
+    ]
+    addresses = Counter(address_keys)
+
+    def field(name: str, project: Callable[[Persona], str]) -> list[str]:
+        return [project(item) for item in world.personas if getattr(item, name)]
 
     return RealismReport(
         person_count=len(world.personas),
@@ -132,9 +160,7 @@ def measure_realism(world: SynthWorld) -> RealismReport:
         cycle_rank=len(world.relationships) - len(world.personas) + len(sizes),
         distinct_degrees=len(degrees),
         max_degree=max(degrees) if degrees else 0,
-        household_sizes=_group_sizes(
-            _address_key(item.addresses[0]) for item in world.personas
-        ),
+        household_sizes=_group_sizes(address_keys),
         workplace_sizes=_group_sizes(
             item.employment[0].organization
             for item in world.personas
@@ -146,23 +172,36 @@ def measure_realism(world: SynthWorld) -> RealismReport:
         normalised_name_collisions=sum(count for count in names.values() if count > 1),
         shared_address_people=sum(count for count in addresses.values() if count > 1),
         distinct_email_domains=len(
-            {item.emails[0].value.split("@")[1] for item in world.personas}
+            {value.split("@")[-1] for value in field("emails", _primary_email)}
         ),
+        missing_attribute_people={
+            name: sum(1 for item in world.personas if not getattr(item, name))
+            for name in _COUNTED_ATTRIBUTES
+        },
+        multi_valued_attribute_people={
+            name: sum(1 for item in world.personas if len(getattr(item, name)) > 1)
+            for name in _COUNTED_ATTRIBUTES
+        },
         non_ascii_name_people=sum(
             1
             for item in world.personas
             if not f"{item.given_name}{item.family_name}".isascii()
         ),
+        # Leakage is scored only over personas that carry the field. A shorter
+        # sequence measures fewer people; a placeholder would invent a constant and
+        # read as structure nobody generated.
         leakage=world_recoverability(
             {
-                "email": [item.emails[0].value for item in world.personas],
-                "username": [item.usernames[0].value for item in world.personas],
-                "phone": [item.phones[0].value for item in world.personas],
-                "national_id": [item.national_ids[0].value for item in world.personas],
+                "email": field("emails", _primary_email),
+                "username": field("usernames", lambda item: item.usernames[0].value),
+                "phone": field("phones", lambda item: item.phones[0].value),
+                "national_id": field(
+                    "national_ids", lambda item: item.national_ids[0].value
+                ),
                 "date_of_birth": [
                     item.date_of_birth.isoformat() for item in world.personas
                 ],
-                "address": [_address_key(item.addresses[0]) for item in world.personas],
+                "address": address_keys,
             }
         ),
     )

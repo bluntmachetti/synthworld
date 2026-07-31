@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import runpy
 import sys
@@ -772,6 +773,12 @@ def test_generate_households_writes_a_world_and_its_manifest(tmp_path: Path) -> 
 
     assert len(world["personas"]) == manifest["realism"]["person_count"]
     assert manifest["profile"] == "households_and_workplaces"
+    # The manifest must be bound to the bytes actually written, not to a
+    # re-serialization that may differ.
+    assert (
+        hashlib.sha256((root / "world.json").read_bytes()).hexdigest()
+        == manifest["world_digest"]
+    )
     assert manifest["config_digest"]
     assert manifest["realism"]["component_count"] > 1
 

@@ -278,8 +278,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 1
         root = args.output
         root.mkdir(parents=True, exist_ok=True)
+        # The exact bytes the manifest digest was taken over. Re-serializing here
+        # would let the digest describe something the file does not contain.
         root.joinpath("world.json").write_text(
-            households.world.model_dump_json(indent=2), encoding="utf-8"
+            households.world_json(), encoding="utf-8"
         )
         root.joinpath("manifest.json").write_text(
             households.manifest.model_dump_json(indent=2), encoding="utf-8"

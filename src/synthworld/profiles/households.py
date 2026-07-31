@@ -33,7 +33,7 @@ import json
 import platform as platform_module
 from collections.abc import Sequence
 from datetime import date, timedelta
-from hashlib import blake2b
+from hashlib import blake2b, sha256
 from typing import Literal, Self
 
 from faker import Faker
@@ -285,6 +285,11 @@ class HouseholdsManifest(SyntheticModel):
     seed: int
     config_digest: str
     config: HouseholdsConfig
+    #: sha256 of the exact bytes `world.json` carries. Without it a manifest cannot
+    #: establish that it describes its sibling artifact: a world replaced, mixed
+    #: with another run's manifest, or half-written after an interrupted export
+    #: would still read as internally consistent.
+    world_digest: str
 
     python_version: str
     platform: str
@@ -295,6 +300,23 @@ class HouseholdsManifest(SyntheticModel):
 class HouseholdsBenchmark(SyntheticModel):
     world: SynthWorld
     manifest: HouseholdsManifest
+
+    def world_json(self) -> str:
+        """The exact serialization the manifest digest is taken over.
+
+        Callers must write these bytes rather than re-serializing, or the digest
+        describes something the file does not contain.
+        """
+
+        return canonical_world_json(self.world)
+
+
+def canonical_world_json(world: SynthWorld) -> str:
+    return world.model_dump_json(indent=2)
+
+
+def world_digest(world: SynthWorld) -> str:
+    return sha256(canonical_world_json(world).encode("utf-8")).hexdigest()
 
 
 def generate_households_benchmark(
@@ -317,6 +339,7 @@ def generate_households_benchmark(
             seed=seed,
             config_digest=settings.digest(),
             config=settings,
+            world_digest=world_digest(world),
             python_version=platform_module.python_version(),
             platform=platform_module.platform(terse=True),
             realism=realism,
@@ -595,6 +618,8 @@ __all__ = [
     "HouseholdsBenchmark",
     "HouseholdsConfig",
     "HouseholdsManifest",
+    "canonical_world_json",
     "generate_households_benchmark",
     "generate_households_world",
+    "world_digest",
 ]

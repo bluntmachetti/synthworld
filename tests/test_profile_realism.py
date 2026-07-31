@@ -150,3 +150,74 @@ def test_leakage_can_be_declared_out_of_scope() -> None:
     )
 
     validate_realism(report, permissive)
+
+
+def test_realism_measures_sparse_personas_instead_of_crashing() -> None:
+    """`Persona` puts no minimum length on any attribute tuple.
+
+    Issue #43 asks for missing and multi-valued attribute prevalence, so a persona
+    with no address is expected input rather than an edge case. An earlier revision
+    indexed `[0]` unconditionally and raised IndexError on a model-valid world.
+    """
+
+    from datetime import date
+
+    from synthworld.models import EmailAddress, EmailKind, Persona, SynthWorld
+
+    bare = Persona(
+        id="person-bare",
+        given_name="Ana",
+        family_name="Silva",
+        date_of_birth=date(1990, 1, 1),
+        addresses=(),
+        emails=(),
+        usernames=(),
+        phones=(),
+        national_ids=(),
+        employment=(),
+        education=(),
+    )
+    plural = bare.model_copy(
+        update={
+            "id": "person-plural",
+            "emails": (
+                EmailAddress(value="a@example.test", kind=EmailKind.PRIMARY),
+                EmailAddress(value="b@other.test", kind=EmailKind.MANAGED_ALIAS),
+            ),
+        }
+    )
+
+    report = measure_realism(
+        SynthWorld(seed=1, personas=(bare, plural), relationships=())
+    )
+
+    assert report.missing_attribute_people["addresses"] == 2
+    assert report.missing_attribute_people["emails"] == 1
+    assert report.multi_valued_attribute_people["emails"] == 1
+    # Scored over the personas that carry the field, not padded with a placeholder
+    # that would read as structure nobody generated.
+    assert report.distinct_email_domains == 1
+
+
+def test_the_manifest_is_bound_to_the_world_it_describes() -> None:
+    """Otherwise a manifest cannot show it belongs to its sibling artifact.
+
+    A world replaced, mixed with another run's manifest, or half-written after an
+    interrupted export would otherwise still read as internally consistent.
+    """
+
+    from hashlib import sha256
+
+    from synthworld.profiles.households import world_digest
+
+    benchmark = generate_households_benchmark(seed=42)
+
+    assert (
+        benchmark.manifest.world_digest
+        == sha256(benchmark.world_json().encode("utf-8")).hexdigest()
+    )
+    assert benchmark.manifest.world_digest == world_digest(benchmark.world)
+    assert (
+        benchmark.manifest.world_digest
+        != generate_households_benchmark(seed=43).manifest.world_digest
+    )
