@@ -98,11 +98,19 @@ meta:
   repin_before: 2026-09-30          # CB4A expiry; re-verify all mappings by then
   benchmark_under_description: asteria-agentic-v1
   agentic_schema_version: "1.0.0"
-  scoring_protocol_version: "0.2.0"
+  scoring_protocol_version: "0.3.0"
   fixture_shape:
     events: 24
     action_attempts: 11
-    labelled_cases: 11              # one per AgenticCaseKind member
+    labelled_cases: 11
+    # AgenticCaseKind has 13 members. The two below name failure reasons the
+    # oracle decides but that no frozen action reaches, so they label no case
+    # here and appear in no control's failure_slices. Listed rather than
+    # subtracted silently: a kind added with no case has to be declared here,
+    # which is the moment to ask why it has none.
+    unexercised_case_kinds:
+      - credential_invalid
+      - policy_version_mismatch
   notes: >-
     Skeleton. No control here has been reviewed by an implementation owner, and
     nothing in this file constitutes a comparative or vendor claim.
@@ -139,15 +147,21 @@ meta:
     never as a comparative result - which is what AGENTIC_BENCHMARK.md already says
     for other reasons.
   known_scoring_gaps: >-
-    Verified 2026-07-29 against the running scorer. C11's expected_policy_version is
-    copied from the public attempt, so echoing the requested version scores 1.0.
-    C08's four required evidence refs are derivable from public data, so a system
-    retaining nothing can score 1.0. C09's metric covers three case kinds while
-    four actually diverge between action and audit, and one of its three
+    Verified 2026-07-29 against the running scorer; C11 revised 2026-07-31.
+    C11's expected_policy_version is now derived from the covering delegation
+    rather than copied from the public attempt, but on this fixture every action
+    still has attempted equal to effective, so an echo continues to score 1.0
+    here - see that control's core_limitations for what remains. C08's four
+    required evidence refs are derivable from public data, so a system retaining
+    nothing can score 1.0. C09's metric covers three case kinds while four
+    actually diverge between action and audit, and one of its three
     (post_revocation_action) does not diverge at all - so two diverging cases are
-    unscored. credential_invalid and policy_version_mismatch are reachable in the
-    oracle but fire in no labelled case. These are the concrete acceptance targets
-    for the generated world in issue #27.
+    unscored. credential_invalid and policy_version_mismatch are labellable case
+    kinds that fire in no labelled case.
+
+    Two separable things: shipping and pinning a fix, which needs no generated
+    world and is what happened to C11, versus demonstrating the closure on a
+    published world, which does. Only the second waits on issue #27.
 
 controls:
 
@@ -764,15 +778,19 @@ controls:
     # engine and policy administrator split and contains no requirement to record
     # which policy version a decision used.
     core_limitations: >-
-      The metric is close to trivial as it stands: expected_policy_version is
-      copied verbatim from the public attempt's policy_version when truth is
-      built, so a system that echoes the value it was given scores 1.0 without
-      demonstrating that the version was used in the decision. Separately,
-      policy_version_mismatch never fires in the frozen fixture - reachable in the
-      oracle, unexercised by any labelled case. Both are fixture and scoring gaps
-      for issue #27; the control cannot be reported as supported until the
-      reported version is checked against the version actually in force rather
-      than the version requested.
+      expected_policy_version is now derived from the delegation that covered the
+      action, resolved without consulting the requested version, so an echo is
+      wrong wherever the two differ. Two limits remain, and the control stays
+      partial until a world exercises them. First, where no delegation covers the
+      action there is no delegation-bound policy to name and the attempted version
+      stands - five of the eleven frozen actions are in that case, so an echo still
+      scores them; the accompanying failure reason is what carries the information
+      that nothing was authorised. Second, policy_version_mismatch still fires in
+      no labelled case, so on the frozen fixture every action has attempted equal
+      to effective by construction and an echo still scores 1.0 there. Only a world
+      carrying mismatch cases demonstrates the closure. This is also delegation-
+      bound policy correctness, not policy-in-force-over-time: PolicyVersion
+      carries no activation schedule.
     lab_extension: >-
       Change policy version mid-run and confirm the deployed decision point binds
       the correct version into its record.

@@ -230,7 +230,7 @@ Custom agentic worlds built with `build_agentic_benchmark` are fully replayed
 and relationally validated before evaluator truth is created. Malformed
 runtime/agent, credential, delegator, actor, and owner-chain joins are rejected;
 truthful unauthorized attempts remain scoreable denials. Agentic scoring
-protocol `0.2.0` also distinguishes missing evidence from fabricated extras with
+protocol `0.3.0` also distinguishes missing evidence from fabricated extras with
 completeness, exact-match, and micro-precision metrics.
 
 See the [user guide](USER_GUIDE.md) for goal-led walkthroughs,

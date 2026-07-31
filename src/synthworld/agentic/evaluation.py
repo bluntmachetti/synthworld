@@ -25,7 +25,7 @@ from synthworld.evaluation import (
     TaskMetric,
 )
 
-AGENTIC_SCORING_PROTOCOL_VERSION = "0.2.0"
+AGENTIC_SCORING_PROTOCOL_VERSION = "0.3.0"
 
 _TEMPORAL_CASES = {
     AgenticCaseKind.VALID_THEN_REVOKED,

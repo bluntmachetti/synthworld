@@ -325,7 +325,7 @@ synthworld evaluate agentic \
 The report separates identity role resolution, action-time allow/deny quality,
 audit-time temporal validity, delegation-chain integrity, attribution,
 accountable ownership, retained evidence, reconstructability, and side effects.
-Agentic scoring protocol `0.2.0` reports evidence completeness, exact match, and
+Agentic scoring protocol `0.3.0` reports evidence completeness, exact match, and
 micro precision separately: missing references lower completeness, while
 fabricated extras can preserve completeness but lower exact match and precision.
 Returning the correct decision does not compensate for missing or fabricated
