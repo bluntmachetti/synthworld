@@ -179,17 +179,34 @@ follows the canonical binding's runtime ID.
 
 `delegation_chain_ids` records the chain the action-time policy check
 selects. Among the delegations granted to the acting logical agent by the
-originating principal that are time-valid, unrevoked, and match the
-attempt's policy version, keep those whose capability covers the resource,
-the action, every requested scope, and the purpose; take the qualifying
-delegation with the lexicographically smallest ID and expand it through its
-parents, root first. The chain is independent of the final decision. An
-action denied for a credential, runtime, tenant, or sub-delegation reason
-still records its covering chain — the fixture's wrong-runtime and
-overprivileged-delegation cases both do — while an action whose covering
-delegation is revoked, expired, or not yet granted records an empty chain,
-as in the post-revocation and invalid-before-grant cases. Null is scored as
-missing capture, not as an empty chain.
+originating principal that are time-valid and unrevoked, keep those whose
+capability covers the resource, the action, every requested scope, and the
+purpose; take the qualifying delegation with the lexicographically smallest
+ID and expand it through its parents, root first. The chain is independent
+of the final decision. An action denied for a credential, runtime, tenant,
+sub-delegation, or policy-version reason still records its covering chain —
+the fixture's wrong-runtime and overprivileged-delegation cases both do —
+while an action whose covering delegation is revoked, expired, or not yet
+granted records an empty chain, as in the post-revocation and
+invalid-before-grant cases. Null is scored as missing capture, not as an
+empty chain.
+
+Selection deliberately ignores the attempt's policy version. It used to
+require a match, which made `expected_policy_version` equal to the requested
+version by construction, so echoing the request scored perfectly. Selection
+is now version-blind and the version is compared afterwards, so a covering
+delegation at a different version yields a denial that still names its
+chain. Where the qualifying delegations disagree on policy version the
+world is rejected as ambiguous; where they agree, the ID tie-break above
+applies as before.
+
+`expected_policy_version` is the covering delegation's version, taken from
+the action-time evaluation. Where no delegation covers the action there is
+no delegation-bound policy to name and the attempted version stands, so
+those rows remain echoable — the accompanying failure reason is what records
+that nothing was authorised. This is delegation-bound policy correctness:
+`PolicyVersion` carries no activation schedule, so the benchmark does not
+model which policy was in force at a given time.
 
 `evidence_refs` is the sorted union of exactly four groups: the policy
 (`evidence:policy:<version>`), the presented credential
