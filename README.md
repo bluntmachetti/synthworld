@@ -267,13 +267,13 @@ SynthWorld is intended to remain a focused ground-truth identity layer rather
 than become a second general-purpose simulator. Planned work is organised as
 packs and adapters:
 
-- data-broker deletion and reappearance for Idcognito;
-- broader AI-agent and non-human identity profiles for ZeroID, Arena, and EADS,
+- data-broker deletion and reappearance for Personal Identity protection solutions;
+- broader AI-agent and non-human identity profiles for Enterprise simulation systems,
   building on the available Asteria Agentic v1 conformance fixture;
 - enterprise IAM and identity-governance scenarios;
 - LLM, RAG, and agent-memory privacy evaluation;
 - digital-wallet and verifiable-credential testing;
-- disaster identity continuity for Aftershock.
+- disaster identity continuity scenario testing.
 
 The phased plan, architecture boundaries, and tracking issues are documented in
 [ROADMAP.md](ROADMAP.md).
