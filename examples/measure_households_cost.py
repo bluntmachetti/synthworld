@@ -25,6 +25,8 @@ import sys
 import time
 import tracemalloc
 
+from pydantic import ValidationError
+
 from synthworld.profiles.households import (
     HouseholdsConfig,
     generate_households_benchmark,
@@ -43,13 +45,33 @@ def measure(*, seed: int, config: HouseholdsConfig) -> tuple[float, int]:
     return elapsed, peak
 
 
+def _positive(value: str) -> int:
+    """An argparse type, so a bad count is an argument error not a traceback.
+
+    Without it `--repeats 0` reaches `statistics.median([])` and dies with
+    `StatisticsError: no median for empty data`, which tells the caller nothing
+    about what they typed.
+    """
+
+    number = int(value)
+    if number < 1:
+        raise argparse.ArgumentTypeError(f"must be 1 or greater, got {number}")
+    return number
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--person-count", type=int, default=100)
-    parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--person-count", type=_positive, default=100)
+    parser.add_argument("--repeats", type=_positive, default=3)
     args = parser.parse_args(argv)
 
-    config = HouseholdsConfig(person_count=args.person_count)
+    try:
+        config = HouseholdsConfig(person_count=args.person_count)
+    except ValidationError as error:
+        # The profile's own bounds, reported as an argument error rather than a
+        # pydantic traceback: the caller mistyped a flag, they did not hit a bug.
+        print(f"--person-count: {error.errors()[0]['msg']}", file=sys.stderr)
+        return 2
     # The first run pays import and Faker-locale costs that later runs do not, so
     # reporting it as the standard figure would overstate steady-state cost.
     measure(seed=1, config=config)
