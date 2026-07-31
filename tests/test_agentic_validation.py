@@ -195,10 +195,15 @@ def test_public_evaluator_and_join_models_reject_cross_file_drift() -> None:
                 "bindings": evaluator.bindings[:-1],
             }
         )
-    with pytest.raises(ValidationError, match="case kind must be nonblank"):
-        evaluator.cases[0].__class__.model_validate(
-            {**evaluator.cases[0].model_dump(), "kind": " "}
-        )
+    # `kind` is a closed vocabulary, so blank is rejected for the same reason as any
+    # other non-member. An unknown-but-plausible kind is the case worth pinning: as a
+    # bare `str` it loaded fine and then read as foreign to every consumer that
+    # branches on kind, which is a silent scoring gap rather than a load error.
+    for rejected in (" ", "credential_expired"):
+        with pytest.raises(ValidationError, match="Input should be"):
+            evaluator.cases[0].__class__.model_validate(
+                {**evaluator.cases[0].model_dump(), "kind": rejected}
+            )
 
     for update, message in (
         ({"world_id": "other"}, "metadata"),

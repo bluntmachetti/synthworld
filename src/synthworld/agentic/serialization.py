@@ -304,6 +304,19 @@ def _deserialize_public_agentic_bundle(public_root: Traversable) -> AgenticPubli
     )
 
 
+def _relative_file_paths(root: Traversable, prefix: str = "") -> set[str]:
+    """Every file at or below ``root``, as a POSIX path relative to it."""
+
+    found: set[str] = set()
+    for entry in root.iterdir():
+        name = f"{prefix}{entry.name}"
+        if entry.is_dir():
+            found |= _relative_file_paths(entry, f"{name}/")
+        else:
+            found.add(name)
+    return found
+
+
 def _verify_artifacts(
     root: Traversable,
     manifest_name: str,
@@ -311,7 +324,19 @@ def _verify_artifacts(
     hashes_key: str,
 ) -> None:
     manifest = _read_json(root.joinpath(manifest_name))
+    # Reject files the published set does not name. Checking only that every expected
+    # path is present and hashes correctly leaves the tree open at the other end: a
+    # stale artifact from an older run, or a file smuggled into a caller-supplied
+    # `root`, verifies clean today because nothing ever enumerates the directory.
+    unexpected = _relative_file_paths(root) - {manifest_name, *expected_paths}
+    if unexpected:
+        raise AgenticArtifactError(
+            "agentic artifact set contains unexpected files: "
+            f"{', '.join(sorted(unexpected))}"
+        )
     hashes = manifest.get(hashes_key)
+    # `expected_paths` is a module constant, never derived from the manifest under
+    # test - deriving it would make this comparison `set(hashes) != set(hashes)`.
     if not isinstance(hashes, dict) or set(hashes) != set(expected_paths):
         raise AgenticArtifactError("agentic artifact manifest is incomplete")
     artifacts = {path: root.joinpath(path).read_bytes() for path in expected_paths}
