@@ -1,0 +1,8 @@
+# Publication and consumer-boundary changes require maintainer review.
+/.github/CODEOWNERS @bluntmachetti
+/.github/workflows/** @bluntmachetti
+/.gitignore @bluntmachetti
+/Makefile @bluntmachetti
+/pyproject.toml @bluntmachetti
+/src/synthworld/** @bluntmachetti
+/tests/test_public_repository_boundary.py @bluntmachetti

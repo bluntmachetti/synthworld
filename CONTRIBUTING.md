@@ -30,6 +30,28 @@ remain physically separated.
 
 By submitting a contribution, you agree that it is licensed under Apache-2.0.
 
+## Consumer-integration boundary
+
+SynthWorld accepts consumer-neutral public inputs, submission contracts,
+evaluators, and reference examples. Product-specific adapters, private product
+types, proprietary fixtures, execution commands, raw product output, and private
+run receipts do not belong in the public repository or distribution.
+
+Use `.local-assurance/` for one-off consumer integrations that must run from this
+checkout. Git and the build configuration exclude that directory, and repository
+tests reject it if it is force-added. This is accidental-publication protection,
+not encrypted storage: do not place reusable credentials there, do not use
+`git add -f`, and archive any required audit evidence in approved private storage.
+Public CI must not clone a private product, receive its credentials, or publish its
+outputs.
+
+If a local integration exposes a reusable SynthWorld improvement, submit the
+consumer-neutral contract, validation, or evaluator change separately and prove it
+with a public reference baseline. Do not copy the product-specific adapter into the
+public implementation or tests.
+
+By submitting a contribution, you agree that it is licensed under Apache-2.0.
+
 ## Releasing
 
 Release tags are signed. A consumer pinning a frozen benchmark has no
