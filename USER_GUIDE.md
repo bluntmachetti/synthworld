@@ -452,8 +452,28 @@ pairs that are the same person where the evidence supports only `insufficient`, 
 pairs that are different people under the same disposition.
 
 A system may answer `merge`, `separate`, or `insufficient`. Abstention is a
-first-class answer, not a failure to answer, and the three truths are serialized as
-three separate files so a consumer can hold the public corpus without either.
+first-class answer, not a failure to answer. The public task and both truths are
+serialized as three separate artifacts so a consumer can hold the public corpus
+without either truth.
+
+### Score complete partitions before projecting pairs
+
+A cluster-producing resolver must submit every public record exactly once through
+the existing `EntityResolutionPrediction` contract. Score that complete partition
+directly with `evaluate_ambiguity_memberships`, supplying the public task and the
+separately loaded `MembershipTruth`. This channel reports pairwise and B-cubed
+precision, recall, and F1 over all within- and cross-scenario record pairs. Every
+metric carries its numerator, denominator, and denominator definition.
+
+Only after the partition is validated, use
+`derive_ambiguity_pair_predictions(prediction, public=...)` to derive decisions for
+the public `pairs_to_decide`. This function consumes no truth: records in one
+cluster become `merge`, and records in different clusters become `separate`. That
+is a forced partition interpretation, so it can never express `insufficient`.
+Score those decisions separately with `evaluate_ambiguity_dispositions`, supplying
+only `DispositionTruth`. Do not reconstruct the complete partition from the
+fifteen selected pairs; a false merge between scenarios may be absent from that
+projection while remaining visible in the raw partition metrics.
 
 ### The report has no aggregate score
 
@@ -467,8 +487,8 @@ report gives you:
   wrong answer, it is an unjustified one;
 - **coverage beside precision** — a system that abstains everywhere would otherwise
   score perfectly;
-- **pairwise and B-cubed** over the clusters your merges induce, because they weight
-  differently and either alone hides what the other shows;
+- **pairwise and B-cubed membership metrics** over the complete submitted partition,
+  because they weight differently and either alone hides what the other shows;
 - **per-scenario support with a machine-readable low-support flag.**
 
 ### Reference baselines

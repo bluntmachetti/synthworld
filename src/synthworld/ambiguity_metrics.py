@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Iterable, Mapping
+from typing import Literal
 from uuid import UUID
 
 from synthworld.ambiguity import (
@@ -31,8 +32,10 @@ from synthworld.ambiguity import (
     PairDisposition,
     PairPrediction,
     PairTruth,
+    PublicAmbiguityTask,
     ScenarioKind,
 )
+from synthworld.ambiguity_serialization import DispositionTruth
 from synthworld.models import SyntheticModel
 
 #: Below this many pairs a slice is reported but must not be concluded from. The
@@ -40,6 +43,7 @@ from synthworld.models import SyntheticModel
 #: it is a conformance fixture, in the sense Asteria Agentic v1 is, not a
 #: statistical benchmark. Seed variants are what raise support.
 MINIMUM_SCENARIO_SUPPORT = 3
+AMBIGUITY_DISPOSITION_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
 
 
 class ScenarioOutcome(SyntheticModel):
@@ -92,6 +96,38 @@ class AmbiguityMetrics(SyntheticModel):
     #: Cluster-level view of the same submission, so a pair-decision system can be
     #: compared against the cluster contract without emitting clusters itself.
     clusters: ClusterMetrics
+
+
+class AmbiguityDispositionMetrics(SyntheticModel):
+    """Evidence-policy scores computed without loading membership truth.
+
+    The exact denominators are fields rather than prose: ``coverage`` is
+    ``decided_count / pair_count``; ``decided_precision`` is
+    ``correct_decided_count / decided_count``; and ``decided_recall`` is
+    ``correct_decided_count / decidable_count``.  The historical names and formulas
+    are preserved under an explicit scoring version.
+    """
+
+    schema_version: Literal["1.0.0"] = "1.0.0"
+    scoring_version: Literal["1.0.0"] = AMBIGUITY_DISPOSITION_SCORING_VERSION
+    task: Literal["ambiguity_evidence_disposition"] = "ambiguity_evidence_disposition"
+    seed: int
+    public_schema_version: str
+    submission_schema_version: str
+    disposition_truth_schema_version: str
+    pair_count: int
+    decided_count: int
+    abstained_count: int
+    decidable_count: int
+    correct_decided_count: int
+    coverage: float
+    decided_precision: float | None
+    decided_recall: float | None
+    false_merges: int
+    false_splits: int
+    unwarranted_decisions: int
+    scenarios: tuple[ScenarioOutcome, ...]
+    low_support_scenarios: tuple[ScenarioKind, ...]
 
 
 class AmbiguityEvaluationError(ValueError):
@@ -175,24 +211,45 @@ def _cluster_metrics(
     )
 
 
-def evaluate_ambiguity_predictions(
+def evaluate_ambiguity_dispositions(
     predictions: Iterable[PairPrediction],
     *,
-    benchmark: AmbiguityBenchmark,
-) -> AmbiguityMetrics:
-    """Score pair decisions against the pack's evidence dispositions."""
+    public: PublicAmbiguityTask,
+    truth: DispositionTruth,
+) -> AmbiguityDispositionMetrics:
+    """Score pair decisions using public task identifiers and disposition truth."""
 
-    truth: dict[tuple[UUID, UUID], PairTruth] = {
-        _key(item.left_record_id, item.right_record_id): item
-        for item in benchmark.answer_key.pairs
+    truth_pairs: dict[tuple[UUID, UUID], PairTruth] = {
+        _key(item.left_record_id, item.right_record_id): item for item in truth.pairs
     }
+    if len(truth_pairs) != len(truth.pairs):
+        raise AmbiguityEvaluationError("disposition truth contains a duplicate pair")
+    public_keys = [
+        _key(item.left_record_id, item.right_record_id)
+        for item in public.pairs_to_decide
+    ]
+    if not public_keys:
+        raise AmbiguityEvaluationError("the public task contains no record pairs")
+    if len(public_keys) != len(set(public_keys)):
+        raise AmbiguityEvaluationError("the public task contains a duplicate pair")
+    public_record_ids = {item.id for item in public.corpus.identity_records}
+    if any(not set(key) <= public_record_ids for key in public_keys):
+        raise AmbiguityEvaluationError(
+            "the public task pair list references a non-public record"
+        )
+    if set(public_keys) != set(truth_pairs):
+        raise AmbiguityEvaluationError(
+            "disposition truth must cover exactly the public task pairs"
+        )
+
+    prediction_items = tuple(predictions)
     submitted: dict[tuple[UUID, UUID], PairDisposition] = {}
-    for prediction in predictions:
+    for prediction in prediction_items:
         key = _key(prediction.left_record_id, prediction.right_record_id)
         if key in submitted:
             raise AmbiguityEvaluationError("a record pair was submitted twice")
         submitted[key] = prediction.disposition
-    if set(submitted) != set(truth):
+    if set(submitted) != set(truth_pairs):
         raise AmbiguityEvaluationError(
             "predictions must cover exactly the benchmark's record pairs"
         )
@@ -202,7 +259,7 @@ def evaluate_ambiguity_predictions(
     by_scenario: dict[ScenarioKind, Counter[str]] = {}
     correct_by_scenario: Counter[ScenarioKind] = Counter()
 
-    for key, expected in truth.items():
+    for key, expected in truth_pairs.items():
         predicted = submitted[key]
         by_scenario.setdefault(expected.scenario, Counter())[predicted.value] += 1
         if expected.disposition is not PairDisposition.INSUFFICIENT:
@@ -225,9 +282,7 @@ def evaluate_ambiguity_predictions(
         ScenarioOutcome(
             scenario=scenario,
             expected=next(
-                item.disposition
-                for item in benchmark.answer_key.pairs
-                if item.scenario is scenario
+                item.disposition for item in truth.pairs if item.scenario is scenario
             ),
             support=sum(by_scenario[scenario].values()),
             correct=correct_by_scenario[scenario],
@@ -236,6 +291,47 @@ def evaluate_ambiguity_predictions(
         )
         for scenario in sorted(by_scenario, key=lambda item: item.value)
     )
+    total = len(truth_pairs)
+    return AmbiguityDispositionMetrics(
+        seed=public.corpus.seed,
+        public_schema_version=public.schema_version,
+        submission_schema_version=prediction_items[0].schema_version,
+        disposition_truth_schema_version=truth.schema_version,
+        pair_count=total,
+        decided_count=decided,
+        abstained_count=total - decided,
+        decidable_count=decidable,
+        correct_decided_count=correct_decided,
+        coverage=decided / total,
+        decided_precision=correct_decided / decided if decided else None,
+        decided_recall=correct_decided / decidable if decidable else None,
+        false_merges=false_merges,
+        false_splits=false_splits,
+        unwarranted_decisions=unwarranted,
+        scenarios=outcomes,
+        low_support_scenarios=tuple(
+            item.scenario for item in outcomes if item.low_support
+        ),
+    )
+
+
+def evaluate_ambiguity_predictions(
+    predictions: Iterable[PairPrediction],
+    *,
+    benchmark: AmbiguityBenchmark,
+) -> AmbiguityMetrics:
+    """Legacy combined report; prefer the two independently typed evaluators."""
+
+    prediction_items = tuple(predictions)
+    disposition_metrics = evaluate_ambiguity_dispositions(
+        prediction_items,
+        public=benchmark.public,
+        truth=DispositionTruth(pairs=benchmark.answer_key.pairs),
+    )
+    submitted = {
+        _key(item.left_record_id, item.right_record_id): item.disposition
+        for item in prediction_items
+    }
     record_ids = [item.record_id for item in benchmark.answer_key.record_memberships]
     entity_of = {
         item.record_id: item.entity_id
@@ -252,30 +348,30 @@ def evaluate_ambiguity_predictions(
         (key for key, value in submitted.items() if value is PairDisposition.MERGE),
     )
 
-    total = len(truth)
     return AmbiguityMetrics(
-        pair_count=total,
-        decided_count=decided,
-        abstained_count=total - decided,
-        coverage=decided / total,
-        decided_precision=correct_decided / decided if decided else None,
-        decided_recall=correct_decided / decidable if decidable else None,
-        false_merges=false_merges,
-        false_splits=false_splits,
-        unwarranted_decisions=unwarranted,
-        scenarios=outcomes,
-        low_support_scenarios=tuple(
-            item.scenario for item in outcomes if item.low_support
-        ),
+        pair_count=disposition_metrics.pair_count,
+        decided_count=disposition_metrics.decided_count,
+        abstained_count=disposition_metrics.abstained_count,
+        coverage=disposition_metrics.coverage,
+        decided_precision=disposition_metrics.decided_precision,
+        decided_recall=disposition_metrics.decided_recall,
+        false_merges=disposition_metrics.false_merges,
+        false_splits=disposition_metrics.false_splits,
+        unwarranted_decisions=disposition_metrics.unwarranted_decisions,
+        scenarios=disposition_metrics.scenarios,
+        low_support_scenarios=disposition_metrics.low_support_scenarios,
         clusters=_cluster_metrics(predicted_clusters, truth_clusters),
     )
 
 
 __all__ = [
+    "AMBIGUITY_DISPOSITION_SCORING_VERSION",
     "MINIMUM_SCENARIO_SUPPORT",
+    "AmbiguityDispositionMetrics",
     "AmbiguityEvaluationError",
     "AmbiguityMetrics",
     "ClusterMetrics",
     "ScenarioOutcome",
+    "evaluate_ambiguity_dispositions",
     "evaluate_ambiguity_predictions",
 ]
