@@ -22,12 +22,14 @@ surface substitution only, and that limit is stated rather than papered over.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from hashlib import blake2b
 
 from synthworld.ambiguity import (
     SCENARIO_DISPOSITIONS,
     AmbiguityAnswerKey,
     AmbiguityBenchmark,
+    PairDisposition,
     PairTruth,
     PublicAmbiguityTask,
     PublicRecordPair,
@@ -38,6 +40,7 @@ from synthworld.connection import (
     PublicConnectionCorpus,
     PublicIdentityAttribute,
     PublicIdentityAttributeKind,
+    PublicIdentityRecord,
     RecordMembership,
 )
 from synthworld.connection_generator import _identity_record
@@ -93,15 +96,21 @@ def _draw(seed: int, purpose: str, index: int) -> int:
     return int.from_bytes(blake2b(material.encode(), digest_size=8).digest(), "big")
 
 
-def _substituted(value: str, kind: str, seed: int, ordinal: int) -> str:
-    """Rewrite one value, keyed on the value itself.
+def _substituted(value: str, kind: str, seed: int) -> str:
+    """Rewrite one value, keyed on the value and nothing else.
 
-    Keyed on the value, so two records that shared a value still share the
-    rewritten one and two that differed still differ. That is what preserves every
-    scenario through the substitution.
+    The key must not include the record's position. An earlier revision passed the
+    ordinal into the hash, so two records that shared a value received *different*
+    replacements - every merge scenario lost the evidence that made it a merge, and
+    the variants asserted a disposition their data no longer supported. The
+    docstring claimed this property while the code destroyed it.
+
+    Sharing is the whole mechanism: two records that shared a value still share the
+    rewritten one, and two that differed still differ, so every scenario survives
+    the substitution intact.
     """
 
-    slot = _draw(seed, f"value:{kind}:{value}", ordinal)
+    slot = _draw(seed, f"value:{kind}:{value}", 0)
     if kind == "email":
         local = f"{_GIVEN[slot % len(_GIVEN)].lower()}.{slot % 900 + 100}"
         return f"{local}@{_DOMAINS[slot % len(_DOMAINS)]}"
@@ -137,19 +146,27 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
                 % len(realizations)
             ]
         )
-        attributes = tuple(
+        rewritten = tuple(
             PublicIdentityAttribute(
                 kind=item.kind,
-                value=_substituted(item.value, item.kind.value, seed, index),
+                value=_substituted(item.value, item.kind.value, seed),
                 confidence=item.confidence,
             )
             for item in draft.attributes
-            # Drop the attributes the chosen realization does not use, so the
-            # scenario is carried by a different field than in the canonical pack.
+        )
+        # Drop the attributes the chosen realization does not use, so the scenario
+        # is carried by a different field than in the canonical pack - but never to
+        # the point of emptying the record. A record whose only attribute is the
+        # one being dropped becomes invalid, which failed generation on 40 of the
+        # first 100 seeds.
+        narrowed = tuple(
+            item
+            for item in rewritten
             if keep is None
             or item.kind is keep
             or item.kind not in (realizations or ())
         )
+        attributes = narrowed or rewritten
         given = _GIVEN[_draw(seed, "given", index) % len(_GIVEN)]
         family = next(
             (item.value for item in attributes if item.kind.value == "family_name"),
@@ -184,6 +201,7 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
                 == drafts[position + 1].entity_number,
             )
         )
+    _require_evidence_survived(records, pairs)
     return AmbiguityBenchmark(
         seed=seed,
         public=PublicAmbiguityTask(
@@ -204,4 +222,45 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
     )
 
 
-__all__ = ["FIXED_REALIZATION", "REALIZATIONS", "generate_ambiguity_variant"]
+def _require_evidence_survived(
+    records: Sequence[PublicIdentityRecord], pairs: Sequence[PairTruth]
+) -> None:
+    """A variant must still support the dispositions it declares.
+
+    Structural rather than hoped-for. A prevalence check compares the answer key
+    against itself - the labels are copied from the canonical drafts and survive any
+    corruption of the data beneath them - so it passed while every merge pair had
+    lost the shared attribute that made it a merge. This looks at the evidence.
+    """
+
+    # A record cannot be empty: `PublicIdentityRecord` requires at least one
+    # attribute, so the realization filter emptying a record surfaces as a
+    # validation error at construction. The `narrowed or rewritten` fallback above
+    # is what prevents it; there is nothing left for this guard to check.
+    by_id = {item.id: item for item in records}
+    for pair in pairs:
+        if pair.disposition is not PairDisposition.MERGE:
+            continue
+        left = {
+            (item.kind, item.value) for item in by_id[pair.left_record_id].attributes
+        }
+        right = {
+            (item.kind, item.value) for item in by_id[pair.right_record_id].attributes
+        }
+        if not left & right:
+            raise AmbiguityVariantError(
+                f"{pair.scenario.value} declares a merge but its records now share "
+                "no attribute"
+            )
+
+
+class AmbiguityVariantError(ValueError):
+    """Raised when a variant no longer supports the truth it carries."""
+
+
+__all__ = [
+    "FIXED_REALIZATION",
+    "REALIZATIONS",
+    "AmbiguityVariantError",
+    "generate_ambiguity_variant",
+]

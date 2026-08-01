@@ -119,6 +119,90 @@ def test_an_incomplete_manifest_is_refused(monkeypatch: pytest.MonkeyPatch) -> N
         module.load_golden_ambiguity_benchmark()
 
 
+_SWEEP = range(100)
+
+
+def test_every_seed_in_a_documented_sweep_generates() -> None:
+    """Generation must not fail on a seed a consumer might reasonably pick.
+
+    Forty of the first hundred seeds raised: a realization could remove a record's
+    only attribute and leave it invalid. Found by an external review running the
+    sweep, not by three hand-picked seeds.
+    """
+
+    failures = []
+    for seed in _SWEEP:
+        try:
+            generate_ambiguity_variant(seed=seed)
+        except Exception as error:
+            failures.append((seed, type(error).__name__))
+
+    assert failures == []
+
+
+def test_merge_pairs_keep_the_evidence_that_makes_them_merges() -> None:
+    """The invariant a prevalence check cannot see, swept over 100 seeds.
+
+    Substitution keyed the replacement on the record's ordinal as well as the value,
+    so two records sharing a value received different replacements and every merge
+    pair lost its shared attribute. The declared prevalence was untouched, because
+    the answer key is copied from the canonical drafts and survives any corruption
+    of the data beneath it - so the test that existed passed on corrupt worlds.
+    """
+
+    for seed in _SWEEP:
+        variant = generate_ambiguity_variant(seed=seed)
+        records = {item.id: item for item in variant.public.corpus.identity_records}
+        for pair in variant.answer_key.pairs:
+            if pair.disposition is not PairDisposition.MERGE:
+                continue
+            left = {
+                (item.kind, item.value)
+                for item in records[pair.left_record_id].attributes
+            }
+            right = {
+                (item.kind, item.value)
+                for item in records[pair.right_record_id].attributes
+            }
+            assert left & right, (
+                f"seed {seed}: {pair.scenario.value} declares a merge but its "
+                "records share no attribute"
+            )
+
+
+def test_no_variant_record_is_left_empty() -> None:
+    for seed in _SWEEP:
+        for record in generate_ambiguity_variant(
+            seed=seed
+        ).public.corpus.identity_records:
+            assert record.attributes
+
+
+def test_the_generator_refuses_a_variant_whose_evidence_did_not_survive() -> None:
+    """Structural, so the defect cannot return quietly.
+
+    Corrupting the substitution reintroduces exactly the original bug, and
+    generation must refuse rather than emit a world asserting a disposition its
+    data no longer supports.
+    """
+
+    from itertools import count
+
+    from synthworld import ambiguity_variants as module
+
+    # Position-dependent substitution: the original defect exactly. Two records
+    # sharing a value must receive the *same* replacement, so a counter breaks the
+    # property while leaving every value individually plausible.
+    counter = count()
+    original = module._substituted
+    try:
+        module._substituted = lambda value, kind, seed: f"{value}-{next(counter)}"
+        with pytest.raises(module.AmbiguityVariantError, match="share no attribute"):
+            module.generate_ambiguity_variant(seed=1)
+    finally:
+        module._substituted = original
+
+
 @pytest.mark.parametrize("seed", _VARIANT_SEEDS)
 def test_variants_preserve_declared_prevalence(seed: int) -> None:
     canonical = Counter(
@@ -268,7 +352,7 @@ def test_an_unknown_attribute_kind_passes_through_substitution() -> None:
     from synthworld.ambiguity_variants import _substituted
 
     assert (
-        _substituted("https://social.example.test/x", "social_profile", 1, 0)
+        _substituted("https://social.example.test/x", "social_profile", 1)
         == "https://social.example.test/x"
     )
 
