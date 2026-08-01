@@ -493,6 +493,81 @@ surface values and, for six of the fifteen scenarios, which attribute carries th
 case. The other nine are defined by their attribute — `recycled_phone` is about a
 phone — so for those a variant changes values only.
 
+## Use case 10: search-provider input without the answer key
+
+Use this when you need to exercise a product's search-provider path offline — at
+the same trust boundary a live SERP integration has, and without a paid provider,
+network access, scraped results or real-person data.
+
+**This emulates a data boundary and a set of controlled failure modes. It does not
+model any search engine's ranking algorithm**, and a system that scores well here
+has been shown to handle the shapes that break consumers — not to rank well.
+
+```python
+from synthworld.search_generator import generate_search_projection
+
+projection = generate_search_projection(seed=20260731)
+for page in projection.responses:          # rank, url, title, snippet only
+    ...
+```
+
+### The public half rejects truth, it does not merely omit it
+
+`PublicSearchResult` and `PublicSearchResponse` forbid extra fields. An adapter that
+tries to attach `match_kind`, `actual_persona_id`, a relevance label or a scenario
+name gets a validation error rather than a passing test and a silent oracle. The
+worked adapter takes a public response and cannot see truth at all — the signature
+is the guarantee, because an adapter is exactly where a truth field gets added by
+someone being helpful.
+
+Truth lives in a separate bundle, bound to the public half by a checksum so a report
+cannot be paired with a projection it did not score.
+
+### Controlled failure modes, all planted deliberately
+
+True, false and insufficient-evidence results in one query; literal same-name
+collisions; rank and order that change with the seed while the planted set does not;
+three-way syndication of one source; missing and truncated snippets; noise; stale
+observations; both Unicode and transliterated spellings of the **same** identity;
+and a reported total larger than any page serves.
+
+### Scoring, and what it refuses to hide
+
+```python
+from synthworld.search_metrics import ResultDecision, ResultJudgement, evaluate_search_judgements
+
+report = evaluate_search_judgements(judgements, truth=projection.truth)
+```
+
+Truth is read here and nowhere earlier. The report separates:
+
+- **false accepts from false rejects** — accepting a stranger's record attaches
+  their exposure to a person; rejecting a real one leaves exposure unfound. A single
+  score trades them silently;
+- **unwarranted decisions** — deciding a result the public text cannot settle is not
+  a wrong answer, it is an unjustified one;
+- **coverage beside precision** — abstaining everywhere would otherwise look perfect;
+- **distinct findings from accepted results** — three aggregator copies of one source
+  are one finding, and a consumer counting them separately overstates exposure
+  threefold;
+- **stale acceptances** and **errors by difficulty** — which cases a system fails
+  matters more than how many.
+
+### Reference baselines
+
+None scores cleanly, on any seed, and CI fails if one ever does:
+
+| policy | coverage | false accept | false reject | unwarranted | findings/accepted |
+|---|---|---|---|---|---|
+| accept everything | 1.00 | 24 | 0 | 6 | 57/72 |
+| exact name in title | 1.00 | 3 | 21 | 6 | 21/27 |
+| folded name, abstains without a snippet | 0.93 | 5 | 7 | 1 | 28/40 |
+
+Accepting everything achieves perfect recall and attaches every collision. Exact
+matching fails the transliterated spelling of the same person — which is why both
+spellings are generated. Normalising and declining without corroboration trades
+coverage for precision, which is the choice the projection exists to make visible.
+
 ## Reading evaluation results
 
 Use `--summary` for the headline metrics and omit it for the complete JSON
