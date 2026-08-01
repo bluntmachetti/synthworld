@@ -441,7 +441,7 @@ transfer**, and this pack exists because of it.
 from synthworld.ambiguity_serialization import load_golden_ambiguity_benchmark
 
 benchmark = load_golden_ambiguity_benchmark()
-records = benchmark.public.identity_records          # no truth of any kind
+records = benchmark.public.corpus.identity_records   # no truth of any kind
 ```
 
 ### Two truths, kept apart
@@ -489,9 +489,13 @@ statistical benchmark, and a 1-of-1 slice is not a rate.
 
 Seed variants raise the variety but not the support:
 `generate_ambiguity_variant(seed=...)` preserves declared prevalence while changing
-surface values and, for six of the fifteen scenarios, which attribute carries the
-case. The other nine are defined by their attribute — `recycled_phone` is about a
-phone — so for those a variant changes values only.
+surface values and, for five of the fifteen scenarios, which attribute carries the
+case. The other ten are defined by their attribute — `recycled_phone` is about a
+phone, and a one-option Unicode choice is not structural variation — so for those a
+variant changes values only. The seed-selected choices are available separately
+through `ambiguity_variant_metadata(seed=...)`; they are evaluator metadata and are
+not added to the public task. Seeds 0 through 99 are the documented correlated
+robustness sweep, not 100 independent observations.
 
 ## Reading evaluation results
 
