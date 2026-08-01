@@ -3,12 +3,21 @@
 from __future__ import annotations
 
 import hashlib
-from collections import Counter
+import os
+import subprocess
+import sys
+from collections import Counter, defaultdict
 from importlib.resources import files
+from pathlib import Path
 
 import pytest
 
-from synthworld.ambiguity import PairDisposition, PairPrediction, ScenarioKind
+from synthworld.ambiguity import (
+    AmbiguityBenchmark,
+    PairDisposition,
+    PairPrediction,
+    ScenarioKind,
+)
 from synthworld.ambiguity_baselines import (
     AMBIGUITY_BASELINE_SEED,
     AMBIGUITY_BASELINES,
@@ -27,7 +36,14 @@ from synthworld.ambiguity_serialization import (
 from synthworld.ambiguity_variants import (
     FIXED_REALIZATION,
     REALIZATIONS,
+    AmbiguityVariantError,
+    ambiguity_variant_metadata,
     generate_ambiguity_variant,
+    validate_ambiguity_variant,
+)
+from synthworld.connection import (
+    PublicIdentityAttributeKind,
+    PublicIdentityRecord,
 )
 
 _VARIANT_SEEDS = (1, 2, 3)
@@ -122,22 +138,66 @@ def test_an_incomplete_manifest_is_refused(monkeypatch: pytest.MonkeyPatch) -> N
 _SWEEP = range(100)
 
 
+def _scenario_records(
+    benchmark: AmbiguityBenchmark, scenario: ScenarioKind
+) -> tuple[PublicIdentityRecord, PublicIdentityRecord]:
+    pair = next(
+        item for item in benchmark.answer_key.pairs if item.scenario is scenario
+    )
+    records = {item.id: item for item in benchmark.public.corpus.identity_records}
+    return records[pair.left_record_id], records[pair.right_record_id]
+
+
+def _replace_records(
+    benchmark: AmbiguityBenchmark, *replacements: PublicIdentityRecord
+) -> AmbiguityBenchmark:
+    by_id = {item.id: item for item in replacements}
+    records = tuple(
+        by_id.get(item.id, item) for item in benchmark.public.corpus.identity_records
+    )
+    corpus = benchmark.public.corpus.model_copy(update={"identity_records": records})
+    public = benchmark.public.model_copy(update={"corpus": corpus})
+    return benchmark.model_copy(update={"public": public})
+
+
+def _replace_attribute_value(
+    record: PublicIdentityRecord,
+    kind: PublicIdentityAttributeKind,
+    value: str,
+) -> PublicIdentityRecord:
+    found = any(item.kind is kind for item in record.attributes)
+    assert found
+    attributes = tuple(
+        item.model_copy(update={"value": value}) if item.kind is kind else item
+        for item in record.attributes
+    )
+    return record.model_copy(update={"attributes": attributes})
+
+
+def _replace_attribute_kind(
+    record: PublicIdentityRecord,
+    old: PublicIdentityAttributeKind,
+    new: PublicIdentityAttributeKind,
+) -> PublicIdentityRecord:
+    found = any(item.kind is old for item in record.attributes)
+    assert found
+    attributes = tuple(
+        item.model_copy(update={"kind": new}) if item.kind is old else item
+        for item in record.attributes
+    )
+    return record.model_copy(update={"attributes": attributes})
+
+
+def _values(record: PublicIdentityRecord) -> dict[PublicIdentityAttributeKind, str]:
+    return {item.kind: item.value for item in record.attributes}
+
+
 def test_every_seed_in_a_documented_sweep_generates() -> None:
-    """Generation must not fail on a seed a consumer might reasonably pick.
+    """Seeds 0..99 are the declared correlated robustness sweep, not 100 samples."""
 
-    Forty of the first hundred seeds raised: a realization could remove a record's
-    only attribute and leave it invalid. Found by an external review running the
-    sweep, not by three hand-picked seeds.
-    """
-
-    failures = []
     for seed in _SWEEP:
-        try:
-            generate_ambiguity_variant(seed=seed)
-        except Exception as error:
-            failures.append((seed, type(error).__name__))
-
-    assert failures == []
+        benchmark = generate_ambiguity_variant(seed=seed)
+        validate_ambiguity_variant(benchmark)
 
 
 def test_merge_pairs_keep_the_evidence_that_makes_them_merges() -> None:
@@ -178,29 +238,152 @@ def test_no_variant_record_is_left_empty() -> None:
             assert record.attributes
 
 
-def test_the_generator_refuses_a_variant_whose_evidence_did_not_survive() -> None:
-    """Structural, so the defect cannot return quietly.
+def test_no_value_or_display_name_collides_across_scenarios() -> None:
+    for seed in _SWEEP:
+        benchmark = generate_ambiguity_variant(seed=seed)
+        records = {item.id: item for item in benchmark.public.corpus.identity_records}
+        attribute_origins: dict[
+            tuple[PublicIdentityAttributeKind, str], set[ScenarioKind]
+        ] = defaultdict(set)
+        display_origins: dict[str, set[ScenarioKind]] = defaultdict(set)
+        for pair in benchmark.answer_key.pairs:
+            for record_id in (pair.left_record_id, pair.right_record_id):
+                record = records[record_id]
+                display_origins[record.display_name.casefold()].add(pair.scenario)
+                for attribute in record.attributes:
+                    attribute_origins[(attribute.kind, attribute.value)].add(
+                        pair.scenario
+                    )
 
-    Corrupting the substitution reintroduces exactly the original bug, and
-    generation must refuse rather than emit a world asserting a disposition its
-    data no longer supports.
-    """
+        assert all(len(origins) == 1 for origins in attribute_origins.values())
+        assert all(len(origins) == 1 for origins in display_origins.values())
 
-    from itertools import count
 
-    from synthworld import ambiguity_variants as module
+@pytest.mark.parametrize("scenario", tuple(ScenarioKind))
+def test_each_scenario_rejects_position_dependent_shared_values(
+    scenario: ScenarioKind,
+) -> None:
+    """Splitting any planned equality simulates the original ordinal-key defect."""
 
-    # Position-dependent substitution: the original defect exactly. Two records
-    # sharing a value must receive the *same* replacement, so a counter breaks the
-    # property while leaving every value individually plausible.
-    counter = count()
-    original = module._substituted
-    try:
-        module._substituted = lambda value, kind, seed: f"{value}-{next(counter)}"
-        with pytest.raises(module.AmbiguityVariantError, match="share no attribute"):
-            module.generate_ambiguity_variant(seed=1)
-    finally:
-        module._substituted = original
+    benchmark = generate_ambiguity_variant(seed=42)
+    left, right = _scenario_records(benchmark, scenario)
+    left_values = _values(left)
+    right_values = _values(right)
+    shared = sorted(
+        (kind for kind in left_values if left_values[kind] == right_values[kind]),
+        key=lambda kind: kind.value,
+    )
+    assert shared
+    replacement = _replace_attribute_value(
+        right, shared[0], f"{right_values[shared[0]]}-position-dependent"
+    )
+
+    with pytest.raises(AmbiguityVariantError, match="public evidence"):
+        validate_ambiguity_variant(_replace_records(benchmark, replacement))
+
+
+@pytest.mark.parametrize("scenario", tuple(ScenarioKind))
+def test_each_scenario_rejects_a_display_name_semantic_mutation(
+    scenario: ScenarioKind,
+) -> None:
+    """Every named scenario has a discriminating display-name predicate."""
+
+    benchmark = generate_ambiguity_variant(seed=42)
+    left, right = _scenario_records(benchmark, scenario)
+    replacement_name = (
+        "Corrupt ExampleName"
+        if left.display_name.casefold() == right.display_name.casefold()
+        else left.display_name
+    )
+    replacement = right.model_copy(update={"display_name": replacement_name})
+
+    with pytest.raises(
+        AmbiguityVariantError,
+        match=rf"{scenario.value} display-name relationship",
+    ):
+        validate_ambiguity_variant(_replace_records(benchmark, replacement))
+
+
+def test_a_distinct_value_collision_is_rejected() -> None:
+    benchmark = generate_ambiguity_variant(seed=42)
+    left, right = _scenario_records(benchmark, ScenarioKind.RECYCLED_PHONE)
+    replacement = _replace_attribute_value(
+        right,
+        PublicIdentityAttributeKind.EMAIL,
+        _values(left)[PublicIdentityAttributeKind.EMAIL],
+    )
+
+    with pytest.raises(AmbiguityVariantError, match="public evidence"):
+        validate_ambiguity_variant(_replace_records(benchmark, replacement))
+
+
+def test_a_missing_selected_realization_is_rejected() -> None:
+    """Seed 42 selects school_year; restoring employer must not pass silently."""
+
+    benchmark = generate_ambiguity_variant(seed=42)
+    metadata = ambiguity_variant_metadata(seed=42)
+    selected = {
+        item.scenario: item.attribute_kind for item in metadata.selected_realizations
+    }
+    scenario = ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE
+    assert selected[scenario] is PublicIdentityAttributeKind.SCHOOL_YEAR
+    left, right = _scenario_records(benchmark, scenario)
+    replacements = tuple(
+        _replace_attribute_kind(
+            record,
+            PublicIdentityAttributeKind.SCHOOL_YEAR,
+            PublicIdentityAttributeKind.EMPLOYER,
+        )
+        for record in (left, right)
+    )
+
+    with pytest.raises(AmbiguityVariantError, match="wrong attribute"):
+        validate_ambiguity_variant(
+            _replace_records(benchmark, *replacements), metadata=metadata
+        )
+
+
+def test_lost_unicode_evidence_is_rejected() -> None:
+    benchmark = generate_ambiguity_variant(seed=42)
+    left, right = _scenario_records(benchmark, ScenarioKind.UNICODE_VARIANT)
+    replacements = (
+        left.model_copy(update={"display_name": "Zoe Dvorak"}),
+        right.model_copy(update={"display_name": "Zoe Dvorak"}),
+    )
+
+    with pytest.raises(AmbiguityVariantError, match="unicode_variant display-name"):
+        validate_ambiguity_variant(_replace_records(benchmark, *replacements))
+
+
+def test_unrelated_unicode_family_values_are_rejected() -> None:
+    benchmark = generate_ambiguity_variant(seed=42)
+    _, right = _scenario_records(benchmark, ScenarioKind.UNICODE_VARIANT)
+    replacement = _replace_attribute_value(
+        right, PublicIdentityAttributeKind.FAMILY_NAME, "UnrelatedSurname"
+    )
+
+    with pytest.raises(AmbiguityVariantError, match="family evidence"):
+        validate_ambiguity_variant(_replace_records(benchmark, replacement))
+
+
+def test_an_accidental_cross_scenario_match_is_rejected() -> None:
+    benchmark = generate_ambiguity_variant(seed=42)
+    recycled, _ = _scenario_records(benchmark, ScenarioKind.RECYCLED_PHONE)
+    duplicate_left, duplicate_right = _scenario_records(
+        benchmark, ScenarioKind.DUPLICATE_OBSERVATION
+    )
+    # Case differences are not a meaningful escape from a cross-scenario email
+    # collision, so the validator compares a canonical collision key.
+    recycled_email = _values(recycled)[PublicIdentityAttributeKind.EMAIL].upper()
+    replacements = tuple(
+        _replace_attribute_value(
+            record, PublicIdentityAttributeKind.EMAIL, recycled_email
+        )
+        for record in (duplicate_left, duplicate_right)
+    )
+
+    with pytest.raises(AmbiguityVariantError, match="collides across scenarios"):
+        validate_ambiguity_variant(_replace_records(benchmark, *replacements))
 
 
 @pytest.mark.parametrize("seed", _VARIANT_SEEDS)
@@ -235,7 +418,102 @@ def test_variants_change_structure_not_only_identifiers() -> None:
             )
         )
 
-    assert len({fingerprint(seed) for seed in _VARIANT_SEEDS}) == len(_VARIANT_SEEDS)
+    # The exact population is the declared 0..99 sweep. It need only contain more
+    # than one semantic structure; correlated variants are not independent samples.
+    assert len({fingerprint(seed) for seed in _SWEEP}) > 1
+
+
+def test_the_declared_sweep_exercises_every_supported_realization() -> None:
+    seen: dict[ScenarioKind, set[PublicIdentityAttributeKind]] = defaultdict(set)
+    for seed in _SWEEP:
+        for item in ambiguity_variant_metadata(seed=seed).selected_realizations:
+            seen[item.scenario].add(item.attribute_kind)
+
+    assert all(len(choices) > 1 for choices in REALIZATIONS.values())
+    assert seen == {
+        scenario: set(choices) for scenario, choices in REALIZATIONS.items()
+    }
+
+
+def test_selected_realizations_are_constructed_in_both_records() -> None:
+    different = {
+        ScenarioKind.CONTRADICTORY_STRONG_IDENTIFIERS,
+        ScenarioKind.STALE_ATTRIBUTE,
+        ScenarioKind.PARTIAL_WITH_CONTRADICTION,
+    }
+    for seed in _SWEEP:
+        benchmark = generate_ambiguity_variant(seed=seed)
+        for item in ambiguity_variant_metadata(seed=seed).selected_realizations:
+            left, right = _scenario_records(benchmark, item.scenario)
+            left_values = _values(left)
+            right_values = _values(right)
+            assert item.attribute_kind in left_values
+            assert item.attribute_kind in right_values
+            assert (
+                left_values[item.attribute_kind] != right_values[item.attribute_kind]
+            ) is (item.scenario in different)
+
+
+def test_variant_metadata_is_evaluator_only() -> None:
+    benchmark = generate_ambiguity_variant(seed=42)
+    public_bytes = ambiguity_artifacts(benchmark)["ambiguity-public-v1.json"]
+    metadata = ambiguity_variant_metadata(seed=42)
+
+    assert metadata.synthetic is True
+    assert metadata.selected_realizations
+    assert b"selected_realizations" not in public_bytes
+    assert b"scenario" not in public_bytes
+
+
+@pytest.mark.parametrize("seed", (0, 42, 99))
+def test_same_seed_variants_serialize_byte_identically(seed: int) -> None:
+    first = generate_ambiguity_variant(seed=seed)
+    second = generate_ambiguity_variant(seed=seed)
+
+    assert ambiguity_artifacts(first) == ambiguity_artifacts(second)
+    assert ambiguity_variant_metadata(seed=seed) == ambiguity_variant_metadata(
+        seed=seed
+    )
+
+
+def test_variant_bytes_do_not_depend_on_python_hash_iteration() -> None:
+    project_root = Path(__file__).parents[1]
+    command = (
+        "import hashlib; "
+        "from synthworld.ambiguity_serialization import ambiguity_artifacts; "
+        "from synthworld.ambiguity_variants import generate_ambiguity_variant; "
+        "artifacts=ambiguity_artifacts(generate_ambiguity_variant(seed=42)); "
+        "print(hashlib.sha256(b''.join(artifacts[name] for name in "
+        "sorted(artifacts))).hexdigest())"
+    )
+    outputs = []
+    for hash_seed in ("1", "8675309"):
+        environment = os.environ.copy()
+        environment["PYTHONHASHSEED"] = hash_seed
+        result = subprocess.run(  # noqa: S603 - fixed interpreter and arguments
+            [sys.executable, "-c", command],
+            cwd=project_root,
+            env=environment,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        outputs.append(result.stdout)
+
+    assert len(set(outputs)) == 1
+
+
+def test_seed_42_realization_regression() -> None:
+    assert tuple(
+        (item.scenario.value, item.attribute_kind.value)
+        for item in ambiguity_variant_metadata(seed=42).selected_realizations
+    ) == (
+        ("contradictory_strong_identifiers", "email"),
+        ("partial_but_sufficient", "date_of_birth"),
+        ("partial_with_contradiction", "school_year"),
+        ("single_uncorroborated_attribute", "school_year"),
+        ("stale_attribute", "full_address"),
+    )
 
 
 def test_every_scenario_still_appears_in_every_variant() -> None:
@@ -352,7 +630,7 @@ def test_an_unknown_attribute_kind_passes_through_substitution() -> None:
     from synthworld.ambiguity_variants import _substituted
 
     assert (
-        _substituted("https://social.example.test/x", "social_profile", 1)
+        _substituted("https://social.example.test/x", "social_profile", 1, 0)
         == "https://social.example.test/x"
     )
 
