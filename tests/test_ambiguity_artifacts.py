@@ -147,7 +147,7 @@ def test_variants_change_structure_not_only_identifiers() -> None:
         return tuple(
             sorted(
                 tuple(sorted(item.kind.value for item in record.attributes))
-                for record in world.public.identity_records
+                for record in world.public.corpus.identity_records
             )
         )
 
@@ -177,7 +177,7 @@ def test_the_realization_split_covers_every_scenario() -> None:
 @pytest.mark.parametrize("seed", _VARIANT_SEEDS)
 def test_variants_remain_adversarial(seed: int) -> None:
     variant = generate_ambiguity_variant(seed=seed)
-    records = {item.id: item for item in variant.public.identity_records}
+    records = {item.id: item for item in variant.public.corpus.identity_records}
 
     for name, decide in AMBIGUITY_BASELINES:
         metrics = evaluate_ambiguity_predictions(

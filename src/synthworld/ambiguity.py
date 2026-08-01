@@ -92,6 +92,37 @@ SCENARIO_DISPOSITIONS: dict[ScenarioKind, PairDisposition] = {
 }
 
 
+class PublicRecordPair(SyntheticModel):
+    """A pair the system is asked to decide. Public: it is the task, not the answer.
+
+    Without this the benchmark is unusable at its own boundary. Thirty records admit
+    435 pairs and the evaluator demands exactly fifteen, so a consumer holding only
+    the public corpus would have to read the answer key to learn which ones to
+    decide - the oracle-free guarantee defeated by the task definition rather than
+    by the data. Asteria publishes its `action_event_ids` for the same reason.
+
+    Carries identifiers and nothing else: no disposition, no scenario, no hint of
+    which pairs are alike.
+    """
+
+    left_record_id: UUID
+    right_record_id: UUID
+
+    @model_validator(mode="after")
+    def require_ordered_distinct_records(self) -> Self:
+        if self.left_record_id >= self.right_record_id:
+            raise ValueError("pair records must be distinct and ordered by id")
+        return self
+
+
+class PublicAmbiguityTask(SyntheticModel):
+    """Everything a system may see: the records, and which pairs to decide."""
+
+    schema_version: Literal["1.0.0"] = AMBIGUITY_SCHEMA_VERSION
+    corpus: PublicConnectionCorpus
+    pairs_to_decide: tuple[PublicRecordPair, ...] = Field(min_length=1)
+
+
 class PairTruth(SyntheticModel):
     """One labelled record pair. Evaluator-only; never serialized into input."""
 
@@ -162,8 +193,24 @@ class PairPrediction(SyntheticModel):
 class AmbiguityBenchmark(SyntheticModel):
     schema_version: Literal["1.0.0"] = AMBIGUITY_SCHEMA_VERSION
     seed: int
-    public: PublicConnectionCorpus
+    public: PublicAmbiguityTask
     answer_key: AmbiguityAnswerKey
+
+    @model_validator(mode="after")
+    def require_public_pairs_to_match_truth(self) -> Self:
+        public = {
+            (item.left_record_id, item.right_record_id)
+            for item in self.public.pairs_to_decide
+        }
+        labelled = {
+            (item.left_record_id, item.right_record_id)
+            for item in self.answer_key.pairs
+        }
+        if public != labelled:
+            raise ValueError(
+                "the public pair list and the labelled pairs must be the same set"
+            )
+        return self
 
 
 __all__ = [
@@ -174,5 +221,7 @@ __all__ = [
     "PairDisposition",
     "PairPrediction",
     "PairTruth",
+    "PublicAmbiguityTask",
+    "PublicRecordPair",
     "ScenarioKind",
 ]

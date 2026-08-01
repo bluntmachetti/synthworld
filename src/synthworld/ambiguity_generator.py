@@ -21,6 +21,8 @@ from synthworld.ambiguity import (
     AmbiguityAnswerKey,
     AmbiguityBenchmark,
     PairTruth,
+    PublicAmbiguityTask,
+    PublicRecordPair,
     ScenarioKind,
 )
 from synthworld.connection import (
@@ -441,8 +443,17 @@ def generate_ambiguity_benchmark(*, seed: int) -> AmbiguityBenchmark:
         )
     return AmbiguityBenchmark(
         seed=seed,
-        public=PublicConnectionCorpus(
-            seed=seed, identity_records=records, association_records=()
+        public=PublicAmbiguityTask(
+            corpus=PublicConnectionCorpus(
+                seed=seed, identity_records=records, association_records=()
+            ),
+            pairs_to_decide=tuple(
+                PublicRecordPair(
+                    left_record_id=item.left_record_id,
+                    right_record_id=item.right_record_id,
+                )
+                for item in pairs
+            ),
         ),
         answer_key=AmbiguityAnswerKey(
             record_memberships=memberships, pairs=tuple(pairs)

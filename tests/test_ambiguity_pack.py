@@ -58,7 +58,7 @@ def test_positives_and_negatives_share_the_attribute_that_decides_them() -> None
     """
 
     benchmark = _benchmark()
-    records = {item.id: item for item in benchmark.public.identity_records}
+    records = {item.id: item for item in benchmark.public.corpus.identity_records}
     carriers: dict[str, set[PairDisposition]] = {}
     for pair in benchmark.answer_key.pairs:
         left, right = records[pair.left_record_id], records[pair.right_record_id]
@@ -328,3 +328,56 @@ def test_answer_key_rejects_duplicate_and_unknown_pairs() -> None:
 
     with pytest.raises(ValidationError, match="no membership"):
         AmbiguityAnswerKey(record_memberships=memberships, pairs=(_sparse_pair(1, 9),))
+
+
+def test_the_benchmark_is_runnable_from_public_data_alone() -> None:
+    """The boundary defect this pack shipped with, now a regression test.
+
+    Thirty records admit 435 pairs and the evaluator demands exactly fifteen. When
+    that list lived only in the answer key, a consumer had to read the oracle to
+    learn which pairs to decide - the guarantee defeated by the task definition
+    rather than by the data.
+    """
+
+    from itertools import combinations
+
+    benchmark = _benchmark()
+    records = benchmark.public.corpus.identity_records
+    task_pairs = {
+        (item.left_record_id, item.right_record_id)
+        for item in benchmark.public.pairs_to_decide
+    }
+
+    assert len(task_pairs) < len(list(combinations(records, 2)))
+    assert task_pairs == {
+        (item.left_record_id, item.right_record_id)
+        for item in benchmark.answer_key.pairs
+    }
+    # The task names the pairs and nothing else.
+    published = benchmark.public.model_dump_json().lower()
+    for word in ("disposition", "scenario", "same_entity", "entity_id"):
+        assert word not in published
+
+
+def test_the_public_pair_list_must_match_the_labelled_pairs() -> None:
+    """A task naming a pair with no label, or omitting a labelled one, is broken."""
+
+    benchmark = _benchmark()
+    from synthworld.ambiguity import AmbiguityBenchmark, PublicAmbiguityTask
+
+    with pytest.raises(ValidationError, match="same set"):
+        AmbiguityBenchmark(
+            seed=benchmark.seed,
+            public=PublicAmbiguityTask(
+                corpus=benchmark.public.corpus,
+                pairs_to_decide=benchmark.public.pairs_to_decide[:-1],
+            ),
+            answer_key=benchmark.answer_key,
+        )
+
+
+def test_public_pairs_are_ordered_and_distinct() -> None:
+    from synthworld.ambiguity import PublicRecordPair
+
+    with pytest.raises(ValidationError, match="distinct and ordered"):
+        PublicRecordPair(left_record_id=UUID(int=2), right_record_id=UUID(int=1))

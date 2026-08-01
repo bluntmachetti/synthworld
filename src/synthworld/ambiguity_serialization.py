@@ -18,8 +18,9 @@ from synthworld.ambiguity import (
     AmbiguityAnswerKey,
     AmbiguityBenchmark,
     PairTruth,
+    PublicAmbiguityTask,
 )
-from synthworld.connection import PublicConnectionCorpus, RecordMembership
+from synthworld.connection import RecordMembership
 from synthworld.models import SyntheticModel
 
 _PUBLIC_FILENAME = "ambiguity-public-v1.json"
@@ -94,10 +95,10 @@ def load_golden_ambiguity_benchmark() -> AmbiguityBenchmark:
         payloads[name] = content
 
     return AmbiguityBenchmark(
-        seed=PublicConnectionCorpus.model_validate_json(
+        seed=PublicAmbiguityTask.model_validate_json(
             payloads[_PUBLIC_FILENAME]
-        ).seed,
-        public=PublicConnectionCorpus.model_validate_json(payloads[_PUBLIC_FILENAME]),
+        ).corpus.seed,
+        public=PublicAmbiguityTask.model_validate_json(payloads[_PUBLIC_FILENAME]),
         answer_key=AmbiguityAnswerKey(
             record_memberships=MembershipTruth.model_validate_json(
                 payloads[_MEMBERSHIP_FILENAME]

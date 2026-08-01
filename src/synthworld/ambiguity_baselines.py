@@ -93,7 +93,9 @@ def run_ambiguity_baseline(
     """Score one decision function over the frozen pack."""
 
     benchmark = generate_ambiguity_benchmark(seed=AMBIGUITY_BASELINE_SEED)
-    records = {item.id: item for item in benchmark.public.identity_records}
+    records = {item.id: item for item in benchmark.public.corpus.identity_records}
+    # Decide the pairs the *task* names, not the ones truth happens to hold: a
+    # consumer never sees the answer key, and neither should a baseline.
     predictions = [
         PairPrediction(
             left_record_id=pair.left_record_id,
@@ -102,7 +104,7 @@ def run_ambiguity_baseline(
                 records[pair.left_record_id], records[pair.right_record_id]
             ),
         )
-        for pair in benchmark.answer_key.pairs
+        for pair in benchmark.public.pairs_to_decide
     ]
     return evaluate_ambiguity_predictions(predictions, benchmark=benchmark)
 
