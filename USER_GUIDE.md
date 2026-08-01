@@ -425,6 +425,74 @@ between 100 and 2000 people while the population rises 20x, because relationship
 construction holds membership groups for the whole world. The `person_count`
 ceiling of 2000 is a configuration limit, not a measured cliff.
 
+## Use case 9: identity-resolution ambiguity
+
+Use this when you need to know whether a resolver actually resolves, rather than
+whether it can follow an exact join.
+
+A resolver scored pairwise F1 **1.0** on the 18-record entity-resolution pack. A
+one-factor mutation matrix then broke it four ways on the same data: unrelated
+people sharing a phone were merged, people sharing an employer and address were
+merged, stale records for one person were split, and Unicode name variants were
+split. **A perfect aggregate score on that pack is not evidence of real-world
+transfer**, and this pack exists because of it.
+
+```python
+from synthworld.ambiguity_serialization import load_golden_ambiguity_benchmark
+
+benchmark = load_golden_ambiguity_benchmark()
+records = benchmark.public.identity_records          # no truth of any kind
+```
+
+### Two truths, kept apart
+
+Canonical entity membership says who someone **is**. Pair disposition says what the
+public record pair **justifies**. They disagree deliberately: the pack contains
+pairs that are the same person where the evidence supports only `insufficient`, and
+pairs that are different people under the same disposition.
+
+A system may answer `merge`, `separate`, or `insufficient`. Abstention is a
+first-class answer, not a failure to answer, and the three truths are serialized as
+three separate files so a consumer can hold the public corpus without either.
+
+### The report has no aggregate score
+
+That is the point. One number is what let a broken resolver read as perfect, so the
+report gives you:
+
+- **false merges and false splits, counted apart** — a false merge attaches one
+  person's records to another, a false split leaves someone unresolved, and a single
+  F1 trades them off silently;
+- **unwarranted decisions** — deciding a pair the evidence cannot settle is not a
+  wrong answer, it is an unjustified one;
+- **coverage beside precision** — a system that abstains everywhere would otherwise
+  score perfectly;
+- **pairwise and B-cubed** over the clusters your merges induce, because they weight
+  differently and either alone hides what the other shows;
+- **per-scenario support with a machine-readable low-support flag.**
+
+### Reference baselines
+
+None of them resolves the pack, and a CI gate fails if one ever does:
+
+| baseline | coverage | precision | false merge | false split | unwarranted |
+|---|---|---|---|---|---|
+| exact strong-identifier | 1.00 | 0.533 | 3 | 1 | 3 |
+| normalised name or address | 1.00 | 0.267 | 5 | 3 | 3 |
+| precision-first (abstains) | 0.73 | 0.727 | 1 | 1 | 1 |
+
+### Limits, stated plainly
+
+The canonical pack carries **one pair per scenario**, so every slice is flagged
+low-support. It is a conformance fixture — like Asteria Agentic v1 — not a
+statistical benchmark, and a 1-of-1 slice is not a rate.
+
+Seed variants raise the variety but not the support:
+`generate_ambiguity_variant(seed=...)` preserves declared prevalence while changing
+surface values and, for six of the fifteen scenarios, which attribute carries the
+case. The other nine are defined by their attribute — `recycled_phone` is about a
+phone — so for those a variant changes values only.
+
 ## Reading evaluation results
 
 Use `--summary` for the headline metrics and omit it for the complete JSON
