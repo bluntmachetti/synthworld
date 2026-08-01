@@ -123,9 +123,19 @@ def test_every_required_serp_behaviour_is_present(seed: int) -> None:
     assert any(other.startswith("persona-unrelated") for other in unrelated)
     # stale observations
     assert any(item.stale for item in projection.truth.results)
-    # unicode and transliterated variants
-    assert any(not item.query.isascii() for item in projection.responses)
-    assert any(item.query.isascii() for item in projection.responses)
+    # Unicode and transliterated variants of the SAME identity, not one spelling
+    # each for different people - otherwise a consumer that normalises one
+    # direction and not the other is never exercised.
+    import unicodedata
+
+    def folded(value: str) -> str:
+        decomposed = unicodedata.normalize("NFKD", value)
+        return "".join(item for item in decomposed if not unicodedata.combining(item))
+
+    spellings: dict[str, set[str]] = {}
+    for page in projection.responses:
+        spellings.setdefault(folded(page.query), set()).add(page.query)
+    assert any(len(values) > 1 for values in spellings.values())
     # pagination boundaries: more reported than served
     assert all(
         page.total_results_reported > len(page.results) for page in projection.responses
@@ -274,3 +284,48 @@ def test_requesting_more_pages_than_there_are_results_emits_no_empty_page() -> N
 
     assert all(page.results for page in projection.responses)
     assert max(page.page for page in projection.responses) < 5
+
+
+def test_a_live_host_cannot_smuggle_a_reserved_domain_into_the_path() -> None:
+    """The reserved-domain contract is about the host, not the string.
+
+    `https://real-site.com/path/.example.test` satisfies a substring check and
+    points at a real site, which is exactly what the safety rule exists to stop.
+    """
+
+    from uuid import UUID
+
+    for url in (
+        "https://real-site.com/path/.example.test",
+        "https://example.test.evil.com/x",
+        "http://records.example.test/x",
+    ):
+        with pytest.raises(ValidationError, match=r"reserved example domain|https"):
+            PublicSearchResult(id=UUID(int=1), rank=1, url=url, title="t")
+
+
+def test_a_false_match_must_name_someone_else_not_nobody() -> None:
+    """`None` is not "someone else" - it is nobody.
+
+    Allowing it produced a false match naming no one, which cannot be scored as a
+    collision and quietly shrinks identity-based evaluation.
+    """
+
+    from uuid import UUID
+
+    with pytest.raises(ValidationError, match="must concern someone else"):
+        SearchTruthBundle(
+            public_digest="x",
+            results=(
+                SearchResultTruth(
+                    result_id=UUID(int=1),
+                    subject_persona_id="persona-0001",
+                    actual_persona_id=None,
+                    match=SearchMatchTruth.FALSE_MATCH,
+                    planted_data_classes=(),
+                    syndication_group=None,
+                    query_id="query-001",
+                    difficulty=1,
+                ),
+            ),
+        )

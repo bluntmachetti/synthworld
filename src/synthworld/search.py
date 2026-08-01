@@ -25,6 +25,7 @@ from __future__ import annotations
 from datetime import datetime
 from enum import StrEnum
 from typing import Literal, Self
+from urllib.parse import urlparse
 from uuid import UUID
 
 from pydantic import ConfigDict, Field, model_validator
@@ -85,7 +86,17 @@ class PublicSearchResult(SyntheticModel):
 
     @model_validator(mode="after")
     def require_reserved_locator(self) -> Self:
-        if not self.url.startswith("https://") or ".example." not in self.url:
+        # Parse the host rather than searching the string. `.example.` anywhere in
+        # a URL is satisfied by https://real-site.com/path/.example.test, which
+        # defeats the whole point of a reserved domain.
+        parsed = urlparse(self.url)
+        host = (parsed.hostname or "").lower()
+        if parsed.scheme != "https":
+            raise ValueError("search result URLs must be https")
+        if not (
+            host == "example.test"
+            or host.endswith((".example.test", ".example.invalid"))
+        ):
             raise ValueError("search result URLs must use a reserved example domain")
         return self
 
@@ -154,8 +165,12 @@ class SearchTruthBundle(SyntheticModel):
             ):
                 raise ValueError("a true match must concern the subject")
             if item.match is SearchMatchTruth.FALSE_MATCH and (
-                item.actual_persona_id == item.subject_persona_id
+                item.actual_persona_id is None
+                or item.actual_persona_id == item.subject_persona_id
             ):
+                # `None` is not "someone else" - it is nobody. Allowing it produced
+                # a false match that named no one, which cannot be scored as a
+                # collision and quietly shrinks identity-based evaluation.
                 raise ValueError("a false match must concern someone else")
         return self
 

@@ -102,9 +102,6 @@ def generate_search_projection(
     truth: list[SearchResultTruth] = []
 
     for subject_index, (persona, display, transliterated) in enumerate(_SUBJECTS):
-        # Unicode and transliterated query variants: the same subject is searched
-        # both ways, and a consumer that normalises only one direction shows it.
-        query = display if subject_index % 2 == 0 else transliterated
         query_id = f"query-{subject_index + 1:03d}"
         planned = _planned_results(
             seed=seed,
@@ -120,49 +117,55 @@ def generate_search_projection(
             planned, key=lambda item: _draw(seed, f"rank:{item.key}", subject_index)
         )
         size = settings.page_size
-        for page in range(1, settings.pages_per_query + 1):
-            window = ordered[(page - 1) * size : page * size]
-            if not window:
-                continue
-            results = []
-            for offset, item in enumerate(window):
-                identifier = _result_id(seed, item.key)
-                results.append(
-                    PublicSearchResult(
-                        id=identifier,
-                        rank=(page - 1) * size + offset + 1,
-                        url=item.url,
-                        title=item.title,
-                        snippet=item.snippet,
-                        observed_at=item.observed_at,
-                        source_name=item.source_name,
+        # BOTH spellings of the same identity, not one spelling each for different
+        # people. An earlier revision alternated by subject, so a consumer that
+        # normalises one direction and not the other was never exercised - and the
+        # comment claimed the opposite, which is worse than the gap itself.
+        for spelling, query in enumerate((display, transliterated)):
+            for page in range(1, settings.pages_per_query + 1):
+                window = ordered[(page - 1) * size : page * size]
+                if not window:
+                    continue
+                results = []
+                for offset, item in enumerate(window):
+                    identifier = _result_id(seed, f"{spelling}:{item.key}")
+                    results.append(
+                        PublicSearchResult(
+                            id=identifier,
+                            rank=(page - 1) * size + offset + 1,
+                            url=item.url,
+                            title=item.title,
+                            snippet=item.snippet,
+                            observed_at=item.observed_at,
+                            source_name=item.source_name,
+                        )
+                    )
+                    truth.append(
+                        SearchResultTruth(
+                            result_id=identifier,
+                            subject_persona_id=item.subject_persona_id,
+                            actual_persona_id=item.actual_persona_id,
+                            match=item.match,
+                            planted_data_classes=item.planted_data_classes,
+                            syndication_group=item.syndication_group,
+                            query_id=query_id,
+                            difficulty=item.difficulty,
+                            stale=item.stale,
+                        )
+                    )
+                responses.append(
+                    PublicSearchResponse(
+                        query=query,
+                        page=page,
+                        page_size=size,
+                        # Deliberately larger than what is returned: providers
+                        # report a total they do not serve, and a consumer that
+                        # treats the cap as the whole result set is wrong in a way
+                        # worth catching.
+                        total_results_reported=len(ordered) + 7,
+                        results=tuple(results),
                     )
                 )
-                truth.append(
-                    SearchResultTruth(
-                        result_id=identifier,
-                        subject_persona_id=item.subject_persona_id,
-                        actual_persona_id=item.actual_persona_id,
-                        match=item.match,
-                        planted_data_classes=item.planted_data_classes,
-                        syndication_group=item.syndication_group,
-                        query_id=item.query_id,
-                        difficulty=item.difficulty,
-                        stale=item.stale,
-                    )
-                )
-            responses.append(
-                PublicSearchResponse(
-                    query=query,
-                    page=page,
-                    page_size=size,
-                    # Deliberately larger than what is returned: providers report a
-                    # total they do not serve, and a consumer that treats the cap as
-                    # the whole result set is wrong in a way worth catching.
-                    total_results_reported=len(ordered) + 7,
-                    results=tuple(results),
-                )
-            )
     ordered_responses = tuple(responses)
     return SearchProjection(
         seed=seed,
