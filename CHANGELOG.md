@@ -11,6 +11,11 @@ agentic schemas) are versioned independently of the package; see
 
 ### Added
 
+- A consumer-integration publication boundary: `.local-assurance/` is excluded
+  from Git and package builds, repository tests reject private consumer symbols,
+  dependencies, unreviewed adapter paths, and force-added local artifacts, and
+  a named CI check plus code-owner review protects the boundary-defining files.
+  Contribution guidance keeps one-off product execution out of public CI.
 - A `synthworld validate agentic-trace` command that checks an observed-action
   JSONL submission for structural and cardinality correctness before scoring,
   with no access to evaluator truth. It reports every bad row in one pass with
