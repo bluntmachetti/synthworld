@@ -28,8 +28,6 @@ domains, fictional phone ranges, obvious example addresses, and deliberately
 invalid national identifiers. Public observations and evaluator-only truth must
 remain physically separated.
 
-By submitting a contribution, you agree that it is licensed under Apache-2.0.
-
 ## Consumer-integration boundary
 
 SynthWorld accepts consumer-neutral public inputs, submission contracts,

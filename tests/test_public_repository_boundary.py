@@ -111,6 +111,26 @@ def test_build_configuration_excludes_local_assurance_workspace() -> None:
     assert wheel["packages"] == ["src/synthworld"]
 
 
+def test_code_owner_gate_is_limited_to_boundary_defining_files() -> None:
+    lines = (_ROOT / ".github/CODEOWNERS").read_text(encoding="utf-8").splitlines()
+    patterns = {
+        line.split(maxsplit=1)[0]
+        for line in lines
+        if line.strip() and not line.lstrip().startswith("#")
+    }
+
+    assert "/src/synthworld/**" not in patterns
+    assert {
+        "/.github/CODEOWNERS",
+        "/.github/workflows/**",
+        "/.gitignore",
+        "/Makefile",
+        "/pyproject.toml",
+        "/src/synthworld/**/*adapter*.py",
+        "/tests/test_public_repository_boundary.py",
+    } <= patterns
+
+
 def test_consumer_references_stay_in_reviewed_public_metadata() -> None:
     tracked_text = _tracked_text(_tracked_paths())
     observed = {
