@@ -28,8 +28,8 @@ from synthworld.ambiguity import (
     AmbiguityBenchmark,
     PairTruth,
     PublicAmbiguityTask,
-    PublicRecordPair,
     ScenarioKind,
+    public_pairs_from_truth,
 )
 from synthworld.ambiguity_generator import _Draft, _drafts
 from synthworld.connection import (
@@ -811,13 +811,7 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
             corpus=PublicConnectionCorpus(
                 seed=seed, identity_records=tuple(records), association_records=()
             ),
-            pairs_to_decide=tuple(
-                PublicRecordPair(
-                    left_record_id=item.left_record_id,
-                    right_record_id=item.right_record_id,
-                )
-                for item in pairs
-            ),
+            pairs_to_decide=public_pairs_from_truth(pairs),
         ),
         answer_key=AmbiguityAnswerKey(
             record_memberships=memberships, pairs=tuple(pairs)

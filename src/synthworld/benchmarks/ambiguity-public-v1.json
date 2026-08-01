@@ -846,43 +846,8 @@
   "pairs_to_decide": [
     {
       "synthetic": true,
-      "left_record_id": "823de7cc-82a3-5287-b090-91b35f23d455",
-      "right_record_id": "d0a8ec79-b1d2-53f1-a51b-4d799290ec83"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "8ef83f37-d901-5a65-87c6-0817d347dce8",
-      "right_record_id": "db414dd5-dc42-5c6c-9df1-cf4e82eca45f"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "55b454c4-69d3-5828-9a91-546d7d7e01c9",
-      "right_record_id": "d13dab7f-43e4-50f9-b55c-6387d2ecf65d"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "29f0192b-e606-545b-9f52-2220921d50f9",
-      "right_record_id": "59a6eff5-22a1-538b-bc1d-d63a0e27a893"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "aaae6c0f-772a-576c-b983-cc1121caa9d5",
-      "right_record_id": "d0e0cf0c-323b-5d72-8a13-c0a64ce62c53"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "885ec647-5e1a-5c8e-80cd-14fb2628aa43",
-      "right_record_id": "9f3246a9-9dfa-53f3-8e96-1e80c7341fa9"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "24a6c901-15f9-5c32-b10a-f461777d5a64",
-      "right_record_id": "75ec1328-6511-5c7f-adf7-6da1be60fd47"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "6ac65983-5867-55e3-8ff0-b95974064269",
-      "right_record_id": "79699a31-7f5d-5ab7-bb96-0ddf07f43301"
+      "left_record_id": "091ecfd8-2405-5b1d-8578-59bc9e0a4e43",
+      "right_record_id": "c57d4a9a-d99b-5037-8385-daa41ef0685b"
     },
     {
       "synthetic": true,
@@ -891,23 +856,13 @@
     },
     {
       "synthetic": true,
-      "left_record_id": "37f6c234-8fd1-58a3-9a20-fc620878699e",
-      "right_record_id": "b6ddc2ac-6937-5f1a-a069-cd1b58f05751"
+      "left_record_id": "1a5aa123-3709-5c02-94dd-e804c7a3c187",
+      "right_record_id": "f7a2ca26-9386-5f25-b14c-41cdfcc5d342"
     },
     {
       "synthetic": true,
-      "left_record_id": "091ecfd8-2405-5b1d-8578-59bc9e0a4e43",
-      "right_record_id": "c57d4a9a-d99b-5037-8385-daa41ef0685b"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "b0888c42-5ec5-527d-b331-d230f0b356ca",
-      "right_record_id": "f11dc1af-26b4-580c-8143-9cc8355314ef"
-    },
-    {
-      "synthetic": true,
-      "left_record_id": "55c76d51-c781-5a52-b5e2-24cb702ea481",
-      "right_record_id": "746a9f41-9f09-551c-9933-c359b679c163"
+      "left_record_id": "24a6c901-15f9-5c32-b10a-f461777d5a64",
+      "right_record_id": "75ec1328-6511-5c7f-adf7-6da1be60fd47"
     },
     {
       "synthetic": true,
@@ -916,8 +871,53 @@
     },
     {
       "synthetic": true,
-      "left_record_id": "1a5aa123-3709-5c02-94dd-e804c7a3c187",
-      "right_record_id": "f7a2ca26-9386-5f25-b14c-41cdfcc5d342"
+      "left_record_id": "29f0192b-e606-545b-9f52-2220921d50f9",
+      "right_record_id": "59a6eff5-22a1-538b-bc1d-d63a0e27a893"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "37f6c234-8fd1-58a3-9a20-fc620878699e",
+      "right_record_id": "b6ddc2ac-6937-5f1a-a069-cd1b58f05751"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "55b454c4-69d3-5828-9a91-546d7d7e01c9",
+      "right_record_id": "d13dab7f-43e4-50f9-b55c-6387d2ecf65d"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "55c76d51-c781-5a52-b5e2-24cb702ea481",
+      "right_record_id": "746a9f41-9f09-551c-9933-c359b679c163"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "6ac65983-5867-55e3-8ff0-b95974064269",
+      "right_record_id": "79699a31-7f5d-5ab7-bb96-0ddf07f43301"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "823de7cc-82a3-5287-b090-91b35f23d455",
+      "right_record_id": "d0a8ec79-b1d2-53f1-a51b-4d799290ec83"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "885ec647-5e1a-5c8e-80cd-14fb2628aa43",
+      "right_record_id": "9f3246a9-9dfa-53f3-8e96-1e80c7341fa9"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "8ef83f37-d901-5a65-87c6-0817d347dce8",
+      "right_record_id": "db414dd5-dc42-5c6c-9df1-cf4e82eca45f"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "aaae6c0f-772a-576c-b983-cc1121caa9d5",
+      "right_record_id": "d0e0cf0c-323b-5d72-8a13-c0a64ce62c53"
+    },
+    {
+      "synthetic": true,
+      "left_record_id": "b0888c42-5ec5-527d-b331-d230f0b356ca",
+      "right_record_id": "f11dc1af-26b4-580c-8143-9cc8355314ef"
     }
   ]
 }

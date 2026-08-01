@@ -19,6 +19,7 @@ own; a system that only emits clusters is scored exactly as before.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from enum import StrEnum
 from typing import Literal, Self
 from uuid import UUID
@@ -116,11 +117,35 @@ class PublicRecordPair(SyntheticModel):
 
 
 class PublicAmbiguityTask(SyntheticModel):
-    """Everything a system may see: the records, and which pairs to decide."""
+    """Everything a system may see: the records, and which pairs to decide.
+
+    ``pairs_to_decide`` must be in canonical record-id order, and the model refuses
+    any other order rather than quietly sorting it. Emitting the pairs in the order
+    the fixture happened to draft them made the *position* of a pair an answer key:
+    the i-th public pair was the i-th :class:`ScenarioKind`, measured 15/15 in the
+    frozen pack and 750/750 across fifty generated seeds. Nothing in the data leaked
+    - the leak was the ordering of a list, which no attribute-level check can see.
+
+    Sorting is a property of the artifact, so it belongs to the model that defines
+    the artifact. A generator that rebuilds this list in draft order now fails to
+    construct rather than shipping a fresh oracle.
+    """
 
     schema_version: Literal["1.0.0"] = AMBIGUITY_SCHEMA_VERSION
     corpus: PublicConnectionCorpus
     pairs_to_decide: tuple[PublicRecordPair, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def require_canonical_pair_order(self) -> Self:
+        keys = [
+            (item.left_record_id, item.right_record_id) for item in self.pairs_to_decide
+        ]
+        if keys != sorted(keys):
+            raise ValueError(
+                "pairs_to_decide must be in canonical record-id order, because the "
+                "order a fixture drafts its pairs in is itself an oracle"
+            )
+        return self
 
 
 class PairTruth(SyntheticModel):
@@ -148,6 +173,21 @@ class PairTruth(SyntheticModel):
         if self.disposition is PairDisposition.SEPARATE and self.same_entity:
             raise ValueError("a separate pair must be different entities in truth")
         return self
+
+
+def public_pairs_from_truth(pairs: Iterable[PairTruth]) -> tuple[PublicRecordPair, ...]:
+    """Project labelled pairs to the public task list, in canonical order.
+
+    The single place the public pair list is built, so the sort cannot be remembered
+    in one generator and forgotten in another.
+    """
+
+    return tuple(
+        PublicRecordPair(left_record_id=left, right_record_id=right)
+        for left, right in sorted(
+            (item.left_record_id, item.right_record_id) for item in pairs
+        )
+    )
 
 
 class AmbiguityAnswerKey(SyntheticModel):
@@ -224,4 +264,5 @@ __all__ = [
     "PublicAmbiguityTask",
     "PublicRecordPair",
     "ScenarioKind",
+    "public_pairs_from_truth",
 ]

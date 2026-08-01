@@ -11,6 +11,7 @@ from importlib.resources import files
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from synthworld.ambiguity import (
     AmbiguityBenchmark,
@@ -452,6 +453,67 @@ def test_selected_realizations_are_constructed_in_both_records() -> None:
             assert (
                 left_values[item.attribute_kind] != right_values[item.attribute_kind]
             ) is (item.scenario in different)
+
+
+def _positional_scenarios(benchmark: AmbiguityBenchmark) -> tuple[ScenarioKind, ...]:
+    """Each public pair's true scenario, in the order the public task lists them."""
+
+    truth = {
+        (item.left_record_id, item.right_record_id): item
+        for item in benchmark.answer_key.pairs
+    }
+    return tuple(
+        truth[(item.left_record_id, item.right_record_id)].scenario
+        for item in benchmark.public.pairs_to_decide
+    )
+
+
+def test_the_position_of_a_public_pair_is_not_an_answer_key() -> None:
+    """The channel no attribute-level check could see, because it is not in the data.
+
+    Both generators built `pairs_to_decide` by walking their drafts, and the drafts
+    are in `ScenarioKind` declaration order. So `pairs_to_decide[i]` was
+    `list(ScenarioKind)[i]` - measured 15/15 on the frozen pack and 750/750 across
+    fifty variant seeds, which decodes every disposition through the public
+    `SCENARIO_DISPOSITIONS` map without reading a single attribute. The pack shipped
+    that way, and `b"scenario" not in public_bytes` passed the whole time.
+    """
+
+    kinds = list(ScenarioKind)
+    canonical = _positional_scenarios(load_golden_ambiguity_benchmark())
+
+    assert canonical != tuple(kinds)
+
+    # Across seeds the map from position to scenario must actually move. A generator
+    # that sorted by some other fixed key would satisfy the assertion above while
+    # still handing out one decoder that works on every seed.
+    observed = [
+        _positional_scenarios(generate_ambiguity_variant(seed=seed))
+        for seed in range(12)
+    ]
+    hits = sum(
+        1
+        for order in observed
+        for index, scenario in enumerate(order)
+        if scenario is kinds[index]
+    )
+    positions = len(observed) * len(kinds)
+
+    assert len(set(observed)) == len(observed)
+    # A fixed order scores `positions`; chance is `positions / len(kinds)`. The bound
+    # is loose on purpose - the point is to separate "no channel" from "a channel",
+    # not to assert an exact coincidence count.
+    assert hits < positions // 4
+
+
+def test_an_unsorted_public_pair_list_is_refused_rather_than_sorted() -> None:
+    """Closing the channel in the model, so no future generator can reopen it."""
+
+    task = load_golden_ambiguity_benchmark().public
+    reversed_pairs = tuple(reversed(task.pairs_to_decide))
+
+    with pytest.raises(ValidationError, match="canonical record-id order"):
+        task.__class__(corpus=task.corpus, pairs_to_decide=reversed_pairs)
 
 
 def test_variant_metadata_is_evaluator_only() -> None:
