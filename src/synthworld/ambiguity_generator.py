@@ -15,6 +15,7 @@ here than scale - the pack's job is to be *correct about hard cases*, not large.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import blake2b
 
 from synthworld.ambiguity import (
     SCENARIO_DISPOSITIONS,
@@ -53,6 +54,25 @@ class _Draft:
     display_name: str
     source_type: PublicIdentitySourceType
     attributes: tuple[PublicIdentityAttribute, ...]
+
+
+def _record_key(
+    display_name: str,
+    source_type: PublicIdentitySourceType,
+    attributes: tuple[PublicIdentityAttribute, ...],
+) -> str:
+    """Address a record by what it contains, never by where it was drafted.
+
+    Identifiers were ``uuid5(namespace, f"{seed}:ambiguity:{position}")`` with
+    ``position`` walking the drafts in scenario order, so anyone holding the public
+    seed could recompute the identifier for each position and read the scenario off
+    it. Content-addressing keeps the identifier a function of the seed and the
+    evidence - which a reader is entitled to - and of nothing else.
+    """
+
+    body = "|".join(sorted(f"{item.kind.value}={item.value}" for item in attributes))
+    material = f"{source_type.value}|{display_name}|{body}"
+    return f"ambiguity:{blake2b(material.encode(), digest_size=16).hexdigest()}"
 
 
 def _drafts() -> tuple[_Draft, ...]:
@@ -405,7 +425,7 @@ def _drafts() -> tuple[_Draft, ...]:
 def generate_ambiguity_benchmark(*, seed: int) -> AmbiguityBenchmark:
     """Build the frozen ambiguity pack for a seed.
 
-    The seed only opaques record identifiers; the cases themselves are fixed, which
+    The seed salts record identifiers; the cases themselves are fixed, which
     is what makes this the canonical pack rather than a variant.
     """
 
@@ -413,12 +433,12 @@ def generate_ambiguity_benchmark(*, seed: int) -> AmbiguityBenchmark:
     records: tuple[PublicIdentityRecord, ...] = tuple(
         _identity_record(
             seed=seed,
-            key=f"ambiguity:{index}",
+            key=_record_key(draft.display_name, draft.source_type, draft.attributes),
             source_type=draft.source_type,
             display_name=draft.display_name,
             attributes=draft.attributes,
         )
-        for index, draft in enumerate(drafts, start=1)
+        for draft in drafts
     )
     memberships = tuple(
         RecordMembership(

@@ -132,8 +132,9 @@ rather than to the evidence:
 - variant record identifiers were derived from draft position and the public seed.
 
 All three are closed, and the first is closed in the model, so a generator that
-rebuilds the pair list in draft order now fails to construct. Two limits remain, and
-both are properties of the design rather than bugs:
+rebuilds the pair list in draft order now fails to construct. Record identifiers in
+both the canonical pack and its variants are content-addressed. One limit remains,
+and it is a property of the design rather than a bug:
 
 - **The evidence determines the answer.** Each scenario is *defined* by its evidence
   pattern — which attribute kinds are present, which agree, which contradict — so a
@@ -141,9 +142,6 @@ both are properties of the design rather than bugs:
   distinct patterns and no collisions. That is the task, not a leak; but it does mean
   a pack containing every scenario exactly once is a conformance fixture rather than
   a discrimination test.
-- **The canonical pack's record identifiers are still positional.** Its answer key
-  ships in this repository, so there is nothing to recover that you do not already
-  have. Generated variants do not have this property.
 
 Held-out private seeds therefore protect surface values, not labels. Treat a score on
 this pack as evidence that a pipeline handles the named hard cases, not as evidence

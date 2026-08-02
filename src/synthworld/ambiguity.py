@@ -145,6 +145,13 @@ class PublicAmbiguityTask(SyntheticModel):
                 "pairs_to_decide must be in canonical record-id order, because the "
                 "order a fixture drafts its pairs in is itself an oracle"
             )
+        # Sorted is not enough: sorting puts duplicates next to each other, and how
+        # many times a pair is listed is another free choice that can be bound to the
+        # answer. A pack repeating merge, separate and insufficient pairs one, two and
+        # three times is canonically ordered, constructs cleanly, and decodes 15/15
+        # from repetition count alone.
+        if len(keys) != len(set(keys)):
+            raise ValueError("pairs_to_decide must not repeat a pair")
         return self
 
 
@@ -238,14 +245,17 @@ class AmbiguityBenchmark(SyntheticModel):
 
     @model_validator(mode="after")
     def require_public_pairs_to_match_truth(self) -> Self:
-        public = {
+        # Multiplicity, not just membership. Comparing sets discards how many times
+        # each pair appears, which lets a public list repeat pairs at rates that
+        # encode their dispositions while still matching truth "as a set".
+        public = sorted(
             (item.left_record_id, item.right_record_id)
             for item in self.public.pairs_to_decide
-        }
-        labelled = {
+        )
+        labelled = sorted(
             (item.left_record_id, item.right_record_id)
             for item in self.answer_key.pairs
-        }
+        )
         if public != labelled:
             raise ValueError(
                 "the public pair list and the labelled pairs must be the same set"

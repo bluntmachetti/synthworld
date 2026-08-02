@@ -473,8 +473,9 @@ def test_selected_realizations_land_where_their_case_needs_them() -> None:
             ]
 
             if item.scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
-                # Exactly one record carries it: neither record is sufficient alone,
-                # and a pair where both carry everything is a duplicate observation.
+                # Exactly one record carries it. The pair is a strict subset, so what
+                # it tests is merging by subsumption; a pair where both carry
+                # everything is a duplicate observation, which is a different case.
                 assert len(carriers) == 1
                 assert set(left_values) != set(right_values)
                 continue
@@ -564,7 +565,9 @@ def test_a_display_name_carries_no_more_than_its_evidence_already_does() -> None
                 correct += 1
         decoded.append(tuple(sorted(slots.items())))
 
-    # No slot-to-scenario map may repeat, or one decoder would serve every seed.
+    # Repeated maps are the signal to watch: each repeat is a seed pair a single
+    # decoder would serve. Requiring all distinct is stricter than needed and is the
+    # cheap form of the split-half transfer test.
     assert len(set(decoded)) == len(decoded)
     # And the old fixed decoder must now do no better than guessing.
     assert correct / decidable < 2 / len(kinds)
@@ -649,6 +652,27 @@ def test_an_unsorted_public_pair_list_is_refused_rather_than_sorted() -> None:
 
     with pytest.raises(ValidationError, match="canonical record-id order"):
         task.__class__(corpus=task.corpus, pairs_to_decide=reversed_pairs)
+
+
+def test_a_repeated_public_pair_is_refused() -> None:
+    """Sorting alone leaves multiplicity free, and free choices get bound to truth.
+
+    Sorting puts duplicates adjacent, so a repeated pair passes the order check. A
+    pack listing merge, separate and insufficient pairs once, twice and three times
+    is canonically ordered, constructs cleanly, and decodes 15/15 from repetition
+    count without reading an attribute.
+    """
+
+    task = load_golden_ambiguity_benchmark().public
+    repeated = tuple(
+        sorted(
+            (*task.pairs_to_decide, task.pairs_to_decide[0]),
+            key=lambda item: (item.left_record_id, item.right_record_id),
+        )
+    )
+
+    with pytest.raises(ValidationError, match="must not repeat a pair"):
+        task.__class__(corpus=task.corpus, pairs_to_decide=repeated)
 
 
 def test_variant_metadata_is_evaluator_only() -> None:

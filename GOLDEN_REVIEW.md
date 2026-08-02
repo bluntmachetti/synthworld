@@ -103,3 +103,47 @@ Consequently, the raw redownload and checksums are the pre-publication
 authority. Viewer `is-valid`, split, first-row, Parquet, and size checks must run
 against the public dataset commit immediately after publication, followed by a
 second raw redownload and digest comparison.
+
+## Ambiguity-v1 review record
+
+Reviewed: 2026-08-02. Seed: `20260731`. Ambiguity schema: `1.0.0`.
+
+The frozen pack contains 30 hand-authored public identity records forming 15 record
+pairs, one per `ScenarioKind`, published as three physically separate artifacts:
+public input, canonical entity membership, and evidence disposition. Seven pairs must
+remain separate, five must merge, and three are cases where the public evidence
+cannot settle the question whatever the canonical truth happens to be.
+
+This revision re-froze all three artifacts. The schema is unchanged at `1.0.0` and no
+record content changed; what moved is metadata that had been bound to the answer key.
+Three channels were closed:
+
+- `pairs_to_decide` was emitted in the order the fixture drafts its cases, so the
+  i-th public pair was the i-th `ScenarioKind` — 15 of 15 on this pack, and 750 of
+  750 across fifty generated seeds. The public task now carries the pairs in
+  canonical record-id order, refuses any other order, and refuses a repeated pair,
+  because how often a pair is listed is a channel too.
+- Record identifiers were `uuid5(namespace, f"{seed}:identity:ambiguity:{position}")`
+  with `position` walking the drafts in scenario order. The seed is embedded in the
+  public artifact, so 30 of 30 identifiers, 15 of 15 scenarios and dispositions, and
+  30 of 30 memberships were recoverable from the public file plus this source, with
+  no attribute read. Identifiers are now content-addressed over source type, display
+  name and attributes.
+- Variant display names and realization placeholders were indexed by the scenario's
+  position in the enum. Both now derive from the pair's own evidence.
+
+The review checked recursive `synthetic: true` markers, reserved domains, fictional
+555 phones, example addresses, the absence of entity IDs, dispositions, scenario
+labels and expected decisions from the public artifact, and that each truth artifact
+can be held without the other. The canonical SHA-256 values are
+`ed95db049127d19884af7763a03ef72c038268681c2f9a182c2c0b3ddd26e641` (public),
+`d6ba59af1f470096932b3d4c0865fb07c671363af3a665938e086aaabf60d9f3` (memberships) and
+`965054497653df240de70fac4c15b99e79fd6746c56b2e3ef37190c8df95d870` (dispositions).
+
+**Scope of the guarantee.** Each scenario is defined by its evidence pattern, and the
+pack contains every scenario exactly once, so the answer remains derivable from the
+evidence — 20 distinct patterns over fifty seeds with no collisions. That is the task
+rather than a leak, but it means this pack measures whether a system handles the named
+hard cases, not whether it can tell them apart from cases it has not seen. A held-out
+seed changes surface values, not labels. Treat it as a conformance fixture, in the
+sense Asteria Agentic v1 is one.

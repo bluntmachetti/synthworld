@@ -31,13 +31,12 @@ from synthworld.ambiguity import (
     ScenarioKind,
     public_pairs_from_truth,
 )
-from synthworld.ambiguity_generator import _Draft, _drafts
+from synthworld.ambiguity_generator import _Draft, _drafts, _record_key
 from synthworld.connection import (
     PublicConnectionCorpus,
     PublicIdentityAttribute,
     PublicIdentityAttributeKind,
     PublicIdentityRecord,
-    PublicIdentitySourceType,
     RecordMembership,
 )
 from synthworld.connection_generator import _identity_record
@@ -295,37 +294,65 @@ def _selected(metadata: AmbiguityVariantMetadata) -> dict[ScenarioKind, _K]:
     return selected
 
 
-def _virtual_key(scenario: ScenarioKind, role: str) -> str:
-    return f"{_VIRTUAL_PREFIX}{scenario.value}:{role}"
+def _draft_anchor(drafts: Sequence[_Draft], scenario: ScenarioKind) -> str:
+    """A pair's identity, taken from its hand-authored evidence rather than its name.
+
+    Realized values are reserved in the substitution plan under a placeholder key.
+    That key used to be the scenario's own name, which made every realized value a
+    deterministic function of the label: with the public seed and this source, all
+    five variable scenarios were recoverable, 500 of 500 across seeds 0-99. Worse, it
+    fed forward - those values are what :func:`_evidence_anchor` ranks, so the label
+    reached the display slots and the record identifiers that were supposed to have
+    been cleaned of it.
+
+    Anchoring on the canonical evidence keeps the placeholder unique per case while
+    depending only on what the case contains.
+    """
+
+    pair = [item for item in drafts if item.scenario is scenario]
+    body = "|".join(
+        sorted(
+            f"{item.kind.value}={item.value}"
+            for draft in pair
+            for item in draft.attributes
+        )
+    )
+    return blake2b(body.encode(), digest_size=16).hexdigest()
+
+
+def _virtual_key(anchor: str, role: str) -> str:
+    return f"{_VIRTUAL_PREFIX}{anchor}:{role}"
 
 
 def _virtual_requirements(
     selected: Mapping[ScenarioKind, _K],
+    anchors: Mapping[ScenarioKind, str],
 ) -> tuple[tuple[_K, str], ...]:
     keys: list[tuple[_K, str]] = []
     for scenario, kind in selected.items():
+        anchor = anchors[scenario]
         if scenario in {
             ScenarioKind.CONTRADICTORY_STRONG_IDENTIFIERS,
             ScenarioKind.STALE_ATTRIBUTE,
         }:
             keys.extend(
                 (
-                    (kind, _virtual_key(scenario, "left")),
-                    (kind, _virtual_key(scenario, "right")),
+                    (kind, _virtual_key(anchor, "left")),
+                    (kind, _virtual_key(anchor, "right")),
                 )
             )
         elif scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
             # One role, not two: only the richer record carries this attribute.
-            keys.append((kind, _virtual_key(scenario, "richer")))
+            keys.append((kind, _virtual_key(anchor, "richer")))
         elif scenario is ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE:
-            keys.append((kind, _virtual_key(scenario, "shared")))
+            keys.append((kind, _virtual_key(anchor, "shared")))
         else:
             other = next(item for item in REALIZATIONS[scenario] if item is not kind)
             keys.extend(
                 (
-                    (kind, _virtual_key(scenario, "left")),
-                    (kind, _virtual_key(scenario, "right")),
-                    (other, _virtual_key(scenario, "corroborating")),
+                    (kind, _virtual_key(anchor, "left")),
+                    (kind, _virtual_key(anchor, "right")),
+                    (other, _virtual_key(anchor, "corroborating")),
                 )
             )
     return tuple(keys)
@@ -359,9 +386,8 @@ def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
         # The offset is spelled out, as it is for emails and usernames. Carrying it
         # only through the family choice left about 30 distinct strings per slot, so
         # two seeds landed on the same institution name often enough to matter: over
-        # 200 seeds, 27 pairs shared an evidence anchor with a pair from another
-        # seed, which lets an attacker carry a memorised evidence-to-label mapping
-        # between seeds.
+        # 200 seeds, 27 anchors recurred in a different seed, which lets an attacker
+        # carry a memorised evidence-to-label mapping between seeds.
         return f"Example {family} Works {offset % 10000:04d}-{slot + 1}"
     if kind == _K.SCHOOL_YEAR.value:
         family = _FAMILY[(offset + slot) % len(_FAMILY)]
@@ -382,7 +408,8 @@ def _substitution_plan(
 ) -> dict[tuple[_K, str], str]:
     selected = _selected(metadata)
     keys = {(item.kind, item.value) for draft in drafts for item in draft.attributes}
-    keys.update(_virtual_requirements(selected))
+    anchors = {scenario: _draft_anchor(drafts, scenario) for scenario in ScenarioKind}
+    keys.update(_virtual_requirements(selected, anchors))
     grouped: dict[_K, set[str]] = defaultdict(set)
     for kind, value in keys:
         grouped[kind].add(value)
@@ -430,6 +457,7 @@ def _rewritten_attributes(
 
 def _realize_attributes(
     scenario: ScenarioKind,
+    anchor: str,
     left: tuple[PublicIdentityAttribute, ...],
     right: tuple[PublicIdentityAttribute, ...],
     selected: Mapping[ScenarioKind, _K],
@@ -444,7 +472,7 @@ def _realize_attributes(
     right_kept = tuple(item for item in right if item.kind not in choices)
 
     def value(kind: _K, role: str) -> str:
-        return substitutions[(kind, _virtual_key(scenario, role))]
+        return substitutions[(kind, _virtual_key(anchor, role))]
 
     if scenario in {
         ScenarioKind.CONTRADICTORY_STRONG_IDENTIFIERS,
@@ -548,25 +576,6 @@ def _display_slots(
         key=lambda item: (_draw(seed, f"display-slot:{item[1]}", 0), item[1]),
     )
     return {scenario: slot for slot, (scenario, _anchor) in enumerate(ordered)}
-
-
-def _record_key(
-    display_name: str,
-    source_type: PublicIdentitySourceType,
-    attributes: tuple[PublicIdentityAttribute, ...],
-) -> str:
-    """Address a record by what it contains, never by where it was drafted.
-
-    Identifiers were ``uuid5(namespace, f"{seed}:ambiguity-variant:{position}")`` with
-    ``position`` walking the drafts in scenario order, so anyone holding the public
-    seed could recompute the identifier for each position and read the scenario off
-    it. Content-addressing keeps the identifier a function of the seed and the
-    evidence - which a reader is entitled to - and of nothing else.
-    """
-
-    body = "|".join(sorted(f"{item.kind.value}={item.value}" for item in attributes))
-    material = f"{source_type.value}|{display_name}|{body}"
-    return f"ambiguity-variant:{blake2b(material.encode(), digest_size=16).hexdigest()}"
 
 
 def _display_names(
@@ -929,6 +938,7 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
         left_draft, right_draft = drafts[position : position + 2]
         left_attributes, right_attributes = _realize_attributes(
             left_draft.scenario,
+            _draft_anchor(drafts, left_draft.scenario),
             _rewritten_attributes(left_draft, substitutions),
             _rewritten_attributes(right_draft, substitutions),
             selected,
