@@ -137,7 +137,9 @@ class BrokerRemovalMetrics(SyntheticModel):
     false_attributions: int = Field(ge=0)
     missed_attributions: int = Field(ge=0)
     #: Decided a listing whose public record cannot settle the question. Not a wrong
-    #: answer - an unwarranted one, exactly as in the ambiguity and search packs.
+    #: answer - an unwarranted one. The same error taxonomy as the ambiguity and search
+    #: packs, though not the same reward: those treat a correct abstention as *not
+    #: decided* and give it no precision credit, while this counts it as correct.
     unwarranted_attributions: int = Field(ge=0)
     attribution_accuracy: DenominatedMetric
     #: Asked for removal of a listing that is not the subject's. The precision half of
@@ -266,7 +268,10 @@ def evaluate_broker_assessment(
         # assessed listings, and that made silence free: assessing only the one listing
         # carrying a public reappearance tied the truth-perfect oracle on five families
         # at one-seventh coverage. Declining to answer is a miss, not an exemption.
-        if fact.concerns_subject:
+        if fact.concerns_subject and fact.attributable:
+            # Only listings the record can attribute are ones a system can be expected
+            # to act on, so the bare case is out of this denominator rather than an
+            # unanswerable part of it.
             warranted += 1
         if really_removed:
             propagation_scored += 1
@@ -296,7 +301,13 @@ def evaluate_broker_assessment(
         else:
             missed_attributions += 1
 
-        if fact.concerns_subject:
+        if not fact.attributable:
+            # Acting on a listing the record cannot attribute is unwarranted for the
+            # same reason deciding it is. A first revision left this free: requesting
+            # removal of everything you abstained on strictly dominated, because the
+            # bare listing really is the subject's, so the reward was deterministic.
+            unwarranted_requests += answer.requested_removal
+        elif fact.concerns_subject:
             request_correct += answer.requested_removal
         elif answer.requested_removal:
             unwarranted_requests += 1

@@ -809,3 +809,29 @@ def test_content_and_truth_must_describe_the_same_listings() -> None:
             listings=world.listings[:-1],
             truth=world.truth,
         )
+
+
+def test_listing_content_cannot_predate_its_own_discovery() -> None:
+    """Events refuse a stage before discovery; content has to obey the same rule.
+
+    Without it a world validates in which a page is readable at a tick where the
+    listing has not been found, and a consumer joining timeline events to listing
+    content crashes rather than scoring.
+    """
+
+    # Seed 1 slides the whole history by two ticks, so nothing is discovered at 0 and
+    # moving content there is genuinely early rather than a no-op.
+    world = generate_temporal_world(seed=1)
+    assert all(item.first_observed_at > 0 for item in world.listings)
+    early = tuple(
+        item.model_copy(update={"first_observed_at": 0}) for item in world.listings
+    )
+
+    with pytest.raises(ValidationError, match="does not appear at its discovery"):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=world.events,
+            listings=early,
+            truth=world.truth,
+        )

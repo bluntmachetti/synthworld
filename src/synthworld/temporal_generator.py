@@ -288,18 +288,35 @@ def _listing_content(
             listing_ref=listing_ref, listed_name=name, first_observed_at=tick
         )
     if case.evidence == "contradicting":
-        # Same name, different person: the address is somewhere the subject has never
-        # lived, and the employer is not theirs either.
-        other = (
+        # Same name, different person: neither the address nor the employer is theirs.
+        #
+        # Both attributes are present, and both are drawn from the same vocabulary the
+        # subject's own use. A first revision published only the address, and put it in
+        # a distinct town - which made the page recognisable without reading anything.
+        # A decoder keyed on nothing but the attribute *count* scored 1.000 on 75 of 75
+        # held-out seeds, as did one grepping for the town name, so the evidence was
+        # decorative: the shape of the record answered the question the values were
+        # supposed to. The comment here used to claim the employer was wrong too, while
+        # the code emitted no employer at all; building the page the comment described
+        # is what closes it.
+        other_address = (
             f"{_draw(seed, 'other-house', 0) % 200 + 1}|"
-            f"Sample Row {_draw(seed, 'other-street', 0) % 900 + 100}|"
-            "Sampleton|00000|ZZ"
+            f"Example Street {_draw(seed, 'other-street', 0) % 900 + 100}|"
+            "Testville|00000|ZZ"
+        )
+        other_employer = (
+            f"Example {_FAMILY[_draw(seed, 'other-work', 0) % len(_FAMILY)]} Works"
         )
         return PublicListingRecord(
             listing_ref=listing_ref,
             listed_name=name,
             attributes=(
-                ListingAttribute(kind=ListingAttributeKind.ADDRESS, value=other),
+                ListingAttribute(
+                    kind=ListingAttributeKind.ADDRESS, value=other_address
+                ),
+                ListingAttribute(
+                    kind=ListingAttributeKind.EMPLOYER, value=other_employer
+                ),
             ),
             first_observed_at=tick,
         )

@@ -175,9 +175,10 @@ class PublicListingRecord(SyntheticModel):
     """What a broker page actually says, as a consumer would read it.
 
     Without this there is no evidence to attribute a listing on. A first revision
-    published only lifecycle events with no content at all, so `false_match` - a
-    listing that was never about the subject - was publicly indistinguishable from
-    three listings that were, in 50 of 50 seeds. Attribution could only be won by
+    published only lifecycle events with no content at all and never said who the
+    subject was, so no listing could be attributed at all: `false_match` was
+    indistinguishable from the six that really are the subject's, and its lifecycle
+    events were byte-identical to three of them. Attribution could only be won by
     abstaining or guessing, which means it was measuring luck.
 
     Content only. Whether the listing really concerns the subject is
@@ -419,6 +420,20 @@ class TemporalWorld(SyntheticModel):
             raise ValueError("a listing is described twice")
         if set(described) != {item.listing_ref for item in self.truth.listings}:
             raise ValueError("listing content and listing truth cover different sets")
+
+        # Content cannot predate the discovery that reveals it. Events already refuse a
+        # stage before discovery; without the same rule here a world validates in which
+        # a page is readable at a tick where the listing has not been found, and any
+        # consumer joining the two crashes rather than scoring.
+        discovered: dict[str, int] = {}
+        for event in self.events:
+            if event.kind is PrivacyEventKind.LISTING_DISCOVERED and event.object_ref:
+                discovered.setdefault(event.object_ref, event.tick)
+        for record in self.listings:
+            if discovered.get(record.listing_ref) != record.first_observed_at:
+                raise ValueError(
+                    f"{record.listing_ref} content does not appear at its discovery"
+                )
 
         reappearances = {
             event.object_ref

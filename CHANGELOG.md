@@ -26,7 +26,9 @@ agentic schemas) are versioned independently of the package; see
 - Public listing content and a published subject identity, so attribution is
   answerable rather than guessable. A first revision emitted lifecycle events with no
   content at all and never said who the subject was, which left the listing that is
-  *not* theirs publicly indistinguishable from six that are. `ListingTruth.attributable`
+  *not* theirs indistinguishable from the six that are. Content is drawn from one
+  vocabulary and every readable page carries the same attribute kinds, so neither the
+  attribute count nor a distinctive token substitutes for reading the values. `ListingTruth.attributable`
   marks the case whose page carries a common name and nothing to corroborate it:
   declining is correct there and deciding is unwarranted, the same distinction
   `PairDisposition.INSUFFICIENT` and `SearchMatchTruth.INSUFFICIENT_EVIDENCE` draw.

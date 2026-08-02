@@ -524,3 +524,65 @@ def test_a_claim_that_cannot_be_true_is_refused() -> None:
             requested_removal=True,
             reappearance_alerted=True,
         )
+
+
+def test_attribution_cannot_be_won_from_the_shape_of_a_record() -> None:
+    """The evidence has to be in the values, not in how many of them there are.
+
+    A first revision gave a matching page two attributes and a contradicting page one,
+    in a different town. A decoder reading nothing but the attribute count scored 1.000
+    on 75 of 75 held-out seeds, as did one grepping for the town name - so the values
+    were decorative and the record's *shape* answered the question.
+    """
+
+    shapes: dict[int, set[bool]] = {}
+    tokens: set[str] = set()
+    for seed in range(40):
+        world = generate_temporal_world(seed=seed)
+        timeline = materialise(world, as_of=world.horizon)
+        facts = {item.listing_ref: item for item in world.truth.listings}
+        for record in timeline.listings:
+            fact = facts[record.listing_ref]
+            if not fact.attributable:
+                continue
+            shapes.setdefault(len(record.attributes), set()).add(fact.concerns_subject)
+            tokens |= {
+                item.value.split("|")[-3]
+                for item in record.attributes
+                if "|" in item.value
+            }
+
+    # Among readable pages, the attribute count says nothing about the answer.
+    assert shapes
+    assert all(len(outcomes) > 1 for outcomes in shapes.values())
+    # And every address shares one town, so no token separates them either.
+    assert len(tokens) == 1
+
+
+def test_requesting_removal_of_an_unreadable_listing_is_unwarranted() -> None:
+    """Acting on what you could not attribute is not free.
+
+    The bare listing really is the subject's, so requesting its removal used to be pure
+    upside: a policy that read the evidence and then requested everything anyway
+    strictly dominated on 100 of 100 seeds while doing the thing the pack calls
+    unwarranted.
+    """
+
+    world, timeline = _at_horizon(3)
+    careful = match_on_published_evidence(timeline)
+    greedy = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            item.model_copy(update={"requested_removal": True})
+            for item in careful.listings
+        ),
+    )
+
+    measured = [
+        evaluate_broker_assessment(item, timeline=timeline, truth=world.truth)
+        for item in (careful, greedy)
+    ]
+
+    assert measured[0].unwarranted_requests == 0
+    assert measured[1].unwarranted_requests > 0
+    assert measured[1].request_recall.value == measured[0].request_recall.value
