@@ -184,10 +184,68 @@ class AmbiguityVariantError(ValueError):
 
 @dataclass(frozen=True)
 class _ScenarioSpec:
+    #: Kinds carried by *both* records.
     kinds: frozenset[PublicIdentityAttributeKind]
     shared: frozenset[PublicIdentityAttributeKind]
     different: frozenset[PublicIdentityAttributeKind]
     display_relation: _DisplayRelation
+    #: Kinds carried by exactly one of the two records. Empty for every case whose
+    #: records are equally rich, and the whole point of `partial_but_sufficient`.
+    lopsided: frozenset[PublicIdentityAttributeKind] = frozenset()
+
+
+@dataclass(frozen=True)
+class _CaseShape:
+    """A case's relational shape, in terms that survive a realization choice.
+
+    Read off the hand-authored canonical drafts and compared against what a variant
+    actually emits. Deliberately coarse: it says whether the two records agree
+    anywhere, contradict anywhere, and how lopsided they are - not which attribute
+    kinds carry those relations, because choosing a different carrying kind is the
+    legitimate variation and must not fail.
+
+    Orientation-free. Variant pairs are ordered by record id, so which record ends up
+    on the left is arbitrary; ``lopsided`` is therefore sorted rather than sided.
+    """
+
+    agrees: bool
+    contradicts: bool
+    lopsided: tuple[int, int]
+
+
+def _case_shape(left: Mapping[_K, str], right: Mapping[_K, str]) -> _CaseShape:
+    common = left.keys() & right.keys()
+    return _CaseShape(
+        agrees=any(left[kind] == right[kind] for kind in common),
+        contradicts=any(left[kind] != right[kind] for kind in common),
+        lopsided=tuple(  # type: ignore[arg-type]
+            sorted((len(left.keys() - right.keys()), len(right.keys() - left.keys())))
+        ),
+    )
+
+
+def canonical_case_shapes() -> dict[ScenarioKind, _CaseShape]:
+    """What each case looks like in the frozen pack, as a shape a variant must keep.
+
+    The point is that this reads a *different source* from the one the generator
+    writes from. `_scenario_spec` and `_realize_attributes` are the same switch
+    stated twice, so validating one against the other proves only that the switch
+    agrees with itself: when the `partial_but_sufficient` realization was changed to
+    hand both records the same attribute, `_scenario_spec` was changed to declare no
+    differing attribute, and the check passed on all 100 seeds while the case had
+    stopped being partial. The canonical drafts are hand-authored and reviewed, so
+    they are the normative statement of what a case means.
+    """
+
+    drafts = _drafts()
+    shapes: dict[ScenarioKind, _CaseShape] = {}
+    for index in range(0, len(drafts), 2):
+        left, right = drafts[index], drafts[index + 1]
+        shapes[left.scenario] = _case_shape(
+            {item.kind: item.value for item in left.attributes},
+            {item.kind: item.value for item in right.attributes},
+        )
+    return shapes
 
 
 def _draw(seed: int, purpose: str, index: int) -> int:
@@ -256,10 +314,10 @@ def _virtual_requirements(
                     (kind, _virtual_key(scenario, "right")),
                 )
             )
-        elif scenario in {
-            ScenarioKind.PARTIAL_BUT_SUFFICIENT,
-            ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE,
-        }:
+        elif scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
+            # One role, not two: only the richer record carries this attribute.
+            keys.append((kind, _virtual_key(scenario, "richer")))
+        elif scenario is ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE:
             keys.append((kind, _virtual_key(scenario, "shared")))
         else:
             other = next(item for item in REALIZATIONS[scenario] if item is not kind)
@@ -388,10 +446,13 @@ def _realize_attributes(
             (*left_kept, _attribute(chosen, value(chosen, "left"))),
             (*right_kept, _attribute(chosen, value(chosen, "right"))),
         )
-    if scenario in {
-        ScenarioKind.PARTIAL_BUT_SUFFICIENT,
-        ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE,
-    }:
+    if scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
+        # "Neither record is sufficient alone; together they are." That requires one
+        # record to be strictly poorer than the other. An earlier revision handed the
+        # same attribute to both, which made the pair attribute-identical in all 100
+        # seeds - a duplicate observation wearing a partial-record label.
+        return left_kept, (*right_kept, _attribute(chosen, value(chosen, "richer")))
+    if scenario is ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE:
         shared = _attribute(chosen, value(chosen, "shared"))
         return (*left_kept, shared), (*right_kept, shared)
 
@@ -557,8 +618,10 @@ def _scenario_spec(
         shared = frozenset({_K.EMAIL, _K.DATE_OF_BIRTH})
         return _ScenarioSpec(shared | {chosen}, shared, frozenset({chosen}), "equal")
     if scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
-        shared = frozenset({_K.FAMILY_NAME, _K.EMPLOYER, chosen})
-        return _ScenarioSpec(shared, shared, frozenset(), "initial_full")
+        shared = frozenset({_K.FAMILY_NAME, _K.EMPLOYER})
+        return _ScenarioSpec(
+            shared, shared, frozenset(), "initial_full", frozenset({chosen})
+        )
     if scenario is ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE:
         shared = frozenset({chosen})
         return _ScenarioSpec(shared, shared, frozenset(), "initial_full")
@@ -642,11 +705,24 @@ def validate_ambiguity_variant(
     *,
     metadata: AmbiguityVariantMetadata | None = None,
 ) -> None:
-    """Validate emitted public evidence independently of copied scenario labels."""
+    """Check emitted evidence against the frozen pack, not against the generator.
+
+    The claim this docstring used to make - validation "independent of copied scenario
+    labels" - was false. Every expectation came from `_scenario_spec`, which is the
+    same per-scenario switch `_realize_attributes` generates from, so the two agreed
+    by construction and a matching mistake in both was asserted rather than caught.
+    That is exactly what happened to `partial_but_sufficient`, corrupt in 100 of 100
+    seeds under a green suite at 100% branch coverage.
+
+    So the shape of each case is now read off the hand-authored canonical drafts and
+    compared with what the variant actually emits. The spec checks remain - they are
+    a useful statement of intent - but they are no longer the only judge.
+    """
 
     metadata = metadata or ambiguity_variant_metadata(seed=benchmark.seed)
     _require(metadata.seed == benchmark.seed, "variant metadata seed does not match")
     selected = _selected(metadata)
+    canonical_shapes = canonical_case_shapes()
     records = {item.id: item for item in benchmark.public.corpus.identity_records}
     memberships = {
         item.record_id: item.entity_id
@@ -685,7 +761,8 @@ def validate_ambiguity_variant(
         right_values = _values(right)
         spec = _scenario_spec(pair.scenario, selected)
         _require(
-            set(left_values) == spec.kinds and set(right_values) == spec.kinds,
+            (set(left_values) & set(right_values)) == spec.kinds
+            and (set(left_values) ^ set(right_values)) == spec.lopsided,
             f"{pair.scenario.value} has the wrong attribute cardinality or kinds",
         )
         shared = frozenset(
@@ -695,6 +772,14 @@ def validate_ambiguity_variant(
         _require(
             shared == spec.shared and different == spec.different,
             f"{pair.scenario.value} public evidence does not exhibit its case",
+        )
+        # The independent check. Everything above compares the emitted world against
+        # `_scenario_spec`, which is the same switch `_realize_attributes` generates
+        # from - so it can only prove the switch agrees with itself. This compares it
+        # against the hand-authored canonical drafts instead.
+        _require(
+            _case_shape(left_values, right_values) == canonical_shapes[pair.scenario],
+            f"{pair.scenario.value} no longer has the shape it has in the frozen pack",
         )
         expected_same_entity = pair.scenario in _SAME_ENTITY_SCENARIOS
         _require(

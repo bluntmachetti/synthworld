@@ -436,7 +436,15 @@ def test_the_declared_sweep_exercises_every_supported_realization() -> None:
     }
 
 
-def test_selected_realizations_are_constructed_in_both_records() -> None:
+def test_selected_realizations_land_where_their_case_needs_them() -> None:
+    """Both records, except where the case is *about* one record having less.
+
+    This test previously required the realized attribute in both records for every
+    scenario, which is why `partial_but_sufficient` losing its asymmetry looked
+    correct: the corruption satisfied the assertion, and the assertion was the only
+    thing watching.
+    """
+
     different = {
         ScenarioKind.CONTRADICTORY_STRONG_IDENTIFIERS,
         ScenarioKind.STALE_ATTRIBUTE,
@@ -448,11 +456,63 @@ def test_selected_realizations_are_constructed_in_both_records() -> None:
             left, right = _scenario_records(benchmark, item.scenario)
             left_values = _values(left)
             right_values = _values(right)
-            assert item.attribute_kind in left_values
-            assert item.attribute_kind in right_values
+            carriers = [
+                values
+                for values in (left_values, right_values)
+                if item.attribute_kind in values
+            ]
+
+            if item.scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
+                # Exactly one record carries it: neither record is sufficient alone,
+                # and a pair where both carry everything is a duplicate observation.
+                assert len(carriers) == 1
+                assert set(left_values) != set(right_values)
+                continue
+
+            assert len(carriers) == 2
             assert (
                 left_values[item.attribute_kind] != right_values[item.attribute_kind]
             ) is (item.scenario in different)
+
+
+def test_a_matching_mistake_in_generator_and_spec_no_longer_validates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Reconstructs the failure exactly, including the part that hid it.
+
+    Corrupting the data alone proves nothing now, because `_scenario_spec` declares
+    the asymmetry and would catch it. The defect that shipped was a corruption in the
+    generator *and* a matching edit to the spec, which is a class of mistake a
+    self-consistency check cannot catch by construction. So this makes both edits -
+    the spec is patched back to the symmetric shape it declared before, and the
+    records are patched to match it - and asserts the canonical drafts still object.
+    """
+
+    from synthworld import ambiguity_variants as module
+
+    benchmark = generate_ambiguity_variant(seed=0)
+    left, right = _scenario_records(benchmark, ScenarioKind.PARTIAL_BUT_SUFFICIENT)
+    poorer, richer = (
+        (left, right) if len(left.attributes) < len(right.attributes) else (right, left)
+    )
+    symmetric = poorer.model_copy(update={"attributes": richer.attributes})
+    corrupted = _replace_records(benchmark, symmetric)
+
+    real_spec = module._scenario_spec
+
+    def spec_without_the_asymmetry(scenario: ScenarioKind, selected: object) -> object:
+        found = real_spec(scenario, selected)  # type: ignore[arg-type]
+        if scenario is not ScenarioKind.PARTIAL_BUT_SUFFICIENT:
+            return found
+        kinds = found.kinds | found.lopsided
+        return module._ScenarioSpec(
+            kinds, kinds, frozenset(), found.display_relation, frozenset()
+        )
+
+    monkeypatch.setattr(module, "_scenario_spec", spec_without_the_asymmetry)
+
+    with pytest.raises(AmbiguityVariantError, match="shape it has in the frozen pack"):
+        validate_ambiguity_variant(corrupted)
 
 
 def _positional_scenarios(benchmark: AmbiguityBenchmark) -> tuple[ScenarioKind, ...]:
