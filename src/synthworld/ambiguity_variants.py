@@ -356,10 +356,18 @@ def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
         return f"{slot + 1}|Example Avenue {offset % 1000:03d}|Testville|00000|ZZ"
     if kind == _K.EMPLOYER.value:
         family = _FAMILY[(offset + slot) % len(_FAMILY)]
-        return f"Example {family} Works {slot + 1}"
+        # The offset is spelled out, as it is for emails and usernames. Carrying it
+        # only through the family choice left about 30 distinct strings per slot, so
+        # two seeds landed on the same institution name often enough to matter: over
+        # 200 seeds, 27 pairs shared an evidence anchor with a pair from another
+        # seed, which lets an attacker carry a memorised evidence-to-label mapping
+        # between seeds.
+        return f"Example {family} Works {offset % 10000:04d}-{slot + 1}"
     if kind == _K.SCHOOL_YEAR.value:
         family = _FAMILY[(offset + slot) % len(_FAMILY)]
-        return f"Test {family} Academy {slot + 1}|{1990 + slot % 30}"
+        return (
+            f"Test {family} Academy {offset % 10000:04d}-{slot + 1}|{1990 + slot % 30}"
+        )
     if kind == _K.DATE_OF_BIRTH.value:
         day_index = offset % (60 * 12 * 27) + slot
         return (
@@ -447,10 +455,16 @@ def _realize_attributes(
             (*right_kept, _attribute(chosen, value(chosen, "right"))),
         )
     if scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
-        # "Neither record is sufficient alone; together they are." That requires one
-        # record to be strictly poorer than the other. An earlier revision handed the
-        # same attribute to both, which made the pair attribute-identical in all 100
-        # seeds - a duplicate observation wearing a partial-record label.
+        # One record is strictly poorer than the other, matching the canonical case.
+        # The canonical comment reads "neither record is sufficient alone; together
+        # they are", which overstates it: under a strict subset the richer record
+        # already equals the union, so what this actually tests is merging by
+        # subsumption - recognising that a sparse record is the same person as a
+        # fuller one, without a contradiction to lean on.
+        #
+        # An earlier revision handed the same attribute to both records, which made
+        # the pair attribute-identical in all 100 seeds: a duplicate observation
+        # wearing a partial-record label.
         return left_kept, (*right_kept, _attribute(chosen, value(chosen, "richer")))
     if scenario is ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE:
         shared = _attribute(chosen, value(chosen, "shared"))

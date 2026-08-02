@@ -105,7 +105,8 @@ properties matter if you plan to derive evaluation data from it, all measured on
   80% of employers and schools. If you generate records where several rows describe
   one persona, that ordinal is an oracle: a matcher can recover the entity partition
   by reading it out of a public field rather than by resolving anything. The shipped
-  entity-resolution pack is hand-authored and does **not** carry it.
+  entity-resolution pack is hand-authored and does not carry *this* ordinal, but it
+  carried three of its own until recently — see below.
 - **The relationship graph is a path.** 100 personas yield 99 edges in one component
   with no cycles, no isolated nodes, and a degree distribution of `{1: 2, 2: 98}`.
   Graph structure therefore carries no signal.
@@ -116,6 +117,37 @@ properties matter if you plan to derive evaluation data from it, all measured on
 That makes it excellent for deterministic tests, demonstrations, and CI: byte-stable,
 tiny, and easy to reason about. It makes it a poor basis for judging whether a system
 will work on real data — a perfect score here is not evidence of transfer.
+
+### What the ambiguity pack does and does not measure
+
+The pack asks a system to decide record pairs. Three of its public surfaces used to
+answer the question for it, each because a *free* choice was tied to the answer key
+rather than to the evidence:
+
+- the public pair list was emitted in draft order, so the i-th pair was the i-th
+  scenario — 15/15 in the frozen pack, 750/750 across fifty generated seeds;
+- display names were indexed by the scenario's position in the enum, so one regex
+  recovered every scenario and, through the published scenario-to-disposition map,
+  every answer;
+- variant record identifiers were derived from draft position and the public seed.
+
+All three are closed, and the first is closed in the model, so a generator that
+rebuilds the pair list in draft order now fails to construct. Two limits remain, and
+both are properties of the design rather than bugs:
+
+- **The evidence determines the answer.** Each scenario is *defined* by its evidence
+  pattern — which attribute kinds are present, which agree, which contradict — so a
+  system that reads the pattern can name the scenario. Over fifty seeds there are 20
+  distinct patterns and no collisions. That is the task, not a leak; but it does mean
+  a pack containing every scenario exactly once is a conformance fixture rather than
+  a discrimination test.
+- **The canonical pack's record identifiers are still positional.** Its answer key
+  ships in this repository, so there is nothing to recover that you do not already
+  have. Generated variants do not have this property.
+
+Held-out private seeds therefore protect surface values, not labels. Treat a score on
+this pack as evidence that a pipeline handles the named hard cases, not as evidence
+that it can tell them apart from cases it has not seen.
 
 Realism improvements land in a separate named profile rather than by changing this
 one, so existing fixtures and checksums stay byte-identical. Track that work in
