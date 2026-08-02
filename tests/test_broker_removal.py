@@ -428,6 +428,7 @@ def test_alerting_on_everything_is_no_longer_free() -> None:
     [
         ({"assessed_count": 99}, "more listings were assessed"),
         ({"abstained_count": 8, "assessed_count": 7}, "more listings were abstained"),
+        ({"unwarranted_attributions": 99}, "more listings were unwarrantedly"),
         ({"recurrence_detected": 9}, "more reappearances were detected"),
         ({"false_attributions": -4}, "greater than or equal to 0"),
     ],
@@ -586,3 +587,50 @@ def test_requesting_removal_of_an_unreadable_listing_is_unwarranted() -> None:
     assert measured[0].unwarranted_requests == 0
     assert measured[1].unwarranted_requests > 0
     assert measured[1].request_recall.value == measured[0].request_recall.value
+
+
+def test_requesting_what_you_denied_is_unwarranted() -> None:
+    """A system cannot deny a listing in one family and act on it in another.
+
+    Request scoring consulted truth and ignored the submission's own conclusion, so a
+    policy could declare every listing someone else's and still request removal of all
+    of them with perfect recall and no unwarranted count.
+    """
+
+    world, timeline = _at_horizon(3)
+    denying = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            ListingAssessment(
+                listing_ref=reference,
+                concerns_subject=False,
+                believed_removed=False,
+                requested_removal=True,
+            )
+            for reference in discoverable_listings(timeline)
+        ),
+    )
+    metrics = evaluate_broker_assessment(denying, timeline=timeline, truth=world.truth)
+
+    assert metrics.request_recall.value == 0.0
+    assert metrics.unwarranted_requests == len(denying.listings)
+
+
+def test_the_evaluator_rechecks_an_invariant_the_model_would_refuse() -> None:
+    """`model_copy` bypasses nested validation, so the boundary needs its own check."""
+
+    world, timeline = _at_horizon(3)
+    honest = match_on_published_evidence(timeline)
+    forged = honest.model_copy(
+        update={
+            "listings": tuple(
+                item.model_copy(
+                    update={"believed_removed": True, "reappearance_alerted": True}
+                )
+                for item in honest.listings
+            )
+        }
+    )
+
+    with pytest.raises(BrokerEvaluationError, match="cannot be believed removed"):
+        evaluate_broker_assessment(forged, timeline=timeline, truth=world.truth)

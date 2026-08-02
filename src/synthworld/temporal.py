@@ -505,11 +505,14 @@ def lifecycle_stage(events: Iterable[PrivacyEvent], listing_ref: str) -> int | N
 
 __all__ = [
     "TEMPORAL_SCHEMA_VERSION",
+    "ListingAttribute",
+    "ListingAttributeKind",
     "ListingTruth",
     "ObservationTruth",
     "ObservationValidity",
     "PrivacyEvent",
     "PrivacyEventKind",
+    "PublicListingRecord",
     "PublicTimeline",
     "TemporalTruth",
     "TemporalWorld",

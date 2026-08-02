@@ -142,8 +142,9 @@ class BrokerRemovalMetrics(SyntheticModel):
     #: decided* and give it no precision credit, while this counts it as correct.
     unwarranted_attributions: int = Field(ge=0)
     attribution_accuracy: DenominatedMetric
-    #: Asked for removal of a listing that is not the subject's. The precision half of
-    #: this family: `request_recall` alone is maximised by requesting everything.
+    #: Asked for removal of a listing that is not the subject's, that the record cannot
+    #: attribute, or that the system itself did not claim. The precision half of this
+    #: family: `request_recall` alone is maximised by requesting everything.
     unwarranted_requests: int = Field(ge=0)
     #: Named recall, not correctness. Its denominator is the listings that really are
     #: the subject's, so correctly *withholding* a request contributes nothing to it -
@@ -175,6 +176,8 @@ class BrokerRemovalMetrics(SyntheticModel):
             raise ValueError("more listings were assessed than were discoverable")
         if self.abstained_count > self.assessed_count:
             raise ValueError("more listings were abstained on than were assessed")
+        if self.unwarranted_attributions > self.discoverable_count:
+            raise ValueError("more listings were unwarrantedly decided than existed")
         if self.recurrence_detected > self.recurrence_count:
             raise ValueError("more reappearances were detected than occurred")
         return self
@@ -233,6 +236,17 @@ def evaluate_broker_assessment(
         )
     discoverable = discoverable_listings(timeline)
     submitted = {item.listing_ref: item for item in assessment.listings}
+    # Re-checked here, not only at construction: `model_copy(update=...)` bypasses
+    # nested validation, so an in-process consumer can hand the evaluator a state the
+    # model refuses. Serialized submissions were already safe; this closes the Python
+    # boundary too.
+    if any(
+        item.believed_removed and item.reappearance_alerted
+        for item in assessment.listings
+    ):
+        raise BrokerEvaluationError(
+            "a listing cannot be believed removed and reported as reappeared"
+        )
     if not set(submitted) <= set(discoverable):
         raise BrokerEvaluationError(
             "an assessment names a listing the timeline has not discovered"
@@ -301,16 +315,19 @@ def evaluate_broker_assessment(
         else:
             missed_attributions += 1
 
-        if not fact.attributable:
+        # A request is warranted only when the system itself concluded the listing is
+        # the subject's. Consulting truth alone let a policy declare every listing
+        # someone else's and still request removal of all of them with perfect recall
+        # and no unwarranted count - denying in one family what it acted on in another.
+        claimed = answer.concerns_subject is True
+        if not fact.attributable or not fact.concerns_subject or not claimed:
             # Acting on a listing the record cannot attribute is unwarranted for the
-            # same reason deciding it is. A first revision left this free: requesting
+            # same reason deciding it is. A first revision left that free: requesting
             # removal of everything you abstained on strictly dominated, because the
             # bare listing really is the subject's, so the reward was deterministic.
             unwarranted_requests += answer.requested_removal
-        elif fact.concerns_subject:
+        else:
             request_correct += answer.requested_removal
-        elif answer.requested_removal:
-            unwarranted_requests += 1
 
         if answer.believed_removed == gone_now:
             completion_correct += 1
@@ -351,7 +368,7 @@ def evaluate_broker_assessment(
         request_recall=_metric(
             request_correct,
             warranted,
-            "discovered listings that really concern the subject",
+            "discovered listings that are the subject's and readable as such",
         ),
         false_completions=false_completions,
         missed_completions=missed_completions,

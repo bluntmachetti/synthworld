@@ -148,6 +148,16 @@ def _cases() -> tuple[_Case, ...]:
             evidence="contradicting",
             removed_at=7,
         ),
+        # A second stranger, listed twice. One false match made the negative class a
+        # singleton, and a decoder counting how many pages shared an address separated
+        # it perfectly without reading anything.
+        _Case(
+            "false_match_syndicated",
+            confirm,
+            concerns_subject=False,
+            evidence="contradicting",
+            removed_at=7,
+        ),
         # Carries a common name and nothing to corroborate it. It really is the
         # subject's, but the page does not say so, and a system that declines is
         # behaving correctly where one that guesses is not.
@@ -278,6 +288,7 @@ def _listing_content(
     listing_ref: str,
     identity: tuple[str, str, str],
     tick: int,
+    prior_address: str,
 ) -> PublicListingRecord:
     """What one broker page says, given the case's declared evidence relation."""
 
@@ -299,13 +310,28 @@ def _listing_content(
         # supposed to. The comment here used to claim the employer was wrong too, while
         # the code emitted no employer at all; building the page the comment described
         # is what closes it.
-        other_address = (
-            f"{_draw(seed, 'other-house', 0) % 200 + 1}|"
-            f"Example Street {_draw(seed, 'other-street', 0) % 900 + 100}|"
-            "Testville|00000|ZZ"
+        # Drawn until they differ. Sampling once let the "wrong" employer equal the
+        # subject's on 16.7% of seeds and the address on a handful, and on at least one
+        # seed the whole record matched a positive page byte for byte while truth still
+        # said `attributable` - so attribution was unanswerable on a valid world.
+        other_address = next(
+            candidate
+            for index in range(64)
+            if (
+                candidate := f"{_draw(seed, 'other-house', index) % 200 + 1}|"
+                f"Example Street {_draw(seed, 'other-street', index) % 900 + 100}|"
+                "Testville|00000|ZZ"
+            )
+            != address
         )
-        other_employer = (
-            f"Example {_FAMILY[_draw(seed, 'other-work', 0) % len(_FAMILY)]} Works"
+        other_employer = next(
+            candidate
+            for index in range(64)
+            if (
+                candidate := "Example "
+                f"{_FAMILY[_draw(seed, 'other-work', index) % len(_FAMILY)]} Works"
+            )
+            != employer
         )
         return PublicListingRecord(
             listing_ref=listing_ref,
@@ -320,11 +346,19 @@ def _listing_content(
             ),
             first_observed_at=tick,
         )
+    # Brokers hold the subject at different points in their history, so a matching page
+    # carries either the current address or the one before it. Publishing the same
+    # string on every positive made multiplicity the answer: counting how many pages
+    # shared an address separated subject from stranger on 2800 of 2800 records.
+    on_prior = _draw(seed, f"listing-address:{case.name}", 0) % 3 == 0
     return PublicListingRecord(
         listing_ref=listing_ref,
         listed_name=name,
         attributes=(
-            ListingAttribute(kind=ListingAttributeKind.ADDRESS, value=address),
+            ListingAttribute(
+                kind=ListingAttributeKind.ADDRESS,
+                value=prior_address if on_prior else address,
+            ),
             ListingAttribute(kind=ListingAttributeKind.EMPLOYER, value=employer),
         ),
         first_observed_at=tick,
@@ -351,6 +385,13 @@ def generate_temporal_world(
     references = _listing_refs(seed)
 
     identity = _subject_identity(seed)
+    # The address the subject held before the move in `stale_binding`. A broker holding
+    # it is holding a real, older binding rather than someone else's record.
+    prior_address = (
+        f"{_draw(seed, 'prior-house', 0) % 200 + 1}|"
+        f"Example Street {_draw(seed, 'prior-street', 0) % 900 + 100}|"
+        "Testville|00000|ZZ"
+    )
     events: list[PrivacyEvent] = []
     listings: list[ListingTruth] = []
     content: list[PublicListingRecord] = []
@@ -358,7 +399,7 @@ def generate_temporal_world(
 
     for kind, value in (
         (_K.NAME_CHANGED, identity[0]),
-        (_K.ADDRESS_CHANGED, identity[1]),
+        (_K.ADDRESS_CHANGED, prior_address),
         (_K.EMPLOYER_CHANGED, identity[2]),
     ):
         events.append(
@@ -375,7 +416,12 @@ def generate_temporal_world(
         listing_ref = references[case.name]
         content.append(
             _listing_content(
-                seed, case, listing_ref, identity, case.stages[0][0] + offset
+                seed,
+                case,
+                listing_ref,
+                identity,
+                case.stages[0][0] + offset,
+                prior_address,
             )
         )
         for relative, kind in case.stages:
@@ -454,7 +500,7 @@ def generate_temporal_world(
                         tick=tick,
                         kind=_K.ADDRESS_CHANGED,
                         subject_ref=subject_ref,
-                        detail=f"Example Street {slot(seed, tick)}|Testville|00000|ZZ",
+                        detail=identity[1],
                     )
                 )
 
