@@ -12,11 +12,12 @@ Three ideas carry the design.
 timestamps are the classic way to lose reproducibility, and this repository has
 already been bitten once by a generator that anchored to ``datetime.now()``.
 
-**Materialisation is a prefix, not a filter.** :func:`materialise` builds the public
-view at tick ``T`` from the events at or before ``T`` and nothing else. It cannot see
-later events, so it cannot leak them — the guarantee is structural rather than a
-promise a reviewer has to check. Asking for tick ``T`` twice returns the same bytes;
-asking for ``T`` then ``T-1`` does not contaminate the second answer.
+**Materialisation returns a prefix.** :func:`materialise` builds the public view at
+tick ``T`` from the events at or before ``T``, and the result carries no reference back
+to the world it came from. That is a property the tests measure at every tick of every
+seed — not a structural impossibility, since the function does hold the whole world
+while it runs. An earlier draft of this docstring claimed the guarantee was structural,
+which described a design that had not been built.
 
 **Being right and being justified are scored apart.** ``ObservationValidity`` records
 whether a retained observation was true *when it was taken*, which is independent of
@@ -27,8 +28,9 @@ reappearance cases is that they are different failures.
 
 The metadata standard from the ambiguity pack applies here from the start: a public
 value may depend on the seed and on the evidence, never on the label. Event
-identifiers are content-addressed and public collections are ordered canonically, so
-neither the identity nor the position of an event can encode its outcome.
+identifiers are content-addressed and public collections are ordered canonically. An
+event's *position* carries nothing — measured uniform across twenty thousand seeds. Its
+*identity* is a keyed function of the seed, which is why the seed is evaluator-side.
 """
 
 from __future__ import annotations
@@ -143,10 +145,15 @@ class PublicTimeline(SyntheticModel):
     ``as_of`` is part of the artifact rather than an argument a caller remembers,
     because a timeline that does not say when it was taken can be compared against the
     wrong truth and still look coherent.
+
+    The seed is deliberately *not* here. It lives on :class:`TemporalTruth`, where
+    :class:`~synthworld.search.SearchTruthBundle` also keeps it and for the same
+    reason: this generator is public, so a public seed lets a consumer rebuild the
+    world and read the answer key out of it. A first revision put it here and handed
+    over every listing's full truth.
     """
 
     schema_version: Literal["1.0.0"] = TEMPORAL_SCHEMA_VERSION
-    seed: int
     as_of: int = Field(ge=0)
     events: tuple[PrivacyEvent, ...]
 
@@ -282,30 +289,59 @@ class TemporalWorld(SyntheticModel):
         if any(item.tick > self.horizon for item in self.events):
             raise ValueError("an event happens after the horizon")
 
-        # Lifecycle ordering, per listing. An acknowledgement before a request, or a
-        # reappearance before a removal, is an impossible history rather than a hard
-        # case, and replaying it would score systems against a world that cannot exist.
+        # The one ordering rule left: nothing happens to a listing before it is
+        # discovered. A first revision also required stages to strictly increase, which
+        # ruled out repeated removal requests and conflicting statuses - both named in
+        # issue #5's scenario list, so both cases rather than corruptions. Having
+        # allowed every stage to repeat, a "moves backwards" check would be dead code:
+        # the only stage that cannot repeat is the highest one.
         seen: dict[str, int] = {}
         for event in self.events:
             if event.kind not in _LIFECYCLE_ORDER or event.object_ref is None:
                 continue
             stage = _LIFECYCLE_ORDER[event.kind]
             previous = seen.get(event.object_ref)
-            if previous is None:
-                if stage != _LIFECYCLE_ORDER[PrivacyEventKind.LISTING_DISCOVERED]:
-                    raise ValueError(
-                        f"{event.object_ref} reaches {event.kind.value} "
-                        "before discovery"
-                    )
-            elif stage <= previous:
+            discovery = _LIFECYCLE_ORDER[PrivacyEventKind.LISTING_DISCOVERED]
+            if previous is None and stage != discovery:
                 raise ValueError(
-                    f"{event.object_ref} moves backwards to {event.kind.value}"
+                    f"{event.object_ref} reaches {event.kind.value} before discovery"
                 )
-            seen[event.object_ref] = stage
+            seen[event.object_ref] = max(stage, previous or 0)
 
         known = {item.listing_ref for item in self.truth.listings}
         if not set(seen) <= known:
             raise ValueError("an event concerns a listing with no truth")
+
+        observations = {item.observation_ref for item in self.truth.observations}
+        referenced = {
+            item.object_ref
+            for item in self.events
+            if item.object_ref is not None
+            and item.kind
+            in {
+                PrivacyEventKind.OBSERVATION_SUPERSEDED,
+                PrivacyEventKind.OBSERVATION_CONTRADICTED,
+                PrivacyEventKind.OBSERVATION_WITHDRAWN,
+            }
+        }
+        if not referenced <= observations:
+            raise ValueError("an event concerns an observation with no truth")
+
+        # Truth must agree with the events about when things happened. A listing whose
+        # truth says it was removed at a tick where no confirmation exists is a world
+        # that scores systems against a history it did not show them.
+        confirmations: dict[str, set[int]] = {}
+        for event in self.events:
+            if event.kind is PrivacyEventKind.REMOVAL_CONFIRMED and event.object_ref:
+                confirmations.setdefault(event.object_ref, set()).add(event.tick)
+        for listing in self.truth.listings:
+            if listing.removed_at is None:
+                continue
+            if listing.removed_at not in confirmations.get(listing.listing_ref, set()):
+                raise ValueError(
+                    f"{listing.listing_ref} claims removal at a tick with no "
+                    "confirming event"
+                )
         return self
 
 
@@ -320,8 +356,9 @@ def materialise(world: TemporalWorld, *, as_of: int) -> PublicTimeline:
 
     if as_of < 0:
         raise ValueError("a tick cannot be negative")
+    if as_of > world.horizon:
+        raise ValueError("a tick cannot exceed the world's horizon")
     return PublicTimeline(
-        seed=world.seed,
         as_of=as_of,
         events=tuple(item for item in world.events if item.tick <= as_of),
     )

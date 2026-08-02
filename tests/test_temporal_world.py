@@ -219,7 +219,6 @@ def test_an_impossible_history_is_refused() -> None:
     """Replay must reject worlds that cannot exist, not score systems against them."""
 
     world = generate_temporal_world(seed=29)
-    listing = world.truth.listings[0].listing_ref
     subject = world.events[0].subject_ref
     orphan = PrivacyEvent(
         id="evt-orphan",
@@ -237,33 +236,39 @@ def test_an_impossible_history_is_refused() -> None:
             truth=world.truth,
         )
 
-    backwards = tuple(
-        item
-        for item in world.events
-        if item.object_ref != listing
-        or item.kind is not PrivacyEventKind.REMOVAL_REQUESTED
+
+def test_a_repeated_request_and_a_conflicting_status_are_representable() -> None:
+    """Issue #5 names both as scenarios, so they must be worlds, not rejections.
+
+    A first revision enforced strictly increasing lifecycle stages, which made
+    "removal requested, refused, requested again" and "confirmed, then reappeared,
+    then confirmed again" invalid histories. That is not hygiene - it rules out two of
+    the cases the consuming pack exists to cover.
+    """
+
+    world = generate_temporal_world(seed=53)
+    listing = world.truth.listings[0].listing_ref
+    subject = world.events[0].subject_ref
+    existing = {item.tick for item in world.events}
+    free = next(tick for tick in range(world.horizon, 0, -1) if tick not in existing)
+    again = PrivacyEvent(
+        id="evt-repeat-request",
+        tick=free,
+        kind=PrivacyEventKind.REMOVAL_REQUESTED,
+        subject_ref=subject,
+        object_ref=listing,
     )
-    with pytest.raises(ValidationError, match=r"before discovery|moves backwards"):
-        TemporalWorld(
-            seed=world.seed,
-            horizon=world.horizon,
-            events=tuple(
-                sorted(
-                    (
-                        *backwards,
-                        PrivacyEvent(
-                            id="evt-late-request",
-                            tick=world.horizon,
-                            kind=PrivacyEventKind.REMOVAL_REQUESTED,
-                            subject_ref=subject,
-                            object_ref=listing,
-                        ),
-                    ),
-                    key=lambda item: (item.tick, item.id),
-                )
-            ),
-            truth=world.truth,
-        )
+
+    replayed = TemporalWorld(
+        seed=world.seed,
+        horizon=world.horizon,
+        events=tuple(
+            sorted((again, *world.events), key=lambda item: (item.tick, item.id))
+        ),
+        truth=world.truth,
+    )
+
+    assert again in replayed.events
 
 
 def test_a_duplicated_event_is_refused() -> None:
@@ -289,7 +294,6 @@ def test_a_timeline_out_of_canonical_order_is_refused() -> None:
 
     with pytest.raises(ValidationError, match="canonical tick and id order"):
         PublicTimeline(
-            seed=timeline.seed,
             as_of=timeline.as_of,
             events=tuple(reversed(timeline.events)),
         )
@@ -363,7 +367,6 @@ def _observation(**overrides: object) -> dict[str, object]:
         ),
         (
             lambda: PublicTimeline(
-                seed=1,
                 as_of=0,
                 events=(PrivacyEvent.model_validate(_event(tick=3)),),
             ),
@@ -371,7 +374,6 @@ def _observation(**overrides: object) -> dict[str, object]:
         ),
         (
             lambda: PublicTimeline(
-                seed=1,
                 as_of=0,
                 events=(
                     PrivacyEvent.model_validate(_event()),
@@ -382,7 +384,6 @@ def _observation(**overrides: object) -> dict[str, object]:
         ),
         (
             lambda: PublicTimeline(
-                seed=1,
                 as_of=2,
                 events=(
                     PrivacyEvent.model_validate(_event(id="evt-b", tick=2)),
@@ -530,3 +531,84 @@ def test_an_event_for_a_listing_with_no_truth_is_refused() -> None:
             ),
             truth=world.truth,
         )
+
+
+def test_a_stage_reached_before_discovery_is_still_refused() -> None:
+    """Repeating a stage is a case; skipping discovery entirely is not a world."""
+
+    world = generate_temporal_world(seed=59)
+    subject = world.events[0].subject_ref
+    listing = world.truth.listings[0].listing_ref
+    without_discovery = tuple(
+        item
+        for item in world.events
+        if not (
+            item.object_ref == listing
+            and item.kind is PrivacyEventKind.LISTING_DISCOVERED
+        )
+    )
+
+    with pytest.raises(ValidationError, match="before discovery"):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=without_discovery,
+            truth=world.truth,
+        )
+    assert subject
+
+
+def test_an_event_for_an_observation_with_no_truth_is_refused() -> None:
+    world = generate_temporal_world(seed=61)
+    subject = world.events[0].subject_ref
+    stranger = PrivacyEvent(
+        id="evt-aaa-obs-stranger",
+        tick=0,
+        kind=PrivacyEventKind.OBSERVATION_WITHDRAWN,
+        subject_ref=subject,
+        object_ref="obs-untracked",
+    )
+
+    with pytest.raises(ValidationError, match="observation with no truth"):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=tuple(
+                sorted((stranger, *world.events), key=lambda item: (item.tick, item.id))
+            ),
+            truth=world.truth,
+        )
+
+
+def test_truth_claiming_a_removal_no_event_confirms_is_refused() -> None:
+    """Truth and events must agree about when things happened.
+
+    Otherwise a system is scored against a history it was never shown: the events say
+    the confirmation came at one tick and the answer key insists on another.
+    """
+
+    world = generate_temporal_world(seed=67)
+    removed = next(item for item in world.truth.listings if item.removed_at is not None)
+    drifted = tuple(
+        item.model_copy(update={"removed_at": world.horizon})
+        if item.listing_ref == removed.listing_ref
+        else item
+        for item in world.truth.listings
+    )
+
+    with pytest.raises(ValidationError, match="no confirming event"):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=world.events,
+            truth=world.truth.model_copy(update={"listings": drifted}),
+        )
+
+
+def test_materialising_past_the_horizon_is_refused() -> None:
+    """Silently returning the whole history would make a horizon advisory."""
+
+    world = generate_temporal_world(seed=71)
+
+    with pytest.raises(ValueError, match="exceed the world's horizon"):
+        materialise(world, as_of=world.horizon + 1)

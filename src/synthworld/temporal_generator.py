@@ -150,16 +150,30 @@ def _event_id(
     return f"evt-{blake2b(material.encode(), digest_size=12).hexdigest()}"
 
 
-def _listing_ref(seed: int, case: _Case) -> str:
-    """A reference derived from the seed and the case's own shape, not its name.
+def _listing_refs(seed: int) -> dict[str, str]:
+    """Assign every case a reference by keyed rank, carrying nothing about the case.
 
-    Naming these `listing-clean_removal` would hand the answer to anyone who read one,
-    which is precisely the mistake the ambiguity pack shipped three times.
+    Two things were wrong with the first version, and its docstring claimed neither.
+    It said the reference derived from "the case's own shape, not its name" while
+    hashing `case.name` directly — renaming a case with its events and truth unchanged
+    moved public bytes in 60 of 60 seeds. And the shape it hashed was the case's
+    *entire* stage list, so the identifier on a discovery event at tick 0 was a
+    function of what that listing would do at tick 14: moving a reappearance from tick
+    14 to 16 changed the public prefix at ticks well before either.
+
+    Slots are now a seed-keyed permutation over positions. The mapping moves with the
+    seed, so no reading transfers, and nothing about a case — its name, its outcome, or
+    its future — reaches the identifier.
     """
 
-    shape = "|".join(f"{tick}:{kind.value}" for tick, kind in case.stages)
-    slot = _draw(seed, f"listing:{shape}:{case.name}", 0) % 10_000
-    return f"listing-{slot:04d}"
+    names = [case.name for case in _cases()]
+    order = sorted(
+        range(len(names)), key=lambda index: _draw(seed, "listing-slot", index)
+    )
+    return {
+        names[case_index]: f"listing-{_draw(seed, 'listing-value', slot) % 10_000:04d}"
+        for slot, case_index in enumerate(order)
+    }
 
 
 def generate_temporal_world(
@@ -179,13 +193,14 @@ def generate_temporal_world(
     # history slides. A per-case offset would make the gap between two lifecycles a
     # function of which cases they are.
     offset = _draw(seed, "offset", 0) % 3
+    references = _listing_refs(seed)
 
     events: list[PrivacyEvent] = []
     listings: list[ListingTruth] = []
     observations: list[ObservationTruth] = []
 
     for case in _cases():
-        listing_ref = _listing_ref(seed, case)
+        listing_ref = references[case.name]
         for relative, kind in case.stages:
             tick = relative + offset
             events.append(
