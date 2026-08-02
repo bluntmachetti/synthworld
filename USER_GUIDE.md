@@ -441,7 +441,7 @@ transfer**, and this pack exists because of it.
 from synthworld.ambiguity_serialization import load_golden_ambiguity_benchmark
 
 benchmark = load_golden_ambiguity_benchmark()
-records = benchmark.public.identity_records          # no truth of any kind
+records = benchmark.public.corpus.identity_records   # no truth of any kind
 ```
 
 ### Two truths, kept apart
@@ -452,8 +452,28 @@ pairs that are the same person where the evidence supports only `insufficient`, 
 pairs that are different people under the same disposition.
 
 A system may answer `merge`, `separate`, or `insufficient`. Abstention is a
-first-class answer, not a failure to answer, and the three truths are serialized as
-three separate files so a consumer can hold the public corpus without either.
+first-class answer, not a failure to answer. The public task and both truths are
+serialized as three separate artifacts so a consumer can hold the public corpus
+without either truth.
+
+### Score complete partitions before projecting pairs
+
+A cluster-producing resolver must submit every public record exactly once through
+the existing `EntityResolutionPrediction` contract. Score that complete partition
+directly with `evaluate_ambiguity_memberships`, supplying the public task and the
+separately loaded `MembershipTruth`. This channel reports pairwise and B-cubed
+precision, recall, and F1 over all within- and cross-scenario record pairs. Every
+metric carries its numerator, denominator, and denominator definition.
+
+Only after the partition is validated, use
+`derive_ambiguity_pair_predictions(prediction, public=...)` to derive decisions for
+the public `pairs_to_decide`. This function consumes no truth: records in one
+cluster become `merge`, and records in different clusters become `separate`. That
+is a forced partition interpretation, so it can never express `insufficient`.
+Score those decisions separately with `evaluate_ambiguity_dispositions`, supplying
+only `DispositionTruth`. Do not reconstruct the complete partition from the
+fifteen selected pairs; a false merge between scenarios may be absent from that
+projection while remaining visible in the raw partition metrics.
 
 ### The report has no aggregate score
 
@@ -467,8 +487,8 @@ report gives you:
   wrong answer, it is an unjustified one;
 - **coverage beside precision** — a system that abstains everywhere would otherwise
   score perfectly;
-- **pairwise and B-cubed** over the clusters your merges induce, because they weight
-  differently and either alone hides what the other shows;
+- **pairwise and B-cubed membership metrics** over the complete submitted partition,
+  because they weight differently and either alone hides what the other shows;
 - **per-scenario support with a machine-readable low-support flag.**
 
 ### Reference baselines
@@ -489,9 +509,13 @@ statistical benchmark, and a 1-of-1 slice is not a rate.
 
 Seed variants raise the variety but not the support:
 `generate_ambiguity_variant(seed=...)` preserves declared prevalence while changing
-surface values and, for six of the fifteen scenarios, which attribute carries the
-case. The other nine are defined by their attribute — `recycled_phone` is about a
-phone — so for those a variant changes values only.
+surface values and, for five of the fifteen scenarios, which attribute carries the
+case. The other ten are defined by their attribute — `recycled_phone` is about a
+phone, and a one-option Unicode choice is not structural variation — so for those a
+variant changes values only. The seed-selected choices are available separately
+through `ambiguity_variant_metadata(seed=...)`; they are evaluator metadata and are
+not added to the public task. Seeds 0 through 99 are the documented correlated
+robustness sweep, not 100 independent observations.
 
 ## Reading evaluation results
 

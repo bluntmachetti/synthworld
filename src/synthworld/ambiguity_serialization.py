@@ -51,11 +51,11 @@ def ambiguity_artifacts(benchmark: AmbiguityBenchmark) -> dict[str, bytes]:
     """Return the three canonical artifacts, physically separate."""
 
     return {
-        _PUBLIC_FILENAME: _payload(benchmark.public),
-        _MEMBERSHIP_FILENAME: _payload(
+        _PUBLIC_FILENAME: ambiguity_public_to_json(benchmark.public),
+        _MEMBERSHIP_FILENAME: membership_truth_to_json(
             MembershipTruth(record_memberships=benchmark.answer_key.record_memberships)
         ),
-        _DISPOSITION_FILENAME: _payload(
+        _DISPOSITION_FILENAME: disposition_truth_to_json(
             DispositionTruth(pairs=benchmark.answer_key.pairs)
         ),
     }
@@ -70,9 +70,7 @@ def ambiguity_manifest(artifacts: dict[str, bytes]) -> str:
     )
 
 
-def load_golden_ambiguity_benchmark() -> AmbiguityBenchmark:
-    """Load and verify all three frozen artifacts before recombining them."""
-
+def _verified_payload(name: str) -> bytes:
     directory = files("synthworld.benchmarks")
     manifest = directory.joinpath(_MANIFEST).read_text(encoding="utf-8")
     expected = dict(
@@ -87,25 +85,45 @@ def load_golden_ambiguity_benchmark() -> AmbiguityBenchmark:
     }:
         raise AmbiguityIntegrityError("frozen ambiguity manifest is incomplete")
 
-    payloads: dict[str, bytes] = {}
-    for name, digest in expected.items():
-        content = directory.joinpath(name).read_bytes()
-        if hashlib.sha256(content).hexdigest() != digest:
-            raise AmbiguityIntegrityError(f"{name} checksum differs")
-        payloads[name] = content
+    content = directory.joinpath(name).read_bytes()
+    if hashlib.sha256(content).hexdigest() != expected[name]:
+        raise AmbiguityIntegrityError(f"{name} checksum differs")
+    return content
+
+
+def load_golden_ambiguity_public_task() -> PublicAmbiguityTask:
+    """Load only checksum-verified public input, without reading either truth."""
+
+    return PublicAmbiguityTask.model_validate_json(_verified_payload(_PUBLIC_FILENAME))
+
+
+def load_golden_ambiguity_membership_truth() -> MembershipTruth:
+    """Load only checksum-verified canonical membership truth."""
+
+    return MembershipTruth.model_validate_json(_verified_payload(_MEMBERSHIP_FILENAME))
+
+
+def load_golden_ambiguity_disposition_truth() -> DispositionTruth:
+    """Load only checksum-verified evidence-disposition truth."""
+
+    return DispositionTruth.model_validate_json(
+        _verified_payload(_DISPOSITION_FILENAME)
+    )
+
+
+def load_golden_ambiguity_benchmark() -> AmbiguityBenchmark:
+    """Load and verify all three frozen artifacts before recombining them."""
+
+    public = load_golden_ambiguity_public_task()
+    memberships = load_golden_ambiguity_membership_truth()
+    dispositions = load_golden_ambiguity_disposition_truth()
 
     return AmbiguityBenchmark(
-        seed=PublicAmbiguityTask.model_validate_json(
-            payloads[_PUBLIC_FILENAME]
-        ).corpus.seed,
-        public=PublicAmbiguityTask.model_validate_json(payloads[_PUBLIC_FILENAME]),
+        seed=public.corpus.seed,
+        public=public,
         answer_key=AmbiguityAnswerKey(
-            record_memberships=MembershipTruth.model_validate_json(
-                payloads[_MEMBERSHIP_FILENAME]
-            ).record_memberships,
-            pairs=DispositionTruth.model_validate_json(
-                payloads[_DISPOSITION_FILENAME]
-            ).pairs,
+            record_memberships=memberships.record_memberships,
+            pairs=dispositions.pairs,
         ),
     )
 
@@ -114,11 +132,29 @@ def _payload(model: SyntheticModel) -> bytes:
     return f"{model.model_dump_json(indent=2)}\n".encode()
 
 
+def ambiguity_public_to_json(public: PublicAmbiguityTask) -> bytes:
+    return _payload(public)
+
+
+def membership_truth_to_json(truth: MembershipTruth) -> bytes:
+    return _payload(truth)
+
+
+def disposition_truth_to_json(truth: DispositionTruth) -> bytes:
+    return _payload(truth)
+
+
 __all__ = [
     "AmbiguityIntegrityError",
     "DispositionTruth",
     "MembershipTruth",
     "ambiguity_artifacts",
     "ambiguity_manifest",
+    "ambiguity_public_to_json",
+    "disposition_truth_to_json",
     "load_golden_ambiguity_benchmark",
+    "load_golden_ambiguity_disposition_truth",
+    "load_golden_ambiguity_membership_truth",
+    "load_golden_ambiguity_public_task",
+    "membership_truth_to_json",
 ]

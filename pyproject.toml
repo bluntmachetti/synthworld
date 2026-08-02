@@ -66,6 +66,9 @@ dev = [
 [project.scripts]
 synthworld = "synthworld.cli:main"
 
+[tool.hatch.build]
+exclude = ["/.local-assurance"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/synthworld"]
 

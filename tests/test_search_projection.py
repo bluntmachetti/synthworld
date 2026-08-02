@@ -66,7 +66,7 @@ def test_truth_models_are_never_reachable_from_the_public_half() -> None:
             assert str(field.annotation).split(".")[-1].strip("'>") not in truth_names
 
 
-def test_the_adapter_consumes_public_data_only() -> None:
+def test_the_public_organic_adapter_consumes_public_data_only() -> None:
     projection = generate_search_projection(seed=1)
     mapped = to_organic_response(projection.responses[0])
 

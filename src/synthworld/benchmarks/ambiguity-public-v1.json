@@ -8,18 +8,28 @@
     "identity_records": [
       {
         "synthetic": true,
-        "id": "091ecfd8-2405-5b1d-8578-59bc9e0a4e43",
-        "source_type": "alumni",
-        "source_url": "https://records.example.test/identity/091ecfd8-2405-5b1d-8578-59bc9e0a4e43",
-        "display_name": "Helen Okonkwo",
+        "id": "0654eb65-b53a-5be4-bf65-ce5b1009f507",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/0654eb65-b53a-5be4-bf65-ce5b1009f507",
+        "display_name": "Rotimi Adeyemi",
         "confidence": 1.0,
         "attributes": [
           {
             "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1976-04-17",
+            "kind": "employer",
+            "value": "Test Bramble Logistics",
             "confidence": 1.0
-          },
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "12155dd1-3691-5155-8b97-32d158cf9003",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/12155dd1-3691-5155-8b97-32d158cf9003",
+        "display_name": "H. Okonkwo",
+        "confidence": 1.0,
+        "attributes": [
           {
             "synthetic": true,
             "kind": "employer",
@@ -42,43 +52,37 @@
       },
       {
         "synthetic": true,
-        "id": "0f8a0d7a-2a98-5e7d-8913-0f50aa853126",
-        "source_type": "alumni",
-        "source_url": "https://records.example.test/identity/0f8a0d7a-2a98-5e7d-8913-0f50aa853126",
-        "display_name": "Priya Nandakumar",
+        "id": "1daaa624-197f-5c2b-a82d-78ccad12469f",
+        "source_type": "broker",
+        "source_url": "https://records.example.test/identity/1daaa624-197f-5c2b-a82d-78ccad12469f",
+        "display_name": "Sofia Marchetti",
         "confidence": 1.0,
         "attributes": [
           {
             "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1988-06-25",
+            "kind": "email",
+            "value": "s.marchetti@example.test",
             "confidence": 1.0
           },
           {
             "synthetic": true,
-            "kind": "family_name",
-            "value": "Nandakumar",
+            "kind": "full_address",
+            "value": "55|Example Avenue|Fictionbury|00000|ZZ",
             "confidence": 1.0
           },
           {
             "synthetic": true,
-            "kind": "school_year",
-            "value": "Test Ashby Institute|2010",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "username",
-            "value": "p.nandakumar",
+            "kind": "phone",
+            "value": "+1-212-555-0182",
             "confidence": 1.0
           }
         ]
       },
       {
         "synthetic": true,
-        "id": "1a5aa123-3709-5c02-94dd-e804c7a3c187",
+        "id": "2222ae31-fa54-57ee-b3cc-2c6c2445f4a3",
         "source_type": "social",
-        "source_url": "https://records.example.test/identity/1a5aa123-3709-5c02-94dd-e804c7a3c187",
+        "source_url": "https://records.example.test/identity/2222ae31-fa54-57ee-b3cc-2c6c2445f4a3",
         "display_name": "K. Osei",
         "confidence": 1.0,
         "attributes": [
@@ -92,9 +96,9 @@
       },
       {
         "synthetic": true,
-        "id": "24a6c901-15f9-5c32-b10a-f461777d5a64",
+        "id": "23417da5-b6e8-5ac9-9804-2126081e951e",
         "source_type": "alumni",
-        "source_url": "https://records.example.test/identity/24a6c901-15f9-5c32-b10a-f461777d5a64",
+        "source_url": "https://records.example.test/identity/23417da5-b6e8-5ac9-9804-2126081e951e",
         "display_name": "Lena Vasquez",
         "confidence": 1.0,
         "attributes": [
@@ -126,243 +130,9 @@
       },
       {
         "synthetic": true,
-        "id": "259e758a-c0f4-58ea-9b5e-ee4fc0fee5b7",
+        "id": "242ce061-e3f0-5e70-b9ea-f5b82f9bccfc",
         "source_type": "alumni",
-        "source_url": "https://records.example.test/identity/259e758a-c0f4-58ea-9b5e-ee4fc0fee5b7",
-        "display_name": "Grace Underhill",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1989-08-14",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "family_name",
-            "value": "Underhill",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "school_year",
-            "value": "Sample Eastmoor Academy|2007",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "29f0192b-e606-545b-9f52-2220921d50f9",
-        "source_type": "conference",
-        "source_url": "https://records.example.test/identity/29f0192b-e606-545b-9f52-2220921d50f9",
-        "display_name": "Ana Prieto",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "email",
-            "value": "a.prieto@example.test",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "employer",
-            "value": "Sample Quarry Analytics",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "full_address",
-            "value": "300|Fictional Way|Exampleford|00000|ZZ",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "2e015bf9-e066-5f37-8796-efc502c8e1ae",
-        "source_type": "directory",
-        "source_url": "https://records.example.test/identity/2e015bf9-e066-5f37-8796-efc502c8e1ae",
-        "display_name": "Priya Whitlock",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1988-06-25",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "family_name",
-            "value": "Whitlock",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "school_year",
-            "value": "Test Ashby Institute|2010",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "username",
-            "value": "p.nandakumar",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "37f6c234-8fd1-58a3-9a20-fc620878699e",
-        "source_type": "conference",
-        "source_url": "https://records.example.test/identity/37f6c234-8fd1-58a3-9a20-fc620878699e",
-        "display_name": "Björn Sørensen",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1981-12-03",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "email",
-            "value": "b.sorensen@example.test",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "family_name",
-            "value": "Sørensen",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "55b454c4-69d3-5828-9a91-546d7d7e01c9",
-        "source_type": "social",
-        "source_url": "https://records.example.test/identity/55b454c4-69d3-5828-9a91-546d7d7e01c9",
-        "display_name": "Callum Wren",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1983-01-08",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "employer",
-            "value": "Test Meridian Logistics",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "username",
-            "value": "quietlantern",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "55c76d51-c781-5a52-b5e2-24cb702ea481",
-        "source_type": "directory",
-        "source_url": "https://records.example.test/identity/55c76d51-c781-5a52-b5e2-24cb702ea481",
-        "display_name": "Rotimi Adeyemi",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "employer",
-            "value": "Test Bramble Logistics",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "59a6eff5-22a1-538b-bc1d-d63a0e27a893",
-        "source_type": "conference",
-        "source_url": "https://records.example.test/identity/59a6eff5-22a1-538b-bc1d-d63a0e27a893",
-        "display_name": "Devi Raman",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "email",
-            "value": "d.raman@example.test",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "employer",
-            "value": "Sample Quarry Analytics",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "full_address",
-            "value": "300|Fictional Way|Exampleford|00000|ZZ",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "6ac65983-5867-55e3-8ff0-b95974064269",
-        "source_type": "broker",
-        "source_url": "https://records.example.test/identity/6ac65983-5867-55e3-8ff0-b95974064269",
-        "display_name": "Owen Brackley",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1974-02-11",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "email",
-            "value": "o.brackley@example.test",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "phone",
-            "value": "+1-212-555-0177",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "746a9f41-9f09-551c-9933-c359b679c163",
-        "source_type": "conference",
-        "source_url": "https://records.example.test/identity/746a9f41-9f09-551c-9933-c359b679c163",
-        "display_name": "R. Adeyemi",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "employer",
-            "value": "Test Bramble Logistics",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "75ec1328-6511-5c7f-adf7-6da1be60fd47",
-        "source_type": "alumni",
-        "source_url": "https://records.example.test/identity/75ec1328-6511-5c7f-adf7-6da1be60fd47",
+        "source_url": "https://records.example.test/identity/242ce061-e3f0-5e70-b9ea-f5b82f9bccfc",
         "display_name": "Mara Vasquez",
         "confidence": 1.0,
         "attributes": [
@@ -394,9 +164,99 @@
       },
       {
         "synthetic": true,
-        "id": "79699a31-7f5d-5ab7-bb96-0ddf07f43301",
+        "id": "4f15243b-491f-580f-b2cd-98e5b6f6f4a5",
         "source_type": "directory",
-        "source_url": "https://records.example.test/identity/79699a31-7f5d-5ab7-bb96-0ddf07f43301",
+        "source_url": "https://records.example.test/identity/4f15243b-491f-580f-b2cd-98e5b6f6f4a5",
+        "display_name": "John Smith",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1979-05-30",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "family_name",
+            "value": "Smith",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "21|Specimen Street|Testville|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "4f3379c7-3a17-5eef-9605-6b13887414e8",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/4f3379c7-3a17-5eef-9605-6b13887414e8",
+        "display_name": "Nadia Farouk",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "n.farouk@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "14|Example Avenue|Testville|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "phone",
+            "value": "+1-212-555-0117",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "6a643633-c062-5758-9036-67dcd65b317d",
+        "source_type": "alumni",
+        "source_url": "https://records.example.test/identity/6a643633-c062-5758-9036-67dcd65b317d",
+        "display_name": "Helen Okonkwo",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1976-04-17",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Granite Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "family_name",
+            "value": "Okonkwo",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "school_year",
+            "value": "Fictional Fenwick College|1998",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "6d81c2e0-7d26-581a-aa29-fec8a0a0d964",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/6d81c2e0-7d26-581a-aa29-fec8a0a0d964",
         "display_name": "Owen Brackley",
         "confidence": 1.0,
         "attributes": [
@@ -422,37 +282,171 @@
       },
       {
         "synthetic": true,
-        "id": "823de7cc-82a3-5287-b090-91b35f23d455",
-        "source_type": "broker",
-        "source_url": "https://records.example.test/identity/823de7cc-82a3-5287-b090-91b35f23d455",
-        "display_name": "Peter Hollis",
+        "id": "7f7efadb-9663-5829-b1e1-a75e3bfa2d7a",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/7f7efadb-9663-5829-b1e1-a75e3bfa2d7a",
+        "display_name": "Ruth Ellery",
         "confidence": 1.0,
         "attributes": [
           {
             "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1968-03-04",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
             "kind": "email",
-            "value": "p.hollis@example.invalid",
+            "value": "ellery.house@example.test",
             "confidence": 1.0
           },
           {
             "synthetic": true,
             "kind": "full_address",
-            "value": "82|Test Lane|Sampleton|00000|ZZ",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "phone",
-            "value": "+1-212-555-0117",
+            "value": "9|Sample Row|Testville|00000|ZZ",
             "confidence": 1.0
           }
         ]
       },
       {
         "synthetic": true,
-        "id": "885ec647-5e1a-5c8e-80cd-14fb2628aa43",
+        "id": "8529e1d3-ca57-5c9b-8929-141223efd1a2",
         "source_type": "directory",
-        "source_url": "https://records.example.test/identity/885ec647-5e1a-5c8e-80cd-14fb2628aa43",
+        "source_url": "https://records.example.test/identity/8529e1d3-ca57-5c9b-8929-141223efd1a2",
+        "display_name": "Priya Whitlock",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1988-06-25",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "family_name",
+            "value": "Whitlock",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "school_year",
+            "value": "Test Ashby Institute|2010",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "p.nandakumar",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "88182fd9-359c-5d75-9b8d-593edb0f22e8",
+        "source_type": "broker",
+        "source_url": "https://records.example.test/identity/88182fd9-359c-5d75-9b8d-593edb0f22e8",
+        "display_name": "Owen Brackley",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1974-02-11",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "o.brackley@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "phone",
+            "value": "+1-212-555-0177",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "8eef6cba-c1bd-502c-b3a9-078c1db7ca58",
+        "source_type": "social",
+        "source_url": "https://records.example.test/identity/8eef6cba-c1bd-502c-b3a9-078c1db7ca58",
+        "display_name": "Callum Wren",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1983-01-08",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Test Meridian Logistics",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "quietlantern",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "8fc6a385-c8ea-5a26-8026-41a9bd69def8",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/8fc6a385-c8ea-5a26-8026-41a9bd69def8",
+        "display_name": "R. Adeyemi",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Test Bramble Logistics",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "913de0a8-b811-5dc8-aaad-a00247f65e37",
+        "source_type": "social",
+        "source_url": "https://records.example.test/identity/913de0a8-b811-5dc8-aaad-a00247f65e37",
+        "display_name": "Iris Bello",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1990-07-19",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Example Harbour Works",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "quietlantern",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "a3112024-fb27-5ea1-a93c-fd4578b15eec",
+        "source_type": "directory",
+        "source_url": "https://records.example.test/identity/a3112024-fb27-5ea1-a93c-fd4578b15eec",
         "display_name": "Mei Lin Chao",
         "confidence": 1.0,
         "attributes": [
@@ -484,16 +478,134 @@
       },
       {
         "synthetic": true,
-        "id": "8ef83f37-d901-5a65-87c6-0817d347dce8",
+        "id": "a75421e4-3358-5ec8-b97a-13a7b7e76b99",
         "source_type": "directory",
-        "source_url": "https://records.example.test/identity/8ef83f37-d901-5a65-87c6-0817d347dce8",
-        "display_name": "Ruth Ellery",
+        "source_url": "https://records.example.test/identity/a75421e4-3358-5ec8-b97a-13a7b7e76b99",
+        "display_name": "Sofia Marchetti",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "s.marchetti@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "55|Example Avenue|Fictionbury|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "phone",
+            "value": "+1-212-555-0182",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "b1af1995-b5f6-571d-82f5-ce95583c09dd",
+        "source_type": "alumni",
+        "source_url": "https://records.example.test/identity/b1af1995-b5f6-571d-82f5-ce95583c09dd",
+        "display_name": "Priya Nandakumar",
         "confidence": 1.0,
         "attributes": [
           {
             "synthetic": true,
             "kind": "date_of_birth",
-            "value": "1968-03-04",
+            "value": "1988-06-25",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "family_name",
+            "value": "Nandakumar",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "school_year",
+            "value": "Test Ashby Institute|2010",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "username",
+            "value": "p.nandakumar",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "b4ba7aca-1b68-59dc-9047-75e5f5d10b4f",
+        "source_type": "broker",
+        "source_url": "https://records.example.test/identity/b4ba7aca-1b68-59dc-9047-75e5f5d10b4f",
+        "display_name": "Grace Underhill",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1991-02-02",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "family_name",
+            "value": "Underhill",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "school_year",
+            "value": "Sample Eastmoor Academy|2007",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "be47d8e8-93ac-563f-823a-4328714568e4",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/be47d8e8-93ac-563f-823a-4328714568e4",
+        "display_name": "Björn Sørensen",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1981-12-03",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "b.sorensen@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "family_name",
+            "value": "Sørensen",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "c096f146-9429-59b1-ac06-9533ada0aa1d",
+        "source_type": "social",
+        "source_url": "https://records.example.test/identity/c096f146-9429-59b1-ac06-9533ada0aa1d",
+        "display_name": "Tomas Ellery",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "date_of_birth",
+            "value": "1995-11-22",
             "confidence": 1.0
           },
           {
@@ -512,9 +624,65 @@
       },
       {
         "synthetic": true,
-        "id": "9f3246a9-9dfa-53f3-8e96-1e80c7341fa9",
+        "id": "cc14bd3c-5cb9-52b7-a45e-457e7bdd3dcb",
         "source_type": "broker",
-        "source_url": "https://records.example.test/identity/9f3246a9-9dfa-53f3-8e96-1e80c7341fa9",
+        "source_url": "https://records.example.test/identity/cc14bd3c-5cb9-52b7-a45e-457e7bdd3dcb",
+        "display_name": "Peter Hollis",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "p.hollis@example.invalid",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "82|Test Lane|Sampleton|00000|ZZ",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "phone",
+            "value": "+1-212-555-0117",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "d1e4f762-8e49-5903-a7da-ed507af4e663",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/d1e4f762-8e49-5903-a7da-ed507af4e663",
+        "display_name": "Devi Raman",
+        "confidence": 1.0,
+        "attributes": [
+          {
+            "synthetic": true,
+            "kind": "email",
+            "value": "d.raman@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Sample Quarry Analytics",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "full_address",
+            "value": "300|Fictional Way|Exampleford|00000|ZZ",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "synthetic": true,
+        "id": "d47b0e1e-92c0-5001-9ac9-4628409c8b5e",
+        "source_type": "broker",
+        "source_url": "https://records.example.test/identity/d47b0e1e-92c0-5001-9ac9-4628409c8b5e",
         "display_name": "Mei Lin Chao",
         "confidence": 1.0,
         "attributes": [
@@ -546,93 +714,37 @@
       },
       {
         "synthetic": true,
-        "id": "a7467bc5-4d2b-50ae-9382-10f72821ec0e",
-        "source_type": "broker",
-        "source_url": "https://records.example.test/identity/a7467bc5-4d2b-50ae-9382-10f72821ec0e",
-        "display_name": "Grace Underhill",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1991-02-02",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "family_name",
-            "value": "Underhill",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "school_year",
-            "value": "Sample Eastmoor Academy|2007",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "aaae6c0f-772a-576c-b983-cc1121caa9d5",
-        "source_type": "alumni",
-        "source_url": "https://records.example.test/identity/aaae6c0f-772a-576c-b983-cc1121caa9d5",
-        "display_name": "John Smith",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1979-05-30",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "family_name",
-            "value": "Smith",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "full_address",
-            "value": "404|Placeholder Close|Sampleton|00000|ZZ",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "b0888c42-5ec5-527d-b331-d230f0b356ca",
-        "source_type": "broker",
-        "source_url": "https://records.example.test/identity/b0888c42-5ec5-527d-b331-d230f0b356ca",
-        "display_name": "Sofia Marchetti",
+        "id": "d507d92d-3459-5351-83e9-3f719b4c516b",
+        "source_type": "conference",
+        "source_url": "https://records.example.test/identity/d507d92d-3459-5351-83e9-3f719b4c516b",
+        "display_name": "Ana Prieto",
         "confidence": 1.0,
         "attributes": [
           {
             "synthetic": true,
             "kind": "email",
-            "value": "s.marchetti@example.test",
+            "value": "a.prieto@example.test",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "employer",
+            "value": "Sample Quarry Analytics",
             "confidence": 1.0
           },
           {
             "synthetic": true,
             "kind": "full_address",
-            "value": "55|Example Avenue|Fictionbury|00000|ZZ",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "phone",
-            "value": "+1-212-555-0182",
+            "value": "300|Fictional Way|Exampleford|00000|ZZ",
             "confidence": 1.0
           }
         ]
       },
       {
         "synthetic": true,
-        "id": "b6ddc2ac-6937-5f1a-a069-cd1b58f05751",
+        "id": "dad4a77d-4b0d-569b-b742-bf2e1356b351",
         "source_type": "broker",
-        "source_url": "https://records.example.test/identity/b6ddc2ac-6937-5f1a-a069-cd1b58f05751",
+        "source_url": "https://records.example.test/identity/dad4a77d-4b0d-569b-b742-bf2e1356b351",
         "display_name": "Bjorn Sorensen",
         "confidence": 1.0,
         "attributes": [
@@ -658,65 +770,25 @@
       },
       {
         "synthetic": true,
-        "id": "c57d4a9a-d99b-5037-8385-daa41ef0685b",
-        "source_type": "directory",
-        "source_url": "https://records.example.test/identity/c57d4a9a-d99b-5037-8385-daa41ef0685b",
-        "display_name": "H. Okonkwo",
+        "id": "dba2d175-5bb5-5211-bae3-cf8adce3f2e6",
+        "source_type": "broker",
+        "source_url": "https://records.example.test/identity/dba2d175-5bb5-5211-bae3-cf8adce3f2e6",
+        "display_name": "Kwame Osei",
         "confidence": 1.0,
         "attributes": [
-          {
-            "synthetic": true,
-            "kind": "employer",
-            "value": "Example Granite Works",
-            "confidence": 1.0
-          },
           {
             "synthetic": true,
             "kind": "family_name",
-            "value": "Okonkwo",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "school_year",
-            "value": "Fictional Fenwick College|1998",
+            "value": "Osei",
             "confidence": 1.0
           }
         ]
       },
       {
         "synthetic": true,
-        "id": "d0a8ec79-b1d2-53f1-a51b-4d799290ec83",
-        "source_type": "directory",
-        "source_url": "https://records.example.test/identity/d0a8ec79-b1d2-53f1-a51b-4d799290ec83",
-        "display_name": "Nadia Farouk",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "email",
-            "value": "n.farouk@example.test",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "full_address",
-            "value": "14|Example Avenue|Testville|00000|ZZ",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "phone",
-            "value": "+1-212-555-0117",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "d0e0cf0c-323b-5d72-8a13-c0a64ce62c53",
-        "source_type": "directory",
-        "source_url": "https://records.example.test/identity/d0e0cf0c-323b-5d72-8a13-c0a64ce62c53",
+        "id": "dfae14d2-8500-50fc-b857-1900fa299640",
+        "source_type": "alumni",
+        "source_url": "https://records.example.test/identity/dfae14d2-8500-50fc-b857-1900fa299640",
         "display_name": "John Smith",
         "confidence": 1.0,
         "attributes": [
@@ -735,107 +807,35 @@
           {
             "synthetic": true,
             "kind": "full_address",
-            "value": "21|Specimen Street|Testville|00000|ZZ",
+            "value": "404|Placeholder Close|Sampleton|00000|ZZ",
             "confidence": 1.0
           }
         ]
       },
       {
         "synthetic": true,
-        "id": "d13dab7f-43e4-50f9-b55c-6387d2ecf65d",
-        "source_type": "social",
-        "source_url": "https://records.example.test/identity/d13dab7f-43e4-50f9-b55c-6387d2ecf65d",
-        "display_name": "Iris Bello",
+        "id": "f9ab81c6-6d05-5bbb-ad57-0a9dc31fec6c",
+        "source_type": "alumni",
+        "source_url": "https://records.example.test/identity/f9ab81c6-6d05-5bbb-ad57-0a9dc31fec6c",
+        "display_name": "Grace Underhill",
         "confidence": 1.0,
         "attributes": [
           {
             "synthetic": true,
             "kind": "date_of_birth",
-            "value": "1990-07-19",
+            "value": "1989-08-14",
             "confidence": 1.0
           },
-          {
-            "synthetic": true,
-            "kind": "employer",
-            "value": "Example Harbour Works",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "username",
-            "value": "quietlantern",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "db414dd5-dc42-5c6c-9df1-cf4e82eca45f",
-        "source_type": "social",
-        "source_url": "https://records.example.test/identity/db414dd5-dc42-5c6c-9df1-cf4e82eca45f",
-        "display_name": "Tomas Ellery",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "date_of_birth",
-            "value": "1995-11-22",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "email",
-            "value": "ellery.house@example.test",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "full_address",
-            "value": "9|Sample Row|Testville|00000|ZZ",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "f11dc1af-26b4-580c-8143-9cc8355314ef",
-        "source_type": "directory",
-        "source_url": "https://records.example.test/identity/f11dc1af-26b4-580c-8143-9cc8355314ef",
-        "display_name": "Sofia Marchetti",
-        "confidence": 1.0,
-        "attributes": [
-          {
-            "synthetic": true,
-            "kind": "email",
-            "value": "s.marchetti@example.test",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "full_address",
-            "value": "55|Example Avenue|Fictionbury|00000|ZZ",
-            "confidence": 1.0
-          },
-          {
-            "synthetic": true,
-            "kind": "phone",
-            "value": "+1-212-555-0182",
-            "confidence": 1.0
-          }
-        ]
-      },
-      {
-        "synthetic": true,
-        "id": "f7a2ca26-9386-5f25-b14c-41cdfcc5d342",
-        "source_type": "broker",
-        "source_url": "https://records.example.test/identity/f7a2ca26-9386-5f25-b14c-41cdfcc5d342",
-        "display_name": "Kwame Osei",
-        "confidence": 1.0,
-        "attributes": [
           {
             "synthetic": true,
             "kind": "family_name",
-            "value": "Osei",
+            "value": "Underhill",
+            "confidence": 1.0
+          },
+          {
+            "synthetic": true,
+            "kind": "school_year",
+            "value": "Sample Eastmoor Academy|2007",
             "confidence": 1.0
           }
         ]
@@ -846,78 +846,78 @@
   "pairs_to_decide": [
     {
       "synthetic": true,
-      "left_record_id": "823de7cc-82a3-5287-b090-91b35f23d455",
-      "right_record_id": "d0a8ec79-b1d2-53f1-a51b-4d799290ec83"
+      "left_record_id": "0654eb65-b53a-5be4-bf65-ce5b1009f507",
+      "right_record_id": "8fc6a385-c8ea-5a26-8026-41a9bd69def8"
     },
     {
       "synthetic": true,
-      "left_record_id": "8ef83f37-d901-5a65-87c6-0817d347dce8",
-      "right_record_id": "db414dd5-dc42-5c6c-9df1-cf4e82eca45f"
+      "left_record_id": "12155dd1-3691-5155-8b97-32d158cf9003",
+      "right_record_id": "6a643633-c062-5758-9036-67dcd65b317d"
     },
     {
       "synthetic": true,
-      "left_record_id": "55b454c4-69d3-5828-9a91-546d7d7e01c9",
-      "right_record_id": "d13dab7f-43e4-50f9-b55c-6387d2ecf65d"
+      "left_record_id": "1daaa624-197f-5c2b-a82d-78ccad12469f",
+      "right_record_id": "a75421e4-3358-5ec8-b97a-13a7b7e76b99"
     },
     {
       "synthetic": true,
-      "left_record_id": "29f0192b-e606-545b-9f52-2220921d50f9",
-      "right_record_id": "59a6eff5-22a1-538b-bc1d-d63a0e27a893"
+      "left_record_id": "2222ae31-fa54-57ee-b3cc-2c6c2445f4a3",
+      "right_record_id": "dba2d175-5bb5-5211-bae3-cf8adce3f2e6"
     },
     {
       "synthetic": true,
-      "left_record_id": "aaae6c0f-772a-576c-b983-cc1121caa9d5",
-      "right_record_id": "d0e0cf0c-323b-5d72-8a13-c0a64ce62c53"
+      "left_record_id": "23417da5-b6e8-5ac9-9804-2126081e951e",
+      "right_record_id": "242ce061-e3f0-5e70-b9ea-f5b82f9bccfc"
     },
     {
       "synthetic": true,
-      "left_record_id": "885ec647-5e1a-5c8e-80cd-14fb2628aa43",
-      "right_record_id": "9f3246a9-9dfa-53f3-8e96-1e80c7341fa9"
+      "left_record_id": "4f15243b-491f-580f-b2cd-98e5b6f6f4a5",
+      "right_record_id": "dfae14d2-8500-50fc-b857-1900fa299640"
     },
     {
       "synthetic": true,
-      "left_record_id": "24a6c901-15f9-5c32-b10a-f461777d5a64",
-      "right_record_id": "75ec1328-6511-5c7f-adf7-6da1be60fd47"
+      "left_record_id": "4f3379c7-3a17-5eef-9605-6b13887414e8",
+      "right_record_id": "cc14bd3c-5cb9-52b7-a45e-457e7bdd3dcb"
     },
     {
       "synthetic": true,
-      "left_record_id": "6ac65983-5867-55e3-8ff0-b95974064269",
-      "right_record_id": "79699a31-7f5d-5ab7-bb96-0ddf07f43301"
+      "left_record_id": "6d81c2e0-7d26-581a-aa29-fec8a0a0d964",
+      "right_record_id": "88182fd9-359c-5d75-9b8d-593edb0f22e8"
     },
     {
       "synthetic": true,
-      "left_record_id": "0f8a0d7a-2a98-5e7d-8913-0f50aa853126",
-      "right_record_id": "2e015bf9-e066-5f37-8796-efc502c8e1ae"
+      "left_record_id": "7f7efadb-9663-5829-b1e1-a75e3bfa2d7a",
+      "right_record_id": "c096f146-9429-59b1-ac06-9533ada0aa1d"
     },
     {
       "synthetic": true,
-      "left_record_id": "37f6c234-8fd1-58a3-9a20-fc620878699e",
-      "right_record_id": "b6ddc2ac-6937-5f1a-a069-cd1b58f05751"
+      "left_record_id": "8529e1d3-ca57-5c9b-8929-141223efd1a2",
+      "right_record_id": "b1af1995-b5f6-571d-82f5-ce95583c09dd"
     },
     {
       "synthetic": true,
-      "left_record_id": "091ecfd8-2405-5b1d-8578-59bc9e0a4e43",
-      "right_record_id": "c57d4a9a-d99b-5037-8385-daa41ef0685b"
+      "left_record_id": "8eef6cba-c1bd-502c-b3a9-078c1db7ca58",
+      "right_record_id": "913de0a8-b811-5dc8-aaad-a00247f65e37"
     },
     {
       "synthetic": true,
-      "left_record_id": "b0888c42-5ec5-527d-b331-d230f0b356ca",
-      "right_record_id": "f11dc1af-26b4-580c-8143-9cc8355314ef"
+      "left_record_id": "a3112024-fb27-5ea1-a93c-fd4578b15eec",
+      "right_record_id": "d47b0e1e-92c0-5001-9ac9-4628409c8b5e"
     },
     {
       "synthetic": true,
-      "left_record_id": "55c76d51-c781-5a52-b5e2-24cb702ea481",
-      "right_record_id": "746a9f41-9f09-551c-9933-c359b679c163"
+      "left_record_id": "b4ba7aca-1b68-59dc-9047-75e5f5d10b4f",
+      "right_record_id": "f9ab81c6-6d05-5bbb-ad57-0a9dc31fec6c"
     },
     {
       "synthetic": true,
-      "left_record_id": "259e758a-c0f4-58ea-9b5e-ee4fc0fee5b7",
-      "right_record_id": "a7467bc5-4d2b-50ae-9382-10f72821ec0e"
+      "left_record_id": "be47d8e8-93ac-563f-823a-4328714568e4",
+      "right_record_id": "dad4a77d-4b0d-569b-b742-bf2e1356b351"
     },
     {
       "synthetic": true,
-      "left_record_id": "1a5aa123-3709-5c02-94dd-e804c7a3c187",
-      "right_record_id": "f7a2ca26-9386-5f25-b14c-41cdfcc5d342"
+      "left_record_id": "d1e4f762-8e49-5903-a7da-ed507af4e663",
+      "right_record_id": "d507d92d-3459-5351-83e9-3f719b4c516b"
     }
   ]
 }

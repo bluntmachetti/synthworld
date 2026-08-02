@@ -14,4 +14,6 @@
       summary).
 - [ ] Evaluator-only truth remains physically separated from public
       artifacts.
+- [ ] No product-specific adapter, private product type, proprietary fixture,
+      execution output, or local assurance artifact is included.
 - [ ] CHANGELOG.md has an entry under Unreleased for user-visible changes.

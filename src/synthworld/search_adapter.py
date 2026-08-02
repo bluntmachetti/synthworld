@@ -1,9 +1,9 @@
-"""A worked adapter from the provider-neutral projection to a consumer shape.
+"""A worked adapter from the provider-neutral projection to an organic-result shape.
 
-Issue #42 asks for one adapter mapping the neutral result to Idcognito's public
-organic-result shape "without adding truth fields". The interesting part is the
-*without*: an adapter is exactly where a truth field gets added by someone trying
-to be helpful, because the truth is right there in the same process.
+Issue #42 asks for a public-only mapping to an ordinary organic-result shape
+"without adding truth fields". The interesting part is the *without*: an adapter
+is exactly where a truth field gets added by someone trying to be helpful, because
+the truth is right there in the same process.
 
 So the adapter takes only :class:`PublicSearchResponse` and cannot see truth at
 all. The signature is the guarantee, and a contract test asserts the mapped shape
