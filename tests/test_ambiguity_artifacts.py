@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
 from importlib.resources import files
 from pathlib import Path
+from uuid import uuid5
 
 import pytest
 from pydantic import ValidationError
@@ -46,6 +48,7 @@ from synthworld.connection import (
     PublicIdentityAttributeKind,
     PublicIdentityRecord,
 )
+from synthworld.connection_generator import _CONNECTION_NAMESPACE
 
 _VARIANT_SEEDS = (1, 2, 3)
 
@@ -270,8 +273,15 @@ def test_each_scenario_rejects_position_dependent_shared_values(
     left, right = _scenario_records(benchmark, scenario)
     left_values = _values(left)
     right_values = _values(right)
+    # Only over the kinds both records carry. `partial_but_sufficient` is lopsided by
+    # definition, and which of its two records sorts first is arbitrary now that
+    # identifiers are content-addressed rather than positional.
     shared = sorted(
-        (kind for kind in left_values if left_values[kind] == right_values[kind]),
+        (
+            kind
+            for kind in left_values.keys() & right_values.keys()
+            if left_values[kind] == right_values[kind]
+        ),
         key=lambda kind: kind.value,
     )
     assert shared
@@ -513,6 +523,71 @@ def test_a_matching_mistake_in_generator_and_spec_no_longer_validates(
 
     with pytest.raises(AmbiguityVariantError, match="shape it has in the frozen pack"):
         validate_ambiguity_variant(corrupted)
+
+
+def test_a_display_name_carries_no_more_than_its_evidence_already_does() -> None:
+    """The channel the repo's own leak detector was written for, and still missed.
+
+    `_display_names` indexed its name pools by `_SCENARIO_INDEX[scenario]`. Because
+    `len(_GIVEN) == 30 == 2 * len(ScenarioKind)`, the given name was a bijection onto
+    (scenario, side), and the fallback family name spelled the ordinal in decimal:
+    one regex over `ExampleNNFamilyNN` recovered the scenario, and through the public
+    `SCENARIO_DISPOSITIONS` map the disposition, on 400 of 400 matching pairs across
+    fifty seeds against a 7/15 majority baseline.
+
+    What makes it a leak is not that the answer is recoverable - it is recoverable
+    from the evidence, which is the task - but that a *free* choice, which name to
+    use, was bound to the label. So the test is that the decoder no longer transfers:
+    the slot a scenario occupies must move between seeds.
+    """
+
+    kinds = list(ScenarioKind)
+    decoded: list[tuple[tuple[int, str], ...]] = []
+    correct = decidable = 0
+
+    for seed in range(1, 21):
+        benchmark = generate_ambiguity_variant(seed=seed)
+        scenario_of = {}
+        for pair in benchmark.answer_key.pairs:
+            scenario_of[pair.left_record_id] = pair.scenario
+            scenario_of[pair.right_record_id] = pair.scenario
+
+        slots: dict[int, str] = {}
+        for record in benchmark.public.corpus.identity_records:
+            found = re.search(r"Example\d\dFamily(\d\d)", record.display_name or "")
+            if found is None:
+                continue
+            slot = int(found.group(1)) // 2
+            slots[slot] = scenario_of[record.id].value
+            decidable += 1
+            if scenario_of[record.id] is kinds[slot]:
+                correct += 1
+        decoded.append(tuple(sorted(slots.items())))
+
+    # No slot-to-scenario map may repeat, or one decoder would serve every seed.
+    assert len(set(decoded)) == len(decoded)
+    # And the old fixed decoder must now do no better than guessing.
+    assert correct / decidable < 2 / len(kinds)
+
+
+def test_a_record_identifier_is_addressed_by_content_not_by_draft_position() -> None:
+    """Identifiers were `uuid5(ns, f"{seed}:ambiguity-variant:{position}")`.
+
+    `position` walked the drafts in `ScenarioKind` order, so holding the public seed
+    was enough to recompute each identifier and read the scenario off it - no
+    attribute or name required.
+    """
+
+    for seed in (1, 7, 42):
+        benchmark = generate_ambiguity_variant(seed=seed)
+        identifiers = {item.id for item in benchmark.public.corpus.identity_records}
+        positional = {
+            uuid5(_CONNECTION_NAMESPACE, f"{seed}:ambiguity-variant:{position}")
+            for position in range(1, len(identifiers) + 1)
+        }
+
+        assert not identifiers & positional
+        assert len(identifiers) == len(benchmark.public.corpus.identity_records)
 
 
 def _positional_scenarios(benchmark: AmbiguityBenchmark) -> tuple[ScenarioKind, ...]:

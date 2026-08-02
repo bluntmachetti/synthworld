@@ -37,6 +37,7 @@ from synthworld.connection import (
     PublicIdentityAttribute,
     PublicIdentityAttributeKind,
     PublicIdentityRecord,
+    PublicIdentitySourceType,
     RecordMembership,
 )
 from synthworld.connection_generator import _identity_record
@@ -155,7 +156,6 @@ _UNICODE_NAMES = (
     ("François", "Francois", "Brontë", "Bronte"),
     ("Šimon", "Simon", "Núñez", "Nunez"),
 )
-_SCENARIO_INDEX = {scenario: index for index, scenario in enumerate(ScenarioKind)}
 _VIRTUAL_PREFIX = "\x00realization:"
 _DisplayRelation = Literal[
     "alias", "distinct", "equal", "initial_full", "same_family", "unicode"
@@ -491,23 +491,85 @@ def _family_value(attributes: Sequence[PublicIdentityAttribute], fallback: str) 
     )
 
 
+def _evidence_anchor(
+    left: tuple[PublicIdentityAttribute, ...],
+    right: tuple[PublicIdentityAttribute, ...],
+) -> str:
+    """Identify a pair by the evidence it carries, independently of side."""
+
+    return "|".join(
+        sorted(f"{item.kind.value}={item.value}" for item in (*left, *right))
+    )
+
+
+def _display_slots(
+    seed: int, anchors: Mapping[ScenarioKind, str]
+) -> dict[ScenarioKind, int]:
+    """Give each pair a disjoint name slot, ranked by its own evidence.
+
+    The slot used to be ``_SCENARIO_INDEX[scenario]``, which put the answer in the
+    public display name: ``len(_GIVEN) == 30 == 2 * len(ScenarioKind)`` made the given
+    name a bijection onto (scenario, side), and the fallback family name spelled the
+    ordinal in decimal as ``ExampleNNFamilyNN``. One regex recovered every scenario -
+    and therefore every disposition, through the public ``SCENARIO_DISPOSITIONS`` map -
+    on 750 of 750 pairs across fifty seeds.
+
+    A seed-keyed *permutation* of the ordinal does not fix that. The seed is in the
+    public artifact and this source is public, so the permutation inverts exactly;
+    three independent reviewers each recovered 750/750 against that proposal.
+
+    What fixes it is dropping the label from the derivation. The slot is now a keyed
+    rank over the pair's own evidence, the same collision-free scheme
+    :func:`_substitution_plan` uses for attribute values. A name therefore tells a
+    reader only what the evidence already told them, and no decoder survives to the
+    next seed, because the anchors are themselves seed-substituted.
+    """
+
+    _require(
+        len(set(anchors.values())) == len(anchors),
+        "two scenarios carry identical evidence, so name slots would be ordinal",
+    )
+    ordered = sorted(
+        anchors.items(),
+        key=lambda item: (_draw(seed, f"display-slot:{item[1]}", 0), item[1]),
+    )
+    return {scenario: slot for slot, (scenario, _anchor) in enumerate(ordered)}
+
+
+def _record_key(
+    display_name: str,
+    source_type: PublicIdentitySourceType,
+    attributes: tuple[PublicIdentityAttribute, ...],
+) -> str:
+    """Address a record by what it contains, never by where it was drafted.
+
+    Identifiers were ``uuid5(namespace, f"{seed}:ambiguity-variant:{position}")`` with
+    ``position`` walking the drafts in scenario order, so anyone holding the public
+    seed could recompute the identifier for each position and read the scenario off
+    it. Content-addressing keeps the identifier a function of the seed and the
+    evidence - which a reader is entitled to - and of nothing else.
+    """
+
+    body = "|".join(sorted(f"{item.kind.value}={item.value}" for item in attributes))
+    material = f"{source_type.value}|{display_name}|{body}"
+    return f"ambiguity-variant:{blake2b(material.encode(), digest_size=16).hexdigest()}"
+
+
 def _display_names(
     *,
     seed: int,
     scenario: ScenarioKind,
+    slot: int,
     left: tuple[PublicIdentityAttribute, ...],
     right: tuple[PublicIdentityAttribute, ...],
 ) -> tuple[str, str]:
-    index = _SCENARIO_INDEX[scenario]
     given_offset = _draw(seed, "display-given", 0) % len(_GIVEN)
     family_offset = _draw(seed, "display-family", 0) % len(_FAMILY)
-    left_given = _GIVEN[(given_offset + index * 2) % len(_GIVEN)]
-    right_given = _GIVEN[(given_offset + index * 2 + 1) % len(_GIVEN)]
-    left_family = _family_value(
-        left, f"Example{family_offset:02d}Family{index * 2:02d}"
-    )
+    left_given = _GIVEN[(given_offset + slot * 2) % len(_GIVEN)]
+    right_given = _GIVEN[(given_offset + slot * 2 + 1) % len(_GIVEN)]
+    left_family = _family_value(left, f"Example{family_offset:02d}Family{slot * 2:02d}")
     right_family = _family_value(
-        right, f"Example{family_offset:02d}Family{index * 2 + 1:02d}"
+        right, f"Example{family_offset:02d}Family{slot * 2 + 1:02d}"
     )
 
     if scenario in {
@@ -838,39 +900,66 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
     records: list[PublicIdentityRecord] = []
     pairs: list[PairTruth] = []
 
+    # Realize every pair before naming any of them. Name slots are ranked across the
+    # whole corpus's evidence, so they cannot be assigned one pair at a time - and
+    # ranking is the point, because it is what keeps the scenario ordinal out.
+    realized: list[
+        tuple[
+            _Draft,
+            _Draft,
+            tuple[PublicIdentityAttribute, ...],
+            tuple[PublicIdentityAttribute, ...],
+        ]
+    ] = []
     for position in range(0, len(drafts), 2):
         left_draft, right_draft = drafts[position : position + 2]
-        scenario = left_draft.scenario
         left_attributes, right_attributes = _realize_attributes(
-            scenario,
+            left_draft.scenario,
             _rewritten_attributes(left_draft, substitutions),
             _rewritten_attributes(right_draft, substitutions),
             selected,
             substitutions,
         )
-        if scenario is ScenarioKind.UNICODE_VARIANT:
+        if left_draft.scenario is ScenarioKind.UNICODE_VARIANT:
             _, _, unicode_family, ascii_family = _unicode_name(seed)
             left_attributes = _replace_family(left_attributes, unicode_family)
             right_attributes = _replace_family(right_attributes, ascii_family)
+        realized.append((left_draft, right_draft, left_attributes, right_attributes))
+
+    slots = _display_slots(
+        seed,
+        {
+            left_draft.scenario: _evidence_anchor(left_attributes, right_attributes)
+            for left_draft, _right, left_attributes, right_attributes in realized
+        },
+    )
+
+    for left_draft, right_draft, left_attributes, right_attributes in realized:
+        scenario = left_draft.scenario
         left_name, right_name = _display_names(
             seed=seed,
             scenario=scenario,
+            slot=slots[scenario],
             left=left_attributes,
             right=right_attributes,
         )
         left_record = _identity_record(
             seed=seed,
-            key=f"ambiguity-variant:{position + 1}",
+            key=_record_key(left_name, left_draft.source_type, left_attributes),
             source_type=left_draft.source_type,
             display_name=left_name,
             attributes=left_attributes,
         )
         right_record = _identity_record(
             seed=seed,
-            key=f"ambiguity-variant:{position + 2}",
+            key=_record_key(right_name, right_draft.source_type, right_attributes),
             source_type=right_draft.source_type,
             display_name=right_name,
             attributes=right_attributes,
+        )
+        _require(
+            left_record.id != right_record.id,
+            "two records in one pair are indistinguishable by content",
         )
         records.extend((left_record, right_record))
         first, second = sorted((left_record.id, right_record.id))
