@@ -147,6 +147,9 @@ class SearchResultTruth(SyntheticModel):
 
 class SearchTruthBundle(SyntheticModel):
     schema_version: Literal["1.0.0"] = SEARCH_SCHEMA_VERSION
+    #: Which projection this describes. Evaluator-side, so recording it here leaks
+    #: nothing, and a score that cannot name its own seed is not reproducible.
+    seed: int
     #: sha256 over the serialized public responses this truth describes. Physical
     #: separation without binding lets a truth bundle be paired with a different
     #: run's responses and still look coherent; the digest makes that detectable.

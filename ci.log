@@ -1,0 +1,2330 @@
+uv run ruff check .
+All checks passed!
+uv run ruff format --check .
+111 files already formatted
+uv run mypy
+Success: no issues found in 107 source files
+uv build --clear
+Building source distribution...
+Building wheel from source distribution...
+Successfully built dist/idcognito_synthworld-0.10.0.tar.gz
+Successfully built dist/idcognito_synthworld-0.10.0-py3-none-any.whl
+uv run python -c "from pathlib import Path; from tarfile import open as open_tar; archives=list(Path('dist').glob('*.tar.gz')); assert len(archives) == 1; archive=open_tar(archives[0], 'r:gz'); names={item.name for item in archive.getmembers()}; archive.close(); assert not any('/.local-assurance/' in name or name.endswith('/.local-assurance') for name in names)"
+uv run python -c "from zipfile import ZipFile; names=set(ZipFile('dist/idcognito_synthworld-0.10.0-py3-none-any.whl').namelist()); assert any(name.endswith('dist-info/licenses/LICENSE') for name in names); required={'synthworld/py.typed','synthworld/benchmarks/golden-v1.json','synthworld/benchmarks/SHA256SUMS','synthworld/benchmarks/extraction-golden-v1.json','synthworld/benchmarks/EXTRACTION_SHA256SUMS','synthworld/benchmarks/extraction-public-golden-v1.json','synthworld/benchmarks/EXTRACTION_PUBLIC_SHA256SUMS','synthworld/benchmarks/extraction-answer-golden-v1.json','synthworld/benchmarks/EXTRACTION_ANSWER_SHA256SUMS','synthworld/benchmarks/connection-golden-v1.json','synthworld/benchmarks/CONNECTION_SHA256SUMS','synthworld/benchmarks/connection-public-golden-v1.json','synthworld/benchmarks/CONNECTION_PUBLIC_SHA256SUMS','synthworld/benchmarks/risk-public-golden-v1.json','synthworld/benchmarks/RISK_PUBLIC_SHA256SUMS','synthworld/benchmarks/risk-answer-golden-v1.json','synthworld/benchmarks/RISK_ANSWER_SHA256SUMS','synthworld/benchmarks/asteria-agentic-v1/public/manifest.json','synthworld/benchmarks/asteria-agentic-v1/public/public_events.jsonl','synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json','synthworld/benchmarks/asteria-agentic-v1/evaluator/authority_truth.jsonl','synthworld/benchmarks/households-smoke-v1.json','synthworld/benchmarks/HOUSEHOLDS_SMOKE_SHA256SUMS','synthworld/benchmarks/ambiguity-public-v1.json','synthworld/benchmarks/ambiguity-memberships-v1.json','synthworld/benchmarks/ambiguity-dispositions-v1.json','synthworld/benchmarks/AMBIGUITY_SHA256SUMS'}; assert required <= names"
+uv run --isolated --no-project --with ./dist/idcognito_synthworld-0.10.0-py3-none-any.whl synthworld connection-metrics
+{
+  "synthetic": true,
+  "adversarial_record_count": 18,
+  "truth_entity_count": 10,
+  "possible_record_pair_count": 153,
+  "same_entity_pair_count": 9,
+  "different_entity_pair_count": 144,
+  "packs": [
+    {
+      "synthetic": true,
+      "pack": "common_name",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 2,
+      "different_entity_pair_count": 4
+    },
+    {
+      "synthetic": true,
+      "pack": "maiden_name",
+      "record_count": 3,
+      "entity_count": 2,
+      "same_entity_pair_count": 1,
+      "different_entity_pair_count": 2
+    },
+    {
+      "synthetic": true,
+      "pack": "misspelling_alias",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 3,
+      "different_entity_pair_count": 3
+    },
+    {
+      "synthetic": true,
+      "pack": "twins_shared_address",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 2,
+      "different_entity_pair_count": 4
+    },
+    {
+      "synthetic": true,
+      "pack": "unicode_diacritics",
+      "record_count": 3,
+      "entity_count": 2,
+      "same_entity_pair_count": 1,
+      "different_entity_pair_count": 2
+    }
+  ],
+  "membership_integrity": 1.0,
+  "pack_integrity": 1.0,
+  "public_identity_record_count": 10,
+  "property_adjacency_record_count": 5,
+  "profile_link_record_count": 3,
+  "neighbor_relationship_count": 2,
+  "social_relationship_count": 1,
+  "unilateral_property_control_count": 1,
+  "unilateral_profile_control_count": 1,
+  "neighbor_reciprocal_evidence_coverage": 1.0,
+  "social_reciprocal_evidence_coverage": 1.0,
+  "unilateral_control_integrity": 1.0,
+  "public_reference_integrity": 1.0,
+  "safely_fake_record_rate": 1.0,
+  "deterministic_replay_integrity": 1.0,
+  "manifest_integrity": 1.0,
+  "answer_key_separation_integrity": 1.0
+}
+uv run --isolated --no-project --with ./dist/idcognito_synthworld-0.10.0-py3-none-any.whl synthworld risk-metrics
+{
+  "synthetic": true,
+  "seed": 20260719,
+  "persona_count": 10,
+  "case_count": 10,
+  "factor_count": 18,
+  "score_sum": 430,
+  "band_distribution": {
+    "critical": 2,
+    "none": 1,
+    "moderate": 5,
+    "high": 1,
+    "low": 1
+  },
+  "safely_fake_record_rate": 1.0,
+  "answer_key_separation_integrity": 1.0,
+  "cross_file_case_integrity": 1.0,
+  "factor_arithmetic_integrity": 1.0,
+  "score_integrity": 1.0,
+  "band_integrity": 1.0,
+  "deterministic_replay_integrity": 1.0,
+  "frozen_artifact_checked": true,
+  "frozen_artifact_integrity": 1.0
+}
+uv run --isolated --no-project --no-cache --with ./dist/idcognito_synthworld-0.10.0-py3-none-any.whl python -c "import tempfile; from pathlib import Path; from synthworld.agentic import generate_asteria_agentic_v1, reference_agentic_trace, trace_submission_to_jsonl; from synthworld.cli import main; benchmark=generate_asteria_agentic_v1(); path=Path(tempfile.mkdtemp())/'trace.jsonl'; path.write_text(trace_submission_to_jsonl(reference_agentic_trace(benchmark)), encoding='utf-8'); assert main(['validate','agentic-trace','--predictions',str(path)]) == 0; assert main(['validate','agentic-trace','--predictions','/dev/null']) == 1"
+Downloading pydantic-core (2.0MiB)
+Downloading faker (2.0MiB)
+ Downloaded faker
+ Downloaded pydantic-core
+Installed 7 packages in 6ms
+agentic-trace: valid
+rows 11, expected actions 11, 0 errors, 0 warnings
+agentic-trace: invalid
+rows 0, expected actions 11, 11 errors, 0 warnings
+error  -  missing_event_id  evt-010-authorised-comparison: evt-010-authorised-comparison is absent from the submission
+error  -  missing_event_id  evt-011-outside-capability: evt-011-outside-capability is absent from the submission
+error  -  missing_event_id  evt-012-overprivileged-delegation: evt-012-overprivileged-delegation is absent from the submission
+error  -  missing_event_id  evt-013-wrong-runtime: evt-013-wrong-runtime is absent from the submission
+error  -  missing_event_id  evt-014-shared-credential: evt-014-shared-credential is absent from the submission
+error  -  missing_event_id  evt-015-valid-then-revoked: evt-015-valid-then-revoked is absent from the submission
+error  -  missing_event_id  evt-016-incorrect-attribution: evt-016-incorrect-attribution is absent from the submission
+error  -  missing_event_id  evt-017-missing-evidence: evt-017-missing-evidence is absent from the submission
+error  -  missing_event_id  evt-018-cross-tenant: evt-018-cross-tenant is absent from the submission
+error  -  missing_event_id  evt-020-post-revocation: evt-020-post-revocation is absent from the submission
+error  -  missing_event_id  evt-021-invalid-before-grant: evt-021-invalid-before-grant is absent from the submission
+uv run --isolated --no-project --no-cache --with ./dist/idcognito_synthworld-0.10.0-py3-none-any.whl python -c "from synthworld.agentic import evaluate_agentic_trace, generate_asteria_agentic_v1, load_golden_agentic_benchmark, reference_agentic_trace; from synthworld.agentic.serialization import agentic_artifact_checksums; generated=generate_asteria_agentic_v1(); assert generated == load_golden_agentic_benchmark(); assert dict(agentic_artifact_checksums(generated)) == {'public':'9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594','evaluator':'3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f'}; report=evaluate_agentic_trace(reference_agentic_trace(generated), benchmark=generated); assert report.scoring_version == '0.3.0'; assert {'provenance_exact_match','provenance_precision'} <= {item.name for item in report.metrics}"
+Downloading pydantic-core (2.0MiB)
+Downloading faker (2.0MiB)
+ Downloaded faker
+ Downloaded pydantic-core
+Installed 7 packages in 6ms
+uv run pytest
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-9.1.1, pluggy-1.6.0
+rootdir: /tmp/claude-1000/-home-kademolu-Projects-synthworld/321fbee3-c970-4615-9ac5-3587f92ad958/scratchpad/pr53
+configfile: pyproject.toml
+testpaths: tests
+plugins: Faker-40.31.0, cov-7.1.0
+collected 740 items
+
+tests/test_agentic_benchmark.py ..................                       [  2%]
+tests/test_agentic_evaluation.py ...........                             [  3%]
+tests/test_agentic_failure_reason_precedence.py ........................ [  7%]
+....................................                                     [ 12%]
+tests/test_agentic_integrity.py ........................                 [ 15%]
+tests/test_agentic_relationships.py ................                     [ 17%]
+tests/test_agentic_replay_validation.py ................................ [ 21%]
+...........                                                              [ 23%]
+tests/test_agentic_trace_validator.py ................................   [ 27%]
+tests/test_agentic_validation.py ..................                      [ 30%]
+tests/test_ambiguity_artifacts.py ...................................... [ 35%]
+..............................                                           [ 39%]
+tests/test_ambiguity_pack.py .......................                     [ 42%]
+tests/test_ambiguity_partition_evaluation.py ..................          [ 44%]
+tests/test_assurance_receipt.py .................................        [ 49%]
+tests/test_baselines.py ....                                             [ 49%]
+tests/test_cli.py ..................................                     [ 54%]
+tests/test_connection_benchmark_metrics.py ......................        [ 57%]
+tests/test_connection_generator.py ...............                       [ 59%]
+tests/test_control_catalogue_vocabulary.py .....                         [ 60%]
+tests/test_corpus_metrics.py .........                                   [ 61%]
+tests/test_design_intent_coverage_table.py .......                       [ 62%]
+tests/test_evaluation.py ..........................                      [ 65%]
+tests/test_exposure_generator.py .....                                   [ 66%]
+tests/test_exposure_ground_truth.py ....                                 [ 66%]
+tests/test_extraction_benchmark.py ............                          [ 68%]
+tests/test_extraction_generator.py ..........                            [ 69%]
+tests/test_extraction_golden_benchmark.py ..                             [ 70%]
+tests/test_generator.py .......                                          [ 71%]
+tests/test_golden_benchmark.py ..                                        [ 71%]
+tests/test_honesty_gate.py ..                                            [ 71%]
+tests/test_households_profile.py ..............................          [ 75%]
+tests/test_households_smoke.py ......                                    [ 76%]
+tests/test_leakage.py ...............                                    [ 78%]
+tests/test_metrics.py ...                                                [ 78%]
+tests/test_profile_realism.py .................                          [ 81%]
+tests/test_public_repository_boundary.py .......                         [ 82%]
+tests/test_relationship_ground_truth.py ..                               [ 82%]
+tests/test_risk_benchmark_metrics.py ...                                 [ 82%]
+tests/test_risk_generator.py .....                                       [ 83%]
+tests/test_risk_golden_benchmark.py ......                               [ 84%]
+tests/test_risk_models.py .......................                        [ 87%]
+tests/test_safety.py ....                                                [ 87%]
+tests/test_search_evaluation.py .....................                    [ 90%]
+tests/test_search_projection.py ....................                     [ 93%]
+tests/test_trace_schema_agreement.py ................................... [ 98%]
+.............                                                            [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.11-final-0 _______________
+
+Name                                            Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------------
+src/synthworld/__init__.py                         23      0      0      0   100%
+src/synthworld/__main__.py                          2      0      0      0   100%
+src/synthworld/agentic/__init__.py                 11      0      0      0   100%
+src/synthworld/agentic/baselines.py                43      0     12      0   100%
+src/synthworld/agentic/errors.py                    4      0      0      0   100%
+src/synthworld/agentic/evaluation.py               56      0      6      0   100%
+src/synthworld/agentic/generator.py                88      0      2      0   100%
+src/synthworld/agentic/integrity.py                48      0     26      0   100%
+src/synthworld/agentic/models.py                  405      0     56      0   100%
+src/synthworld/agentic/projection.py               41      0      8      0   100%
+src/synthworld/agentic/relationships.py           112      0     46      0   100%
+src/synthworld/agentic/replay.py                  245      0    130      0   100%
+src/synthworld/agentic/serialization.py           116      0     20      0   100%
+src/synthworld/agentic/trace_validation.py        108      0     32      0   100%
+src/synthworld/ambiguity.py                        95      0     20      0   100%
+src/synthworld/ambiguity_baselines.py              45      0     10      0   100%
+src/synthworld/ambiguity_generator.py              30      0      2      0   100%
+src/synthworld/ambiguity_metrics.py               145      0     38      0   100%
+src/synthworld/ambiguity_partition.py             136      0     44      0   100%
+src/synthworld/ambiguity_serialization.py          51      0      4      0   100%
+src/synthworld/ambiguity_variants.py              269      0     82      0   100%
+src/synthworld/assurance/__init__.py                3      0      0      0   100%
+src/synthworld/assurance/ambiguity.py             150      0     32      0   100%
+src/synthworld/assurance/models.py                154      0     22      0   100%
+src/synthworld/assurance/receipt.py               122      0     24      0   100%
+src/synthworld/assurance/reference_product.py      56      0     10      0   100%
+src/synthworld/baselines.py                       169      0     54      0   100%
+src/synthworld/benchmarks/__init__.py               0      0      0      0   100%
+src/synthworld/cli.py                             228      0     52      0   100%
+src/synthworld/connection.py                      207      0     30      0   100%
+src/synthworld/connection_generator.py             89      0      8      0   100%
+src/synthworld/connection_metrics.py              246      0     46      0   100%
+src/synthworld/connection_serialization.py         15      0      0      0   100%
+src/synthworld/corpus_metrics.py                  106      0     72      0   100%
+src/synthworld/corpus_serialization.py              8      0      0      0   100%
+src/synthworld/evaluation.py                      368      0    100      0   100%
+src/synthworld/exposure_generator.py               41      0      6      0   100%
+src/synthworld/exposures.py                        85      0      0      0   100%
+src/synthworld/extraction.py                      152      0     36      0   100%
+src/synthworld/extraction_generator.py             72      0      6      0   100%
+src/synthworld/extraction_serialization.py         44      0      6      0   100%
+src/synthworld/generator.py                        92      0     20      0   100%
+src/synthworld/leakage.py                         105      0     26      0   100%
+src/synthworld/metrics.py                         104      0     48      0   100%
+src/synthworld/models.py                           78      0      0      0   100%
+src/synthworld/profiles/__init__.py                 2      0      0      0   100%
+src/synthworld/profiles/households.py             174      0     36      0   100%
+src/synthworld/profiles/realism.py                 95      0     28      0   100%
+src/synthworld/profiles/smoke.py                   26      0      4      0   100%
+src/synthworld/risk.py                            145      0     42      0   100%
+src/synthworld/risk_generator.py                   27      0      4      0   100%
+src/synthworld/risk_metrics.py                     88      0     18      0   100%
+src/synthworld/risk_serialization.py               39      0      6      0   100%
+src/synthworld/search.py                           79      0     18      0   100%
+src/synthworld/search_adapter.py                    8      0      0      0   100%
+src/synthworld/search_baselines.py                 25      0      4      0   100%
+src/synthworld/search_generator.py                 87      0     14      0   100%
+src/synthworld/search_metrics.py                   95      0     26      0   100%
+src/synthworld/serialization.py                     4      0      0      0   100%
+-------------------------------------------------------------------------------------------
+TOTAL                                            5661      0   1336      0   100%
+Coverage XML written to file coverage.xml
+Required test coverage of 100% reached. Total coverage: 100.00%
+============================= 740 passed in 15.35s =============================
+uv run synthworld metrics --seed 20260719 --persona-count 10
+{
+  "synthetic": true,
+  "persona_count": 10,
+  "relationship_count": 9,
+  "safely_fake_record_rate": 1.0,
+  "relationship_evidence_integrity": 1.0,
+  "graph_connected": true
+}
+uv run synthworld corpus-metrics --seed 20260719 --persona-count 10
+{
+  "synthetic": true,
+  "persona_count": 10,
+  "script_count": 10,
+  "script_coverage": 1.0,
+  "exposure_reference_integrity": 1.0,
+  "safely_fake_record_rate": 1.0,
+  "zero_exposure_persona_count": 1,
+  "name_collision_false_positive_count": 5,
+  "broker_reappearance_count": 3
+}
+uv run synthworld corpus-metrics --seed 20260719 --persona-count 100
+{
+  "synthetic": true,
+  "persona_count": 100,
+  "script_count": 100,
+  "script_coverage": 1.0,
+  "exposure_reference_integrity": 1.0,
+  "safely_fake_record_rate": 1.0,
+  "zero_exposure_persona_count": 1,
+  "name_collision_false_positive_count": 50,
+  "broker_reappearance_count": 33
+}
+uv run synthworld connection-metrics --seed 20260719 --persona-count 10
+{
+  "synthetic": true,
+  "adversarial_record_count": 18,
+  "truth_entity_count": 10,
+  "possible_record_pair_count": 153,
+  "same_entity_pair_count": 9,
+  "different_entity_pair_count": 144,
+  "packs": [
+    {
+      "synthetic": true,
+      "pack": "common_name",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 2,
+      "different_entity_pair_count": 4
+    },
+    {
+      "synthetic": true,
+      "pack": "maiden_name",
+      "record_count": 3,
+      "entity_count": 2,
+      "same_entity_pair_count": 1,
+      "different_entity_pair_count": 2
+    },
+    {
+      "synthetic": true,
+      "pack": "misspelling_alias",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 3,
+      "different_entity_pair_count": 3
+    },
+    {
+      "synthetic": true,
+      "pack": "twins_shared_address",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 2,
+      "different_entity_pair_count": 4
+    },
+    {
+      "synthetic": true,
+      "pack": "unicode_diacritics",
+      "record_count": 3,
+      "entity_count": 2,
+      "same_entity_pair_count": 1,
+      "different_entity_pair_count": 2
+    }
+  ],
+  "membership_integrity": 1.0,
+  "pack_integrity": 1.0,
+  "public_identity_record_count": 10,
+  "property_adjacency_record_count": 5,
+  "profile_link_record_count": 3,
+  "neighbor_relationship_count": 2,
+  "social_relationship_count": 1,
+  "unilateral_property_control_count": 1,
+  "unilateral_profile_control_count": 1,
+  "neighbor_reciprocal_evidence_coverage": 1.0,
+  "social_reciprocal_evidence_coverage": 1.0,
+  "unilateral_control_integrity": 1.0,
+  "public_reference_integrity": 1.0,
+  "safely_fake_record_rate": 1.0,
+  "deterministic_replay_integrity": 1.0,
+  "manifest_integrity": 1.0,
+  "answer_key_separation_integrity": 1.0
+}
+uv run synthworld connection-metrics --seed 20260719 --persona-count 100
+{
+  "synthetic": true,
+  "adversarial_record_count": 18,
+  "truth_entity_count": 10,
+  "possible_record_pair_count": 153,
+  "same_entity_pair_count": 9,
+  "different_entity_pair_count": 144,
+  "packs": [
+    {
+      "synthetic": true,
+      "pack": "common_name",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 2,
+      "different_entity_pair_count": 4
+    },
+    {
+      "synthetic": true,
+      "pack": "maiden_name",
+      "record_count": 3,
+      "entity_count": 2,
+      "same_entity_pair_count": 1,
+      "different_entity_pair_count": 2
+    },
+    {
+      "synthetic": true,
+      "pack": "misspelling_alias",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 3,
+      "different_entity_pair_count": 3
+    },
+    {
+      "synthetic": true,
+      "pack": "twins_shared_address",
+      "record_count": 4,
+      "entity_count": 2,
+      "same_entity_pair_count": 2,
+      "different_entity_pair_count": 4
+    },
+    {
+      "synthetic": true,
+      "pack": "unicode_diacritics",
+      "record_count": 3,
+      "entity_count": 2,
+      "same_entity_pair_count": 1,
+      "different_entity_pair_count": 2
+    }
+  ],
+  "membership_integrity": 1.0,
+  "pack_integrity": 1.0,
+  "public_identity_record_count": 100,
+  "property_adjacency_record_count": 41,
+  "profile_link_record_count": 39,
+  "neighbor_relationship_count": 20,
+  "social_relationship_count": 19,
+  "unilateral_property_control_count": 1,
+  "unilateral_profile_control_count": 1,
+  "neighbor_reciprocal_evidence_coverage": 1.0,
+  "social_reciprocal_evidence_coverage": 1.0,
+  "unilateral_control_integrity": 1.0,
+  "public_reference_integrity": 1.0,
+  "safely_fake_record_rate": 1.0,
+  "deterministic_replay_integrity": 1.0,
+  "manifest_integrity": 1.0,
+  "answer_key_separation_integrity": 1.0
+}
+uv run synthworld risk-metrics --seed 20260719 --persona-count 10
+{
+  "synthetic": true,
+  "seed": 20260719,
+  "persona_count": 10,
+  "case_count": 10,
+  "factor_count": 18,
+  "score_sum": 430,
+  "band_distribution": {
+    "critical": 2,
+    "none": 1,
+    "moderate": 5,
+    "high": 1,
+    "low": 1
+  },
+  "safely_fake_record_rate": 1.0,
+  "answer_key_separation_integrity": 1.0,
+  "cross_file_case_integrity": 1.0,
+  "factor_arithmetic_integrity": 1.0,
+  "score_integrity": 1.0,
+  "band_integrity": 1.0,
+  "deterministic_replay_integrity": 1.0,
+  "frozen_artifact_checked": true,
+  "frozen_artifact_integrity": 1.0
+}
+uv run synthworld risk-metrics --seed 20260719 --persona-count 100
+{
+  "synthetic": true,
+  "seed": 20260719,
+  "persona_count": 100,
+  "case_count": 100,
+  "factor_count": 198,
+  "score_sum": 4780,
+  "band_distribution": {
+    "critical": 17,
+    "high": 24,
+    "moderate": 41,
+    "low": 17,
+    "none": 1
+  },
+  "safely_fake_record_rate": 1.0,
+  "answer_key_separation_integrity": 1.0,
+  "cross_file_case_integrity": 1.0,
+  "factor_arithmetic_integrity": 1.0,
+  "score_integrity": 1.0,
+  "band_integrity": 1.0,
+  "deterministic_replay_integrity": 1.0,
+  "frozen_artifact_checked": false,
+  "frozen_artifact_integrity": null
+}
+uv run python examples/evaluate_extraction.py --seed 20260719 --persona-count 10
+{
+  "synthetic": true,
+  "schema_version": "0.1.0",
+  "scoring_version": "0.1.0",
+  "task": "extraction",
+  "seed": 20260719,
+  "persona_count": 10,
+  "benchmark_version": "1.0.0",
+  "checksum_scheme": "synthworld-json-v1",
+  "artifact_checksums": [
+    [
+      "public",
+      "10632f000f8aeb8ccd8557476b18b940cfd35b91f7cb38dcf209269de987160e"
+    ],
+    [
+      "answers",
+      "ffc6503df8cbb9d8f99161ee29324e8d0a0187901118e8eeaa590b49e7598f78"
+    ]
+  ],
+  "metrics": [
+    {
+      "synthetic": true,
+      "name": "exact_precision",
+      "value": 1.0,
+      "support": 69
+    },
+    {
+      "synthetic": true,
+      "name": "exact_recall",
+      "value": 0.46,
+      "support": 150
+    },
+    {
+      "synthetic": true,
+      "name": "exact_f1",
+      "value": 0.6301369863013699,
+      "support": 150
+    },
+    {
+      "synthetic": true,
+      "name": "relaxed_precision",
+      "value": 1.0,
+      "support": 69
+    },
+    {
+      "synthetic": true,
+      "name": "relaxed_recall",
+      "value": 0.46,
+      "support": 150
+    },
+    {
+      "synthetic": true,
+      "name": "relaxed_f1",
+      "value": 0.6301369863013699,
+      "support": 150
+    }
+  ],
+  "slices": [
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "address",
+      "outcome": "missed",
+      "count": 15,
+      "support": 15
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "date_of_birth",
+      "outcome": "missed",
+      "count": 6,
+      "support": 6
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "education",
+      "outcome": "missed",
+      "count": 13,
+      "support": 13
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "employer",
+      "outcome": "missed",
+      "count": 34,
+      "support": 34
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "username",
+      "outcome": "missed",
+      "count": 13,
+      "support": 13
+    },
+    {
+      "synthetic": true,
+      "dimension": "overall",
+      "value": "all",
+      "outcome": "spurious",
+      "count": 0,
+      "support": 69
+    }
+  ]
+}
+uv run python examples/evaluate_all.py --seed 20260719 --persona-count 10
+
+=== Evaluating Extraction ===
+{
+  "synthetic": true,
+  "schema_version": "0.1.0",
+  "scoring_version": "0.1.0",
+  "task": "extraction",
+  "seed": 20260719,
+  "persona_count": 10,
+  "benchmark_version": "1.0.0",
+  "checksum_scheme": "synthworld-json-v1",
+  "artifact_checksums": [
+    [
+      "public",
+      "10632f000f8aeb8ccd8557476b18b940cfd35b91f7cb38dcf209269de987160e"
+    ],
+    [
+      "answers",
+      "ffc6503df8cbb9d8f99161ee29324e8d0a0187901118e8eeaa590b49e7598f78"
+    ]
+  ],
+  "metrics": [
+    {
+      "synthetic": true,
+      "name": "exact_precision",
+      "value": 1.0,
+      "support": 69
+    },
+    {
+      "synthetic": true,
+      "name": "exact_recall",
+      "value": 0.46,
+      "support": 150
+    },
+    {
+      "synthetic": true,
+      "name": "exact_f1",
+      "value": 0.6301369863013699,
+      "support": 150
+    },
+    {
+      "synthetic": true,
+      "name": "relaxed_precision",
+      "value": 1.0,
+      "support": 69
+    },
+    {
+      "synthetic": true,
+      "name": "relaxed_recall",
+      "value": 0.46,
+      "support": 150
+    },
+    {
+      "synthetic": true,
+      "name": "relaxed_f1",
+      "value": 0.6301369863013699,
+      "support": 150
+    }
+  ],
+  "slices": [
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "address",
+      "outcome": "missed",
+      "count": 15,
+      "support": 15
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "date_of_birth",
+      "outcome": "missed",
+      "count": 6,
+      "support": 6
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "education",
+      "outcome": "missed",
+      "count": 13,
+      "support": 13
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "employer",
+      "outcome": "missed",
+      "count": 34,
+      "support": 34
+    },
+    {
+      "synthetic": true,
+      "dimension": "data_class",
+      "value": "username",
+      "outcome": "missed",
+      "count": 13,
+      "support": 13
+    },
+    {
+      "synthetic": true,
+      "dimension": "overall",
+      "value": "all",
+      "outcome": "spurious",
+      "count": 0,
+      "support": 69
+    }
+  ]
+}
+
+=== Evaluating Entity Resolution ===
+{
+  "synthetic": true,
+  "schema_version": "0.1.0",
+  "scoring_version": "0.1.0",
+  "task": "entity_resolution",
+  "seed": 20260719,
+  "persona_count": 10,
+  "benchmark_version": "1.0.0",
+  "checksum_scheme": "synthworld-json-v1",
+  "artifact_checksums": [
+    [
+      "public",
+      "fa896ae417f75d6fc4ac650ec26683a39b3994bc004c743fc1fcc71f605ff17e"
+    ],
+    [
+      "benchmark",
+      "044b52650039059b5841e0af9c512e2bbc7dbb089d43e465d43fda06889a8fe4"
+    ]
+  ],
+  "metrics": [
+    {
+      "synthetic": true,
+      "name": "pairwise_precision",
+      "value": 1.0,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "name": "pairwise_recall",
+      "value": 0.3333333333333333,
+      "support": 9
+    },
+    {
+      "synthetic": true,
+      "name": "pairwise_f1",
+      "value": 0.5,
+      "support": 9
+    },
+    {
+      "synthetic": true,
+      "name": "bcubed_precision",
+      "value": 1.0,
+      "support": 18
+    },
+    {
+      "synthetic": true,
+      "name": "bcubed_recall",
+      "value": 0.7037037037037037,
+      "support": 18
+    },
+    {
+      "synthetic": true,
+      "name": "bcubed_f1",
+      "value": 0.8260869565217391,
+      "support": 18
+    }
+  ],
+  "slices": [
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "common_name",
+      "outcome": "false_merge",
+      "count": 0,
+      "support": 4
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "common_name",
+      "outcome": "false_split",
+      "count": 2,
+      "support": 2
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "maiden_name",
+      "outcome": "false_merge",
+      "count": 0,
+      "support": 2
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "maiden_name",
+      "outcome": "false_split",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "misspelling_alias",
+      "outcome": "false_merge",
+      "count": 0,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "misspelling_alias",
+      "outcome": "false_split",
+      "count": 2,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "twins_shared_address",
+      "outcome": "false_merge",
+      "count": 0,
+      "support": 4
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "twins_shared_address",
+      "outcome": "false_split",
+      "count": 0,
+      "support": 2
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "unicode_diacritics",
+      "outcome": "false_merge",
+      "count": 0,
+      "support": 2
+    },
+    {
+      "synthetic": true,
+      "dimension": "adversarial_pack",
+      "value": "unicode_diacritics",
+      "outcome": "false_split",
+      "count": 1,
+      "support": 1
+    }
+  ]
+}
+
+=== Evaluating Relationship Inference ===
+{
+  "synthetic": true,
+  "schema_version": "0.1.0",
+  "scoring_version": "0.1.0",
+  "task": "relationship_inference",
+  "seed": 20260719,
+  "persona_count": 10,
+  "benchmark_version": "1.0.0",
+  "checksum_scheme": "synthworld-json-v1",
+  "artifact_checksums": [
+    [
+      "public",
+      "9e8366d957a18b7829fd9bde98e28cf874d306b1b7b67ec45a85c076655d54c4"
+    ],
+    [
+      "benchmark",
+      "0edd5a20bac0ead283a33c94a9efd3d42c0d90c6c47843b6fb75004483c85123"
+    ]
+  ],
+  "metrics": [
+    {
+      "synthetic": true,
+      "name": "edge_precision",
+      "value": 1.0,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "name": "edge_recall",
+      "value": 1.0,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "name": "edge_f1",
+      "value": 1.0,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "name": "citation_precision",
+      "value": 1.0,
+      "support": 6
+    },
+    {
+      "synthetic": true,
+      "name": "evidence_backed_recall",
+      "value": 1.0,
+      "support": 3
+    }
+  ],
+  "slices": [
+    {
+      "synthetic": true,
+      "dimension": "overall",
+      "value": "all",
+      "outcome": "false_edge",
+      "count": 0,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "dimension": "unilateral_control",
+      "value": "all",
+      "outcome": "false_edge",
+      "count": 0,
+      "support": 2
+    }
+  ]
+}
+
+=== Evaluating Risk Calibration ===
+{
+  "synthetic": true,
+  "schema_version": "0.1.0",
+  "scoring_version": "0.1.0",
+  "task": "risk_calibration",
+  "seed": 20260719,
+  "persona_count": 10,
+  "benchmark_version": "1.0.0",
+  "checksum_scheme": "synthworld-json-v1",
+  "artifact_checksums": [
+    [
+      "public",
+      "690c2fb081826f72970af1e729651819c3563d9aa590190d566af24424238b33"
+    ],
+    [
+      "answers",
+      "32479aa077887a63d31a4de3dfbc822f01f6622f09ea6dd6d2a87e3af3cb319e"
+    ]
+  ],
+  "metrics": [
+    {
+      "synthetic": true,
+      "name": "band_accuracy",
+      "value": 0.4,
+      "support": 10
+    },
+    {
+      "synthetic": true,
+      "name": "macro_f1",
+      "value": 0.36,
+      "support": 10
+    },
+    {
+      "synthetic": true,
+      "name": "mean_band_distance",
+      "value": 0.8,
+      "support": 10
+    },
+    {
+      "synthetic": true,
+      "name": "mean_absolute_error",
+      "value": 21.0,
+      "support": 10
+    },
+    {
+      "synthetic": true,
+      "name": "brier",
+      "value": null,
+      "support": 10
+    }
+  ],
+  "slices": [
+    {
+      "synthetic": true,
+      "dimension": "true_band",
+      "value": "none",
+      "outcome": "misband",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "true_band",
+      "value": "low",
+      "outcome": "misband",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "true_band",
+      "value": "moderate",
+      "outcome": "misband",
+      "count": 3,
+      "support": 5
+    },
+    {
+      "synthetic": true,
+      "dimension": "true_band",
+      "value": "high",
+      "outcome": "misband",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "true_band",
+      "value": "critical",
+      "outcome": "misband",
+      "count": 2,
+      "support": 2
+    }
+  ]
+}
+
+=== Evaluating Agent Identity and Authority ===
+{
+  "synthetic": true,
+  "schema_version": "0.1.0",
+  "scoring_version": "0.3.0",
+  "task": "agentic_authority",
+  "seed": 20260719,
+  "persona_count": 10,
+  "benchmark_version": "1.0.0",
+  "checksum_scheme": "sha256-artifact-set-v1",
+  "artifact_checksums": [
+    [
+      "public",
+      "9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594"
+    ],
+    [
+      "evaluator",
+      "3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f"
+    ]
+  ],
+  "metrics": [
+    {
+      "synthetic": true,
+      "name": "principal_resolution_accuracy",
+      "value": 1.0,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "logical_agent_resolution_accuracy",
+      "value": 1.0,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "runtime_binding_accuracy",
+      "value": 1.0,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "credential_subject_accuracy",
+      "value": 1.0,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "authorization_decision_accuracy",
+      "value": 0.6363636363636364,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "delegation_chain_integrity",
+      "value": 0.45454545454545453,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "attribution_integrity",
+      "value": 0.9090909090909091,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "accountable_owner_chain_integrity",
+      "value": 1.0,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "provenance_completeness",
+      "value": 0.5454545454545454,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "provenance_exact_match",
+      "value": 0.45454545454545453,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "audit_reconstructability_accuracy",
+      "value": 1.0,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "expected_side_effect_accuracy",
+      "value": 0.6363636363636364,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "policy_version_accuracy",
+      "value": 1.0,
+      "support": 11
+    },
+    {
+      "synthetic": true,
+      "name": "provenance_precision",
+      "value": 0.9714285714285714,
+      "support": 35
+    },
+    {
+      "synthetic": true,
+      "name": "authorization_decision_precision",
+      "value": 0.5,
+      "support": 2
+    },
+    {
+      "synthetic": true,
+      "name": "authorization_decision_recall",
+      "value": 0.25,
+      "support": 4
+    },
+    {
+      "synthetic": true,
+      "name": "authorization_decision_f1",
+      "value": 0.3333333333333333,
+      "support": 4
+    },
+    {
+      "synthetic": true,
+      "name": "temporal_validity_accuracy",
+      "value": 1.0,
+      "support": 3
+    },
+    {
+      "synthetic": true,
+      "name": "least_privilege_accuracy",
+      "value": 0.8571428571428572,
+      "support": 7
+    },
+    {
+      "synthetic": true,
+      "name": "excess_authority_rate",
+      "value": 0.14285714285714285,
+      "support": 7
+    }
+  ],
+  "slices": [
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "authorization_decision_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "delegation_chain_integrity",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "provenance_completeness",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "provenance_exact_match",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "authorised_action",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "authorization_decision_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "delegation_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "provenance_completeness",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "provenance_exact_match",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "outside_capability",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "authorization_decision_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "delegation_chain_integrity",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "provenance_completeness",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "provenance_exact_match",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "overprivileged_subdelegation",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "authorization_decision_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "delegation_chain_integrity",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "provenance_completeness",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "provenance_exact_match",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "wrong_runtime",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "authorization_decision_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "delegation_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "provenance_completeness",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "provenance_exact_match",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "shared_credential",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "authorization_decision_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "delegation_chain_integrity",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "provenance_completeness",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "provenance_exact_match",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "valid_then_revoked",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "authorization_decision_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "delegation_chain_integrity",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "attribution_integrity",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "provenance_completeness",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "provenance_exact_match",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "incorrect_attribution",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "authorization_decision_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "delegation_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "provenance_completeness",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "provenance_exact_match",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "missing_retained_evidence",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "authorization_decision_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "delegation_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "provenance_completeness",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "provenance_exact_match",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "cross_tenant_confusion",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "authorization_decision_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "delegation_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "provenance_completeness",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "provenance_exact_match",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "post_revocation_action",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "principal_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "logical_agent_resolution_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "runtime_binding_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "credential_subject_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "authorization_decision_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "delegation_chain_integrity",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "attribution_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "accountable_owner_chain_integrity",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "provenance_completeness",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "provenance_exact_match",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "audit_reconstructability_accuracy",
+      "count": 0,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "expected_side_effect_accuracy",
+      "count": 1,
+      "support": 1
+    },
+    {
+      "synthetic": true,
+      "dimension": "case_kind",
+      "value": "invalid_then_later_granted",
+      "outcome": "policy_version_accuracy",
+      "count": 0,
+      "support": 1
+    }
+  ]
+}
+uv run python examples/generate_benchmarks_doc.py --check
+BENCHMARKS.md is up to date
+uv run python -c "from synthworld.ambiguity_baselines import AMBIGUITY_BASELINES, run_ambiguity_baseline; rows=[(name, run_ambiguity_baseline(fn)) for name, fn in AMBIGUITY_BASELINES]; assert len(rows) == 3; assert all(m.false_merges + m.false_splits + m.unwarranted_decisions > 0 for _, m in rows), 'a baseline resolved the ambiguity pack'; assert any(m.coverage < 1.0 for _, m in rows), 'no baseline abstains, so abstention is unscored'; print('\n'.join(f'{name}: coverage={m.coverage:.2f} decided_precision={m.decided_precision} false_merges={m.false_merges} false_splits={m.false_splits} unwarranted={m.unwarranted_decisions}' for name, m in rows))"
+Exact strong-identifier matcher: coverage=1.00 decided_precision=0.5333333333333333 false_merges=3 false_splits=1 unwarranted=3
+Normalised-name or shared-address matcher: coverage=1.00 decided_precision=0.26666666666666666 false_merges=5 false_splits=3 unwarranted=3
+Precision-first matcher (may abstain): coverage=0.73 decided_precision=0.7272727272727273 false_merges=1 false_splits=1 unwarranted=1
+uv run python -c "from synthworld.search_baselines import SEARCH_BASELINES, run_search_baseline; from synthworld.search_generator import generate_search_projection; p=generate_search_projection(seed=1); rows=[(n, run_search_baseline(f, projection=p).metrics) for n, f in SEARCH_BASELINES]; assert all(m.false_accepts + m.false_rejects + m.unwarranted_decisions > 0 for _, m in rows), 'a baseline scored the search projection cleanly'; assert any(m.coverage < 1.0 for _, m in rows), 'no baseline abstains, so abstention is unscored'; assert any(m.distinct_findings < m.accepted_results for _, m in rows), 'syndication is not being collapsed, so the metric proves nothing'; print(chr(10).join(f'{n}: coverage={m.coverage:.2f} false_accepts={m.false_accepts} false_rejects={m.false_rejects} unwarranted={m.unwarranted_decisions} findings={m.distinct_findings}/{m.accepted_results}' for n, m in rows))"
+Accept everything: coverage=1.00 false_accepts=24 false_rejects=0 unwarranted=6 findings=57/72
+Exact name in title: coverage=1.00 false_accepts=3 false_rejects=21 unwarranted=6 findings=21/27
+Folded name, abstains without a snippet: coverage=0.93 false_accepts=5 false_rejects=7 unwarranted=1 findings=28/40
+uv run python agent-authority-contract/tools/generate_trace_schema.py --check
+schemas match the models
+uv run python agent-authority-contract/tools/generate_design_intent_traces.py --check
+design-intent traces match their generator
+uv run python agent-authority-contract/tools/render_coverage_table.py --check
+coverage table matches the scorer
+uv run python -c "import subprocess,sys,tempfile; from pathlib import Path; d=Path(tempfile.mkdtemp()); subprocess.run([sys.executable,'-m','synthworld.cli' if False else 'synthworld'],capture_output=True); from synthworld.cli import main; assert main(['generate-agentic','--output',str(d/'a')])==0; subprocess.run([sys.executable,'agent-authority-contract/adapter-template/adapter.py','--public-dir',str(d/'a/public'),'--output',str(d/'t.jsonl')],check=True,capture_output=True); assert main(['validate','agentic-trace','--predictions',str(d/'t.jsonl')])==0, 'the shipped adapter template must produce a valid trace'"
+Asteria Agentic v1 ready: 24 events, 11 actions -> /tmp/tmpr_me_0qw/a
+agentic-trace: valid
+rows 11, expected actions 11, 0 errors, 11 warnings
+warning  -  no_scored_fields  evt-010-authorised-comparison: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-011-outside-capability: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-012-overprivileged-delegation: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-013-wrong-runtime: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-014-shared-credential: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-015-valid-then-revoked: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-016-incorrect-attribution: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-017-missing-evidence: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-018-cross-tenant: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-020-post-revocation: only fields the scorer does not read are set, so this row scores nothing
+warning  -  no_scored_fields  evt-021-invalid-before-grant: only fields the scorer does not read are set, so this row scores nothing
+EXIT=0
