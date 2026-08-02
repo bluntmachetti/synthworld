@@ -4,18 +4,22 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
 from importlib.resources import files
 from pathlib import Path
+from uuid import uuid5
 
 import pytest
+from pydantic import ValidationError
 
 from synthworld.ambiguity import (
     AmbiguityBenchmark,
     PairDisposition,
     PairPrediction,
+    PairTruth,
     ScenarioKind,
 )
 from synthworld.ambiguity_baselines import (
@@ -38,6 +42,7 @@ from synthworld.ambiguity_variants import (
     REALIZATIONS,
     AmbiguityVariantError,
     ambiguity_variant_metadata,
+    canonical_source_agreement,
     generate_ambiguity_variant,
     validate_ambiguity_variant,
 )
@@ -45,6 +50,7 @@ from synthworld.connection import (
     PublicIdentityAttributeKind,
     PublicIdentityRecord,
 )
+from synthworld.connection_generator import _CONNECTION_NAMESPACE
 
 _VARIANT_SEEDS = (1, 2, 3)
 
@@ -192,6 +198,16 @@ def _values(record: PublicIdentityRecord) -> dict[PublicIdentityAttributeKind, s
     return {item.kind: item.value for item in record.attributes}
 
 
+def _pairs_with_records(
+    benchmark: AmbiguityBenchmark,
+) -> list[tuple[PairTruth, PublicIdentityRecord, PublicIdentityRecord]]:
+    records = {item.id: item for item in benchmark.public.corpus.identity_records}
+    return [
+        (pair, records[pair.left_record_id], records[pair.right_record_id])
+        for pair in benchmark.answer_key.pairs
+    ]
+
+
 def test_every_seed_in_a_documented_sweep_generates() -> None:
     """Seeds 0..99 are the declared correlated robustness sweep, not 100 samples."""
 
@@ -269,8 +285,15 @@ def test_each_scenario_rejects_position_dependent_shared_values(
     left, right = _scenario_records(benchmark, scenario)
     left_values = _values(left)
     right_values = _values(right)
+    # Only over the kinds both records carry. `partial_but_sufficient` is lopsided by
+    # definition, and which of its two records sorts first is arbitrary now that
+    # identifiers are content-addressed rather than positional.
     shared = sorted(
-        (kind for kind in left_values if left_values[kind] == right_values[kind]),
+        (
+            kind
+            for kind in left_values.keys() & right_values.keys()
+            if left_values[kind] == right_values[kind]
+        ),
         key=lambda kind: kind.value,
     )
     assert shared
@@ -435,7 +458,15 @@ def test_the_declared_sweep_exercises_every_supported_realization() -> None:
     }
 
 
-def test_selected_realizations_are_constructed_in_both_records() -> None:
+def test_selected_realizations_land_where_their_case_needs_them() -> None:
+    """Both records, except where the case is *about* one record having less.
+
+    This test previously required the realized attribute in both records for every
+    scenario, which is why `partial_but_sufficient` losing its asymmetry looked
+    correct: the corruption satisfied the assertion, and the assertion was the only
+    thing watching.
+    """
+
     different = {
         ScenarioKind.CONTRADICTORY_STRONG_IDENTIFIERS,
         ScenarioKind.STALE_ATTRIBUTE,
@@ -447,11 +478,256 @@ def test_selected_realizations_are_constructed_in_both_records() -> None:
             left, right = _scenario_records(benchmark, item.scenario)
             left_values = _values(left)
             right_values = _values(right)
-            assert item.attribute_kind in left_values
-            assert item.attribute_kind in right_values
+            carriers = [
+                values
+                for values in (left_values, right_values)
+                if item.attribute_kind in values
+            ]
+
+            if item.scenario is ScenarioKind.PARTIAL_BUT_SUFFICIENT:
+                # Exactly one record carries it. The pair is a strict subset, so what
+                # it tests is merging by subsumption; a pair where both carry
+                # everything is a duplicate observation, which is a different case.
+                assert len(carriers) == 1
+                assert set(left_values) != set(right_values)
+                continue
+
+            assert len(carriers) == 2
             assert (
                 left_values[item.attribute_kind] != right_values[item.attribute_kind]
             ) is (item.scenario in different)
+
+
+def test_a_matching_mistake_in_generator_and_spec_no_longer_validates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Reconstructs the failure exactly, including the part that hid it.
+
+    Corrupting the data alone proves nothing now, because `_scenario_spec` declares
+    the asymmetry and would catch it. The defect that shipped was a corruption in the
+    generator *and* a matching edit to the spec, which is a class of mistake a
+    self-consistency check cannot catch by construction. So this makes both edits -
+    the spec is patched back to the symmetric shape it declared before, and the
+    records are patched to match it - and asserts the canonical drafts still object.
+    """
+
+    from synthworld import ambiguity_variants as module
+
+    benchmark = generate_ambiguity_variant(seed=0)
+    left, right = _scenario_records(benchmark, ScenarioKind.PARTIAL_BUT_SUFFICIENT)
+    poorer, richer = (
+        (left, right) if len(left.attributes) < len(right.attributes) else (right, left)
+    )
+    symmetric = poorer.model_copy(update={"attributes": richer.attributes})
+    corrupted = _replace_records(benchmark, symmetric)
+
+    real_spec = module._scenario_spec
+
+    def spec_without_the_asymmetry(scenario: ScenarioKind, selected: object) -> object:
+        found = real_spec(scenario, selected)  # type: ignore[arg-type]
+        if scenario is not ScenarioKind.PARTIAL_BUT_SUFFICIENT:
+            return found
+        kinds = found.kinds | found.lopsided
+        return module._ScenarioSpec(
+            kinds, kinds, frozenset(), found.display_relation, frozenset()
+        )
+
+    monkeypatch.setattr(module, "_scenario_spec", spec_without_the_asymmetry)
+
+    with pytest.raises(AmbiguityVariantError, match="shape it has in the frozen pack"):
+        validate_ambiguity_variant(corrupted)
+
+
+def test_a_display_name_carries_no_more_than_its_evidence_already_does() -> None:
+    """The channel the repo's own leak detector was written for, and still missed.
+
+    `_display_names` indexed its name pools by `_SCENARIO_INDEX[scenario]`. Because
+    `len(_GIVEN) == 30 == 2 * len(ScenarioKind)`, the given name was a bijection onto
+    (scenario, side), and the fallback family name spelled the ordinal in decimal:
+    one regex over `ExampleNNFamilyNN` recovered the scenario, and through the public
+    `SCENARIO_DISPOSITIONS` map the disposition, on 400 of 400 matching pairs across
+    fifty seeds against a 7/15 majority baseline.
+
+    What makes it a leak is not that the answer is recoverable - it is recoverable
+    from the evidence, which is the task - but that a *free* choice, which name to
+    use, was bound to the label. So the test is that the decoder no longer transfers:
+    the slot a scenario occupies must move between seeds.
+    """
+
+    kinds = list(ScenarioKind)
+    decoded: list[tuple[tuple[int, str], ...]] = []
+    correct = decidable = 0
+
+    for seed in range(1, 21):
+        benchmark = generate_ambiguity_variant(seed=seed)
+        scenario_of = {}
+        for pair in benchmark.answer_key.pairs:
+            scenario_of[pair.left_record_id] = pair.scenario
+            scenario_of[pair.right_record_id] = pair.scenario
+
+        slots: dict[int, str] = {}
+        for record in benchmark.public.corpus.identity_records:
+            found = re.search(r"Example\d\dFamily(\d\d)", record.display_name or "")
+            if found is None:
+                continue
+            slot = int(found.group(1)) // 2
+            slots[slot] = scenario_of[record.id].value
+            decidable += 1
+            if scenario_of[record.id] is kinds[slot]:
+                correct += 1
+        decoded.append(tuple(sorted(slots.items())))
+
+    # Repeated maps are the signal to watch: each repeat is a seed pair a single
+    # decoder would serve. Requiring all distinct is stricter than needed and is the
+    # cheap form of the split-half transfer test.
+    assert len(set(decoded)) == len(decoded)
+    # And the old fixed decoder must now do no better than guessing.
+    assert correct / decidable < 2 / len(kinds)
+
+
+def test_provenance_varies_by_seed_but_keeps_what_the_case_means() -> None:
+    """Source types were copied from the drafts, so they were constant per scenario.
+
+    A decoder trained on one seed, using nothing but each pair's unordered
+    source-type signature, scored 1200/1500 on a hundred others against a 7/15
+    baseline — an 80% oracle in a field no check looked at. Whether the two records
+    share a source is part of the case; which source it is was a free choice.
+    """
+
+    trained: dict[frozenset[str], ScenarioKind] = {}
+    for pair, left, right in _pairs_with_records(generate_ambiguity_variant(seed=0)):
+        trained.setdefault(
+            frozenset({left.source_type.value, right.source_type.value}), pair.scenario
+        )
+
+    agreement = canonical_source_agreement()
+    correct = total = 0
+    for seed in range(1, 41):
+        benchmark = generate_ambiguity_variant(seed=seed)
+        for pair, left, right in _pairs_with_records(benchmark):
+            # The relation the case depends on survives every seed.
+            assert (left.source_type is right.source_type) is agreement[pair.scenario]
+            signature = frozenset({left.source_type.value, right.source_type.value})
+            total += 1
+            correct += trained.get(signature) is pair.scenario
+
+    assert correct / total < 2 / len(ScenarioKind)
+
+
+def test_a_pack_whose_provenance_contradicts_the_frozen_pack_is_refused() -> None:
+    """Nothing checked source types, so every record could be relabelled and pass."""
+
+    benchmark = generate_ambiguity_variant(seed=3)
+    scenario = next(
+        item for item, shared in canonical_source_agreement().items() if not shared
+    )
+    left, right = _scenario_records(benchmark, scenario)
+    flattened = right.model_copy(update={"source_type": left.source_type})
+
+    with pytest.raises(AmbiguityVariantError, match="come from one source"):
+        validate_ambiguity_variant(_replace_records(benchmark, flattened))
+
+
+def test_a_record_identifier_is_addressed_by_content_not_by_draft_position() -> None:
+    """Identifiers were `uuid5(ns, f"{seed}:ambiguity-variant:{position}")`.
+
+    `position` walked the drafts in `ScenarioKind` order, so holding the public seed
+    was enough to recompute each identifier and read the scenario off it - no
+    attribute or name required.
+    """
+
+    for seed in (1, 7, 42):
+        benchmark = generate_ambiguity_variant(seed=seed)
+        identifiers = {item.id for item in benchmark.public.corpus.identity_records}
+        positional = {
+            uuid5(_CONNECTION_NAMESPACE, f"{seed}:ambiguity-variant:{position}")
+            for position in range(1, len(identifiers) + 1)
+        }
+
+        assert not identifiers & positional
+        assert len(identifiers) == len(benchmark.public.corpus.identity_records)
+
+
+def _positional_scenarios(benchmark: AmbiguityBenchmark) -> tuple[ScenarioKind, ...]:
+    """Each public pair's true scenario, in the order the public task lists them."""
+
+    truth = {
+        (item.left_record_id, item.right_record_id): item
+        for item in benchmark.answer_key.pairs
+    }
+    return tuple(
+        truth[(item.left_record_id, item.right_record_id)].scenario
+        for item in benchmark.public.pairs_to_decide
+    )
+
+
+def test_the_position_of_a_public_pair_is_not_an_answer_key() -> None:
+    """The channel no attribute-level check could see, because it is not in the data.
+
+    Both generators built `pairs_to_decide` by walking their drafts, and the drafts
+    are in `ScenarioKind` declaration order. So `pairs_to_decide[i]` was
+    `list(ScenarioKind)[i]` - measured 15/15 on the frozen pack and 750/750 across
+    fifty variant seeds, which decodes every disposition through the public
+    `SCENARIO_DISPOSITIONS` map without reading a single attribute. The pack shipped
+    that way, and `b"scenario" not in public_bytes` passed the whole time.
+    """
+
+    kinds = list(ScenarioKind)
+    canonical = _positional_scenarios(load_golden_ambiguity_benchmark())
+
+    assert canonical != tuple(kinds)
+
+    # Across seeds the map from position to scenario must actually move. A generator
+    # that sorted by some other fixed key would satisfy the assertion above while
+    # still handing out one decoder that works on every seed.
+    observed = [
+        _positional_scenarios(generate_ambiguity_variant(seed=seed))
+        for seed in range(12)
+    ]
+    hits = sum(
+        1
+        for order in observed
+        for index, scenario in enumerate(order)
+        if scenario is kinds[index]
+    )
+    positions = len(observed) * len(kinds)
+
+    assert len(set(observed)) == len(observed)
+    # A fixed order scores `positions`; chance is `positions / len(kinds)`. The bound
+    # is loose on purpose - the point is to separate "no channel" from "a channel",
+    # not to assert an exact coincidence count.
+    assert hits < positions // 4
+
+
+def test_an_unsorted_public_pair_list_is_refused_rather_than_sorted() -> None:
+    """Closing the channel in the model, so no future generator can reopen it."""
+
+    task = load_golden_ambiguity_benchmark().public
+    reversed_pairs = tuple(reversed(task.pairs_to_decide))
+
+    with pytest.raises(ValidationError, match="canonical record-id order"):
+        task.__class__(corpus=task.corpus, pairs_to_decide=reversed_pairs)
+
+
+def test_a_repeated_public_pair_is_refused() -> None:
+    """Sorting alone leaves multiplicity free, and free choices get bound to truth.
+
+    Sorting puts duplicates adjacent, so a repeated pair passes the order check. A
+    pack listing merge, separate and insufficient pairs once, twice and three times
+    is canonically ordered, constructs cleanly, and decodes 15/15 from repetition
+    count without reading an attribute.
+    """
+
+    task = load_golden_ambiguity_benchmark().public
+    repeated = tuple(
+        sorted(
+            (*task.pairs_to_decide, task.pairs_to_decide[0]),
+            key=lambda item: (item.left_record_id, item.right_record_id),
+        )
+    )
+
+    with pytest.raises(ValidationError, match="must not repeat a pair"):
+        task.__class__(corpus=task.corpus, pairs_to_decide=repeated)
 
 
 def test_variant_metadata_is_evaluator_only() -> None:

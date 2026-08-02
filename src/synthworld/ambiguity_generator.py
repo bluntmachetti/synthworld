@@ -15,6 +15,7 @@ here than scale - the pack's job is to be *correct about hard cases*, not large.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import blake2b
 
 from synthworld.ambiguity import (
     SCENARIO_DISPOSITIONS,
@@ -22,8 +23,8 @@ from synthworld.ambiguity import (
     AmbiguityBenchmark,
     PairTruth,
     PublicAmbiguityTask,
-    PublicRecordPair,
     ScenarioKind,
+    public_pairs_from_truth,
 )
 from synthworld.connection import (
     PublicConnectionCorpus,
@@ -53,6 +54,42 @@ class _Draft:
     display_name: str
     source_type: PublicIdentitySourceType
     attributes: tuple[PublicIdentityAttribute, ...]
+
+
+def _record_key(
+    display_name: str,
+    source_type: PublicIdentitySourceType,
+    attributes: tuple[PublicIdentityAttribute, ...],
+) -> str:
+    """Address a record by what it contains, never by where it was drafted.
+
+    Identifiers were ``uuid5(namespace, f"{seed}:ambiguity:{position}")`` with
+    ``position`` walking the drafts in scenario order, so anyone holding the public
+    seed could recompute the identifier for each position and read the scenario off
+    it. Content-addressing keeps the identifier a function of the seed and the
+    evidence - which a reader is entitled to - and of nothing else.
+
+    Every field is length-prefixed rather than delimited. A `|`-joined encoding is
+    ambiguous: a value containing the delimiter can reproduce another record's
+    material exactly, and two different records would then share an identifier. The
+    corpus-wide uniqueness check turns that into a loud failure rather than silent
+    aliasing, but an encoding that cannot collide is better than one that is caught.
+    Confidence is included because it is emitted publicly and could otherwise carry a
+    label without changing the identifier.
+    """
+
+    parts = [
+        source_type.value,
+        display_name,
+        *(
+            f"{item.kind.value}={item.value}={item.confidence!r}"
+            for item in sorted(
+                attributes, key=lambda item: (item.kind.value, item.value)
+            )
+        ),
+    ]
+    material = "".join(f"{len(part)}:{part}" for part in parts)
+    return f"ambiguity:{blake2b(material.encode(), digest_size=16).hexdigest()}"
 
 
 def _drafts() -> tuple[_Draft, ...]:
@@ -405,7 +442,7 @@ def _drafts() -> tuple[_Draft, ...]:
 def generate_ambiguity_benchmark(*, seed: int) -> AmbiguityBenchmark:
     """Build the frozen ambiguity pack for a seed.
 
-    The seed only opaques record identifiers; the cases themselves are fixed, which
+    The seed salts record identifiers; the cases themselves are fixed, which
     is what makes this the canonical pack rather than a variant.
     """
 
@@ -413,12 +450,12 @@ def generate_ambiguity_benchmark(*, seed: int) -> AmbiguityBenchmark:
     records: tuple[PublicIdentityRecord, ...] = tuple(
         _identity_record(
             seed=seed,
-            key=f"ambiguity:{index}",
+            key=_record_key(draft.display_name, draft.source_type, draft.attributes),
             source_type=draft.source_type,
             display_name=draft.display_name,
             attributes=draft.attributes,
         )
-        for index, draft in enumerate(drafts, start=1)
+        for draft in drafts
     )
     memberships = tuple(
         RecordMembership(
@@ -447,13 +484,7 @@ def generate_ambiguity_benchmark(*, seed: int) -> AmbiguityBenchmark:
             corpus=PublicConnectionCorpus(
                 seed=seed, identity_records=records, association_records=()
             ),
-            pairs_to_decide=tuple(
-                PublicRecordPair(
-                    left_record_id=item.left_record_id,
-                    right_record_id=item.right_record_id,
-                )
-                for item in pairs
-            ),
+            pairs_to_decide=public_pairs_from_truth(pairs),
         ),
         answer_key=AmbiguityAnswerKey(
             record_memberships=memberships, pairs=tuple(pairs)

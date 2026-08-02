@@ -229,6 +229,23 @@ SynthWorld's golden answer keys are committed in this repository, so they are
 public; adversarial or competitive evaluation requires benchmarks generated
 from held-out private seeds.
 
+Hygiene has a sharper form than "no labelled field appears in public output", and
+it is the one to hold generators to: **a public value may depend on the seed and on
+the evidence, and never on the label.** Where a generator has a free choice — which
+name to use, what order to list things in, which identifier to mint — binding that
+choice to truth hands the answer over without ever writing it down. The ambiguity
+pack shipped three such channels (pair ordering, name-pool indexing, positional
+identifiers), none of which a field-name check could see, and all of which survived
+100% branch coverage. Recovering a label *from the evidence* is not a leak; that is
+the task.
+
+Held-out private seeds are necessary for competitive evaluation but not always
+sufficient. A seed protects surface values. Where a pack's case list is fixed and
+each case is defined by its evidence pattern — as in the ambiguity pack, whose
+scenarios appear exactly once each — the label remains derivable from the repository
+alone, whatever the seed. Read each pack's own section for what its seeds do and do
+not conceal.
+
 ### Scorer inputs (Prediction schemas)
 
 | Task | Prediction schema | Required fields | Meaning |
