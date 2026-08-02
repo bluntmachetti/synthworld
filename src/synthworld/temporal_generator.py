@@ -176,6 +176,21 @@ def _listing_refs(seed: int) -> dict[str, str]:
     }
 
 
+def _observation_ref(seed: int, listing_ref: str, index: int) -> str:
+    """An opaque reference that names neither its listing nor its position.
+
+    A first revision emitted `f"{listing_ref}-obs-{index}"`. Both halves were channels.
+    The prefix bound an observation to a listing whose reference a consumer already
+    holds, and the suffix was a draft position; and because only one case carries
+    observations at all, any publicly visible `-obs-` reference named that case on 50
+    of 50 seeds. Joining is still possible - a consumer sees the reference in the event
+    that concerns it - but the reference no longer says what it belongs to.
+    """
+
+    material = f"{len(listing_ref)}:{listing_ref}{len(str(index))}:{index}"
+    return f"obs-{_draw(seed, f'observation:{material}', 0) % 100_000:05d}"
+
+
 def generate_temporal_world(
     *,
     seed: int = TEMPORAL_BASELINE_SEED,
@@ -230,7 +245,7 @@ def generate_temporal_world(
 
         for index, (relative, validity, current) in enumerate(case.observations):
             tick = relative + offset
-            observation_ref = f"{listing_ref}-obs-{index}"
+            observation_ref = _observation_ref(seed, listing_ref, index)
             observations.append(
                 ObservationTruth(
                     observation_ref=observation_ref,
@@ -244,7 +259,7 @@ def generate_temporal_world(
                 # The earlier observation is superseded by this one, and the event
                 # saying so is public: a consumer can see that something replaced it
                 # without being told which of the two is right now.
-                earlier = f"{listing_ref}-obs-{index - 1}"
+                earlier = _observation_ref(seed, listing_ref, index - 1)
                 observations[-2] = observations[-2].model_copy(
                     update={"superseded_by": observation_ref}
                 )

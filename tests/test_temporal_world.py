@@ -612,3 +612,33 @@ def test_materialising_past_the_horizon_is_refused() -> None:
 
     with pytest.raises(ValueError, match="exceed the world's horizon"):
         materialise(world, as_of=world.horizon + 1)
+
+
+def test_an_observation_reference_names_neither_its_listing_nor_its_position() -> None:
+    """The channel the first review missed, because it looked at listings.
+
+    References were `f"{listing_ref}-obs-{index}"`. The prefix bound an observation to
+    a listing whose reference a consumer already holds, the suffix was a draft
+    position, and because only one case carries observations at all, a publicly
+    visible `-obs-` reference named that case on 50 of 50 seeds.
+    """
+
+    seen: set[str] = set()
+    for seed in range(1, 31):
+        world = generate_temporal_world(seed=seed)
+        timeline = materialise(world, as_of=world.horizon)
+        listings = {item.listing_ref for item in world.truth.listings}
+        references = {
+            item.object_ref
+            for item in timeline.events
+            if item.object_ref is not None and item.object_ref.startswith("obs-")
+        }
+
+        assert references
+        assert not any(
+            listing in reference for reference in references for listing in listings
+        )
+        seen |= references
+
+    # And they must move with the seed, or one reading serves every world.
+    assert len(seen) == 30
