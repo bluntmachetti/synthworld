@@ -19,6 +19,7 @@ from synthworld.ambiguity import (
     AmbiguityBenchmark,
     PairDisposition,
     PairPrediction,
+    PairTruth,
     ScenarioKind,
 )
 from synthworld.ambiguity_baselines import (
@@ -41,6 +42,7 @@ from synthworld.ambiguity_variants import (
     REALIZATIONS,
     AmbiguityVariantError,
     ambiguity_variant_metadata,
+    canonical_source_agreement,
     generate_ambiguity_variant,
     validate_ambiguity_variant,
 )
@@ -194,6 +196,16 @@ def _replace_attribute_kind(
 
 def _values(record: PublicIdentityRecord) -> dict[PublicIdentityAttributeKind, str]:
     return {item.kind: item.value for item in record.attributes}
+
+
+def _pairs_with_records(
+    benchmark: AmbiguityBenchmark,
+) -> list[tuple[PairTruth, PublicIdentityRecord, PublicIdentityRecord]]:
+    records = {item.id: item for item in benchmark.public.corpus.identity_records}
+    return [
+        (pair, records[pair.left_record_id], records[pair.right_record_id])
+        for pair in benchmark.answer_key.pairs
+    ]
 
 
 def test_every_seed_in_a_documented_sweep_generates() -> None:
@@ -571,6 +583,49 @@ def test_a_display_name_carries_no_more_than_its_evidence_already_does() -> None
     assert len(set(decoded)) == len(decoded)
     # And the old fixed decoder must now do no better than guessing.
     assert correct / decidable < 2 / len(kinds)
+
+
+def test_provenance_varies_by_seed_but_keeps_what_the_case_means() -> None:
+    """Source types were copied from the drafts, so they were constant per scenario.
+
+    A decoder trained on one seed, using nothing but each pair's unordered
+    source-type signature, scored 1200/1500 on a hundred others against a 7/15
+    baseline — an 80% oracle in a field no check looked at. Whether the two records
+    share a source is part of the case; which source it is was a free choice.
+    """
+
+    trained: dict[frozenset[str], ScenarioKind] = {}
+    for pair, left, right in _pairs_with_records(generate_ambiguity_variant(seed=0)):
+        trained.setdefault(
+            frozenset({left.source_type.value, right.source_type.value}), pair.scenario
+        )
+
+    agreement = canonical_source_agreement()
+    correct = total = 0
+    for seed in range(1, 41):
+        benchmark = generate_ambiguity_variant(seed=seed)
+        for pair, left, right in _pairs_with_records(benchmark):
+            # The relation the case depends on survives every seed.
+            assert (left.source_type is right.source_type) is agreement[pair.scenario]
+            signature = frozenset({left.source_type.value, right.source_type.value})
+            total += 1
+            correct += trained.get(signature) is pair.scenario
+
+    assert correct / total < 2 / len(ScenarioKind)
+
+
+def test_a_pack_whose_provenance_contradicts_the_frozen_pack_is_refused() -> None:
+    """Nothing checked source types, so every record could be relabelled and pass."""
+
+    benchmark = generate_ambiguity_variant(seed=3)
+    scenario = next(
+        item for item, shared in canonical_source_agreement().items() if not shared
+    )
+    left, right = _scenario_records(benchmark, scenario)
+    flattened = right.model_copy(update={"source_type": left.source_type})
+
+    with pytest.raises(AmbiguityVariantError, match="come from one source"):
+        validate_ambiguity_variant(_replace_records(benchmark, flattened))
 
 
 def test_a_record_identifier_is_addressed_by_content_not_by_draft_position() -> None:

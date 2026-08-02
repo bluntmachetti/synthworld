@@ -37,6 +37,7 @@ from synthworld.connection import (
     PublicIdentityAttribute,
     PublicIdentityAttributeKind,
     PublicIdentityRecord,
+    PublicIdentitySourceType,
     RecordMembership,
 )
 from synthworld.connection_generator import _identity_record
@@ -210,6 +211,22 @@ class _CaseShape:
     agrees: bool
     contradicts: bool
     lopsided: tuple[int, int]
+
+
+def canonical_source_agreement() -> dict[ScenarioKind, bool]:
+    """Whether each case's two records share a provenance, per the canonical drafts.
+
+    Nothing checked this before, so every record could be relabelled `directory` and
+    the pack still validated - which is why the source types could drift into being
+    pure label metadata without anything noticing.
+    """
+
+    drafts = _drafts()
+    return {
+        drafts[index].scenario: drafts[index].source_type
+        is drafts[index + 1].source_type
+        for index in range(0, len(drafts), 2)
+    }
 
 
 def _case_shape(left: Mapping[_K, str], right: Mapping[_K, str]) -> _CaseShape:
@@ -544,6 +561,30 @@ def _evidence_anchor(
     )
 
 
+def _source_types(
+    seed: int, anchor: str, left: _Draft, right: _Draft
+) -> tuple[PublicIdentitySourceType, PublicIdentitySourceType]:
+    """Choose provenance per seed, preserving only whether the two sources agree.
+
+    Source types were copied verbatim from the drafts, so they were constant per
+    scenario on every seed: a decoder trained on one seed and using nothing but each
+    pair's unordered source-type signature scored 1200 of 1500 on a hundred others,
+    against a 7/15 baseline.
+
+    Whether two records come from one source or two is part of the case - a syndicated
+    observation needs two, twins found in one alumni directory need one - so that
+    relation is preserved and validated against the canonical drafts. *Which* source
+    is a free choice, and free choices must not be bound to the label.
+    """
+
+    kinds = tuple(PublicIdentitySourceType)
+    first = kinds[_draw(seed, f"source:{anchor}", 0) % len(kinds)]
+    if left.source_type is right.source_type:
+        return first, first
+    others = tuple(item for item in kinds if item is not first)
+    return first, others[_draw(seed, f"source:{anchor}", 1) % len(others)]
+
+
 def _display_slots(
     seed: int, anchors: Mapping[ScenarioKind, str]
 ) -> dict[ScenarioKind, int]:
@@ -808,6 +849,7 @@ def validate_ambiguity_variant(
     _require(metadata.seed == benchmark.seed, "variant metadata seed does not match")
     selected = _selected(metadata)
     canonical_shapes = canonical_case_shapes()
+    canonical_shared_sources = canonical_source_agreement()
     records = {item.id: item for item in benchmark.public.corpus.identity_records}
     memberships = {
         item.record_id: item.entity_id
@@ -865,6 +907,12 @@ def validate_ambiguity_variant(
         _require(
             _case_shape(left_values, right_values) == canonical_shapes[pair.scenario],
             f"{pair.scenario.value} no longer has the shape it has in the frozen pack",
+        )
+        _require(
+            (left.source_type is right.source_type)
+            is canonical_shared_sources[pair.scenario],
+            f"{pair.scenario.value} disagrees with the frozen pack on whether its "
+            "two records come from one source",
         )
         expected_same_entity = pair.scenario in _SAME_ENTITY_SCENARIOS
         _require(
@@ -967,17 +1015,20 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
             left=left_attributes,
             right=right_attributes,
         )
+        left_source, right_source = _source_types(
+            seed, _draft_anchor(drafts, scenario), left_draft, right_draft
+        )
         left_record = _identity_record(
             seed=seed,
-            key=_record_key(left_name, left_draft.source_type, left_attributes),
-            source_type=left_draft.source_type,
+            key=_record_key(left_name, left_source, left_attributes),
+            source_type=left_source,
             display_name=left_name,
             attributes=left_attributes,
         )
         right_record = _identity_record(
             seed=seed,
-            key=_record_key(right_name, right_draft.source_type, right_attributes),
-            source_type=right_draft.source_type,
+            key=_record_key(right_name, right_source, right_attributes),
+            source_type=right_source,
             display_name=right_name,
             attributes=right_attributes,
         )
