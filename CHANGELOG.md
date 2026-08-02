@@ -14,8 +14,8 @@ agentic schemas) are versioned independently of the package; see
 - A deterministic temporal slice for privacy exposure, and a broker
   deletion-and-reappearance pack scored on top of it. Virtual time is an integer tick,
   never a wall clock; `materialise` returns the events at or before a tick, so a
-  system is asked what it knew when it could have known it. Seven named cases, each a
-  way a removal workflow fails: a clean removal, a phantom removal the broker confirms
+  system is asked what it knew when it could have known it. Seven named cases - six failure modes and a
+  clean-removal control: a clean removal, a phantom removal the broker confirms
   but never performs, a reappearance after genuine removal, reseller copies surviving
   a source deletion, a refusal, a listing that was never the subject's, and a stale
   binding after a move. The clean and phantom cases emit the same sequence of event

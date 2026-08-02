@@ -1,7 +1,10 @@
 """Scoring for the broker deletion-and-reappearance pack, issue #5.
 
-A removal workflow can fail in six unrelated ways, and one number hides all of them.
-So this reports six families and never combines them:
+A removal workflow can fail in six ways that no single number can distinguish, so
+this reports six families and never combines them. They are separately *reportable*
+rather than independent: a listing that has come back is not gone, so recurrence and
+completion move together on that listing by construction. What the separation buys is
+that a failure in one cannot be paid for by a success in another.
 
 **Discovery** — did the system notice the listings the timeline showed it? A system
 that assesses nothing has perfect precision on everything else.
@@ -24,12 +27,16 @@ while reseller copies survive, and a report that calls that done overstates what
 achieved.
 
 **Recurrence** — a listing that comes back after a confirmed removal. A system that
-stops watching once it sees a confirmation never sees this, and its completion score
-looks identical to one that keeps watching.
+stops watching once it sees a confirmation never sees this, and is also wrong about
+that listing's completion, which is the coupling noted above.
 
 Every score carries its numerator, denominator and the denominator's meaning, matching
 :class:`~synthworld.ambiguity_partition.DenominatedMetric`. A serialized report that
 cannot be re-derived is one a reader has to trust rather than check.
+
+Every family is denominated over the listings the timeline *showed*, not over the ones
+a system chose to answer. Declining to assess is a miss rather than an exemption -
+otherwise assessing one listing well beats assessing seven honestly.
 
 The join to truth happens here and nowhere earlier. An assessment names listings by
 the opaque references it met in the public timeline; it never sees `ListingTruth`.
@@ -54,16 +61,16 @@ BROKER_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
 
 
 class BrokerEvaluationError(ValueError):
-    """Raised when a submission does not match the timeline it claims to assess."""
+    """Raised when a submission, timeline and truth do not describe one another."""
 
 
 class ListingAssessment(SyntheticModel):
     """What a system concluded about one listing, at one tick.
 
-    ``concerns_subject`` is ``None`` for an abstention. Some listings genuinely cannot
-    be attributed from the public timeline, and a system that declines is behaving
-    correctly where one that guesses is not - so declining is recorded rather than
-    scored as an error.
+    ``concerns_subject`` is ``None`` for an abstention, which avoids being charged a
+    *false* attribution without removing the listing from the denominator. Note the
+    narrowness: only attribution can be abstained from. ``believed_removed`` and
+    ``requested_removal`` are required, so a submission always makes those two claims.
     """
 
     listing_ref: str = Field(min_length=1)
@@ -80,9 +87,10 @@ class ListingAssessment(SyntheticModel):
 
 
 class BrokerAssessment(SyntheticModel):
-    """A complete submission for one tick.
+    """One tick's submission. Partial and empty submissions are valid.
 
-    Public-only: nothing reachable from it touches evaluator truth.
+    Public-only: nothing reachable from it touches evaluator truth. A listing left out
+    is scored as a miss rather than excluded, so partial is allowed but not free.
     """
 
     schema_version: Literal["1.0.0"] = "1.0.0"
@@ -103,36 +111,53 @@ class BrokerRemovalMetrics(SyntheticModel):
     schema_version: Literal["1.0.0"] = "1.0.0"
     scoring_version: Literal["1.0.0"] = BROKER_SCORING_VERSION
     task: Literal["broker_removal"] = "broker_removal"
-    as_of: int
-    #: Listings the public timeline had discovered by `as_of`. The denominator every
-    #: other family is bounded by.
-    discoverable_count: int
-    assessed_count: int
-    abstained_count: int
+    as_of: int = Field(ge=0)
+    #: Listings the public timeline had discovered by `as_of`. Every family is scored
+    #: over this, so declining to assess costs rather than shrinks the denominator.
+    discoverable_count: int = Field(ge=0)
+    assessed_count: int = Field(ge=0)
+    abstained_count: int = Field(ge=0)
     discovery_coverage: DenominatedMetric
     #: Attributed a listing to the subject that is someone else's, and the reverse.
-    false_attributions: int
-    missed_attributions: int
+    false_attributions: int = Field(ge=0)
+    missed_attributions: int = Field(ge=0)
     attribution_accuracy: DenominatedMetric
-    #: Asked for removal of a listing that is not the subject's.
-    unwarranted_requests: int
-    request_correctness: DenominatedMetric
+    #: Asked for removal of a listing that is not the subject's. The precision half of
+    #: this family: `request_recall` alone is maximised by requesting everything.
+    unwarranted_requests: int = Field(ge=0)
+    #: Named recall, not correctness. Its denominator is the listings that really are
+    #: the subject's, so correctly *withholding* a request contributes nothing to it -
+    #: that shows up in `unwarranted_requests`. The two are read together or not at all.
+    request_recall: DenominatedMetric
     #: Believed a listing gone when it is not, and the reverse. The phantom case makes
     #: the first of these unreachable from public evidence alone.
-    false_completions: int
-    missed_completions: int
+    false_completions: int = Field(ge=0)
+    missed_completions: int = Field(ge=0)
     completion_accuracy: DenominatedMetric
-    #: Listings with surviving downstream copies that the system called fully done.
-    overstated_propagation: int
+    #: Listings whose copies survive that the system said were not propagated. Named
+    #: for what it counts: a first revision called it `overstated_propagation` and
+    #: documented it as "called fully done", but it fires regardless of what the system
+    #: claimed about completion.
+    missed_surviving_copies: int
     propagation_accuracy: DenominatedMetric
     #: Reappearances by `as_of`, and how many were alerted.
-    recurrence_count: int
-    recurrence_detected: int
+    recurrence_count: int = Field(ge=0)
+    recurrence_detected: int = Field(ge=0)
     #: Alerts raised on listings that have not reappeared. Without this, recall is a
     #: free family: alerting on everything scored a perfect 1.0 at no cost, and the
     #: report could not tell a spammer from a system that was watching.
-    false_recurrence_alerts: int
+    false_recurrence_alerts: int = Field(ge=0)
     recurrence_recall: DenominatedMetric
+
+    @model_validator(mode="after")
+    def require_counts_to_fit_their_denominators(self) -> Self:
+        if self.assessed_count > self.discoverable_count:
+            raise ValueError("more listings were assessed than were discoverable")
+        if self.abstained_count > self.assessed_count:
+            raise ValueError("more listings were abstained on than were assessed")
+        if self.recurrence_detected > self.recurrence_count:
+            raise ValueError("more reappearances were detected than occurred")
+        return self
 
 
 def _metric(
@@ -205,7 +230,7 @@ def evaluate_broker_assessment(
     false_attributions = missed_attributions = attribution_correct = 0
     unwarranted_requests = warranted = request_correct = 0
     false_completions = missed_completions = completion_correct = 0
-    overstated = propagation_scored = propagation_correct = 0
+    missed_copies = propagation_scored = propagation_correct = 0
     recurrence_total = recurrence_found = false_alerts = 0
 
     for reference in discoverable:
@@ -217,15 +242,23 @@ def evaluate_broker_assessment(
         gone_now = really_removed and not really_back
         copies_survive = bool(fact.downstream_refs) and really_removed
 
+        # Every family is denominated over what the timeline *showed*, not over what
+        # the system chose to answer. A first revision denominated four of them over
+        # assessed listings, and that made silence free: assessing only the one listing
+        # carrying a public reappearance tied the truth-perfect oracle on five families
+        # at one-seventh coverage. Declining to answer is a miss, not an exemption.
+        if fact.concerns_subject:
+            warranted += 1
+        if really_removed:
+            propagation_scored += 1
         if really_back:
             recurrence_total += 1
 
         answer = submitted.get(reference)
         if answer is None:
-            # Not assessed. No answer is invented on the system's behalf, so it is not
-            # charged an attribution, completion or request error. It does still enter
-            # the recurrence denominator above: a reappearance the system was shown and
-            # said nothing about is a miss, not an abstention.
+            # Nothing is invented on the system's behalf - it is not charged a *false*
+            # anything - but the denominators above already counted this listing, so
+            # the omission shows up as a miss in every family it belonged to.
             continue
 
         if answer.concerns_subject is not None:
@@ -237,7 +270,6 @@ def evaluate_broker_assessment(
                 missed_attributions += 1
 
         if fact.concerns_subject:
-            warranted += 1
             request_correct += answer.requested_removal
         elif answer.requested_removal:
             unwarranted_requests += 1
@@ -250,11 +282,10 @@ def evaluate_broker_assessment(
             missed_completions += 1
 
         if really_removed:
-            propagation_scored += 1
             if answer.believed_propagated == copies_survive:
                 propagation_correct += 1
             elif copies_survive:
-                overstated += 1
+                missed_copies += 1
 
         if really_back:
             recurrence_found += answer.reappearance_alerted
@@ -262,7 +293,6 @@ def evaluate_broker_assessment(
             false_alerts += 1
 
     assessed = len(submitted)
-    decided = assessed - abstained
     return BrokerRemovalMetrics(
         as_of=tick,
         discoverable_count=len(discoverable),
@@ -274,22 +304,28 @@ def evaluate_broker_assessment(
         false_attributions=false_attributions,
         missed_attributions=missed_attributions,
         attribution_accuracy=_metric(
-            attribution_correct, decided, "listings attributed rather than abstained"
+            attribution_correct,
+            len(discoverable),
+            "listings the timeline has discovered",
         ),
         unwarranted_requests=unwarranted_requests,
-        request_correctness=_metric(
+        request_recall=_metric(
             request_correct,
             warranted,
-            "assessed listings that really concern the subject",
+            "discovered listings that really concern the subject",
         ),
         false_completions=false_completions,
         missed_completions=missed_completions,
-        completion_accuracy=_metric(completion_correct, assessed, "listings assessed"),
-        overstated_propagation=overstated,
+        completion_accuracy=_metric(
+            completion_correct,
+            len(discoverable),
+            "listings the timeline has discovered",
+        ),
+        missed_surviving_copies=missed_copies,
         propagation_accuracy=_metric(
             propagation_correct,
             propagation_scored,
-            "assessed listings really removed by now",
+            "discovered listings really removed by now",
         ),
         recurrence_count=recurrence_total,
         recurrence_detected=recurrence_found,

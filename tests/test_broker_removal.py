@@ -46,12 +46,13 @@ def test_no_baseline_resolves_the_pack(seed: int) -> None:
 
 
 @pytest.mark.parametrize("seed", _SEEDS)
-def test_believing_the_broker_misses_exactly_what_it_cannot_see(seed: int) -> None:
-    """The phantom, the surviving copies and the reappearance - and nothing else.
+def test_believing_the_broker_fails_the_cases_it_cannot_see(seed: int) -> None:
+    """The phantom, the surviving copies and the reappearance.
 
-    Trusting confirmations is not stupidity: it is correct on every case where the
-    broker told the truth. What separates it from a good system is the three cases the
-    public timeline cannot settle, so those are what its errors must be.
+    Not *only* those - it also attributes the false match to the subject and asks
+    for its removal, which are publicly visible failures. An earlier version of this
+    test said "and nothing else", which was wrong, and the wrongness mattered: it
+    made the baseline look like a ceiling on what public evidence allows.
     """
 
     world, timeline = _at_horizon(seed)
@@ -60,7 +61,7 @@ def test_believing_the_broker_misses_exactly_what_it_cannot_see(seed: int) -> No
     )
 
     assert metrics.discovery_coverage.value == 1.0
-    assert metrics.overstated_propagation > 0
+    assert metrics.missed_surviving_copies > 0
     assert metrics.recurrence_detected == 0
     assert metrics.recurrence_count > 0
     # It also asks for removal of a listing that is not the subject's.
@@ -68,10 +69,15 @@ def test_believing_the_broker_misses_exactly_what_it_cannot_see(seed: int) -> No
 
 
 @pytest.mark.parametrize("seed", _SEEDS)
-def test_watching_after_confirmation_gains_recurrence_and_nothing_else(
+def test_watching_after_confirmation_gains_recurrence_and_completion(
     seed: int,
 ) -> None:
-    """The gap between the two baselines is exactly the publicly visible part."""
+    """Catching the reappearance also corrects the completion claim for that listing.
+
+    An earlier version said "and nothing else", which the arithmetic contradicts: a
+    listing that has come back is not gone, so seeing the reappearance fixes two
+    families at once. What neither baseline gains is the phantom or the copies.
+    """
 
     world, timeline = _at_horizon(seed)
     naive = run_broker_baseline(
@@ -85,7 +91,7 @@ def test_watching_after_confirmation_gains_recurrence_and_nothing_else(
     assert naive.recurrence_detected == 0
     # Neither can see the phantom removal or the reseller copies.
     assert watchful.false_completions > 0
-    assert watchful.overstated_propagation == naive.overstated_propagation
+    assert watchful.missed_surviving_copies == naive.missed_surviving_copies
 
 
 def test_the_scope_of_the_task_is_public() -> None:
@@ -104,8 +110,8 @@ def test_the_scope_of_the_task_is_public() -> None:
     assert set(scope) <= {item.listing_ref for item in world.truth.listings}
 
 
-def test_truth_is_read_as_of_the_tick_being_scored() -> None:
-    """A removal that has not happened yet is not one the system was wrong to deny.
+def test_a_reappearance_that_has_not_happened_yet_is_not_a_miss() -> None:
+    """A future event is not one the system was wrong to stay silent about.
 
     Scoring an early tick against final truth would punish a correct answer for being
     given before the fact, which is the opposite of what a temporal benchmark is for.
@@ -141,7 +147,14 @@ def test_truth_is_read_as_of_the_tick_being_scored() -> None:
     assert metrics.recurrence_recall.value is None
 
 
-def test_abstention_is_recorded_rather_than_scored_as_error() -> None:
+def test_abstaining_avoids_a_false_answer_but_is_not_free() -> None:
+    """Declining is not an error; it is also not a way to keep a denominator small.
+
+    Abstention shields the system from being charged a *false* attribution. It does
+    not remove the listing from the denominator, because every family is scored over
+    what the timeline showed rather than over what the system chose to answer.
+    """
+
     world, timeline = _at_horizon(13)
     scope = discoverable_listings(timeline)
     abstaining = BrokerAssessment(
@@ -163,11 +176,18 @@ def test_abstention_is_recorded_rather_than_scored_as_error() -> None:
     assert metrics.abstained_count == len(scope)
     assert metrics.false_attributions == 0
     assert metrics.missed_attributions == 0
-    assert metrics.attribution_accuracy.value is None
+    assert metrics.attribution_accuracy.value == 0.0
+    assert metrics.attribution_accuracy.denominator == len(scope)
 
 
-def test_assessing_nothing_shows_up_in_coverage_not_in_accuracy() -> None:
-    """Silence must not buy a perfect score on the families it declined to answer."""
+def test_assessing_nothing_scores_nothing() -> None:
+    """Silence must not buy a small denominator on the families it declined.
+
+    A first revision denominated four families over *assessed* listings, so a system
+    could assess only the single listing carrying a public reappearance and tie the
+    truth-perfect oracle on five of the six at one-seventh coverage. Every denominator
+    is the discovered world now, so an omission is a miss.
+    """
 
     world, timeline = _at_horizon(17)
     empty = BrokerAssessment(as_of=timeline.as_of, listings=())
@@ -175,7 +195,53 @@ def test_assessing_nothing_shows_up_in_coverage_not_in_accuracy() -> None:
 
     assert metrics.discovery_coverage.value == 0.0
     assert metrics.assessed_count == 0
-    assert metrics.completion_accuracy.value is None
+    assert metrics.completion_accuracy.value == 0.0
+    assert metrics.attribution_accuracy.value == 0.0
+    assert metrics.recurrence_recall.value == 0.0
+
+
+def test_a_sparse_submission_cannot_tie_a_complete_one() -> None:
+    """The gaming strategy the denominator change exists to defeat.
+
+    Assess only the listing carrying the public reappearance event, answer it
+    perfectly, and ignore the rest. Under the old denominators that scored 1.0 on
+    attribution, request, completion, propagation and recurrence alike.
+    """
+
+    world, timeline = _at_horizon(3)
+    scope = discoverable_listings(timeline)
+    reappeared = {
+        item.object_ref
+        for item in timeline.events
+        if item.kind is PrivacyEventKind.LISTING_REAPPEARED and item.object_ref
+    }
+    facts = {item.listing_ref: item for item in world.truth.listings}
+    sparse = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            ListingAssessment(
+                listing_ref=reference,
+                concerns_subject=facts[reference].concerns_subject,
+                believed_removed=False,
+                requested_removal=True,
+                believed_propagated=False,
+                reappearance_alerted=True,
+            )
+            for reference in scope
+            if reference in reappeared
+        ),
+    )
+    metrics = evaluate_broker_assessment(sparse, timeline=timeline, truth=world.truth)
+
+    assert metrics.assessed_count == 1
+    assert metrics.discovery_coverage.value is not None
+    assert metrics.discovery_coverage.value < 0.2
+    # Perfect on the one listing it answered, and nowhere near perfect overall.
+    assert metrics.recurrence_recall.value == 1.0
+    for family in ("attribution_accuracy", "completion_accuracy", "request_recall"):
+        metric = getattr(metrics, family)
+        assert metric.value is not None
+        assert metric.value < 0.5
 
 
 def test_every_score_publishes_the_denominator_it_used() -> None:
@@ -189,7 +255,7 @@ def test_every_score_publishes_the_denominator_it_used() -> None:
     for name in (
         "discovery_coverage",
         "attribution_accuracy",
-        "request_correctness",
+        "request_recall",
         "completion_accuracy",
         "propagation_accuracy",
         "recurrence_recall",
@@ -251,8 +317,8 @@ def test_truth_missing_a_discovered_listing_is_refused() -> None:
         evaluate_broker_assessment(assessment, timeline=timeline, truth=thinned)
 
 
-def test_the_opposite_errors_are_counted_separately() -> None:
-    """Under-claiming is a different failure from over-claiming, and both are real.
+def test_attribution_errors_in_both_directions_are_counted_separately() -> None:
+    """Attribution has a counter each way. Propagation has one counter and a ratio.
 
     The reference policies only ever err in one direction — they trust the broker and
     attribute everything to the subject — so a submission that errs the other way is
@@ -286,10 +352,10 @@ def test_the_opposite_errors_are_counted_separately() -> None:
     assert metrics.false_attributions > 0
     assert metrics.attribution_accuracy.value == 0.0
     # Claiming propagation where no copies survive is wrong, but it is not the
-    # `overstated_propagation` failure, which is calling a leaky removal complete.
+    # `missed_surviving_copies` failure, which is calling a leaky removal complete.
     assert metrics.propagation_accuracy.value is not None
     assert metrics.propagation_accuracy.value < 1.0
-    assert metrics.overstated_propagation == 0
+    assert metrics.missed_surviving_copies == 0
     # It never asked for removal, so nothing it did was unwarranted.
     assert metrics.unwarranted_requests == 0
 
@@ -350,3 +416,31 @@ def test_alerting_on_everything_is_no_longer_free() -> None:
     # ...and the report tells them apart anyway.
     assert metrics.false_recurrence_alerts > 0
     assert watchful.false_recurrence_alerts == 0
+
+
+@pytest.mark.parametrize(
+    ("update", "message"),
+    [
+        ({"assessed_count": 99}, "more listings were assessed"),
+        ({"abstained_count": 8, "assessed_count": 7}, "more listings were abstained"),
+        ({"recurrence_detected": 9}, "more reappearances were detected"),
+        ({"false_attributions": -4}, "greater than or equal to 0"),
+    ],
+)
+def test_an_arithmetically_impossible_report_is_refused(
+    update: dict[str, int], message: str
+) -> None:
+    """A report is an artifact, so it has to be checkable on its own terms.
+
+    The model previously accepted 99 listings assessed out of 7 discoverable, 9
+    reappearances detected out of 1, and a negative error count. A consumer reading a
+    serialized report has no way to tell those apart from a real one.
+    """
+
+    world, timeline = _at_horizon(3)
+    metrics = run_broker_baseline(
+        watch_after_confirmation, timeline=timeline, truth=world.truth
+    )
+
+    with pytest.raises(ValidationError, match=message):
+        metrics.__class__.model_validate({**metrics.model_dump(), **update})
