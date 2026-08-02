@@ -136,9 +136,9 @@ The review checked recursive `synthetic: true` markers, reserved domains, fictio
 555 phones, example addresses, the absence of entity IDs, dispositions, scenario
 labels and expected decisions from the public artifact, and that each truth artifact
 can be held without the other. The canonical SHA-256 values are
-`ed95db049127d19884af7763a03ef72c038268681c2f9a182c2c0b3ddd26e641` (public),
-`d6ba59af1f470096932b3d4c0865fb07c671363af3a665938e086aaabf60d9f3` (memberships) and
-`965054497653df240de70fac4c15b99e79fd6746c56b2e3ef37190c8df95d870` (dispositions).
+`217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a` (public),
+`42d7f52a4c4a058d2616630dce719fb8c659fd56d4789d91d0cfdee96a264a8e` (memberships) and
+`07f64fc42942d998b695eba1b15ed2bba7b032996ebac271c3b7c5900f3e9203` (dispositions).
 
 **Scope of the guarantee.** Each scenario is defined by its evidence pattern, and the
 pack contains every scenario exactly once, so the answer remains derivable from the

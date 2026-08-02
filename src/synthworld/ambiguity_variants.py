@@ -211,6 +211,12 @@ class _CaseShape:
     agrees: bool
     contradicts: bool
     lopsided: tuple[int, int]
+    #: How many kinds agree and contradict, counted rather than merely detected.
+    #: Only meaningful where the realization is fixed, so it is ``None`` for the five
+    #: cases that choose a carrying attribute per seed - there the counts move for
+    #: legitimate reasons. Without it the shape was coarse enough that reducing
+    #: `duplicate_observation` from three shared attributes to one still validated.
+    counts: tuple[int, int] | None
 
 
 def canonical_source_agreement() -> dict[ScenarioKind, bool]:
@@ -229,14 +235,18 @@ def canonical_source_agreement() -> dict[ScenarioKind, bool]:
     }
 
 
-def _case_shape(left: Mapping[_K, str], right: Mapping[_K, str]) -> _CaseShape:
+def _case_shape(
+    left: Mapping[_K, str], right: Mapping[_K, str], *, exact: bool
+) -> _CaseShape:
     common = left.keys() & right.keys()
+    agreeing = sum(1 for kind in common if left[kind] == right[kind])
     return _CaseShape(
-        agrees=any(left[kind] == right[kind] for kind in common),
-        contradicts=any(left[kind] != right[kind] for kind in common),
+        agrees=agreeing > 0,
+        contradicts=agreeing < len(common),
         lopsided=tuple(  # type: ignore[arg-type]
             sorted((len(left.keys() - right.keys()), len(right.keys() - left.keys())))
         ),
+        counts=(agreeing, len(common) - agreeing) if exact else None,
     )
 
 
@@ -260,6 +270,7 @@ def canonical_case_shapes() -> dict[ScenarioKind, _CaseShape]:
         shapes[left.scenario] = _case_shape(
             {item.kind: item.value for item in left.attributes},
             {item.kind: item.value for item in right.attributes},
+            exact=left.scenario not in REALIZATIONS,
         )
     return shapes
 
@@ -905,7 +916,10 @@ def validate_ambiguity_variant(
         # from - so it can only prove the switch agrees with itself. This compares it
         # against the hand-authored canonical drafts instead.
         _require(
-            _case_shape(left_values, right_values) == canonical_shapes[pair.scenario],
+            _case_shape(
+                left_values, right_values, exact=pair.scenario not in REALIZATIONS
+            )
+            == canonical_shapes[pair.scenario],
             f"{pair.scenario.value} no longer has the shape it has in the frozen pack",
         )
         _require(

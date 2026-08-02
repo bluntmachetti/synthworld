@@ -68,10 +68,27 @@ def _record_key(
     seed could recompute the identifier for each position and read the scenario off
     it. Content-addressing keeps the identifier a function of the seed and the
     evidence - which a reader is entitled to - and of nothing else.
+
+    Every field is length-prefixed rather than delimited. A `|`-joined encoding is
+    ambiguous: a value containing the delimiter can reproduce another record's
+    material exactly, and two different records would then share an identifier. The
+    corpus-wide uniqueness check turns that into a loud failure rather than silent
+    aliasing, but an encoding that cannot collide is better than one that is caught.
+    Confidence is included because it is emitted publicly and could otherwise carry a
+    label without changing the identifier.
     """
 
-    body = "|".join(sorted(f"{item.kind.value}={item.value}" for item in attributes))
-    material = f"{source_type.value}|{display_name}|{body}"
+    parts = [
+        source_type.value,
+        display_name,
+        *(
+            f"{item.kind.value}={item.value}={item.confidence!r}"
+            for item in sorted(
+                attributes, key=lambda item: (item.kind.value, item.value)
+            )
+        ),
+    ]
+    material = "".join(f"{len(part)}:{part}" for part in parts)
     return f"ambiguity:{blake2b(material.encode(), digest_size=16).hexdigest()}"
 
 
