@@ -159,6 +159,45 @@ class PrivacyEvent(SyntheticModel):
         return self
 
 
+class ListingAttributeKind(StrEnum):
+    """The observable fields a broker page carries about a person."""
+
+    ADDRESS = "address"
+    EMPLOYER = "employer"
+
+
+class ListingAttribute(SyntheticModel):
+    kind: ListingAttributeKind
+    value: str = Field(min_length=1)
+
+
+class PublicListingRecord(SyntheticModel):
+    """What a broker page actually says, as a consumer would read it.
+
+    Without this there is no evidence to attribute a listing on. A first revision
+    published only lifecycle events with no content at all, so `false_match` - a
+    listing that was never about the subject - was publicly indistinguishable from
+    three listings that were, in 50 of 50 seeds. Attribution could only be won by
+    abstaining or guessing, which means it was measuring luck.
+
+    Content only. Whether the listing really concerns the subject is
+    :class:`ListingTruth`'s business, and a consumer decides it by comparing this
+    against what the timeline says about the subject.
+    """
+
+    listing_ref: str = Field(min_length=1)
+    listed_name: str = Field(min_length=1)
+    attributes: tuple[ListingAttribute, ...] = ()
+    first_observed_at: int = Field(ge=0)
+
+    @model_validator(mode="after")
+    def require_one_value_per_kind(self) -> Self:
+        kinds = [item.kind for item in self.attributes]
+        if len(kinds) != len(set(kinds)):
+            raise ValueError("a listing repeats an attribute kind")
+        return self
+
+
 class PublicTimeline(SyntheticModel):
     """Everything a system may see, as of one tick.
 
@@ -176,9 +215,18 @@ class PublicTimeline(SyntheticModel):
     schema_version: Literal["1.0.0"] = TEMPORAL_SCHEMA_VERSION
     as_of: int = Field(ge=0)
     events: tuple[PrivacyEvent, ...]
+    #: What each discovered listing says, for the listings discovered by `as_of`.
+    listings: tuple[PublicListingRecord, ...] = ()
 
     @model_validator(mode="after")
     def require_canonical_prefix(self) -> Self:
+        if any(item.first_observed_at > self.as_of for item in self.listings):
+            raise ValueError("a timeline cannot contain a listing from after its tick")
+        references = [item.listing_ref for item in self.listings]
+        if len(references) != len(set(references)):
+            raise ValueError("timeline listing references must be unique")
+        if references != sorted(references):
+            raise ValueError("timeline listings must be in canonical reference order")
         if any(item.tick > self.as_of for item in self.events):
             raise ValueError("a timeline cannot contain an event from after its tick")
         identifiers = [item.id for item in self.events]
@@ -200,6 +248,13 @@ class ListingTruth(SyntheticModel):
     #: Whether the listing really concerns the subject. A listing can be discovered,
     #: requested and confirmed removed while never having been about them at all.
     concerns_subject: bool
+    #: Whether the public record carries enough to settle `concerns_subject`. A
+    #: listing bearing only a common name is *not* attributable whatever the truth
+    #: happens to be, and a system that declines it is behaving correctly where one
+    #: that guesses is not. The same distinction the ambiguity pack draws with
+    #: `PairDisposition.INSUFFICIENT` and the search pack with
+    #: `SearchMatchTruth.INSUFFICIENT_EVIDENCE`.
+    attributable: bool = True
     #: The tick a confirmed removal actually took effect, if it ever did. `None` means
     #: the listing was never really removed, whatever the events claimed.
     removed_at: int | None = None
@@ -294,6 +349,8 @@ class TemporalWorld(SyntheticModel):
     seed: int
     horizon: int = Field(ge=0)
     events: tuple[PrivacyEvent, ...]
+    #: Public content for every listing in the run.
+    listings: tuple[PublicListingRecord, ...] = ()
     truth: TemporalTruth
 
     @model_validator(mode="after")
@@ -355,6 +412,14 @@ class TemporalWorld(SyntheticModel):
         # the phantom case exists to show can be false; tying true completion to it
         # would make delayed and early actual deletion unrepresentable and take
         # propagation lag out of issue #5's reach. A first revision did exactly that.
+        # Content must exist for exactly the listings truth knows about, or a system
+        # is asked to attribute a listing it cannot read, or shown one nobody scores.
+        described = [item.listing_ref for item in self.listings]
+        if len(described) != len(set(described)):
+            raise ValueError("a listing is described twice")
+        if set(described) != {item.listing_ref for item in self.truth.listings}:
+            raise ValueError("listing content and listing truth cover different sets")
+
         reappearances = {
             event.object_ref
             for event in self.events
@@ -386,6 +451,9 @@ def materialise(world: TemporalWorld, *, as_of: int) -> PublicTimeline:
     return PublicTimeline(
         as_of=as_of,
         events=tuple(item for item in world.events if item.tick <= as_of),
+        listings=tuple(
+            item for item in world.listings if item.first_observed_at <= as_of
+        ),
     )
 
 

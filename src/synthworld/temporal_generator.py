@@ -54,11 +54,14 @@ from hashlib import blake2b
 from typing import Literal
 
 from synthworld.temporal import (
+    ListingAttribute,
+    ListingAttributeKind,
     ListingTruth,
     ObservationTruth,
     ObservationValidity,
     PrivacyEvent,
     PrivacyEventKind,
+    PublicListingRecord,
     TemporalTruth,
     TemporalWorld,
 )
@@ -68,7 +71,24 @@ _K = PrivacyEventKind
 #: The canonical horizon. Long enough for a request/acknowledge/confirm cycle plus a
 #: later reappearance, short enough to read end to end.
 TEMPORAL_HORIZON = 24
+
+#: Local name pools. Deliberately not imported from the ambiguity pack: sharing them
+#: would couple two benchmarks' surface values, so a change made for one would move the
+#: other's bytes.
+_GIVEN = ("Ada", "Bilal", "Chen", "Dara", "Esme", "Faisal", "Gita", "Hugo")
+_FAMILY = ("Aldridge", "Barros", "Chevalier", "Delgado", "Eriksen", "Fontaine")
 TEMPORAL_BASELINE_SEED = 20260802
+
+
+#: How a listing's content relates to the subject's own identity.
+#:
+#: ``matching`` - the listed name and a corroborating attribute both agree, so the
+#: attribution is decidable and positive.
+#: ``contradicting`` - the name agrees and the corroborating attribute does not, which
+#: is decidable and negative: a same-name collision.
+#: ``bare`` - the name and nothing else. Whatever the truth, the public record cannot
+#: settle it, and declining is the correct behaviour.
+_ListingEvidence = Literal["matching", "contradicting", "bare"]
 
 
 @dataclass(frozen=True)
@@ -78,6 +98,7 @@ class _Case:
     name: str
     stages: tuple[tuple[int, PrivacyEventKind], ...]
     concerns_subject: bool = True
+    evidence: _ListingEvidence = "matching"
     #: Relative tick at which the removal genuinely took effect, if it ever did.
     removed_at: int | None = None
     reappeared_at: int | None = None
@@ -120,7 +141,17 @@ def _cases() -> tuple[_Case, ...]:
             ),
             removed_at=None,
         ),
-        _Case("false_match", confirm, concerns_subject=False, removed_at=7),
+        _Case(
+            "false_match",
+            confirm,
+            concerns_subject=False,
+            evidence="contradicting",
+            removed_at=7,
+        ),
+        # Carries a common name and nothing to corroborate it. It really is the
+        # subject's, but the page does not say so, and a system that declines is
+        # behaving correctly where one that guesses is not.
+        _Case("unattributable_listing", confirm, evidence="bare", removed_at=7),
         _Case(
             "stale_binding",
             ((0, _K.LISTING_DISCOVERED),),
@@ -223,6 +254,66 @@ def _observation_ref(seed: int, listing_ref: str, index: int) -> str:
     return f"obs-{_draw(seed, f'observation:{material}', 0) % 100_000:05d}"
 
 
+def _subject_identity(seed: int) -> tuple[str, str, str]:
+    """The subject's name, address and employer, drawn from the seed.
+
+    Published as events at tick 0. Without them a consumer has nothing to compare a
+    broker page against, which is why attribution used to be unanswerable.
+    """
+
+    given = _GIVEN[_draw(seed, "subject-given", 0) % len(_GIVEN)]
+    family = _FAMILY[_draw(seed, "subject-family", 0) % len(_FAMILY)]
+    address = (
+        f"{_draw(seed, 'subject-house', 0) % 200 + 1}|"
+        f"Example Street {_draw(seed, 'subject-street', 0) % 900 + 100}|"
+        "Testville|00000|ZZ"
+    )
+    employer = f"Example {_FAMILY[_draw(seed, 'subject-work', 0) % len(_FAMILY)]} Works"
+    return f"{given} {family}", address, employer
+
+
+def _listing_content(
+    seed: int,
+    case: _Case,
+    listing_ref: str,
+    identity: tuple[str, str, str],
+    tick: int,
+) -> PublicListingRecord:
+    """What one broker page says, given the case's declared evidence relation."""
+
+    name, address, employer = identity
+    if case.evidence == "bare":
+        # A common name and nothing to corroborate it. Undecidable by construction.
+        return PublicListingRecord(
+            listing_ref=listing_ref, listed_name=name, first_observed_at=tick
+        )
+    if case.evidence == "contradicting":
+        # Same name, different person: the address is somewhere the subject has never
+        # lived, and the employer is not theirs either.
+        other = (
+            f"{_draw(seed, 'other-house', 0) % 200 + 1}|"
+            f"Sample Row {_draw(seed, 'other-street', 0) % 900 + 100}|"
+            "Sampleton|00000|ZZ"
+        )
+        return PublicListingRecord(
+            listing_ref=listing_ref,
+            listed_name=name,
+            attributes=(
+                ListingAttribute(kind=ListingAttributeKind.ADDRESS, value=other),
+            ),
+            first_observed_at=tick,
+        )
+    return PublicListingRecord(
+        listing_ref=listing_ref,
+        listed_name=name,
+        attributes=(
+            ListingAttribute(kind=ListingAttributeKind.ADDRESS, value=address),
+            ListingAttribute(kind=ListingAttributeKind.EMPLOYER, value=employer),
+        ),
+        first_observed_at=tick,
+    )
+
+
 def generate_temporal_world(
     *,
     seed: int = TEMPORAL_BASELINE_SEED,
@@ -242,12 +333,34 @@ def generate_temporal_world(
     offset = _draw(seed, "offset", 0) % 3
     references = _listing_refs(seed)
 
+    identity = _subject_identity(seed)
     events: list[PrivacyEvent] = []
     listings: list[ListingTruth] = []
+    content: list[PublicListingRecord] = []
     observations: list[ObservationTruth] = []
+
+    for kind, value in (
+        (_K.NAME_CHANGED, identity[0]),
+        (_K.ADDRESS_CHANGED, identity[1]),
+        (_K.EMPLOYER_CHANGED, identity[2]),
+    ):
+        events.append(
+            PrivacyEvent(
+                id=_event_id(0, kind, subject_ref, None, value),
+                tick=0,
+                kind=kind,
+                subject_ref=subject_ref,
+                detail=value,
+            )
+        )
 
     for case in _cases():
         listing_ref = references[case.name]
+        content.append(
+            _listing_content(
+                seed, case, listing_ref, identity, case.stages[0][0] + offset
+            )
+        )
         for relative, kind in case.stages:
             tick = relative + offset
             events.append(
@@ -263,6 +376,7 @@ def generate_temporal_world(
             ListingTruth(
                 listing_ref=listing_ref,
                 concerns_subject=case.concerns_subject,
+                attributable=case.evidence != "bare",
                 removed_at=(
                     None if case.removed_at is None else case.removed_at + offset
                 ),
@@ -343,6 +457,7 @@ def generate_temporal_world(
         seed=seed,
         horizon=horizon,
         events=ordered,
+        listings=tuple(sorted(content, key=lambda item: item.listing_ref)),
         truth=TemporalTruth(
             seed=seed,
             horizon=horizon,

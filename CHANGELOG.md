@@ -23,6 +23,13 @@ agentic schemas) are versioned independently of the package; see
   cannot happen — a confirmation with no request, a reappearance with no removal — while
   admitting repeated requests and conflicting statuses, which are cases rather than
   corruptions.
+- Public listing content and a published subject identity, so attribution is
+  answerable rather than guessable. A first revision emitted lifecycle events with no
+  content at all and never said who the subject was, which left the listing that is
+  *not* theirs publicly indistinguishable from six that are. `ListingTruth.attributable`
+  marks the case whose page carries a common name and nothing to corroborate it:
+  declining is correct there and deciding is unwarranted, the same distinction
+  `PairDisposition.INSUFFICIENT` and `SearchMatchTruth.INSUFFICIENT_EVIDENCE` draw.
 - `evaluate_broker_assessment`, reporting six families that are never combined:
   discovery, identity matching, request correctness, completion, propagation and
   recurrence. Every score publishes its numerator, denominator and the denominator's

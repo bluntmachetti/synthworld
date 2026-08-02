@@ -13,6 +13,7 @@ from synthworld.broker_metrics import (
     believe_the_broker,
     discoverable_listings,
     evaluate_broker_assessment,
+    match_on_published_evidence,
     run_broker_baseline,
     watch_after_confirmation,
 )
@@ -176,7 +177,11 @@ def test_abstaining_avoids_a_false_answer_but_is_not_free() -> None:
     assert metrics.abstained_count == len(scope)
     assert metrics.false_attributions == 0
     assert metrics.missed_attributions == 0
-    assert metrics.attribution_accuracy.value == 0.0
+    assert metrics.unwarranted_attributions == 0
+    # Credited only for the listing whose record genuinely cannot settle the question,
+    # where declining is the right answer rather than a way of avoiding one.
+    assert metrics.attribution_accuracy.value is not None
+    assert 0.0 < metrics.attribution_accuracy.value < 0.5
     assert metrics.attribution_accuracy.denominator == len(scope)
 
 
@@ -444,3 +449,78 @@ def test_an_arithmetically_impossible_report_is_refused(
 
     with pytest.raises(ValidationError, match=message):
         metrics.__class__.model_validate({**metrics.model_dump(), **update})
+
+
+def test_attribution_is_answerable_from_published_evidence() -> None:
+    """The contract question this pack could not answer before.
+
+    Lifecycle events carried no content and the subject's identity was never published,
+    so the listing that is *not* the subject's was publicly indistinguishable from
+    those that are, in 50 of 50 seeds. Attribution could only be won by abstaining or
+    guessing, which means the family measured luck.
+    """
+
+    world, timeline = _at_horizon(3)
+    guessing = run_broker_baseline(
+        believe_the_broker, timeline=timeline, truth=world.truth
+    )
+    reading = run_broker_baseline(
+        match_on_published_evidence, timeline=timeline, truth=world.truth
+    )
+
+    assert reading.attribution_accuracy.value == 1.0
+    assert reading.unwarranted_attributions == 0
+    assert guessing.attribution_accuracy.value is not None
+    assert guessing.attribution_accuracy.value < reading.attribution_accuracy.value
+    assert guessing.unwarranted_attributions > 0
+    # Reading the evidence buys attribution and nothing else: neither policy can see
+    # the phantom removal, because no public event reveals it.
+    assert reading.false_completions > 0
+
+
+def test_deciding_an_unreadable_listing_is_unwarranted_not_wrong() -> None:
+    """One listing carries a common name and nothing to corroborate it.
+
+    Whatever the truth happens to be, the page cannot settle it, so declining is
+    correct and deciding is unjustified rather than incorrect - the distinction the
+    ambiguity and search packs already draw.
+    """
+
+    world, timeline = _at_horizon(3)
+    unreadable = [item for item in world.truth.listings if not item.attributable]
+    decisive = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            ListingAssessment(
+                listing_ref=item.listing_ref,
+                concerns_subject=True,
+                believed_removed=False,
+                requested_removal=True,
+            )
+            for item in unreadable
+        ),
+    )
+    metrics = evaluate_broker_assessment(decisive, timeline=timeline, truth=world.truth)
+
+    assert len(unreadable) == 1
+    assert metrics.unwarranted_attributions == 1
+    assert metrics.false_attributions == 0
+    assert metrics.missed_attributions == 0
+
+
+def test_a_claim_that_cannot_be_true_is_refused() -> None:
+    """Believed removed *and* reappeared is not wrong, it is incoherent.
+
+    A listing that has come back is not gone, and truth carries a single `removed_at`,
+    so no world can make both right. Scoring an unsatisfiable claim as merely incorrect
+    would tell a consumer their answer was wrong when it was meaningless.
+    """
+
+    with pytest.raises(ValidationError, match="cannot be believed removed"):
+        ListingAssessment(
+            listing_ref="listing-0001",
+            concerns_subject=True,
+            believed_removed=True,
+            requested_removal=True,
+            reappearance_alerted=True,
+        )

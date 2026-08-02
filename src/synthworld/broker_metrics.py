@@ -52,6 +52,7 @@ from pydantic import Field, model_validator
 from synthworld.ambiguity_partition import DenominatedMetric
 from synthworld.models import SyntheticModel
 from synthworld.temporal import (
+    ListingAttributeKind,
     PrivacyEventKind,
     PublicTimeline,
     TemporalTruth,
@@ -84,6 +85,20 @@ class ListingAssessment(SyntheticModel):
     believed_propagated: bool = False
     #: Whether the system raised a reappearance alert.
     reappearance_alerted: bool = False
+
+    @model_validator(mode="after")
+    def require_a_claim_that_could_be_true(self) -> Self:
+        # A listing that has come back is not gone - `gone_now` is exactly
+        # `really_removed and not really_back` - and truth carries a single
+        # `removed_at`, so no world can make both of these right. Scoring a claim that
+        # is unsatisfiable in principle as merely wrong would tell a consumer their
+        # answer was incorrect when it was incoherent. Relax this if removal cycles
+        # arrive (#65), which is the only thing that would make it satisfiable.
+        if self.believed_removed and self.reappearance_alerted:
+            raise ValueError(
+                "a listing cannot be believed removed and reported as reappeared"
+            )
+        return self
 
 
 class BrokerAssessment(SyntheticModel):
@@ -121,6 +136,9 @@ class BrokerRemovalMetrics(SyntheticModel):
     #: Attributed a listing to the subject that is someone else's, and the reverse.
     false_attributions: int = Field(ge=0)
     missed_attributions: int = Field(ge=0)
+    #: Decided a listing whose public record cannot settle the question. Not a wrong
+    #: answer - an unwarranted one, exactly as in the ambiguity and search packs.
+    unwarranted_attributions: int = Field(ge=0)
     attribution_accuracy: DenominatedMetric
     #: Asked for removal of a listing that is not the subject's. The precision half of
     #: this family: `request_recall` alone is maximised by requesting everything.
@@ -228,6 +246,7 @@ def evaluate_broker_assessment(
     tick = assessment.as_of
     abstained = sum(1 for item in submitted.values() if item.concerns_subject is None)
     false_attributions = missed_attributions = attribution_correct = 0
+    unwarranted_attributions = 0
     unwarranted_requests = warranted = request_correct = 0
     false_completions = missed_completions = completion_correct = 0
     missed_copies = propagation_scored = propagation_correct = 0
@@ -261,13 +280,21 @@ def evaluate_broker_assessment(
             # the omission shows up as a miss in every family it belonged to.
             continue
 
-        if answer.concerns_subject is not None:
-            if answer.concerns_subject == fact.concerns_subject:
+        if not fact.attributable:
+            # The record cannot settle it, so declining is the right answer and
+            # deciding is unwarranted rather than wrong.
+            if answer.concerns_subject is None:
                 attribution_correct += 1
-            elif answer.concerns_subject:
-                false_attributions += 1
             else:
-                missed_attributions += 1
+                unwarranted_attributions += 1
+        elif answer.concerns_subject is None:
+            pass  # Abstained on a decidable listing: not charged an error, not correct.
+        elif answer.concerns_subject == fact.concerns_subject:
+            attribution_correct += 1
+        elif answer.concerns_subject:
+            false_attributions += 1
+        else:
+            missed_attributions += 1
 
         if fact.concerns_subject:
             request_correct += answer.requested_removal
@@ -303,6 +330,7 @@ def evaluate_broker_assessment(
         ),
         false_attributions=false_attributions,
         missed_attributions=missed_attributions,
+        unwarranted_attributions=unwarranted_attributions,
         attribution_accuracy=_metric(
             attribution_correct,
             len(discoverable),
@@ -376,6 +404,54 @@ def believe_the_broker(timeline: PublicTimeline) -> BrokerAssessment:
     )
 
 
+def match_on_published_evidence(timeline: PublicTimeline) -> BrokerAssessment:
+    """Attributes by reading the listing against the subject's published identity.
+
+    The baseline that exists to show attribution is answerable. It compares each
+    listing's address against every address the timeline has said the subject holds,
+    and declines when the page carries nothing to compare - which is right, because one
+    listing bears a common name and nothing else.
+
+    Still believes broker confirmations, so it fails the phantom removal and the
+    surviving copies exactly as the other baselines do. The point is the contrast: a
+    system reasoning about evidence beats one guessing, and neither gets completion.
+    """
+
+    known = {
+        item.detail
+        for item in timeline.events
+        if item.kind is PrivacyEventKind.ADDRESS_CHANGED and item.detail
+    }
+    watchful = {
+        item.listing_ref: item for item in watch_after_confirmation(timeline).listings
+    }
+    return BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            watchful[record.listing_ref].model_copy(
+                update={
+                    "concerns_subject": (
+                        None
+                        if not record.attributes
+                        else any(
+                            item.value in known
+                            for item in record.attributes
+                            if item.kind is ListingAttributeKind.ADDRESS
+                        )
+                    ),
+                    "requested_removal": bool(record.attributes)
+                    and any(
+                        item.value in known
+                        for item in record.attributes
+                        if item.kind is ListingAttributeKind.ADDRESS
+                    ),
+                }
+            )
+            for record in timeline.listings
+        ),
+    )
+
+
 def watch_after_confirmation(timeline: PublicTimeline) -> BrokerAssessment:
     """A better baseline: keeps watching, so it catches the public reappearance.
 
@@ -410,6 +486,7 @@ BROKER_BASELINES: tuple[
 ] = (
     ("Believes every broker confirmation", believe_the_broker),
     ("Keeps watching after confirmation", watch_after_confirmation),
+    ("Matches on published evidence", match_on_published_evidence),
 )
 
 
@@ -434,6 +511,7 @@ __all__ = [
     "believe_the_broker",
     "discoverable_listings",
     "evaluate_broker_assessment",
+    "match_on_published_evidence",
     "run_broker_baseline",
     "watch_after_confirmation",
 ]
