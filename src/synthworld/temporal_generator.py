@@ -2,8 +2,9 @@
 
 Every world here is built from named cases rather than sampled, for the same reason
 the ambiguity pack is hand-authored: a reviewer has to be able to read the fixture and
-say whether it means what it claims. The seed varies surface values and the spacing of
-ticks; it does not invent cases.
+say whether it means what it claims. The seed varies surface values, a global time
+offset and the rescan stride; the gaps *within* a lifecycle are fixed, and the seed
+never invents cases.
 
 The cases exist because each is a way a privacy-removal workflow fails in practice:
 
@@ -136,16 +137,46 @@ def _draw(seed: int, purpose: str, index: int) -> int:
     return int.from_bytes(blake2b(material.encode(), digest_size=8).digest(), "big")
 
 
+def _distinct_slots(
+    seed: int, purpose: str, count: int, modulus: int
+) -> tuple[int, ...]:
+    """`count` distinct values below `modulus`, drawn deterministically.
+
+    Drawing each slot independently and reducing modulo 10,000 collides: four seeds in
+    the first two thousand assigned one reference to two cases, and generation failed
+    outright rather than emitting a world. Rejecting duplicates as they appear keeps
+    the assignment injective without making it affine in the slot, which would put an
+    arithmetic progression back into a public value.
+    """
+
+    values: list[int] = []
+    seen: set[int] = set()
+    index = 0
+    while len(values) < count:
+        candidate = _draw(seed, purpose, index) % modulus
+        index += 1
+        if candidate not in seen:
+            seen.add(candidate)
+            values.append(candidate)
+    return tuple(values)
+
+
 def _event_id(
-    tick: int, kind: PrivacyEventKind, subject_ref: str, object_ref: str | None
+    tick: int,
+    kind: PrivacyEventKind,
+    subject_ref: str,
+    object_ref: str | None,
+    detail: str | None = None,
 ) -> str:
     """Address an event by what it is, never by the order it was drafted in.
 
     Length-prefixed rather than delimited, so a reference containing the separator
-    cannot reproduce another event's material.
+    cannot reproduce another event's material. ``detail`` is part of the material: two
+    events at one tick differing only in a broker's stated reason are different events,
+    and omitting it gave them one identifier.
     """
 
-    parts = (str(tick), kind.value, subject_ref, object_ref or "")
+    parts = (str(tick), kind.value, subject_ref, object_ref or "", detail or "")
     material = "".join(f"{len(part)}:{part}" for part in parts)
     return f"evt-{blake2b(material.encode(), digest_size=12).hexdigest()}"
 
@@ -170,8 +201,9 @@ def _listing_refs(seed: int) -> dict[str, str]:
     order = sorted(
         range(len(names)), key=lambda index: _draw(seed, "listing-slot", index)
     )
+    values = _distinct_slots(seed, "listing-value", len(names), 10_000)
     return {
-        names[case_index]: f"listing-{_draw(seed, 'listing-value', slot) % 10_000:04d}"
+        names[case_index]: f"listing-{values[slot]:04d}"
         for slot, case_index in enumerate(order)
     }
 
@@ -206,7 +238,7 @@ def generate_temporal_world(
     subject_ref = f"subject-{_draw(seed, 'subject', 0) % 10_000:04d}"
     # One shared offset, so cases stay aligned relative to each other while the whole
     # history slides. A per-case offset would make the gap between two lifecycles a
-    # function of which cases they are.
+    # function of which cases they are. Gaps *within* a lifecycle are fixed.
     offset = _draw(seed, "offset", 0) % 3
     references = _listing_refs(seed)
 
@@ -266,7 +298,11 @@ def generate_temporal_world(
                 events.append(
                     PrivacyEvent(
                         id=_event_id(
-                            tick, _K.OBSERVATION_SUPERSEDED, subject_ref, earlier
+                            tick,
+                            _K.OBSERVATION_SUPERSEDED,
+                            subject_ref,
+                            earlier,
+                            "address_changed",
                         ),
                         tick=tick,
                         kind=_K.OBSERVATION_SUPERSEDED,
@@ -277,7 +313,13 @@ def generate_temporal_world(
                 )
                 events.append(
                     PrivacyEvent(
-                        id=_event_id(tick, _K.ADDRESS_CHANGED, subject_ref, None),
+                        id=_event_id(
+                            tick,
+                            _K.ADDRESS_CHANGED,
+                            subject_ref,
+                            None,
+                            f"Example Street {slot(seed, tick)}|Testville|00000|ZZ",
+                        ),
                         tick=tick,
                         kind=_K.ADDRESS_CHANGED,
                         subject_ref=subject_ref,
@@ -288,7 +330,7 @@ def generate_temporal_world(
     for index, tick in enumerate(_rescan_schedule(seed, horizon)):
         events.append(
             PrivacyEvent(
-                id=_event_id(tick, _K.RESCAN, subject_ref, None),
+                id=_event_id(tick, _K.RESCAN, subject_ref, None, f"scheduled-{index}"),
                 tick=tick,
                 kind=_K.RESCAN,
                 subject_ref=subject_ref,

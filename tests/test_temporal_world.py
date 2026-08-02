@@ -29,6 +29,7 @@ from synthworld.temporal_generator import (
     TEMPORAL_BASELINE_SEED,
     TEMPORAL_CASE_NAMES,
     TEMPORAL_HORIZON,
+    _distinct_slots,
     generate_temporal_world,
 )
 
@@ -228,7 +229,7 @@ def test_an_impossible_history_is_refused() -> None:
         object_ref="listing-unknown",
     )
 
-    with pytest.raises(ValidationError, match="before discovery"):
+    with pytest.raises(ValidationError, match="no preceding"):
         TemporalWorld(
             seed=world.seed,
             horizon=world.horizon,
@@ -548,7 +549,7 @@ def test_a_stage_reached_before_discovery_is_still_refused() -> None:
         )
     )
 
-    with pytest.raises(ValidationError, match="before discovery"):
+    with pytest.raises(ValidationError, match="no preceding"):
         TemporalWorld(
             seed=world.seed,
             horizon=world.horizon,
@@ -580,28 +581,59 @@ def test_an_event_for_an_observation_with_no_truth_is_refused() -> None:
         )
 
 
-def test_truth_claiming_a_removal_no_event_confirms_is_refused() -> None:
-    """Truth and events must agree about when things happened.
+def test_true_completion_is_not_tied_to_the_broker_s_claim() -> None:
+    """A confirmation is what the broker said, not what happened.
 
-    Otherwise a system is scored against a history it was never shown: the events say
-    the confirmation came at one tick and the answer key insists on another.
+    A first revision required `removed_at` to equal a `REMOVAL_CONFIRMED` tick. That
+    reads well and is wrong: the phantom case exists precisely because a confirmation
+    can be false, and tying true completion to it makes delayed and early actual
+    deletion unrepresentable - taking propagation lag out of issue #5's reach.
     """
 
     world = generate_temporal_world(seed=67)
     removed = next(item for item in world.truth.listings if item.removed_at is not None)
-    drifted = tuple(
+    delayed = tuple(
         item.model_copy(update={"removed_at": world.horizon})
         if item.listing_ref == removed.listing_ref
         else item
         for item in world.truth.listings
     )
 
-    with pytest.raises(ValidationError, match="no confirming event"):
+    later = TemporalWorld(
+        seed=world.seed,
+        horizon=world.horizon,
+        events=world.events,
+        truth=world.truth.model_copy(update={"listings": delayed}),
+    )
+
+    assert later.truth.listings != world.truth.listings
+    # The public events are untouched, which is the point: a system cannot see the
+    # difference between a deletion that happened on time and one that lagged.
+    assert materialise(later, as_of=world.horizon) == materialise(
+        world, as_of=world.horizon
+    )
+
+
+def test_a_public_reappearance_absent_from_truth_is_refused() -> None:
+    """Hidden truth is the design; a hidden *public* event is a broken history."""
+
+    world = generate_temporal_world(seed=73)
+    reappeared = next(
+        item for item in world.truth.listings if item.reappeared_at is not None
+    )
+    forgotten = tuple(
+        item.model_copy(update={"reappeared_at": None, "removed_at": None})
+        if item.listing_ref == reappeared.listing_ref
+        else item
+        for item in world.truth.listings
+    )
+
+    with pytest.raises(ValidationError, match="truth does not record it"):
         TemporalWorld(
             seed=world.seed,
             horizon=world.horizon,
             events=world.events,
-            truth=world.truth.model_copy(update={"listings": drifted}),
+            truth=world.truth.model_copy(update={"listings": forgotten}),
         )
 
 
@@ -642,3 +674,26 @@ def test_an_observation_reference_names_neither_its_listing_nor_its_position() -
 
     # And they must move with the seed, or one reading serves every world.
     assert len(seen) == 30
+
+
+def test_slot_assignment_rejects_duplicates_rather_than_colliding() -> None:
+    """The path that only fires on unlucky seeds, so it is exercised deliberately.
+
+    Drawing each slot independently and reducing modulo the pool collided on four
+    seeds in the first two thousand, and generation failed outright rather than
+    emitting a world. A small pool forces the collision every time.
+    """
+
+    crowded = _distinct_slots(seed=1, purpose="test", count=8, modulus=8)
+
+    assert len(set(crowded)) == 8
+    assert sorted(crowded) == list(range(8))
+    # Deterministic, and the order is not the identity permutation.
+    assert _distinct_slots(seed=1, purpose="test", count=8, modulus=8) == crowded
+
+
+def test_every_seed_in_a_wide_sweep_generates() -> None:
+    """Generation must not fail on an unlucky seed, which it used to."""
+
+    for seed in range(200):
+        generate_temporal_world(seed=seed)

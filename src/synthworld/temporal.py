@@ -14,8 +14,8 @@ already been bitten once by a generator that anchored to ``datetime.now()``.
 
 **Materialisation returns a prefix.** :func:`materialise` builds the public view at
 tick ``T`` from the events at or before ``T``, and the result carries no reference back
-to the world it came from. That is a property the tests measure at every tick of every
-seed — not a structural impossibility, since the function does hold the whole world
+to the world it came from. That is a property the tests measure at every tick of four
+seeds — not a structural impossibility, since the function does hold the whole world
 while it runs. An earlier draft of this docstring claimed the guarantee was structural,
 which described a design that had not been built.
 
@@ -28,9 +28,10 @@ reappearance cases is that they are different failures.
 
 The metadata standard from the ambiguity pack applies here from the start: a public
 value may depend on the seed and on the evidence, never on the label. Event
-identifiers are content-addressed and public collections are ordered canonically. An
-event's *position* carries nothing — measured uniform across twenty thousand seeds. Its
-*identity* is a keyed function of the seed, which is why the seed is evaluator-side.
+identifiers are digests of the event's own visible fields and public collections are
+ordered canonically. An event's *position* carries nothing — measured uniform across
+twenty thousand seeds. Its *identity* depends on references that are themselves drawn
+from the seed, which is why the seed is evaluator-side.
 """
 
 from __future__ import annotations
@@ -81,8 +82,8 @@ class PrivacyEventKind(StrEnum):
     RESCAN = "rescan"
 
 
-#: Events that close a listing's lifecycle, and the state each implies. A listing that
-#: reappears after `REMOVAL_CONFIRMED` is the case issue #5 exists for.
+#: The events that make up a listing's lifecycle. The integers order them for reading
+#: only; what constrains a history is `_LIFECYCLE_REQUIRES` below.
 _LIFECYCLE_ORDER: dict[PrivacyEventKind, int] = {
     PrivacyEventKind.LISTING_DISCOVERED: 0,
     PrivacyEventKind.REMOVAL_REQUESTED: 1,
@@ -90,6 +91,25 @@ _LIFECYCLE_ORDER: dict[PrivacyEventKind, int] = {
     PrivacyEventKind.REMOVAL_CONFIRMED: 3,
     PrivacyEventKind.REMOVAL_REFUSED: 3,
     PrivacyEventKind.LISTING_REAPPEARED: 4,
+}
+
+
+#: What must already have happened to a listing before each event can. Satisfied by
+#: any earlier tick and satisfiable repeatedly, so "requested, refused, requested
+#: again" and a second removal cycle after a reappearance are both representable while
+#: a confirmation with no request is not.
+_LIFECYCLE_REQUIRES: dict[PrivacyEventKind, frozenset[PrivacyEventKind]] = {
+    PrivacyEventKind.REMOVAL_REQUESTED: frozenset(
+        {PrivacyEventKind.LISTING_DISCOVERED}
+    ),
+    PrivacyEventKind.REMOVAL_ACKNOWLEDGED: frozenset(
+        {PrivacyEventKind.REMOVAL_REQUESTED}
+    ),
+    PrivacyEventKind.REMOVAL_CONFIRMED: frozenset({PrivacyEventKind.REMOVAL_REQUESTED}),
+    PrivacyEventKind.REMOVAL_REFUSED: frozenset({PrivacyEventKind.REMOVAL_REQUESTED}),
+    PrivacyEventKind.LISTING_REAPPEARED: frozenset(
+        {PrivacyEventKind.REMOVAL_CONFIRMED}
+    ),
 }
 
 
@@ -289,24 +309,26 @@ class TemporalWorld(SyntheticModel):
         if any(item.tick > self.horizon for item in self.events):
             raise ValueError("an event happens after the horizon")
 
-        # The one ordering rule left: nothing happens to a listing before it is
-        # discovered. A first revision also required stages to strictly increase, which
-        # ruled out repeated removal requests and conflicting statuses - both named in
-        # issue #5's scenario list, so both cases rather than corruptions. Having
-        # allowed every stage to repeat, a "moves backwards" check would be dead code:
-        # the only stage that cannot repeat is the highest one.
-        seen: dict[str, int] = {}
+        # Causality, not monotonicity. A first revision required stages to strictly
+        # increase, which rejected repeated removal requests and conflicting statuses -
+        # both named in issue #5's scenarios, so both cases rather than corruptions.
+        # Dropping the rule altogether over-corrected: it then accepted a confirmation
+        # with no request and a reappearance with no removal, which no workflow
+        # produces. What each event needs is its own precondition, satisfied at any
+        # earlier tick and satisfiable more than once.
+        seen: dict[str, set[PrivacyEventKind]] = {}
         for event in self.events:
             if event.kind not in _LIFECYCLE_ORDER or event.object_ref is None:
                 continue
-            stage = _LIFECYCLE_ORDER[event.kind]
-            previous = seen.get(event.object_ref)
-            discovery = _LIFECYCLE_ORDER[PrivacyEventKind.LISTING_DISCOVERED]
-            if previous is None and stage != discovery:
+            history = seen.setdefault(event.object_ref, set())
+            required = _LIFECYCLE_REQUIRES.get(event.kind)
+            if required is not None and not (required & history):
+                wanted = " or ".join(sorted(item.value for item in required))
                 raise ValueError(
-                    f"{event.object_ref} reaches {event.kind.value} before discovery"
+                    f"{event.object_ref} reaches {event.kind.value} "
+                    f"with no preceding {wanted}"
                 )
-            seen[event.object_ref] = max(stage, previous or 0)
+            history.add(event.kind)
 
         known = {item.listing_ref for item in self.truth.listings}
         if not set(seen) <= known:
@@ -327,20 +349,22 @@ class TemporalWorld(SyntheticModel):
         if not referenced <= observations:
             raise ValueError("an event concerns an observation with no truth")
 
-        # Truth must agree with the events about when things happened. A listing whose
-        # truth says it was removed at a tick where no confirmation exists is a world
-        # that scores systems against a history it did not show them.
-        confirmations: dict[str, set[int]] = {}
-        for event in self.events:
-            if event.kind is PrivacyEventKind.REMOVAL_CONFIRMED and event.object_ref:
-                confirmations.setdefault(event.object_ref, set()).add(event.tick)
+        # A public reappearance is an observable fact, so truth must know about it.
+        # Note what is deliberately *not* checked: `removed_at` is not required to
+        # match a `REMOVAL_CONFIRMED` tick. A confirmation is the broker's claim, which
+        # the phantom case exists to show can be false; tying true completion to it
+        # would make delayed and early actual deletion unrepresentable and take
+        # propagation lag out of issue #5's reach. A first revision did exactly that.
+        reappearances = {
+            event.object_ref
+            for event in self.events
+            if event.kind is PrivacyEventKind.LISTING_REAPPEARED and event.object_ref
+        }
         for listing in self.truth.listings:
-            if listing.removed_at is None:
-                continue
-            if listing.removed_at not in confirmations.get(listing.listing_ref, set()):
+            if listing.listing_ref in reappearances and listing.reappeared_at is None:
                 raise ValueError(
-                    f"{listing.listing_ref} claims removal at a tick with no "
-                    "confirming event"
+                    f"{listing.listing_ref} reappears publicly but truth does not "
+                    "record it"
                 )
         return self
 
@@ -348,10 +372,11 @@ class TemporalWorld(SyntheticModel):
 def materialise(world: TemporalWorld, *, as_of: int) -> PublicTimeline:
     """Build the public view at ``as_of`` from the events at or before it.
 
-    A prefix rather than a filter over a fuller object: what is returned is built from
-    the surviving events alone, so no later event and no truth can reach the result.
-    That is why this is a function over the world rather than a method on a snapshot
-    that already holds everything.
+    A filter, and honestly labelled as one: the world it reads holds the truth and the
+    future while this runs. What the tests establish is that nothing beyond the
+    surviving events reaches the returned object — a measured property, not an
+    impossibility. It is a function rather than a method so the result has no reference
+    back to the world.
     """
 
     if as_of < 0:
