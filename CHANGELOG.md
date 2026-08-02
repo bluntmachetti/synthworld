@@ -11,6 +11,16 @@ agentic schemas) are versioned independently of the package; see
 
 ### Added
 
+- Separate ambiguity membership and evidence-disposition evaluation channels. A
+  complete `EntityResolutionPrediction` is validated and scored directly against
+  explicit membership truth with denominated pairwise and B-cubed metrics; a
+  public-only projection derives forced binary decisions for the selected task
+  pairs without discarding the raw partition or loading truth.
+- A consumer-integration publication boundary: `.local-assurance/` is excluded
+  from Git and package builds, repository tests reject private consumer symbols,
+  dependencies, unreviewed adapter paths, and force-added local artifacts, and
+  a named CI check plus code-owner review protects the boundary-defining files.
+  Contribution guidance keeps one-off product execution out of public CI.
 - A `synthworld validate agentic-trace` command that checks an observed-action
   JSONL submission for structural and cardinality correctness before scoring,
   with no access to evaluator truth. It reports every bad row in one pass with

@@ -3,6 +3,7 @@
 /.pytest_cache/
 /.ruff_cache/
 /.venv/
+/.local-assurance/
 /AGENTS.md
 /build/
 /coverage.xml
