@@ -18,8 +18,8 @@ agentic schemas) are versioned independently of the package; see
   way a removal workflow fails: a clean removal, a phantom removal the broker confirms
   but never performs, a reappearance after genuine removal, reseller copies surviving
   a source deletion, a refusal, a listing that was never the subject's, and a stale
-  binding after a move. The clean and phantom cases emit byte-identical public events,
-  so the hardest one cannot be read off the timeline. Replay refuses histories that
+  binding after a move. The clean and phantom cases emit the same sequence of event
+  kinds at the same ticks, so the hardest one cannot be read off the timeline. Replay refuses histories that
   cannot happen — a confirmation with no request, a reappearance with no removal — while
   admitting repeated requests and conflicting statuses, which are cases rather than
   corruptions.

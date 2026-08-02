@@ -45,11 +45,9 @@ from pydantic import Field, model_validator
 from synthworld.ambiguity_partition import DenominatedMetric
 from synthworld.models import SyntheticModel
 from synthworld.temporal import (
-    _LIFECYCLE_ORDER,
     PrivacyEventKind,
     PublicTimeline,
     TemporalTruth,
-    lifecycle_stage,
 )
 
 BROKER_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
@@ -130,6 +128,10 @@ class BrokerRemovalMetrics(SyntheticModel):
     #: Reappearances by `as_of`, and how many were alerted.
     recurrence_count: int
     recurrence_detected: int
+    #: Alerts raised on listings that have not reappeared. Without this, recall is a
+    #: free family: alerting on everything scored a perfect 1.0 at no cost, and the
+    #: report could not tell a spammer from a system that was watching.
+    false_recurrence_alerts: int
     recurrence_recall: DenominatedMetric
 
 
@@ -204,7 +206,7 @@ def evaluate_broker_assessment(
     unwarranted_requests = warranted = request_correct = 0
     false_completions = missed_completions = completion_correct = 0
     overstated = propagation_scored = propagation_correct = 0
-    recurrence_total = recurrence_found = 0
+    recurrence_total = recurrence_found = false_alerts = 0
 
     for reference in discoverable:
         fact = known[reference]
@@ -220,8 +222,10 @@ def evaluate_broker_assessment(
 
         answer = submitted.get(reference)
         if answer is None:
-            # Not assessed at all. Counted only against discovery coverage - inventing
-            # a wrong answer on the system's behalf would make silence look like error.
+            # Not assessed. No answer is invented on the system's behalf, so it is not
+            # charged an attribution, completion or request error. It does still enter
+            # the recurrence denominator above: a reappearance the system was shown and
+            # said nothing about is a miss, not an abstention.
             continue
 
         if answer.concerns_subject is not None:
@@ -254,6 +258,8 @@ def evaluate_broker_assessment(
 
         if really_back:
             recurrence_found += answer.reappearance_alerted
+        elif answer.reappearance_alerted:
+            false_alerts += 1
 
     assessed = len(submitted)
     decided = assessed - abstained
@@ -272,19 +278,26 @@ def evaluate_broker_assessment(
         ),
         unwarranted_requests=unwarranted_requests,
         request_correctness=_metric(
-            request_correct, warranted, "listings that really concern the subject"
+            request_correct,
+            warranted,
+            "assessed listings that really concern the subject",
         ),
         false_completions=false_completions,
         missed_completions=missed_completions,
         completion_accuracy=_metric(completion_correct, assessed, "listings assessed"),
         overstated_propagation=overstated,
         propagation_accuracy=_metric(
-            propagation_correct, propagation_scored, "listings really removed by now"
+            propagation_correct,
+            propagation_scored,
+            "assessed listings really removed by now",
         ),
         recurrence_count=recurrence_total,
         recurrence_detected=recurrence_found,
+        false_recurrence_alerts=false_alerts,
         recurrence_recall=_metric(
-            recurrence_found, recurrence_total, "listings that have really reappeared"
+            recurrence_found,
+            recurrence_total,
+            "listings that have really reappeared, assessed or not",
         ),
     )
 
@@ -292,22 +305,32 @@ def evaluate_broker_assessment(
 def believe_the_broker(timeline: PublicTimeline) -> BrokerAssessment:
     """The baseline the pack exists to defeat: trust every confirmation.
 
-    Scores perfectly on the six cases where the broker told the truth and fails the
-    phantom, the reseller copies and the reappearance. A pack on which this scores
-    cleanly is not measuring anything.
+    Believes a listing is gone exactly when a confirmation was published, attributes
+    every listing to the subject and asks for every removal. It therefore fails the
+    phantom removal, the reseller copies, the reappearance *and* the listing that was
+    never the subject's - the last of which is publicly visible, so this is not a
+    ceiling on what a good system can do. A pack on which this scores cleanly is not
+    measuring anything.
     """
 
-    # Read from the vocabulary rather than written as a literal, so a change to the
-    # lifecycle cannot silently change what this baseline believes.
-    confirmed = _LIFECYCLE_ORDER[PrivacyEventKind.REMOVAL_CONFIRMED]
+    # Read the confirming *event*, not a lifecycle ordinal. A first revision compared
+    # `lifecycle_stage(...) >= _LIFECYCLE_ORDER[REMOVAL_CONFIRMED]`, and those integers
+    # order the vocabulary for reading only - refusal and confirmation share the value
+    # 3 - so the baseline believed a refused listing had been removed. The comment
+    # above it claimed reading from the vocabulary made the baseline safe from exactly
+    # that. It caused it.
+    confirmed = {
+        item.object_ref
+        for item in timeline.events
+        if item.kind is PrivacyEventKind.REMOVAL_CONFIRMED and item.object_ref
+    }
     return BrokerAssessment(
         as_of=timeline.as_of,
         listings=tuple(
             ListingAssessment(
                 listing_ref=reference,
                 concerns_subject=True,
-                believed_removed=(lifecycle_stage(timeline.events, reference) or 0)
-                >= confirmed,
+                believed_removed=reference in confirmed,
                 requested_removal=True,
                 believed_propagated=False,
                 reappearance_alerted=False,

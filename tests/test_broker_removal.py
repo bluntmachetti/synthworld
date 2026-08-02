@@ -292,3 +292,61 @@ def test_the_opposite_errors_are_counted_separately() -> None:
     assert metrics.overstated_propagation == 0
     # It never asked for removal, so nothing it did was unwarranted.
     assert metrics.unwarranted_requests == 0
+
+
+def test_a_refusal_is_not_a_confirmation() -> None:
+    """The bug a comment about avoiding hard-coded values introduced.
+
+    `believe_the_broker` compared `lifecycle_stage(...) >= _LIFECYCLE_ORDER[
+    REMOVAL_CONFIRMED]`. Those integers order the vocabulary for reading only, and
+    refusal shares the value 3 with confirmation, so the baseline believed a refused
+    listing had been removed - a failure on a case where the broker told the truth,
+    and one that is publicly visible.
+    """
+
+    world, timeline = _at_horizon(3)
+    refused = {
+        item.object_ref
+        for item in timeline.events
+        if item.kind is PrivacyEventKind.REMOVAL_REFUSED and item.object_ref
+    }
+    assessment = believe_the_broker(timeline)
+    by_reference = {item.listing_ref: item for item in assessment.listings}
+
+    assert refused
+    assert all(not by_reference[item].believed_removed for item in refused)
+    # And what it still gets wrong is the phantom, which no public event reveals.
+    metrics = evaluate_broker_assessment(
+        assessment, timeline=timeline, truth=world.truth
+    )
+    assert metrics.false_completions > 0
+
+
+def test_alerting_on_everything_is_no_longer_free() -> None:
+    """Recall alone made recurrence a family a spammer could win outright."""
+
+    world, timeline = _at_horizon(3)
+    scope = discoverable_listings(timeline)
+    spam = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            ListingAssessment(
+                listing_ref=reference,
+                concerns_subject=True,
+                believed_removed=False,
+                requested_removal=True,
+                reappearance_alerted=True,
+            )
+            for reference in scope
+        ),
+    )
+    metrics = evaluate_broker_assessment(spam, timeline=timeline, truth=world.truth)
+    watchful = run_broker_baseline(
+        watch_after_confirmation, timeline=timeline, truth=world.truth
+    )
+
+    # It matches the watchful baseline's headline recall...
+    assert metrics.recurrence_recall.value == watchful.recurrence_recall.value
+    # ...and the report tells them apart anyway.
+    assert metrics.false_recurrence_alerts > 0
+    assert watchful.false_recurrence_alerts == 0
