@@ -11,6 +11,27 @@ agentic schemas) are versioned independently of the package; see
 
 ### Added
 
+- A deterministic temporal slice for privacy exposure, and a broker
+  deletion-and-reappearance pack scored on top of it. Virtual time is an integer tick,
+  never a wall clock; `materialise` returns the events at or before a tick, so a
+  system is asked what it knew when it could have known it. Seven named cases, each a
+  way a removal workflow fails: a clean removal, a phantom removal the broker confirms
+  but never performs, a reappearance after genuine removal, reseller copies surviving
+  a source deletion, a refusal, a listing that was never the subject's, and a stale
+  binding after a move. The clean and phantom cases emit byte-identical public events,
+  so the hardest one cannot be read off the timeline. Replay refuses histories that
+  cannot happen — a confirmation with no request, a reappearance with no removal — while
+  admitting repeated requests and conflicting statuses, which are cases rather than
+  corruptions.
+- `evaluate_broker_assessment`, reporting six families that are never combined:
+  discovery, identity matching, request correctness, completion, propagation and
+  recurrence. Every score publishes its numerator, denominator and the denominator's
+  meaning. Two reference policies run in CI, gated on properties rather than numbers:
+  neither may resolve the pack, both must overstate propagation, and recurrence must
+  separate them — trusting broker confirmations catches no reappearance, while
+  continuing to watch catches every one and still cannot see the phantom removal or
+  the surviving copies.
+
 - Scoring for the oracle-free search projection: `evaluate_search_judgements`
   separates false accepts from false rejects and from unwarranted decisions on
   results the public text cannot settle, reports coverage beside precision so
