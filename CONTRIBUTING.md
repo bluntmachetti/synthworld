@@ -20,6 +20,23 @@ output for a fixed seed, and unchanged benchmark checksums unless a deliberately
 reviewed benchmark version is being introduced. User-visible changes should add
 an entry to the Unreleased section of [CHANGELOG.md](CHANGELOG.md).
 
+## Reporting a security or safety issue
+
+Do not open a public issue for it. Use the **Report a vulnerability** button under
+the repository's [Security tab](https://github.com/bluntmachetti/synthworld/security);
+private reporting is enabled, so the report stays between you and the maintainers
+until a fix is published. [SECURITY.md](SECURITY.md) sets out the scope.
+
+Three classes belong there rather than in a public issue: **real or realistic
+personal data** a generator can emit, **leaked secrets**, and **oracle leakage** -
+evaluator truth reachable from a public artifact, directly or by derivation. That
+last one is specific to a benchmark and easy to underrate: a system scored against a
+leaking artifact produces a number that means nothing, and the result still looks
+valid, so the harm is silent.
+
+If you are unsure, report privately. Being wrong about scope costs one reply; being
+wrong the other way publishes a defect before it is fixed.
+
 ## Synthetic-data boundary
 
 Never submit real personal data or plausible identifiers that could belong to a
