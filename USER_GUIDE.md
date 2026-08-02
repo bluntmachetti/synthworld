@@ -574,8 +574,14 @@ Truth is read here and nowhere earlier. The report separates:
 - **distinct findings from accepted results** — three aggregator copies of one source
   are one finding, and a consumer counting them separately overstates exposure
   threefold;
-- **stale acceptances** and **errors by difficulty** — which cases a system fails
-  matters more than how many.
+- **stale acceptances** and **errors by difficulty, beside that tier's support** —
+  which cases a system fails matters more than how many, and raw counts answer the
+  wrong question. The accept-everything baseline on seed 1 errs 18 times at
+  difficulty 1 and 12 times at difficulty 3, which reads as though tier 1 were the
+  problem; tier 1 holds 42 results and tier 3 holds 12, so the rates are 0.43 and
+  1.00 — complete failure on the hardest tier, ranked as the milder one. Tiers with
+  no errors are listed too, because a missing row is indistinguishable from a tier
+  that is not there.
 
 ### Reference baselines
 

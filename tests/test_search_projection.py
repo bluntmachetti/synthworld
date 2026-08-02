@@ -251,14 +251,16 @@ def test_truth_rows_must_be_coherent() -> None:
 
     with pytest.raises(ValidationError, match="true match must concern the subject"):
         SearchTruthBundle(
-            public_digest="x", results=(row(actual_persona_id="persona-0002"),)
+            seed=1, public_digest="x", results=(row(actual_persona_id="persona-0002"),)
         )
     with pytest.raises(ValidationError, match="false match must concern someone else"):
         SearchTruthBundle(
-            public_digest="x", results=(row(match=SearchMatchTruth.FALSE_MATCH),)
+            seed=1,
+            public_digest="x",
+            results=(row(match=SearchMatchTruth.FALSE_MATCH),),
         )
     with pytest.raises(ValidationError, match="unique per result"):
-        SearchTruthBundle(public_digest="x", results=(row(), row()))
+        SearchTruthBundle(seed=1, public_digest="x", results=(row(), row()))
 
 
 def test_an_explicit_configuration_is_honoured() -> None:
@@ -315,6 +317,7 @@ def test_a_false_match_must_name_someone_else_not_nobody() -> None:
 
     with pytest.raises(ValidationError, match="must concern someone else"):
         SearchTruthBundle(
+            seed=1,
             public_digest="x",
             results=(
                 SearchResultTruth(

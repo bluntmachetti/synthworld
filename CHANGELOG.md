@@ -11,6 +11,17 @@ agentic schemas) are versioned independently of the package; see
 
 ### Added
 
+- Scoring for the oracle-free search projection: `evaluate_search_judgements`
+  separates false accepts from false rejects and from unwarranted decisions on
+  results the public text cannot settle, reports coverage beside precision so
+  abstaining everywhere cannot look perfect, and reports distinct findings against
+  accepted results so a consumer that fails to collapse syndicated copies is visible.
+  Errors are broken out by difficulty tier *with that tier's support*, because raw
+  error counts rank tiers by size rather than by failure rate. `SearchMetrics` and
+  `SearchEvaluation` publish their denominators, a `scoring_version` and a task
+  discriminator, matching the ambiguity evaluation channels, and `SearchTruthBundle`
+  now records the seed it describes.
+
 - Separate ambiguity membership and evidence-disposition evaluation channels. A
   complete `EntityResolutionPrediction` is validated and scored directly against
   explicit membership truth with denominated pairwise and B-cubed metrics; a

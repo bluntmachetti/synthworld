@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import Counter
+
 import pytest
 from pydantic import ValidationError
 
@@ -166,11 +168,15 @@ def test_an_evaluation_without_a_digest_is_refused() -> None:
 
     with pytest.raises(ValidationError, match="must name the projection"):
         SearchEvaluation(
+            seed=1,
+            truth_schema_version="1.0.0",
             public_digest="",
             metrics=SearchMetrics(
                 result_count=1,
                 decided_count=0,
                 abstained_count=1,
+                decidable_count=0,
+                correct_decided_count=0,
                 coverage=0.0,
                 false_accepts=0,
                 false_rejects=0,
@@ -212,12 +218,27 @@ def test_no_baseline_scores_the_projection_cleanly(
     assert wrong > 0, f"{name} scored projection {seed} cleanly"
 
 
-def test_difficulty_is_reported_for_the_errors() -> None:
-    """Which cases a system fails matters more than how many."""
+def test_difficulty_is_reported_with_the_support_its_rate_needs() -> None:
+    """Which cases a system fails matters more than how many - so counts need a base.
 
-    metrics = run_search_baseline(exact_name_in_title, projection=_projection()).metrics
+    Reporting errors alone inverts the ranking. The accept-everything baseline makes
+    more errors at difficulty 1 than at difficulty 3 purely because tier 1 is larger,
+    while tier 3 is where it fails completely.
+    """
+
+    projection = _projection()
+    metrics = run_search_baseline(exact_name_in_title, projection=projection).metrics
+    support = Counter(item.difficulty for item in projection.truth.results)
 
     assert metrics.by_difficulty
-    assert sum(metrics.by_difficulty.values()) == (
+    assert sum(item.errors for item in metrics.by_difficulty) == (
         metrics.false_accepts + metrics.false_rejects + metrics.unwarranted_decisions
     )
+    # Every tier the projection contains, not only the ones with errors.
+    assert tuple(item.difficulty for item in metrics.by_difficulty) == tuple(
+        sorted(support)
+    )
+    assert all(
+        item.support == support[item.difficulty] for item in metrics.by_difficulty
+    )
+    assert all(item.errors <= item.support for item in metrics.by_difficulty)

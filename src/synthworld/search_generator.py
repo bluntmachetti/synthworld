@@ -171,7 +171,9 @@ def generate_search_projection(
         seed=seed,
         responses=ordered_responses,
         truth=SearchTruthBundle(
-            public_digest=public_digest(ordered_responses), results=tuple(truth)
+            seed=seed,
+            public_digest=public_digest(ordered_responses),
+            results=tuple(truth),
         ),
     )
 
