@@ -44,7 +44,10 @@ from pydantic import Field, model_validator
 
 from synthworld.models import SyntheticModel
 
-TEMPORAL_SCHEMA_VERSION: Literal["1.0.0"] = "1.0.0"
+#: Bumped to 1.1.0 when listing content arrived. Additive: the public artifact gained
+#: `listings` and truth gained `attributable`, both defaulted, so every 1.0.0 artifact
+#: still parses. A consumer that ignores the new field reads exactly what it did.
+TEMPORAL_SCHEMA_VERSION: Literal["1.1.0"] = "1.1.0"
 
 
 class PrivacyEventKind(StrEnum):
@@ -133,7 +136,7 @@ class PrivacyEvent(SyntheticModel):
     is really about the subject.
     """
 
-    schema_version: Literal["1.0.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
     id: str = Field(min_length=1)
     tick: int = Field(ge=0)
     kind: PrivacyEventKind
@@ -213,7 +216,7 @@ class PublicTimeline(SyntheticModel):
     over every listing's full truth.
     """
 
-    schema_version: Literal["1.0.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
     as_of: int = Field(ge=0)
     events: tuple[PrivacyEvent, ...]
     #: What each discovered listing says, for the listings discovered by `as_of`.
@@ -307,7 +310,7 @@ class ObservationTruth(SyntheticModel):
 class TemporalTruth(SyntheticModel):
     """Evaluator-only truth, physically separate from any timeline."""
 
-    schema_version: Literal["1.0.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
     seed: int
     #: The last tick the world was generated for. Truth is stated once, for the whole
     #: run; a timeline is a prefix of it.
@@ -346,7 +349,7 @@ class TemporalWorld(SyntheticModel):
     Evaluator-side. A consumer receives :func:`materialise` output, never this.
     """
 
-    schema_version: Literal["1.0.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
     seed: int
     horizon: int = Field(ge=0)
     events: tuple[PrivacyEvent, ...]

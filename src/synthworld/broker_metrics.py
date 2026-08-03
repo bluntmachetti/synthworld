@@ -58,7 +58,12 @@ from synthworld.temporal import (
     TemporalTruth,
 )
 
-BROKER_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
+#: 2.0.0, not 1.1.0. The formulas changed rather than grew: four families moved from
+#: an assessed-listings denominator to the discovered world, a request is warranted
+#: only when the system claimed the listing, and `request_correctness` became
+#: `request_recall`. The same submission scores differently, so two reports at one
+#: version would be incomparable - which is the only thing this constant is for.
+BROKER_SCORING_VERSION: Literal["2.0.0"] = "2.0.0"
 
 
 class BrokerEvaluationError(ValueError):
@@ -124,7 +129,7 @@ class BrokerRemovalMetrics(SyntheticModel):
     """Six families, never combined."""
 
     schema_version: Literal["1.0.0"] = "1.0.0"
-    scoring_version: Literal["1.0.0"] = BROKER_SCORING_VERSION
+    scoring_version: Literal["2.0.0"] = BROKER_SCORING_VERSION
     task: Literal["broker_removal"] = "broker_removal"
     as_of: int = Field(ge=0)
     #: Listings the public timeline had discovered by `as_of`. Every family is scored

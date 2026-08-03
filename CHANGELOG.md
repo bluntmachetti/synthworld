@@ -9,6 +9,18 @@ agentic schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+### Changed
+
+- `BROKER_SCORING_VERSION` is `2.0.0`. The scoring formulas changed rather than grew:
+  four families moved from an assessed-listings denominator to the discovered world,
+  a removal request counts as warranted only when the system itself concluded the
+  listing is the subject's, and `request_correctness` became `request_recall` because
+  its denominator was always recall's. The same submission scores differently, so two
+  reports at one version would be incomparable.
+- `TEMPORAL_SCHEMA_VERSION` is `1.1.0`. Additive: the public artifact gained
+  `listings` and truth gained `attributable`, both defaulted, so every `1.0.0`
+  artifact still parses and a consumer that ignores the new field reads what it did.
+
 ### Added
 
 - A deterministic temporal slice for privacy exposure, and a broker
