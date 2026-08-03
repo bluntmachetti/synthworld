@@ -13,12 +13,15 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Security
 
-- Eleven channels through which the ambiguity pack's answer key was recoverable from
-  its public artifact are closed. Anyone who generated evaluation packs with an earlier
-  version should regenerate them: a system under test could reach the right answer
-  without doing the task, so scores measured against those packs do not mean what they
-  appear to. The frozen canonical pack was affected too and is re-cut here, with new
-  digests recorded in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
+- **Nine of eleven** known channels through which the ambiguity pack's answer key was
+  recoverable from its public artifact are closed. Two remain open and are described
+  below; regenerating a pack with this version does not make it safe against those two.
+  Anyone who generated evaluation packs with an earlier version should still
+  regenerate: nine channels are a great deal worse than two, and a system under test
+  could otherwise reach the right answer without doing the task at all, so scores
+  measured against those packs do not mean what they appear to. The frozen canonical
+  pack was affected too and is re-cut here, with new digests recorded in
+  [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
 - Eight of the eleven were metadata bound to the label — collection ordering, name
   pools indexed by a scenario ordinal, positional record identifiers, source types
   constant per scenario, repetition counts, attribute counts, a distinctive locality
@@ -31,12 +34,14 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   baseline. `generate_ambiguity_variant` now requires a `key` that is never serialized;
   pass `UNKEYED` to reproduce the published packs, or at least 16 bytes from
   `secrets.token_bytes` for evaluation.
-- Two remain open and are tracked in
-  [#68](https://github.com/bluntmachetti/synthworld/issues/68): non-ASCII display names
-  appear in only one scenario, and source-type agreement implies one disposition. A key
-  does not close either, because neither depends on a draw. Both are properties of a
-  fixed case list, which
-  [#62](https://github.com/bluntmachetti/synthworld/issues/62) addresses.
+- **The two that remain open**, tracked in
+  [#68](https://github.com/bluntmachetti/synthworld/issues/68). Non-ASCII display names
+  appear in only one scenario, so a search for them identifies a `merge` pair on every
+  seed measured. Source-type agreement implies `separate` on every pair measured where
+  the two sources match. A key closes neither, because neither depends on a draw: they
+  are properties of a fixed case list, which
+  [#62](https://github.com/bluntmachetti/synthworld/issues/62) addresses. Treat scores
+  on the affected scenarios accordingly until then.
 
 ### Changed
 
@@ -307,7 +312,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/bluntmachetti/synthworld/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/bluntmachetti/synthworld/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/bluntmachetti/synthworld/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bluntmachetti/synthworld/compare/v0.7.0...v0.8.0
