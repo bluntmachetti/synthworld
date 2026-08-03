@@ -274,36 +274,46 @@ aggregate hides which you have.
 |---|---|---|---|---|
 | identity_resolution | `principal_resolution_accuracy` | the originating principal is named correctly | it is not | scored action events |
 | | `logical_agent_resolution_accuracy` | the acting logical agent is named correctly | it is not | scored action events |
-| | `runtime_binding_accuracy` | the runtime is bound to the right logical agent | it is not | scored action events |
+| | `runtime_binding_accuracy` | the runtime principal is named correctly | it is not | scored action events |
 | | `credential_subject_accuracy` | the presented credential's subject is named correctly | it is not | scored action events |
 | authorization | `authorization_decision_accuracy` | allow/deny matches truth | it never does | scored action events |
 | | `authorization_decision_precision` | nothing allowed should have been denied | everything allowed should have been denied | actions the trace allowed |
 | | `authorization_decision_recall` | nothing that should be allowed was denied | everything allowable was denied | actions truth allows |
 | | `authorization_decision_f1` | harmonic mean of the two above | — | actions truth allows |
-| | `temporal_validity_accuracy` | the audit-time verdict is right where *when* the action happened decides it — acting after a revocation, or before a grant | the verdict is wrong on every such case | action events whose case turns on timing |
-| | `policy_version_accuracy` | the policy version the covering delegation carried is named correctly | it is not | scored action events |
+| | `temporal_validity_accuracy` | the audit-time verdict is right on every event labelled `valid_then_revoked`, `post_revocation_action` or `invalid_then_later_granted` | it is wrong on all of them | events carrying one of those three case labels |
+| | `policy_version_accuracy` | the expected policy version is named correctly — the covering delegation's where a chain exists, and the attempt's own where truth records no chain | it is not | scored action events |
 | delegation_and_accountability | `delegation_chain_integrity` | the delegation chain matches the one the action-time check selected, root first | it does not | scored action events |
 | | `attribution_integrity` | the actor the action is attributed to is correct | it is not | scored action events |
 | | `accountable_owner_chain_integrity` | the chain of principals accountable for the action is correct | it is not | scored action events |
-| observability | `provenance_completeness` | every required evidence reference was submitted | none were | scored action events |
+| observability | `provenance_completeness` | every event carried its complete required evidence set | no event carried a complete set — which happens well short of submitting nothing | scored action events |
 | | `provenance_exact_match` | the evidence set is exactly right — nothing missing, nothing fabricated | it is not | scored action events |
-| | `provenance_precision` | no submitted evidence reference was fabricated | all were | evidence references submitted |
+| | `provenance_precision` | no submitted evidence reference was fabricated | all were | distinct evidence references submitted |
 | | `audit_reconstructability_accuracy` | the claim about whether the decision can be rebuilt from retained evidence is right | it is not | scored action events |
 | | `expected_side_effect_accuracy` | the side effect the action should record is named correctly | it is not | scored action events |
 | least_privilege | `least_privilege_accuracy` | nothing truth denies was allowed | everything truth denies was allowed | actions truth denies |
-| | `excess_authority_rate` | — (0.0 is the good end) | every denied action was allowed | actions truth denies |
+| | `excess_authority_rate` | every action truth denies was allowed — this is the **bad** end | nothing truth denies was allowed | actions truth denies |
 
-`excess_authority_rate` is the only metric where zero is the good score; it is the
-complement of `least_privilege_accuracy` and both are reported because a reader
-scanning for failures should not have to invert one of them in their head.
+`excess_authority_rate` is the only metric where zero is the good score, so its row
+reads in the opposite direction to every other. It is the exact complement of
+`least_privilege_accuracy`, and both are reported so a reader scanning for failures
+does not have to invert one in their head.
 
-A metric is `null` rather than `0.0` when its denominator is empty — a world with no
-timing cases cannot score temporal validity, and reporting zero there would read as
-total failure at something never asked.
+`authorization` and `least_privilege` are reported apart but are not independent: both
+project the submitted decision, so flipping a single denial moves metrics in both
+families. They are separate because over-permission is the failure a reader looks for
+by name.
 
-Agentic reports use scoring protocol `0.4.0`; other SynthWorld tasks remain on
-their existing scoring protocols. `0.4.0` groups metrics into families and publishes what each denominator counts,
-changing the report's shape without moving any number. `0.3.0` derives
+A metric is `null` rather than `0.0` when it cannot be computed. Usually that is an
+empty denominator — a world with no timing cases cannot score temporal validity, and
+zero would read as total failure at something never asked. It is not only that:
+`authorization_decision_f1` is null whenever precision and recall are both zero, which
+can happen with a perfectly non-empty denominator.
+
+Agentic reports use scoring protocol `0.3.0`; other SynthWorld tasks remain on
+their existing scoring protocols. Grouping metrics into families changed the report's *shape*, not any metric's
+definition or value, so it moved `EVALUATION_SCHEMA_VERSION` to `0.2.0` rather than
+this number - and that knob is shared, because every task's report gained the same two
+fields. `0.3.0` derives
 `expected_policy_version` from
 the delegation that covered the action rather than echoing the attempt, and
 records the covering chain on a policy-version-mismatch denial. Asteria Agentic

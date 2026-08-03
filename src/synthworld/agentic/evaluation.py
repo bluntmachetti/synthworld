@@ -25,14 +25,19 @@ from synthworld.evaluation import (
     TaskMetric,
 )
 
-AGENTIC_SCORING_PROTOCOL_VERSION = "0.4.0"
+AGENTIC_SCORING_PROTOCOL_VERSION = "0.3.0"
 
 #: Which family each metric belongs to, and what its denominator counts.
 #:
-#: The split that matters is the last two against the rest. An agent can decide well
+#: The split that matters is `observability` against the rest. An agent can decide well
 #: and log badly, or the reverse, and twenty numbers in one list hide which - a reader
 #: cannot tell "the model is making bad calls" from "the model is not recording what it
 #: decided". Reported as families, that distinction is the first thing visible.
+#:
+#: `authorization` and `least_privilege` are reported apart but are not independent:
+#: both project the submitted `decision`, so flipping one denial moves metrics in both.
+#: They are separate because over-permission is the failure a reader looks for by name,
+#: not because they are orthogonal.
 _METRIC_FAMILIES: dict[str, tuple[str, str]] = {
     "principal_resolution_accuracy": ("identity_resolution", "scored action events"),
     "logical_agent_resolution_accuracy": (
@@ -45,9 +50,14 @@ _METRIC_FAMILIES: dict[str, tuple[str, str]] = {
     "authorization_decision_precision": ("authorization", "actions the trace allowed"),
     "authorization_decision_recall": ("authorization", "actions truth allows"),
     "authorization_decision_f1": ("authorization", "actions truth allows"),
+    # Named by the case labels rather than by a description of them. "Events whose
+    # case turns on timing" reads well and is wrong twice over: `post_revocation_action`
+    # is deny at action time and deny at audit, so echoing the decision passes it, while
+    # two events that genuinely diverge allow-to-deny are *not* in this set.
     "temporal_validity_accuracy": (
         "authorization",
-        "action events whose case turns on when the action happened",
+        "action events labelled valid_then_revoked, post_revocation_action or "
+        "invalid_then_later_granted",
     ),
     "policy_version_accuracy": ("authorization", "scored action events"),
     "delegation_chain_integrity": (
@@ -67,7 +77,6 @@ _METRIC_FAMILIES: dict[str, tuple[str, str]] = {
     ),
     "audit_reconstructability_accuracy": ("observability", "scored action events"),
     "expected_side_effect_accuracy": ("observability", "scored action events"),
-    "least_privilege": ("least_privilege", "actions truth denies"),
     "least_privilege_accuracy": ("least_privilege", "actions truth denies"),
     "excess_authority_rate": ("least_privilege", "actions truth denies"),
 }

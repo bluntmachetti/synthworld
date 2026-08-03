@@ -61,7 +61,12 @@ from synthworld.risk_serialization import (
     risk_answer_key_to_json,
 )
 
-EVALUATION_SCHEMA_VERSION = "0.1.0"
+#: 0.2.0 since `TaskMetric` gained `family` and `denominator_meaning`. This is the
+#: wire-shape knob and it moves for *every* task, because `TaskMetric` is shared: an
+#: extraction or risk report now carries two more keys than it did, even though no
+#: metric of theirs changed meaning. A per-task scoring version would have said only
+#: that agentic changed, which is false about the bytes.
+EVALUATION_SCHEMA_VERSION = "0.2.0"
 SCORING_PROTOCOL_VERSION = "0.1.0"
 CHECKSUM_SCHEME = "synthworld-json-v1"
 
@@ -122,7 +127,7 @@ class FailureSlice(SyntheticModel):
 class EvaluationReport(SyntheticModel):
     """The uniform result of scoring one task's predictions against truth."""
 
-    schema_version: Literal["0.1.0"] = "0.1.0"
+    schema_version: Literal["0.2.0"] = "0.2.0"
     scoring_version: str
     task: str
     seed: int

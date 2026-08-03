@@ -24,7 +24,7 @@ from synthworld.agentic.models import (
     ObservedActionTrace,
 )
 from synthworld.agentic.replay import AgenticReplayError
-from synthworld.evaluation import EvaluationInputError
+from synthworld.evaluation import EvaluationInputError, EvaluationReport
 
 
 def test_reference_trace_scores_every_independent_dimension() -> None:
@@ -34,7 +34,7 @@ def test_reference_trace_scores_every_independent_dimension() -> None:
     metrics = {item.name: item.value for item in report.metrics}
 
     assert report.task == "agentic_authority"
-    assert report.scoring_version == "0.4.0"
+    assert report.scoring_version == "0.3.0"
     assert report.checksum_scheme == "sha256-artifact-set-v1"
     assert metrics["excess_authority_rate"] == 0.0
     assert all(
@@ -259,28 +259,63 @@ def test_every_metric_names_its_family_and_denominator() -> None:
             assert 0.0 <= metric.value <= 1.0
 
 
-def test_metrics_separate_deciding_well_from_recording_well() -> None:
-    """The split the families exist for.
+def _family_means(report: EvaluationReport) -> dict[str, float]:
+    scored: dict[str, list[float]] = {}
+    for metric in report.metrics:
+        if metric.value is not None and metric.family:
+            scored.setdefault(metric.family, []).append(metric.value)
+    return {name: sum(values) / len(values) for name, values in scored.items()}
 
-    An agent can make correct decisions and log them badly, or the reverse. Those need
-    different fixes, and one aggregate cannot tell a reader which they have.
+
+def test_metrics_separate_deciding_well_from_recording_well() -> None:
+    """The split the families exist for, demonstrated rather than asserted.
+
+    An earlier version of this test checked only that five family *labels* appeared,
+    which would have passed with every metric assigned to the wrong family. What the
+    families claim is that deciding well and recording well come apart, so the test
+    takes the reference trace and wrecks one at a time.
     """
 
     benchmark = generate_asteria_agentic_v1()
-    report = evaluate_agentic_trace(
-        reference_agentic_trace(benchmark), benchmark=benchmark
-    )
-    families = {metric.family for metric in report.metrics}
+    reference = reference_agentic_trace(benchmark)
 
-    assert "observability" in families
-    assert {
-        "identity_resolution",
-        "authorization",
-        "delegation_and_accountability",
-        "least_privilege",
-    } <= families
-    # Every metric is placed; none falls into an unnamed catch-all.
-    assert None not in families
+    # Records nothing, decides exactly as truth does.
+    silent = reference.model_copy(
+        update={
+            "rows": tuple(
+                row.model_copy(update={"evidence_refs": (), "side_effect": None})
+                for row in reference.rows
+            )
+        }
+    )
+    # Records everything faithfully, decides the opposite of truth every time.
+    reckless = reference.model_copy(
+        update={
+            "rows": tuple(
+                row.model_copy(
+                    update={
+                        "decision": (
+                            Decision.DENY
+                            if row.decision is Decision.ALLOW
+                            else Decision.ALLOW
+                        )
+                    }
+                )
+                for row in reference.rows
+            )
+        }
+    )
+
+    quiet = _family_means(evaluate_agentic_trace(silent, benchmark=benchmark))
+    loud = _family_means(evaluate_agentic_trace(reckless, benchmark=benchmark))
+
+    # Recording badly costs observability and leaves the verdict families alone.
+    assert quiet["observability"] < 0.5
+    assert quiet["identity_resolution"] == 1.0
+    assert quiet["delegation_and_accountability"] == 1.0
+    # Deciding badly costs authorization and leaves observability alone.
+    assert loud["authorization"] < 0.5
+    assert loud["observability"] == 1.0
 
 
 def test_the_glossary_documents_every_metric_the_scorer_emits() -> None:

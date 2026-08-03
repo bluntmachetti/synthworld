@@ -11,17 +11,26 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Changed
 
-- Agentic reports use scoring protocol `0.4.0`. Every metric now names the family it
-  belongs to and what its denominator counts, so a report can be read by family and
-  each ratio re-derived rather than trusted. No number moves; the report gains shape.
-  The split that carries the most information is observability against everything
-  else: an agent can decide well and record badly, or the reverse, and those need
-  different fixes. `TaskMetric` gains optional `family` and `denominator_meaning`
-  fields, so reports from tasks that predate the convention stay valid.
-- `AGENTIC_BENCHMARK.md` gains a per-metric glossary saying what each of the twenty
-  metrics measures and what 0.0 and 1.0 mean. Four of them - including
-  `temporal_validity_accuracy` - had no mention in any document, so the only way to
-  learn what they measured was to read the scorer or diff scores between policies.
+- `EVALUATION_SCHEMA_VERSION` is `0.2.0`. `TaskMetric` gains optional `family` and
+  `denominator_meaning`, so **every** task's report carries two more keys - extraction,
+  entity resolution, relationship inference and risk included, even though none of
+  their metrics changed meaning. The wire shape is what moved, so the schema knob is
+  what moves; no per-task scoring version changes, because a scoring version here means
+  the metric definitions and those are untouched.
+- Agentic metrics are grouped into five families and every denominator says what it
+  counts, so a report can be read by family and each ratio re-derived rather than
+  trusted. No metric value moves. The split carrying the most information is
+  `observability` against the rest: an agent can decide well and record badly, or the
+  reverse, and those need different fixes. Measured on the reference trace, wrecking
+  the recording drops observability to 0.25 while identity resolution, authorization
+  and delegation stay at 1.0; wrecking the decisions drops authorization to 0.40 while
+  observability stays at 1.0.
+- `AGENTIC_BENCHMARK.md` gains a per-metric glossary: what each measures, what 0.0 and
+  1.0 mean, and its denominator. **Sixteen of the twenty** metrics had no mention in any
+  top-level document, so the only way to learn what they measured was to read the
+  scorer or diff scores between policies. (They were cited in
+  `agent-authority-contract/control-catalogue.yaml` and its design-intent notes, which
+  a first version of this entry overlooked while claiming a repository-wide count.)
 
 ## [0.11.0] - 2026-08-03
 
