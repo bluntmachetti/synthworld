@@ -3,11 +3,40 @@
 All notable changes to this project are documented in this file. The format is
 based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-The data contracts (core-world, exposure, extraction, connection, risk, and
-agentic schemas) are versioned independently of the package; see
-[DATA_DICTIONARY.md](DATA_DICTIONARY.md).
+The data contracts (core-world, exposure, extraction, connection, risk, agentic,
+ambiguity, search, temporal, and broker schemas) are versioned independently of the
+package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
+
+## [0.11.0] - 2026-08-03
+
+### Security
+
+- Eleven channels through which the ambiguity pack's answer key was recoverable from
+  its public artifact are closed. Anyone who generated evaluation packs with an earlier
+  version should regenerate them: a system under test could reach the right answer
+  without doing the task, so scores measured against those packs do not mean what they
+  appear to. The frozen canonical pack was affected too and is re-cut here, with new
+  digests recorded in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
+- Eight of the eleven were metadata bound to the label — collection ordering, name
+  pools indexed by a scenario ordinal, positional record identifiers, source types
+  constant per scenario, repetition counts, attribute counts, a distinctive locality
+  token, and cross-listing multiplicity. Each is closed by deriving the value from the
+  evidence rather than from the case.
+- The ninth was different and is the reason for the new `key` parameter: the
+  substitution plan was a deterministic function of a *published* seed over canonical
+  values that live in public source, so it could be recomputed and inverted rather than
+  correlated. Rebuilding it recovered the disposition on 0.929 of pairs against a 0.467
+  baseline. `generate_ambiguity_variant` now requires a `key` that is never serialized;
+  pass `UNKEYED` to reproduce the published packs, or at least 16 bytes from
+  `secrets.token_bytes` for evaluation.
+- Two remain open and are tracked in
+  [#68](https://github.com/bluntmachetti/synthworld/issues/68): non-ASCII display names
+  appear in only one scenario, and source-type agreement implies one disposition. A key
+  does not close either, because neither depends on a draw. Both are properties of a
+  fixed case list, which
+  [#62](https://github.com/bluntmachetti/synthworld/issues/62) addresses.
 
 ### Changed
 
