@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -22,7 +24,7 @@ from synthworld.agentic.models import (
     ObservedActionTrace,
 )
 from synthworld.agentic.replay import AgenticReplayError
-from synthworld.evaluation import EvaluationInputError
+from synthworld.evaluation import EvaluationInputError, EvaluationReport
 
 
 def test_reference_trace_scores_every_independent_dimension() -> None:
@@ -232,3 +234,113 @@ def test_public_baselines_reject_incomplete_claims_and_nonactions() -> None:
         baselines._public_row(
             benchmark.public.events[0], benchmark.public, decision=Decision.DENY
         )
+
+
+def test_every_metric_names_its_family_and_denominator() -> None:
+    """A report a reader cannot re-derive is one they have to trust.
+
+    Ambiguity, search and broker scoring all publish denominators; the agentic
+    surface predates that convention and shipped twenty metrics as one flat list with
+    nothing saying what `support` counted. An external reviewer had to reverse-engineer
+    `temporal_validity_accuracy` by diffing scores between two agent policies.
+    """
+
+    benchmark = generate_asteria_agentic_v1()
+    report = evaluate_agentic_trace(
+        reference_agentic_trace(benchmark), benchmark=benchmark
+    )
+
+    assert report.metrics
+    for metric in report.metrics:
+        assert metric.family, metric.name
+        assert metric.support_meaning, metric.name
+        if metric.value is not None:
+            assert 0.0 <= metric.value <= 1.0
+
+    # For every metric but F1, support really is the denominator, so the numerator is
+    # an integer. F1 is excluded because it is computed from precision and recall -
+    # which is exactly why the field is named for support rather than for a denominator.
+    for metric in report.metrics:
+        if metric.name == "authorization_decision_f1" or not metric.support:
+            continue
+        if metric.value is not None:
+            numerator = metric.value * metric.support
+            assert abs(numerator - round(numerator)) < 1e-9, metric.name
+
+
+def _named(report: EvaluationReport) -> dict[str, float | None]:
+    return {metric.name: metric.value for metric in report.metrics}
+
+
+def test_metrics_separate_deciding_well_from_recording_well() -> None:
+    """The split the families exist for, demonstrated rather than asserted.
+
+    An earlier version checked only that family *labels* appeared, which would have
+    passed with every metric assigned to the wrong family. A second averaged each
+    family, which is unsound: `least_privilege_accuracy` and `excess_authority_rate`
+    are exact complements, so any family holding both averages to 0.5 whatever the
+    trace does. This asserts on named metrics.
+    """
+
+    benchmark = generate_asteria_agentic_v1()
+    reference = reference_agentic_trace(benchmark)
+
+    # Records nothing, decides exactly as truth does.
+    silent = reference.model_copy(
+        update={
+            "rows": tuple(
+                row.model_copy(update={"evidence_refs": (), "side_effect": None})
+                for row in reference.rows
+            )
+        }
+    )
+    # Records everything faithfully, decides the opposite of truth every time.
+    reckless = reference.model_copy(
+        update={
+            "rows": tuple(
+                row.model_copy(
+                    update={
+                        "decision": (
+                            Decision.DENY
+                            if row.decision is Decision.ALLOW
+                            else Decision.ALLOW
+                        )
+                    }
+                )
+                for row in reference.rows
+            )
+        }
+    )
+
+    quiet = _named(evaluate_agentic_trace(silent, benchmark=benchmark))
+    loud = _named(evaluate_agentic_trace(reckless, benchmark=benchmark))
+
+    # Recording badly costs observability and leaves the verdict metrics untouched.
+    assert quiet["provenance_completeness"] == 0.0
+    assert quiet["expected_side_effect_accuracy"] == 0.0
+    assert quiet["authorization_decision_accuracy"] == 1.0
+    assert quiet["principal_resolution_accuracy"] == 1.0
+    # Deciding badly costs authorization and leaves the recording metrics untouched.
+    assert loud["authorization_decision_accuracy"] == 0.0
+    assert loud["excess_authority_rate"] == 1.0
+    assert loud["provenance_completeness"] == 1.0
+    assert loud["expected_side_effect_accuracy"] == 1.0
+
+
+def test_the_glossary_documents_every_metric_the_scorer_emits() -> None:
+    """Documentation that drifts from the code is worse than none.
+
+    Four of these metrics had zero mentions across every document in the repository
+    before this test existed.
+    """
+
+    benchmark = generate_asteria_agentic_v1()
+    report = evaluate_agentic_trace(
+        reference_agentic_trace(benchmark), benchmark=benchmark
+    )
+    documented = (
+        Path(__file__).parents[1].joinpath("AGENTIC_BENCHMARK.md").read_text("utf-8")
+    )
+
+    for metric in report.metrics:
+        assert f"`{metric.name}`" in documented, metric.name

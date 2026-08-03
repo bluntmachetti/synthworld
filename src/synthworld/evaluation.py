@@ -61,7 +61,12 @@ from synthworld.risk_serialization import (
     risk_answer_key_to_json,
 )
 
-EVALUATION_SCHEMA_VERSION = "0.1.0"
+#: 0.2.0 since `TaskMetric` gained `family` and `support_meaning`. This is the
+#: wire-shape knob and it moves for *every* task, because `TaskMetric` is shared: an
+#: extraction or risk report now carries two more keys than it did, even though no
+#: metric of theirs changed meaning. A per-task scoring version would have said only
+#: that agentic changed, which is false about the bytes.
+EVALUATION_SCHEMA_VERSION = "0.2.0"
 SCORING_PROTOCOL_VERSION = "0.1.0"
 CHECKSUM_SCHEME = "synthworld-json-v1"
 
@@ -77,11 +82,31 @@ class EvaluationInputError(ValueError):
 
 
 class TaskMetric(SyntheticModel):
-    """One named scalar metric. A null value marks the metric undefined here."""
+    """One named scalar metric. A null value marks the metric undefined here.
+
+    ``family`` and ``support_meaning`` are optional because tasks adopted them at
+    different times. That does **not** make old stored reports readable: the report's
+    own ``schema_version`` is a single-value literal, so a serialized `0.1.0` report is
+    rejected outright by this model. A first version of this docstring claimed the
+    defaults kept such reports valid, which is false — the defaults keep old *scoring
+    code* working, not old *data* loadable. Read stored reports with the version of the
+    library that wrote them, or migrate them.
+
+    ``support_meaning`` says what ``support`` counts, which is not always the
+    denominator. For a simple ratio the two coincide and the value is re-derivable. For
+    ``authorization_decision_f1`` they do not: support is classification support while
+    the value comes from precision and recall, both of which are reported beside it. The
+    field is named for what it is rather than for what it usually is.
+    """
 
     name: str
     value: float | None
     support: int = Field(ge=0)
+    #: Which group of related failures this belongs to, so a report can be read by
+    #: family rather than as one undifferentiated list.
+    family: str | None = None
+    #: What `support` counts. Without it, a reader has to infer it from the scorer.
+    support_meaning: str | None = None
 
     @model_validator(mode="after")
     def reject_non_finite(self) -> TaskMetric:
@@ -109,7 +134,7 @@ class FailureSlice(SyntheticModel):
 class EvaluationReport(SyntheticModel):
     """The uniform result of scoring one task's predictions against truth."""
 
-    schema_version: Literal["0.1.0"] = "0.1.0"
+    schema_version: Literal["0.2.0"] = "0.2.0"
     scoring_version: str
     task: str
     seed: int

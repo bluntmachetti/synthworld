@@ -287,7 +287,7 @@ All prediction schemas are Pydantic models supporting `.model_validate_json(text
 | Model | Required fields | Meaning |
 |---|---|---|
 | `EvaluationReport` | `schema_version`, `scoring_version`, `task`, `seed`, `persona_count`, `benchmark_version`, `checksum_scheme`, `artifact_checksums`, `metrics`, `slices` | The uniform scored result of a task prediction set against separate truth. |
-| `TaskMetric` | `name`, `value`, `support` | One named scalar metric. A `null` value marks the metric undefined for that score. |
+| `TaskMetric` | `name`, `value`, `support`, `family`, `support_meaning` | One named scalar metric. A `null` value marks the metric undefined for that score. |
 | `FailureSlice` | `dimension`, `value`, `outcome`, `count`, `support` | A counted slice of where the system failed (e.g. `data_class` missed, or `adversarial_pack` false merge/split) for error analysis. |
 
 ### Error handling
