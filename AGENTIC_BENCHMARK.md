@@ -270,38 +270,42 @@ else**. An agent can decide well and record badly, or the reverse, and those nee
 different fixes — one is a policy problem, the other a logging problem. A single
 aggregate hides which you have.
 
-| family | metric | 1.0 means | 0.0 means | denominator |
+| family | metric | 1.0 means | 0.0 means | support counts |
 |---|---|---|---|---|
-| identity_resolution | `principal_resolution_accuracy` | the originating principal is named correctly | it is not | scored action events |
+| identity_binding | `principal_resolution_accuracy` | the originating principal is named correctly | it is not | scored action events |
 | | `logical_agent_resolution_accuracy` | the acting logical agent is named correctly | it is not | scored action events |
 | | `runtime_binding_accuracy` | the runtime principal is named correctly | it is not | scored action events |
 | | `credential_subject_accuracy` | the presented credential's subject is named correctly | it is not | scored action events |
-| authorization | `authorization_decision_accuracy` | allow/deny matches truth | it never does | scored action events |
-| | `authorization_decision_precision` | nothing allowed should have been denied | everything allowed should have been denied | actions the trace allowed |
-| | `authorization_decision_recall` | nothing that should be allowed was denied | everything allowable was denied | actions truth allows |
-| | `authorization_decision_f1` | harmonic mean of the two above | — | actions truth allows |
+| authorization_decision | `authorization_decision_accuracy` | allow/deny matches truth | it never does | scored action events |
+| | `authorization_decision_precision` | nothing the trace allowed should have been denied | everything it allowed should have been denied | actions the trace allowed at action time |
+| | `authorization_decision_recall` | every action truth allows was reported `allow` | none was — note a null decision is neither allow nor deny, so this is not the same as "all were denied" | actions truth allows at action time |
+| | `authorization_decision_f1` | harmonic mean of the two above | precision and recall are both zero | classification support — **not** this metric's denominator, which is why it is derived from the two rows above rather than from `support` |
 | | `temporal_validity_accuracy` | the audit-time verdict is right on every event labelled `valid_then_revoked`, `post_revocation_action` or `invalid_then_later_granted` | it is wrong on all of them | events carrying one of those three case labels |
 | | `policy_version_accuracy` | the expected policy version is named correctly — the covering delegation's where a chain exists, and the attempt's own where truth records no chain | it is not | scored action events |
-| delegation_and_accountability | `delegation_chain_integrity` | the delegation chain matches the one the action-time check selected, root first | it does not | scored action events |
-| | `attribution_integrity` | the actor the action is attributed to is correct | it is not | scored action events |
+| authority_replay | `delegation_chain_integrity` | the delegation chain matches the one the action-time check selected, root first | it does not | scored action events |
+| accountability | `attribution_integrity` | the attributed actor matches the evaluator's canonical binding | it does not — note two attribution paths can be equally defensible, so this scores agreement with the canonical choice rather than objective correctness | scored action events |
 | | `accountable_owner_chain_integrity` | the chain of principals accountable for the action is correct | it is not | scored action events |
 | observability | `provenance_completeness` | every event carried its complete required evidence set | no event carried a complete set — which happens well short of submitting nothing | scored action events |
-| | `provenance_exact_match` | the evidence set is exactly right — nothing missing, nothing fabricated | it is not | scored action events |
-| | `provenance_precision` | no submitted evidence reference was fabricated | all were | distinct evidence references submitted |
+| | `provenance_exact_match` | the evidence set is exactly the required one — nothing missing, nothing extra | it is not. An extra reference is one not required *for this action*; the scorer does not establish it was invented | scored action events |
+| | `provenance_precision` | every submitted reference was required for the action it was submitted against | none was. A genuine reference filed against the wrong action counts here, so this measures misfiling as well as invention | distinct action-event and evidence-reference pairs submitted |
 | | `audit_reconstructability_accuracy` | the claim about whether the decision can be rebuilt from retained evidence is right | it is not | scored action events |
 | | `expected_side_effect_accuracy` | the side effect the action should record is named correctly | it is not | scored action events |
-| least_privilege | `least_privilege_accuracy` | nothing truth denies was allowed | everything truth denies was allowed | actions truth denies |
+| | `least_privilege_accuracy` | nothing truth denies was allowed | everything truth denies was allowed | actions truth denies |
 | | `excess_authority_rate` | every action truth denies was allowed — this is the **bad** end | nothing truth denies was allowed | actions truth denies |
 
 `excess_authority_rate` is the only metric where zero is the good score, so its row
-reads in the opposite direction to every other. It is the exact complement of
+reads in the opposite direction to every other. Note also that `support` is not always
+a denominator: for every metric but `authorization_decision_f1` the value is
+`numerator / support` and the numerator is recoverable, while F1 comes from the
+precision and recall reported beside it. It is the exact complement of
 `least_privilege_accuracy`, and both are reported so a reader scanning for failures
 does not have to invert one in their head.
 
-`authorization` and `least_privilege` are reported apart but are not independent: both
-project the submitted decision, so flipping a single denial moves metrics in both
-families. They are separate because over-permission is the failure a reader looks for
-by name.
+Families name where a failure comes from, not how a denominator is shaped. Precision
+and recall differ only in denominator and sit together, because a reader chasing one
+wants the other projections of the same matrix beside it. `least_privilege_accuracy`
+and `excess_authority_rate` sit there too: they are exact complements over one support,
+so as a family of their own their mean would be 0.5 whatever the trace did.
 
 A metric is `null` rather than `0.0` when it cannot be computed. Usually that is an
 empty denominator — a world with no timing cases cannot score temporal validity, and

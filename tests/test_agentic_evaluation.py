@@ -253,27 +253,33 @@ def test_every_metric_names_its_family_and_denominator() -> None:
     assert report.metrics
     for metric in report.metrics:
         assert metric.family, metric.name
-        assert metric.denominator_meaning, metric.name
-        # `support` is the denominator, so a defined value must be re-derivable.
-        if metric.value is not None and metric.support:
+        assert metric.support_meaning, metric.name
+        if metric.value is not None:
             assert 0.0 <= metric.value <= 1.0
 
-
-def _family_means(report: EvaluationReport) -> dict[str, float]:
-    scored: dict[str, list[float]] = {}
+    # For every metric but F1, support really is the denominator, so the numerator is
+    # an integer. F1 is excluded because it is computed from precision and recall -
+    # which is exactly why the field is named for support rather than for a denominator.
     for metric in report.metrics:
-        if metric.value is not None and metric.family:
-            scored.setdefault(metric.family, []).append(metric.value)
-    return {name: sum(values) / len(values) for name, values in scored.items()}
+        if metric.name == "authorization_decision_f1" or not metric.support:
+            continue
+        if metric.value is not None:
+            numerator = metric.value * metric.support
+            assert abs(numerator - round(numerator)) < 1e-9, metric.name
+
+
+def _named(report: EvaluationReport) -> dict[str, float | None]:
+    return {metric.name: metric.value for metric in report.metrics}
 
 
 def test_metrics_separate_deciding_well_from_recording_well() -> None:
     """The split the families exist for, demonstrated rather than asserted.
 
-    An earlier version of this test checked only that five family *labels* appeared,
-    which would have passed with every metric assigned to the wrong family. What the
-    families claim is that deciding well and recording well come apart, so the test
-    takes the reference trace and wrecks one at a time.
+    An earlier version checked only that family *labels* appeared, which would have
+    passed with every metric assigned to the wrong family. A second averaged each
+    family, which is unsound: `least_privilege_accuracy` and `excess_authority_rate`
+    are exact complements, so any family holding both averages to 0.5 whatever the
+    trace does. This asserts on named metrics.
     """
 
     benchmark = generate_asteria_agentic_v1()
@@ -306,16 +312,19 @@ def test_metrics_separate_deciding_well_from_recording_well() -> None:
         }
     )
 
-    quiet = _family_means(evaluate_agentic_trace(silent, benchmark=benchmark))
-    loud = _family_means(evaluate_agentic_trace(reckless, benchmark=benchmark))
+    quiet = _named(evaluate_agentic_trace(silent, benchmark=benchmark))
+    loud = _named(evaluate_agentic_trace(reckless, benchmark=benchmark))
 
-    # Recording badly costs observability and leaves the verdict families alone.
-    assert quiet["observability"] < 0.5
-    assert quiet["identity_resolution"] == 1.0
-    assert quiet["delegation_and_accountability"] == 1.0
-    # Deciding badly costs authorization and leaves observability alone.
-    assert loud["authorization"] < 0.5
-    assert loud["observability"] == 1.0
+    # Recording badly costs observability and leaves the verdict metrics untouched.
+    assert quiet["provenance_completeness"] == 0.0
+    assert quiet["expected_side_effect_accuracy"] == 0.0
+    assert quiet["authorization_decision_accuracy"] == 1.0
+    assert quiet["principal_resolution_accuracy"] == 1.0
+    # Deciding badly costs authorization and leaves the recording metrics untouched.
+    assert loud["authorization_decision_accuracy"] == 0.0
+    assert loud["excess_authority_rate"] == 1.0
+    assert loud["provenance_completeness"] == 1.0
+    assert loud["expected_side_effect_accuracy"] == 1.0
 
 
 def test_the_glossary_documents_every_metric_the_scorer_emits() -> None:

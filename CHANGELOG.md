@@ -12,11 +12,13 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 ### Changed
 
 - `EVALUATION_SCHEMA_VERSION` is `0.2.0`. `TaskMetric` gains optional `family` and
-  `denominator_meaning`, so **every** task's report carries two more keys - extraction,
+  `support_meaning`, so **every** task's report carries two more keys - extraction,
   entity resolution, relationship inference and risk included, even though none of
   their metrics changed meaning. The wire shape is what moved, so the schema knob is
   what moves; no per-task scoring version changes, because a scoring version here means
-  the metric definitions and those are untouched.
+  the metric definitions and those are untouched. A stored `0.1.0` report does **not**
+  load under the new model — the report's `schema_version` is a single-value literal —
+  so read archived reports with the library version that wrote them.
 - Agentic metrics are grouped into five families and every denominator says what it
   counts, so a report can be read by family and each ratio re-derived rather than
   trusted. No metric value moves. The split carrying the most information is

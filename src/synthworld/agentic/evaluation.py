@@ -34,41 +34,46 @@ AGENTIC_SCORING_PROTOCOL_VERSION = "0.3.0"
 #: cannot tell "the model is making bad calls" from "the model is not recording what it
 #: decided". Reported as families, that distinction is the first thing visible.
 #:
-#: `authorization` and `least_privilege` are reported apart but are not independent:
-#: both project the submitted `decision`, so flipping one denial moves metrics in both.
-#: They are separate because over-permission is the failure a reader looks for by name,
-#: not because they are orthogonal.
+#: Families name where a failure comes from, not how a denominator is shaped. Metrics
+#: that differ only in denominator - precision against recall - belong together, because
+#: a reader chasing a bad number wants the other projections of the same matrix beside
+#: it.
 _METRIC_FAMILIES: dict[str, tuple[str, str]] = {
-    "principal_resolution_accuracy": ("identity_resolution", "scored action events"),
-    "logical_agent_resolution_accuracy": (
-        "identity_resolution",
+    "principal_resolution_accuracy": ("identity_binding", "scored action events"),
+    "logical_agent_resolution_accuracy": ("identity_binding", "scored action events"),
+    "runtime_binding_accuracy": ("identity_binding", "scored action events"),
+    "credential_subject_accuracy": ("identity_binding", "scored action events"),
+    "authorization_decision_accuracy": (
+        "authorization_decision",
         "scored action events",
     ),
-    "runtime_binding_accuracy": ("identity_resolution", "scored action events"),
-    "credential_subject_accuracy": ("identity_resolution", "scored action events"),
-    "authorization_decision_accuracy": ("authorization", "scored action events"),
-    "authorization_decision_precision": ("authorization", "actions the trace allowed"),
-    "authorization_decision_recall": ("authorization", "actions truth allows"),
-    "authorization_decision_f1": ("authorization", "actions truth allows"),
+    "authorization_decision_precision": (
+        "authorization_decision",
+        "actions the trace allowed at action time",
+    ),
+    "authorization_decision_recall": (
+        "authorization_decision",
+        "actions truth allows at action time",
+    ),
+    # Support is classification support, not this metric's denominator: F1 comes from
+    # the precision and recall reported beside it.
+    "authorization_decision_f1": (
+        "authorization_decision",
+        "actions truth allows at action time, as classification support",
+    ),
     # Named by the case labels rather than by a description of them. "Events whose
     # case turns on timing" reads well and is wrong twice over: `post_revocation_action`
     # is deny at action time and deny at audit, so echoing the decision passes it, while
     # two events that genuinely diverge allow-to-deny are *not* in this set.
     "temporal_validity_accuracy": (
-        "authorization",
+        "authority_replay",
         "action events labelled valid_then_revoked, post_revocation_action or "
         "invalid_then_later_granted",
     ),
-    "policy_version_accuracy": ("authorization", "scored action events"),
-    "delegation_chain_integrity": (
-        "delegation_and_accountability",
-        "scored action events",
-    ),
-    "attribution_integrity": ("delegation_and_accountability", "scored action events"),
-    "accountable_owner_chain_integrity": (
-        "delegation_and_accountability",
-        "scored action events",
-    ),
+    "policy_version_accuracy": ("authority_replay", "scored action events"),
+    "delegation_chain_integrity": ("authority_replay", "scored action events"),
+    "attribution_integrity": ("accountability", "scored action events"),
+    "accountable_owner_chain_integrity": ("accountability", "scored action events"),
     "provenance_completeness": ("observability", "scored action events"),
     "provenance_exact_match": ("observability", "scored action events"),
     "provenance_precision": (
@@ -77,16 +82,31 @@ _METRIC_FAMILIES: dict[str, tuple[str, str]] = {
     ),
     "audit_reconstructability_accuracy": ("observability", "scored action events"),
     "expected_side_effect_accuracy": ("observability", "scored action events"),
-    "least_privilege_accuracy": ("least_privilege", "actions truth denies"),
-    "excess_authority_rate": ("least_privilege", "actions truth denies"),
+    # Folded into authorization_decision rather than standing alone. They are exact
+    # complements over one support, so as a family their mean is 0.5 whatever the trace
+    # does - one degree of freedom wearing a family's clothes - and both are projections
+    # of the same action-time confusion matrix as the four metrics above.
+    "least_privilege_accuracy": ("authorization_decision", "actions truth denies"),
+    "excess_authority_rate": ("authorization_decision", "actions truth denies"),
 }
 
 
 def _described(metric: TaskMetric) -> TaskMetric:
-    """Attach the family and denominator meaning for a metric built above."""
+    """Attach the family and support meaning for a metric built above.
+
+    Constructed rather than `model_copy(update=...)`, which silently drops keys the
+    model does not have. Renaming a field left every metric with a `None` meaning and
+    no error anywhere - the tests caught it, but nothing in the call itself would have.
+    """
 
     family, meaning = _METRIC_FAMILIES[metric.name]
-    return metric.model_copy(update={"family": family, "denominator_meaning": meaning})
+    return TaskMetric(
+        name=metric.name,
+        value=metric.value,
+        support=metric.support,
+        family=family,
+        support_meaning=meaning,
+    )
 
 
 _TEMPORAL_CASES = {
