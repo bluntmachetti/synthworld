@@ -13,11 +13,14 @@ import pytest
 from pydantic import ValidationError
 
 from synthworld.temporal import (
+    ListingAttribute,
+    ListingAttributeKind,
     ListingTruth,
     ObservationTruth,
     ObservationValidity,
     PrivacyEvent,
     PrivacyEventKind,
+    PublicListingRecord,
     PublicTimeline,
     TemporalTruth,
     TemporalWorld,
@@ -234,6 +237,7 @@ def test_an_impossible_history_is_refused() -> None:
             seed=world.seed,
             horizon=world.horizon,
             events=(orphan,),
+            listings=world.listings,
             truth=world.truth,
         )
 
@@ -248,7 +252,11 @@ def test_a_repeated_request_and_a_conflicting_status_are_representable() -> None
     """
 
     world = generate_temporal_world(seed=53)
-    listing = world.truth.listings[0].listing_ref
+    listing = next(
+        item.object_ref
+        for item in world.events
+        if item.kind is PrivacyEventKind.REMOVAL_REQUESTED and item.object_ref
+    )
     subject = world.events[0].subject_ref
     existing = {item.tick for item in world.events}
     free = next(tick for tick in range(world.horizon, 0, -1) if tick not in existing)
@@ -266,6 +274,7 @@ def test_a_repeated_request_and_a_conflicting_status_are_representable() -> None
         events=tuple(
             sorted((again, *world.events), key=lambda item: (item.tick, item.id))
         ),
+        listings=world.listings,
         truth=world.truth,
     )
 
@@ -283,6 +292,7 @@ def test_a_duplicated_event_is_refused() -> None:
             seed=world.seed,
             horizon=world.horizon,
             events=(first, *world.events),
+            listings=world.listings,
             truth=world.truth,
         )
 
@@ -480,6 +490,7 @@ def test_a_world_whose_truth_describes_another_run_is_refused() -> None:
             seed=world.seed + 1,
             horizon=world.horizon,
             events=world.events,
+            listings=world.listings,
             truth=world.truth,
         )
 
@@ -492,6 +503,7 @@ def test_a_world_with_events_out_of_order_or_past_the_horizon_is_refused() -> No
             seed=world.seed,
             horizon=world.horizon,
             events=tuple(reversed(world.events)),
+            listings=world.listings,
             truth=world.truth,
         )
 
@@ -506,6 +518,7 @@ def test_a_world_with_events_out_of_order_or_past_the_horizon_is_refused() -> No
             seed=world.seed,
             horizon=world.horizon,
             events=(*world.events, late),
+            listings=world.listings,
             truth=world.truth,
         )
 
@@ -530,6 +543,7 @@ def test_an_event_for_a_listing_with_no_truth_is_refused() -> None:
             events=tuple(
                 sorted((stranger, *world.events), key=lambda item: (item.tick, item.id))
             ),
+            listings=world.listings,
             truth=world.truth,
         )
 
@@ -539,7 +553,11 @@ def test_a_stage_reached_before_discovery_is_still_refused() -> None:
 
     world = generate_temporal_world(seed=59)
     subject = world.events[0].subject_ref
-    listing = world.truth.listings[0].listing_ref
+    listing = next(
+        item.object_ref
+        for item in world.events
+        if item.kind is PrivacyEventKind.REMOVAL_REQUESTED and item.object_ref
+    )
     without_discovery = tuple(
         item
         for item in world.events
@@ -554,6 +572,7 @@ def test_a_stage_reached_before_discovery_is_still_refused() -> None:
             seed=world.seed,
             horizon=world.horizon,
             events=without_discovery,
+            listings=world.listings,
             truth=world.truth,
         )
     assert subject
@@ -577,6 +596,7 @@ def test_an_event_for_an_observation_with_no_truth_is_refused() -> None:
             events=tuple(
                 sorted((stranger, *world.events), key=lambda item: (item.tick, item.id))
             ),
+            listings=world.listings,
             truth=world.truth,
         )
 
@@ -603,6 +623,7 @@ def test_true_completion_is_not_tied_to_the_broker_s_claim() -> None:
         seed=world.seed,
         horizon=world.horizon,
         events=world.events,
+        listings=world.listings,
         truth=world.truth.model_copy(update={"listings": delayed}),
     )
 
@@ -633,6 +654,7 @@ def test_a_public_reappearance_absent_from_truth_is_refused() -> None:
             seed=world.seed,
             horizon=world.horizon,
             events=world.events,
+            listings=world.listings,
             truth=world.truth.model_copy(update={"listings": forgotten}),
         )
 
@@ -697,3 +719,119 @@ def test_every_seed_in_a_wide_sweep_generates() -> None:
 
     for seed in range(200):
         generate_temporal_world(seed=seed)
+
+
+def _record(**overrides: object) -> dict[str, object]:
+    base: dict[str, object] = {
+        "listing_ref": "listing-0001",
+        "listed_name": "Ada Barros",
+        "first_observed_at": 0,
+    }
+    return {**base, **overrides}
+
+
+@pytest.mark.parametrize(
+    ("build", "message"),
+    [
+        (
+            lambda: PublicListingRecord.model_validate(
+                _record(
+                    attributes=(
+                        ListingAttribute(kind=ListingAttributeKind.ADDRESS, value="a"),
+                        ListingAttribute(kind=ListingAttributeKind.ADDRESS, value="b"),
+                    )
+                )
+            ),
+            "repeats an attribute kind",
+        ),
+        (
+            lambda: PublicTimeline(
+                as_of=0,
+                events=(),
+                listings=(
+                    PublicListingRecord.model_validate(_record(first_observed_at=5)),
+                ),
+            ),
+            "listing from after its tick",
+        ),
+        (
+            lambda: PublicTimeline(
+                as_of=0,
+                events=(),
+                listings=(
+                    PublicListingRecord.model_validate(_record()),
+                    PublicListingRecord.model_validate(_record()),
+                ),
+            ),
+            "listing references must be unique",
+        ),
+        (
+            lambda: PublicTimeline(
+                as_of=0,
+                events=(),
+                listings=(
+                    PublicListingRecord.model_validate(_record(listing_ref="b")),
+                    PublicListingRecord.model_validate(_record(listing_ref="a")),
+                ),
+            ),
+            "canonical reference order",
+        ),
+    ],
+)
+def test_listing_content_is_validated_like_every_other_public_collection(
+    build: Callable[[], object], message: str
+) -> None:
+    """Content is public, so it is ordered and deduped like the events beside it."""
+
+    with pytest.raises(ValidationError, match=message):
+        build()
+
+
+def test_content_and_truth_must_describe_the_same_listings() -> None:
+    """Otherwise a system attributes a listing nobody scores, or the reverse."""
+
+    world = generate_temporal_world(seed=79)
+
+    with pytest.raises(ValidationError, match="described twice"):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=world.events,
+            listings=(*world.listings, world.listings[0]),
+            truth=world.truth,
+        )
+
+    with pytest.raises(ValidationError, match="cover different sets"):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=world.events,
+            listings=world.listings[:-1],
+            truth=world.truth,
+        )
+
+
+def test_listing_content_cannot_predate_its_own_discovery() -> None:
+    """Events refuse a stage before discovery; content has to obey the same rule.
+
+    Without it a world validates in which a page is readable at a tick where the
+    listing has not been found, and a consumer joining timeline events to listing
+    content crashes rather than scoring.
+    """
+
+    # Seed 1 slides the whole history by two ticks, so nothing is discovered at 0 and
+    # moving content there is genuinely early rather than a no-op.
+    world = generate_temporal_world(seed=1)
+    assert all(item.first_observed_at > 0 for item in world.listings)
+    early = tuple(
+        item.model_copy(update={"first_observed_at": 0}) for item in world.listings
+    )
+
+    with pytest.raises(ValidationError, match="does not appear at its discovery"):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=world.events,
+            listings=early,
+            truth=world.truth,
+        )

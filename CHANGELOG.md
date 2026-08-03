@@ -9,6 +9,18 @@ agentic schemas) are versioned independently of the package; see
 
 ## [Unreleased]
 
+### Changed
+
+- `BROKER_SCORING_VERSION` is `2.0.0`. The scoring formulas changed rather than grew:
+  four families moved from an assessed-listings denominator to the discovered world,
+  a removal request counts as warranted only when the system itself concluded the
+  listing is the subject's, and `request_correctness` became `request_recall` because
+  its denominator was always recall's. The same submission scores differently, so two
+  reports at one version would be incomparable.
+- `TEMPORAL_SCHEMA_VERSION` is `1.1.0`. Additive: the public artifact gained
+  `listings` and truth gained `attributable`, both defaulted, so every `1.0.0`
+  artifact still parses and a consumer that ignores the new field reads what it did.
+
 ### Added
 
 - A deterministic temporal slice for privacy exposure, and a broker
@@ -23,6 +35,15 @@ agentic schemas) are versioned independently of the package; see
   cannot happen — a confirmation with no request, a reappearance with no removal — while
   admitting repeated requests and conflicting statuses, which are cases rather than
   corruptions.
+- Public listing content and a published subject identity, so attribution is
+  answerable rather than guessable. A first revision emitted lifecycle events with no
+  content at all and never said who the subject was, which left the listing that is
+  *not* theirs indistinguishable from the six that are. Content is drawn from one
+  vocabulary and every readable page carries the same attribute kinds, so neither the
+  attribute count nor a distinctive token substitutes for reading the values. `ListingTruth.attributable`
+  marks the case whose page carries a common name and nothing to corroborate it:
+  declining is correct there and deciding is unwarranted, the same distinction
+  `PairDisposition.INSUFFICIENT` and `SearchMatchTruth.INSUFFICIENT_EVIDENCE` draw.
 - `evaluate_broker_assessment`, reporting six families that are never combined:
   discovery, identity matching, request correctness, completion, propagation and
   recurrence. Every score publishes its numerator, denominator and the denominator's

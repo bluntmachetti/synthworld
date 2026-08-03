@@ -52,12 +52,18 @@ from pydantic import Field, model_validator
 from synthworld.ambiguity_partition import DenominatedMetric
 from synthworld.models import SyntheticModel
 from synthworld.temporal import (
+    ListingAttributeKind,
     PrivacyEventKind,
     PublicTimeline,
     TemporalTruth,
 )
 
-BROKER_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
+#: 2.0.0, not 1.1.0. The formulas changed rather than grew: four families moved from
+#: an assessed-listings denominator to the discovered world, a request is warranted
+#: only when the system claimed the listing, and `request_correctness` became
+#: `request_recall`. The same submission scores differently, so two reports at one
+#: version would be incomparable - which is the only thing this constant is for.
+BROKER_SCORING_VERSION: Literal["2.0.0"] = "2.0.0"
 
 
 class BrokerEvaluationError(ValueError):
@@ -85,6 +91,20 @@ class ListingAssessment(SyntheticModel):
     #: Whether the system raised a reappearance alert.
     reappearance_alerted: bool = False
 
+    @model_validator(mode="after")
+    def require_a_claim_that_could_be_true(self) -> Self:
+        # A listing that has come back is not gone - `gone_now` is exactly
+        # `really_removed and not really_back` - and truth carries a single
+        # `removed_at`, so no world can make both of these right. Scoring a claim that
+        # is unsatisfiable in principle as merely wrong would tell a consumer their
+        # answer was incorrect when it was incoherent. Relax this if removal cycles
+        # arrive (#65), which is the only thing that would make it satisfiable.
+        if self.believed_removed and self.reappearance_alerted:
+            raise ValueError(
+                "a listing cannot be believed removed and reported as reappeared"
+            )
+        return self
+
 
 class BrokerAssessment(SyntheticModel):
     """One tick's submission. Partial and empty submissions are valid.
@@ -109,7 +129,7 @@ class BrokerRemovalMetrics(SyntheticModel):
     """Six families, never combined."""
 
     schema_version: Literal["1.0.0"] = "1.0.0"
-    scoring_version: Literal["1.0.0"] = BROKER_SCORING_VERSION
+    scoring_version: Literal["2.0.0"] = BROKER_SCORING_VERSION
     task: Literal["broker_removal"] = "broker_removal"
     as_of: int = Field(ge=0)
     #: Listings the public timeline had discovered by `as_of`. Every family is scored
@@ -121,9 +141,15 @@ class BrokerRemovalMetrics(SyntheticModel):
     #: Attributed a listing to the subject that is someone else's, and the reverse.
     false_attributions: int = Field(ge=0)
     missed_attributions: int = Field(ge=0)
+    #: Decided a listing whose public record cannot settle the question. Not a wrong
+    #: answer - an unwarranted one. The same error taxonomy as the ambiguity and search
+    #: packs, though not the same reward: those treat a correct abstention as *not
+    #: decided* and give it no precision credit, while this counts it as correct.
+    unwarranted_attributions: int = Field(ge=0)
     attribution_accuracy: DenominatedMetric
-    #: Asked for removal of a listing that is not the subject's. The precision half of
-    #: this family: `request_recall` alone is maximised by requesting everything.
+    #: Asked for removal of a listing that is not the subject's, that the record cannot
+    #: attribute, or that the system itself did not claim. The precision half of this
+    #: family: `request_recall` alone is maximised by requesting everything.
     unwarranted_requests: int = Field(ge=0)
     #: Named recall, not correctness. Its denominator is the listings that really are
     #: the subject's, so correctly *withholding* a request contributes nothing to it -
@@ -155,6 +181,8 @@ class BrokerRemovalMetrics(SyntheticModel):
             raise ValueError("more listings were assessed than were discoverable")
         if self.abstained_count > self.assessed_count:
             raise ValueError("more listings were abstained on than were assessed")
+        if self.unwarranted_attributions > self.discoverable_count:
+            raise ValueError("more listings were unwarrantedly decided than existed")
         if self.recurrence_detected > self.recurrence_count:
             raise ValueError("more reappearances were detected than occurred")
         return self
@@ -213,6 +241,17 @@ def evaluate_broker_assessment(
         )
     discoverable = discoverable_listings(timeline)
     submitted = {item.listing_ref: item for item in assessment.listings}
+    # Re-checked here, not only at construction: `model_copy(update=...)` bypasses
+    # nested validation, so an in-process consumer can hand the evaluator a state the
+    # model refuses. Serialized submissions were already safe; this closes the Python
+    # boundary too.
+    if any(
+        item.believed_removed and item.reappearance_alerted
+        for item in assessment.listings
+    ):
+        raise BrokerEvaluationError(
+            "a listing cannot be believed removed and reported as reappeared"
+        )
     if not set(submitted) <= set(discoverable):
         raise BrokerEvaluationError(
             "an assessment names a listing the timeline has not discovered"
@@ -228,6 +267,7 @@ def evaluate_broker_assessment(
     tick = assessment.as_of
     abstained = sum(1 for item in submitted.values() if item.concerns_subject is None)
     false_attributions = missed_attributions = attribution_correct = 0
+    unwarranted_attributions = 0
     unwarranted_requests = warranted = request_correct = 0
     false_completions = missed_completions = completion_correct = 0
     missed_copies = propagation_scored = propagation_correct = 0
@@ -247,7 +287,10 @@ def evaluate_broker_assessment(
         # assessed listings, and that made silence free: assessing only the one listing
         # carrying a public reappearance tied the truth-perfect oracle on five families
         # at one-seventh coverage. Declining to answer is a miss, not an exemption.
-        if fact.concerns_subject:
+        if fact.concerns_subject and fact.attributable:
+            # Only listings the record can attribute are ones a system can be expected
+            # to act on, so the bare case is out of this denominator rather than an
+            # unanswerable part of it.
             warranted += 1
         if really_removed:
             propagation_scored += 1
@@ -261,18 +304,35 @@ def evaluate_broker_assessment(
             # the omission shows up as a miss in every family it belonged to.
             continue
 
-        if answer.concerns_subject is not None:
-            if answer.concerns_subject == fact.concerns_subject:
+        if not fact.attributable:
+            # The record cannot settle it, so declining is the right answer and
+            # deciding is unwarranted rather than wrong.
+            if answer.concerns_subject is None:
                 attribution_correct += 1
-            elif answer.concerns_subject:
-                false_attributions += 1
             else:
-                missed_attributions += 1
+                unwarranted_attributions += 1
+        elif answer.concerns_subject is None:
+            pass  # Abstained on a decidable listing: not charged an error, not correct.
+        elif answer.concerns_subject == fact.concerns_subject:
+            attribution_correct += 1
+        elif answer.concerns_subject:
+            false_attributions += 1
+        else:
+            missed_attributions += 1
 
-        if fact.concerns_subject:
+        # A request is warranted only when the system itself concluded the listing is
+        # the subject's. Consulting truth alone let a policy declare every listing
+        # someone else's and still request removal of all of them with perfect recall
+        # and no unwarranted count - denying in one family what it acted on in another.
+        claimed = answer.concerns_subject is True
+        if not fact.attributable or not fact.concerns_subject or not claimed:
+            # Acting on a listing the record cannot attribute is unwarranted for the
+            # same reason deciding it is. A first revision left that free: requesting
+            # removal of everything you abstained on strictly dominated, because the
+            # bare listing really is the subject's, so the reward was deterministic.
+            unwarranted_requests += answer.requested_removal
+        else:
             request_correct += answer.requested_removal
-        elif answer.requested_removal:
-            unwarranted_requests += 1
 
         if answer.believed_removed == gone_now:
             completion_correct += 1
@@ -303,6 +363,7 @@ def evaluate_broker_assessment(
         ),
         false_attributions=false_attributions,
         missed_attributions=missed_attributions,
+        unwarranted_attributions=unwarranted_attributions,
         attribution_accuracy=_metric(
             attribution_correct,
             len(discoverable),
@@ -312,7 +373,7 @@ def evaluate_broker_assessment(
         request_recall=_metric(
             request_correct,
             warranted,
-            "discovered listings that really concern the subject",
+            "discovered listings that are the subject's and readable as such",
         ),
         false_completions=false_completions,
         missed_completions=missed_completions,
@@ -376,6 +437,54 @@ def believe_the_broker(timeline: PublicTimeline) -> BrokerAssessment:
     )
 
 
+def match_on_published_evidence(timeline: PublicTimeline) -> BrokerAssessment:
+    """Attributes by reading the listing against the subject's published identity.
+
+    The baseline that exists to show attribution is answerable. It compares each
+    listing's address against every address the timeline has said the subject holds,
+    and declines when the page carries nothing to compare - which is right, because one
+    listing bears a common name and nothing else.
+
+    Still believes broker confirmations, so it fails the phantom removal and the
+    surviving copies exactly as the other baselines do. The point is the contrast: a
+    system reasoning about evidence beats one guessing, and neither gets completion.
+    """
+
+    known = {
+        item.detail
+        for item in timeline.events
+        if item.kind is PrivacyEventKind.ADDRESS_CHANGED and item.detail
+    }
+    watchful = {
+        item.listing_ref: item for item in watch_after_confirmation(timeline).listings
+    }
+    return BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            watchful[record.listing_ref].model_copy(
+                update={
+                    "concerns_subject": (
+                        None
+                        if not record.attributes
+                        else any(
+                            item.value in known
+                            for item in record.attributes
+                            if item.kind is ListingAttributeKind.ADDRESS
+                        )
+                    ),
+                    "requested_removal": bool(record.attributes)
+                    and any(
+                        item.value in known
+                        for item in record.attributes
+                        if item.kind is ListingAttributeKind.ADDRESS
+                    ),
+                }
+            )
+            for record in timeline.listings
+        ),
+    )
+
+
 def watch_after_confirmation(timeline: PublicTimeline) -> BrokerAssessment:
     """A better baseline: keeps watching, so it catches the public reappearance.
 
@@ -410,6 +519,7 @@ BROKER_BASELINES: tuple[
 ] = (
     ("Believes every broker confirmation", believe_the_broker),
     ("Keeps watching after confirmation", watch_after_confirmation),
+    ("Matches on published evidence", match_on_published_evidence),
 )
 
 
@@ -434,6 +544,7 @@ __all__ = [
     "believe_the_broker",
     "discoverable_listings",
     "evaluate_broker_assessment",
+    "match_on_published_evidence",
     "run_broker_baseline",
     "watch_after_confirmation",
 ]

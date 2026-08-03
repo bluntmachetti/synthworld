@@ -13,6 +13,7 @@ from synthworld.broker_metrics import (
     believe_the_broker,
     discoverable_listings,
     evaluate_broker_assessment,
+    match_on_published_evidence,
     run_broker_baseline,
     watch_after_confirmation,
 )
@@ -176,7 +177,11 @@ def test_abstaining_avoids_a_false_answer_but_is_not_free() -> None:
     assert metrics.abstained_count == len(scope)
     assert metrics.false_attributions == 0
     assert metrics.missed_attributions == 0
-    assert metrics.attribution_accuracy.value == 0.0
+    assert metrics.unwarranted_attributions == 0
+    # Credited only for the listing whose record genuinely cannot settle the question,
+    # where declining is the right answer rather than a way of avoiding one.
+    assert metrics.attribution_accuracy.value is not None
+    assert 0.0 < metrics.attribution_accuracy.value < 0.5
     assert metrics.attribution_accuracy.denominator == len(scope)
 
 
@@ -423,6 +428,7 @@ def test_alerting_on_everything_is_no_longer_free() -> None:
     [
         ({"assessed_count": 99}, "more listings were assessed"),
         ({"abstained_count": 8, "assessed_count": 7}, "more listings were abstained"),
+        ({"unwarranted_attributions": 99}, "more listings were unwarrantedly"),
         ({"recurrence_detected": 9}, "more reappearances were detected"),
         ({"false_attributions": -4}, "greater than or equal to 0"),
     ],
@@ -444,3 +450,187 @@ def test_an_arithmetically_impossible_report_is_refused(
 
     with pytest.raises(ValidationError, match=message):
         metrics.__class__.model_validate({**metrics.model_dump(), **update})
+
+
+def test_attribution_is_answerable_from_published_evidence() -> None:
+    """The contract question this pack could not answer before.
+
+    Lifecycle events carried no content and the subject's identity was never published,
+    so the listing that is *not* the subject's was publicly indistinguishable from
+    those that are, in 50 of 50 seeds. Attribution could only be won by abstaining or
+    guessing, which means the family measured luck.
+    """
+
+    world, timeline = _at_horizon(3)
+    guessing = run_broker_baseline(
+        believe_the_broker, timeline=timeline, truth=world.truth
+    )
+    reading = run_broker_baseline(
+        match_on_published_evidence, timeline=timeline, truth=world.truth
+    )
+
+    assert reading.attribution_accuracy.value == 1.0
+    assert reading.unwarranted_attributions == 0
+    assert guessing.attribution_accuracy.value is not None
+    assert guessing.attribution_accuracy.value < reading.attribution_accuracy.value
+    assert guessing.unwarranted_attributions > 0
+    # Reading the evidence buys attribution and nothing else: neither policy can see
+    # the phantom removal, because no public event reveals it.
+    assert reading.false_completions > 0
+
+
+def test_deciding_an_unreadable_listing_is_unwarranted_not_wrong() -> None:
+    """One listing carries a common name and nothing to corroborate it.
+
+    Whatever the truth happens to be, the page cannot settle it, so declining is
+    correct and deciding is unjustified rather than incorrect - the distinction the
+    ambiguity and search packs already draw.
+    """
+
+    world, timeline = _at_horizon(3)
+    unreadable = [item for item in world.truth.listings if not item.attributable]
+    decisive = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            ListingAssessment(
+                listing_ref=item.listing_ref,
+                concerns_subject=True,
+                believed_removed=False,
+                requested_removal=True,
+            )
+            for item in unreadable
+        ),
+    )
+    metrics = evaluate_broker_assessment(decisive, timeline=timeline, truth=world.truth)
+
+    assert len(unreadable) == 1
+    assert metrics.unwarranted_attributions == 1
+    assert metrics.false_attributions == 0
+    assert metrics.missed_attributions == 0
+
+
+def test_a_claim_that_cannot_be_true_is_refused() -> None:
+    """Believed removed *and* reappeared is not wrong, it is incoherent.
+
+    A listing that has come back is not gone, and truth carries a single `removed_at`,
+    so no world can make both right. Scoring an unsatisfiable claim as merely incorrect
+    would tell a consumer their answer was wrong when it was meaningless.
+    """
+
+    with pytest.raises(ValidationError, match="cannot be believed removed"):
+        ListingAssessment(
+            listing_ref="listing-0001",
+            concerns_subject=True,
+            believed_removed=True,
+            requested_removal=True,
+            reappearance_alerted=True,
+        )
+
+
+def test_attribution_cannot_be_won_from_the_shape_of_a_record() -> None:
+    """The evidence has to be in the values, not in how many of them there are.
+
+    A first revision gave a matching page two attributes and a contradicting page one,
+    in a different town. A decoder reading nothing but the attribute count scored 1.000
+    on 75 of 75 held-out seeds, as did one grepping for the town name - so the values
+    were decorative and the record's *shape* answered the question.
+    """
+
+    shapes: dict[int, set[bool]] = {}
+    tokens: set[str] = set()
+    for seed in range(40):
+        world = generate_temporal_world(seed=seed)
+        timeline = materialise(world, as_of=world.horizon)
+        facts = {item.listing_ref: item for item in world.truth.listings}
+        for record in timeline.listings:
+            fact = facts[record.listing_ref]
+            if not fact.attributable:
+                continue
+            shapes.setdefault(len(record.attributes), set()).add(fact.concerns_subject)
+            tokens |= {
+                item.value.split("|")[-3]
+                for item in record.attributes
+                if "|" in item.value
+            }
+
+    # Among readable pages, the attribute count says nothing about the answer.
+    assert shapes
+    assert all(len(outcomes) > 1 for outcomes in shapes.values())
+    # And every address shares one town, so no token separates them either.
+    assert len(tokens) == 1
+
+
+def test_requesting_removal_of_an_unreadable_listing_is_unwarranted() -> None:
+    """Acting on what you could not attribute is not free.
+
+    The bare listing really is the subject's, so requesting its removal used to be pure
+    upside: a policy that read the evidence and then requested everything anyway
+    strictly dominated on 100 of 100 seeds while doing the thing the pack calls
+    unwarranted.
+    """
+
+    world, timeline = _at_horizon(3)
+    careful = match_on_published_evidence(timeline)
+    greedy = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            item.model_copy(update={"requested_removal": True})
+            for item in careful.listings
+        ),
+    )
+
+    measured = [
+        evaluate_broker_assessment(item, timeline=timeline, truth=world.truth)
+        for item in (careful, greedy)
+    ]
+
+    assert measured[0].unwarranted_requests == 0
+    assert measured[1].unwarranted_requests > 0
+    assert measured[1].request_recall.value == measured[0].request_recall.value
+
+
+def test_requesting_what_you_denied_is_unwarranted() -> None:
+    """A system cannot deny a listing in one family and act on it in another.
+
+    Request scoring consulted truth and ignored the submission's own conclusion, so a
+    policy could declare every listing someone else's and still request removal of all
+    of them with perfect recall and no unwarranted count.
+    """
+
+    world, timeline = _at_horizon(3)
+    denying = BrokerAssessment(
+        as_of=timeline.as_of,
+        listings=tuple(
+            ListingAssessment(
+                listing_ref=reference,
+                concerns_subject=False,
+                believed_removed=False,
+                requested_removal=True,
+            )
+            for reference in discoverable_listings(timeline)
+        ),
+    )
+    metrics = evaluate_broker_assessment(denying, timeline=timeline, truth=world.truth)
+
+    assert metrics.request_recall.value == 0.0
+    assert metrics.unwarranted_requests == len(denying.listings)
+
+
+def test_the_evaluator_rechecks_an_invariant_the_model_would_refuse() -> None:
+    """`model_copy` bypasses nested validation, so the boundary needs its own check."""
+
+    world, timeline = _at_horizon(3)
+    honest = match_on_published_evidence(timeline)
+    forged = honest.model_copy(
+        update={
+            "listings": tuple(
+                item.model_copy(
+                    update={"believed_removed": True, "reappearance_alerted": True}
+                )
+                for item in honest.listings
+            )
+        }
+    )
+
+    with pytest.raises(BrokerEvaluationError, match="cannot be believed removed"):
+        evaluate_broker_assessment(forged, timeline=timeline, truth=world.truth)
