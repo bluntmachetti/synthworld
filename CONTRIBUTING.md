@@ -101,6 +101,17 @@ Cutting a release:
     git verify-tag v0.11.0                   # expect: Good "git" signature
     git push origin v0.11.0
 
+Pushing the tag is the whole release. `release.yml` verifies the tag matches
+`pyproject.toml`, runs `make ci`, builds, publishes to PyPI via trusted publishing, and
+then creates the GitHub release — notes taken from this version's `CHANGELOG.md`
+section, with the distribution attached. If that section is missing or empty the
+release step fails rather than publishing an empty note, so write the changelog entry
+before tagging.
+
+v0.11.0 had to have its release object created by hand, because the workflow published
+to PyPI and stopped there. A consumer checking GitHub releases saw 0.10.0 as current
+while PyPI served 0.11.0.
+
 `tag.gpgSign` covers annotated tags only. Create tags with `-a` (or `-s`): a
 lightweight tag names a commit directly and carries no signature of its own,
 which is why v0.7.0 and v0.8.0 show nothing.
