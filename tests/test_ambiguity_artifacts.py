@@ -9,6 +9,7 @@ import subprocess
 import sys
 from collections import Counter, defaultdict
 from importlib.resources import files
+from itertools import product
 from pathlib import Path
 from uuid import uuid5
 
@@ -16,6 +17,7 @@ import pytest
 from pydantic import ValidationError
 
 from synthworld.ambiguity import (
+    SCENARIO_DISPOSITIONS,
     AmbiguityBenchmark,
     PairDisposition,
     PairPrediction,
@@ -29,7 +31,7 @@ from synthworld.ambiguity_baselines import (
     precision_first,
     run_ambiguity_baseline,
 )
-from synthworld.ambiguity_generator import generate_ambiguity_benchmark
+from synthworld.ambiguity_generator import _drafts, generate_ambiguity_benchmark
 from synthworld.ambiguity_metrics import evaluate_ambiguity_predictions
 from synthworld.ambiguity_serialization import (
     AmbiguityIntegrityError,
@@ -41,6 +43,9 @@ from synthworld.ambiguity_variants import (
     FIXED_REALIZATION,
     REALIZATIONS,
     AmbiguityVariantError,
+    AmbiguityVariantMetadata,
+    ScenarioRealization,
+    _substitution_plan,
     ambiguity_variant_metadata,
     canonical_source_agreement,
     generate_ambiguity_variant,
@@ -341,7 +346,13 @@ def test_a_distinct_value_collision_is_rejected() -> None:
 
 
 def test_a_missing_selected_realization_is_rejected() -> None:
-    """Seed 42 selects school_year; restoring employer must not pass silently."""
+    """Swapping the selected attribute for the other option must not pass silently.
+
+    Derived rather than pinned: an earlier version asserted seed 42 selects
+    `school_year`, which stopped being true the moment the draw was keyed. What the
+    test is about is that *the* selected kind is the one that must appear, whichever
+    the seed chose.
+    """
 
     benchmark = generate_ambiguity_variant(seed=42)
     metadata = ambiguity_variant_metadata(seed=42)
@@ -349,15 +360,11 @@ def test_a_missing_selected_realization_is_rejected() -> None:
         item.scenario: item.attribute_kind for item in metadata.selected_realizations
     }
     scenario = ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE
-    assert selected[scenario] is PublicIdentityAttributeKind.SCHOOL_YEAR
+    chosen = selected[scenario]
+    other = next(item for item in REALIZATIONS[scenario] if item is not chosen)
     left, right = _scenario_records(benchmark, scenario)
     replacements = tuple(
-        _replace_attribute_kind(
-            record,
-            PublicIdentityAttributeKind.SCHOOL_YEAR,
-            PublicIdentityAttributeKind.EMPLOYER,
-        )
-        for record in (left, right)
+        _replace_attribute_kind(record, chosen, other) for record in (left, right)
     )
 
     with pytest.raises(AmbiguityVariantError, match="wrong attribute"):
@@ -784,10 +791,10 @@ def test_seed_42_realization_regression() -> None:
         (item.scenario.value, item.attribute_kind.value)
         for item in ambiguity_variant_metadata(seed=42).selected_realizations
     ) == (
-        ("contradictory_strong_identifiers", "email"),
+        ("contradictory_strong_identifiers", "phone"),
         ("partial_but_sufficient", "date_of_birth"),
-        ("partial_with_contradiction", "school_year"),
-        ("single_uncorroborated_attribute", "school_year"),
+        ("partial_with_contradiction", "date_of_birth"),
+        ("single_uncorroborated_attribute", "employer"),
         ("stale_attribute", "full_address"),
     )
 
@@ -931,3 +938,125 @@ def test_induced_clusters_close_over_transitive_merges() -> None:
 
     assert clusters[records[0]] == frozenset(records[:3])
     assert clusters[records[3]] == frozenset({records[3]})
+
+
+def _invert_the_plan(benchmark: AmbiguityBenchmark, key: bytes) -> float:
+    """Rebuild the substitution plan from public information and decode dispositions.
+
+    The attack in full: the seed is published in the corpus, the canonical values live
+    in `_drafts()` in public source, and the plan orders each kind's values by a public
+    draw. Brute-force the realization combinations, keep the plan whose outputs appear
+    in the corpus, invert it, and read each record's canonical value - which names its
+    draft, which names its scenario, which gives the disposition.
+    """
+
+    combos = list(product(*REALIZATIONS.values()))
+    order = list(REALIZATIONS)
+    surfaces = {
+        item.value
+        for record in benchmark.public.corpus.identity_records
+        for item in record.attributes
+    }
+    best: tuple[int, dict[tuple[PublicIdentityAttributeKind, str], str]] | None = None
+    for combo in combos:
+        metadata = AmbiguityVariantMetadata(
+            seed=benchmark.public.corpus.seed,
+            selected_realizations=tuple(
+                ScenarioRealization(scenario=scenario, attribute_kind=kind)
+                for scenario, kind in zip(order, combo, strict=True)
+            ),
+        )
+        plan = _substitution_plan(_drafts(), metadata, key)
+        score = len(surfaces & set(plan.values()))
+        if best is None or score > best[0]:
+            best = (score, plan)
+
+    assert best is not None
+    inverse = {value: canonical for canonical, value in best[1].items()}
+    draft_of = {
+        (item.kind, item.value): draft.scenario
+        for draft in _drafts()
+        for item in draft.attributes
+    }
+    records = {item.id: item for item in benchmark.public.corpus.identity_records}
+    truth = {
+        (item.left_record_id, item.right_record_id): item
+        for item in benchmark.answer_key.pairs
+    }
+
+    correct = 0
+    for pair in benchmark.public.pairs_to_decide:
+        votes = [
+            draft_of[canonical]
+            for reference in (pair.left_record_id, pair.right_record_id)
+            for item in records[reference].attributes
+            if (canonical := inverse.get(item.value)) is not None
+            and canonical in draft_of
+        ]
+        if not votes:
+            # Denominated over every pair, not over the ones the decoder happened to
+            # recognise. Dividing by its own coverage lets a decoder that recovers
+            # almost nothing report a high score off the handful it stumbled onto.
+            continue
+        guess = max(set(votes), key=votes.count)
+        correct += (
+            SCENARIO_DISPOSITIONS[guess]
+            is truth[(pair.left_record_id, pair.right_record_id)].disposition
+        )
+    return correct / len(benchmark.public.pairs_to_decide)
+
+
+def test_an_unkeyed_pack_can_be_decoded_by_rebuilding_its_own_generator() -> None:
+    """The channel no leak detector could ever have found, recorded as a fact.
+
+    This is not a correlation between a feature and the label - it is recomputation of
+    the generator. A statistical detector looks for structure in emitted values; there
+    is none to find, because the values are a keyed hash. What breaks is that the key
+    was empty, the seed is published, and the canonical inputs are in this repository.
+
+    Recorded rather than fixed, because it cannot be fixed for a published pack whose
+    answer key also ships here. It is the reason `key` exists.
+    """
+
+    scores = [
+        _invert_the_plan(generate_ambiguity_variant(seed=seed), key=b"")
+        for seed in range(900, 912)
+    ]
+    baseline = 7 / len(ScenarioKind)
+
+    # Stated against the majority baseline rather than a round number: the claim is
+    # that the pack is recoverable, and "far above what guessing gets" is what that
+    # means. A fixed 0.9 was tighter than a twelve-seed sample supports - it holds at
+    # 0.93 over thirty seeds and dips below on some shorter windows.
+    assert sum(scores) / len(scores) > 1.5 * baseline
+
+
+def test_a_keyed_pack_cannot_be_decoded_that_way() -> None:
+    """With a key the attacker holds, decoding still works - the key is the secret.
+
+    So the test is that a pack generated under a key the attacker does *not* hold is
+    not recoverable, and that possession of the key is exactly what separates the two.
+    """
+
+    held = [
+        generate_ambiguity_variant(seed=seed, key=b"held-out-key")
+        for seed in range(900, 912)
+    ]
+    with_key = [_invert_the_plan(item, key=b"held-out-key") for item in held]
+    without = [_invert_the_plan(item, key=b"") for item in held]
+    baseline = 7 / len(ScenarioKind)
+
+    assert sum(with_key) / len(with_key) > 1.5 * baseline
+    assert sum(without) / len(without) < 0.5 * baseline
+
+
+def test_a_key_changes_the_pack_without_changing_replay() -> None:
+    first = generate_ambiguity_variant(seed=42, key=b"held-out-key")
+    again = generate_ambiguity_variant(seed=42, key=b"held-out-key")
+    unkeyed = generate_ambiguity_variant(seed=42)
+
+    assert first.model_dump_json() == again.model_dump_json()
+    assert first.model_dump_json() != unkeyed.model_dump_json()
+    validate_ambiguity_variant(
+        first, metadata=ambiguity_variant_metadata(seed=42, key=b"held-out-key")
+    )

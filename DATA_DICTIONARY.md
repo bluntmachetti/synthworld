@@ -239,6 +239,19 @@ identifiers), none of which a field-name check could see, and all of which survi
 100% branch coverage. Recovering a label *from the evidence* is not a leak; that is
 the task.
 
+A held-out *seed* is not a secret. The seed is published inside the artifact, the
+generator is public source, and the canonical inputs are in this repository — so an
+artifact generated from a deterministic public function of those is recomputable, and
+the answer key with it. Measured on the ambiguity variants: rebuilding the substitution
+plan from public information alone recovered the disposition on **0.929** of pairs
+against a 0.467 baseline, reading no identity evidence.
+
+What protects an artifact is a **key**: `generate_ambiguity_variant(seed=..., key=...)`
+takes a byte string that is never serialized. The same attack against a keyed pack
+scores 0.080. Published packs use the empty key and are byte-identical to unkeyed
+output, which is correct — their answer keys ship here, so they claim no secret and
+remain auditable. Generate evaluation packs with a key you do not publish.
+
 Held-out private seeds are necessary for competitive evaluation but not always
 sufficient. A seed protects surface values. Where a pack's case list is fixed and
 each case is defined by its evidence pattern — as in the ambiguity pack, whose

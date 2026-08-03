@@ -275,9 +275,39 @@ def canonical_case_shapes() -> dict[ScenarioKind, _CaseShape]:
     return shapes
 
 
-def _draw(seed: int, purpose: str, index: int) -> int:
-    material = f"ambiguity-variant|{seed}|{purpose}|{index}"
-    return int.from_bytes(blake2b(material.encode(), digest_size=8).digest(), "big")
+def _draw(seed: int, purpose: str, index: int, key: bytes = b"") -> int:
+    """A keyed pseudorandom draw. The key is never serialized.
+
+    Without a key this generator is invertible, and that is not a hypothetical. The
+    seed is published in `PublicConnectionCorpus.seed`, the canonical values live in
+    `_drafts()` in this public source, and `_substitution_plan` orders each kind's
+    values by `_draw(seed, f"value-order:{kind}:{value}", 0)`. So the whole
+    canonical-to-surface map is recomputable by anyone holding the repository: brute
+    force the 32 realization combinations, keep the plan whose outputs appear in the
+    corpus, invert it, and read each record's canonical value - which names its draft,
+    which names its scenario. Measured over seeds 900-929, that recovers the
+    disposition on **0.974** of pairs against a 0.467 majority baseline, reading no
+    identity evidence at all.
+
+    No hash makes that go away. Any deterministic public function of a public seed and
+    a public value set inverts; three comments in this module already say so about
+    permutations, and the same argument applies here. What closes it is a secret, so a
+    pack generated with an unpublished key cannot be recomputed.
+
+    `key=b""` is byte-identical to unkeyed blake2b, so the published packs - whose
+    answer keys ship in this repository anyway, and which claim no secret - are
+    unchanged and remain auditable.
+
+    Material is length-prefixed rather than delimited because 22 canonical values
+    contain the `|` separator, including every address, so a delimited encoding was
+    collision-free only by luck.
+    """
+
+    parts = (str(seed), purpose, str(index))
+    material = "".join(f"{len(item)}:{item}" for item in parts)
+    return int.from_bytes(
+        blake2b(material.encode(), digest_size=8, key=key).digest(), "big"
+    )
 
 
 def _require(condition: bool, message: str) -> None:
@@ -285,14 +315,16 @@ def _require(condition: bool, message: str) -> None:
         raise AmbiguityVariantError(message)
 
 
-def ambiguity_variant_metadata(*, seed: int) -> AmbiguityVariantMetadata:
+def ambiguity_variant_metadata(
+    *, seed: int, key: bytes = b""
+) -> AmbiguityVariantMetadata:
     """Return the deterministic evaluator-only realization choices for ``seed``."""
 
     selected = tuple(
         ScenarioRealization(
             scenario=scenario,
             attribute_kind=choices[
-                _draw(seed, f"realization:{scenario.value}", 0) % len(choices)
+                _draw(seed, f"realization:{scenario.value}", 0, key) % len(choices)
             ],
         )
         for scenario, choices in sorted(
@@ -386,7 +418,7 @@ def _virtual_requirements(
     return tuple(keys)
 
 
-def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
+def _substituted(value: str, kind: str, seed: int, slot: int, key: bytes = b"") -> str:
     """Format the collision-free slot assigned to one distinct source value.
 
     ``slot`` is the corpus-wide rank of the source value within its attribute kind,
@@ -394,7 +426,7 @@ def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
     values receive distinct slots.
     """
 
-    offset = _draw(seed, f"surface:{kind}", 0)
+    offset = _draw(seed, f"surface:{kind}", 0, key)
     if kind == _K.EMAIL.value:
         return (
             f"synthetic.{offset % 10000:04d}.{slot:04d}"
@@ -432,7 +464,7 @@ def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
 
 
 def _substitution_plan(
-    drafts: Sequence[_Draft], metadata: AmbiguityVariantMetadata
+    drafts: Sequence[_Draft], metadata: AmbiguityVariantMetadata, key: bytes = b""
 ) -> dict[tuple[_K, str], str]:
     selected = _selected(metadata)
     keys = {(item.kind, item.value) for draft in drafts for item in draft.attributes}
@@ -447,12 +479,12 @@ def _substitution_plan(
         ordered = sorted(
             values,
             key=lambda value: (
-                _draw(metadata.seed, f"value-order:{kind.value}:{value}", 0),
+                _draw(metadata.seed, f"value-order:{kind.value}:{value}", 0, key),
                 value,
             ),
         )
         rewritten = [
-            _substituted(value, kind.value, metadata.seed, slot)
+            _substituted(value, kind.value, metadata.seed, slot, key)
             for slot, value in enumerate(ordered)
         ]
         _require(
@@ -975,13 +1007,13 @@ def validate_ambiguity_variant(
     )
 
 
-def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
+def generate_ambiguity_variant(*, seed: int, key: bytes = b"") -> AmbiguityBenchmark:
     """Generate one deterministic variant and refuse semantically corrupt output."""
 
     drafts = _drafts()
-    metadata = ambiguity_variant_metadata(seed=seed)
+    metadata = ambiguity_variant_metadata(seed=seed, key=key)
     selected = _selected(metadata)
-    substitutions = _substitution_plan(drafts, metadata)
+    substitutions = _substitution_plan(drafts, metadata, key)
     records: list[PublicIdentityRecord] = []
     pairs: list[PairTruth] = []
 
