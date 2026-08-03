@@ -46,6 +46,7 @@ from synthworld.ambiguity_variants import (
     AmbiguityVariantMetadata,
     ScenarioRealization,
     _substitution_plan,
+    _unicode_name,
     ambiguity_variant_metadata,
     canonical_source_agreement,
     generate_ambiguity_variant,
@@ -1060,3 +1061,37 @@ def test_a_key_changes_the_pack_without_changing_replay() -> None:
     validate_ambiguity_variant(
         first, metadata=ambiguity_variant_metadata(seed=42, key=b"held-out-key")
     )
+
+
+def test_no_public_surface_of_a_keyed_pack_is_a_pure_function_of_the_seed() -> None:
+    """Partial keying is worse than none, because it looks safe.
+
+    A first revision gave `_draw` a `b""` default and left four call sites in the
+    module unkeyed, so a caller who passed a key still got unicode names, source types
+    and display offsets computed from the published seed alone. Recomputing
+    `_unicode_name(seed)` and grepping the corpus identified the `unicode_variant`
+    pair - a MERGE - on 30 of 30 keyed packs.
+
+    The structural guard is that `_draw` has no default, so an unkeyed call is a type
+    error. This is the behavioural half: nothing a keyed pack publishes may be
+    reproducible by someone holding only the seed.
+    """
+
+    seeds = range(900, 915)
+    matches = 0
+    for seed in seeds:
+        benchmark = generate_ambiguity_variant(seed=seed, key=b"held-out-key")
+        published = benchmark.public.corpus.seed
+        # Everything an attacker can compute from the seed with an empty key.
+        guessed = set(_unicode_name(published, b""))
+        names = {
+            item.display_name
+            for item in benchmark.public.corpus.identity_records
+            if item.display_name
+        }
+        matches += any(
+            part in name for name in names for part in guessed if len(part) > 3
+        )
+
+    # At chance for a five-entry pool, not the certainty partial keying gave.
+    assert matches < len(seeds) * 0.5

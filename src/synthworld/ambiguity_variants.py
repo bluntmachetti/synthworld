@@ -275,7 +275,7 @@ def canonical_case_shapes() -> dict[ScenarioKind, _CaseShape]:
     return shapes
 
 
-def _draw(seed: int, purpose: str, index: int, key: bytes = b"") -> int:
+def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
     """A keyed pseudorandom draw. The key is never serialized.
 
     Without a key this generator is invertible, and that is not a hypothetical. The
@@ -297,6 +297,15 @@ def _draw(seed: int, purpose: str, index: int, key: bytes = b"") -> int:
     `key=b""` is byte-identical to unkeyed blake2b, so the published packs - whose
     answer keys ship in this repository anyway, and which claim no secret - are
     unchanged and remain auditable.
+
+    The key has no default *on purpose*. A first revision defaulted it to `b""`, and
+    four call sites in this module were never updated - so a caller who passed a key
+    got a pack whose unicode names, source types and display offsets were still a pure
+    function of the published seed. Recomputing the unicode-name draw from the seed
+    alone and grepping the corpus for it identified the `unicode_variant` pair, which
+    is a MERGE, on 30 of 30 keyed packs. Partial keying is worse than none, because
+    it looks safe. Making the argument required turns that from a thing a reviewer must
+    notice into a type error.
 
     Material is length-prefixed rather than delimited because 22 canonical values
     contain the `|` separator, including every address, so a delimited encoding was
@@ -574,8 +583,8 @@ def _realize_attributes(
     )
 
 
-def _unicode_name(seed: int) -> tuple[str, str, str, str]:
-    return _UNICODE_NAMES[_draw(seed, "unicode-name", 0) % len(_UNICODE_NAMES)]
+def _unicode_name(seed: int, key: bytes) -> tuple[str, str, str, str]:
+    return _UNICODE_NAMES[_draw(seed, "unicode-name", 0, key) % len(_UNICODE_NAMES)]
 
 
 def _replace_family(
@@ -605,7 +614,7 @@ def _evidence_anchor(
 
 
 def _source_types(
-    seed: int, anchor: str, left: _Draft, right: _Draft
+    seed: int, anchor: str, left: _Draft, right: _Draft, key: bytes
 ) -> tuple[PublicIdentitySourceType, PublicIdentitySourceType]:
     """Choose provenance per seed, preserving only whether the two sources agree.
 
@@ -621,15 +630,15 @@ def _source_types(
     """
 
     kinds = tuple(PublicIdentitySourceType)
-    first = kinds[_draw(seed, f"source:{anchor}", 0) % len(kinds)]
+    first = kinds[_draw(seed, f"source:{anchor}", 0, key) % len(kinds)]
     if left.source_type is right.source_type:
         return first, first
     others = tuple(item for item in kinds if item is not first)
-    return first, others[_draw(seed, f"source:{anchor}", 1) % len(others)]
+    return first, others[_draw(seed, f"source:{anchor}", 1, key) % len(others)]
 
 
 def _display_slots(
-    seed: int, anchors: Mapping[ScenarioKind, str]
+    seed: int, anchors: Mapping[ScenarioKind, str], key: bytes
 ) -> dict[ScenarioKind, int]:
     """Give each pair a disjoint name slot, ranked by its own evidence.
 
@@ -657,7 +666,7 @@ def _display_slots(
     )
     ordered = sorted(
         anchors.items(),
-        key=lambda item: (_draw(seed, f"display-slot:{item[1]}", 0), item[1]),
+        key=lambda item: (_draw(seed, f"display-slot:{item[1]}", 0, key), item[1]),
     )
     return {scenario: slot for slot, (scenario, _anchor) in enumerate(ordered)}
 
@@ -669,9 +678,10 @@ def _display_names(
     slot: int,
     left: tuple[PublicIdentityAttribute, ...],
     right: tuple[PublicIdentityAttribute, ...],
+    key: bytes,
 ) -> tuple[str, str]:
-    given_offset = _draw(seed, "display-given", 0) % len(_GIVEN)
-    family_offset = _draw(seed, "display-family", 0) % len(_FAMILY)
+    given_offset = _draw(seed, "display-given", 0, key) % len(_GIVEN)
+    family_offset = _draw(seed, "display-family", 0, key) % len(_FAMILY)
     left_given = _GIVEN[(given_offset + slot * 2) % len(_GIVEN)]
     right_given = _GIVEN[(given_offset + slot * 2 + 1) % len(_GIVEN)]
     left_family = _family_value(left, f"Example{family_offset:02d}Family{slot * 2:02d}")
@@ -696,7 +706,9 @@ def _display_names(
     if scenario is ScenarioKind.ALIAS_CHANGE:
         return f"{left_given} {left_family}", f"{left_given} {right_family}"
     if scenario is ScenarioKind.UNICODE_VARIANT:
-        unicode_given, ascii_given, unicode_family, ascii_family = _unicode_name(seed)
+        unicode_given, ascii_given, unicode_family, ascii_family = _unicode_name(
+            seed, key
+        )
         return f"{unicode_given} {unicode_family}", f"{ascii_given} {ascii_family}"
     if scenario in {
         ScenarioKind.PARTIAL_BUT_SUFFICIENT,
@@ -1039,7 +1051,7 @@ def generate_ambiguity_variant(*, seed: int, key: bytes = b"") -> AmbiguityBench
             substitutions,
         )
         if left_draft.scenario is ScenarioKind.UNICODE_VARIANT:
-            _, _, unicode_family, ascii_family = _unicode_name(seed)
+            _, _, unicode_family, ascii_family = _unicode_name(seed, key)
             left_attributes = _replace_family(left_attributes, unicode_family)
             right_attributes = _replace_family(right_attributes, ascii_family)
         realized.append((left_draft, right_draft, left_attributes, right_attributes))
@@ -1050,6 +1062,7 @@ def generate_ambiguity_variant(*, seed: int, key: bytes = b"") -> AmbiguityBench
             left_draft.scenario: _evidence_anchor(left_attributes, right_attributes)
             for left_draft, _right, left_attributes, right_attributes in realized
         },
+        key,
     )
 
     for left_draft, right_draft, left_attributes, right_attributes in realized:
@@ -1060,9 +1073,10 @@ def generate_ambiguity_variant(*, seed: int, key: bytes = b"") -> AmbiguityBench
             slot=slots[scenario],
             left=left_attributes,
             right=right_attributes,
+            key=key,
         )
         left_source, right_source = _source_types(
-            seed, _draft_anchor(drafts, scenario), left_draft, right_draft
+            seed, _draft_anchor(drafts, scenario), left_draft, right_draft, key
         )
         left_record = _identity_record(
             seed=seed,
