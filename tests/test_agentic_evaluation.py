@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -32,7 +34,7 @@ def test_reference_trace_scores_every_independent_dimension() -> None:
     metrics = {item.name: item.value for item in report.metrics}
 
     assert report.task == "agentic_authority"
-    assert report.scoring_version == "0.3.0"
+    assert report.scoring_version == "0.4.0"
     assert report.checksum_scheme == "sha256-artifact-set-v1"
     assert metrics["excess_authority_rate"] == 0.0
     assert all(
@@ -232,3 +234,69 @@ def test_public_baselines_reject_incomplete_claims_and_nonactions() -> None:
         baselines._public_row(
             benchmark.public.events[0], benchmark.public, decision=Decision.DENY
         )
+
+
+def test_every_metric_names_its_family_and_denominator() -> None:
+    """A report a reader cannot re-derive is one they have to trust.
+
+    Ambiguity, search and broker scoring all publish denominators; the agentic
+    surface predates that convention and shipped twenty metrics as one flat list with
+    nothing saying what `support` counted. An external reviewer had to reverse-engineer
+    `temporal_validity_accuracy` by diffing scores between two agent policies.
+    """
+
+    benchmark = generate_asteria_agentic_v1()
+    report = evaluate_agentic_trace(
+        reference_agentic_trace(benchmark), benchmark=benchmark
+    )
+
+    assert report.metrics
+    for metric in report.metrics:
+        assert metric.family, metric.name
+        assert metric.denominator_meaning, metric.name
+        # `support` is the denominator, so a defined value must be re-derivable.
+        if metric.value is not None and metric.support:
+            assert 0.0 <= metric.value <= 1.0
+
+
+def test_metrics_separate_deciding_well_from_recording_well() -> None:
+    """The split the families exist for.
+
+    An agent can make correct decisions and log them badly, or the reverse. Those need
+    different fixes, and one aggregate cannot tell a reader which they have.
+    """
+
+    benchmark = generate_asteria_agentic_v1()
+    report = evaluate_agentic_trace(
+        reference_agentic_trace(benchmark), benchmark=benchmark
+    )
+    families = {metric.family for metric in report.metrics}
+
+    assert "observability" in families
+    assert {
+        "identity_resolution",
+        "authorization",
+        "delegation_and_accountability",
+        "least_privilege",
+    } <= families
+    # Every metric is placed; none falls into an unnamed catch-all.
+    assert None not in families
+
+
+def test_the_glossary_documents_every_metric_the_scorer_emits() -> None:
+    """Documentation that drifts from the code is worse than none.
+
+    Four of these metrics had zero mentions across every document in the repository
+    before this test existed.
+    """
+
+    benchmark = generate_asteria_agentic_v1()
+    report = evaluate_agentic_trace(
+        reference_agentic_trace(benchmark), benchmark=benchmark
+    )
+    documented = (
+        Path(__file__).parents[1].joinpath("AGENTIC_BENCHMARK.md").read_text("utf-8")
+    )
+
+    for metric in report.metrics:
+        assert f"`{metric.name}`" in documented, metric.name

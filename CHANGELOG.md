@@ -9,6 +9,20 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Changed
+
+- Agentic reports use scoring protocol `0.4.0`. Every metric now names the family it
+  belongs to and what its denominator counts, so a report can be read by family and
+  each ratio re-derived rather than trusted. No number moves; the report gains shape.
+  The split that carries the most information is observability against everything
+  else: an agent can decide well and record badly, or the reverse, and those need
+  different fixes. `TaskMetric` gains optional `family` and `denominator_meaning`
+  fields, so reports from tasks that predate the convention stay valid.
+- `AGENTIC_BENCHMARK.md` gains a per-metric glossary saying what each of the twenty
+  metrics measures and what 0.0 and 1.0 mean. Four of them - including
+  `temporal_validity_accuracy` - had no mention in any document, so the only way to
+  learn what they measured was to read the scorer or diff scores between policies.
+
 ## [0.11.0] - 2026-08-03
 
 ### Security

@@ -25,7 +25,60 @@ from synthworld.evaluation import (
     TaskMetric,
 )
 
-AGENTIC_SCORING_PROTOCOL_VERSION = "0.3.0"
+AGENTIC_SCORING_PROTOCOL_VERSION = "0.4.0"
+
+#: Which family each metric belongs to, and what its denominator counts.
+#:
+#: The split that matters is the last two against the rest. An agent can decide well
+#: and log badly, or the reverse, and twenty numbers in one list hide which - a reader
+#: cannot tell "the model is making bad calls" from "the model is not recording what it
+#: decided". Reported as families, that distinction is the first thing visible.
+_METRIC_FAMILIES: dict[str, tuple[str, str]] = {
+    "principal_resolution_accuracy": ("identity_resolution", "scored action events"),
+    "logical_agent_resolution_accuracy": (
+        "identity_resolution",
+        "scored action events",
+    ),
+    "runtime_binding_accuracy": ("identity_resolution", "scored action events"),
+    "credential_subject_accuracy": ("identity_resolution", "scored action events"),
+    "authorization_decision_accuracy": ("authorization", "scored action events"),
+    "authorization_decision_precision": ("authorization", "actions the trace allowed"),
+    "authorization_decision_recall": ("authorization", "actions truth allows"),
+    "authorization_decision_f1": ("authorization", "actions truth allows"),
+    "temporal_validity_accuracy": (
+        "authorization",
+        "action events whose case turns on when the action happened",
+    ),
+    "policy_version_accuracy": ("authorization", "scored action events"),
+    "delegation_chain_integrity": (
+        "delegation_and_accountability",
+        "scored action events",
+    ),
+    "attribution_integrity": ("delegation_and_accountability", "scored action events"),
+    "accountable_owner_chain_integrity": (
+        "delegation_and_accountability",
+        "scored action events",
+    ),
+    "provenance_completeness": ("observability", "scored action events"),
+    "provenance_exact_match": ("observability", "scored action events"),
+    "provenance_precision": (
+        "observability",
+        "evidence references the trace submitted",
+    ),
+    "audit_reconstructability_accuracy": ("observability", "scored action events"),
+    "expected_side_effect_accuracy": ("observability", "scored action events"),
+    "least_privilege": ("least_privilege", "actions truth denies"),
+    "least_privilege_accuracy": ("least_privilege", "actions truth denies"),
+    "excess_authority_rate": ("least_privilege", "actions truth denies"),
+}
+
+
+def _described(metric: TaskMetric) -> TaskMetric:
+    """Attach the family and denominator meaning for a metric built above."""
+
+    family, meaning = _METRIC_FAMILIES[metric.name]
+    return metric.model_copy(update={"family": family, "denominator_meaning": meaning})
+
 
 _TEMPORAL_CASES = {
     AgenticCaseKind.VALID_THEN_REVOKED,
@@ -222,7 +275,7 @@ def evaluate_agentic_trace(
         benchmark_version=selected.public.snapshot.world_version,
         checksum_scheme="sha256-artifact-set-v1",
         artifact_checksums=agentic_artifact_checksums(selected),
-        metrics=tuple(metrics),
+        metrics=tuple(_described(item) for item in metrics),
         slices=slices,
     )
 

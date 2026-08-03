@@ -262,8 +262,49 @@ report = evaluate_agentic_trace(submission)
 
 ## Metrics and baselines
 
-Agentic reports use scoring protocol `0.3.0`; other SynthWorld tasks remain on
-their existing scoring protocols. `0.3.0` derives `expected_policy_version` from
+Every metric names the family it belongs to and what its denominator counts, so a
+report can be read by family and each ratio re-derived rather than trusted.
+
+The split that carries the most information is **observability against everything
+else**. An agent can decide well and record badly, or the reverse, and those need
+different fixes — one is a policy problem, the other a logging problem. A single
+aggregate hides which you have.
+
+| family | metric | 1.0 means | 0.0 means | denominator |
+|---|---|---|---|---|
+| identity_resolution | `principal_resolution_accuracy` | the originating principal is named correctly | it is not | scored action events |
+| | `logical_agent_resolution_accuracy` | the acting logical agent is named correctly | it is not | scored action events |
+| | `runtime_binding_accuracy` | the runtime is bound to the right logical agent | it is not | scored action events |
+| | `credential_subject_accuracy` | the presented credential's subject is named correctly | it is not | scored action events |
+| authorization | `authorization_decision_accuracy` | allow/deny matches truth | it never does | scored action events |
+| | `authorization_decision_precision` | nothing allowed should have been denied | everything allowed should have been denied | actions the trace allowed |
+| | `authorization_decision_recall` | nothing that should be allowed was denied | everything allowable was denied | actions truth allows |
+| | `authorization_decision_f1` | harmonic mean of the two above | — | actions truth allows |
+| | `temporal_validity_accuracy` | the audit-time verdict is right where *when* the action happened decides it — acting after a revocation, or before a grant | the verdict is wrong on every such case | action events whose case turns on timing |
+| | `policy_version_accuracy` | the policy version the covering delegation carried is named correctly | it is not | scored action events |
+| delegation_and_accountability | `delegation_chain_integrity` | the delegation chain matches the one the action-time check selected, root first | it does not | scored action events |
+| | `attribution_integrity` | the actor the action is attributed to is correct | it is not | scored action events |
+| | `accountable_owner_chain_integrity` | the chain of principals accountable for the action is correct | it is not | scored action events |
+| observability | `provenance_completeness` | every required evidence reference was submitted | none were | scored action events |
+| | `provenance_exact_match` | the evidence set is exactly right — nothing missing, nothing fabricated | it is not | scored action events |
+| | `provenance_precision` | no submitted evidence reference was fabricated | all were | evidence references submitted |
+| | `audit_reconstructability_accuracy` | the claim about whether the decision can be rebuilt from retained evidence is right | it is not | scored action events |
+| | `expected_side_effect_accuracy` | the side effect the action should record is named correctly | it is not | scored action events |
+| least_privilege | `least_privilege_accuracy` | nothing truth denies was allowed | everything truth denies was allowed | actions truth denies |
+| | `excess_authority_rate` | — (0.0 is the good end) | every denied action was allowed | actions truth denies |
+
+`excess_authority_rate` is the only metric where zero is the good score; it is the
+complement of `least_privilege_accuracy` and both are reported because a reader
+scanning for failures should not have to invert one of them in their head.
+
+A metric is `null` rather than `0.0` when its denominator is empty — a world with no
+timing cases cannot score temporal validity, and reporting zero there would read as
+total failure at something never asked.
+
+Agentic reports use scoring protocol `0.4.0`; other SynthWorld tasks remain on
+their existing scoring protocols. `0.4.0` groups metrics into families and publishes what each denominator counts,
+changing the report's shape without moving any number. `0.3.0` derives
+`expected_policy_version` from
 the delegation that covered the action rather than echoing the attempt, and
 records the covering chain on a policy-version-mismatch denial. Asteria Agentic
 v1's artifacts are byte-identical under both, because it registers a single

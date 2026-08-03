@@ -77,11 +77,24 @@ class EvaluationInputError(ValueError):
 
 
 class TaskMetric(SyntheticModel):
-    """One named scalar metric. A null value marks the metric undefined here."""
+    """One named scalar metric. A null value marks the metric undefined here.
+
+    ``family`` and ``denominator_meaning`` are optional because tasks adopted them at
+    different times, and defaulting them keeps every report that predates the
+    convention valid. Populate both in new work: a report whose denominators cannot be
+    named is one a reader has to trust rather than check, and a flat list of twenty
+    numbers hides which *kind* of thing a system is bad at.
+    """
 
     name: str
     value: float | None
     support: int = Field(ge=0)
+    #: Which group of related failures this belongs to, so a report can be read by
+    #: family rather than as one undifferentiated list.
+    family: str | None = None
+    #: What `support` counts. Without it, `value` is a ratio whose denominator the
+    #: reader has to infer from the scorer's source.
+    denominator_meaning: str | None = None
 
     @model_validator(mode="after")
     def reject_non_finite(self) -> TaskMetric:
