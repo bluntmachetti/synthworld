@@ -9,6 +9,7 @@ import subprocess
 import sys
 from collections import Counter, defaultdict
 from importlib.resources import files
+from itertools import product
 from pathlib import Path
 from uuid import uuid5
 
@@ -16,6 +17,7 @@ import pytest
 from pydantic import ValidationError
 
 from synthworld.ambiguity import (
+    SCENARIO_DISPOSITIONS,
     AmbiguityBenchmark,
     PairDisposition,
     PairPrediction,
@@ -29,7 +31,7 @@ from synthworld.ambiguity_baselines import (
     precision_first,
     run_ambiguity_baseline,
 )
-from synthworld.ambiguity_generator import generate_ambiguity_benchmark
+from synthworld.ambiguity_generator import _drafts, generate_ambiguity_benchmark
 from synthworld.ambiguity_metrics import evaluate_ambiguity_predictions
 from synthworld.ambiguity_serialization import (
     AmbiguityIntegrityError,
@@ -40,7 +42,12 @@ from synthworld.ambiguity_serialization import (
 from synthworld.ambiguity_variants import (
     FIXED_REALIZATION,
     REALIZATIONS,
+    UNKEYED,
     AmbiguityVariantError,
+    AmbiguityVariantMetadata,
+    ScenarioRealization,
+    _substitution_plan,
+    _unicode_name,
     ambiguity_variant_metadata,
     canonical_source_agreement,
     generate_ambiguity_variant,
@@ -212,7 +219,7 @@ def test_every_seed_in_a_documented_sweep_generates() -> None:
     """Seeds 0..99 are the declared correlated robustness sweep, not 100 samples."""
 
     for seed in _SWEEP:
-        benchmark = generate_ambiguity_variant(seed=seed)
+        benchmark = generate_ambiguity_variant(seed=seed, key=UNKEYED)
         validate_ambiguity_variant(benchmark)
 
 
@@ -227,7 +234,7 @@ def test_merge_pairs_keep_the_evidence_that_makes_them_merges() -> None:
     """
 
     for seed in _SWEEP:
-        variant = generate_ambiguity_variant(seed=seed)
+        variant = generate_ambiguity_variant(seed=seed, key=UNKEYED)
         records = {item.id: item for item in variant.public.corpus.identity_records}
         for pair in variant.answer_key.pairs:
             if pair.disposition is not PairDisposition.MERGE:
@@ -249,14 +256,14 @@ def test_merge_pairs_keep_the_evidence_that_makes_them_merges() -> None:
 def test_no_variant_record_is_left_empty() -> None:
     for seed in _SWEEP:
         for record in generate_ambiguity_variant(
-            seed=seed
+            seed=seed, key=UNKEYED
         ).public.corpus.identity_records:
             assert record.attributes
 
 
 def test_no_value_or_display_name_collides_across_scenarios() -> None:
     for seed in _SWEEP:
-        benchmark = generate_ambiguity_variant(seed=seed)
+        benchmark = generate_ambiguity_variant(seed=seed, key=UNKEYED)
         records = {item.id: item for item in benchmark.public.corpus.identity_records}
         attribute_origins: dict[
             tuple[PublicIdentityAttributeKind, str], set[ScenarioKind]
@@ -281,7 +288,7 @@ def test_each_scenario_rejects_position_dependent_shared_values(
 ) -> None:
     """Splitting any planned equality simulates the original ordinal-key defect."""
 
-    benchmark = generate_ambiguity_variant(seed=42)
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
     left, right = _scenario_records(benchmark, scenario)
     left_values = _values(left)
     right_values = _values(right)
@@ -311,7 +318,7 @@ def test_each_scenario_rejects_a_display_name_semantic_mutation(
 ) -> None:
     """Every named scenario has a discriminating display-name predicate."""
 
-    benchmark = generate_ambiguity_variant(seed=42)
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
     left, right = _scenario_records(benchmark, scenario)
     replacement_name = (
         "Corrupt ExampleName"
@@ -328,7 +335,7 @@ def test_each_scenario_rejects_a_display_name_semantic_mutation(
 
 
 def test_a_distinct_value_collision_is_rejected() -> None:
-    benchmark = generate_ambiguity_variant(seed=42)
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
     left, right = _scenario_records(benchmark, ScenarioKind.RECYCLED_PHONE)
     replacement = _replace_attribute_value(
         right,
@@ -341,23 +348,25 @@ def test_a_distinct_value_collision_is_rejected() -> None:
 
 
 def test_a_missing_selected_realization_is_rejected() -> None:
-    """Seed 42 selects school_year; restoring employer must not pass silently."""
+    """Swapping the selected attribute for the other option must not pass silently.
 
-    benchmark = generate_ambiguity_variant(seed=42)
-    metadata = ambiguity_variant_metadata(seed=42)
+    Derived rather than pinned: an earlier version asserted seed 42 selects
+    `school_year`, which stopped being true the moment the draw was keyed. What the
+    test is about is that *the* selected kind is the one that must appear, whichever
+    the seed chose.
+    """
+
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
+    metadata = ambiguity_variant_metadata(seed=42, key=UNKEYED)
     selected = {
         item.scenario: item.attribute_kind for item in metadata.selected_realizations
     }
     scenario = ScenarioKind.SINGLE_UNCORROBORATED_ATTRIBUTE
-    assert selected[scenario] is PublicIdentityAttributeKind.SCHOOL_YEAR
+    chosen = selected[scenario]
+    other = next(item for item in REALIZATIONS[scenario] if item is not chosen)
     left, right = _scenario_records(benchmark, scenario)
     replacements = tuple(
-        _replace_attribute_kind(
-            record,
-            PublicIdentityAttributeKind.SCHOOL_YEAR,
-            PublicIdentityAttributeKind.EMPLOYER,
-        )
-        for record in (left, right)
+        _replace_attribute_kind(record, chosen, other) for record in (left, right)
     )
 
     with pytest.raises(AmbiguityVariantError, match="wrong attribute"):
@@ -367,7 +376,7 @@ def test_a_missing_selected_realization_is_rejected() -> None:
 
 
 def test_lost_unicode_evidence_is_rejected() -> None:
-    benchmark = generate_ambiguity_variant(seed=42)
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
     left, right = _scenario_records(benchmark, ScenarioKind.UNICODE_VARIANT)
     replacements = (
         left.model_copy(update={"display_name": "Zoe Dvorak"}),
@@ -379,7 +388,7 @@ def test_lost_unicode_evidence_is_rejected() -> None:
 
 
 def test_unrelated_unicode_family_values_are_rejected() -> None:
-    benchmark = generate_ambiguity_variant(seed=42)
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
     _, right = _scenario_records(benchmark, ScenarioKind.UNICODE_VARIANT)
     replacement = _replace_attribute_value(
         right, PublicIdentityAttributeKind.FAMILY_NAME, "UnrelatedSurname"
@@ -390,7 +399,7 @@ def test_unrelated_unicode_family_values_are_rejected() -> None:
 
 
 def test_an_accidental_cross_scenario_match_is_rejected() -> None:
-    benchmark = generate_ambiguity_variant(seed=42)
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
     recycled, _ = _scenario_records(benchmark, ScenarioKind.RECYCLED_PHONE)
     duplicate_left, duplicate_right = _scenario_records(
         benchmark, ScenarioKind.DUPLICATE_OBSERVATION
@@ -419,7 +428,7 @@ def test_variants_preserve_declared_prevalence(seed: int) -> None:
     )
     variant = Counter(
         item.disposition
-        for item in generate_ambiguity_variant(seed=seed).answer_key.pairs
+        for item in generate_ambiguity_variant(seed=seed, key=UNKEYED).answer_key.pairs
     )
 
     assert variant == canonical
@@ -433,7 +442,7 @@ def test_variants_change_structure_not_only_identifiers() -> None:
     """
 
     def fingerprint(seed: int) -> tuple[tuple[str, ...], ...]:
-        world = generate_ambiguity_variant(seed=seed)
+        world = generate_ambiguity_variant(seed=seed, key=UNKEYED)
         return tuple(
             sorted(
                 tuple(sorted(item.kind.value for item in record.attributes))
@@ -449,7 +458,9 @@ def test_variants_change_structure_not_only_identifiers() -> None:
 def test_the_declared_sweep_exercises_every_supported_realization() -> None:
     seen: dict[ScenarioKind, set[PublicIdentityAttributeKind]] = defaultdict(set)
     for seed in _SWEEP:
-        for item in ambiguity_variant_metadata(seed=seed).selected_realizations:
+        for item in ambiguity_variant_metadata(
+            seed=seed, key=UNKEYED
+        ).selected_realizations:
             seen[item.scenario].add(item.attribute_kind)
 
     assert all(len(choices) > 1 for choices in REALIZATIONS.values())
@@ -473,8 +484,10 @@ def test_selected_realizations_land_where_their_case_needs_them() -> None:
         ScenarioKind.PARTIAL_WITH_CONTRADICTION,
     }
     for seed in _SWEEP:
-        benchmark = generate_ambiguity_variant(seed=seed)
-        for item in ambiguity_variant_metadata(seed=seed).selected_realizations:
+        benchmark = generate_ambiguity_variant(seed=seed, key=UNKEYED)
+        for item in ambiguity_variant_metadata(
+            seed=seed, key=UNKEYED
+        ).selected_realizations:
             left, right = _scenario_records(benchmark, item.scenario)
             left_values = _values(left)
             right_values = _values(right)
@@ -513,7 +526,7 @@ def test_a_matching_mistake_in_generator_and_spec_no_longer_validates(
 
     from synthworld import ambiguity_variants as module
 
-    benchmark = generate_ambiguity_variant(seed=0)
+    benchmark = generate_ambiguity_variant(seed=0, key=UNKEYED)
     left, right = _scenario_records(benchmark, ScenarioKind.PARTIAL_BUT_SUFFICIENT)
     poorer, richer = (
         (left, right) if len(left.attributes) < len(right.attributes) else (right, left)
@@ -559,7 +572,7 @@ def test_a_display_name_carries_no_more_than_its_evidence_already_does() -> None
     correct = decidable = 0
 
     for seed in range(1, 21):
-        benchmark = generate_ambiguity_variant(seed=seed)
+        benchmark = generate_ambiguity_variant(seed=seed, key=UNKEYED)
         scenario_of = {}
         for pair in benchmark.answer_key.pairs:
             scenario_of[pair.left_record_id] = pair.scenario
@@ -595,7 +608,9 @@ def test_provenance_varies_by_seed_but_keeps_what_the_case_means() -> None:
     """
 
     trained: dict[frozenset[str], ScenarioKind] = {}
-    for pair, left, right in _pairs_with_records(generate_ambiguity_variant(seed=0)):
+    for pair, left, right in _pairs_with_records(
+        generate_ambiguity_variant(seed=0, key=UNKEYED)
+    ):
         trained.setdefault(
             frozenset({left.source_type.value, right.source_type.value}), pair.scenario
         )
@@ -603,7 +618,7 @@ def test_provenance_varies_by_seed_but_keeps_what_the_case_means() -> None:
     agreement = canonical_source_agreement()
     correct = total = 0
     for seed in range(1, 41):
-        benchmark = generate_ambiguity_variant(seed=seed)
+        benchmark = generate_ambiguity_variant(seed=seed, key=UNKEYED)
         for pair, left, right in _pairs_with_records(benchmark):
             # The relation the case depends on survives every seed.
             assert (left.source_type is right.source_type) is agreement[pair.scenario]
@@ -617,7 +632,7 @@ def test_provenance_varies_by_seed_but_keeps_what_the_case_means() -> None:
 def test_a_pack_whose_provenance_contradicts_the_frozen_pack_is_refused() -> None:
     """Nothing checked source types, so every record could be relabelled and pass."""
 
-    benchmark = generate_ambiguity_variant(seed=3)
+    benchmark = generate_ambiguity_variant(seed=3, key=UNKEYED)
     scenario = next(
         item for item, shared in canonical_source_agreement().items() if not shared
     )
@@ -637,7 +652,7 @@ def test_a_record_identifier_is_addressed_by_content_not_by_draft_position() -> 
     """
 
     for seed in (1, 7, 42):
-        benchmark = generate_ambiguity_variant(seed=seed)
+        benchmark = generate_ambiguity_variant(seed=seed, key=UNKEYED)
         identifiers = {item.id for item in benchmark.public.corpus.identity_records}
         positional = {
             uuid5(_CONNECTION_NAMESPACE, f"{seed}:ambiguity-variant:{position}")
@@ -681,7 +696,7 @@ def test_the_position_of_a_public_pair_is_not_an_answer_key() -> None:
     # that sorted by some other fixed key would satisfy the assertion above while
     # still handing out one decoder that works on every seed.
     observed = [
-        _positional_scenarios(generate_ambiguity_variant(seed=seed))
+        _positional_scenarios(generate_ambiguity_variant(seed=seed, key=UNKEYED))
         for seed in range(12)
     ]
     hits = sum(
@@ -731,9 +746,9 @@ def test_a_repeated_public_pair_is_refused() -> None:
 
 
 def test_variant_metadata_is_evaluator_only() -> None:
-    benchmark = generate_ambiguity_variant(seed=42)
+    benchmark = generate_ambiguity_variant(seed=42, key=UNKEYED)
     public_bytes = ambiguity_artifacts(benchmark)["ambiguity-public-v1.json"]
-    metadata = ambiguity_variant_metadata(seed=42)
+    metadata = ambiguity_variant_metadata(seed=42, key=UNKEYED)
 
     assert metadata.synthetic is True
     assert metadata.selected_realizations
@@ -743,13 +758,13 @@ def test_variant_metadata_is_evaluator_only() -> None:
 
 @pytest.mark.parametrize("seed", (0, 42, 99))
 def test_same_seed_variants_serialize_byte_identically(seed: int) -> None:
-    first = generate_ambiguity_variant(seed=seed)
-    second = generate_ambiguity_variant(seed=seed)
+    first = generate_ambiguity_variant(seed=seed, key=UNKEYED)
+    second = generate_ambiguity_variant(seed=seed, key=UNKEYED)
 
     assert ambiguity_artifacts(first) == ambiguity_artifacts(second)
-    assert ambiguity_variant_metadata(seed=seed) == ambiguity_variant_metadata(
-        seed=seed
-    )
+    assert ambiguity_variant_metadata(
+        seed=seed, key=UNKEYED
+    ) == ambiguity_variant_metadata(seed=seed, key=UNKEYED)
 
 
 def test_variant_bytes_do_not_depend_on_python_hash_iteration() -> None:
@@ -757,8 +772,10 @@ def test_variant_bytes_do_not_depend_on_python_hash_iteration() -> None:
     command = (
         "import hashlib; "
         "from synthworld.ambiguity_serialization import ambiguity_artifacts; "
+        "from synthworld.ambiguity_variants import UNKEYED; "
         "from synthworld.ambiguity_variants import generate_ambiguity_variant; "
-        "artifacts=ambiguity_artifacts(generate_ambiguity_variant(seed=42)); "
+        "pack=generate_ambiguity_variant(seed=42, key=UNKEYED); "
+        "artifacts=ambiguity_artifacts(pack); "
         "print(hashlib.sha256(b''.join(artifacts[name] for name in "
         "sorted(artifacts))).hexdigest())"
     )
@@ -782,12 +799,14 @@ def test_variant_bytes_do_not_depend_on_python_hash_iteration() -> None:
 def test_seed_42_realization_regression() -> None:
     assert tuple(
         (item.scenario.value, item.attribute_kind.value)
-        for item in ambiguity_variant_metadata(seed=42).selected_realizations
+        for item in ambiguity_variant_metadata(
+            seed=42, key=UNKEYED
+        ).selected_realizations
     ) == (
-        ("contradictory_strong_identifiers", "email"),
+        ("contradictory_strong_identifiers", "phone"),
         ("partial_but_sufficient", "date_of_birth"),
-        ("partial_with_contradiction", "school_year"),
-        ("single_uncorroborated_attribute", "school_year"),
+        ("partial_with_contradiction", "date_of_birth"),
+        ("single_uncorroborated_attribute", "employer"),
         ("stale_attribute", "full_address"),
     )
 
@@ -796,7 +815,9 @@ def test_every_scenario_still_appears_in_every_variant() -> None:
     for seed in _VARIANT_SEEDS:
         scenarios = {
             item.scenario
-            for item in generate_ambiguity_variant(seed=seed).answer_key.pairs
+            for item in generate_ambiguity_variant(
+                seed=seed, key=UNKEYED
+            ).answer_key.pairs
         }
         assert scenarios == set(ScenarioKind)
 
@@ -814,7 +835,7 @@ def test_the_realization_split_covers_every_scenario() -> None:
 
 @pytest.mark.parametrize("seed", _VARIANT_SEEDS)
 def test_variants_remain_adversarial(seed: int) -> None:
-    variant = generate_ambiguity_variant(seed=seed)
+    variant = generate_ambiguity_variant(seed=seed, key=UNKEYED)
     records = {item.id: item for item in variant.public.corpus.identity_records}
 
     for name, decide in AMBIGUITY_BASELINES:
@@ -906,7 +927,7 @@ def test_an_unknown_attribute_kind_passes_through_substitution() -> None:
     from synthworld.ambiguity_variants import _substituted
 
     assert (
-        _substituted("https://social.example.test/x", "social_profile", 1, 0)
+        _substituted("https://social.example.test/x", "social_profile", 1, 0, UNKEYED)
         == "https://social.example.test/x"
     )
 
@@ -931,3 +952,168 @@ def test_induced_clusters_close_over_transitive_merges() -> None:
 
     assert clusters[records[0]] == frozenset(records[:3])
     assert clusters[records[3]] == frozenset({records[3]})
+
+
+def _invert_the_plan(benchmark: AmbiguityBenchmark, key: bytes) -> float:
+    """Rebuild the substitution plan from public information and decode dispositions.
+
+    The attack in full: the seed is published in the corpus, the canonical values live
+    in `_drafts()` in public source, and the plan orders each kind's values by a public
+    draw. Brute-force the realization combinations, keep the plan whose outputs appear
+    in the corpus, invert it, and read each record's canonical value - which names its
+    draft, which names its scenario, which gives the disposition.
+    """
+
+    combos = list(product(*REALIZATIONS.values()))
+    order = list(REALIZATIONS)
+    surfaces = {
+        item.value
+        for record in benchmark.public.corpus.identity_records
+        for item in record.attributes
+    }
+    best: tuple[int, dict[tuple[PublicIdentityAttributeKind, str], str]] | None = None
+    for combo in combos:
+        metadata = AmbiguityVariantMetadata(
+            seed=benchmark.public.corpus.seed,
+            selected_realizations=tuple(
+                ScenarioRealization(scenario=scenario, attribute_kind=kind)
+                for scenario, kind in zip(order, combo, strict=True)
+            ),
+        )
+        plan = _substitution_plan(_drafts(), metadata, key)
+        score = len(surfaces & set(plan.values()))
+        if best is None or score > best[0]:
+            best = (score, plan)
+
+    assert best is not None
+    inverse = {value: canonical for canonical, value in best[1].items()}
+    draft_of = {
+        (item.kind, item.value): draft.scenario
+        for draft in _drafts()
+        for item in draft.attributes
+    }
+    records = {item.id: item for item in benchmark.public.corpus.identity_records}
+    truth = {
+        (item.left_record_id, item.right_record_id): item
+        for item in benchmark.answer_key.pairs
+    }
+
+    correct = 0
+    for pair in benchmark.public.pairs_to_decide:
+        votes = [
+            draft_of[canonical]
+            for reference in (pair.left_record_id, pair.right_record_id)
+            for item in records[reference].attributes
+            if (canonical := inverse.get(item.value)) is not None
+            and canonical in draft_of
+        ]
+        if not votes:
+            # Denominated over every pair, not over the ones the decoder happened to
+            # recognise. Dividing by its own coverage lets a decoder that recovers
+            # almost nothing report a high score off the handful it stumbled onto.
+            continue
+        # Sorted, not `max(set(...))`: set iteration order depends on
+        # PYTHONHASHSEED, so ties made this attacker's own score wobble by ~0.01
+        # between runs - in a suite that gates on hash-seed independence.
+        tally = Counter(votes)
+        guess = min(tally, key=lambda item: (-tally[item], item.value))
+        correct += (
+            SCENARIO_DISPOSITIONS[guess]
+            is truth[(pair.left_record_id, pair.right_record_id)].disposition
+        )
+    return correct / len(benchmark.public.pairs_to_decide)
+
+
+def test_an_unkeyed_pack_can_be_decoded_by_rebuilding_its_own_generator() -> None:
+    """The channel no leak detector could ever have found, recorded as a fact.
+
+    This is not a correlation between a feature and the label - it is recomputation of
+    the generator. A statistical detector looks for structure in emitted values; there
+    is none to find, because the values are a keyed hash. What breaks is that the key
+    was empty, the seed is published, and the canonical inputs are in this repository.
+
+    Recorded rather than fixed, because it cannot be fixed for a published pack whose
+    answer key also ships here. It is the reason `key` exists.
+    """
+
+    scores = [
+        _invert_the_plan(generate_ambiguity_variant(seed=seed, key=UNKEYED), key=b"")
+        for seed in range(900, 912)
+    ]
+    baseline = 7 / len(ScenarioKind)
+
+    # Stated against the majority baseline rather than a round number: the claim is
+    # that the pack is recoverable, and "far above what guessing gets" is what that
+    # means. A fixed 0.9 was tighter than a twelve-seed sample supports - it holds at
+    # 0.93 over thirty seeds and dips below on some shorter windows.
+    assert sum(scores) / len(scores) > 1.5 * baseline
+
+
+def test_a_keyed_pack_cannot_be_decoded_that_way() -> None:
+    """With a key the attacker holds, decoding still works - the key is the secret.
+
+    So the test is that a pack generated under a key the attacker does *not* hold is
+    not recoverable, and that possession of the key is exactly what separates the two.
+    """
+
+    held = [
+        generate_ambiguity_variant(seed=seed, key=b"held-out-key")
+        for seed in range(900, 912)
+    ]
+    with_key = [_invert_the_plan(item, key=b"held-out-key") for item in held]
+    without = [_invert_the_plan(item, key=b"") for item in held]
+    baseline = 7 / len(ScenarioKind)
+
+    # Note what the second number is. It is a recovery rate over every pair, not the
+    # accuracy of a strategy: without the key the decoder can answer for roughly a
+    # fifth of pairs and abstains on the rest, so it lands below a majority-class
+    # baseline that always answers. That is not anti-correlation, it is a decoder that
+    # mostly cannot decode.
+    assert sum(with_key) / len(with_key) > 1.5 * baseline
+    assert sum(without) / len(without) < 0.5 * baseline
+
+
+def test_a_key_changes_the_pack_without_changing_replay() -> None:
+    first = generate_ambiguity_variant(seed=42, key=b"held-out-key")
+    again = generate_ambiguity_variant(seed=42, key=b"held-out-key")
+    unkeyed = generate_ambiguity_variant(seed=42, key=UNKEYED)
+
+    assert first.model_dump_json() == again.model_dump_json()
+    assert first.model_dump_json() != unkeyed.model_dump_json()
+    validate_ambiguity_variant(
+        first, metadata=ambiguity_variant_metadata(seed=42, key=b"held-out-key")
+    )
+
+
+def test_no_public_surface_of_a_keyed_pack_is_a_pure_function_of_the_seed() -> None:
+    """Partial keying is worse than none, because it looks safe.
+
+    A first revision gave `_draw` a `b""` default and left four call sites in the
+    module unkeyed, so a caller who passed a key still got unicode names, source types
+    and display offsets computed from the published seed alone. Recomputing
+    `_unicode_name(seed)` and grepping the corpus identified the `unicode_variant`
+    pair - a MERGE - on 30 of 30 keyed packs.
+
+    The structural guard is that `_draw` has no default, so an unkeyed call is a type
+    error. This is the behavioural half: nothing a keyed pack publishes may be
+    reproducible by someone holding only the seed.
+    """
+
+    seeds = range(900, 915)
+    matches = 0
+    for seed in seeds:
+        benchmark = generate_ambiguity_variant(seed=seed, key=b"held-out-key")
+        published = benchmark.public.corpus.seed
+        # Everything an attacker can compute from the seed with an empty key.
+        guessed = set(_unicode_name(published, b""))
+        names = {
+            item.display_name
+            for item in benchmark.public.corpus.identity_records
+            if item.display_name
+        }
+        matches += any(
+            part in name for name in names for part in guessed if len(part) > 3
+        )
+
+    # At chance for a five-entry pool, not the certainty partial keying gave.
+    assert matches < len(seeds) * 0.5

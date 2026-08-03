@@ -156,6 +156,10 @@ _UNICODE_NAMES = (
     ("François", "Francois", "Brontë", "Bronte"),
     ("Šimon", "Simon", "Núñez", "Nunez"),
 )
+#: The key that reproduces the published packs. Named rather than spelled `b""` at
+#: call sites, so choosing to generate an invertible pack is a visible decision.
+UNKEYED: bytes = b""
+
 _VIRTUAL_PREFIX = "\x00realization:"
 _DisplayRelation = Literal[
     "alias", "distinct", "equal", "initial_full", "same_family", "unicode"
@@ -275,9 +279,54 @@ def canonical_case_shapes() -> dict[ScenarioKind, _CaseShape]:
     return shapes
 
 
-def _draw(seed: int, purpose: str, index: int) -> int:
-    material = f"ambiguity-variant|{seed}|{purpose}|{index}"
-    return int.from_bytes(blake2b(material.encode(), digest_size=8).digest(), "big")
+def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
+    """A keyed pseudorandom draw. The key is never serialized.
+
+    Without a key this generator is invertible, and that is not a hypothetical. The
+    seed is published in `PublicConnectionCorpus.seed`, the canonical values live in
+    `_drafts()` in this public source, and `_substitution_plan` orders each kind's
+    values by `_draw(seed, f"value-order:{kind}:{value}", 0)`. So the whole
+    canonical-to-surface map is recomputable by anyone holding the repository: brute
+    force the 32 realization combinations, keep the plan whose outputs appear in the
+    corpus, invert it, and read each record's canonical value - which names its draft,
+    which names its scenario. Measured over seeds 900-929, that recovers the
+    disposition on **0.929** of pairs against a 0.467 majority baseline, reading no
+    identity evidence at all.
+
+    No hash makes that go away. Any deterministic public function of a public seed and
+    a public value set inverts; three comments in this module already say so about
+    permutations, and the same argument applies here. What closes it is a secret, so a
+    pack generated with an unpublished key cannot be recomputed.
+
+    `key=b""` is byte-identical to *unkeyed blake2b over the same material*, but this
+    change also length-prefixes the material, so variant bytes do move. Saying "the
+    published packs are unchanged" would be an overclaim: what is unchanged is every
+    frozen artifact, and only because the canonical generator does not route through
+    this function. Variants are not frozen, so moving them is allowed - it is worth
+    being exact about which of the two is true.
+
+    The key has no default *on purpose*. A first revision defaulted it to `b""`, and
+    four call sites in this module were never updated - so a caller who passed a key
+    got a pack whose unicode names, source types and display offsets were still a pure
+    function of the published seed. Recomputing the unicode-name draw from the seed
+    alone and grepping the corpus for it identified the `unicode_variant` pair, which
+    is a MERGE, on 30 of 30 keyed packs. Partial keying is worse than none, because
+    it looks safe. Making the argument required turns that from a thing a reviewer must
+    notice into a type error.
+
+    Material is length-prefixed rather than delimited because 22 canonical values
+    contain the `|` separator, including every address. The delimited form was in fact
+    injective here - the seed and index are digits, so a purpose string cannot forge a
+    boundary - but that held by accident of the surrounding field types rather than by
+    the encoding, and an encoding that cannot collide is worth more than one that
+    happens not to.
+    """
+
+    parts = (str(seed), purpose, str(index))
+    material = "".join(f"{len(item)}:{item}" for item in parts)
+    return int.from_bytes(
+        blake2b(material.encode(), digest_size=8, key=key).digest(), "big"
+    )
 
 
 def _require(condition: bool, message: str) -> None:
@@ -285,14 +334,14 @@ def _require(condition: bool, message: str) -> None:
         raise AmbiguityVariantError(message)
 
 
-def ambiguity_variant_metadata(*, seed: int) -> AmbiguityVariantMetadata:
+def ambiguity_variant_metadata(*, seed: int, key: bytes) -> AmbiguityVariantMetadata:
     """Return the deterministic evaluator-only realization choices for ``seed``."""
 
     selected = tuple(
         ScenarioRealization(
             scenario=scenario,
             attribute_kind=choices[
-                _draw(seed, f"realization:{scenario.value}", 0) % len(choices)
+                _draw(seed, f"realization:{scenario.value}", 0, key) % len(choices)
             ],
         )
         for scenario, choices in sorted(
@@ -386,7 +435,7 @@ def _virtual_requirements(
     return tuple(keys)
 
 
-def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
+def _substituted(value: str, kind: str, seed: int, slot: int, key: bytes) -> str:
     """Format the collision-free slot assigned to one distinct source value.
 
     ``slot`` is the corpus-wide rank of the source value within its attribute kind,
@@ -394,7 +443,7 @@ def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
     values receive distinct slots.
     """
 
-    offset = _draw(seed, f"surface:{kind}", 0)
+    offset = _draw(seed, f"surface:{kind}", 0, key)
     if kind == _K.EMAIL.value:
         return (
             f"synthetic.{offset % 10000:04d}.{slot:04d}"
@@ -432,7 +481,7 @@ def _substituted(value: str, kind: str, seed: int, slot: int) -> str:
 
 
 def _substitution_plan(
-    drafts: Sequence[_Draft], metadata: AmbiguityVariantMetadata
+    drafts: Sequence[_Draft], metadata: AmbiguityVariantMetadata, key: bytes
 ) -> dict[tuple[_K, str], str]:
     selected = _selected(metadata)
     keys = {(item.kind, item.value) for draft in drafts for item in draft.attributes}
@@ -447,12 +496,12 @@ def _substitution_plan(
         ordered = sorted(
             values,
             key=lambda value: (
-                _draw(metadata.seed, f"value-order:{kind.value}:{value}", 0),
+                _draw(metadata.seed, f"value-order:{kind.value}:{value}", 0, key),
                 value,
             ),
         )
         rewritten = [
-            _substituted(value, kind.value, metadata.seed, slot)
+            _substituted(value, kind.value, metadata.seed, slot, key)
             for slot, value in enumerate(ordered)
         ]
         _require(
@@ -542,8 +591,8 @@ def _realize_attributes(
     )
 
 
-def _unicode_name(seed: int) -> tuple[str, str, str, str]:
-    return _UNICODE_NAMES[_draw(seed, "unicode-name", 0) % len(_UNICODE_NAMES)]
+def _unicode_name(seed: int, key: bytes) -> tuple[str, str, str, str]:
+    return _UNICODE_NAMES[_draw(seed, "unicode-name", 0, key) % len(_UNICODE_NAMES)]
 
 
 def _replace_family(
@@ -573,7 +622,7 @@ def _evidence_anchor(
 
 
 def _source_types(
-    seed: int, anchor: str, left: _Draft, right: _Draft
+    seed: int, anchor: str, left: _Draft, right: _Draft, key: bytes
 ) -> tuple[PublicIdentitySourceType, PublicIdentitySourceType]:
     """Choose provenance per seed, preserving only whether the two sources agree.
 
@@ -589,15 +638,15 @@ def _source_types(
     """
 
     kinds = tuple(PublicIdentitySourceType)
-    first = kinds[_draw(seed, f"source:{anchor}", 0) % len(kinds)]
+    first = kinds[_draw(seed, f"source:{anchor}", 0, key) % len(kinds)]
     if left.source_type is right.source_type:
         return first, first
     others = tuple(item for item in kinds if item is not first)
-    return first, others[_draw(seed, f"source:{anchor}", 1) % len(others)]
+    return first, others[_draw(seed, f"source:{anchor}", 1, key) % len(others)]
 
 
 def _display_slots(
-    seed: int, anchors: Mapping[ScenarioKind, str]
+    seed: int, anchors: Mapping[ScenarioKind, str], key: bytes
 ) -> dict[ScenarioKind, int]:
     """Give each pair a disjoint name slot, ranked by its own evidence.
 
@@ -625,7 +674,7 @@ def _display_slots(
     )
     ordered = sorted(
         anchors.items(),
-        key=lambda item: (_draw(seed, f"display-slot:{item[1]}", 0), item[1]),
+        key=lambda item: (_draw(seed, f"display-slot:{item[1]}", 0, key), item[1]),
     )
     return {scenario: slot for slot, (scenario, _anchor) in enumerate(ordered)}
 
@@ -637,9 +686,10 @@ def _display_names(
     slot: int,
     left: tuple[PublicIdentityAttribute, ...],
     right: tuple[PublicIdentityAttribute, ...],
+    key: bytes,
 ) -> tuple[str, str]:
-    given_offset = _draw(seed, "display-given", 0) % len(_GIVEN)
-    family_offset = _draw(seed, "display-family", 0) % len(_FAMILY)
+    given_offset = _draw(seed, "display-given", 0, key) % len(_GIVEN)
+    family_offset = _draw(seed, "display-family", 0, key) % len(_FAMILY)
     left_given = _GIVEN[(given_offset + slot * 2) % len(_GIVEN)]
     right_given = _GIVEN[(given_offset + slot * 2 + 1) % len(_GIVEN)]
     left_family = _family_value(left, f"Example{family_offset:02d}Family{slot * 2:02d}")
@@ -664,7 +714,9 @@ def _display_names(
     if scenario is ScenarioKind.ALIAS_CHANGE:
         return f"{left_given} {left_family}", f"{left_given} {right_family}"
     if scenario is ScenarioKind.UNICODE_VARIANT:
-        unicode_given, ascii_given, unicode_family, ascii_family = _unicode_name(seed)
+        unicode_given, ascii_given, unicode_family, ascii_family = _unicode_name(
+            seed, key
+        )
         return f"{unicode_given} {unicode_family}", f"{ascii_given} {ascii_family}"
     if scenario in {
         ScenarioKind.PARTIAL_BUT_SUFFICIENT,
@@ -856,7 +908,7 @@ def validate_ambiguity_variant(
     a useful statement of intent - but they are no longer the only judge.
     """
 
-    metadata = metadata or ambiguity_variant_metadata(seed=benchmark.seed)
+    metadata = metadata or ambiguity_variant_metadata(seed=benchmark.seed, key=UNKEYED)
     _require(metadata.seed == benchmark.seed, "variant metadata seed does not match")
     selected = _selected(metadata)
     canonical_shapes = canonical_case_shapes()
@@ -975,13 +1027,26 @@ def validate_ambiguity_variant(
     )
 
 
-def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
-    """Generate one deterministic variant and refuse semantically corrupt output."""
+def generate_ambiguity_variant(*, seed: int, key: bytes) -> AmbiguityBenchmark:
+    """Generate one deterministic variant and refuse semantically corrupt output.
+
+    ``key`` has no default at this boundary either, and that is the layer that matters:
+    the callers here are evaluators rather than this module. A default would let one
+    forget the argument and receive a fully invertible pack, with no error and nothing
+    in the artifact distinguishing it from a protected one.
+
+    Pass ``UNKEYED`` to reproduce the published packs. For evaluation, pass at least 16
+    bytes from :func:`secrets.token_bytes` and use a fresh key per evaluation. A
+    low-entropy key does not close the channel, it only enlarges the search: the
+    original attack enumerated 32 candidate plans, and an attacker who can enumerate
+    keys simply generates plans under each and keeps the one whose outputs appear in
+    the corpus.
+    """
 
     drafts = _drafts()
-    metadata = ambiguity_variant_metadata(seed=seed)
+    metadata = ambiguity_variant_metadata(seed=seed, key=key)
     selected = _selected(metadata)
-    substitutions = _substitution_plan(drafts, metadata)
+    substitutions = _substitution_plan(drafts, metadata, key)
     records: list[PublicIdentityRecord] = []
     pairs: list[PairTruth] = []
 
@@ -1007,7 +1072,7 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
             substitutions,
         )
         if left_draft.scenario is ScenarioKind.UNICODE_VARIANT:
-            _, _, unicode_family, ascii_family = _unicode_name(seed)
+            _, _, unicode_family, ascii_family = _unicode_name(seed, key)
             left_attributes = _replace_family(left_attributes, unicode_family)
             right_attributes = _replace_family(right_attributes, ascii_family)
         realized.append((left_draft, right_draft, left_attributes, right_attributes))
@@ -1018,6 +1083,7 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
             left_draft.scenario: _evidence_anchor(left_attributes, right_attributes)
             for left_draft, _right, left_attributes, right_attributes in realized
         },
+        key,
     )
 
     for left_draft, right_draft, left_attributes, right_attributes in realized:
@@ -1028,9 +1094,10 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
             slot=slots[scenario],
             left=left_attributes,
             right=right_attributes,
+            key=key,
         )
         left_source, right_source = _source_types(
-            seed, _draft_anchor(drafts, scenario), left_draft, right_draft
+            seed, _draft_anchor(drafts, scenario), left_draft, right_draft, key
         )
         left_record = _identity_record(
             seed=seed,
@@ -1087,6 +1154,7 @@ def generate_ambiguity_variant(*, seed: int) -> AmbiguityBenchmark:
 __all__ = [
     "FIXED_REALIZATION",
     "REALIZATIONS",
+    "UNKEYED",
     "AmbiguityVariantError",
     "AmbiguityVariantMetadata",
     "ScenarioRealization",

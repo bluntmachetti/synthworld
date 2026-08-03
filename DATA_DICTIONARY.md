@@ -239,6 +239,30 @@ identifiers), none of which a field-name check could see, and all of which survi
 100% branch coverage. Recovering a label *from the evidence* is not a leak; that is
 the task.
 
+A held-out *seed* is not a secret. The seed is published inside the artifact, the
+generator is public source, and the canonical inputs are in this repository — so an
+artifact generated from a deterministic public function of those is recomputable, and
+the answer key with it. Measured on the ambiguity variants: rebuilding the substitution
+plan from public information alone recovered the disposition on **0.929** of pairs
+against a 0.467 baseline, reading no identity evidence.
+
+What a key protects is narrower than "the artifact", and the precise claim is worth
+stating: **the serialized seed diversifies surface values but does not conceal them; a
+high-entropy unpublished key prevents recomputation of the key-dependent free choices
+and the substitution plan; and neither conceals a label that the public evidence
+already implies.** A reviewer's structural attacker, reading only attribute kinds and
+which of them agree, recovered 450 of 450 dispositions on keyed packs — legitimate
+evidence under this threat model, and the reason the sentence needs its third clause.
+
+The mechanism is a **key**: `generate_ambiguity_variant(seed=..., key=...)`
+takes a byte string that is never serialized. The same attack against a keyed pack
+scores 0.080 — and that number is a *recovery* rate, not an accuracy: without the key
+the decoder can produce an answer for only about a fifth of pairs and is right on 8% of
+all of them. It is not "worse than guessing"; it is a decoder that mostly cannot answer,
+which is what closing the channel looks like. Published packs use the empty key and are byte-identical to unkeyed
+output, which is correct — their answer keys ship here, so they claim no secret and
+remain auditable. Generate evaluation packs with a key you do not publish.
+
 Held-out private seeds are necessary for competitive evaluation but not always
 sufficient. A seed protects surface values. Where a pack's case list is fixed and
 each case is defined by its evidence pattern — as in the ambiguity pack, whose
