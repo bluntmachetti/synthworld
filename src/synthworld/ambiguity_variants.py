@@ -156,6 +156,10 @@ _UNICODE_NAMES = (
     ("François", "Francois", "Brontë", "Bronte"),
     ("Šimon", "Simon", "Núñez", "Nunez"),
 )
+#: The key that reproduces the published packs. Named rather than spelled `b""` at
+#: call sites, so choosing to generate an invertible pack is a visible decision.
+UNKEYED: bytes = b""
+
 _VIRTUAL_PREFIX = "\x00realization:"
 _DisplayRelation = Literal[
     "alias", "distinct", "equal", "initial_full", "same_family", "unicode"
@@ -286,7 +290,7 @@ def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
     force the 32 realization combinations, keep the plan whose outputs appear in the
     corpus, invert it, and read each record's canonical value - which names its draft,
     which names its scenario. Measured over seeds 900-929, that recovers the
-    disposition on **0.974** of pairs against a 0.467 majority baseline, reading no
+    disposition on **0.929** of pairs against a 0.467 majority baseline, reading no
     identity evidence at all.
 
     No hash makes that go away. Any deterministic public function of a public seed and
@@ -324,9 +328,7 @@ def _require(condition: bool, message: str) -> None:
         raise AmbiguityVariantError(message)
 
 
-def ambiguity_variant_metadata(
-    *, seed: int, key: bytes = b""
-) -> AmbiguityVariantMetadata:
+def ambiguity_variant_metadata(*, seed: int, key: bytes) -> AmbiguityVariantMetadata:
     """Return the deterministic evaluator-only realization choices for ``seed``."""
 
     selected = tuple(
@@ -427,7 +429,7 @@ def _virtual_requirements(
     return tuple(keys)
 
 
-def _substituted(value: str, kind: str, seed: int, slot: int, key: bytes = b"") -> str:
+def _substituted(value: str, kind: str, seed: int, slot: int, key: bytes) -> str:
     """Format the collision-free slot assigned to one distinct source value.
 
     ``slot`` is the corpus-wide rank of the source value within its attribute kind,
@@ -473,7 +475,7 @@ def _substituted(value: str, kind: str, seed: int, slot: int, key: bytes = b"") 
 
 
 def _substitution_plan(
-    drafts: Sequence[_Draft], metadata: AmbiguityVariantMetadata, key: bytes = b""
+    drafts: Sequence[_Draft], metadata: AmbiguityVariantMetadata, key: bytes
 ) -> dict[tuple[_K, str], str]:
     selected = _selected(metadata)
     keys = {(item.kind, item.value) for draft in drafts for item in draft.attributes}
@@ -900,7 +902,7 @@ def validate_ambiguity_variant(
     a useful statement of intent - but they are no longer the only judge.
     """
 
-    metadata = metadata or ambiguity_variant_metadata(seed=benchmark.seed)
+    metadata = metadata or ambiguity_variant_metadata(seed=benchmark.seed, key=UNKEYED)
     _require(metadata.seed == benchmark.seed, "variant metadata seed does not match")
     selected = _selected(metadata)
     canonical_shapes = canonical_case_shapes()
@@ -1019,8 +1021,21 @@ def validate_ambiguity_variant(
     )
 
 
-def generate_ambiguity_variant(*, seed: int, key: bytes = b"") -> AmbiguityBenchmark:
-    """Generate one deterministic variant and refuse semantically corrupt output."""
+def generate_ambiguity_variant(*, seed: int, key: bytes) -> AmbiguityBenchmark:
+    """Generate one deterministic variant and refuse semantically corrupt output.
+
+    ``key`` has no default at this boundary either, and that is the layer that matters:
+    the callers here are evaluators rather than this module. A default would let one
+    forget the argument and receive a fully invertible pack, with no error and nothing
+    in the artifact distinguishing it from a protected one.
+
+    Pass ``UNKEYED`` to reproduce the published packs. For evaluation, pass at least 16
+    bytes from :func:`secrets.token_bytes` and use a fresh key per evaluation. A
+    low-entropy key does not close the channel, it only enlarges the search: the
+    original attack enumerated 32 candidate plans, and an attacker who can enumerate
+    keys simply generates plans under each and keeps the one whose outputs appear in
+    the corpus.
+    """
 
     drafts = _drafts()
     metadata = ambiguity_variant_metadata(seed=seed, key=key)
@@ -1133,6 +1148,7 @@ def generate_ambiguity_variant(*, seed: int, key: bytes = b"") -> AmbiguityBench
 __all__ = [
     "FIXED_REALIZATION",
     "REALIZATIONS",
+    "UNKEYED",
     "AmbiguityVariantError",
     "AmbiguityVariantMetadata",
     "ScenarioRealization",
