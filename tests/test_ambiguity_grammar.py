@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import inspect
-from collections import defaultdict
+from collections import Counter, defaultdict
 from itertools import product
 
 import pytest
@@ -95,6 +95,62 @@ def test_the_archetype_that_motivated_the_grammar() -> None:
     assert disposition_of(moved) is PairDisposition.MERGE
 
 
+def test_no_single_value_reveals_the_relation_that_made_it() -> None:
+    """The channel the signature guarantee does not close, and nearly shipped.
+
+    A first version gave each relation its own surface marker - one email domain only
+    for NEAR, another only for FAR, a parenthesised phone only for NEAR, one town only
+    for a FAR address. A decoder classifying each value *in isolation* recovered the
+    relation on 1200 of 1200 renderings and then ran the public `disposition_of` to get
+    the answer. The key did not help, because nothing was being recomputed - the answer
+    was written on the surface.
+
+    So this trains the best structural decoder it can on one set of seeds and scores it
+    on another. Anything above chance means a form belongs to a relation.
+    """
+
+    def shape(value: str) -> tuple[object, ...]:
+        return (
+            value.count("|"),
+            value.count("@"),
+            value.count("-"),
+            value.count("/"),
+            value.count("_"),
+            value.count("."),
+            value.isupper(),
+            value.endswith(" "),
+            value.split("@")[-1] if "@" in value else "",
+            value.split("|")[2] if value.count("|") > 2 else "",
+        )
+
+    learned: dict[tuple[K, tuple[object, ...]], Counter[Relation]] = defaultdict(
+        Counter
+    )
+    relations = (Relation.EQUAL, Relation.NEAR, Relation.FAR)
+    for seed in range(150):
+        for kind in _RENDERED:
+            for relation in relations:
+                for value in render_relation(
+                    kind, relation, seed=seed, key=b"secret", slot=0
+                ):
+                    learned[(kind, shape(value))][relation] += 1
+
+    correct = total = 0
+    for seed in range(150, 250):
+        for kind in _RENDERED:
+            for relation in relations:
+                for value in render_relation(
+                    kind, relation, seed=seed, key=b"secret", slot=0
+                ):
+                    tally = learned.get((kind, shape(value)))
+                    guess = tally.most_common(1)[0][0] if tally else Relation.FAR
+                    total += 1
+                    correct += guess is relation
+
+    # Chance is one in three. A real channel showed 1.000 here.
+    assert correct / total < 0.42
+
+
 def test_nothing_that_makes_a_value_can_see_the_answer() -> None:
     """Enforced by the signature, so a leak of that shape is a type error.
 
@@ -141,18 +197,25 @@ def _similarity(kind: K, left: str, right: str) -> float:
     """
 
     if kind is K.PHONE:
-        first = "".join(item for item in left if item.isdigit())
-        second = "".join(item for item in right if item.isdigit())
-        return 1.0 if first == second else 0.0
+
+        def digits(value: str) -> str:
+            # `00` is the international dialling prefix and `+` means the same thing,
+            # so a normaliser that does not fold them reports the same line as two.
+            # Standard E.164 handling; the surface forms deliberately include both.
+            found = "".join(item for item in value if item.isdigit())
+            return found[2:] if found.startswith("00") else found
+
+        return 1.0 if digits(left) == digits(right) else 0.0
 
     def tokens(value: str) -> set[str]:
-        #  included because usernames use it as a separator, and the near case for a
-        # handle is a suffixed variant of the same stem.
-        for separator in ("|", "@", "-", " ", "_"):
+        # Every separator these surface forms use. They were added one at a time, each
+        # because a near pair scored as far without it - and each time the rendering was
+        # right and this comparison was wrong.
+        for separator in ("|", "@", "-", " ", "_", "/", "."):
             value = value.replace(separator, "\x00")
         return {item for item in value.split("\x00") if item}
 
-    one, other = tokens(left), tokens(right)
+    one, other = tokens(left.casefold()), tokens(right.casefold())
     union = one | other
     return len(one & other) / len(union) if union else 0.0
 

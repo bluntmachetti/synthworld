@@ -87,6 +87,11 @@ _KIND_EVIDENCE: dict[PublicIdentityAttributeKind, tuple[float, float]] = {
 #: Deliberately wide. A narrow band would make `insufficient` a rounding artefact of two
 #: thresholds rather than a real region, and the whole point of the third disposition is
 #: that some evidence genuinely settles nothing.
+#: Interchangeable surface forms. Every one is reachable for every value regardless of
+#: relation, which is what stops a form naming its relation.
+_DOMAINS = ("example.test", "mail.example.test", "example.invalid")
+_TOWNS = ("Testville", "Sampleton", "Exampleford")
+
 _MERGE_THRESHOLD = 0.55
 _SEPARATE_THRESHOLD = -0.35
 
@@ -161,6 +166,16 @@ def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
     )
 
 
+def _variant(seed: int, purpose: str, slot: int, key: bytes, count: int) -> int:
+    """Pick one of `count` interchangeable surface forms for a value.
+
+    Drawn per *value*, never per relation. That distinction is the whole of the fix
+    below: if a form belongs to a relation, the relation is written on the value.
+    """
+
+    return _draw(seed, f"form:{purpose}", slot, key) % count
+
+
 def render_relation(
     kind: PublicIdentityAttributeKind,
     relation: Relation,
@@ -171,110 +186,100 @@ def render_relation(
 ) -> tuple[str, str]:
     """Two safely fictional values standing in the requested relation.
 
-    The signature is the guarantee: there is no disposition, no archetype and no
-    ``same_entity`` parameter, so no surface value can be a function of the answer.
-    Every leak closed in #59 reached a public value through exactly that route.
+    Both values are drawn from **one** distribution of surface forms. The relation
+    decides how they relate to each other and never how either one looks, so no single
+    value carries its relation and a reader must compare the pair to learn anything.
+
+    That is not where this started. A first version gave each relation its own surface
+    marker - `mail.example.test` only for NEAR, `example.invalid` only for FAR, a
+    parenthesised phone only for NEAR, `Sampleton` only for a FAR address, a
+    `(Division N)` suffix only for a NEAR employer. Six of eight kinds were affected,
+    and a decoder classifying each value *in isolation* recovered the relation on 1200
+    of 1200 renderings - then ran the public :func:`disposition_of` to get the answer.
+    The key did not help, because nothing was being recomputed: the answer was written
+    on the surface. Making the pack a lookup table one level down is exactly the defect
+    #62 exists to remove.
+
+    The signature guarantee - no label parameter - was real and insufficient. It stops
+    the label flowing in; it cannot stop the *relation* being stamped on the way out,
+    and the relation determines the label. What closes it is that every free choice is
+    drawn per value from a shared pool: an `example.invalid` address is as likely on a
+    merge pair as on a separate one.
     """
 
-    left = _draw(seed, f"{kind.value}:left", slot, key)
-    right = _draw(seed, f"{kind.value}:right", slot, key)
+    left_seed = _draw(seed, f"{kind.value}:identity", slot, key)
+    other_seed = _draw(seed, f"{kind.value}:other", slot, key)
+    # The identity component is what NEAR preserves and FAR does not. The form is a
+    # free choice drawn independently for each side, so it carries nothing.
+    right_seed = left_seed if relation is not Relation.FAR else other_seed
+    left_form = _variant(seed, f"{kind.value}:left", slot, key, 3)
+    right_form = (
+        left_form
+        if relation is Relation.EQUAL
+        else _variant(seed, f"{kind.value}:right", slot, key, 3)
+    )
+    if relation is Relation.NEAR and right_form == left_form:
+        # NEAR must differ somewhere, or it renders identical to EQUAL.
+        right_form = (right_form + 1) % 3
+    return (
+        _surface(kind, left_seed, left_form),
+        _surface(kind, right_seed, right_form),
+    )
+
+
+def _surface(kind: PublicIdentityAttributeKind, identity: int, form: int) -> str:
+    """One value, from an identity component and an interchangeable surface form.
+
+    Every form is reachable for every value. Two values sharing an identity and
+    differing in form are `NEAR`; sharing both are `EQUAL`; sharing neither are `FAR`.
+    A reader holding one value alone sees an identity it cannot place and a form that
+    means nothing.
+    """
 
     if kind is _K.PHONE:
-        subscriber = left % 100 + 100
-        first = f"+1-212-555-{subscriber:04d}"
-        if relation is Relation.EQUAL:
-            return first, first
-        # The same line written differently - the messy-data case a resolver has to
-        # normalise before it can match. A first revision used consecutive subscriber
-        # numbers, which reads as continuity and is not: `0115` and `0116` share no
-        # token, exactly as `0115` and `0256` do, so nothing distinguished it from FAR
-        # to any comparison a real matcher would make.
-        if relation is Relation.NEAR:
-            return first, f"+1 (212) 555 {subscriber:04d}"
-        return first, f"+1-212-555-{right % 100 + 200:04d}"
+        digits = f"{identity % 100 + 100:04d}"
+        return (
+            f"+1-212-555-{digits}",
+            f"+1 (212) 555 {digits}",
+            f"001 212 555 {digits}",
+        )[form]
 
     if kind is _K.EMAIL:
-        stem = f"stem{left % 9000 + 1000:04d}"
-        first = f"{stem}@example.test"
-        if relation is Relation.EQUAL:
-            return first, first
-        # The local part survives a change of provider - the same person, reachable
-        # somewhere else - against an unrelated address entirely.
-        return first, (
-            f"{stem}@mail.example.test"
-            if relation is Relation.NEAR
-            else f"other{right % 9000 + 1000:04d}@example.invalid"
-        )
-
-    if kind is _K.FULL_ADDRESS:
-        street = f"Example Street {left % 900 + 100:03d}"
-        first = f"{left % 200 + 1}|{street}|Testville|00000|ZZ"
-        if relation is Relation.EQUAL:
-            return first, first
-        # One street, another door, against another town entirely.
-        return first, (
-            f"{left % 200 + 2}|{street}|Testville|00000|ZZ"
-            if relation is Relation.NEAR
-            else f"{right % 200 + 1}|Example Street {right % 900 + 100:03d}|"
-            "Sampleton|00000|ZZ"
-        )
+        local = f"user{identity % 9000 + 1000:04d}"
+        return f"{local}@{_DOMAINS[form]}"
 
     if kind is _K.USERNAME:
-        stem = f"handle{left % 9000 + 1000:04d}"
-        if relation is Relation.EQUAL:
-            return stem, stem
-        return stem, (
-            f"{stem}_{left % 90 + 10:02d}"
-            if relation is Relation.NEAR
-            else f"handle{right % 9000 + 1000:04d}"
-        )
+        handle = f"handle{identity % 9000 + 1000:04d}"
+        return (handle, f"{handle}_", f"{handle}.")[form]
+
+    if kind is _K.FULL_ADDRESS:
+        house, street = identity % 200 + 1, identity % 900 + 100
+        town = _TOWNS[form]
+        return f"{house}|Example Street {street}|{town}|00000|ZZ"
 
     if kind is _K.DATE_OF_BIRTH:
-        year, month, day = 1950 + left % 50, left % 12 + 1, left % 27 + 1
-        first = f"{year:04d}-{month:02d}-{day:02d}"
-        if relation is Relation.EQUAL:
-            return first, first
-        # A transposed pair of digits in the day is the classic keying error; a
-        # different year entirely is a different person.
-        return first, (
-            f"{year:04d}-{month:02d}-{(day % 27) + 1:02d}"
-            if relation is Relation.NEAR
-            else f"{1950 + right % 50:04d}-{right % 12 + 1:02d}-{right % 27 + 1:02d}"
-        )
+        year, month, day = 1950 + identity % 50, identity % 12 + 1, identity % 27 + 1
+        return (
+            f"{year:04d}-{month:02d}-{day:02d}",
+            f"{day:02d}/{month:02d}/{year:04d}",
+            f"{year:04d}/{month:02d}/{day:02d}",
+        )[form]
 
     if kind is _K.FAMILY_NAME:
-        first = f"Surname{left % 9000 + 1000:04d}"
-        if relation is Relation.EQUAL:
-            return first, first
-        # A maiden name kept as a compound, against an unrelated surname.
-        return first, (
-            f"{first}-Surname{left % 90 + 10:02d}"
-            if relation is Relation.NEAR
-            else f"Surname{right % 9000 + 1000:04d}"
-        )
+        name = f"Surname{identity % 9000 + 1000:04d}"
+        return (name, name.upper(), f"{name}-{name}")[form]
 
     if kind is _K.EMPLOYER:
-        first = f"Example Works {left % 9000 + 1000:04d}"
-        if relation is Relation.EQUAL:
-            return first, first
-        # The same employer under a renamed division, against a different company.
-        return first, (
-            f"{first} (Division {left % 9 + 1})"
-            if relation is Relation.NEAR
-            else f"Test Logistics {right % 9000 + 1000:04d}"
-        )
+        company = f"Example Works {identity % 9000 + 1000:04d}"
+        return (company, f"{company} Ltd", f"{company} Limited")[form]
 
-    institution = f"Sample Academy {left % 900 + 100:03d}"
-    year = 1990 + left % 30
-    first = f"{institution}|{year}"
-    if relation is Relation.EQUAL:
-        return first, first
-    # One institution, adjacent cohorts - siblings, or a repeated year.
-    return first, (
-        f"{institution}|{year + 1}"
-        if relation is Relation.NEAR
-        else f"Test College {right % 900 + 100:03d}|{1990 + right % 30}"
-    )
+    institution = f"Sample Academy {identity % 900 + 100:03d}"
+    year = 1990 + identity % 30
+    return (
+        f"{institution}|{year}",
+        f"{institution.upper()}|{year}",
+        f"{institution} |{year}",
+    )[form]
 
 
 __all__ = [
