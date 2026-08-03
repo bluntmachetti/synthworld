@@ -246,7 +246,15 @@ the answer key with it. Measured on the ambiguity variants: rebuilding the subst
 plan from public information alone recovered the disposition on **0.929** of pairs
 against a 0.467 baseline, reading no identity evidence.
 
-What protects an artifact is a **key**: `generate_ambiguity_variant(seed=..., key=...)`
+What a key protects is narrower than "the artifact", and the precise claim is worth
+stating: **the serialized seed diversifies surface values but does not conceal them; a
+high-entropy unpublished key prevents recomputation of the key-dependent free choices
+and the substitution plan; and neither conceals a label that the public evidence
+already implies.** A reviewer's structural attacker, reading only attribute kinds and
+which of them agree, recovered 450 of 450 dispositions on keyed packs — legitimate
+evidence under this threat model, and the reason the sentence needs its third clause.
+
+The mechanism is a **key**: `generate_ambiguity_variant(seed=..., key=...)`
 takes a byte string that is never serialized. The same attack against a keyed pack
 scores 0.080 — and that number is a *recovery* rate, not an accuracy: without the key
 the decoder can produce an answer for only about a fifth of pairs and is right on 8% of

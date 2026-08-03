@@ -1012,7 +1012,11 @@ def _invert_the_plan(benchmark: AmbiguityBenchmark, key: bytes) -> float:
             # recognise. Dividing by its own coverage lets a decoder that recovers
             # almost nothing report a high score off the handful it stumbled onto.
             continue
-        guess = max(set(votes), key=votes.count)
+        # Sorted, not `max(set(...))`: set iteration order depends on
+        # PYTHONHASHSEED, so ties made this attacker's own score wobble by ~0.01
+        # between runs - in a suite that gates on hash-seed independence.
+        tally = Counter(votes)
+        guess = min(tally, key=lambda item: (-tally[item], item.value))
         correct += (
             SCENARIO_DISPOSITIONS[guess]
             is truth[(pair.left_record_id, pair.right_record_id)].disposition

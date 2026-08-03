@@ -298,9 +298,12 @@ def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
     permutations, and the same argument applies here. What closes it is a secret, so a
     pack generated with an unpublished key cannot be recomputed.
 
-    `key=b""` is byte-identical to unkeyed blake2b, so the published packs - whose
-    answer keys ship in this repository anyway, and which claim no secret - are
-    unchanged and remain auditable.
+    `key=b""` is byte-identical to *unkeyed blake2b over the same material*, but this
+    change also length-prefixes the material, so variant bytes do move. Saying "the
+    published packs are unchanged" would be an overclaim: what is unchanged is every
+    frozen artifact, and only because the canonical generator does not route through
+    this function. Variants are not frozen, so moving them is allowed - it is worth
+    being exact about which of the two is true.
 
     The key has no default *on purpose*. A first revision defaulted it to `b""`, and
     four call sites in this module were never updated - so a caller who passed a key
@@ -312,8 +315,11 @@ def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
     notice into a type error.
 
     Material is length-prefixed rather than delimited because 22 canonical values
-    contain the `|` separator, including every address, so a delimited encoding was
-    collision-free only by luck.
+    contain the `|` separator, including every address. The delimited form was in fact
+    injective here - the seed and index are digits, so a purpose string cannot forge a
+    boundary - but that held by accident of the surrounding field types rather than by
+    the encoding, and an encoding that cannot collide is worth more than one that
+    happens not to.
     """
 
     parts = (str(seed), purpose, str(index))
