@@ -248,7 +248,10 @@ against a 0.467 baseline, reading no identity evidence.
 
 What protects an artifact is a **key**: `generate_ambiguity_variant(seed=..., key=...)`
 takes a byte string that is never serialized. The same attack against a keyed pack
-scores 0.080. Published packs use the empty key and are byte-identical to unkeyed
+scores 0.080 — and that number is a *recovery* rate, not an accuracy: without the key
+the decoder can produce an answer for only about a fifth of pairs and is right on 8% of
+all of them. It is not "worse than guessing"; it is a decoder that mostly cannot answer,
+which is what closing the channel looks like. Published packs use the empty key and are byte-identical to unkeyed
 output, which is correct — their answer keys ship here, so they claim no secret and
 remain auditable. Generate evaluation packs with a key you do not publish.
 

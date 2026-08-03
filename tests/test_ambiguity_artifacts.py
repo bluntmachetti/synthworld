@@ -1047,6 +1047,11 @@ def test_a_keyed_pack_cannot_be_decoded_that_way() -> None:
     without = [_invert_the_plan(item, key=b"") for item in held]
     baseline = 7 / len(ScenarioKind)
 
+    # Note what the second number is. It is a recovery rate over every pair, not the
+    # accuracy of a strategy: without the key the decoder can answer for roughly a
+    # fifth of pairs and abstains on the rest, so it lands below a majority-class
+    # baseline that always answers. That is not anti-correlation, it is a decoder that
+    # mostly cannot decode.
     assert sum(with_key) / len(with_key) > 1.5 * baseline
     assert sum(without) / len(without) < 0.5 * baseline
 
