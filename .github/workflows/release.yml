@@ -52,3 +52,49 @@ jobs:
           path: dist/
       - name: Publish to PyPI via Trusted Publishing
         uses: pypa/gh-action-pypi-publish@ba38be9e461d3875417946c167d0b5f3d385a247 # v1.14.1
+
+  announce:
+    name: Create the GitHub release
+    needs: publish
+    runs-on: ubuntu-latest
+    # Its own job so `publish` keeps only `id-token: write`. Writing contents is a
+    # wider grant than uploading a package and does not belong beside the OIDC step.
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Download distribution
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - name: Extract the changelog section for this tag
+        run: |
+          python3 - "${GITHUB_REF_NAME#v}" > release-notes.md <<'PY'
+          import pathlib, re, sys
+
+          version = sys.argv[1]
+          text = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+          match = re.search(
+              rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|\Z)",
+              text,
+              re.MULTILINE | re.DOTALL,
+          )
+          if match is None or not match.group(1).strip():
+              raise SystemExit(
+                  f"CHANGELOG.md has no content under a [{version}] heading. "
+                  "A release nobody wrote down is a release nobody can read."
+              )
+          sys.stdout.write(match.group(1).strip() + "\n")
+          PY
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --verify-tag \
+            --title "SynthWorld ${GITHUB_REF_NAME#v}" \
+            --notes-file release-notes.md \
+            --generate-notes \
+            dist/*
