@@ -16,14 +16,18 @@ from synthworld.ambiguity import (
 )
 from synthworld.ambiguity_generator import _drafts
 from synthworld.ambiguity_grammar import (
-    EvidenceKind as K,
-)
-from synthworld.ambiguity_grammar import (
+    _FS,
+    _SPACE,
     Relation,
+    _surface,
     disposition_of,
     kind_fingerprint,
     render_relation,
+    validate_parameters,
     weight_of,
+)
+from synthworld.ambiguity_grammar import (
+    EvidenceKind as K,
 )
 
 #: Every kind the grammar renders. The enumeration test below is combinatorial, so it
@@ -395,7 +399,7 @@ def test_the_derived_rule_reproduces_the_hand_written_answers() -> None:
     assert disagreed == _KNOWN_DISAGREEMENTS
 
 
-@pytest.mark.parametrize("kind", sorted(K, key=lambda item: item.value))
+@pytest.mark.parametrize("kind", sorted(K))
 def test_every_kind_prefers_agreement_to_contradiction(kind: K) -> None:
     """A kind whose FAR outscored its EQUAL would be evidence read backwards."""
 
@@ -403,3 +407,41 @@ def test_every_kind_prefers_agreement_to_contradiction(kind: K) -> None:
     assert weight_of(kind, Relation.EQUAL) > 0.0
     assert weight_of(kind, Relation.FAR) < 0.0
     assert weight_of(kind, Relation.LOPSIDED) == 0.0
+
+
+@pytest.mark.parametrize("kind", sorted(K))
+def test_a_surface_names_exactly_one_value(kind: K) -> None:
+    """`FAR` means "these differ", so two indices must not render the same string.
+
+    They did. `_surface` reduced a 64-bit draw with `% 16` for given names and `% 100`
+    for phones, and `FAR` drew its second index independently, so the two collided and
+    the pair rendered identical values under a truth that said they differed. 61 in 3000
+    given-name pairs, 10 phones, 3 addresses. A label contradicted by its own data is
+    the defect this module exists to remove, and it arrived through the renderer rather
+    than through a scenario table.
+    """
+
+    rendered = {_surface(kind, index, 0) for index in range(_SPACE[kind])}
+
+    assert len(rendered) == _SPACE[kind]
+
+
+@pytest.mark.parametrize("kind", sorted(K))
+def test_far_never_renders_two_equal_values(kind: K) -> None:
+    for seed in range(400):
+        left, right = render_relation(kind, Relation.FAR, seed=seed, key=b"k", slot=0)
+        assert left != right, (kind.value, seed)
+
+
+def test_a_row_that_is_not_a_distribution_is_refused() -> None:
+    """Otherwise the generator and the scorer disagree with no symptom anywhere.
+
+    `sample_relation` would draw from a skewed row while `weight_of` scored as though
+    it were a distribution, so the pack would be systematically mislabelled by a rule
+    that looked correct.
+    """
+
+    validate_parameters(_FS)  # the shipped table is one
+
+    with pytest.raises(ValueError, match="must sum to one"):
+        validate_parameters({K.PHONE: ((0.5, 0.2, 0.2), (0.1, 0.1, 0.8))})

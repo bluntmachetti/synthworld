@@ -130,7 +130,8 @@ _FS: dict[EvidenceKind, _Params] = {
 #: `separate` - a contradiction there is reason to withhold judgement, not to conclude.
 _VETO: frozenset[EvidenceKind] = frozenset({EvidenceKind.GIVEN_NAME})
 
-_INDEX = {Relation.EQUAL: 0, Relation.NEAR: 1, Relation.FAR: 2}
+_ORDER = (Relation.EQUAL, Relation.NEAR, Relation.FAR)
+_INDEX = {relation: index for index, relation in enumerate(_ORDER)}
 
 #: Interchangeable surface forms. Every one is reachable for every value regardless of
 #: relation, which is what stops a form naming its relation.
@@ -193,6 +194,68 @@ def disposition_of(relations: Mapping[EvidenceKind, Relation]) -> PairDispositio
     if total <= _SEPARATE_BITS:
         return PairDisposition.SEPARATE
     return PairDisposition.INSUFFICIENT
+
+
+def validate_parameters(table: Mapping[EvidenceKind, _Params]) -> None:
+    """Refuse a table whose rows are not distributions.
+
+    `m` and `u` are probabilities over the three outcomes, so each row must sum to one.
+    A row that does not is not a distribution: :func:`sample_relation` would quietly
+    draw a skewed corpus from it while :func:`weight_of` went on reporting weights as
+    though nothing were wrong, and the pack and its scoring rule would disagree with no
+    symptom anywhere. Checked at import for the shipped table, and callable so a
+    population-specific table can be checked too.
+    """
+
+    for kind, rows in table.items():
+        for row in rows:
+            if abs(sum(row) - 1.0) > 1e-9:
+                raise ValueError(f"{kind.value} outcome probabilities must sum to one")
+
+
+validate_parameters(_FS)
+
+
+def sample_relation(
+    kind: EvidenceKind,
+    *,
+    same_entity: bool,
+    seed: int,
+    slot: int,
+    key: bytes,
+) -> Relation:
+    """Draw one comparison outcome from what being the same person implies.
+
+    This is :func:`weight_of` run backwards, off the same table. `m` is by definition
+    the probability of an outcome given one person and `u` given two, so sampling from
+    them generates a corpus the scoring rule is *already* correct about - the generator
+    and the scorer cannot drift, because there is only one set of numbers.
+
+    That is what replaces hand-authoring. A hand-written case has an identity, and any
+    feature identifying the case identifies its label; a pair drawn from a distribution
+    has no identity to leak. `same_entity` reaches a value only through the relation it
+    induces, which is exactly the dependency the task is to invert.
+    """
+
+    m, u = _FS[kind]
+    row = m if same_entity else u
+    # 1e-9 of resolution over the outcome space, from a keyed draw. Comparing against
+    # cumulative mass rather than bucketing an integer, so the three outcomes get their
+    # stated probabilities and not a rounding of them.
+    point = (
+        _draw(seed, f"relation:{kind.value}:{same_entity}", slot, key) % 10**9
+    ) / 10**9
+    # The last outcome is the fallthrough rather than a case, so there is no branch
+    # here that a valid table can never reach - the suite gates on full branch coverage
+    # and forbids pragmas, and an unreachable arm would have to be one or the other.
+    # It also removes any dependence on the row summing to exactly 1.0 in floating
+    # point, which `validate_parameters` only guarantees to within 1e-9.
+    running = 0.0
+    for outcome, mass in zip(_ORDER[:-1], row[:-1], strict=True):
+        running += mass
+        if point < running:
+            return outcome
+    return _ORDER[-1]
 
 
 def kind_fingerprint(
@@ -265,11 +328,26 @@ def render_relation(
     merge pair as on a separate one.
     """
 
-    left_seed = _draw(seed, f"{kind.value}:identity", slot, key)
-    other_seed = _draw(seed, f"{kind.value}:other", slot, key)
+    space = _SPACE[kind]
+    left_seed = _draw(seed, f"{kind.value}:identity", slot, key) % space
     # The identity component is what NEAR preserves and FAR does not. The form is a
     # free choice drawn independently for each side, so it carries nothing.
-    right_seed = left_seed if relation is not Relation.FAR else other_seed
+    #
+    # FAR steps to a *different* index rather than drawing a second one. Drawing
+    # independently let the two collide, and `_surface` maps an index to one value, so
+    # a collision rendered a FAR pair as two identical strings - a pair whose truth
+    # says "these differ" and whose data says they are the same. Measured at 61 in 3000
+    # for given names, 10 for phones and 3 for addresses. That is the defect this whole
+    # module exists to remove, arriving through the renderer instead of through a
+    # scenario table, and no amount of care about labels would have caught it.
+    right_seed = (
+        left_seed
+        if relation is not Relation.FAR
+        else (
+            left_seed + 1 + _draw(seed, f"{kind.value}:other", slot, key) % (space - 1)
+        )
+        % space
+    )
     left_form = _variant(seed, f"{kind.value}:left", slot, key, 3)
     right_form = (
         left_form
@@ -285,6 +363,22 @@ def render_relation(
     )
 
 
+#: How many distinct values each kind can render. `_surface` must be injective over
+#: `range(_SPACE[kind])`, because `render_relation` relies on two different indices
+#: producing two different strings to make FAR mean what it says.
+_SPACE: dict[EvidenceKind, int] = {
+    EvidenceKind.GIVEN_NAME: 16,
+    EvidenceKind.FAMILY_NAME: 9000,
+    EvidenceKind.DATE_OF_BIRTH: 50 * 12 * 27,
+    EvidenceKind.EMAIL: 9000,
+    EvidenceKind.PHONE: 9000,
+    EvidenceKind.USERNAME: 9000,
+    EvidenceKind.FULL_ADDRESS: 200 * 900,
+    EvidenceKind.EMPLOYER: 9000,
+    EvidenceKind.SCHOOL_YEAR: 900 * 30,
+}
+
+
 def _surface(kind: EvidenceKind, identity: int, form: int) -> str:
     """One value, from an identity component and an interchangeable surface form.
 
@@ -295,11 +389,11 @@ def _surface(kind: EvidenceKind, identity: int, form: int) -> str:
     """
 
     if kind is EvidenceKind.GIVEN_NAME:
-        given = _GIVEN[identity % len(_GIVEN)]
+        given = _GIVEN[identity]
         return (given, given.upper(), f"{given[0]}.")[form]
 
     if kind is EvidenceKind.PHONE:
-        digits = f"{identity % 100 + 100:04d}"
+        digits = f"{identity + 1000:04d}"
         return (
             f"+1-212-555-{digits}",
             f"+1 (212) 555 {digits}",
@@ -307,20 +401,21 @@ def _surface(kind: EvidenceKind, identity: int, form: int) -> str:
         )[form]
 
     if kind is EvidenceKind.EMAIL:
-        local = f"user{identity % 9000 + 1000:04d}"
+        local = f"user{identity + 1000:04d}"
         return f"{local}@{_DOMAINS[form]}"
 
     if kind is EvidenceKind.USERNAME:
-        handle = f"handle{identity % 9000 + 1000:04d}"
+        handle = f"handle{identity + 1000:04d}"
         return (handle, f"{handle}_", f"{handle}.")[form]
 
     if kind is EvidenceKind.FULL_ADDRESS:
-        house, street = identity % 200 + 1, identity % 900 + 100
+        house, street = identity % 200 + 1, identity // 200 + 100
         town = _TOWNS[form]
         return f"{house}|Example Street {street}|{town}|00000|ZZ"
 
     if kind is EvidenceKind.DATE_OF_BIRTH:
-        year, month, day = 1950 + identity % 50, identity % 12 + 1, identity % 27 + 1
+        year = 1950 + identity // (12 * 27)
+        month, day = identity // 27 % 12 + 1, identity % 27 + 1
         return (
             f"{year:04d}-{month:02d}-{day:02d}",
             f"{day:02d}/{month:02d}/{year:04d}",
@@ -328,15 +423,15 @@ def _surface(kind: EvidenceKind, identity: int, form: int) -> str:
         )[form]
 
     if kind is EvidenceKind.FAMILY_NAME:
-        name = f"Surname{identity % 9000 + 1000:04d}"
+        name = f"Surname{identity + 1000:04d}"
         return (name, name.upper(), f"{name}-{name}")[form]
 
     if kind is EvidenceKind.EMPLOYER:
-        company = f"Example Works {identity % 9000 + 1000:04d}"
+        company = f"Example Works {identity + 1000:04d}"
         return (company, f"{company} Ltd", f"{company} Limited")[form]
 
     institution = f"Sample Academy {identity % 900 + 100:03d}"
-    year = 1990 + identity % 30
+    year = 1990 + identity // 900
     return (
         f"{institution}|{year}",
         f"{institution.upper()}|{year}",
@@ -351,5 +446,7 @@ __all__ = [
     "disposition_of",
     "kind_fingerprint",
     "render_relation",
+    "sample_relation",
+    "validate_parameters",
     "weight_of",
 ]
