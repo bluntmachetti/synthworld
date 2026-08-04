@@ -312,12 +312,27 @@ seen before. What it keeps is legitimate — agreement patterns really do predic
 — and what it loses is the distinction v1 could not express, between a reformatted phone
 number and a different person's.
 
-One known weakness, tracked as **#79**: the `m`/`u` table was estimated over v1's
+**Class balance.** The three dispositions hold roughly 38% `merge`, 53% `separate` and
+**9%** `insufficient`, and fewer than 1% of packs are missing a class entirely. Both are
+asserted rather than hoped for: every class must hold at least 8% of the mass, and at most
+2% of packs may lack one.
+
+That gate exists because the middle class was starving. It held 7.6% of pairs and **8.5%
+of individual packs contained none at all**, so one pack in twelve was a two-class
+benchmark wearing a three-class enum — while the test suite stayed green, because it only
+asked that each class appear *somewhere* across many seeds. The fix was Fellegi–Sunter's
+own: the decision is three-way, and the middle region is sized by the error rates you will
+tolerate rather than left over between two hand-picked thresholds. Decision now needs 16:1
+odds, and packs carry 50–90 pairs rather than 18–44, because whether a pack contains all
+three classes is a sample-size question as much as a threshold one.
+
+One known weakness remains, tracked as **#79**: the `m`/`u` table was estimated over v1's
 non-match population, which is deliberately households, twins and classmates. v2 samples
 from that same table, so the pack and its scoring rule agree by construction, but the
-numbers make names close to decisive — the two name kinds alone give the same answer on
-86.8% of pairs, and `insufficient` is about 4% of the pack. Fellegi–Sunter parameters
-belong to a population; sharing one table across two is the thing to fix.
+numbers still lean on names — the two name kinds alone give the same answer on **59.3%**
+of pairs. That figure was 86.8% before the decision threshold moved, so the symptom is
+much reduced, but the cause is untouched: Fellegi–Sunter parameters belong to a
+population, and sharing one table across two is the thing to fix.
 
 ### Scorer inputs (Prediction schemas)
 
