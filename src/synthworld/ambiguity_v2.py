@@ -30,6 +30,7 @@ Three properties follow from the construction rather than from tests:
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from types import MappingProxyType
 from typing import Literal, Self
 from uuid import UUID
 
@@ -57,17 +58,48 @@ class DerivedPairTruth(SyntheticModel):
     right_record_id: UUID
     #: What is true, sampled first and independently of anything observable.
     same_entity: bool
-    #: What the two records can be compared on, and how each comparison came out.
-    relations: Mapping[EvidenceKind, Relation]
+    #: What the two records can be compared on, and how each comparison came out. Stored
+    #: as a sorted tuple rather than a mapping because a mapping field is *mutable after
+    #: validation*: `frozen=True` stops a field being reassigned, not a dict inside one
+    #: being written to. A caller could set `relations[GIVEN_NAME] = FAR` on a merge
+    #: pair, and the validator below would never rerun - leaving a truth object whose
+    #: label contradicts its own evidence, the exact state this class exists to make
+    #: unrepresentable. Read it through :attr:`relations`.
+    comparisons: tuple[tuple[EvidenceKind, Relation], ...]
     #: What the evidence justifies. Not an independent field - see the validator.
     disposition: PairDisposition
+
+    @property
+    def relations(self) -> Mapping[EvidenceKind, Relation]:
+        """The comparisons as a mapping, rebuilt per access so it cannot be
+        written to."""
+
+        return MappingProxyType(dict(self.comparisons))
+
+    @model_validator(mode="before")
+    @classmethod
+    def accept_a_mapping(cls, data: object) -> object:
+        """Let callers pass `comparisons={kind: relation}` and store it canonically.
+
+        Sorted here rather than trusted from the caller, so the order comparisons were
+        drawn in cannot survive into the artifact. Emission order was one of v1's leaks.
+        """
+
+        if isinstance(data, dict) and isinstance(data.get("comparisons"), Mapping):
+            data = data | {"comparisons": tuple(sorted(data["comparisons"].items()))}
+        return data
 
     @model_validator(mode="after")
     def require_the_answer_to_follow_from_the_evidence(self) -> Self:
         if self.left_record_id >= self.right_record_id:
             raise ValueError("pair records must be distinct and ordered by id")
-        if not self.relations:
+        if not self.comparisons:
             raise ValueError("a pair must record at least one comparison")
+        kinds = [kind for kind, _ in self.comparisons]
+        if len(set(kinds)) != len(kinds):
+            raise ValueError("a pair must not compare the same kind twice")
+        if kinds != sorted(kinds):
+            raise ValueError("comparisons must be in canonical kind order")
         # The whole design in one line. v1 asserted a disposition per scenario and
         # checked it against a lookup table, so the table *was* the ground truth and
         # every path to it was a leak. Here the disposition has no independent

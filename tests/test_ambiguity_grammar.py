@@ -5,6 +5,7 @@ from __future__ import annotations
 import inspect
 from collections import Counter, defaultdict
 from itertools import product
+from typing import cast
 from unicodedata import normalize
 
 import pytest
@@ -19,10 +20,12 @@ from synthworld.ambiguity_grammar import (
     _FS,
     _SPACE,
     Relation,
+    _Params,
     _surface,
     disposition_of,
     kind_fingerprint,
     render_relation,
+    render_value,
     sample_relation,
     validate_parameters,
     weight_of,
@@ -149,25 +152,30 @@ def test_no_single_value_reveals_the_relation_that_made_it() -> None:
         Counter
     )
     relations = (Relation.EQUAL, Relation.NEAR, Relation.FAR)
+    # Every slot, not just slot zero. An implementation that stamped the relation on
+    # values whenever `slot > 0` would leak nearly every generated pair while a
+    # slot-zero-only test went on passing.
     for seed in range(150):
-        for kind in _RENDERED:
-            for relation in relations:
-                for value in render_relation(
-                    kind, relation, seed=seed, key=b"secret", slot=0
-                ):
-                    learned[(kind, shape(value))][relation] += 1
+        for slot in range(3):
+            for kind in _RENDERED:
+                for relation in relations:
+                    for value in render_relation(
+                        kind, relation, seed=seed, key=b"secret", slot=slot
+                    ):
+                        learned[(kind, shape(value))][relation] += 1
 
     correct = total = 0
     for seed in range(150, 250):
-        for kind in _RENDERED:
-            for relation in relations:
-                for value in render_relation(
-                    kind, relation, seed=seed, key=b"secret", slot=0
-                ):
-                    tally = learned.get((kind, shape(value)))
-                    guess = tally.most_common(1)[0][0] if tally else Relation.FAR
-                    total += 1
-                    correct += guess is relation
+        for slot in range(3):
+            for kind in _RENDERED:
+                for relation in relations:
+                    for value in render_relation(
+                        kind, relation, seed=seed, key=b"secret", slot=slot
+                    ):
+                        tally = learned.get((kind, shape(value)))
+                        guess = tally.most_common(1)[0][0] if tally else Relation.FAR
+                        total += 1
+                        correct += guess is relation
 
     # Chance is one in three. A real channel showed 1.000 here.
     assert correct / total < 0.42
@@ -177,15 +185,28 @@ def test_nothing_that_makes_a_value_can_see_the_answer() -> None:
     """Enforced by the signature, so a leak of that shape is a type error.
 
     Every one of the eight metadata channels closed in #59 reached a public value by
-    reading the case or its label. `render_relation` has no parameter it could read
-    either from, and this test pins that rather than trusting a reviewer to notice a
-    later argument being added.
+    reading the case or its label. None of the functions that produce a public value
+    has a parameter it could read one from, and this pins that rather than trusting a
+    reviewer to notice a later argument being added.
+
+    An earlier version inspected `render_relation` alone while claiming "nothing that
+    makes a value", which left every other value-producing function unchecked - the
+    name asserted more than the body did, which is the defect this suite keeps finding
+    in the code it tests.
     """
 
-    parameters = set(inspect.signature(render_relation).parameters)
+    forbidden = {"disposition", "scenario", "same_entity", "archetype", "label"}
+    for maker in (render_relation, render_value, _surface, disposition_of):
+        parameters = set(inspect.signature(maker).parameters)
+        assert not parameters & forbidden, maker.__name__
 
-    assert parameters == {"kind", "relation", "seed", "key", "slot"}
-    assert not parameters & {"disposition", "scenario", "same_entity", "archetype"}
+    assert set(inspect.signature(render_relation).parameters) == {
+        "kind",
+        "relation",
+        "seed",
+        "key",
+        "slot",
+    }
 
 
 @pytest.mark.parametrize("kind", _RENDERED)
@@ -382,7 +403,7 @@ _KNOWN_DISAGREEMENTS = frozenset(
 )
 
 
-def test_the_derived_rule_reproduces_the_hand_written_answers() -> None:
+def test_the_derived_rule_agrees_with_thirteen_of_the_fifteen_answers() -> None:
     """Thirteen of fifteen, with the other two named rather than absorbed.
 
     The point of #62 is that a disposition should follow from evidence instead of being
@@ -447,6 +468,21 @@ def test_a_row_that_is_not_a_distribution_is_refused() -> None:
     with pytest.raises(ValueError, match="must sum to one"):
         validate_parameters({K.PHONE: ((0.5, 0.2, 0.2), (0.1, 0.1, 0.8))})
 
+    # Summing to one is not enough, and an earlier version checked nothing else. A
+    # negative mass makes `log2(m/u)` a domain error or a nonsense weight; a NaN makes
+    # every comparison against it false, so `sample_relation` would fall through to the
+    # last outcome for that whole kind. Both of these sum to one.
+    with pytest.raises(ValueError, match=r"within \[0, 1\]"):
+        validate_parameters({K.PHONE: ((-1.0, 1.0, 1.0), (0.1, 0.1, 0.8))})
+    with pytest.raises(ValueError, match=r"within \[0, 1\]"):
+        validate_parameters({K.PHONE: ((float("nan"), 0.5, 0.5), (0.1, 0.1, 0.8))})
+    # Cast because the annotation already forbids a two-outcome row, so mypy rejects
+    # this call. The guard is still worth testing: the function is public, and a table
+    # loaded from JSON or built by an untyped caller reaches it with no static check.
+    short = cast("_Params", ((0.5, 0.5), (0.1, 0.1, 0.8)))
+    with pytest.raises(ValueError, match="one probability per outcome"):
+        validate_parameters({K.PHONE: short})
+
 
 @pytest.mark.parametrize("kind", sorted(K))
 def test_the_label_never_enters_the_draw_material(kind: K) -> None:
@@ -482,3 +518,31 @@ def test_the_label_never_enters_the_draw_material(kind: K) -> None:
         )
 
         assert max(low, other_low) < min(high, other_high), (kind.value, seed)
+
+
+@pytest.mark.parametrize("kind", sorted(K))
+def test_rendering_an_absence_as_a_comparison_is_refused(kind: K) -> None:
+    """`LOPSIDED` had no rendering and was silently treated as "not FAR".
+
+    A caller asking for missingness got two values standing in no stated relation, so
+    the contract that a rendered pair stands in the relation it claims did not hold for
+    a quarter of the vocabulary - and `test_rendered_values_stand_in_the_relation_they_
+    claim` never noticed, because it does not parametrize over LOPSIDED.
+    """
+
+    with pytest.raises(ValueError, match="absence, not a comparison"):
+        render_relation(kind, Relation.LOPSIDED, seed=1, key=b"k", slot=0)
+
+
+@pytest.mark.parametrize("kind", sorted(K))
+def test_a_one_sided_value_is_drawn_from_the_same_pool_as_a_paired_one(kind: K) -> None:
+    """Otherwise "the other record lacks this" is readable from the value itself."""
+
+    one_sided = {render_value(kind, seed=seed, key=b"k", slot=0) for seed in range(200)}
+    paired = {
+        value
+        for seed in range(200)
+        for value in render_relation(kind, Relation.EQUAL, seed=seed, key=b"k", slot=0)
+    }
+
+    assert one_sided == paired

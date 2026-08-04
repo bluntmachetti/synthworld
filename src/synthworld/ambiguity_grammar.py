@@ -38,7 +38,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from enum import StrEnum
 from hashlib import blake2b
-from math import log2
+from math import isfinite, log2
 from typing import Literal
 
 from synthworld.ambiguity import PairDisposition
@@ -209,6 +209,18 @@ def validate_parameters(table: Mapping[EvidenceKind, _Params]) -> None:
 
     for kind, rows in table.items():
         for row in rows:
+            # Summing to one is necessary, not sufficient. `(-1.0, 1.0, 1.0)`
+            # sums to one and is not a distribution; a first version of this function
+            # accepted it while its own docstring and test both said otherwise. A
+            # negative mass makes `log2(m/u)` a domain error or a nonsense weight, and a
+            # NaN makes every comparison against it false, so `sample_relation`
+            # would fall through to the last outcome for that entire kind.
+            if len(row) != len(_ORDER):
+                raise ValueError(f"{kind.value} needs one probability per outcome")
+            if not all(isfinite(mass) and 0.0 <= mass <= 1.0 for mass in row):
+                raise ValueError(
+                    f"{kind.value} outcome probabilities must each be within [0, 1]"
+                )
             if abs(sum(row) - 1.0) > 1e-9:
                 raise ValueError(f"{kind.value} outcome probabilities must sum to one")
 
@@ -337,6 +349,14 @@ def render_relation(
     """
 
     space = _SPACE[kind]
+    if relation is Relation.LOPSIDED:
+        # An absence is not a comparison, so there is no pair of values to render. The
+        # old behaviour was to treat it as "not FAR" and return two values that stood in
+        # no stated relation at all - a caller asking for missingness got a NEAR-ish
+        # pair, and the contract that a rendered pair stands in the relation it claims
+        # quietly did not hold for a quarter of the vocabulary. Use `render_value`.
+        raise ValueError("LOPSIDED is an absence, not a comparison: use render_value")
+
     left_seed = _draw(seed, f"{kind.value}:identity", slot, key) % space
     # The identity component is what NEAR preserves and FAR does not. The form is a
     # free choice drawn independently for each side, so it carries nothing.
@@ -385,6 +405,22 @@ _SPACE: dict[EvidenceKind, int] = {
     EvidenceKind.EMPLOYER: 9000,
     EvidenceKind.SCHOOL_YEAR: 900 * 30,
 }
+
+
+def render_value(kind: EvidenceKind, *, seed: int, key: bytes, slot: int) -> str:
+    """One value for a kind only one record carries.
+
+    Drawn from exactly the same identity and form pools as either half of a rendered
+    pair, so a one-sided value is not distinguishable from a two-sided one. Anything
+    else would make "the other record lacks this" readable from the value itself, and
+    which fields a record happens to carry would start carrying something.
+    """
+
+    return _surface(
+        kind,
+        _draw(seed, f"{kind.value}:identity", slot, key) % _SPACE[kind],
+        _variant(seed, f"{kind.value}:left", slot, key, 3),
+    )
 
 
 def _surface(kind: EvidenceKind, identity: int, form: int) -> str:
@@ -454,6 +490,7 @@ __all__ = [
     "disposition_of",
     "kind_fingerprint",
     "render_relation",
+    "render_value",
     "sample_relation",
     "validate_parameters",
     "weight_of",

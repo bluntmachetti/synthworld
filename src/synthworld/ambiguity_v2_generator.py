@@ -14,11 +14,15 @@ carries, which records are asked about - is drawn from a purpose string that doe
 mention `same_entity` or the disposition, so there is nothing for a free choice to be
 bound to.
 
-What a held-out seed conceals is the key, and therefore the *values*. It does not
-conceal the rule: :func:`disposition_of` is published, and a solver that recovers the
-relations from the rendered values and applies it should score perfectly. That is the
-intended difficulty. The task is reading `Sørensen` against `Sorensen`, a phone written
-three ways, and an initial against a full name - not guessing a hidden mapping.
+A held-out seed does not conceal a key - the seed is serialized in the artifact, and
+the key is a separate secret that is never serialized at all. What an unpublished
+*key* conceals is the *values*, since every draw here is keyed.
+
+Neither conceals the rule. :func:`disposition_of` is published, and a solver that
+recovers the relations from the rendered values and applies it should score perfectly.
+That is the intended difficulty: reading `Sørensen` against `Sorensen`, one phone line
+written three ways, an initial against a full name, and a field one record carries and
+the other does not - rather than guessing a hidden mapping.
 """
 
 from __future__ import annotations
@@ -32,6 +36,7 @@ from synthworld.ambiguity_grammar import (
     _draw,
     disposition_of,
     render_relation,
+    render_value,
     sample_relation,
 )
 from synthworld.ambiguity_v2 import (
@@ -55,7 +60,9 @@ _SOURCES = tuple(PublicIdentitySourceType)
 
 #: How much of each pack is genuinely the same person. Varying this per seed is the
 #: point: a fixed prevalence lets a solver score well by guessing the majority class,
-#: and v1's was fixed at five merges in fifteen for every seed ever generated.
+#: and v1's was fixed at seven `same_entity` pairs in fifteen for every seed ever
+#: generated. (Not five - that is v1's `merge` count, and conflating the two is the
+#: same mistake as conflating what is true with what the evidence justifies.)
 _PREVALENCE = (0.25, 0.70)
 
 #: Pairs per pack, and distractor records beyond those the pairs need. Both vary per
@@ -173,7 +180,11 @@ def _pair(
         if any(kind in item for item in carried)
     }
     rendered = {
-        kind: render_relation(kind, relation, seed=seed, key=key, slot=slot)
+        kind: (
+            render_relation(kind, relation, seed=seed, key=key, slot=slot)
+            if relation is not Relation.LOPSIDED
+            else (render_value(kind, seed=seed, key=key, slot=slot),) * 2
+        )
         for kind, relation in relations.items()
     }
     # Sorted, and not checked for collision here: `DerivedPairTruth` already refuses
@@ -188,7 +199,7 @@ def _pair(
         left_record_id=ids[0],
         right_record_id=ids[1],
         same_entity=same_entity,
-        relations=relations,
+        comparisons=tuple(sorted(relations.items())),
         # Read off the evidence, never chosen. The model refuses any other value, so
         # this line is a derivation rather than a claim the pack has to be trusted on.
         disposition=disposition_of(relations),

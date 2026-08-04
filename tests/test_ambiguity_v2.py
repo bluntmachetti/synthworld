@@ -31,7 +31,7 @@ def _truth(**overrides: object) -> DerivedPairTruth:
         "left_record_id": UUID(int=1),
         "right_record_id": UUID(int=2),
         "same_entity": True,
-        "relations": {
+        "comparisons": {
             EvidenceKind.GIVEN_NAME: Relation.EQUAL,
             EvidenceKind.DATE_OF_BIRTH: Relation.EQUAL,
         },
@@ -70,12 +70,17 @@ def test_truth_and_the_evidence_are_allowed_to_disagree() -> None:
 
 def test_a_pair_with_no_comparisons_is_refused() -> None:
     with pytest.raises(ValidationError, match="at least one comparison"):
-        _truth(relations={})
+        _truth(comparisons={})
 
 
 def test_pair_records_must_be_distinct_and_ordered() -> None:
     with pytest.raises(ValidationError, match="distinct and ordered"):
         _truth(left_record_id=UUID(int=2), right_record_id=UUID(int=1))
+
+    # Equal, not just reversed. The name says distinct *and* ordered and an earlier
+    # version only checked the ordering half.
+    with pytest.raises(ValidationError, match="distinct and ordered"):
+        _truth(left_record_id=UUID(int=2), right_record_id=UUID(int=2))
 
 
 def _task(**overrides: object) -> PublicAmbiguityTaskV2:
@@ -121,11 +126,19 @@ def test_the_public_task_refuses_a_pair_naming_a_record_it_does_not_have() -> No
 def test_a_pack_replays_and_is_keyed() -> None:
     first, first_truths = generate_ambiguity_v2_pack(seed=5, key=_KEY)
     again, again_truths = generate_ambiguity_v2_pack(seed=5, key=_KEY)
-    other, _ = generate_ambiguity_v2_pack(seed=5, key=b"a-different-key")
+    other, other_truths = generate_ambiguity_v2_pack(seed=5, key=b"a-different-key")
 
     assert first == again
     assert first_truths == again_truths
+    # The truths must move too, not just some public field. A generator that drew
+    # labels and evidence from the seed alone and used the key only for `source_type`
+    # would pass a test that discarded the other key's truths - and would be
+    # seed-invertible without the key, which is exactly v1's tenth channel.
     assert first != other
+    assert first_truths != other_truths
+    assert [item.disposition for item in first_truths] != [
+        item.disposition for item in other_truths
+    ]
 
 
 def test_the_pack_shape_is_not_a_constant() -> None:
@@ -322,3 +335,37 @@ def test_a_one_sided_kind_appears_on_exactly_one_record() -> None:
                 assert (kind.value in left) != (kind.value in right), kind.value
 
     assert checked
+
+
+def test_a_kind_compared_twice_is_refused() -> None:
+    """A repeated kind would let one comparison silently overwrite another.
+
+    Only reachable by passing the stored tuple form directly - the mapping shorthand
+    cannot express it - which is exactly why the validator has to check the stored form
+    rather than trusting the shorthand it usually arrives as.
+    """
+
+    with pytest.raises(ValidationError, match="not compare the same kind twice"):
+        _truth(
+            comparisons=(
+                (EvidenceKind.GIVEN_NAME, Relation.EQUAL),
+                (EvidenceKind.GIVEN_NAME, Relation.FAR),
+            )
+        )
+
+
+def test_comparisons_out_of_canonical_order_are_refused() -> None:
+    """The order comparisons were drawn in must not survive into the artifact.
+
+    Emission order was one of v1's leaks - the i-th public pair was the i-th scenario,
+    measured 15/15 - so a tuple field that accepted any order would reopen it one level
+    down.
+    """
+
+    with pytest.raises(ValidationError, match="canonical kind order"):
+        _truth(
+            comparisons=(
+                (EvidenceKind.PHONE, Relation.EQUAL),
+                (EvidenceKind.GIVEN_NAME, Relation.EQUAL),
+            )
+        )
