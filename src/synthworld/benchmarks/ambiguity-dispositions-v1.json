@@ -38,7 +38,7 @@
       "synthetic": true,
       "left_record_id": "4f15243b-491f-580f-b2cd-98e5b6f6f4a5",
       "right_record_id": "dfae14d2-8500-50fc-b857-1900fa299640",
-      "disposition": "separate",
+      "disposition": "insufficient",
       "scenario": "same_name_and_date_of_birth",
       "same_entity": false
     },

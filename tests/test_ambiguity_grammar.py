@@ -383,10 +383,14 @@ def _projected() -> list[tuple[ScenarioKind, dict[K, Relation]]]:
 #: they are not fixed by moving numbers. Tracked as #77.
 #:
 #: `same_name_and_date_of_birth` is two people agreeing on given name, family name and
-#: birth date and differing on nothing else recorded. v1 calls that `separate` because
-#: it planted two people; the evidence says merge, and any honest resolver would say
-#: merge too. The disagreement is with the *scenario*, not with the rule: the pair
-#: carries no evidence of being two people, so the label is unearned.
+#: birth date and differing on nothing else recorded. v1 originally called that
+#: `separate` because it planted two people; #77 corrected the label to `insufficient`
+#: after the pack's first consumer abstained on exactly this pair, independently giving
+#: the same reason - the evidence cannot justify "separate". The rule still disagrees,
+#: now from the other side: it says `merge`, because the two name kinds plus a birth
+#: date clear the corroboration bar. That residual overconfidence in names is #79's
+#: territory, not a label defect - `insufficient` is what the evidence justifies for a
+#: pair that is indistinguishable on paper.
 #:
 #: `contradictory_strong_identifiers` v1 calls `separate` and the rule calls
 #: `insufficient` - contradiction between strong identifiers is a reason to withhold,

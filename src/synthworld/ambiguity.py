@@ -79,7 +79,13 @@ SCENARIO_DISPOSITIONS: dict[ScenarioKind, PairDisposition] = {
     ScenarioKind.SHARED_HOUSEHOLD_EMAIL: PairDisposition.SEPARATE,
     ScenarioKind.REUSED_USERNAME: PairDisposition.SEPARATE,
     ScenarioKind.SHARED_EMPLOYER_AND_ADDRESS: PairDisposition.SEPARATE,
-    ScenarioKind.SAME_NAME_AND_DATE_OF_BIRTH: PairDisposition.SEPARATE,
+    # Corrected from `separate` (#77). The pair is two people in canonical truth, but
+    # the public evidence - matching name and birth date, nothing that distinguishes
+    # them - cannot justify concluding it. The first consumer to run the pack abstained
+    # here and gave the same reason independently: without temporal evidence, "separate"
+    # is unearned. The label is what the evidence justifies, not what is true; those are
+    # different questions, and this pair is the case that shows why.
+    ScenarioKind.SAME_NAME_AND_DATE_OF_BIRTH: PairDisposition.INSUFFICIENT,
     ScenarioKind.CONTRADICTORY_STRONG_IDENTIFIERS: PairDisposition.SEPARATE,
     ScenarioKind.TWINS_OVERLAPPING_CONTEXT: PairDisposition.SEPARATE,
     ScenarioKind.STALE_ATTRIBUTE: PairDisposition.MERGE,

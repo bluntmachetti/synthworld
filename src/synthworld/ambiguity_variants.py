@@ -629,7 +629,7 @@ def _source_types(
     Source types were copied verbatim from the drafts, so they were constant per
     scenario on every seed: a decoder trained on one seed and using nothing but each
     pair's unordered source-type signature scored 1200 of 1500 on a hundred others,
-    against a 7/15 baseline.
+    against the 7/15 majority baseline of the time (6/15 since #77).
 
     Whether two records come from one source or two is part of the case - a syndicated
     observation needs two, twins found in one alumni directory need one - so that
