@@ -335,7 +335,17 @@ def test_every_named_failure_mode_is_present_in_truth() -> None:
     )
     assert any(item.removed_at is None for item in listings)  # phantom or refused
     assert any(item.reappeared_at is not None for item in listings)
-    assert any(item.downstream_refs for item in listings)
+    assert any(
+        copy.removed_at is None for item in listings for copy in item.downstream_copies
+    )
+    # Copies that catch up late rather than never (#65) - the case a completion-at-
+    # source-removal baseline must fail, which needs "wrong for a while" to exist as
+    # well as "wrong forever".
+    assert any(
+        copy.removed_at is not None
+        for item in listings
+        for copy in item.downstream_copies
+    )
     assert any(not item.concerns_subject for item in listings)
 
 
@@ -414,7 +424,14 @@ def _observation(**overrides: object) -> dict[str, object]:
             "must reappear after it was removed",
         ),
         (
-            lambda: ListingTruth.model_validate(_listing(downstream_refs=("a", "a"))),
+            lambda: ListingTruth.model_validate(
+                _listing(
+                    downstream_copies=(
+                        {"copy_ref": "a"},
+                        {"copy_ref": "a"},
+                    )
+                )
+            ),
             "downstream references must be unique",
         ),
         (

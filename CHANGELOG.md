@@ -9,6 +9,34 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Added
+
+- The broker-removal pack is scored through the unified evaluator: `evaluate_broker_removal`
+  projects each family's headline ratio into the standard `EvaluationReport`, the CLI gains
+  `synthworld evaluate broker`, and `examples/evaluate_broker_adapter.py` is the worked
+  Idcognito-style adapter #5 asked for - public timeline in, versioned assessment out,
+  scored against regenerated truth. Closes the last acceptance criteria of #5.
+- Propagation **lag** is representable and scored (#65). Downstream copies carry their own
+  removal tick (`None` never goes), a new `slow_propagation` case has copies that catch up
+  late rather than never, a submission can predict the completion tick, and
+  `propagation_lag` reports mean absolute error with support. The credulous baseline now
+  predicts completion at confirmation - "done means done everywhere" - and eats a 14-tick
+  error on exactly the case built to price that claim; the example adapter's modest grace
+  period cuts it to 4.
+
+### Changed
+
+- **Temporal schema `1.2.0`.** `ListingTruth.downstream_refs` (bare strings) becomes
+  `downstream_copies` with per-copy removal ticks, and a recorded reappearance must now
+  coincide with a published `LISTING_REAPPEARED` event - truth that disagrees with the
+  public timeline is refused as corrupt input. Deliberately asymmetric with removal, which
+  stays unpinned because a confirmation is the broker's claim and the phantom case exists
+  to show the claim can be false. `BrokerAssessment` moves to `1.1.0` for the new
+  prediction field; propagation state is now read *as of the assessed tick*, so a slowly
+  propagating deletion no longer scores identically to one that never propagates.
+- `DenominatedMetric` moved to `synthworld.models`, below the evaluation/partition import
+  cycle it was about to create; `ambiguity_partition` re-exports it unchanged.
+
 ## [0.12.0] - 2026-08-04
 
 ### Changed

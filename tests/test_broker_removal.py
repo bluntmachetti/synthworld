@@ -10,6 +10,7 @@ from synthworld.broker_metrics import (
     BrokerAssessment,
     BrokerEvaluationError,
     ListingAssessment,
+    PropagationLagMetric,
     believe_the_broker,
     discoverable_listings,
     evaluate_broker_assessment,
@@ -634,3 +635,85 @@ def test_the_evaluator_rechecks_an_invariant_the_model_would_refuse() -> None:
 
     with pytest.raises(BrokerEvaluationError, match="cannot be believed removed"):
         evaluate_broker_assessment(forged, timeline=timeline, truth=world.truth)
+
+
+def test_a_reappearance_truth_with_no_public_event_is_refused() -> None:
+    """Truth-to-public, the direction #65 found unchecked.
+
+    A world could record `reappeared_at=8` while publishing the reappearance at tick 6,
+    or publishing nothing at all. At the published tick a system that alerts is charged
+    a false alarm and one that reports the listing present is charged a missed
+    completion - both for being right about what they were shown. The refusal message
+    names no truth value: this is evaluator-input corruption, not something to explain
+    to the holder of a public file.
+
+    The asymmetry with removal is deliberate and documented at the validator:
+    `removed_at` is *not* pinned to a confirmation, because a confirmation is the
+    broker's claim and the phantom case exists to show claims can be false. A
+    reappearance is an observation.
+    """
+
+    world = generate_temporal_world(seed=31)
+    reappearing = next(
+        item for item in world.truth.listings if item.reappeared_at is not None
+    )
+    moved = reappearing.model_copy(update={"reappeared_at": world.horizon})
+    doctored = world.truth.model_copy(
+        update={
+            "listings": tuple(
+                moved if item.listing_ref == reappearing.listing_ref else item
+                for item in world.truth.listings
+            )
+        }
+    )
+
+    with pytest.raises(
+        ValidationError, match="must coincide with a published reappearance"
+    ):
+        TemporalWorld(
+            seed=world.seed,
+            horizon=world.horizon,
+            events=world.events,
+            listings=world.listings,
+            truth=doctored,
+        )
+
+
+def test_a_lag_mean_must_match_its_parts() -> None:
+    """The metric model refuses invented numbers in either direction."""
+
+    with pytest.raises(ValidationError, match="no support is an invented number"):
+        PropagationLagMetric(
+            total_absolute_error=0,
+            support=0,
+            support_meaning="predicted listings",
+            mean_absolute_error=0.0,
+        )
+    with pytest.raises(ValidationError, match="must equal total error over support"):
+        PropagationLagMetric(
+            total_absolute_error=10,
+            support=2,
+            support_meaning="predicted listings",
+            mean_absolute_error=3.0,
+        )
+
+
+def test_completion_at_source_removal_fails_the_late_copies(seed: int = 11) -> None:
+    """#65's acceptance case, run as the attack it describes.
+
+    "Done means done everywhere" - completion predicted at the confirmation tick - is
+    the claim the `slow_propagation` case exists to price. The credulous baseline makes
+    exactly that claim and must eat the lag; an adapter allowing any nonzero grace does
+    strictly better, so the metric separates the two behaviours rather than recording
+    that both predicted *something*.
+    """
+
+    world = generate_temporal_world(seed=seed)
+    timeline = materialise(world, as_of=world.horizon)
+    credulous = evaluate_broker_assessment(
+        believe_the_broker(timeline), timeline=timeline, truth=world.truth
+    )
+
+    assert credulous.propagation_lag.support >= 1
+    assert credulous.propagation_lag.mean_absolute_error is not None
+    assert credulous.propagation_lag.mean_absolute_error > 0

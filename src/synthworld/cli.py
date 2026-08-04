@@ -21,6 +21,7 @@ from synthworld.agentic.trace_validation import (
     TraceValidationReport,
     validate_trace_jsonl,
 )
+from synthworld.broker_metrics import BrokerAssessment
 from synthworld.connection_generator import (
     generate_adversarial_connection_benchmark,
     generate_relationship_connection_benchmark,
@@ -39,6 +40,7 @@ from synthworld.evaluation import (
     ExtractionPredictionSet,
     RelationshipPrediction,
     RiskPrediction,
+    evaluate_broker_removal,
     evaluate_entity_resolution,
     evaluate_extraction,
     evaluate_relationship_inference,
@@ -121,6 +123,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             elif args.task == "entity-resolution":
                 report = evaluate_entity_resolution(
                     EntityResolutionPrediction.model_validate_json(text),
+                    seed=args.seed,
+                )
+            elif args.task == "broker":
+                report = evaluate_broker_removal(
+                    BrokerAssessment.model_validate_json(text),
                     seed=args.seed,
                 )
             elif args.task == "relationship":
@@ -476,6 +483,7 @@ def _parser() -> argparse.ArgumentParser:
         choices=[
             "agentic",
             "extraction",
+            "broker",
             "entity-resolution",
             "relationship",
             "risk",

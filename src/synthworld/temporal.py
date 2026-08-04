@@ -47,7 +47,7 @@ from synthworld.models import SyntheticModel
 #: Bumped to 1.1.0 when listing content arrived. Additive: the public artifact gained
 #: `listings` and truth gained `attributable`, both defaulted, so every 1.0.0 artifact
 #: still parses. A consumer that ignores the new field reads exactly what it did.
-TEMPORAL_SCHEMA_VERSION: Literal["1.1.0"] = "1.1.0"
+TEMPORAL_SCHEMA_VERSION: Literal["1.2.0"] = "1.2.0"
 
 
 class PrivacyEventKind(StrEnum):
@@ -136,7 +136,7 @@ class PrivacyEvent(SyntheticModel):
     is really about the subject.
     """
 
-    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.2.0"] = TEMPORAL_SCHEMA_VERSION
     id: str = Field(min_length=1)
     tick: int = Field(ge=0)
     kind: PrivacyEventKind
@@ -216,7 +216,7 @@ class PublicTimeline(SyntheticModel):
     over every listing's full truth.
     """
 
-    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.2.0"] = TEMPORAL_SCHEMA_VERSION
     as_of: int = Field(ge=0)
     events: tuple[PrivacyEvent, ...]
     #: What each discovered listing says, for the listings discovered by `as_of`.
@@ -245,6 +245,19 @@ class PublicTimeline(SyntheticModel):
         return self
 
 
+class DownstreamCopy(SyntheticModel):
+    """One downstream copy of a listing, with its own removal fate.
+
+    The tick is the point (#65). A flat reference could say copies *exist*; it could
+    not say a deletion propagated slowly, and slow is the realistic case - the source
+    goes, and resellers catch up over days or never. `removed_at` is when this copy
+    actually went; `None` means it never does, however long the run watches.
+    """
+
+    copy_ref: str = Field(min_length=1)
+    removed_at: int | None = Field(default=None, ge=0)
+
+
 class ListingTruth(SyntheticModel):
     """Evaluator-only truth about one broker listing."""
 
@@ -262,11 +275,14 @@ class ListingTruth(SyntheticModel):
     #: The tick a confirmed removal actually took effect, if it ever did. `None` means
     #: the listing was never really removed, whatever the events claimed.
     removed_at: int | None = None
-    #: The tick the listing came back, if it did.
+    #: The tick the listing came back, if it did. Unlike `removed_at`, a recorded
+    #: reappearance must coincide with a published `LISTING_REAPPEARED` event - see
+    #: the asymmetry note on `TemporalWorld.require_replayable_history`.
     reappeared_at: int | None = None
-    #: Downstream copies that survive the removal of this listing. The reason a
-    #: confirmed deletion is not the end of the story.
-    downstream_refs: tuple[str, ...] = ()
+    #: Downstream copies of this listing, each with its own removal fate. The reason a
+    #: confirmed deletion is not the end of the story: a copy with `removed_at=None`
+    #: survives forever, and one with a later tick is the lag a system should predict.
+    downstream_copies: tuple[DownstreamCopy, ...] = ()
 
     @model_validator(mode="after")
     def require_coherent_lifecycle(self) -> Self:
@@ -277,7 +293,8 @@ class ListingTruth(SyntheticModel):
                 )
             if self.reappeared_at <= self.removed_at:
                 raise ValueError("a listing must reappear after it was removed")
-        if len(self.downstream_refs) != len(set(self.downstream_refs)):
+        references = [item.copy_ref for item in self.downstream_copies]
+        if len(references) != len(set(references)):
             raise ValueError("downstream references must be unique")
         return self
 
@@ -310,7 +327,7 @@ class ObservationTruth(SyntheticModel):
 class TemporalTruth(SyntheticModel):
     """Evaluator-only truth, physically separate from any timeline."""
 
-    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.2.0"] = TEMPORAL_SCHEMA_VERSION
     seed: int
     #: The last tick the world was generated for. Truth is stated once, for the whole
     #: run; a timeline is a prefix of it.
@@ -329,7 +346,11 @@ class TemporalTruth(SyntheticModel):
         ticks = [
             tick
             for item in self.listings
-            for tick in (item.removed_at, item.reappeared_at)
+            for tick in (
+                item.removed_at,
+                item.reappeared_at,
+                *(copy.removed_at for copy in item.downstream_copies),
+            )
             if tick is not None
         ] + [item.observed_at for item in self.observations]
         if any(tick > self.horizon for tick in ticks):
@@ -349,7 +370,7 @@ class TemporalWorld(SyntheticModel):
     Evaluator-side. A consumer receives :func:`materialise` output, never this.
     """
 
-    schema_version: Literal["1.1.0"] = TEMPORAL_SCHEMA_VERSION
+    schema_version: Literal["1.2.0"] = TEMPORAL_SCHEMA_VERSION
     seed: int
     horizon: int = Field(ge=0)
     events: tuple[PrivacyEvent, ...]
@@ -394,6 +415,30 @@ class TemporalWorld(SyntheticModel):
         known = {item.listing_ref for item in self.truth.listings}
         if not set(seen) <= known:
             raise ValueError("an event concerns a listing with no truth")
+
+        # Truth-to-public, the direction the first revision did not check (#65). A
+        # recorded reappearance with no published event - or at a different tick -
+        # charges every consumer for missing something they were never shown, and the
+        # reverse timing error charges an alert as false when it was right about what
+        # was visible. Deliberately asymmetric with removal: `removed_at` is *not*
+        # pinned to `REMOVAL_CONFIRMED`, because a confirmation is the broker's claim
+        # and the phantom case exists to show the claim can be false. A reappearance is
+        # an observation, not a claim, so pinning it is right where pinning removal
+        # would be wrong. The message names no truth value on purpose: this is refused
+        # as evaluator-input corruption, not explained to the holder of a public file.
+        published = {
+            (event.object_ref, event.tick)
+            for event in self.events
+            if event.kind is PrivacyEventKind.LISTING_REAPPEARED
+        }
+        for fact in self.truth.listings:
+            if fact.reappeared_at is None:
+                continue
+            if (fact.listing_ref, fact.reappeared_at) not in published:
+                raise ValueError(
+                    "a recorded reappearance must coincide with a published "
+                    "reappearance event"
+                )
 
         observations = {item.observation_ref for item in self.truth.observations}
         referenced = {
@@ -508,6 +553,7 @@ def lifecycle_stage(events: Iterable[PrivacyEvent], listing_ref: str) -> int | N
 
 __all__ = [
     "TEMPORAL_SCHEMA_VERSION",
+    "DownstreamCopy",
     "ListingAttribute",
     "ListingAttributeKind",
     "ListingTruth",

@@ -41,6 +41,7 @@ metrics:
 examples:
 	$(UV) run python examples/evaluate_extraction.py --seed $(SEED) --persona-count $(PERSONAS)
 	$(UV) run python examples/evaluate_all.py --seed $(SEED) --persona-count $(PERSONAS)
+	$(UV) run python examples/evaluate_broker_adapter.py --seed $(SEED)
 
 baselines:
 	$(UV) run python examples/generate_benchmarks_doc.py --check

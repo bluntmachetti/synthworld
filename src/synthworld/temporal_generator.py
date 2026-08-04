@@ -54,6 +54,7 @@ from hashlib import blake2b
 from typing import Literal
 
 from synthworld.temporal import (
+    DownstreamCopy,
     ListingAttribute,
     ListingAttributeKind,
     ListingTruth,
@@ -102,7 +103,8 @@ class _Case:
     #: Relative tick at which the removal genuinely took effect, if it ever did.
     removed_at: int | None = None
     reappeared_at: int | None = None
-    downstream: tuple[str, ...] = ()
+    #: Downstream copies as `(name, relative removal tick)`. `None` never goes.
+    downstream: tuple[tuple[str, int | None], ...] = ()
     observations: tuple[tuple[int, ObservationValidity, bool], ...] = field(
         default_factory=tuple
     )
@@ -130,7 +132,18 @@ def _cases() -> tuple[_Case, ...]:
             "reseller_copy",
             confirm,
             removed_at=7,
-            downstream=("mirror-a", "mirror-b"),
+            downstream=(("mirror-a", None), ("mirror-b", None)),
+        ),
+        # Deletion propagating slowly, not failing (#65). The source goes at 7 and the
+        # copies catch up at 15 and 21, so a system that reports completion the moment
+        # the source is gone is wrong here in a way `reseller_copy` cannot show - there
+        # the copies never go, and "wrong forever" and "wrong for a while" need
+        # different answers from a resolver watching the same public events.
+        _Case(
+            "slow_propagation",
+            confirm,
+            removed_at=7,
+            downstream=(("mirror-a", 15), ("mirror-b", 21)),
         ),
         _Case(
             "refused",
@@ -446,8 +459,12 @@ def generate_temporal_world(
                 reappeared_at=(
                     None if case.reappeared_at is None else case.reappeared_at + offset
                 ),
-                downstream_refs=tuple(
-                    f"{listing_ref}-{name}" for name in case.downstream
+                downstream_copies=tuple(
+                    DownstreamCopy(
+                        copy_ref=f"{listing_ref}-{name}",
+                        removed_at=None if gone is None else gone + offset,
+                    )
+                    for name, gone in case.downstream
                 ),
             )
         )
