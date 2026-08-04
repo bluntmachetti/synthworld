@@ -10,6 +10,19 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from synthworld.agentic.enterprise.metrics import (
+    evaluate_enterprise_agentic_prediction,
+    perfect_enterprise_agentic_prediction,
+)
+from synthworld.agentic.enterprise.models import (
+    EnterpriseAgenticBenchmarkV1,
+    EnterpriseAgenticEvaluatorArtifactsV1,
+    EnterpriseAgenticMetricsV1,
+    EnterpriseAgenticPredictionV1,
+    EnterpriseAgenticPublicInputV1,
+    EnterpriseAgenticTruthV1,
+)
+from synthworld.agentic.enterprise.reference import reference_enterprise_agentic
 from synthworld.enterprise.abac.metrics import (
     EnterpriseAbacMetricsV1,
     EnterpriseAbacPredictionV1,
@@ -203,6 +216,12 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "enterprise-identity-fabric-metrics.schema.json": (
         EnterpriseIdentityFabricMetricsV1
     ),
+    "enterprise-agentic-benchmark.schema.json": EnterpriseAgenticBenchmarkV1,
+    "enterprise-agentic-public-input.schema.json": EnterpriseAgenticPublicInputV1,
+    "enterprise-agentic-truth.schema.json": EnterpriseAgenticTruthV1,
+    "enterprise-agentic-evaluator.schema.json": (EnterpriseAgenticEvaluatorArtifactsV1),
+    "enterprise-agentic-prediction.schema.json": EnterpriseAgenticPredictionV1,
+    "enterprise-agentic-metrics.schema.json": EnterpriseAgenticMetricsV1,
 }
 
 
@@ -273,6 +292,27 @@ def expected_files() -> dict[Path, bytes]:
     )
     files[EXAMPLE_DIR / "enterprise-identity-fabric-metrics.json"] = (
         canonical_json_bytes(perfect_identity_fabric_metrics)
+    )
+    reference_agentic = reference_enterprise_agentic()
+    perfect_agentic_prediction = perfect_enterprise_agentic_prediction(
+        reference_agentic.evaluator
+    )
+    perfect_agentic_metrics = evaluate_enterprise_agentic_prediction(
+        public=reference_agentic.public,
+        evaluator=reference_agentic.evaluator,
+        prediction=perfect_agentic_prediction,
+    )
+    files[EXAMPLE_DIR / "enterprise-agentic-public-input.json"] = canonical_json_bytes(
+        reference_agentic.public
+    )
+    files[EXAMPLE_DIR / "enterprise-agentic-evaluator.json"] = canonical_json_bytes(
+        reference_agentic.evaluator
+    )
+    files[EXAMPLE_DIR / "enterprise-agentic-prediction.json"] = canonical_json_bytes(
+        perfect_agentic_prediction
+    )
+    files[EXAMPLE_DIR / "enterprise-agentic-metrics.json"] = canonical_json_bytes(
+        perfect_agentic_metrics
     )
     return files
 

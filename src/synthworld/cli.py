@@ -8,6 +8,17 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from synthworld.agent_authority.models import AgentAuthorityRunPlanV1
+from synthworld.agentic.enterprise import (
+    EnterpriseAgenticArtifactError,
+    EnterpriseAgenticEvaluationError,
+    enterprise_agentic_trace_from_jsonl,
+    evaluate_enterprise_agentic_prediction,
+    export_enterprise_agentic_benchmark,
+    load_evaluator_enterprise_agentic_benchmark,
+    load_public_enterprise_agentic_benchmark,
+    reference_enterprise_agentic,
+    validate_enterprise_agentic_trace_jsonl,
+)
 from synthworld.agentic.evaluation import (
     evaluate_agentic_trace,
     trace_submission_from_jsonl,
@@ -191,6 +202,35 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             return 0
 
+        if args.task == "enterprise-agentic-trace":
+            try:
+                enterprise_public = load_public_enterprise_agentic_benchmark(
+                    args.benchmark_root
+                )
+                enterprise_validation = validate_enterprise_agentic_trace_jsonl(
+                    args.predictions.read_text(encoding="utf-8-sig"),
+                    public=enterprise_public,
+                )
+            except (
+                OSError,
+                UnicodeDecodeError,
+                EnterpriseAgenticArtifactError,
+                ValidationError,
+            ) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            if args.json:
+                print(enterprise_validation.model_dump_json(indent=2))
+            else:
+                verdict = "valid" if enterprise_validation.valid else "invalid"
+                print(
+                    f"enterprise-agentic-trace: {verdict}; "
+                    f"rows={enterprise_validation.row_count}, "
+                    f"expected={enterprise_validation.expected_case_count}, "
+                    f"issues={len(enterprise_validation.issues)}"
+                )
+            return 0 if enterprise_validation.valid else 1
+
         # Its own try block: the evaluate handler below guards a different set of
         # calls, and this path raises different things. Narrow on purpose - catching
         # every ValueError would report an internal defect as though the user's file
@@ -228,6 +268,34 @@ def main(argv: Sequence[str] | None = None) -> int:
             text = args.predictions.read_text(encoding="utf-8-sig")
             if args.task == "agentic":
                 report = evaluate_agentic_trace(trace_submission_from_jsonl(text))
+            elif args.task == "enterprise-agentic":
+                if args.benchmark_root is None:
+                    raise EnterpriseAgenticEvaluationError(
+                        "--benchmark-root is required for enterprise-agentic evaluation"
+                    )
+                enterprise_public = load_public_enterprise_agentic_benchmark(
+                    args.benchmark_root
+                )
+                enterprise_evaluator = load_evaluator_enterprise_agentic_benchmark(
+                    args.benchmark_root
+                )
+                enterprise_report = evaluate_enterprise_agentic_prediction(
+                    public=enterprise_public,
+                    evaluator=enterprise_evaluator,
+                    prediction=enterprise_agentic_trace_from_jsonl(text),
+                )
+                if args.summary:
+                    for metric in enterprise_report.metrics:
+                        value = (
+                            "null" if metric.value is None else f"{metric.value:.4f}"
+                        )
+                        print(
+                            f"{metric.family:>26}  {metric.name:<48} "
+                            f"{value:>6} n={metric.denominator}"
+                        )
+                else:
+                    print(enterprise_report.model_dump_json(indent=2))
+                return 0
             elif args.task == "extraction":
                 report = evaluate_extraction(
                     ExtractionPredictionSet.model_validate_json(text),
@@ -256,7 +324,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                     seed=args.seed,
                     persona_count=args.persona_count,
                 )
-        except (OSError, ValidationError, EvaluationInputError) as error:
+        except (
+            OSError,
+            ValidationError,
+            EvaluationInputError,
+            EnterpriseAgenticArtifactError,
+            EnterpriseAgenticEvaluationError,
+        ) as error:
             print(str(error), file=sys.stderr)
             return 1
 
@@ -274,6 +348,23 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{len(agentic_benchmark.public.events)} events, "
             f"{len(agentic_benchmark.evaluator.authority_truth)} actions "
             f"-> {args.output}"
+        )
+        return 0
+
+    if args.command == "generate-enterprise-agentic":
+        enterprise_agentic = reference_enterprise_agentic(seed=args.seed)
+        try:
+            export_enterprise_agentic_benchmark(
+                args.output,
+                public=enterprise_agentic.public,
+                evaluator=enterprise_agentic.evaluator,
+            )
+        except (OSError, EnterpriseAgenticArtifactError) as error:
+            print(str(error), file=sys.stderr)
+            return 1
+        print(
+            "Enterprise-agentic smoke pack ready: "
+            f"{len(enterprise_agentic.evaluator.truth.cases)} cases -> {args.output}"
         )
         return 0
 
@@ -592,6 +683,16 @@ def _parser() -> argparse.ArgumentParser:
     )
     generate_agentic.add_argument("--output", type=Path, required=True)
 
+    generate_enterprise_agentic = subparsers.add_parser(
+        "generate-enterprise-agentic",
+        help="write the fixed-access enterprise-agentic smoke artifact trees",
+    )
+    _add_seed_argument(generate_enterprise_agentic)
+    generate_enterprise_agentic.add_argument(
+        "--tier", choices=("smoke",), default="smoke"
+    )
+    generate_enterprise_agentic.add_argument("--output", type=Path, required=True)
+
     validate = subparsers.add_parser(
         "validate",
         help="check a submission's shape before scoring, without answer-key truth",
@@ -622,6 +723,13 @@ def _parser() -> argparse.ArgumentParser:
         help="validate an agent-authority receipt directory",
     )
     receipt.add_argument("--input", type=Path, required=True)
+    enterprise_agentic_trace = validation_tasks.add_parser(
+        "enterprise-agentic-trace",
+        help="validate an enterprise-agentic JSONL trace against public input",
+    )
+    enterprise_agentic_trace.add_argument("--predictions", type=Path, required=True)
+    enterprise_agentic_trace.add_argument("--benchmark-root", type=Path, required=True)
+    enterprise_agentic_trace.add_argument("--json", action="store_true")
 
     evaluate = subparsers.add_parser(
         "evaluate",
@@ -631,6 +739,7 @@ def _parser() -> argparse.ArgumentParser:
         "task",
         choices=[
             "agentic",
+            "enterprise-agentic",
             "extraction",
             "broker",
             "entity-resolution",
@@ -661,6 +770,11 @@ def _parser() -> argparse.ArgumentParser:
         "--summary",
         action="store_true",
         help="print compact human table of metrics instead of JSON",
+    )
+    evaluate.add_argument(
+        "--benchmark-root",
+        type=Path,
+        help="enterprise-agentic public/evaluator artifact root",
     )
     return parser
 

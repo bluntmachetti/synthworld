@@ -194,6 +194,71 @@ workflow evidence, and authority-change legitimacy remain later separately typed
 work. The pack is also not a directory service, IGA workflow system, PDP, policy
 engine, SGNL client, runtime enforcement service, or continuous-assurance agent.
 
+## Enterprise-agentic smoke benchmark
+
+The independently versioned `synthworld.agentic.enterprise` package is the
+issue-#27 smoke projection over the same fixed universe, corpus, component truth,
+and compiled access state used by the identity-fabric pack. It does not resize
+that universe or corpus. Agent runtime accounts, runtimes, opaque synthetic
+credential handles, capabilities, human-to-agent delegations, action events,
+case prevalence, and retained audit evidence belong only to this overlay. The
+handles are identifiers for safely fictional records, never reusable credential
+material.
+
+Every case retains the immutable enterprise final decision `F` and separately
+emits `AgenticExpectedDecisionV1`. The downstream decision allows only when `F`
+allows and every applicable subject, tenant, agent-account, runtime, credential,
+capability, and delegation gate is satisfied. Gate outcomes and ordered failure
+reasons remain separate, so a product cannot hide an enterprise denial behind a
+runtime failure or vice versa.
+
+Two explicit mappings are covered:
+
+- `agent_as_principal` binds the frozen access atom to the agent principal. A
+  human owner or provenance delegation is attributable context and grants no
+  enterprise authority implicitly.
+- `human_subject_agent_context` binds the atom to the human and carries exact
+  agent principal, agent runtime-account, runtime, credential, capability, and
+  delegation references. Agent authority is not unioned into the human's `F`.
+
+The 20-case reference pack distinguishes valid and enterprise-denied actions,
+human ownership that must not override an agent denial, same-human/different-agent
+and same-agent/different-human contexts, missing and revoked delegation,
+suspended agent account, revoked or shared credential, wrong subject, wrong
+runtime, wrong scope, cross-tenant context, and evidence discarded before audit.
+All event time uses the repository's integer `tick` axis and canonical
+`(tick, event id)` order; no UTC field or alternate clock exists. The pinned
+OpenID AIIM snapshot supplies experimental scenario tags only. It defines
+neither a normative protocol nor a core agent identity model, and draft
+COAZ-MCP/AARP profiles remain out of scope.
+
+Public artifacts contain the exact enterprise policy inputs, overlay state,
+events, mapping context, and opaque case inventory. Evaluator artifacts separately
+contain component truth, compiled access state, expected gates/decisions,
+attribution, evidence truth, and AIIM-informed labels. The evaluator loader
+recompiles enterprise `F` and every downstream gate. Metrics independently report
+enterprise-decision, final-decision, failure-reason, per-gate, per-mapping,
+attribution, evidence, and audit-reconstructability accuracy with explicit
+denominators; there is no agentic aggregate score.
+
+Four shortcut baselines—enterprise-decision-only, owner-authority union,
+lifecycle/revocation blindness, and discarded evidence—fail their dedicated
+dimensions. The smoke pack exports, reloads, validates JSONL traces, and scores
+end to end. Generate a deterministic reference run with:
+
+```bash
+synthworld generate-enterprise-agentic \
+  --tier smoke \
+  --seed 20260804 \
+  --output enterprise-agentic-world
+```
+
+The command is a reference-smoke entry point. The pure Python projection accepts
+an explicitly compiled access input and evaluator artifacts; it performs no
+network call, credential exchange, model execution, PDP decision, runtime
+enforcement, containment, or external vendor configuration. Frozen
+`generate-agentic` remains dedicated to Asteria v1.
+
 ## Pure standards projections
 
 The projection package performs deterministic data conversion only:
