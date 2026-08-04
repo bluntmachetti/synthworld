@@ -247,12 +247,17 @@ def test_forced_partition_decisions_are_scored_only_against_dispositions() -> No
     assert report.pair_count == 15
     assert report.decided_count == report.pair_count
     assert report.abstained_count == 0
-    assert report.decidable_count == 12
-    assert report.correct_decided_count == 12
+    # Eleven, not twelve, since #77: `same_name_and_date_of_birth` is `insufficient`,
+    # so the clairvoyant partition-follower's "separate" there is an unwarranted
+    # decision - it answered from the truth, which the public evidence cannot reach.
+    # A scorer that rewarded it would be scoring clairvoyance, which is the exact
+    # conflation this evaluation exists to refuse.
+    assert report.decidable_count == 11
+    assert report.correct_decided_count == 11
     assert report.coverage == 1.0
-    assert report.decided_precision == 12 / 15
+    assert report.decided_precision == 11 / 15
     assert report.decided_recall == 1.0
-    assert report.unwarranted_decisions == 3
+    assert report.unwarranted_decisions == 4
     assert set(report.low_support_scenarios) == set(ScenarioKind)
     serialized = report.model_dump_json()
     assert "entity_id" not in serialized

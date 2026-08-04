@@ -57,7 +57,9 @@ def test_truth_and_the_evidence_are_allowed_to_disagree() -> None:
     """Two people who look identical on paper are `merge` and not the same entity.
 
     v1 forbade this - a merge pair had to be the same entity - which is why it could not
-    represent `same_name_and_date_of_birth` honestly and why #77 exists. The disposition
+    represent `same_name_and_date_of_birth` honestly, why #77 existed, and why fixing it
+    meant relabelling the pair `insufficient` rather than pretending the evidence could
+    reach the truth. The disposition
     is what the public evidence justifies; `same_entity` is what is true. A benchmark
     that conflates them is scoring clairvoyance rather than resolution.
     """

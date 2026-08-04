@@ -110,8 +110,8 @@ Reviewed: 2026-08-02. Seed: `20260731`. Ambiguity schema: `1.0.0`.
 
 The frozen pack contains 30 hand-authored public identity records forming 15 record
 pairs, one per `ScenarioKind`, published as three physically separate artifacts:
-public input, canonical entity membership, and evidence disposition. Seven pairs must
-remain separate, five must merge, and three are cases where the public evidence
+public input, canonical entity membership, and evidence disposition. Six pairs must
+remain separate, five must merge, and four are cases where the public evidence
 cannot settle the question whatever the canonical truth happens to be.
 
 This revision re-froze all three artifacts. The schema is unchanged at `1.0.0` and no
@@ -138,7 +138,17 @@ labels and expected decisions from the public artifact, and that each truth arti
 can be held without the other. The canonical SHA-256 values are
 `217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a` (public),
 `42d7f52a4c4a058d2616630dce719fb8c659fd56d4789d91d0cfdee96a264a8e` (memberships) and
-`07f64fc42942d998b695eba1b15ed2bba7b032996ebac271c3b7c5900f3e9203` (dispositions).
+`334808680b46f58f78ac820c887548692b057eab97bb6cf41571d1e77dd87e11` (dispositions).
+
+**2026-08-04 re-freeze (#77).** One label changed: `same_name_and_date_of_birth` moved
+from `separate` to `insufficient`. The pair is two people in canonical truth, but the
+public evidence — matching name and birth date, nothing distinguishing them — cannot
+justify concluding it, and the first consumer to run the pack abstained on exactly this
+pair for exactly this reason, independently. The disposition is what the evidence
+justifies, not what is true; membership truth is unchanged (`same_entity` still false),
+so the memberships and public artifacts are byte-identical to the 2026-08-02 freeze and
+only the dispositions artifact was re-cut. The previous dispositions digest was
+`07f64fc42942d998b695eba1b15ed2bba7b032996ebac271c3b7c5900f3e9203`.
 
 **Scope of the guarantee.** Each scenario is defined by its evidence pattern, and the
 pack contains every scenario exactly once, so the answer remains derivable from the

@@ -11,6 +11,16 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Changed
 
+- **Breaking (ambiguity answer key):** `same_name_and_date_of_birth` is now
+  `insufficient`, not `separate` (#77). The pair is two people in canonical truth, but
+  the public evidence — matching name and birth date, nothing distinguishing them —
+  cannot justify concluding it. The pack's first consumer abstained on exactly this pair
+  and independently gave the same reason. Membership truth is unchanged; the public and
+  memberships artifacts are byte-identical, and only the dispositions artifact was
+  re-cut (new digest in `GOLDEN_REVIEW.md`). A resolver scored against the old key that
+  answered `separate` here was being rewarded for clairvoyance; one that abstains is now
+  scored correctly.
+
 - `EVALUATION_SCHEMA_VERSION` is `0.2.0`. `TaskMetric` gains optional `family` and
   `support_meaning`, so **every** task's report carries two more keys - extraction,
   entity resolution, relationship inference and risk included, even though none of

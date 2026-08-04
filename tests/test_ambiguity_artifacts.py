@@ -559,7 +559,7 @@ def test_a_display_name_carries_no_more_than_its_evidence_already_does() -> None
     (scenario, side), and the fallback family name spelled the ordinal in decimal:
     one regex over `ExampleNNFamilyNN` recovered the scenario, and through the public
     `SCENARIO_DISPOSITIONS` map the disposition, on 400 of 400 matching pairs across
-    fifty seeds against a 7/15 majority baseline.
+    fifty seeds against the 7/15 majority baseline of the time (6/15 since #77).
 
     What makes it a leak is not that the answer is recoverable - it is recoverable
     from the evidence, which is the task - but that a *free* choice, which name to
@@ -602,7 +602,7 @@ def test_provenance_varies_by_seed_but_keeps_what_the_case_means() -> None:
     """Source types were copied from the drafts, so they were constant per scenario.
 
     A decoder trained on one seed, using nothing but each pair's unordered
-    source-type signature, scored 1200/1500 on a hundred others against a 7/15
+    source-type signature, scored 1200/1500 on a hundred others against the then-7/15
     baseline — an 80% oracle in a field no check looked at. Whether the two records
     share a source is part of the case; which source it is was a free choice.
     """
