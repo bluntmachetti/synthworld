@@ -423,11 +423,26 @@ def test_the_derived_rule_agrees_with_thirteen_of_the_fifteen_answers() -> None:
 
 @pytest.mark.parametrize("kind", sorted(K))
 def test_every_kind_prefers_agreement_to_contradiction(kind: K) -> None:
-    """A kind whose FAR outscored its EQUAL would be evidence read backwards."""
+    """Weights must fall monotonically from EQUAL through NEAR to FAR.
 
-    assert weight_of(kind, Relation.EQUAL) > weight_of(kind, Relation.FAR)
-    assert weight_of(kind, Relation.EQUAL) > 0.0
-    assert weight_of(kind, Relation.FAR) < 0.0
+    An earlier version asserted only `EQUAL > FAR`, and four kinds violated the middle
+    of the ordering without it noticing: family name paid +0.63 for byte equality and
+    +1.00 for a near variant, address +0.78 against +1.32, employer +0.87 against +1.00,
+    and phone paid exactly the same for both. A resolver reading that table is paid more
+    for a near-miss surname than for an exact match, and the test name said "prefers
+    agreement" while the body allowed it.
+    """
+
+    equal, near, far = (
+        weight_of(kind, relation)
+        for relation in (Relation.EQUAL, Relation.NEAR, Relation.FAR)
+    )
+
+    assert equal > near > far, kind.value
+    assert equal > 0.0
+    assert far < 0.0
+    # Missingness is neither evidence nor its opposite, so a sparse record is not
+    # punished for being sparse.
     assert weight_of(kind, Relation.LOPSIDED) == 0.0
 
 
@@ -472,10 +487,15 @@ def test_a_row_that_is_not_a_distribution_is_refused() -> None:
     # negative mass makes `log2(m/u)` a domain error or a nonsense weight; a NaN makes
     # every comparison against it false, so `sample_relation` would fall through to the
     # last outcome for that whole kind. Both of these sum to one.
-    with pytest.raises(ValueError, match=r"within \[0, 1\]"):
+    with pytest.raises(ValueError, match=r"within \(0, 1\]"):
         validate_parameters({K.PHONE: ((-1.0, 1.0, 1.0), (0.1, 0.1, 0.8))})
-    with pytest.raises(ValueError, match=r"within \[0, 1\]"):
+    with pytest.raises(ValueError, match=r"within \(0, 1\]"):
         validate_parameters({K.PHONE: ((float("nan"), 0.5, 0.5), (0.1, 0.1, 0.8))})
+    # Zero is the case that reads as legitimate - "near variants never occur in this
+    # population" is a sentence someone would write - and it passes every other check
+    # here, then makes `weight_of` raise while `sample_relation` keeps drawing.
+    with pytest.raises(ValueError, match=r"within \(0, 1\]"):
+        validate_parameters({K.PHONE: ((0.5, 0.5, 0.0), (0.05, 0.15, 0.80))})
     # Cast because the annotation already forbids a two-outcome row, so mypy rejects
     # this call. The guard is still worth testing: the function is public, and a table
     # loaded from JSON or built by an untyped caller reaches it with no static check.

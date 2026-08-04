@@ -26,9 +26,9 @@ is sampled; ``disposition`` means *what the public evidence justifies*, so compu
 from the evidence is what the word means rather than a compromise. It also keeps
 per-pair truth exactly checkable, so the disposition scorer needs no change.
 
-**Rendering cannot see the label.** :func:`render_relation` takes a kind, a relation, a
-seed and a key. There is no parameter it could read a disposition from, so the eight
-metadata channels closed in #59 — ordering, name pools, identifiers, source types,
+**Rendering cannot see the label.** :func:`render_relation` takes a kind, a relation,
+a seed, a key and a slot. There is no parameter it could read a disposition from, so
+the eight metadata channels closed in #59 — ordering, name pools, identifiers, sources,
 repetition counts, attribute counts, locality tokens, multiplicity — cannot recur here
 by the same route. A type signature enforces that; a test would only sample it.
 """
@@ -98,6 +98,15 @@ class Relation(StrEnum):
 #: and the old table made a differing email the strongest negative in the system while
 #: its own comment said such a difference "says almost nothing".
 #:
+#: One constraint is not negotiable and the first table broke it on four kinds: an exact
+#: match must never be worth *less* than a near one. Family name paid +0.63 for byte
+#: equality and +1.00 for a near variant, address +0.78 against +1.32, employer +0.87
+#: against +1.00, and phone paid exactly the same for both. A resolver reading that
+#: table is paid more for a near-miss surname than an exact match, which no amount of
+#: population-specific estimation makes defensible. Fixed by raising `u_near` on those
+#: four - saying near variants are commoner among non-matches than the first estimate
+#: allowed, which is the true statement and the one that restores monotonicity.
+#:
 #: `u` is estimated over *this pack's* non-match population, which is the part that
 #: matters and the part a general-purpose table would get wrong. The negatives here are
 #: deliberately households, twins, colleagues and classmates - not strangers drawn at
@@ -107,13 +116,13 @@ _Params = tuple[tuple[float, float, float], tuple[float, float, float]]
 
 _FS: dict[EvidenceKind, _Params] = {
     EvidenceKind.GIVEN_NAME: ((0.75, 0.20, 0.05), (0.03, 0.07, 0.90)),
-    EvidenceKind.FAMILY_NAME: ((0.85, 0.10, 0.05), (0.55, 0.05, 0.40)),
+    EvidenceKind.FAMILY_NAME: ((0.85, 0.10, 0.05), (0.55, 0.08, 0.37)),
     EvidenceKind.DATE_OF_BIRTH: ((0.93, 0.05, 0.02), (0.06, 0.02, 0.92)),
     EvidenceKind.EMAIL: ((0.70, 0.20, 0.10), (0.15, 0.05, 0.80)),
-    EvidenceKind.PHONE: ((0.72, 0.18, 0.10), (0.12, 0.03, 0.85)),
+    EvidenceKind.PHONE: ((0.72, 0.18, 0.10), (0.12, 0.05, 0.83)),
     EvidenceKind.USERNAME: ((0.80, 0.15, 0.05), (0.10, 0.05, 0.85)),
-    EvidenceKind.FULL_ADDRESS: ((0.60, 0.25, 0.15), (0.35, 0.10, 0.55)),
-    EvidenceKind.EMPLOYER: ((0.55, 0.20, 0.25), (0.30, 0.10, 0.60)),
+    EvidenceKind.FULL_ADDRESS: ((0.60, 0.25, 0.15), (0.35, 0.18, 0.47)),
+    EvidenceKind.EMPLOYER: ((0.55, 0.20, 0.25), (0.30, 0.14, 0.56)),
     EvidenceKind.SCHOOL_YEAR: ((0.75, 0.15, 0.10), (0.25, 0.15, 0.60)),
 }
 
@@ -217,9 +226,16 @@ def validate_parameters(table: Mapping[EvidenceKind, _Params]) -> None:
             # would fall through to the last outcome for that entire kind.
             if len(row) != len(_ORDER):
                 raise ValueError(f"{kind.value} needs one probability per outcome")
-            if not all(isfinite(mass) and 0.0 <= mass <= 1.0 for mass in row):
+            if not all(isfinite(mass) and 0.0 < mass <= 1.0 for mass in row):
+                # Strictly positive, not merely non-negative. A zero mass passes every
+                # other check here and then makes `weight_of` raise - ZeroDivisionError
+                # for `u = 0`, a domain error for `m = 0` - while `sample_relation`
+                # carries on drawing from the row quite happily. `u_near = 0` is a
+                # plausible thing to write for a population where near variants never
+                # occur, which is what makes the gap worth closing rather than a
+                # theoretical corner.
                 raise ValueError(
-                    f"{kind.value} outcome probabilities must each be within [0, 1]"
+                    f"{kind.value} outcome probabilities must each be within (0, 1]"
                 )
             if abs(sum(row) - 1.0) > 1e-9:
                 raise ValueError(f"{kind.value} outcome probabilities must sum to one")

@@ -110,10 +110,14 @@ def _comparable(seed: int, slot: int, key: bytes) -> tuple[EvidenceKind, ...]:
     # A record with no attributes cannot exist - `PublicIdentityRecord` requires at
     # least one - and the two name kinds live in `display_name` rather than in an
     # attribute, so a pair comparable only on names would build a corpus record with an
-    # empty attribute list. Falling back to the most commonly recorded identifier keeps
-    # that impossible without making sparseness itself readable: email is present on
-    # most records anyway, so forcing it changes what a sparse pair looks like far less
-    # than a shorter attribute list would.
+    # empty attribute list.
+    #
+    # The fallback is the first comparable non-name kind in sorted order, which is a
+    # wart: it fires on 8.9% of pairs and lands on email 198 times in 416, so records
+    # carrying exactly one attribute carry an email 43.7% of the time against a 14.0%
+    # baseline. Measured against the label it is nothing - P(same_entity | fallback) is
+    # 0.447 against 0.491 overall, within noise at 1.8 sigma - so it is a visible
+    # regularity that carries no answer, not a leak. Tracked as #82.
     return (*_IN_NAME, *(optional or (EvidenceKind.EMAIL,)))
 
 
@@ -151,7 +155,17 @@ def _carried(
 
 
 def _record_id(seed: int, slot: int, side: int, key: bytes) -> UUID:
-    return UUID(int=_draw(seed, f"record:{side}", slot, key) % (1 << 128), version=4)
+    """A record identifier with no structure beyond the draw that made it.
+
+    `_draw` returns eight bytes, so this is a 64-bit identifier written in a 128-bit
+    field - the version and variant bits are fixed and the top half is zero. An earlier
+    version masked with `% (1 << 128)`, which does nothing to a 64-bit value and read as
+    though the identifier had far more entropy than it has. Measured: no mutual
+    information between identifier bytes and the label (p >= 0.30), which is the
+    property that matters, but the code should not overstate what it produces.
+    """
+
+    return UUID(int=_draw(seed, f"record:{side}", slot, key), version=4)
 
 
 def _pair(
@@ -251,26 +265,25 @@ def _record(
 def _distractor(seed: int, index: int, key: bytes) -> PublicIdentityRecord:
     """A record no pair asks about, drawn from the same machinery as a real one.
 
-    Built by rendering a relation vector that is then thrown away, so a distractor is
-    indistinguishable from half of a pair. Anything cheaper - a shorter attribute list,
-    a fixed source - would make "is this a distractor" readable, and a solver that can
-    tell which records are asked about learns the pair list without being given it.
+    Built from the same machinery as either half of a pair, so *as a single record* it
+    is drawn from the same law: attribute counts agree at p = 0.121 over 31,763 records
+    and source types match within 0.03.
+
+    It is not indistinguishable *in corpus context*, and an earlier version of this
+    docstring claimed it was. A paired record shares identity components with its
+    partner, so a nearest-neighbour score separates the two roles at AUC 0.846. That is
+    unavoidable - a pair is two records that resemble each other - and it costs nothing,
+    because the pair list is public. What matters is that no *record-local* feature
+    marks the role, and none does.
     """
 
     slot = 10**6 + index
-    relations = {
-        kind: sample_relation(
-            kind,
-            same_entity=_fraction(seed, "distractor-entity", slot, key) < 0.5,
-            seed=seed,
-            slot=slot,
-            key=key,
-        )
-        for kind in _comparable(seed, slot, key)
-    }
+    kinds = _comparable(seed, slot, key)
+    # No relation is sampled. A distractor has no partner, so there is nothing for a
+    # relation to hold between; the previous version drew a full vector and used none of
+    # it, since rendering side zero does not depend on the relation at all.
     rendered = {
-        kind: render_relation(kind, relation, seed=seed, key=key, slot=slot)
-        for kind, relation in relations.items()
+        kind: (render_value(kind, seed=seed, key=key, slot=slot),) * 2 for kind in kinds
     }
     return _record(
         seed,
@@ -279,7 +292,7 @@ def _distractor(seed: int, index: int, key: bytes) -> PublicIdentityRecord:
         key,
         _record_id(seed, slot, 0, key),
         rendered,
-        _carried(seed, slot, key, tuple(relations), 0),
+        _carried(seed, slot, key, kinds, 0),
     )
 
 

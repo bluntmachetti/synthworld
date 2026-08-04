@@ -21,7 +21,7 @@ from synthworld.ambiguity_v2_generator import (
     generate_ambiguity_v2_pack,
     prevalence_of,
 )
-from synthworld.connection import PublicConnectionCorpus
+from synthworld.connection import PublicConnectionCorpus, PublicIdentityRecord
 
 _KEY = b"held-out-key"
 
@@ -369,3 +369,107 @@ def test_comparisons_out_of_canonical_order_are_refused() -> None:
                 (EvidenceKind.GIVEN_NAME, Relation.EQUAL),
             )
         )
+
+
+def _metadata(record: object, position: int, pair_index: int) -> dict[str, object]:
+    """Everything about a record except the evidence it carries.
+
+    Every one of these was a leak channel in v1, or is the v2 analogue of one. None may
+    predict the answer; the evidence may, and does.
+    """
+
+    assert isinstance(record, PublicIdentityRecord)
+    return {
+        "source_type": record.source_type.value,
+        "record_confidence": round(record.confidence, 1),
+        "attribute_count": len(record.attributes),
+        "mean_attribute_confidence": round(
+            sum(item.confidence for item in record.attributes) / len(record.attributes),
+            1,
+        ),
+        "corpus_position_parity": position % 4,
+        "identifier_low_bits": record.id.int % 8,
+        "pair_index_parity": pair_index % 4,
+        "kinds_present": tuple(sorted(item.kind.value for item in record.attributes)),
+    }
+
+
+def test_no_metadata_channel_predicts_the_answer() -> None:
+    """The regression test v2 shipped without, and the reason v1 leaked eleven times.
+
+    Every closed channel in #59 and #66 was metadata quietly bound to truth - display
+    order, identifiers, provenance strings, source counts, case shapes. Nothing in this
+    suite would have caught one recurring in v2: appending `same_entity` to a confidence
+    purpose string passes every other test here.
+
+    So this is the attack, run as a test. A decoder is trained on one key's packs, one
+    metadata channel at a time, and scored on held-out seeds under a held-out key. A
+    channel that beats the majority baseline by a real margin is carrying the answer.
+    The evidence deliberately is not offered to it: reading the answer off the values is
+    the task, and a test that forbade that would be forbidding the benchmark.
+    """
+
+    def channels(
+        record: PublicIdentityRecord, position: int, index: int, truth: DerivedPairTruth
+    ) -> dict[str, object]:
+        # A control channel that *is* bound to the label, so the decoder has to catch
+        # something. Without it this test proves only that the decoder scores badly,
+        # which a decoder that always guessed wrong would also do - and a test that
+        # cannot fail is the defect this suite keeps finding in the code it tests.
+        return _metadata(record, position, index) | {
+            "control_bound_to_the_label": truth.same_entity
+        }
+
+    trained: dict[str, dict[object, Counter[PairDisposition]]] = defaultdict(
+        lambda: defaultdict(Counter)
+    )
+    prior: Counter[PairDisposition] = Counter()
+    for seed in range(1, 41):
+        task, truths = generate_ambiguity_v2_pack(seed=seed, key=b"attacker-key")
+        position = {
+            record.id: index
+            for index, record in enumerate(task.corpus.identity_records)
+        }
+        by_id = {record.id: record for record in task.corpus.identity_records}
+        for index, pair in enumerate(truths):
+            for record_id in (pair.left_record_id, pair.right_record_id):
+                record = by_id[record_id]
+                for channel, value in channels(
+                    record, position[record_id], index, pair
+                ).items():
+                    trained[channel][value][pair.disposition] += 1
+            prior[pair.disposition] += 1
+    fallback = min(prior.most_common(1))[0]
+
+    scored: Counter[str] = Counter()
+    total = 0
+    seen: Counter[PairDisposition] = Counter()
+    for seed in range(800, 830):
+        task, truths = generate_ambiguity_v2_pack(seed=seed, key=_KEY)
+        position = {
+            record.id: index
+            for index, record in enumerate(task.corpus.identity_records)
+        }
+        by_id = {record.id: record for record in task.corpus.identity_records}
+        for index, pair in enumerate(truths):
+            total += 1
+            seen[pair.disposition] += 1
+            record = by_id[pair.left_record_id]
+            for channel, value in channels(
+                record, position[pair.left_record_id], index, pair
+            ).items():
+                tally = trained[channel].get(value)
+                guess = min(tally.most_common(1))[0] if tally else fallback
+                scored[channel] += guess is pair.disposition
+
+    baseline = max(seen.values()) / total
+
+    # The detector works: a channel bound to the label is caught easily.
+    assert scored["control_bound_to_the_label"] / total > baseline + 0.15
+
+    for channel, correct in scored.items():
+        if channel == "control_bound_to_the_label":
+            continue
+        # Five points of headroom over the majority class, which is what a channel
+        # carrying nothing looks like once sampling noise is allowed for.
+        assert correct / total < baseline + 0.05, (channel, correct / total, baseline)
