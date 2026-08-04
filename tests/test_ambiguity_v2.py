@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from unicodedata import combining, normalize
 from uuid import UUID, uuid4
 
 import pytest
 from pydantic import ValidationError
 
 from synthworld.ambiguity import PairDisposition, PublicRecordPair
-from synthworld.ambiguity_grammar import EvidenceKind, Relation, kind_fingerprint
+from synthworld.ambiguity_grammar import (
+    EvidenceKind,
+    Relation,
+    disposition_of,
+    kind_fingerprint,
+)
 from synthworld.ambiguity_v2 import (
     AMBIGUITY_V2_SCHEMA_VERSION,
     DerivedPairTruth,
@@ -473,3 +479,76 @@ def test_no_metadata_channel_predicts_the_answer() -> None:
         # Five points of headroom over the majority class, which is what a channel
         # carrying nothing looks like once sampling noise is allowed for.
         assert correct / total < baseline + 0.05, (channel, correct / total, baseline)
+
+
+def _fold(value: str) -> str:
+    atomic = str.maketrans(
+        # The dotless i is deliberate - see the surname pool in `ambiguity_surfaces`.
+        {"ø": "o", "ł": "l", "đ": "d", "æ": "ae", "þ": "th", "ð": "d", "ı": "i"}  # noqa: RUF001
+    )
+    stripped = normalize("NFKD", value.translate(atomic))
+    return "".join(item for item in stripped if not combining(item)).casefold()
+
+
+def _overlap(left: str, right: str) -> float:
+    def tokens(value: str) -> set[str]:
+        for separator in "|@-_/.,()+ ":
+            value = value.replace(separator, "\x00")
+        return {item for item in _fold(value).split("\x00") if item}
+
+    one, other = tokens(left), tokens(right)
+    return len(one & other) / len(one | other) if one | other else 0.0
+
+
+def test_a_strong_normaliser_cannot_solve_the_pack() -> None:
+    """#80: the pack used to be exactly solvable by a thirty-line parser.
+
+    Every value was an index written in cleartext - `Surname1042`, `user1042@…` - and
+    `NEAR` meant "same index, different form" where every form was a lossless
+    re-encoding. So stripping the form and comparing indices recovered every relation,
+    and applying the published rule scored **1.0000** on held-out-key packs. Nothing
+    leaked; the pack simply had no difficulty in it.
+
+    The surfaces now damage the identity rather than re-encoding it - `Sørensen` against
+    `Soerensen`, `Robert` against `Bob`, `Kowalczyk` against `Kowalcyzk` - and `FAR`
+    draws a plausible neighbour rather than an obvious stranger. So this attacker, which
+    folds diacritics, strips punctuation and compares token overlap, does well and not
+    perfectly.
+
+    Both bounds matter. Below the lower one the evidence would not be readable at all
+    and `NEAR` would be decoration; at 1.0 the benchmark has stopped measuring.
+    """
+
+    correct = total = 0
+    seen: Counter[PairDisposition] = Counter()
+    for seed in range(700, 730):
+        task, truths = generate_ambiguity_v2_pack(seed=seed, key=_KEY)
+        by_id = {record.id: record for record in task.corpus.identity_records}
+
+        def fields(record: PublicIdentityRecord) -> dict[str, str]:
+            given, family = record.display_name.split(" ", 1)
+            return {item.kind.value: item.value for item in record.attributes} | {
+                "given_name": given,
+                "family_name": family,
+            }
+
+        for pair in truths:
+            left = fields(by_id[pair.left_record_id])
+            right = fields(by_id[pair.right_record_id])
+            recovered = {}
+            for name in set(left) | set(right):
+                if name not in left or name not in right:
+                    recovered[EvidenceKind(name)] = Relation.LOPSIDED
+                elif left[name] == right[name]:
+                    recovered[EvidenceKind(name)] = Relation.EQUAL
+                elif _overlap(left[name], right[name]) >= 0.34:
+                    recovered[EvidenceKind(name)] = Relation.NEAR
+                else:
+                    recovered[EvidenceKind(name)] = Relation.FAR
+            total += 1
+            seen[pair.disposition] += 1
+            correct += disposition_of(recovered) is pair.disposition
+
+    baseline = max(seen.values()) / total
+
+    assert baseline + 0.15 < correct / total < 0.95, (correct / total, baseline)

@@ -18,10 +18,9 @@ from synthworld.ambiguity import (
 from synthworld.ambiguity_generator import _drafts
 from synthworld.ambiguity_grammar import (
     _FS,
-    _SPACE,
     Relation,
+    _first_different,
     _Params,
-    _surface,
     disposition_of,
     kind_fingerprint,
     render_relation,
@@ -33,6 +32,7 @@ from synthworld.ambiguity_grammar import (
 from synthworld.ambiguity_grammar import (
     EvidenceKind as K,
 )
+from synthworld.ambiguity_surfaces import pool_size, surface, variant_count
 
 #: Every kind the grammar renders. The enumeration test below is combinatorial, so it
 #: uses a subset; the rendering tests must cover all of them, or a kind can ship with a
@@ -196,7 +196,7 @@ def test_nothing_that_makes_a_value_can_see_the_answer() -> None:
     """
 
     forbidden = {"disposition", "scenario", "same_entity", "archetype", "label"}
-    for maker in (render_relation, render_value, _surface, disposition_of):
+    for maker in (render_relation, render_value, surface, disposition_of):
         parameters = set(inspect.signature(maker).parameters)
         assert not parameters & forbidden, maker.__name__
 
@@ -221,6 +221,22 @@ def test_rendered_values_stand_in_the_relation_they_claim(
         assert left == right
     else:
         assert left != right
+
+
+def _ascii(value: str) -> str:
+    """Fold to bare letters the way a resolver would before comparing.
+
+    The atomic translation is not decoration: NFKD leaves `ø`, `ł`, `æ` and `þ` atomic,
+    so `ascii/ignore` deletes them outright and `Sørensen` becomes `srensen`. That is
+    #78, and this pack now plants those letters deliberately.
+    """
+
+    atomic = str.maketrans(
+        # The dotless i is deliberate - see the surname pool.
+        {"ø": "o", "ł": "l", "đ": "d", "æ": "ae", "þ": "th", "ð": "d", "ı": "i"}  # noqa: RUF001
+    )
+    folded = normalize("NFKD", value.translate(atomic))
+    return "".join(item for item in folded if item.isalnum())
 
 
 def _similarity(kind: K, left: str, right: str) -> float:
@@ -250,6 +266,14 @@ def _similarity(kind: K, left: str, right: str) -> float:
         if len(left.rstrip(".")) == 1 or len(right.rstrip(".")) == 1:
             return 1.0 if initial(left) == initial(right) else 0.0
 
+    if kind is K.EMAIL:
+        # Local parts only. Every address in the pack ends in a reserved example domain,
+        # so token overlap on the domain swamps the comparison and reports two unrelated
+        # addresses as similar - it scored FAR above NEAR until this was split out. A
+        # resolver compares local parts and treats the provider as weak evidence, which
+        # is exactly why changing provider is a NEAR and not a FAR.
+        left, right = left.split("@")[0], right.split("@")[0]
+
     if kind is K.PHONE:
 
         def digits(value: str) -> str:
@@ -257,9 +281,18 @@ def _similarity(kind: K, left: str, right: str) -> float:
             # so a normaliser that does not fold them reports the same line as two.
             # Standard E.164 handling; the surface forms deliberately include both.
             found = "".join(item for item in value if item.isdigit())
-            return found[2:] if found.startswith("00") else found
+            for prefix in ("00", "44", "0"):
+                if found.startswith(prefix):
+                    found = found[len(prefix) :]
+                    break
+            return found[-9:]
 
-        return 1.0 if digits(left) == digits(right) else 0.0
+        # Graded, not all-or-nothing. A transposed digit scored zero, the same as a
+        # completely different line, so a damaged NEAR was indistinguishable from a FAR
+        # and the aggregate came out at exactly 0.000 for both.
+        left_digits, right_digits = digits(left), digits(right)
+        shared = sum(a == b for a, b in zip(left_digits, right_digits, strict=False))
+        return shared / max(len(left_digits), len(right_digits), 1)
 
     def tokens(value: str) -> set[str]:
         # Every separator these surface forms use. They were added one at a time, each
@@ -271,23 +304,53 @@ def _similarity(kind: K, left: str, right: str) -> float:
 
     one, other = tokens(left.casefold()), tokens(right.casefold())
     union = one | other
-    return len(one & other) / len(union) if union else 0.0
+    overlap = len(one & other) / len(union) if union else 0.0
+    if overlap:
+        return overlap
+
+    # Character bigrams when no whole token matches. `Sørensen` and `Soerensen` are one
+    # surname written twice and share no *token*, so token overlap alone reported 0.002
+    # against 0.000 for family names - a margin so thin the assertion would have passed
+    # had NEAR surnames been meaningless. Every real matcher compares strings at
+    # character level for exactly this reason.
+    def bigrams(value: str) -> set[str]:
+        folded = _ascii(value.casefold())
+        return {folded[index : index + 2] for index in range(len(folded) - 1)}
+
+    one_grams, other_grams = bigrams(left), bigrams(right)
+    all_grams = one_grams | other_grams
+    # Halved, so a character-level match never outscores a whole-token match.
+    return len(one_grams & other_grams) / len(all_grams) / 2 if all_grams else 0.0
 
 
 def test_near_is_visibly_nearer_than_far() -> None:
-    """Otherwise the distinction is a label rather than something a resolver can read.
+    """On average, and no longer on every pair - which is the whole of #80.
 
-    Measured with a token comparison a real matcher would plausibly use. If continuity
-    is invisible to that, it is invisible to a system under test and the relation is
-    decoration.
+    This used to assert that for every kind at one seed, the NEAR value scored higher
+    against the left value than the FAR value did. That held because every form was a
+    reversible re-encoding of an index, so NEAR always shared its tokens exactly and FAR
+    never did. It is the same property that let a thirty-line parser score 1.0000.
+
+    Now `NEAR` may be `Robert` against `Bob`, which shares nothing, and `FAR` may be
+    `Müller` against `Miller`, which shares almost everything. So the two overlap, and a
+    pairwise assertion would be asserting the benchmark is easy. What must remain true
+    is that continuity is visible *in aggregate* - otherwise `NEAR` is a label rather
+    than something a resolver can read.
     """
 
     for kind in _RENDERED:
-        left, near = render_relation(kind, Relation.NEAR, seed=11, key=b"", slot=0)
-        also_left, far = render_relation(kind, Relation.FAR, seed=11, key=b"", slot=0)
+        near = far = 0.0
+        for seed in range(120):
+            left, right = render_relation(
+                kind, Relation.NEAR, seed=seed, key=b"", slot=0
+            )
+            near += _similarity(kind, left, right)
+            left, right = render_relation(
+                kind, Relation.FAR, seed=seed, key=b"", slot=0
+            )
+            far += _similarity(kind, left, right)
 
-        assert left == also_left
-        assert _similarity(kind, left, near) > _similarity(kind, left, far), kind.value
+        assert near > far, (kind.value, near / 120, far / 120)
 
 
 def test_rendering_replays_and_is_keyed() -> None:
@@ -446,21 +509,30 @@ def test_every_kind_prefers_agreement_to_contradiction(kind: K) -> None:
     assert weight_of(kind, Relation.LOPSIDED) == 0.0
 
 
-@pytest.mark.parametrize("kind", sorted(K))
-def test_a_surface_names_exactly_one_value(kind: K) -> None:
-    """`FAR` means "these differ", so two indices must not render the same string.
+def test_two_given_names_may_render_the_same_string() -> None:
+    """The old injectivity requirement was an artefact of index-encoded values.
 
-    They did. `_surface` reduced a 64-bit draw with `% 16` for given names and `% 100`
-    for phones, and `FAR` drew its second index independently, so the two collided and
-    the pair rendered identical values under a truth that said they differed. 61 in 3000
-    given-name pairs, 10 phones, 3 addresses. A label contradicted by its own data is
-    the defect this module exists to remove, and it arrived through the renderer rather
-    than through a scenario table.
+    `_surface` used to map an index to one string, so it had to be injective or `FAR`
+    could render two identical values. The pools replace that: `Kate` is reachable from
+    Katherine and from Ekaterina, `M.` from Margaret and from Mohammed, and an initial
+    from several. That is true of names, and it is part of the difficulty - a shared
+    given name is weak evidence precisely because two people can carry the same one.
+
+    Only claimed for given names. The other pools happen to render distinctly, and
+    asserting otherwise would be asserting something untrue of them.
+
+    `FAR` is kept honest by :func:`test_far_never_renders_two_equal_values` instead,
+    which is the property that matters: a truth saying two values differ must never be
+    contradicted by the values themselves.
     """
 
-    rendered = {_surface(kind, index, 0) for index in range(_SPACE[kind])}
+    rendered = [
+        surface(K.GIVEN_NAME, identity, variant, 0)
+        for identity in range(pool_size(K.GIVEN_NAME))
+        for variant in range(variant_count(K.GIVEN_NAME))
+    ]
 
-    assert len(rendered) == _SPACE[kind]
+    assert len(rendered) > len(set(rendered))
 
 
 @pytest.mark.parametrize("kind", sorted(K))
@@ -566,3 +638,17 @@ def test_a_one_sided_value_is_drawn_from_the_same_pool_as_a_paired_one(kind: K) 
     }
 
     assert one_sided == paired
+
+
+def test_a_rendering_that_cannot_differ_is_refused() -> None:
+    """A pair whose truth says the values differ, while the values are identical.
+
+    The shipped pools never produce it. Changing them could - `Kate` is reachable from
+    two given-name families already - and the answer is a loud failure at generation
+    time rather than a pack that quietly contradicts itself.
+    """
+
+    assert _first_different(("Kate", "Katie"), "Kate") == "Katie"
+
+    with pytest.raises(ValueError, match="every rendering collided"):
+        _first_different(("Kate", "Kate"), "Kate")
