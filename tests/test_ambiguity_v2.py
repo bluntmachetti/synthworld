@@ -473,3 +473,37 @@ def test_no_metadata_channel_predicts_the_answer() -> None:
         # Five points of headroom over the majority class, which is what a channel
         # carrying nothing looks like once sampling noise is allowed for.
         assert correct / total < baseline + 0.05, (channel, correct / total, baseline)
+
+
+def test_every_disposition_holds_a_real_share_of_the_pack() -> None:
+    """A third class with 7% of the mass is a two-class benchmark with a longer enum.
+
+    `test_every_disposition_occurs` only asks that each class appear *somewhere* across
+    twenty-four seeds, which stayed true while `insufficient` fell to 7.6% of pairs and
+    **8.5% of individual packs contained none at all**. A consumer scoring one pack
+    would have been scoring two classes one time in twelve, and nothing said so.
+
+    Two levers set the balance and both are needed. Widening the decision band alone,
+    far enough to fix this, makes a third canonical scenario disagree with v1 -
+    `partial_but_sufficient` becomes insufficient, contradicting its own name. Raising
+    the pack-size floor supplies the rest: whether a pack holds all three classes
+    is a sample-size question: at this rate an 18-pair pack misses one 16% of the time
+    and a 50-pair pack 0.6%.
+    """
+
+    seen: Counter[PairDisposition] = Counter()
+    packs_missing_a_class = 0
+    packs = 60
+    for seed in range(400, 400 + packs):
+        _, truths = generate_ambiguity_v2_pack(seed=seed, key=_KEY)
+        present = {pair.disposition for pair in truths}
+        packs_missing_a_class += len(present) < len(PairDisposition)
+        seen.update(pair.disposition for pair in truths)
+
+    total = sum(seen.values())
+    for disposition in PairDisposition:
+        assert seen[disposition] / total >= 0.08, (
+            disposition.value,
+            seen[disposition] / total,
+        )
+    assert packs_missing_a_class / packs <= 0.02, packs_missing_a_class / packs

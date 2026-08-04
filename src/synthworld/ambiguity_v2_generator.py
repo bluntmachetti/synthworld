@@ -71,7 +71,12 @@ _PREVALENCE = (0.25, 0.70)
 #: drawn from per pair. The low end is what produces genuinely undecidable pairs.
 _COMPLETENESS = (0.05, 0.85)
 
-_PAIRS = (18, 44)
+#: Raised from `(18, 44)`. Whether a pack contains all three dispositions is a
+#: *sample-size* question as much as a threshold one: at a 9.6% insufficient rate an
+#: 18-pair pack misses that class 16% of the time and a 50-pair pack 0.6%. Widening
+#: the band far enough to fix it alone would have broken a canonical scenario, so both
+#: levers are used together - see `_MERGE_BITS`.
+_PAIRS = (50, 90)
 _DISTRACTORS = (8, 30)
 
 

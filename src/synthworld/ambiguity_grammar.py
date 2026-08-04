@@ -167,8 +167,23 @@ _TOWNS = ("Testville", "Sampleton", "Exampleford")
 
 #: Log-odds in bits. Zero is the point of indifference, so a band around it is where the
 #: evidence genuinely settles nothing rather than where two thresholds happen to sit.
-_MERGE_BITS = 3.0
-_SEPARATE_BITS = -3.0
+#: Where the evidence stops being merely suggestive. Fellegi-Sunter's decision is
+#: *three*-way - link, possible link, non-link - and the middle region is not a leftover
+#: between two thresholds: it is sized by the error rates you are willing to tolerate.
+#: Picking the thresholds by hand is what starved it.
+#:
+#: At +/-3.0 the middle class held 7.6% of pairs and **8.5% of packs contained none
+#: at all**, so one pack in twelve was a two-class benchmark wearing a three-class
+#: enum. At +/-4.0 - odds of 16:1 before either decision is taken - it holds 9.6%, the
+#: false-link rate is 0.42% and the false-non-link rate 1.92%.
+#:
+#: Moving further was tempting and is wrong. At +/-5.0 the middle class is healthier
+#: still, but a *third* canonical scenario starts to disagree with v1:
+#: `partial_but_sufficient` becomes insufficient, contradicting the premise its own name
+#: states. A rule that disagrees with the pack's vocabulary is not better calibrated, it
+#: is differently wrong. The rest of the balance comes from pack size instead.
+_MERGE_BITS = 4.0
+_SEPARATE_BITS = -4.0
 
 #: Kinds that are not independent evidence, grouped by what they are read off.
 #:
