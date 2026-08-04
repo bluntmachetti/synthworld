@@ -242,9 +242,17 @@ def sample_relation(
     # 1e-9 of resolution over the outcome space, from a keyed draw. Comparing against
     # cumulative mass rather than bucketing an integer, so the three outcomes get their
     # stated probabilities and not a rounding of them.
-    point = (
-        _draw(seed, f"relation:{kind.value}:{same_entity}", slot, key) % 10**9
-    ) / 10**9
+    # The purpose string does not mention `same_entity`, so the label never enters the
+    # hash material. It reaches the outcome only by choosing which row the point is
+    # read against, which is the one channel it is supposed to have. An earlier version
+    # keyed the draw on it, which was not exploitable without the key but put the label
+    # in the material for no benefit - and every leak this pack has had began as
+    # something that was not exploitable yet.
+    #
+    # Sharing one point across both rows also couples them: the same pair drawn as a
+    # match and as a non-match moves through the same quantile, which is the standard
+    # common-random-numbers trick and makes the two populations comparable.
+    point = (_draw(seed, f"relation:{kind.value}", slot, key) % 10**9) / 10**9
     # The last outcome is the fallthrough rather than a case, so there is no branch
     # here that a valid table can never reach - the suite gates on full branch coverage
     # and forbids pragmas, and an unreachable arm would have to be one or the other.

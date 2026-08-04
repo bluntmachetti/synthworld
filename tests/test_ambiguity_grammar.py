@@ -23,6 +23,7 @@ from synthworld.ambiguity_grammar import (
     disposition_of,
     kind_fingerprint,
     render_relation,
+    sample_relation,
     validate_parameters,
     weight_of,
 )
@@ -445,3 +446,39 @@ def test_a_row_that_is_not_a_distribution_is_refused() -> None:
 
     with pytest.raises(ValueError, match="must sum to one"):
         validate_parameters({K.PHONE: ((0.5, 0.2, 0.2), (0.1, 0.1, 0.8))})
+
+
+@pytest.mark.parametrize("kind", sorted(K))
+def test_the_label_never_enters_the_draw_material(kind: K) -> None:
+    """`same_entity` must reach the outcome only by choosing a row, never by hashing.
+
+    Checked behaviourally rather than by reading the source. One point is drawn per
+    (kind, seed, slot) and read against `m` or `u`, so the two outcomes a pair would get
+    as a match and as a non-match must be consistent with a *single* quantile. If the
+    label were in the hash material the two draws would be independent, and the
+    quantile intervals they imply would routinely fail to intersect.
+
+    Not exploitable without the key either way - but every leak this pack has had began
+    as something that was not exploitable yet, and the earlier version put the label in
+    the material for no benefit at all.
+    """
+
+    def interval(
+        row: tuple[float, float, float], outcome: Relation
+    ) -> tuple[float, float]:
+        bounds = (0.0, row[0], row[0] + row[1], 1.0)
+        index = (Relation.EQUAL, Relation.NEAR, Relation.FAR).index(outcome)
+        return bounds[index], bounds[index + 1]
+
+    matched, unmatched = _FS[kind]
+    for seed in range(300):
+        low, high = interval(
+            matched,
+            sample_relation(kind, same_entity=True, seed=seed, slot=0, key=b"k"),
+        )
+        other_low, other_high = interval(
+            unmatched,
+            sample_relation(kind, same_entity=False, seed=seed, slot=0, key=b"k"),
+        )
+
+        assert max(low, other_low) < min(high, other_high), (kind.value, seed)

@@ -28,6 +28,7 @@ from uuid import UUID
 from synthworld.ambiguity import PairDisposition
 from synthworld.ambiguity_grammar import (
     EvidenceKind,
+    Relation,
     _draw,
     disposition_of,
     render_relation,
@@ -109,6 +110,39 @@ def _comparable(seed: int, slot: int, key: bytes) -> tuple[EvidenceKind, ...]:
     return (*_IN_NAME, *(optional or (EvidenceKind.EMAIL,)))
 
 
+def _carried(
+    seed: int, slot: int, key: bytes, kinds: tuple[EvidenceKind, ...], side: int
+) -> tuple[EvidenceKind, ...]:
+    """Which of a pair's comparable kinds this side actually records.
+
+    Drawn per side, so the two records in a pair carry different fields - which is the
+    ordinary situation and the one v1's vocabulary has a word for. Without this,
+    `LOPSIDED` is unreachable: every pair produced EQUAL, NEAR or FAR and both sides
+    carried the same fields in all 626 pairs across twenty seeds. A quarter of the
+    relation vocabulary being unreachable is not a small gap - one record holding a
+    phone the other lacks is the most common thing in record linkage, and a pack that
+    cannot express it is not exercising the missingness rule at all.
+
+    The names are exempt: every record has a display name, so a given or family name is
+    never one-sided. That is a property of the corpus format, not a modelling choice.
+    """
+
+    carried = tuple(
+        kind
+        for kind in kinds
+        if kind in _IN_NAME
+        or _fraction(seed, f"carries:{kind.value}:{side}", slot, key) < 0.82
+    )
+    # Every record needs at least one attribute, and the names are not attributes. The
+    # fallback has to come from `kinds` rather than being a fixed kind: a constant would
+    # name something this pair may not be comparable on at all, and the record would be
+    # built with an attribute the other side has no counterpart for by construction.
+    if len(carried) > len(_IN_NAME):
+        return carried
+    spare = next(kind for kind in kinds if kind not in _IN_NAME)
+    return (*carried, spare)
+
+
 def _record_id(seed: int, slot: int, side: int, key: bytes) -> UUID:
     return UUID(int=_draw(seed, f"record:{side}", slot, key) % (1 << 128), version=4)
 
@@ -124,11 +158,19 @@ def _pair(
     # while each pair stays an independent draw. A prevalence fixed across seeds - v1's
     # was five merges in fifteen, every time - is a free win for guessing the majority.
     same_entity = _fraction(seed, "same-entity", slot, key) < prevalence
+    comparable = _comparable(seed, slot, key)
+    carried = tuple(_carried(seed, slot, key, comparable, side) for side in (0, 1))
+    both = [kind for kind in comparable if all(kind in item for item in carried)]
+    # A kind only one side records is `LOPSIDED`: missingness, not disagreement. It is
+    # worth zero bits, so a sparse record is not punished for being sparse.
     relations = {
         kind: sample_relation(
             kind, same_entity=same_entity, seed=seed, slot=slot, key=key
         )
-        for kind in _comparable(seed, slot, key)
+        if kind in both
+        else Relation.LOPSIDED
+        for kind in comparable
+        if any(kind in item for item in carried)
     }
     rendered = {
         kind: render_relation(kind, relation, seed=seed, key=key, slot=slot)
@@ -139,7 +181,8 @@ def _pair(
     # gates on full branch coverage and forbids pragmas.
     ids = sorted(_record_id(seed, slot, side, key) for side in (0, 1))
     records = tuple(
-        _record(seed, slot, side, key, ids[side], rendered) for side in (0, 1)
+        _record(seed, slot, side, key, ids[side], rendered, carried[side])
+        for side in (0, 1)
     )
     truth = DerivedPairTruth(
         left_record_id=ids[0],
@@ -160,6 +203,7 @@ def _record(
     key: bytes,
     record_id: UUID,
     rendered: dict[EvidenceKind, tuple[str, str]],
+    carried: tuple[EvidenceKind, ...],
 ) -> PublicIdentityRecord:
     """One side of a pair, dressed in metadata drawn independently of the answer.
 
@@ -177,7 +221,7 @@ def _record(
             + _fraction(seed, f"conf:{kind.value}:{side}", slot, key) * 0.4,
         )
         for kind in sorted(rendered)
-        if kind not in _IN_NAME
+        if kind not in _IN_NAME and kind in carried
     )
     # Indexed, not `.get` with a default: `_comparable` always returns both name kinds,
     # so a default would be a branch that never runs and a claim that is never true.
@@ -217,7 +261,15 @@ def _distractor(seed: int, index: int, key: bytes) -> PublicIdentityRecord:
         kind: render_relation(kind, relation, seed=seed, key=key, slot=slot)
         for kind, relation in relations.items()
     }
-    return _record(seed, slot, 0, key, _record_id(seed, slot, 0, key), rendered)
+    return _record(
+        seed,
+        slot,
+        0,
+        key,
+        _record_id(seed, slot, 0, key),
+        rendered,
+        _carried(seed, slot, key, tuple(relations), 0),
+    )
 
 
 def generate_ambiguity_v2_pack(

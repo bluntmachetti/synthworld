@@ -210,10 +210,15 @@ def test_the_fingerprint_no_longer_determines_the_answer() -> None:
 
     Here the same decoder is trained on sixty public-key seeds and scored on held-out
     seeds under a held-out key, with a majority-class fallback so that an unseen
-    fingerprint costs it a guess rather than a certainty. What it retains is legitimate:
-    the fingerprint *is* evidence, and agreement patterns really do predict identity.
-    What it loses is the part v1 could not express - whether a disagreement is a
-    reformatted phone number or a different person's.
+    fingerprint costs it a guess rather than a certainty. It gets **0.694** against a
+    0.488 majority baseline, and **0.840** on the 67.6% of pairs whose fingerprint it
+    has seen before.
+
+    What it retains is legitimate: the fingerprint *is* evidence, and agreement patterns
+    really do predict identity. A benchmark where reading the evidence did not help
+    would be broken in the other direction. What it loses is the part v1 could not
+    express - whether a disagreement is a reformatted phone number or a different
+    person's, which the fingerprint flattens to "did not agree".
     """
 
     learned: dict[tuple[tuple[str, bool], ...], Counter[PairDisposition]] = defaultdict(
@@ -257,3 +262,48 @@ def test_the_schema_version_is_declared() -> None:
 
     assert task.schema_version == AMBIGUITY_V2_SCHEMA_VERSION == "2.0.0"
     assert isinstance(task.corpus, PublicConnectionCorpus)
+
+
+def test_the_two_sides_of_a_pair_carry_different_fields() -> None:
+    """One record holding a phone the other lacks is the ordinary case, not an edge.
+
+    A first version drew field presence per pair rather than per side, so both records
+    always carried exactly the same kinds: `LOPSIDED` never occurred in 3277 relations
+    and all 626 pairs had identically sized records. A quarter of the relation
+    vocabulary was unreachable, which meant the missingness rule - worth zero bits, so
+    that a sparse record is not punished for being sparse - was never exercised by any
+    generated pack.
+    """
+
+    relations: Counter[Relation] = Counter()
+    same_size = Counter[bool]()
+    for seed in range(1, 21):
+        task, truths = generate_ambiguity_v2_pack(seed=seed, key=_KEY)
+        by_id = {record.id: record for record in task.corpus.identity_records}
+        for pair in truths:
+            relations.update(pair.relations.values())
+            same_size[
+                len(by_id[pair.left_record_id].attributes)
+                == len(by_id[pair.right_record_id].attributes)
+            ] += 1
+
+    assert relations[Relation.LOPSIDED]
+    assert same_size[False]
+    assert set(relations) == set(Relation)
+
+
+def test_a_one_sided_kind_appears_on_exactly_one_record() -> None:
+    """Otherwise `LOPSIDED` is a label rather than something the corpus shows."""
+
+    task, truths = generate_ambiguity_v2_pack(seed=4, key=_KEY)
+    by_id = {record.id: record for record in task.corpus.identity_records}
+    checked = 0
+    for pair in truths:
+        left = {item.kind.value for item in by_id[pair.left_record_id].attributes}
+        right = {item.kind.value for item in by_id[pair.right_record_id].attributes}
+        for kind, relation in pair.relations.items():
+            if relation is Relation.LOPSIDED and kind.value in left | right:
+                checked += 1
+                assert (kind.value in left) != (kind.value in right), kind.value
+
+    assert checked
