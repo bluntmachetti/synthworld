@@ -566,3 +566,155 @@ def test_a_one_sided_value_is_drawn_from_the_same_pool_as_a_paired_one(kind: K) 
     }
 
     assert one_sided == paired
+
+
+def test_one_agreeing_field_is_never_enough_to_merge() -> None:
+    """A coincidence until something else agrees too.
+
+    A birth date alone scores +3.95 and a given name +4.64, both over the +3.0
+    threshold, so two records agreeing on a date and nothing else were a merge. That was
+    reachable: 79 of 14,062 generated pairs merged on the display name alone, and two of
+    those were genuinely two people.
+
+    Raising the threshold would be the wrong instrument - it weakens every vector rather
+    than the ones with nothing corroborating them.
+    """
+
+    for kind in sorted(K):
+        assert disposition_of({kind: Relation.EQUAL}) is not PairDisposition.MERGE, (
+            kind.value
+        )
+
+    assert (
+        disposition_of({K.DATE_OF_BIRTH: Relation.EQUAL, K.GIVEN_NAME: Relation.EQUAL})
+        is PairDisposition.MERGE
+    )
+
+
+def test_the_two_halves_of_a_name_corroborate_once() -> None:
+    """A given name and a family name are one string, not two witnesses.
+
+    The corroboration rule above is defeated by its own premise otherwise: `GIVEN_NAME`
+    and `FAMILY_NAME` are the two halves of one `display_name`, so counting them
+    separately let a bare name match satisfy "two independent kinds agree" and carry a
+    merge anyway. Measured at 93 of 3,844 merges riding on the display name alone,
+    including pairs that were genuinely two people and contradicted each other on
+    employer.
+    """
+
+    assert (
+        disposition_of({K.GIVEN_NAME: Relation.EQUAL, K.FAMILY_NAME: Relation.EQUAL})
+        is not PairDisposition.MERGE
+    )
+    # One genuinely independent field is all it takes.
+    assert (
+        disposition_of(
+            {
+                K.GIVEN_NAME: Relation.EQUAL,
+                K.FAMILY_NAME: Relation.EQUAL,
+                K.DATE_OF_BIRTH: Relation.EQUAL,
+            }
+        )
+        is PairDisposition.MERGE
+    )
+
+
+def test_the_veto_yields_to_overwhelming_agreement() -> None:
+    """A contradicted given name refuses a merge. It does not conclude two people.
+
+    An absolute veto forces `separate` against +15.6 bits - every other kind
+    byte-identical, including email, phone and username. The twins case justifies
+    overriding family name, birth date, address and school year. It does not justify
+    overriding three shared strong identifiers.
+    """
+
+    twins = {
+        K.GIVEN_NAME: Relation.FAR,
+        K.FAMILY_NAME: Relation.EQUAL,
+        K.DATE_OF_BIRTH: Relation.EQUAL,
+        K.FULL_ADDRESS: Relation.EQUAL,
+        K.SCHOOL_YEAR: Relation.EQUAL,
+    }
+    everything = {kind: Relation.EQUAL for kind in K} | {K.GIVEN_NAME: Relation.FAR}
+
+    assert disposition_of(twins) is PairDisposition.SEPARATE
+    assert disposition_of(everything) is PairDisposition.INSUFFICIENT
+
+
+def test_a_veto_does_not_withhold_when_the_evidence_has_already_settled_it() -> None:
+    """Overwhelming evidence of two people is `separate`, not `undecidable`.
+
+    The yield rule compared the *positive* support alone and discarded every
+    contradiction beside it, so this pair - differing birth date, email, surname and
+    address, at -9.184 bits overall - came back `insufficient` because three identifiers
+    happened to agree. 1,199 vectors did that.
+    """
+
+    overwhelming = {
+        K.GIVEN_NAME: Relation.FAR,
+        K.DATE_OF_BIRTH: Relation.FAR,
+        K.EMAIL: Relation.FAR,
+        K.FAMILY_NAME: Relation.FAR,
+        K.FULL_ADDRESS: Relation.FAR,
+        K.EMPLOYER: Relation.EQUAL,
+        K.PHONE: Relation.EQUAL,
+        K.SCHOOL_YEAR: Relation.EQUAL,
+        K.USERNAME: Relation.EQUAL,
+    }
+
+    assert sum(weight_of(kind, r) for kind, r in overwhelming.items()) < -9.0
+    assert disposition_of(overwhelming) is PairDisposition.SEPARATE
+
+
+#: A subset small enough to enumerate in a suite that runs in seconds, chosen to include
+#: the veto kind, the other half of the display name, and identifiers either side of it.
+#: The full 4^9 enumeration finds nothing this misses and takes minutes.
+_ENUMERATED = (
+    K.GIVEN_NAME,
+    K.FAMILY_NAME,
+    K.DATE_OF_BIRTH,
+    K.USERNAME,
+    K.EMPLOYER,
+)
+_BETTER = {Relation.FAR: Relation.NEAR, Relation.NEAR: Relation.EQUAL}
+_RANK = {
+    PairDisposition.SEPARATE: 0,
+    PairDisposition.INSUFFICIENT: 1,
+    PairDisposition.MERGE: 2,
+}
+
+
+def test_better_evidence_never_gives_a_worse_verdict() -> None:
+    """Improving one comparison must never move the answer away from merge.
+
+    It could. `given_name` FAR -> NEAR lifts the veto and moves the pair to the ordinary
+    branch, and that turned `insufficient` into `separate` on exactly 3 vectors - the
+    evidence got better and the verdict got worse. Two branches with different logic do
+    that at the seam between them unless the seam is checked, and only an enumeration
+    checks a seam.
+    """
+
+    for combination in product(
+        (Relation.EQUAL, Relation.NEAR, Relation.FAR, Relation.LOPSIDED),
+        repeat=len(_ENUMERATED),
+    ):
+        vector = dict(zip(_ENUMERATED, combination, strict=True))
+        before = disposition_of(vector)
+        for kind, relation in vector.items():
+            if relation not in _BETTER:
+                continue
+            after = disposition_of(vector | {kind: _BETTER[relation]})
+
+            assert _RANK[after] >= _RANK[before], (kind.value, vector, before, after)
+
+
+def test_no_relation_is_worth_exactly_nothing() -> None:
+    """`school_year: NEAR` scored 0.000 bits - in the vocabulary, inert in use.
+
+    `LOPSIDED` is excluded because zero is what it means: missingness is not evidence
+    either way, which is the one weight in this module nobody argued with.
+    """
+
+    for kind in sorted(K):
+        for relation in (Relation.EQUAL, Relation.NEAR, Relation.FAR):
+            assert weight_of(kind, relation) != 0.0, (kind.value, relation.value)
