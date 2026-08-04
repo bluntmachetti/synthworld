@@ -36,6 +36,10 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
         Path(".github/workflows/release.yml"),
         Path("CHANGELOG.md"),
+        # The worked broker adapter names the consumer once, in its module docstring,
+        # to say whose integration pattern it demonstrates - reviewed 2026-08-04 with
+        # PR #95, which is the review this allowlist exists to force.
+        Path("examples/evaluate_broker_adapter.py"),
         Path("Makefile"),
         Path("README.md"),
         Path("ROADMAP.md"),
@@ -48,6 +52,9 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
 _ALLOWED_PUBLIC_ADAPTER_EXAMPLES = frozenset(
     {
         Path("agent-authority-contract/adapter-template/adapter.py"),
+        # Public-timeline-only by construction; asserts nothing truth-side is
+        # reachable from it. Reviewed 2026-08-04 with PR #95.
+        Path("examples/evaluate_broker_adapter.py"),
         Path("src/synthworld/search_adapter.py"),
     }
 )

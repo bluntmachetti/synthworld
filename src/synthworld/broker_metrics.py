@@ -49,8 +49,7 @@ from typing import Literal, Self
 
 from pydantic import Field, model_validator
 
-from synthworld.ambiguity_partition import DenominatedMetric
-from synthworld.models import SyntheticModel
+from synthworld.models import DenominatedMetric, SyntheticModel
 from synthworld.temporal import (
     ListingAttributeKind,
     PrivacyEventKind,
@@ -88,6 +87,12 @@ class ListingAssessment(SyntheticModel):
     requested_removal: bool
     #: Whether the system believes copies survive elsewhere.
     believed_propagated: bool = False
+    #: The tick by which the system expects every downstream copy to be gone. `None`
+    #: makes no lag claim - either the system believes copies never fully propagate,
+    #: or it declines to predict - and contributes nothing to the lag support. A claim
+    #: is scored only against listings whose copies really do all go (#65), because
+    #: "how late" is a question with no answer where the answer is "never".
+    expected_propagation_complete_by: int | None = Field(default=None, ge=0)
     #: Whether the system raised a reappearance alert.
     reappearance_alerted: bool = False
 
@@ -113,7 +118,7 @@ class BrokerAssessment(SyntheticModel):
     is scored as a miss rather than excluded, so partial is allowed but not free.
     """
 
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.1.0"] = "1.1.0"
     as_of: int = Field(ge=0)
     listings: tuple[ListingAssessment, ...]
 
@@ -125,10 +130,34 @@ class BrokerAssessment(SyntheticModel):
         return self
 
 
+class PropagationLagMetric(SyntheticModel):
+    """How far off the system's propagation-completion predictions were, with support.
+
+    Absolute error in ticks, averaged over the listings where the question has an
+    answer: copies exist, every copy is really gone by `as_of`, and the system made a
+    prediction. `None` with zero support rather than a silent 0.0 - the empty case is
+    "no evidence", not "perfect".
+    """
+
+    total_absolute_error: int = Field(ge=0)
+    support: int = Field(ge=0)
+    support_meaning: str
+    mean_absolute_error: float | None
+
+    @model_validator(mode="after")
+    def require_the_mean_to_match_its_parts(self) -> Self:
+        if self.support == 0:
+            if self.mean_absolute_error is not None:
+                raise ValueError("a lag mean with no support is an invented number")
+        elif self.mean_absolute_error != self.total_absolute_error / self.support:
+            raise ValueError("the lag mean must equal total error over support")
+        return self
+
+
 class BrokerRemovalMetrics(SyntheticModel):
     """Six families, never combined."""
 
-    schema_version: Literal["1.0.0"] = "1.0.0"
+    schema_version: Literal["1.1.0"] = "1.1.0"
     scoring_version: Literal["2.0.0"] = BROKER_SCORING_VERSION
     task: Literal["broker_removal"] = "broker_removal"
     as_of: int = Field(ge=0)
@@ -166,6 +195,9 @@ class BrokerRemovalMetrics(SyntheticModel):
     #: claimed about completion.
     missed_surviving_copies: int
     propagation_accuracy: DenominatedMetric
+    #: The lag half of the family (#65). `propagation_accuracy` asks *whether* copies
+    #: survive right now; this asks *when* the system said they would all be gone.
+    propagation_lag: PropagationLagMetric
     #: Reappearances by `as_of`, and how many were alerted.
     recurrence_count: int = Field(ge=0)
     recurrence_detected: int = Field(ge=0)
@@ -271,6 +303,7 @@ def evaluate_broker_assessment(
     unwarranted_requests = warranted = request_correct = 0
     false_completions = missed_completions = completion_correct = 0
     missed_copies = propagation_scored = propagation_correct = 0
+    lag_support = lag_error = 0
     recurrence_total = recurrence_found = false_alerts = 0
 
     for reference in discoverable:
@@ -280,7 +313,22 @@ def evaluate_broker_assessment(
         really_removed = fact.removed_at is not None and fact.removed_at <= tick
         really_back = fact.reappeared_at is not None and fact.reappeared_at <= tick
         gone_now = really_removed and not really_back
-        copies_survive = bool(fact.downstream_refs) and really_removed
+        # A copy survives *as of this tick* - a flat "copies exist" reading scored a
+        # slowly-propagating deletion identically to one that never propagates, which
+        # is #65's first finding. Copies only count once the source is really gone;
+        # before that the listing itself is the surviving record.
+        copies_survive = really_removed and any(
+            copy.removed_at is None or copy.removed_at > tick
+            for copy in fact.downstream_copies
+        )
+        # The lag question has an answer only when every copy is really gone by now.
+        copy_removals = [copy.removed_at for copy in fact.downstream_copies]
+        all_copies_gone_at = (
+            max(gone for gone in copy_removals if gone is not None)
+            if copy_removals
+            and all(gone is not None and gone <= tick for gone in copy_removals)
+            else None
+        )
 
         # Every family is denominated over what the timeline *showed*, not over what
         # the system chose to answer. A first revision denominated four of them over
@@ -346,6 +394,14 @@ def evaluate_broker_assessment(
                 propagation_correct += 1
             elif copies_survive:
                 missed_copies += 1
+        if (
+            all_copies_gone_at is not None
+            and answer.expected_propagation_complete_by is not None
+        ):
+            lag_support += 1
+            lag_error += abs(
+                answer.expected_propagation_complete_by - all_copies_gone_at
+            )
 
         if really_back:
             recurrence_found += answer.reappearance_alerted
@@ -383,6 +439,14 @@ def evaluate_broker_assessment(
             "listings the timeline has discovered",
         ),
         missed_surviving_copies=missed_copies,
+        propagation_lag=PropagationLagMetric(
+            total_absolute_error=lag_error,
+            support=lag_support,
+            support_meaning=(
+                "predicted listings whose downstream copies have all really gone"
+            ),
+            mean_absolute_error=lag_error / lag_support if lag_support else None,
+        ),
         propagation_accuracy=_metric(
             propagation_correct,
             propagation_scored,
@@ -416,11 +480,10 @@ def believe_the_broker(timeline: PublicTimeline) -> BrokerAssessment:
     # 3 - so the baseline believed a refused listing had been removed. The comment
     # above it claimed reading from the vocabulary made the baseline safe from exactly
     # that. It caused it.
-    confirmed = {
-        item.object_ref
-        for item in timeline.events
-        if item.kind is PrivacyEventKind.REMOVAL_CONFIRMED and item.object_ref
-    }
+    confirmed: dict[str, int] = {}
+    for item in timeline.events:
+        if item.kind is PrivacyEventKind.REMOVAL_CONFIRMED and item.object_ref:
+            confirmed.setdefault(item.object_ref, item.tick)
     return BrokerAssessment(
         as_of=timeline.as_of,
         listings=tuple(
@@ -430,6 +493,12 @@ def believe_the_broker(timeline: PublicTimeline) -> BrokerAssessment:
                 believed_removed=reference in confirmed,
                 requested_removal=True,
                 believed_propagated=False,
+                # Done means done everywhere: propagation is expected complete the
+                # tick the broker confirmed. This is the prediction #65's late-copy
+                # case exists to fail - the source goes at confirmation and the
+                # mirrors go a week or two later, so this baseline's lag error is the
+                # size of exactly the gap it refuses to model.
+                expected_propagation_complete_by=confirmed.get(reference),
                 reappearance_alerted=False,
             )
             for reference in discoverable_listings(timeline)

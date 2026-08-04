@@ -30,6 +30,12 @@ from uuid import UUID
 
 from pydantic import Field, model_validator
 
+from synthworld.broker_metrics import (
+    BROKER_SCORING_VERSION,
+    BrokerAssessment,
+    BrokerEvaluationError,
+    evaluate_broker_assessment,
+)
 from synthworld.connection import (
     AdversarialCase,
     PublicAssociationRecord,
@@ -53,13 +59,15 @@ from synthworld.extraction_serialization import (
     extraction_answers_to_json,
     public_extraction_corpus_to_json,
 )
-from synthworld.models import SyntheticModel
+from synthworld.models import DenominatedMetric, SyntheticModel
 from synthworld.risk import RiskBand, RiskCaseTruth
 from synthworld.risk_generator import generate_risk_benchmark
 from synthworld.risk_serialization import (
     public_risk_corpus_to_json,
     risk_answer_key_to_json,
 )
+from synthworld.temporal import materialise
+from synthworld.temporal_generator import generate_temporal_world
 
 #: 0.2.0 since `TaskMetric` gained `family` and `support_meaning`. This is the
 #: wire-shape knob and it moves for *every* task, because `TaskMetric` is shared: an
@@ -854,6 +862,101 @@ def evaluate_risk_calibration(
     )
 
 
+def evaluate_broker_removal(
+    assessment: BrokerAssessment, *, seed: int
+) -> EvaluationReport:
+    """Score a broker-removal assessment through the unified report (#5's last gap).
+
+    The native :class:`BrokerRemovalMetrics` report remains the full account - counts,
+    both halves of each family, the lag decomposition. This projection carries each
+    family's headline ratio into the shape every other task reports in, so a consumer
+    holding five packs reads five reports with one parser. Nothing is recomputed; a
+    projection that rescored would eventually disagree with what it projects.
+
+    The world is regenerated from the seed and materialised at the assessment's own
+    tick, so a submission is scored against exactly the public timeline a consumer of
+    that seed and tick was shown.
+    """
+
+    world = generate_temporal_world(seed=seed)
+    if assessment.as_of > world.horizon:
+        raise EvaluationInputError(
+            "the assessment is for a tick after the world's horizon"
+        )
+    timeline = materialise(world, as_of=assessment.as_of)
+    try:
+        native = evaluate_broker_assessment(
+            assessment, timeline=timeline, truth=world.truth
+        )
+    except BrokerEvaluationError as error:
+        # One error type at the unified boundary, whatever the task. The broker
+        # scorer's messages are public-safe by construction, so passing one through
+        # changes the exception's face without changing what it says.
+        raise EvaluationInputError(str(error)) from error
+
+    def carried(name: str, metric: DenominatedMetric, family: str) -> TaskMetric:
+        return TaskMetric(
+            name=name,
+            value=metric.value,
+            support=int(metric.denominator),
+            family=family,
+            support_meaning=metric.denominator_meaning,
+        )
+
+    metrics = (
+        carried("discovery_coverage", native.discovery_coverage, "discovery"),
+        carried("attribution_accuracy", native.attribution_accuracy, "attribution"),
+        carried("request_recall", native.request_recall, "request_conduct"),
+        # The precision halves ride along, or the projection teaches greed. Recall
+        # alone is maximised by requesting everything and alerting on everything; the
+        # native report documents each pair as "read together or not at all", and a
+        # projection that dropped one half made a spammer indistinguishable from a
+        # careful system through the CLI. Counts, not rates - the native report
+        # defines no rate, and this projection recomputes nothing.
+        TaskMetric(
+            name="unwarranted_requests",
+            value=float(native.unwarranted_requests),
+            support=native.discoverable_count,
+            family="request_conduct",
+            support_meaning="listings the timeline has discovered",
+        ),
+        carried("completion_accuracy", native.completion_accuracy, "removal"),
+        carried("propagation_accuracy", native.propagation_accuracy, "propagation"),
+        TaskMetric(
+            name="propagation_lag_mean_error",
+            value=native.propagation_lag.mean_absolute_error,
+            support=native.propagation_lag.support,
+            family="propagation",
+            support_meaning=native.propagation_lag.support_meaning,
+        ),
+        carried("recurrence_recall", native.recurrence_recall, "recurrence"),
+        TaskMetric(
+            name="false_recurrence_alerts",
+            value=float(native.false_recurrence_alerts),
+            support=native.discoverable_count,
+            family="recurrence",
+            support_meaning="listings the timeline has discovered",
+        ),
+    )
+    return EvaluationReport(
+        scoring_version=BROKER_SCORING_VERSION,
+        task="broker_removal",
+        seed=seed,
+        # One subject per temporal world by construction.
+        persona_count=1,
+        benchmark_version=world.truth.schema_version,
+        checksum_scheme=CHECKSUM_SCHEME,
+        artifact_checksums=(
+            ("public", _sha256(timeline.model_dump_json())),
+            ("truth", _sha256(world.truth.model_dump_json())),
+        ),
+        metrics=metrics,
+        # Failure detail lives in the native report's counted fields; slices here
+        # would be a second copy that could drift from it.
+        slices=(),
+    )
+
+
 def _macro_f1(
     predicted: dict[UUID, RiskCasePrediction],
     truth: dict[UUID, RiskCaseTruth],
@@ -958,6 +1061,7 @@ __all__ = [
     "RiskCasePrediction",
     "RiskPrediction",
     "TaskMetric",
+    "evaluate_broker_removal",
     "evaluate_entity_resolution",
     "evaluate_extraction",
     "evaluate_relationship_inference",

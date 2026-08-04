@@ -19,56 +19,18 @@ from itertools import combinations
 from typing import Literal
 from uuid import UUID
 
-from pydantic import Field, model_validator
+from pydantic import Field
 
 from synthworld.ambiguity import PairDisposition, PairPrediction, PublicAmbiguityTask
 from synthworld.ambiguity_serialization import MembershipTruth
 from synthworld.evaluation import EntityResolutionPrediction
-from synthworld.models import SyntheticModel
+from synthworld.models import DenominatedMetric, SyntheticModel
 
 AMBIGUITY_MEMBERSHIP_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
 
 
 class AmbiguityPartitionEvaluationError(ValueError):
     """Raised when public input, a partition, or membership truth is malformed."""
-
-
-class DenominatedMetric(SyntheticModel):
-    """One score with the exact numerator and denominator used to compute it."""
-
-    value: float | None
-    numerator: float = Field(ge=0.0)
-    denominator: float = Field(ge=0.0)
-    denominator_meaning: str
-    undefined_reason: str | None = None
-
-    @model_validator(mode="after")
-    def validate_fraction(self) -> DenominatedMetric:
-        numbers = (self.numerator, self.denominator)
-        if not all(math.isfinite(item) for item in numbers):
-            raise ValueError("metric numerator and denominator must be finite")
-        if not self.denominator_meaning.strip():
-            raise ValueError("metric denominator meaning must be nonblank")
-        if self.value is None:
-            if self.undefined_reason is None:
-                raise ValueError("an undefined metric must explain why")
-        else:
-            if not math.isfinite(self.value):
-                raise ValueError("metric value must be finite")
-            if not 0.0 <= self.value <= 1.0:
-                raise ValueError("metric value must be in [0, 1]")
-            if self.undefined_reason is not None:
-                raise ValueError("a defined metric cannot have an undefined reason")
-            if not self.denominator:
-                raise ValueError("a defined metric cannot have a zero denominator")
-            if not math.isclose(
-                self.value,
-                self.numerator / self.denominator,
-                rel_tol=1e-12,
-                abs_tol=1e-12,
-            ):
-                raise ValueError("metric value must equal numerator / denominator")
-        return self
 
 
 class AmbiguityMembershipMetrics(SyntheticModel):

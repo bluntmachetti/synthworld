@@ -809,3 +809,34 @@ def test_generate_households_refuses_a_world_below_its_declared_shape(
     assert exit_code == 1
     assert "largest component" in capsys.readouterr().err
     assert not root.exists()
+
+
+def test_evaluate_broker_command_scores_an_assessment(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """`synthworld evaluate broker` - the wiring #5's acceptance criteria required."""
+
+    from synthworld.broker_metrics import match_on_published_evidence
+    from synthworld.temporal import materialise
+    from synthworld.temporal_generator import generate_temporal_world
+
+    world = generate_temporal_world(seed=11)
+    timeline = materialise(world, as_of=world.horizon)
+    predictions = tmp_path / "assessment.json"
+    predictions.write_text(
+        match_on_published_evidence(timeline).model_dump_json(), encoding="utf-8"
+    )
+
+    exit_code = main(
+        ["evaluate", "broker", "--predictions", str(predictions), "--seed", "11"]
+    )
+
+    report = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert report["task"] == "broker_removal"
+    assert {metric["name"] for metric in report["metrics"]} >= {
+        "discovery_coverage",
+        "propagation_lag_mean_error",
+        "recurrence_recall",
+    }
