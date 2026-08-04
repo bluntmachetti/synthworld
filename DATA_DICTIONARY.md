@@ -263,12 +263,34 @@ which is what closing the channel looks like. Published packs use the empty key 
 output, which is correct — their answer keys ship here, so they claim no secret and
 remain auditable. Generate evaluation packs with a key you do not publish.
 
+**Evaluation-key custody.** The keys in this repository's tests and published packs
+(`b""`, `b"held-out-key"` and similar) are deliberately public and claim no secrecy;
+their packs are auditable precisely because anyone can regenerate them. A key used for a
+*real* evaluation is a secret, and it is governed:
+
+- **Generation**: at least 256 bits from a CSPRNG (`secrets.token_bytes(32)`); never a
+  phrase, never derived from the seed.
+- **Storage**: outside the repository, in a secret store; injected into CI or harnesses
+  as masked ephemeral environment material. The Gitleaks scan in CI is a backstop, not
+  the mechanism.
+- **Scope and rotation**: one key per evaluation campaign. Scores are comparable only
+  within a key; rotating starts a new comparison, and that is the point of rotating.
+- **Never serialized**: no key bytes, key digests, or key-derived identifiers in
+  artifacts, receipts, or logs. Key recovery yields every latent draw and therefore
+  every answer — it voids the evaluation, not just weakens it.
+
 Held-out private seeds are necessary for competitive evaluation but not always
 sufficient. A seed protects surface values. Where a pack's case list is fixed and
 each case is defined by its evidence pattern — as in the ambiguity pack, whose
 scenarios appear exactly once each — the label remains derivable from the repository
 alone, whatever the seed. Read each pack's own section for what its seeds do and do
 not conceal.
+
+**Reading v1 results at the right size.** Keyed v1 variants vary *surfaces*, not
+structure: every variant contains the same fifteen scenario pairs re-skinned. A run over
+fifty variants is therefore evidence about **fifteen structural cases**, deterministically
+replicated — not about 750 independent problems — and should be reported at that size.
+Structural cross-seed variation is what v2 adds.
 
 #### Ambiguity v2: what a held-out seed conceals
 
@@ -292,9 +314,22 @@ Stated precisely, for a pack generated with an unpublished key:
 - **Not claimed:** that `same_entity` is recoverable from the evidence. It often is not,
   and that is the point — see below.
 
-The difficulty is therefore comparison, not guessing a hidden mapping: `Sørensen`
-against `Sorensen`, one phone line written three ways, an initial against a full name,
-and a field one record carries and the other does not.
+**What v2 does and does not measure — read this before using it.** The *construction*
+above is sound and measured: labels derive from evidence, metadata carries nothing (a
+metadata-only attacker scores 0.484 against a 0.504 majority baseline — chance), and
+class balance is asserted. The *surfaces* are placeholders: every rendered value encodes
+its identity index in cleartext, so a ~30-line normaliser recovers every relation
+exactly and scores **1.0000** on held-out-key packs. A successor design with realistic
+pools and edit damage was adversarially reviewed and also fell — pool inversion 0.9967,
+pool-membership alone 0.88–0.90, a one-bit `display_name ==` classifier 0.8096 — and
+was closed unmerged. **Do not use v2 to rank resolvers.** It is a calibrated,
+leak-free scaffold whose difficulty work is tracked in #80, where a reviewed
+structured-noise design with a computed error floor is parked awaiting implementation.
+
+One clarification the failures made precise: **a key conceals which sample was drawn,
+never the law.** Keying prevents recomputation of metadata free choices; it cannot make
+published evidence harder to decode, because the generator, pools and format strings
+are public source and the reachable value set is enumerable offline.
 
 Two consequences worth stating plainly. **`disposition` and `same_entity` are allowed
 to differ.** The disposition is what the public evidence justifies; `same_entity` is
