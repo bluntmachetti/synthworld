@@ -146,6 +146,54 @@ contains ABAC/ReBAC component truth and compiled aggregate access state. Both
 trees have exact canonical inventories and digest-bound manifests; loaders reject
 extra, missing, non-regular, noncanonical, stale, or cross-bound artifacts.
 
+## Identity-fabric smoke benchmark
+
+The independently versioned `identity_fabric` package is the first bounded
+directory/access-state slice of issue #7. It consumes the fixed enterprise
+universe, corpus, native policy inputs, and compiled component states; it does not
+introduce an identity-topology layer or add a principal, account, group, role,
+target, atom, request, or cell. EADS continues to own operational systems,
+services, dependencies, deployment/network topology, and business impact.
+
+The public input contains only directory/account/access observations, declared
+intent and policy inputs, two ordered immutable checkpoint states, and a
+vendor-neutral query inventory. Evaluator artifacts separately contain canonical
+account bindings, direct and effective membership, direct/group/hierarchy role
+resolution, direct and inherited entitlement truth, birthright and approved
+exception classification, intended/effective/final access, SSD and session DSD,
+ABAC/ReBAC component truth, redundant derivations, access outside birthright,
+access outside intent, privilege accumulation, and case labels. An approved
+exception is deliberately non-birthright without being classified as sprawl.
+Checkpoint `sequence` is only canonical ordering between declared immutable
+snapshots; it is not time or a second clock. Every validity and lifecycle
+decision continues to use the existing integer `tick` axis.
+
+Metrics remain independent and state their exact denominators. Directory/RBAC,
+ABAC, and ReBAC component reports are retained alongside separate membership,
+role-resolution, account-binding/lifecycle, entitlement, birthright, exception,
+conflict, redundancy, sprawl, and cross-checkpoint accumulation metrics. There is
+no combined identity-fabric or authorization score. Missing predictions score as
+incorrect; unknown checkpoint, query, cell, or benchmark bindings fail.
+
+Five intentionally weak baselines make the important distinctions observable:
+direct-only membership, role resolution without hierarchy or nested groups,
+trusting recorded account ownership, applying only the latest checkpoint, and
+classifying every non-birthright grant as sprawl. The generated reference pack
+contains a dedicated failure for each shortcut while preserving the pinned PR2
+universe and PR3 corpus bytes.
+
+Export writes exactly one canonical public input plus its manifest under
+`public/`, and exactly one evaluator bundle plus its manifest under `evaluator/`.
+The public-only loader never traverses the evaluator directory; the evaluator
+loader recompiles all truth and verifies the cross-visibility bindings.
+
+This slice evaluates account observations at the corpus's existing integer ticks,
+but does not claim to deliver the broader lifecycle/governance portion of #7.
+Joiner/mover/leaver event programmes, access reviews, ownership remediation,
+workflow evidence, and authority-change legitimacy remain later separately typed
+work. The pack is also not a directory service, IGA workflow system, PDP, policy
+engine, SGNL client, runtime enforcement service, or continuous-assurance agent.
+
 ## Pure standards projections
 
 The projection package performs deterministic data conversion only:

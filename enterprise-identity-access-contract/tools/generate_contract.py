@@ -33,6 +33,21 @@ from synthworld.enterprise.conformance.models import (
     AuthorizationConformanceVectorV1,
     PolicyCoverageManifestV1,
 )
+from synthworld.enterprise.identity_fabric.metrics import (
+    evaluate_enterprise_identity_fabric,
+    perfect_enterprise_identity_fabric_prediction,
+)
+from synthworld.enterprise.identity_fabric.models import (
+    EnterpriseIdentityFabricBenchmarkV1,
+    EnterpriseIdentityFabricEvaluatorArtifactsV1,
+    EnterpriseIdentityFabricMetricsV1,
+    EnterpriseIdentityFabricPredictionV1,
+    EnterpriseIdentityFabricPublicInputV1,
+    EnterpriseIdentityFabricTruthV1,
+)
+from synthworld.enterprise.identity_fabric.reference import (
+    reference_enterprise_identity_fabric,
+)
 from synthworld.enterprise.models import (
     EnterpriseCanonicalBindingTruthV1,
     EnterpriseDirectoryRbacStateInputV1,
@@ -172,6 +187,22 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "openfga-mapping-profile.schema.json": OpenFgaMappingProfileV1,
     "openfga-projection.schema.json": OpenFgaProjectionV1,
     "shared-signals-mapping-profile.schema.json": SharedSignalsMappingProfileV1,
+    "enterprise-identity-fabric-benchmark.schema.json": (
+        EnterpriseIdentityFabricBenchmarkV1
+    ),
+    "enterprise-identity-fabric-public-input.schema.json": (
+        EnterpriseIdentityFabricPublicInputV1
+    ),
+    "enterprise-identity-fabric-truth.schema.json": EnterpriseIdentityFabricTruthV1,
+    "enterprise-identity-fabric-evaluator.schema.json": (
+        EnterpriseIdentityFabricEvaluatorArtifactsV1
+    ),
+    "enterprise-identity-fabric-prediction.schema.json": (
+        EnterpriseIdentityFabricPredictionV1
+    ),
+    "enterprise-identity-fabric-metrics.schema.json": (
+        EnterpriseIdentityFabricMetricsV1
+    ),
 }
 
 
@@ -222,6 +253,26 @@ def expected_files() -> dict[Path, bytes]:
     )
     files[EXAMPLE_DIR / "enterprise-authorization-evaluation-profile.json"] = (
         _json_bytes(reference_authorization.evaluation_profile.model_dump(mode="json"))
+    )
+    reference_identity_fabric = reference_enterprise_identity_fabric()
+    perfect_identity_fabric_prediction = perfect_enterprise_identity_fabric_prediction(
+        reference_identity_fabric.evaluator
+    )
+    perfect_identity_fabric_metrics = evaluate_enterprise_identity_fabric(
+        artifacts=reference_identity_fabric.evaluator,
+        predictions=perfect_identity_fabric_prediction,
+    )
+    files[EXAMPLE_DIR / "enterprise-identity-fabric-public-input.json"] = (
+        canonical_json_bytes(reference_identity_fabric.public)
+    )
+    files[EXAMPLE_DIR / "enterprise-identity-fabric-evaluator.json"] = (
+        canonical_json_bytes(reference_identity_fabric.evaluator)
+    )
+    files[EXAMPLE_DIR / "enterprise-identity-fabric-prediction.json"] = (
+        canonical_json_bytes(perfect_identity_fabric_prediction)
+    )
+    files[EXAMPLE_DIR / "enterprise-identity-fabric-metrics.json"] = (
+        canonical_json_bytes(perfect_identity_fabric_metrics)
     )
     return files
 

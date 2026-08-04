@@ -1,0 +1,324 @@
+{
+  "$defs": {
+    "IdentityFabricAccessQueryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "checkpoint_id": {
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "checkpoint_id",
+        "cell_id"
+      ],
+      "title": "IdentityFabricAccessQueryV1",
+      "type": "object"
+    },
+    "IdentityFabricAccountQueryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "checkpoint_id": {
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query_id",
+        "checkpoint_id",
+        "account_id",
+        "tick"
+      ],
+      "title": "IdentityFabricAccountQueryV1",
+      "type": "object"
+    },
+    "IdentityFabricAccumulationQueryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "from_checkpoint_id": {
+          "title": "From Checkpoint Id",
+          "type": "string"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "to_checkpoint_id": {
+          "title": "To Checkpoint Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query_id",
+        "subject_id",
+        "from_checkpoint_id",
+        "to_checkpoint_id"
+      ],
+      "title": "IdentityFabricAccumulationQueryV1",
+      "type": "object"
+    },
+    "IdentityFabricCheckpointReferenceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_id": {
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "checkpoint_input_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "checkpoint_id",
+        "sequence",
+        "checkpoint_input_digest"
+      ],
+      "title": "IdentityFabricCheckpointReferenceV1",
+      "type": "object"
+    },
+    "IdentityFabricMembershipQueryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_id": {
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "group_id": {
+          "title": "Group Id",
+          "type": "string"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "checkpoint_id",
+        "subject_id",
+        "group_id"
+      ],
+      "title": "IdentityFabricMembershipQueryV1",
+      "type": "object"
+    },
+    "IdentityFabricRoleQueryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_id": {
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "checkpoint_id",
+        "subject_id",
+        "role_id"
+      ],
+      "title": "IdentityFabricRoleQueryV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_queries": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricAccessQueryV1"
+      },
+      "title": "Access Queries",
+      "type": "array"
+    },
+    "account_queries": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricAccountQueryV1"
+      },
+      "title": "Account Queries",
+      "type": "array"
+    },
+    "accumulation_queries": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricAccumulationQueryV1"
+      },
+      "title": "Accumulation Queries",
+      "type": "array"
+    },
+    "checkpoints": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricCheckpointReferenceV1"
+      },
+      "minItems": 2,
+      "title": "Checkpoints",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "invariant_input_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "membership_queries": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricMembershipQueryV1"
+      },
+      "title": "Membership Queries",
+      "type": "array"
+    },
+    "profile_version": {
+      "const": "identity-fabric-smoke-1.0.0",
+      "default": "identity-fabric-smoke-1.0.0",
+      "title": "Profile Version",
+      "type": "string"
+    },
+    "role_queries": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricRoleQueryV1"
+      },
+      "title": "Role Queries",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "invariant_input_digest",
+    "checkpoints",
+    "membership_queries",
+    "role_queries",
+    "account_queries",
+    "access_queries",
+    "accumulation_queries"
+  ],
+  "title": "EnterpriseIdentityFabricBenchmarkV1",
+  "type": "object"
+}

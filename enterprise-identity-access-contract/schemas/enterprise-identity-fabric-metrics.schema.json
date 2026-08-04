@@ -1,0 +1,288 @@
+{
+  "$defs": {
+    "EnterpriseAbacMetricsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac_truth_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "metrics": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+          },
+          "title": "Metrics",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "abac_truth_digest",
+        "metrics"
+      ],
+      "title": "EnterpriseAbacMetricsV1",
+      "type": "object"
+    },
+    "EnterpriseAuthorizationMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "empty_behaviour": {
+          "$ref": "#/$defs/MetricEmptyBehaviour"
+        },
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "family",
+        "name",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning",
+        "empty_behaviour",
+        "value"
+      ],
+      "title": "EnterpriseAuthorizationMetricV1",
+      "type": "object"
+    },
+    "EnterpriseDirectoryRbacMetricsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "directory_rbac_truth_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "metrics": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+          },
+          "title": "Metrics",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "directory_rbac_truth_digest",
+        "metrics"
+      ],
+      "title": "EnterpriseDirectoryRbacMetricsV1",
+      "type": "object"
+    },
+    "EnterpriseRebacMetricsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "metrics": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+          },
+          "title": "Metrics",
+          "type": "array"
+        },
+        "rebac_truth_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rebac_truth_digest",
+        "metrics"
+      ],
+      "title": "EnterpriseRebacMetricsV1",
+      "type": "object"
+    },
+    "IdentityFabricCheckpointMetricsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac": {
+          "$ref": "#/$defs/EnterpriseAbacMetricsV1"
+        },
+        "checkpoint_id": {
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "directory_rbac": {
+          "$ref": "#/$defs/EnterpriseDirectoryRbacMetricsV1"
+        },
+        "identity_fabric_metrics": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+          },
+          "title": "Identity Fabric Metrics",
+          "type": "array"
+        },
+        "rebac": {
+          "$ref": "#/$defs/EnterpriseRebacMetricsV1"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "checkpoint_id",
+        "directory_rbac",
+        "abac",
+        "rebac",
+        "identity_fabric_metrics"
+      ],
+      "title": "IdentityFabricCheckpointMetricsV1",
+      "type": "object"
+    },
+    "MetricEmptyBehaviour": {
+      "enum": [
+        "nonempty",
+        "null_if_empty"
+      ],
+      "title": "MetricEmptyBehaviour",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "benchmark_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "checkpoints": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricCheckpointMetricsV1"
+      },
+      "title": "Checkpoints",
+      "type": "array"
+    },
+    "cross_checkpoint_metrics": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+      },
+      "title": "Cross Checkpoint Metrics",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "truth_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    }
+  },
+  "required": [
+    "benchmark_digest",
+    "truth_digest",
+    "checkpoints",
+    "cross_checkpoint_metrics"
+  ],
+  "title": "EnterpriseIdentityFabricMetricsV1",
+  "type": "object"
+}
