@@ -123,7 +123,7 @@ _FS: dict[EvidenceKind, _Params] = {
     EvidenceKind.USERNAME: ((0.80, 0.15, 0.05), (0.10, 0.05, 0.85)),
     EvidenceKind.FULL_ADDRESS: ((0.60, 0.25, 0.15), (0.35, 0.18, 0.47)),
     EvidenceKind.EMPLOYER: ((0.55, 0.20, 0.25), (0.30, 0.14, 0.56)),
-    EvidenceKind.SCHOOL_YEAR: ((0.75, 0.15, 0.10), (0.25, 0.15, 0.60)),
+    EvidenceKind.SCHOOL_YEAR: ((0.75, 0.15, 0.10), (0.25, 0.10, 0.65)),
 }
 
 #: Evidence whose contradiction refuses a merge however much else agrees.
@@ -170,6 +170,37 @@ _TOWNS = ("Testville", "Sampleton", "Exampleford")
 _MERGE_BITS = 3.0
 _SEPARATE_BITS = -3.0
 
+#: Kinds that are not independent evidence, grouped by what they are read off.
+#:
+#: A given name and a family name are the two halves of one `display_name`. Counting
+#: them as two corroborators is counting one string twice, and a first version of the
+#: corroboration rule below did exactly that - so a bare name match satisfied "two
+#: independent kinds agree" and still carried a merge. Measured at 93 of 3,844 merges
+#: riding on the display name alone, which is what made the one-bit classifier
+#: "identical display name -> merge" score 0.810 against a 0.546 baseline.
+_SOURCES: dict[EvidenceKind, str] = {
+    EvidenceKind.GIVEN_NAME: "display_name",
+    EvidenceKind.FAMILY_NAME: "display_name",
+}
+
+#: How many independent sources must agree before a merge is allowed at all.
+#:
+#: Without this a single field carries a merge on its own: a birth date alone is worth
+#: +3.95 and a given name +4.64, both over the threshold, so two records agreeing on a
+#: date and nothing else were a merge. Raising the threshold instead would be the wrong
+#: instrument - it weakens every vector rather than the ones with nothing corroborating
+#: them. Real resolvers carry a corroboration rule of exactly this shape, because a
+#: single agreeing field is a coincidence until something else agrees too.
+_MERGE_NEEDS_CORROBORATION = 2
+
+#: How much independent agreement makes a vetoed pair undecidable rather than separate.
+#:
+#: An absolute veto forces `separate` against +15.6 bits - every other kind
+#: byte-identical, including email, phone and username. The twins case justifies
+#: overriding family name, birth date, address and school year. It does not justify
+#: overriding three shared strong identifiers, and an expert would withhold there.
+_VETO_YIELDS_ABOVE = 8.0
+
 
 def weight_of(kind: EvidenceKind, relation: Relation) -> float:
     """The log-odds contribution of one outcome, in bits.
@@ -195,10 +226,42 @@ def disposition_of(relations: Mapping[EvidenceKind, Relation]) -> PairDispositio
 
     if not relations:
         return PairDisposition.INSUFFICIENT
+    weights = {kind: weight_of(kind, relation) for kind, relation in relations.items()}
+    total = sum(weights.values())
+
     if any(relations.get(kind) is Relation.FAR for kind in _VETO):
-        return PairDisposition.SEPARATE
-    total = sum(weight_of(kind, relation) for kind, relation in relations.items())
-    if total >= _MERGE_BITS:
+        # A veto refuses the merge. Whether it also concludes *separate* depends on how
+        # much argues the other way: a contradicted given name against a shared email,
+        # phone and username is a pair to withhold on, not one to decide.
+        #
+        # But only when the rest has not already settled it. Comparing the *positive*
+        # support alone discards every contradiction beside it, so a pair with a
+        # differing birth date, email, surname and address still came back
+        # `insufficient` because three identifiers agreed. 1,199 vectors did that, the
+        # worst at -9.184 bits.
+        #
+        # Checking the net first also keeps the rule monotone. Improving the given name
+        # from FAR to NEAR lifts the veto and moves to the branch below, which used to
+        # turn `insufficient` into `separate` - better evidence, worse verdict, on
+        # exactly 3 vectors. It cannot now: the veto only withholds when the net is
+        # already above the separate threshold, and improving a relation only raises it.
+        if total <= _SEPARATE_BITS:
+            return PairDisposition.SEPARATE
+        supporting = sum(
+            weight
+            for kind, weight in weights.items()
+            if kind not in _VETO and weight > 0
+        )
+        return (
+            PairDisposition.INSUFFICIENT
+            if supporting >= _VETO_YIELDS_ABOVE
+            else PairDisposition.SEPARATE
+        )
+
+    corroborating = {
+        _SOURCES.get(kind, kind.value) for kind, weight in weights.items() if weight > 0
+    }
+    if total >= _MERGE_BITS and len(corroborating) >= _MERGE_NEEDS_CORROBORATION:
         return PairDisposition.MERGE
     if total <= _SEPARATE_BITS:
         return PairDisposition.SEPARATE
