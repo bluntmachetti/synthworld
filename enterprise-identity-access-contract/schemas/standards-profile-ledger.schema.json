@@ -1,0 +1,110 @@
+{
+  "$defs": {
+    "StandardsProfileCategory": {
+      "description": "Why a source is relevant to the bounded native model or a projection.",
+      "enum": [
+        "normative_standard",
+        "government_reference",
+        "research",
+        "implementation_model",
+        "community_work",
+        "test_method"
+      ],
+      "title": "StandardsProfileCategory",
+      "type": "string"
+    },
+    "StandardsProfileEntryV1": {
+      "additionalProperties": false,
+      "description": "One exact external source mapped to one SynthWorld profile revision.",
+      "properties": {
+        "authoritative_uri": {
+          "minLength": 1,
+          "pattern": "^https://",
+          "title": "Authoritative Uri",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/StandardsProfileCategory"
+        },
+        "reviewed_on": {
+          "format": "date",
+          "title": "Reviewed On",
+          "type": "string"
+        },
+        "selected_profile_id": {
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Selected Profile Id",
+          "type": "string"
+        },
+        "selected_profile_version": {
+          "minLength": 1,
+          "title": "Selected Profile Version",
+          "type": "string"
+        },
+        "source_edition": {
+          "minLength": 1,
+          "title": "Source Edition",
+          "type": "string"
+        },
+        "source_id": {
+          "minLength": 1,
+          "pattern": "^[a-z0-9][a-z0-9._-]*$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/StandardsProfileStatus"
+        }
+      },
+      "required": [
+        "source_id",
+        "category",
+        "source_edition",
+        "status",
+        "authoritative_uri",
+        "selected_profile_id",
+        "selected_profile_version",
+        "reviewed_on"
+      ],
+      "title": "StandardsProfileEntryV1",
+      "type": "object"
+    },
+    "StandardsProfileStatus": {
+      "description": "Publication maturity; draft-like inputs never masquerade as final.",
+      "enum": [
+        "final",
+        "reaffirmed",
+        "draft",
+        "expired",
+        "research",
+        "implementation"
+      ],
+      "title": "StandardsProfileStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Dated, canonical standards selection; never an ambient latest lookup.",
+  "properties": {
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/StandardsProfileEntryV1"
+      },
+      "minItems": 1,
+      "title": "Entries",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "entries"
+  ],
+  "title": "StandardsProfileLedgerV1",
+  "type": "object"
+}

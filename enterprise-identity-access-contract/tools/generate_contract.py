@@ -10,6 +10,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from synthworld.enterprise.canonical import canonical_json_bytes
 from synthworld.enterprise.models import (
     EnterpriseCanonicalBindingTruthV1,
     EnterpriseDirectoryRbacStateInputV1,
@@ -18,10 +19,33 @@ from synthworld.enterprise.models import (
     EnterpriseIdentityAccessImportV1,
     EnterpriseIdentityAccessUniverseV1,
 )
+from synthworld.enterprise.rbac.corpus_models import (
+    EnterpriseEvaluationCaseInventoryV1,
+    EnterpriseEvaluationCorpusConfigV1,
+    EnterpriseEvaluationCorpusV1,
+)
+from synthworld.enterprise.rbac.metrics import (
+    EnterpriseDirectoryRbacMetricsV1,
+    EnterpriseDirectoryRbacPredictionV1,
+)
+from synthworld.enterprise.rbac.models import (
+    CompiledEnterpriseDirectoryRbacTruthV1,
+    EnterpriseDirectoryRbacIntentOverlayV1,
+    EnterpriseDirectoryRbacKernelV1,
+    EnterpriseRbacSessionStateInputV1,
+)
+from synthworld.enterprise.rbac.reference import (
+    reference_enterprise_evaluation_corpus_config,
+    reference_enterprise_rbac_inputs,
+)
 from synthworld.enterprise.reference import (
     reference_enterprise_csv_bundle,
     reference_enterprise_json,
     reference_enterprise_yaml,
+)
+from synthworld.enterprise.standards import (
+    StandardsProfileLedgerV1,
+    standards_profile_ledger_v1,
 )
 
 ROOT = Path("enterprise-identity-access-contract")
@@ -41,6 +65,28 @@ SCHEMAS: dict[str, type[BaseModel]] = {
         EnterpriseIdentityAccessUniverseV1
     ),
     "enterprise-canonical-binding-truth.schema.json": EnterpriseCanonicalBindingTruthV1,
+    "standards-profile-ledger.schema.json": StandardsProfileLedgerV1,
+    "enterprise-evaluation-corpus-config.schema.json": (
+        EnterpriseEvaluationCorpusConfigV1
+    ),
+    "enterprise-evaluation-corpus.schema.json": EnterpriseEvaluationCorpusV1,
+    "enterprise-evaluation-case-inventory.schema.json": (
+        EnterpriseEvaluationCaseInventoryV1
+    ),
+    "enterprise-directory-rbac-intent.schema.json": (
+        EnterpriseDirectoryRbacIntentOverlayV1
+    ),
+    "enterprise-rbac-session-state-input.schema.json": (
+        EnterpriseRbacSessionStateInputV1
+    ),
+    "enterprise-directory-rbac-kernel.schema.json": EnterpriseDirectoryRbacKernelV1,
+    "compiled-enterprise-directory-rbac-truth.schema.json": (
+        CompiledEnterpriseDirectoryRbacTruthV1
+    ),
+    "enterprise-directory-rbac-prediction.schema.json": (
+        EnterpriseDirectoryRbacPredictionV1
+    ),
+    "enterprise-directory-rbac-metrics.schema.json": EnterpriseDirectoryRbacMetricsV1,
 }
 
 
@@ -63,6 +109,19 @@ def expected_files() -> dict[Path, bytes]:
     )
     for name, payload in reference_enterprise_csv_bundle().items():
         files[EXAMPLE_DIR / "csv" / name] = payload.encode()
+    files[ROOT / "standards-profile-ledger.json"] = canonical_json_bytes(
+        standards_profile_ledger_v1()
+    )
+    reference_rbac = reference_enterprise_rbac_inputs()
+    files[EXAMPLE_DIR / "enterprise-rbac-corpus-config.json"] = _json_bytes(
+        reference_enterprise_evaluation_corpus_config().model_dump(mode="json")
+    )
+    files[EXAMPLE_DIR / "enterprise-directory-rbac-intent.json"] = _json_bytes(
+        reference_rbac.intent.model_dump(mode="json")
+    )
+    files[EXAMPLE_DIR / "enterprise-rbac-session-state.json"] = _json_bytes(
+        reference_rbac.session_state.model_dump(mode="json")
+    )
     return files
 
 

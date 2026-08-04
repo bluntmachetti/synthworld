@@ -1,0 +1,31 @@
+{
+  "evaluation_corpus_digest": {
+    "algorithm": "sha256",
+    "synthetic": true,
+    "value": "1293dc2a22820f1e0b72f85c7c17028872c424b7483223f50b6f4dd822acf1d6"
+  },
+  "schema_version": "1.0.0",
+  "sessions": [
+    {
+      "activated_role_ids": [
+        "e793a152-ac32-51ac-a87e-b2333e8413c9"
+      ],
+      "observed_at_tick": 5,
+      "observed_outcome": "accepted",
+      "revision_id": "observed-employee-session",
+      "session_state_id": "962b13c2-8081-58eb-a2ee-5934502568af",
+      "valid_until_tick": 10
+    },
+    {
+      "activated_role_ids": [
+        "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c",
+        "e793a152-ac32-51ac-a87e-b2333e8413c9"
+      ],
+      "observed_at_tick": 5,
+      "observed_outcome": "accepted",
+      "revision_id": "observed-agent-session",
+      "session_state_id": "a44e58ac-aa24-5280-adb2-e0906efd0386",
+      "valid_until_tick": 10
+    }
+  ]
+}

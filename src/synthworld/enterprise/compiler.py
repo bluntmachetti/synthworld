@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from collections.abc import Iterable
 from dataclasses import dataclass
 from uuid import UUID
@@ -21,12 +20,10 @@ from synthworld.enterprise.canonical import (
     ENTERPRISE_UNIT_NAMESPACE_V1,
     blueprint_namespace_uuid,
     canonical_json_bytes,
-    encode_parts,
     stable_enterprise_id,
     synthetic_digest,
 )
 from synthworld.enterprise.models import (
-    ENTERPRISE_SELECTOR_ALGORITHM_VERSION,
     AccessAtomV1,
     AccessSubjectKind,
     AccountAllocationTemplateV1,
@@ -54,6 +51,7 @@ from synthworld.enterprise.models import (
     ResourceSetTemplateV1,
     SelectorV1,
 )
+from synthworld.enterprise.selection import select_principal_slot_indices
 from synthworld.enterprise.validation import (
     dag_max_depth,
     ensure_valid_enterprise_identity_access,
@@ -750,26 +748,18 @@ def _select_principals(
     namespace: UUID,
     selection_key: str,
 ) -> tuple[_PrincipalSlot, ...]:
-    count = selector_count(selector, len(population))
-    ranked = sorted(
-        population,
-        key=lambda item: (
-            hashlib.sha256(
-                encode_parts(
-                    (
-                        ENTERPRISE_SELECTOR_ALGORITHM_VERSION,
-                        str(seed),
-                        str(namespace),
-                        item.population_key,
-                        selection_key,
-                        str(item.slot),
-                    )
-                ).encode("utf-8")
-            ).digest(),
-            item.principal.principal_id,
-        ),
+    if not population:
+        return ()
+    by_slot = {item.slot: item for item in population}
+    selected_slots = select_principal_slot_indices(
+        population_key=population[0].population_key,
+        population_count=len(population),
+        selector=selector,
+        seed=seed,
+        blueprint_namespace=namespace,
+        selection_key=selection_key,
     )
-    return tuple(sorted(ranked[:count], key=lambda item: item.principal.principal_id))
+    return tuple(by_slot[slot] for slot in selected_slots)
 
 
 def _validate_post_freeze_state(

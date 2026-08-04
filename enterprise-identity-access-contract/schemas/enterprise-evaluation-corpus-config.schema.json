@@ -1,0 +1,534 @@
+{
+  "$defs": {
+    "AccessEvaluationCellTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_atom_id": {
+          "minLength": 1,
+          "title": "Access Atom Id",
+          "type": "string"
+        },
+        "cell_key": {
+          "title": "Cell Key",
+          "type": "string"
+        },
+        "context_key": {
+          "title": "Context Key",
+          "type": "string"
+        },
+        "session_state_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Session State Key"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cell_key",
+        "access_atom_id",
+        "context_key",
+        "tick"
+      ],
+      "title": "AccessEvaluationCellTemplateV1",
+      "type": "object"
+    },
+    "AuthorizationSessionSlotTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_tick": {
+          "minimum": 0,
+          "title": "Activation Tick",
+          "type": "integer"
+        },
+        "session_key": {
+          "title": "Session Key",
+          "type": "string"
+        },
+        "session_state_key": {
+          "title": "Session State Key",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "session_state_key",
+        "session_key",
+        "subject_id",
+        "activation_tick"
+      ],
+      "title": "AuthorizationSessionSlotTemplateV1",
+      "type": "object"
+    },
+    "EnterpriseAccessRequestTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_key": {
+          "title": "Cell Key",
+          "type": "string"
+        },
+        "request_key": {
+          "title": "Request Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_key",
+        "cell_key"
+      ],
+      "title": "EnterpriseAccessRequestTemplateV1",
+      "type": "object"
+    },
+    "EnterpriseCompileOuterSafetyV1": {
+      "additionalProperties": false,
+      "properties": {
+        "max_canonical_bytes": {
+          "default": 10737418240,
+          "exclusiveMinimum": 0,
+          "title": "Max Canonical Bytes",
+          "type": "integer"
+        },
+        "max_expanded_steps": {
+          "default": 25000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Expanded Steps",
+          "type": "integer"
+        },
+        "max_relations": {
+          "default": 10000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Relations",
+          "type": "integer"
+        },
+        "max_serialized_records": {
+          "default": 10000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Serialized Records",
+          "type": "integer"
+        },
+        "max_work_units": {
+          "default": 100000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Work Units",
+          "type": "integer"
+        }
+      },
+      "title": "EnterpriseCompileOuterSafetyV1",
+      "type": "object"
+    },
+    "EnterpriseContextTemplateV1": {
+      "additionalProperties": false,
+      "description": "An opaque context slot; later mechanisms attach typed facts by ID.",
+      "properties": {
+        "context_key": {
+          "title": "Context Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_key"
+      ],
+      "title": "EnterpriseContextTemplateV1",
+      "type": "object"
+    },
+    "EnterpriseEvaluatorCaseTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "case_key": {
+          "title": "Case Key",
+          "type": "string"
+        },
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Labels",
+          "type": "array"
+        },
+        "target_key": {
+          "title": "Target Key",
+          "type": "string"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/EvaluationCaseTargetKind"
+        }
+      },
+      "required": [
+        "case_key",
+        "target_kind",
+        "target_key",
+        "labels"
+      ],
+      "title": "EnterpriseEvaluatorCaseTemplateV1",
+      "type": "object"
+    },
+    "EnterpriseIdentityAccessCompileBudgetV1": {
+      "additionalProperties": false,
+      "properties": {
+        "max_access_atoms": {
+          "default": 500000,
+          "exclusiveMinimum": 0,
+          "title": "Max Access Atoms",
+          "type": "integer"
+        },
+        "max_access_requests": {
+          "default": 1000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Access Requests",
+          "type": "integer"
+        },
+        "max_accounts": {
+          "default": 100000,
+          "exclusiveMinimum": 0,
+          "title": "Max Accounts",
+          "type": "integer"
+        },
+        "max_attribute_facts": {
+          "default": 1000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Attribute Facts",
+          "type": "integer"
+        },
+        "max_authorization_targets": {
+          "default": 50000,
+          "exclusiveMinimum": 0,
+          "title": "Max Authorization Targets",
+          "type": "integer"
+        },
+        "max_declared_actions": {
+          "default": 100000,
+          "exclusiveMinimum": 0,
+          "title": "Max Declared Actions",
+          "type": "integer"
+        },
+        "max_derivations_per_cell": {
+          "default": 64,
+          "exclusiveMinimum": 0,
+          "title": "Max Derivations Per Cell",
+          "type": "integer"
+        },
+        "max_directory_rbac_relations": {
+          "default": 50000,
+          "exclusiveMinimum": 0,
+          "title": "Max Directory Rbac Relations",
+          "type": "integer"
+        },
+        "max_evaluation_cells": {
+          "default": 1000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Evaluation Cells",
+          "type": "integer"
+        },
+        "max_evaluator_cases": {
+          "default": 1000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Evaluator Cases",
+          "type": "integer"
+        },
+        "max_group_depth": {
+          "default": 64,
+          "exclusiveMinimum": 0,
+          "title": "Max Group Depth",
+          "type": "integer"
+        },
+        "max_groups": {
+          "default": 10000,
+          "exclusiveMinimum": 0,
+          "title": "Max Groups",
+          "type": "integer"
+        },
+        "max_native_contexts": {
+          "default": 10000,
+          "exclusiveMinimum": 0,
+          "title": "Max Native Contexts",
+          "type": "integer"
+        },
+        "max_principals": {
+          "default": 100000,
+          "exclusiveMinimum": 0,
+          "title": "Max Principals",
+          "type": "integer"
+        },
+        "max_rebac_path_expansions": {
+          "default": 100000,
+          "exclusiveMinimum": 0,
+          "title": "Max Rebac Path Expansions",
+          "type": "integer"
+        },
+        "max_rebac_paths_per_cell": {
+          "default": 64,
+          "exclusiveMinimum": 0,
+          "title": "Max Rebac Paths Per Cell",
+          "type": "integer"
+        },
+        "max_rebac_rules": {
+          "default": 10000,
+          "exclusiveMinimum": 0,
+          "title": "Max Rebac Rules",
+          "type": "integer"
+        },
+        "max_rebac_tuples": {
+          "default": 500000,
+          "exclusiveMinimum": 0,
+          "title": "Max Rebac Tuples",
+          "type": "integer"
+        },
+        "max_role_activation_requests": {
+          "default": 100000,
+          "exclusiveMinimum": 0,
+          "title": "Max Role Activation Requests",
+          "type": "integer"
+        },
+        "max_role_depth": {
+          "default": 64,
+          "exclusiveMinimum": 0,
+          "title": "Max Role Depth",
+          "type": "integer"
+        },
+        "max_roles": {
+          "default": 10000,
+          "exclusiveMinimum": 0,
+          "title": "Max Roles",
+          "type": "integer"
+        },
+        "max_scenario_deltas": {
+          "default": 1000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Scenario Deltas",
+          "type": "integer"
+        },
+        "max_session_state_slots": {
+          "default": 100000,
+          "exclusiveMinimum": 0,
+          "title": "Max Session State Slots",
+          "type": "integer"
+        },
+        "max_sod_constraints": {
+          "default": 10000,
+          "exclusiveMinimum": 0,
+          "title": "Max Sod Constraints",
+          "type": "integer"
+        },
+        "max_sod_evaluations": {
+          "default": 1000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Sod Evaluations",
+          "type": "integer"
+        },
+        "max_sod_role_set_width": {
+          "default": 32,
+          "exclusiveMinimum": 0,
+          "title": "Max Sod Role Set Width",
+          "type": "integer"
+        },
+        "max_temporal_events": {
+          "default": 1000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Temporal Events",
+          "type": "integer"
+        },
+        "max_total_abac_predicates": {
+          "default": 100000,
+          "exclusiveMinimum": 0,
+          "title": "Max Total Abac Predicates",
+          "type": "integer"
+        },
+        "max_total_abac_rules": {
+          "default": 10000,
+          "exclusiveMinimum": 0,
+          "title": "Max Total Abac Rules",
+          "type": "integer"
+        },
+        "max_total_derivations": {
+          "default": 2000000,
+          "exclusiveMinimum": 0,
+          "title": "Max Total Derivations",
+          "type": "integer"
+        }
+      },
+      "title": "EnterpriseIdentityAccessCompileBudgetV1",
+      "type": "object"
+    },
+    "EnterpriseIdentityAccessCompileConfigV1": {
+      "additionalProperties": false,
+      "properties": {
+        "budget": {
+          "$ref": "#/$defs/EnterpriseIdentityAccessCompileBudgetV1"
+        },
+        "outer_safety": {
+          "$ref": "#/$defs/EnterpriseCompileOuterSafetyV1"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "title": "EnterpriseIdentityAccessCompileConfigV1",
+      "type": "object"
+    },
+    "EvaluationCaseTargetKind": {
+      "enum": [
+        "access_cell",
+        "activation_request"
+      ],
+      "title": "EvaluationCaseTargetKind",
+      "type": "string"
+    },
+    "RoleActivationRequestTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "request_key": {
+          "title": "Request Key",
+          "type": "string"
+        },
+        "requested_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requested Role Ids",
+          "type": "array"
+        },
+        "session_state_key": {
+          "title": "Session State Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_key",
+        "session_state_key",
+        "requested_role_ids"
+      ],
+      "title": "RoleActivationRequestTemplateV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_requests": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAccessRequestTemplateV1"
+      },
+      "minItems": 1,
+      "title": "Access Requests",
+      "type": "array"
+    },
+    "compile_config": {
+      "$ref": "#/$defs/EnterpriseIdentityAccessCompileConfigV1"
+    },
+    "contexts": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseContextTemplateV1"
+      },
+      "minItems": 1,
+      "title": "Contexts",
+      "type": "array"
+    },
+    "evaluation_cells": {
+      "items": {
+        "$ref": "#/$defs/AccessEvaluationCellTemplateV1"
+      },
+      "minItems": 1,
+      "title": "Evaluation Cells",
+      "type": "array"
+    },
+    "evaluator_cases": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EnterpriseEvaluatorCaseTemplateV1"
+      },
+      "title": "Evaluator Cases",
+      "type": "array"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "role_activation_requests": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RoleActivationRequestTemplateV1"
+      },
+      "title": "Role Activation Requests",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_slots": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AuthorizationSessionSlotTemplateV1"
+      },
+      "title": "Session Slots",
+      "type": "array"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "contexts",
+    "evaluation_cells",
+    "access_requests"
+  ],
+  "title": "EnterpriseEvaluationCorpusConfigV1",
+  "type": "object"
+}

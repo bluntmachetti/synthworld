@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from uuid import UUID
 
 import pytest
 
 from synthworld.enterprise.canonical import canonical_json_bytes
 from synthworld.enterprise.compiler import (
     EnterpriseCompileError,
+    _select_principals,
     _validate_post_freeze_state,
     compile_enterprise_identity_access_universe,
 )
@@ -18,6 +20,7 @@ from synthworld.enterprise.models import (
     AccountObservationV1,
     AccountSubjectAccessAtomRuleV1,
     AdministrativeState,
+    AllSelectorV1,
     CountSelectorV1,
     DirectEntitlementV1,
     EnterpriseCompileOuterSafetyV1,
@@ -60,6 +63,19 @@ def _assert_recursive_synthetic(value: object) -> None:
         for nested in value:
             if isinstance(nested, dict | list):
                 _assert_recursive_synthetic(nested)
+
+
+def test_empty_internal_population_selection_remains_a_noop() -> None:
+    assert (
+        _select_principals(
+            (),
+            AllSelectorV1(),
+            seed=0,
+            namespace=UUID(int=0),
+            selection_key="empty",
+        )
+        == ()
+    )
 
 
 def test_reference_universe_is_pinned_sparse_and_visibility_safe() -> None:
