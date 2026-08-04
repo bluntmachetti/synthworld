@@ -270,6 +270,55 @@ scenarios appear exactly once each — the label remains derivable from the repo
 alone, whatever the seed. Read each pack's own section for what its seeds do and do
 not conceal.
 
+#### Ambiguity v2: what a held-out seed conceals
+
+That last paragraph states a limit of the v1 construction rather than of seeds, and
+`ambiguity_v2_generator` is the answer to it. There is no case list. Each pair samples
+whether the two records are one person, draws every comparison from the Fellegi–Sunter
+`m`/`u` row that fact implies, and *derives* the disposition with `disposition_of` —
+the same published rule a solver is invited to use. `DerivedPairTruth` refuses to
+construct if the two disagree, so the label has no independent existence for a free
+choice to be bound to.
+
+Stated precisely, for a pack generated with an unpublished key:
+
+- **Concealed:** every rendered value, every record identifier, the pair count, the
+  prevalence of true matches, per-pair completeness, and the distractor count. All are
+  keyed draws, and `generate_ambiguity_v2_pack` has no default key — a partially keyed
+  generator reads as protected while call sites quietly fall back to `b""`.
+- **Not concealed, by design:** the scoring rule. `disposition_of`, the `m`/`u` table
+  and the thresholds are public. A solver that recovers the relations from the rendered
+  values and applies the rule *should* score perfectly; that is the task, not a leak.
+- **Not claimed:** that `same_entity` is recoverable from the evidence. It often is not,
+  and that is the point — see below.
+
+The difficulty is therefore comparison, not guessing a hidden mapping: `Sørensen`
+against `Sorensen`, one phone line written three ways, an initial against a full name,
+and a field one record carries and the other does not.
+
+Two consequences worth stating plainly. **`disposition` and `same_entity` are allowed
+to differ.** The disposition is what the public evidence justifies; `same_entity` is
+what is true. v1 forbade the difference, which is why it could not represent two people
+who are identical on paper. Scoring is against the disposition; a benchmark scored
+against `same_entity` where the evidence cannot reach it is measuring clairvoyance.
+
+**Measured.** A decoder holding only the kind-level fingerprint — which kinds are
+present and which agree — recovered the v1 disposition on 750 of 750 pairs across fifty
+seeds, because every fingerprint was a scenario and every scenario had one hand-written
+answer. Against v2, trained on sixty public-key seeds and scored on held-out seeds under
+a held-out key with a majority-class fallback, the same decoder scores **0.694** against
+a 0.488 majority baseline, and **0.840** on the 67.6% of pairs whose fingerprint it has
+seen before. What it keeps is legitimate — agreement patterns really do predict identity
+— and what it loses is the distinction v1 could not express, between a reformatted phone
+number and a different person's.
+
+One known weakness, tracked as **#79**: the `m`/`u` table was estimated over v1's
+non-match population, which is deliberately households, twins and classmates. v2 samples
+from that same table, so the pack and its scoring rule agree by construction, but the
+numbers make names close to decisive — the two name kinds alone give the same answer on
+86.8% of pairs, and `insufficient` is about 4% of the pack. Fellegi–Sunter parameters
+belong to a population; sharing one table across two is the thing to fix.
+
 ### Scorer inputs (Prediction schemas)
 
 | Task | Prediction schema | Required fields | Meaning |
