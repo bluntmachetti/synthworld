@@ -1,0 +1,2 @@
+key,tenant_key,organisation_key,target_kind,owner_unit_key,instance_count
+resource-customer-api,tenant-main,organisation-main,api,team-platform,2

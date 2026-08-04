@@ -36,6 +36,21 @@ from synthworld.connection_serialization import (
 )
 from synthworld.corpus_metrics import evaluate_corpus
 from synthworld.corpus_serialization import corpus_to_json
+from synthworld.enterprise.compiler import (
+    EnterpriseCompileError,
+    compile_enterprise_identity_access_universe,
+)
+from synthworld.enterprise.models import EnterpriseIdentityAccessValidationReportV1
+from synthworld.enterprise.parsers import load_enterprise_identity_access_import
+from synthworld.enterprise.scaffold import (
+    EnterpriseScaffoldError,
+    scaffold_enterprise_access,
+)
+from synthworld.enterprise.serialization import (
+    EnterpriseArtifactError,
+    export_enterprise_identity_access_compile_result,
+)
+from synthworld.enterprise.validation import EnterpriseImportError
 from synthworld.evaluation import (
     EntityResolutionPrediction,
     EvaluationInputError,
@@ -78,6 +93,79 @@ from synthworld.serialization import world_to_json
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
+
+    if args.command == "scaffold-enterprise-access":
+        try:
+            scaffold_enterprise_access(
+                output_format=args.format,
+                output=args.output,
+                id_namespace_salt=args.id_namespace_salt,
+            )
+        except (OSError, ValidationError, EnterpriseScaffoldError) as error:
+            print(str(error), file=sys.stderr)
+            return 1
+        print(
+            "Private enterprise identity/access template ready "
+            f"({args.format}) -> {args.output}"
+        )
+        print(
+            "Importing structure is not anonymisation; protect the source and "
+            "namespace salt."
+        )
+        return 0
+
+    if args.command == "validate-enterprise-access":
+        try:
+            load_enterprise_identity_access_import(args.input)
+            validation_report = EnterpriseIdentityAccessValidationReportV1(
+                valid=True, diagnostics=()
+            )
+        except EnterpriseImportError as error:
+            validation_report = EnterpriseIdentityAccessValidationReportV1(
+                valid=False, diagnostics=error.diagnostics
+            )
+        if args.json:
+            print(validation_report.model_dump_json(indent=2))
+        elif validation_report.valid:
+            print("enterprise identity/access import: valid")
+        else:
+            for diagnostic in validation_report.diagnostics:
+                location = ":".join(
+                    str(item)
+                    for item in (diagnostic.file, diagnostic.row, diagnostic.column)
+                    if item is not None
+                )
+                print(
+                    f"{diagnostic.code} {location}: {diagnostic.message}".strip(),
+                    file=sys.stderr,
+                )
+        return 0 if validation_report.valid else 1
+
+    if args.command == "compile-enterprise-access":
+        try:
+            import_model = load_enterprise_identity_access_import(args.input)
+            result = compile_enterprise_identity_access_universe(
+                import_model=import_model,
+                seed=args.seed,
+            )
+            export_enterprise_identity_access_compile_result(args.output, result)
+        except (
+            EnterpriseArtifactError,
+            EnterpriseCompileError,
+            EnterpriseImportError,
+            OSError,
+            ValidationError,
+        ) as error:
+            print(str(error), file=sys.stderr)
+            return 1
+        print(
+            "Enterprise identity/access universe ready: "
+            f"{len(result.public_universe.principals)} principals, "
+            f"{len(result.public_universe.accounts)} account slots, "
+            f"{len(result.public_universe.access_atoms)} access atoms -> "
+            f"{args.output}"
+        )
+        return 0
 
     if args.command == "validate":
         if args.task == "agent-authority-run-plan":
@@ -382,6 +470,31 @@ def main(argv: Sequence[str] | None = None) -> int:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="synthworld")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    scaffold_enterprise = subparsers.add_parser(
+        "scaffold-enterprise-access",
+        help="write a private enterprise identity/access authoring template",
+    )
+    scaffold_enterprise.add_argument(
+        "--format", choices=["yaml", "json", "csv"], default="yaml"
+    )
+    scaffold_enterprise.add_argument("--output", type=Path, required=True)
+    scaffold_enterprise.add_argument("--id-namespace-salt")
+
+    validate_enterprise = subparsers.add_parser(
+        "validate-enterprise-access",
+        help="validate a YAML, JSON, CSV-directory, or ZIP identity/access import",
+    )
+    validate_enterprise.add_argument("--input", type=Path, required=True)
+    validate_enterprise.add_argument("--json", action="store_true")
+
+    compile_enterprise = subparsers.add_parser(
+        "compile-enterprise-access",
+        help="compile a fixed fictional enterprise identity/access universe",
+    )
+    compile_enterprise.add_argument("--input", type=Path, required=True)
+    compile_enterprise.add_argument("--seed", type=int, required=True)
+    compile_enterprise.add_argument("--output", type=Path, required=True)
 
     households = subparsers.add_parser(
         "generate-households",

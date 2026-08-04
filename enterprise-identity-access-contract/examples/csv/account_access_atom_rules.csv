@@ -1,0 +1,2 @@
+rule_key,account_allocation_key,action
+atom-workforce-account-write,allocation-workforce-api,write

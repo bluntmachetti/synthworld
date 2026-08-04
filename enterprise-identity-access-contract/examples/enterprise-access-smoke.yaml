@@ -1,0 +1,122 @@
+schema_version: 1.0.0
+blueprint:
+  schema_version: 1.0.0
+  blueprint_key: example-enterprise
+  id_namespace_salt: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+  tenants:
+  - key: tenant-main
+  organisations:
+  - key: organisation-main
+    tenant_key: tenant-main
+  units:
+  - key: division-operations
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    unit_kind: division
+    parent_unit_key: null
+  - key: team-platform
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    unit_kind: team
+    parent_unit_key: division-operations
+  populations:
+  - key: population-agents
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    unit_key: team-platform
+    population_kind: agent
+    count: 2
+  - key: population-employees
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    unit_key: team-platform
+    population_kind: employee
+    count: 4
+  groups:
+  - key: group-platform
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    owner_unit_key: team-platform
+  - key: group-workforce
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    owner_unit_key: division-operations
+  roles:
+  - key: role-api-admin
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    owner_unit_key: team-platform
+  - key: role-api-reader
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    owner_unit_key: team-platform
+  resource_sets:
+  - key: resource-customer-api
+    tenant_key: tenant-main
+    organisation_key: organisation-main
+    target_kind: api
+    owner_unit_key: team-platform
+    instance_count: 2
+    actions:
+    - read
+    - write
+  principal_access_atom_rules:
+  - rule_key: atom-agent-read
+    population_key: population-agents
+    resource_set_key: resource-customer-api
+    action: read
+    selector:
+      kind: all
+  - rule_key: atom-employee-read
+    population_key: population-employees
+    resource_set_key: resource-customer-api
+    action: read
+    selector:
+      kind: all
+iam_universe_extension:
+  schema_version: 1.0.0
+  account_allocations:
+  - key: allocation-workforce-api
+    population_key: population-employees
+    resource_set_key: resource-customer-api
+    account_kind: workforce
+    selector:
+      kind: count
+      count: 2
+    accounts_per_selected_subject: 1
+  account_access_atom_rules:
+  - rule_key: atom-workforce-account-write
+    account_allocation_key: allocation-workforce-api
+    action: write
+directory_rbac_state:
+  schema_version: 1.0.0
+  account_observations: []
+  memberships:
+  - rule_key: membership-platform-employees
+    population_key: population-employees
+    group_key: group-platform
+    selector:
+      kind: all
+  group_nesting:
+  - child_group_key: group-platform
+    parent_group_key: group-workforce
+  group_role_assignments:
+  - group_key: group-workforce
+    role_key: role-api-reader
+  population_role_assignments:
+  - rule_key: assignment-agent-admin
+    population_key: population-agents
+    role_key: role-api-admin
+    selector:
+      kind: all
+  role_hierarchy:
+  - senior_role_key: role-api-admin
+    junior_role_key: role-api-reader
+  role_grants:
+  - role_key: role-api-admin
+    resource_set_key: resource-customer-api
+    action: write
+  - role_key: role-api-reader
+    resource_set_key: resource-customer-api
+    action: read
+  direct_entitlements: []

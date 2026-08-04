@@ -1,0 +1,183 @@
+{
+  "$defs": {
+    "AccountAllocationTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_kind": {
+          "$ref": "#/$defs/AccountKind"
+        },
+        "accounts_per_selected_subject": {
+          "exclusiveMinimum": 0,
+          "title": "Accounts Per Selected Subject",
+          "type": "integer"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "resource_set_key": {
+          "title": "Resource Set Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "key",
+        "population_key",
+        "resource_set_key",
+        "account_kind",
+        "selector",
+        "accounts_per_selected_subject"
+      ],
+      "title": "AccountAllocationTemplateV1",
+      "type": "object"
+    },
+    "AccountKind": {
+      "enum": [
+        "workforce",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "AccountKind",
+      "type": "string"
+    },
+    "AccountSubjectAccessAtomRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_allocation_key": {
+          "title": "Account Allocation Key",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_key",
+        "account_allocation_key",
+        "action"
+      ],
+      "title": "AccountSubjectAccessAtomRuleV1",
+      "type": "object"
+    },
+    "AllSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "all",
+          "default": "all",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "AllSelectorV1",
+      "type": "object"
+    },
+    "CountSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "count",
+          "default": "count",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "CountSelectorV1",
+      "type": "object"
+    },
+    "FractionSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "fraction",
+          "default": "fraction",
+          "title": "Kind",
+          "type": "string"
+        },
+        "numerator": {
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "title": "FractionSelectorV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "account_access_atom_rules": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AccountSubjectAccessAtomRuleV1"
+      },
+      "title": "Account Access Atom Rules",
+      "type": "array"
+    },
+    "account_allocations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AccountAllocationTemplateV1"
+      },
+      "title": "Account Allocations",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "EnterpriseIamUniverseExtensionV1",
+  "type": "object"
+}
