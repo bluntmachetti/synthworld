@@ -652,3 +652,63 @@ def test_a_rendering_that_cannot_differ_is_refused() -> None:
 
     with pytest.raises(ValueError, match="every rendering collided"):
         _first_different(("Kate", "Kate"), "Kate")
+
+
+def test_one_agreeing_field_is_never_enough_to_merge() -> None:
+    """A coincidence until something else agrees too.
+
+    A birth date alone scores +3.95 and a given name +4.64, both over the +3.0
+    threshold, so two records agreeing on a date and nothing else used to be a merge.
+    That was reachable: 79 of 14,062 generated pairs merged on the display name alone,
+    and two of those 79 were genuinely two people.
+
+    Raising the threshold would have been the wrong instrument - it weakens every vector
+    rather than the ones with nothing corroborating them.
+    """
+
+    for kind in sorted(K):
+        alone = disposition_of({kind: Relation.EQUAL})
+
+        assert alone is not PairDisposition.MERGE, kind.value
+
+    # And corroboration is all it takes: the same date with a name beside it merges.
+    assert (
+        disposition_of({K.DATE_OF_BIRTH: Relation.EQUAL, K.GIVEN_NAME: Relation.EQUAL})
+        is PairDisposition.MERGE
+    )
+
+
+def test_the_veto_yields_to_overwhelming_agreement() -> None:
+    """A contradicted given name refuses a merge. It does not conclude two people.
+
+    The veto used to be absolute, forcing `separate` against +15.6 bits - every other
+    kind byte-identical, including email, phone and username. The twins case justifies
+    overriding family name, birth date, address and school year. It does not justify
+    overriding three shared strong identifiers, and an expert would withhold there.
+    """
+
+    twins = {
+        K.GIVEN_NAME: Relation.FAR,
+        K.FAMILY_NAME: Relation.EQUAL,
+        K.DATE_OF_BIRTH: Relation.EQUAL,
+        K.FULL_ADDRESS: Relation.EQUAL,
+        K.SCHOOL_YEAR: Relation.EQUAL,
+    }
+    everything = {kind: Relation.EQUAL for kind in K} | {K.GIVEN_NAME: Relation.FAR}
+
+    # The case the veto exists for still separates.
+    assert disposition_of(twins) is PairDisposition.SEPARATE
+    # The case it was overreaching on now withholds.
+    assert disposition_of(everything) is PairDisposition.INSUFFICIENT
+
+
+def test_no_relation_is_worth_exactly_nothing() -> None:
+    """`school_year: NEAR` scored 0.000 bits - present in the vocabulary, inert in use.
+
+    `LOPSIDED` is excluded because zero is what it means: missingness is not evidence
+    either way, which is the one weight in this module nobody argued with.
+    """
+
+    for kind in sorted(K):
+        for relation in (Relation.EQUAL, Relation.NEAR, Relation.FAR):
+            assert weight_of(kind, relation) != 0.0, (kind.value, relation.value)
