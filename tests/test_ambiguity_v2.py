@@ -181,6 +181,15 @@ def test_distractors_are_present_and_belong_to_no_pair() -> None:
     assert len(asked) == 2 * len(truths)
 
 
+def _assert_same_distribution[Bucket](observed: dict[bool, Counter[Bucket]]) -> None:
+    """Distractors and paired records must be drawn alike, bucket by bucket."""
+
+    totals = {role: sum(tally.values()) for role, tally in observed.items()}
+    for bucket in set(observed[True]) | set(observed[False]):
+        share = [observed[role][bucket] / totals[role] for role in (True, False)]
+        assert abs(share[0] - share[1]) < 0.05, bucket
+
+
 def test_a_distractor_is_not_distinguishable_by_shape() -> None:
     """If a distractor were cheaper to build, "is this asked about" would be readable.
 
@@ -189,15 +198,21 @@ def test_a_distractor_is_not_distinguishable_by_shape() -> None:
     something, and the next thing shape could carry is the answer.
     """
 
-    task, _ = generate_ambiguity_v2_pack(seed=3, key=_KEY)
     by_role: dict[bool, Counter[int]] = defaultdict(Counter)
-    for record in task.corpus.identity_records:
-        by_role[record.id in task.distractor_ids][len(record.attributes)] += 1
+    sources: dict[bool, Counter[str]] = defaultdict(Counter)
+    for seed in range(1, 41):
+        task, _ = generate_ambiguity_v2_pack(seed=seed, key=_KEY)
+        for record in task.corpus.identity_records:
+            distractor = record.id in task.distractor_ids
+            by_role[distractor][len(record.attributes)] += 1
+            sources[distractor][record.source_type.value] += 1
 
-    assert set(by_role[True]) & set(by_role[False])
-    assert {item.source_type for item in task.corpus.identity_records} == set(
-        type(task.corpus.identity_records[0].source_type)
-    )
+    # Compared as distributions, not as sets of observed values. A first version
+    # asserted only that the two attribute-count sets intersected, which would have
+    # passed with every distractor carrying one attribute and every paired record six.
+    # The test name claimed indistinguishability and the body checked overlap.
+    _assert_same_distribution(by_role)
+    _assert_same_distribution(sources)
 
 
 def test_the_fingerprint_no_longer_determines_the_answer() -> None:
