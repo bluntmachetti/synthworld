@@ -1,0 +1,357 @@
+{
+  "$defs": {
+    "DirectSubjectRelationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Cell Ids",
+          "type": "array"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "relation": {
+          "enum": [
+            "owns",
+            "collaborates_on"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "template": {
+          "const": "direct_subject_relation",
+          "default": "direct_subject_relation",
+          "title": "Template",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "rule_id",
+        "revision_id",
+        "effect",
+        "cell_ids",
+        "valid_from_tick",
+        "relation"
+      ],
+      "title": "DirectSubjectRelationV1",
+      "type": "object"
+    },
+    "GroupCollaborationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Cell Ids",
+          "type": "array"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "template": {
+          "const": "group_collaboration",
+          "default": "group_collaboration",
+          "title": "Template",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "rule_id",
+        "revision_id",
+        "effect",
+        "cell_ids",
+        "valid_from_tick"
+      ],
+      "title": "GroupCollaborationV1",
+      "type": "object"
+    },
+    "ManagerOfOwnerV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Cell Ids",
+          "type": "array"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "template": {
+          "const": "manager_of_owner",
+          "default": "manager_of_owner",
+          "title": "Template",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "rule_id",
+        "revision_id",
+        "effect",
+        "cell_ids",
+        "valid_from_tick"
+      ],
+      "title": "ManagerOfOwnerV1",
+      "type": "object"
+    },
+    "RebacRelation": {
+      "enum": [
+        "member_of",
+        "owns",
+        "manages",
+        "collaborates_on"
+      ],
+      "title": "RebacRelation",
+      "type": "string"
+    },
+    "RelationTupleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "object_entity_id": {
+          "minLength": 1,
+          "title": "Object Entity Id",
+          "type": "string"
+        },
+        "relation": {
+          "$ref": "#/$defs/RebacRelation"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "subject_entity_id": {
+          "minLength": 1,
+          "title": "Subject Entity Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tuple_id": {
+          "title": "Tuple Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "tuple_id",
+        "tenant_id",
+        "subject_entity_id",
+        "relation",
+        "object_entity_id",
+        "snapshot_id",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "RelationTupleV1",
+      "type": "object"
+    },
+    "RuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "RuleEffect",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "relation_tuples": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RelationTupleV1"
+      },
+      "title": "Relation Tuples",
+      "type": "array"
+    },
+    "rules": {
+      "default": [],
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "direct_subject_relation": "#/$defs/DirectSubjectRelationV1",
+            "group_collaboration": "#/$defs/GroupCollaborationV1",
+            "manager_of_owner": "#/$defs/ManagerOfOwnerV1"
+          },
+          "propertyName": "template"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/DirectSubjectRelationV1"
+          },
+          {
+            "$ref": "#/$defs/GroupCollaborationV1"
+          },
+          {
+            "$ref": "#/$defs/ManagerOfOwnerV1"
+          }
+        ]
+      },
+      "title": "Rules",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "unknown_evidence_cell_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Unknown Evidence Cell Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest"
+  ],
+  "title": "EnterpriseRebacIntentOverlayV1",
+  "type": "object"
+}

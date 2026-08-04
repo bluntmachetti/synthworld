@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "expected_semantics": {
+      "minLength": 1,
+      "title": "Expected Semantics",
+      "type": "string"
+    },
+    "native_feature": {
+      "minLength": 1,
+      "title": "Native Feature",
+      "type": "string"
+    },
+    "standards_source_id": {
+      "title": "Standards Source Id",
+      "type": "string"
+    },
+    "vector_id": {
+      "title": "Vector Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "vector_id",
+    "standards_source_id",
+    "native_feature",
+    "expected_semantics"
+  ],
+  "title": "AuthorizationConformanceVectorV1",
+  "type": "object"
+}

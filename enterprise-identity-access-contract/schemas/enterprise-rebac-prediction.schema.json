@@ -1,0 +1,72 @@
+{
+  "$defs": {
+    "MechanismOutcome": {
+      "description": "Native outcome retained before benchmark default-deny normalization.",
+      "enum": [
+        "allow",
+        "deny",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "MechanismOutcome",
+      "type": "string"
+    },
+    "RebacCellPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "actual_path_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Path Ids",
+          "type": "array"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "intended_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "intended_path_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Path Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cell_id",
+        "actual_outcome",
+        "intended_outcome"
+      ],
+      "title": "RebacCellPredictionV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cells": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RebacCellPredictionV1"
+      },
+      "title": "Cells",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "EnterpriseRebacPredictionV1",
+  "type": "object"
+}

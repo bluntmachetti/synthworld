@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "AuthorizationCellProfileV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/AuthorizationEvaluationProfileKind"
+        }
+      },
+      "required": [
+        "cell_id",
+        "profile"
+      ],
+      "title": "AuthorizationCellProfileV1",
+      "type": "object"
+    },
+    "AuthorizationEvaluationProfileKind": {
+      "enum": [
+        "rbac",
+        "abac",
+        "rebac",
+        "rbac_with_abac_guard",
+        "rebac_with_abac_guard"
+      ],
+      "title": "AuthorizationEvaluationProfileKind",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cells": {
+      "items": {
+        "$ref": "#/$defs/AuthorizationCellProfileV1"
+      },
+      "minItems": 1,
+      "title": "Cells",
+      "type": "array"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "evaluation_corpus_digest",
+    "cells"
+  ],
+  "title": "AuthorizationEvaluationProfileV1",
+  "type": "object"
+}

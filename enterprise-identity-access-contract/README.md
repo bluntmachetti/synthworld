@@ -88,10 +88,94 @@ is indexed by the already frozen atom IDs, so adding an unrelated rule does not
 cause an implicit cell-product scan. Derivation, SoD, serialized-record, and
 canonical-byte limits remain independently enforced.
 
+## Bounded authorization families
+
+PR4 adds ABAC and ReBAC as independently versioned state/intent overlays over
+the already frozen universe and evaluation corpus. The standalone JSON examples
+`enterprise-abac-state.json`, `enterprise-abac-intent.json`,
+`enterprise-rebac-state.json`, and `enterprise-rebac-intent.json` are the
+authoring starting points. They do not extend the v1 structural import envelope
+or any PR3 union. Each overlay binds the exact universe and corpus digests and
+may populate only existing cells; it cannot create a principal, account, target,
+atom, context, request, session, or evaluation cell.
+
+The ABAC vocabulary is a closed NIST-category profile. It provides typed
+subject, resource, action, and environment facts and eleven named predicates:
+subject kind, employment type, same tenant, subject unit, subject-unit ownership,
+target kind, classification within clearance, action, action class, minimum
+assurance, and network zone. Rules are flat `all`/`any` combinations with an
+explicit allow or deny effect. Missing facts and explicitly unknown facts remain
+distinct evidence while both produce the native `unknown` predicate outcome.
+There is no arbitrary attribute key, user-selected operator, nested expression,
+negation, function, or executable policy text.
+
+Native ReBAC is similarly closed. The only relation matrices are `member_of`,
+`owns`, `manages`, and `collaborates_on`; the only path templates are
+`DirectSubjectRelation`, `GroupCollaboration`, and `ManagerOfOwner`, with maximum
+path lengths one, two, and two. Tuples and rules carry explicit snapshot,
+revision, tenant, and half-open tick validity. A two-hop path must use one
+snapshot. Native input has no userset subjects, rewrite rules, recursion, union,
+intersection, exclusion, wildcard, condition, delegation, or request-contextual
+tuple. Human-to-agent delegation remains a later agentic-profile concern.
+
+ABAC fact/rule/predicate limits and ReBAC tuple/rule/path-expansion limits are
+independent of the frozen atom and cell budgets. Both compilers preflight their
+work and serialized-record ceilings before expansion. Inactive revisions,
+unknown evidence, conflicts, and every valid explain path are retained
+deterministically; coverage that exceeds a bound fails rather than resizing the
+world. ABAC decision/predicate metrics and ReBAC decision/path metrics report
+their own numerators, denominators, and empty behavior—there is no combined
+authorization score.
+
+## Fixed composition and artifact boundary
+
+`EnterpriseAuthorizationCompositionV1` contains only exact schema-version and
+canonical-digest references to directory/RBAC and optional ABAC/ReBAC component
+truth. `EnterpriseAuthorizationKernelV1` binds one of five closed profiles to
+each existing cell: RBAC, ABAC, ReBAC, RBAC with an ABAC guard, or ReBAC with an
+ABAC guard. The compiler requires every referenced payload explicitly, performs
+no ambient lookup, preserves each mechanism's raw
+`allow`/`deny`/`not_applicable`/`unknown` outcome, applies deny-overrides or the
+selected guard algebra, and then applies account binding and lifecycle as
+unconditional final-deny gates. Intended, effective, and final decisions and
+pre-combination conflicts remain separate evaluator records.
+
+Authorization export is physically split. The public tree contains ABAC/ReBAC
+state and intent, composition, and the cell/profile kernel. The evaluator tree
+contains ABAC/ReBAC component truth and compiled aggregate access state. Both
+trees have exact canonical inventories and digest-bound manifests; loaders reject
+extra, missing, non-regular, noncanonical, stale, or cross-bound artifacts.
+
+## Pure standards projections
+
+The projection package performs deterministic data conversion only:
+
+- SCIM maps account slots to Users and groups to Groups at an explicit snapshot
+  tick. It preserves direct versus indirect membership and declares provider
+  capabilities, but emits empty roles/entitlements and assigns no authorization
+  meaning to `active` or membership.
+- AuthZEN maps a frozen request to Subject, Action, Resource, and Context with
+  field-level provenance. Runtime responses are separate observations that
+  retain allow, deny, indeterminate, transport error, timeout, or unavailable
+  before optional normalization.
+- OpenFGA maps the bounded compiled ReBAC subset. Group usersets appear only at
+  this projection boundary; snapshot and validity limitations are explicit and
+  an OpenFGA runtime remains an external system under test.
+- Shared Signals/CAEP has a versioned mapping/support profile only. It emits no
+  events in PR4. PR7 must build its schedule view on the shipped
+  `synthworld.temporal` v1.1 integer-tick contract; it may not introduce UTC or a
+  second logical clock.
+
+Every target emits a complete support matrix with one `exact`, `approximated`,
+or `unsupported` row per exercised native feature, a mandatory semantic delta
+for every non-exact row, a canonical mapping digest, and conformance-vector IDs.
+Projection fidelity reports those three rates independently. The package has no
+SCIM network operations, AuthZEN HTTP client, Shared Signals transmitter,
+OpenFGA writer/evaluator, vendor connector, credential handling, or production
+enforcement behavior.
+
 This is an offline reference oracle, not a PDP, policy administration service,
-mutable directory, or runtime enforcement component. ABAC and ReBAC remain
-independently versioned PR4 families; there are no placeholder variants in the
-frozen PR3 unions.
+mutable directory, identity fabric, or runtime enforcement component.
 
 Generate or verify the schemas and examples with:
 

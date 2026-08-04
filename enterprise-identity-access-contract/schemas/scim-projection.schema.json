@@ -1,0 +1,384 @@
+{
+  "$defs": {
+    "ProjectionSupportClassification": {
+      "enum": [
+        "exact",
+        "approximated",
+        "unsupported"
+      ],
+      "title": "ProjectionSupportClassification",
+      "type": "string"
+    },
+    "ProjectionSupportMatrixV1": {
+      "additionalProperties": false,
+      "properties": {
+        "exercised_native_features": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Exercised Native Features",
+          "type": "array"
+        },
+        "mapping_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "native_profile_version": {
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "profile_id": {
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/ProjectionSupportRowV1"
+          },
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target": {
+          "$ref": "#/$defs/ProjectionTarget"
+        },
+        "target_profile_version": {
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_id",
+        "target",
+        "native_profile_version",
+        "target_profile_version",
+        "mapping_digest",
+        "exercised_native_features",
+        "rows"
+      ],
+      "title": "ProjectionSupportMatrixV1",
+      "type": "object"
+    },
+    "ProjectionSupportRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/ProjectionSupportClassification"
+        },
+        "conformance_vector_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Conformance Vector Ids",
+          "type": "array"
+        },
+        "mapping_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "mapping_id": {
+          "title": "Mapping Id",
+          "type": "string"
+        },
+        "native_profile_version": {
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "native_source_feature": {
+          "title": "Native Source Feature",
+          "type": "string"
+        },
+        "semantic_delta": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Semantic Delta"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_construct": {
+          "title": "Target Construct",
+          "type": "string"
+        },
+        "target_profile_version": {
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mapping_id",
+        "native_source_feature",
+        "target_construct",
+        "classification",
+        "semantic_delta",
+        "native_profile_version",
+        "target_profile_version",
+        "mapping_digest",
+        "conformance_vector_ids"
+      ],
+      "title": "ProjectionSupportRowV1",
+      "type": "object"
+    },
+    "ProjectionTarget": {
+      "enum": [
+        "scim",
+        "authzen",
+        "openfga",
+        "shared_signals"
+      ],
+      "title": "ProjectionTarget",
+      "type": "string"
+    },
+    "ScimGroupMemberProjectionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "membership_kind": {
+          "$ref": "#/$defs/ScimMembershipKind"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id",
+        "membership_kind"
+      ],
+      "title": "ScimGroupMemberProjectionV1",
+      "type": "object"
+    },
+    "ScimGroupProjectionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "group_id": {
+          "title": "Group Id",
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/ScimGroupMemberProjectionV1"
+          },
+          "title": "Members",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "group_id",
+        "display_name",
+        "members"
+      ],
+      "title": "ScimGroupProjectionV1",
+      "type": "object"
+    },
+    "ScimMembershipKind": {
+      "enum": [
+        "direct",
+        "indirect"
+      ],
+      "title": "ScimMembershipKind",
+      "type": "string"
+    },
+    "ScimProviderCapability": {
+      "enum": [
+        "core_user",
+        "core_group",
+        "patch",
+        "filter",
+        "bulk"
+      ],
+      "title": "ScimProviderCapability",
+      "type": "string"
+    },
+    "ScimUserProjectionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "authorization_semantics": {
+          "const": "none",
+          "default": "none",
+          "title": "Authorization Semantics",
+          "type": "string"
+        },
+        "entitlements": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Entitlements",
+          "type": "array"
+        },
+        "roles": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "source_account_id": {
+          "title": "Source Account Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "user_name": {
+          "title": "User Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id",
+        "source_account_id",
+        "user_name",
+        "active"
+      ],
+      "title": "ScimUserProjectionV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "directory_rbac_kernel_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "groups": {
+      "items": {
+        "$ref": "#/$defs/ScimGroupProjectionV1"
+      },
+      "title": "Groups",
+      "type": "array"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "mapping_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "provider_capabilities": {
+      "items": {
+        "$ref": "#/$defs/ScimProviderCapability"
+      },
+      "title": "Provider Capabilities",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "snapshot_tick": {
+      "minimum": 0,
+      "title": "Snapshot Tick",
+      "type": "integer"
+    },
+    "support_matrix": {
+      "$ref": "#/$defs/ProjectionSupportMatrixV1"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "users": {
+      "items": {
+        "$ref": "#/$defs/ScimUserProjectionV1"
+      },
+      "title": "Users",
+      "type": "array"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "directory_rbac_kernel_digest",
+    "snapshot_tick",
+    "provider_capabilities",
+    "mapping_digest",
+    "support_matrix",
+    "users",
+    "groups"
+  ],
+  "title": "ScimProjectionV1",
+  "type": "object"
+}

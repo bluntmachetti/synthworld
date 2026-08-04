@@ -1,0 +1,149 @@
+{
+  "$defs": {
+    "AuthorizationSourceLayer": {
+      "description": "Whether a component row came from observed or intended policy state.",
+      "enum": [
+        "actual",
+        "intended"
+      ],
+      "title": "AuthorizationSourceLayer",
+      "type": "string"
+    },
+    "ProjectionMappingDefinitionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/ProjectionSupportClassification"
+        },
+        "conformance_vector_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Conformance Vector Ids",
+          "type": "array"
+        },
+        "mapping_id": {
+          "title": "Mapping Id",
+          "type": "string"
+        },
+        "native_source_feature": {
+          "minLength": 1,
+          "title": "Native Source Feature",
+          "type": "string"
+        },
+        "semantic_delta": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Semantic Delta"
+        },
+        "target_construct": {
+          "minLength": 1,
+          "title": "Target Construct",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mapping_id",
+        "native_source_feature",
+        "target_construct",
+        "classification",
+        "conformance_vector_ids"
+      ],
+      "title": "ProjectionMappingDefinitionV1",
+      "type": "object"
+    },
+    "ProjectionMappingProfileV1": {
+      "additionalProperties": false,
+      "properties": {
+        "definitions": {
+          "items": {
+            "$ref": "#/$defs/ProjectionMappingDefinitionV1"
+          },
+          "minItems": 1,
+          "title": "Definitions",
+          "type": "array"
+        },
+        "native_profile_version": {
+          "minLength": 1,
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "profile_id": {
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/ProjectionTarget"
+        },
+        "target_profile_version": {
+          "minLength": 1,
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_id",
+        "target",
+        "native_profile_version",
+        "target_profile_version",
+        "definitions"
+      ],
+      "title": "ProjectionMappingProfileV1",
+      "type": "object"
+    },
+    "ProjectionSupportClassification": {
+      "enum": [
+        "exact",
+        "approximated",
+        "unsupported"
+      ],
+      "title": "ProjectionSupportClassification",
+      "type": "string"
+    },
+    "ProjectionTarget": {
+      "enum": [
+        "scim",
+        "authzen",
+        "openfga",
+        "shared_signals"
+      ],
+      "title": "ProjectionTarget",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "mapping_profile": {
+      "$ref": "#/$defs/ProjectionMappingProfileV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_layer": {
+      "$ref": "#/$defs/AuthorizationSourceLayer"
+    }
+  },
+  "required": [
+    "source_layer",
+    "mapping_profile"
+  ],
+  "title": "OpenFgaMappingProfileV1",
+  "type": "object"
+}

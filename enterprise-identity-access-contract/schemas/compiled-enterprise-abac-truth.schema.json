@@ -1,0 +1,399 @@
+{
+  "$defs": {
+    "AbacAttributeFactTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "active_at_cell_tick": {
+          "title": "Active At Cell Tick",
+          "type": "boolean"
+        },
+        "attribute_key": {
+          "enum": [
+            "principal_kind",
+            "employment_type",
+            "tenant_id",
+            "unit_id",
+            "clearance",
+            "target_kind",
+            "owner_unit_id",
+            "classification",
+            "action_id",
+            "action_class",
+            "assurance_level",
+            "network_zone"
+          ],
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/AttributeCategory"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "revision_id",
+        "source_layer",
+        "cell_id",
+        "category",
+        "attribute_key",
+        "value_state",
+        "value",
+        "active_at_cell_tick"
+      ],
+      "title": "AbacAttributeFactTruthV1",
+      "type": "object"
+    },
+    "AbacCellTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_conflict": {
+          "title": "Actual Conflict",
+          "type": "boolean"
+        },
+        "actual_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "actual_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Rule Truth Ids",
+          "type": "array"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "intended_conflict": {
+          "title": "Intended Conflict",
+          "type": "boolean"
+        },
+        "intended_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "intended_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Rule Truth Ids",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cell_id",
+        "actual_outcome",
+        "intended_outcome",
+        "actual_conflict",
+        "intended_conflict",
+        "actual_rule_truth_ids",
+        "intended_rule_truth_ids"
+      ],
+      "title": "AbacCellTruthV1",
+      "type": "object"
+    },
+    "AbacPredicateTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/PredicateOutcome"
+        },
+        "predicate_index": {
+          "minimum": 0,
+          "title": "Predicate Index",
+          "type": "integer"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "supporting_fact_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supporting Fact Ids",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "truth_id": {
+          "title": "Truth Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truth_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "predicate_index",
+        "outcome",
+        "supporting_fact_ids"
+      ],
+      "title": "AbacPredicateTruthV1",
+      "type": "object"
+    },
+    "AbacRuleTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "predicate_outcome": {
+          "$ref": "#/$defs/PredicateOutcome"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "truth_id": {
+          "title": "Truth Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truth_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "effect",
+        "predicate_outcome",
+        "outcome"
+      ],
+      "title": "AbacRuleTruthV1",
+      "type": "object"
+    },
+    "AttributeCategory": {
+      "enum": [
+        "subject",
+        "resource",
+        "action",
+        "environment"
+      ],
+      "title": "AttributeCategory",
+      "type": "string"
+    },
+    "AttributeValueState": {
+      "enum": [
+        "known",
+        "unknown"
+      ],
+      "title": "AttributeValueState",
+      "type": "string"
+    },
+    "AuthorizationSourceLayer": {
+      "description": "Whether a component row came from observed or intended policy state.",
+      "enum": [
+        "actual",
+        "intended"
+      ],
+      "title": "AuthorizationSourceLayer",
+      "type": "string"
+    },
+    "MechanismOutcome": {
+      "description": "Native outcome retained before benchmark default-deny normalization.",
+      "enum": [
+        "allow",
+        "deny",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "MechanismOutcome",
+      "type": "string"
+    },
+    "PredicateOutcome": {
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "PredicateOutcome",
+      "type": "string"
+    },
+    "RuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "RuleEffect",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "abac_intent_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "abac_state_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "attribute_facts": {
+      "items": {
+        "$ref": "#/$defs/AbacAttributeFactTruthV1"
+      },
+      "title": "Attribute Facts",
+      "type": "array"
+    },
+    "cells": {
+      "items": {
+        "$ref": "#/$defs/AbacCellTruthV1"
+      },
+      "title": "Cells",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "predicate_truth": {
+      "items": {
+        "$ref": "#/$defs/AbacPredicateTruthV1"
+      },
+      "title": "Predicate Truth",
+      "type": "array"
+    },
+    "rule_truth": {
+      "items": {
+        "$ref": "#/$defs/AbacRuleTruthV1"
+      },
+      "title": "Rule Truth",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "abac_state_digest",
+    "abac_intent_digest",
+    "attribute_facts",
+    "predicate_truth",
+    "rule_truth",
+    "cells"
+  ],
+  "title": "CompiledEnterpriseAbacTruthV1",
+  "type": "object"
+}

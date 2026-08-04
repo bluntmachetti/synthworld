@@ -1,0 +1,177 @@
+{
+  "$defs": {
+    "AbacComponentReferenceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "component_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "component_schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Component Schema Version",
+          "type": "string"
+        },
+        "family": {
+          "const": "abac",
+          "default": "abac",
+          "title": "Family",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "component_digest"
+      ],
+      "title": "AbacComponentReferenceV1",
+      "type": "object"
+    },
+    "DirectoryRbacComponentReferenceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "component_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "component_schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Component Schema Version",
+          "type": "string"
+        },
+        "family": {
+          "const": "directory_rbac",
+          "default": "directory_rbac",
+          "title": "Family",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "component_digest"
+      ],
+      "title": "DirectoryRbacComponentReferenceV1",
+      "type": "object"
+    },
+    "RebacComponentReferenceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "component_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "component_schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Component Schema Version",
+          "type": "string"
+        },
+        "family": {
+          "const": "rebac",
+          "default": "rebac",
+          "title": "Family",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "component_digest"
+      ],
+      "title": "RebacComponentReferenceV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "abac": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AbacComponentReferenceV1"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "directory_rbac": {
+      "$ref": "#/$defs/DirectoryRbacComponentReferenceV1"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "rebac": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RebacComponentReferenceV1"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "directory_rbac"
+  ],
+  "title": "EnterpriseAuthorizationCompositionV1",
+  "type": "object"
+}

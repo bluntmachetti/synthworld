@@ -1,0 +1,113 @@
+{
+  "$defs": {
+    "AuthZenRawOutcome": {
+      "enum": [
+        "allow",
+        "deny",
+        "indeterminate",
+        "transport_error",
+        "timeout",
+        "unavailable"
+      ],
+      "title": "AuthZenRawOutcome",
+      "type": "string"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_request_id": {
+      "title": "Access Request Id",
+      "type": "string"
+    },
+    "normalized_decision": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "raw_boolean_decision": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Raw Boolean Decision"
+    },
+    "raw_outcome": {
+      "$ref": "#/$defs/AuthZenRawOutcome"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "transport_evidence_digest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "access_request_id",
+    "raw_outcome",
+    "raw_boolean_decision",
+    "normalized_decision",
+    "transport_evidence_digest"
+  ],
+  "title": "AuthZenNormalizedObservationV1",
+  "type": "object"
+}
