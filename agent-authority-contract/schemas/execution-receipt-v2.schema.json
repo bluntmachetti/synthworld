@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/execution-receipt-v2.schema.json",
+  "x-generated-from": "synthworld.assurance.models_v2.ExecutionReceiptV2",
+  "x-generated-by": "agent-authority-contract/tools/generate_protocol_schemas.py",
+  "x-regenerate-with": "uv run python agent-authority-contract/tools/generate_protocol_schemas.py",
+  "$defs": {
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "ExecutionStatus": {
+      "enum": [
+        "succeeded",
+        "failed"
+      ],
+      "title": "ExecutionStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "boundary": {
+      "minLength": 1,
+      "title": "Boundary",
+      "type": "string"
+    },
+    "callable_identifier": {
+      "minLength": 1,
+      "title": "Callable Identifier",
+      "type": "string"
+    },
+    "adapter_name": {
+      "minLength": 1,
+      "title": "Adapter Name",
+      "type": "string"
+    },
+    "adapter_version": {
+      "minLength": 1,
+      "title": "Adapter Version",
+      "type": "string"
+    },
+    "adapter_source_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "systems_under_test": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Systems Under Test",
+      "type": "array"
+    },
+    "run_plan_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "stimulus_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "source_public_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "product_input_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "product_output_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "exit_code": {
+      "title": "Exit Code",
+      "type": "integer"
+    },
+    "status": {
+      "$ref": "#/$defs/ExecutionStatus"
+    }
+  },
+  "required": [
+    "boundary",
+    "callable_identifier",
+    "adapter_name",
+    "adapter_version",
+    "adapter_source_digest",
+    "systems_under_test",
+    "run_plan_digest",
+    "stimulus_digest",
+    "source_public_digest",
+    "product_input_digest",
+    "product_output_digest",
+    "exit_code",
+    "status"
+  ],
+  "title": "ExecutionReceiptV2",
+  "type": "object"
+}

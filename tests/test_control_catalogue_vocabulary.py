@@ -20,6 +20,11 @@ from pathlib import Path
 
 import yaml
 
+from synthworld.agent_authority.common import (
+    AGENT_AUTHORITY_PROTOCOL_VERSION,
+    LAB_CONTROL_IDS,
+    OPERATIONAL_CONTROL_IDS,
+)
 from synthworld.agentic import (
     AGENTIC_SCORING_PROTOCOL_VERSION,
     evaluate_agentic_trace,
@@ -146,3 +151,17 @@ def test_declared_versions_track_the_code_they_describe() -> None:
 
     assert meta["scoring_protocol_version"] == AGENTIC_SCORING_PROTOCOL_VERSION
     assert meta["agentic_schema_version"] == AGENTIC_SCHEMA_VERSION
+    assert meta["agent_authority_protocol_version"] == (
+        AGENT_AUTHORITY_PROTOCOL_VERSION
+    )
+
+
+def test_agent_authority_protocol_coverage_is_explicit_without_live_claim() -> None:
+    meta = _catalogue()["meta"]
+    assert isinstance(meta, dict)
+    coverage = meta["agent_authority_protocol_coverage"]
+    assert isinstance(coverage, dict)
+    assert coverage["status"] == "modeled-not-live-evidence"
+    assert coverage["controls"] == [
+        control.value for control in (*LAB_CONTROL_IDS, *OPERATIONAL_CONTROL_IDS)
+    ]

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from synthworld.agent_authority.models import AgentAuthorityRunPlanV1
 from synthworld.agentic.evaluation import (
     evaluate_agentic_trace,
     trace_submission_from_jsonl,
@@ -21,6 +22,8 @@ from synthworld.agentic.trace_validation import (
     TraceValidationReport,
     validate_trace_jsonl,
 )
+from synthworld.assurance.agent_authority import validate_agent_authority_run_receipt
+from synthworld.assurance.receipt import ReceiptIntegrityError
 from synthworld.broker_metrics import BrokerAssessment
 from synthworld.connection_generator import (
     generate_adversarial_connection_benchmark,
@@ -77,6 +80,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == "validate":
+        if args.task == "agent-authority-run-plan":
+            try:
+                AgentAuthorityRunPlanV1.model_validate_json(
+                    args.input.read_text(encoding="utf-8-sig")
+                )
+            except (OSError, UnicodeDecodeError, ValidationError) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            print("agent-authority-run-plan: valid")
+            return 0
+
+        if args.task == "agent-authority-receipt":
+            try:
+                manifest = validate_agent_authority_run_receipt(args.input)
+            except (OSError, UnicodeDecodeError, ReceiptIntegrityError) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            print(
+                "agent-authority-receipt: valid "
+                f"({len(manifest.artifacts)} bound artifacts)"
+            )
+            return 0
+
         # Its own try block: the evaluate handler below guards a different set of
         # calls, and this path raises different things. Narrow on purpose - catching
         # every ValueError would report an internal defect as though the user's file
@@ -457,22 +483,32 @@ def _parser() -> argparse.ArgumentParser:
         "validate",
         help="check a submission's shape before scoring, without answer-key truth",
     )
-    validate.add_argument(
-        "task",
-        choices=["agentic-trace"],
-        help="artifact to validate",
+    validation_tasks = validate.add_subparsers(dest="task", required=True)
+    agentic_trace = validation_tasks.add_parser(
+        "agentic-trace",
+        help="validate an observed-action JSONL submission",
     )
-    validate.add_argument(
+    agentic_trace.add_argument(
         "--predictions",
         type=Path,
         required=True,
         help="path to the observed-action JSONL file to check",
     )
-    validate.add_argument(
+    agentic_trace.add_argument(
         "--json",
         action="store_true",
         help="print the machine-readable report instead of a human summary",
     )
+    run_plan = validation_tasks.add_parser(
+        "agent-authority-run-plan",
+        help="validate a pre-execution agent-authority run plan",
+    )
+    run_plan.add_argument("--input", type=Path, required=True)
+    receipt = validation_tasks.add_parser(
+        "agent-authority-receipt",
+        help="validate an agent-authority receipt directory",
+    )
+    receipt.add_argument("--input", type=Path, required=True)
 
     evaluate = subparsers.add_parser(
         "evaluate",

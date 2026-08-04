@@ -1,0 +1,81 @@
+{
+  "manifest_version": "0.1.0-draft",
+  "run_id": "legacy-example-run",
+  "created_at": "2026-08-04T08:00:00Z",
+  "completed_at": "2026-08-04T08:01:00Z",
+  "operator": "example operator",
+  "run_layer": "lab",
+  "controls_exercised": [
+    "SW-AA-L01",
+    "SW-AA-L02"
+  ],
+  "benchmark_identity": {
+    "kind": "frozen",
+    "benchmark_id": "asteria-agentic-v1",
+    "benchmark_version": "1.0.0",
+    "artifact_checksums": {
+      "scheme": "sha256-artifact-set-v1",
+      "root_digest": "legacy-root-digest"
+    }
+  },
+  "scoring": {
+    "agentic_schema_version": "1.0.0",
+    "scoring_protocol_version": "1.0.0"
+  },
+  "build_provenance": {
+    "synthworld_ref": "v0.11.0",
+    "python_version": "3.13.5",
+    "dependency_lock_digest": "legacy-lock-digest",
+    "container_image_digest": null,
+    "platform": "linux-x86_64"
+  },
+  "adapter": {
+    "name": "legacy-example-adapter",
+    "version": "0.1.0",
+    "source_url": "https://example.invalid/legacy-adapter",
+    "author": "example operator",
+    "authored_by_benchmark_maintainer": false
+  },
+  "systems_under_test": [
+    {
+      "role": "gateway",
+      "name": "legacy gateway",
+      "version": "1.2.3",
+      "image_digest": "legacy-image-digest",
+      "configuration_digest": "legacy-configuration-digest",
+      "configuration_url": null,
+      "is_reference_implementation": false,
+      "notes": "example only"
+    }
+  ],
+  "topology": {
+    "agent_can_reach_target_directly": false,
+    "enforcement_points": [
+      "legacy gateway"
+    ],
+    "isolation_mechanism": "example network boundary",
+    "notes": null
+  },
+  "authority_critical_dependencies": [
+    "legacy gateway"
+  ],
+  "declared_bounds": {
+    "revocation_propagation_ms": 1000,
+    "notes": "chosen before execution"
+  },
+  "review": {
+    "status": "accepted_with_caveats",
+    "reviewer": "example reviewer",
+    "reviewer_affiliation": "example vendor",
+    "reviewed_at": "2026-08-04T07:00:00Z",
+    "caveats": [
+      "legacy fixture"
+    ]
+  },
+  "conflicts_declared": [
+    "adapter authored by evaluation operator"
+  ],
+  "limitations": [
+    "legacy manifest lacks receipt-v2 provenance fields"
+  ]
+}

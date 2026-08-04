@@ -99,6 +99,18 @@ meta:
   benchmark_under_description: asteria-agentic-v1
   agentic_schema_version: "1.0.0"
   scoring_protocol_version: "0.3.0"
+  agent_authority_protocol_version: "1.0.0"
+  agent_authority_protocol_coverage:
+    status: modeled-not-live-evidence
+    controls:
+      - SW-AA-L01
+      - SW-AA-L02
+      - SW-AA-L03
+      - SW-AA-L04
+      - SW-AA-L05
+      - SW-AA-L06
+      - SW-AA-L07
+      - SW-AA-L08
   fixture_shape:
     events: 24
     action_attempts: 11

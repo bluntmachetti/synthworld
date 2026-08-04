@@ -1,0 +1,924 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/run-receipt-manifest-v2.schema.json",
+  "x-generated-from": "synthworld.assurance.models_v2.RunReceiptManifestV2",
+  "x-generated-by": "agent-authority-contract/tools/generate_protocol_schemas.py",
+  "x-regenerate-with": "uv run python agent-authority-contract/tools/generate_protocol_schemas.py",
+  "$defs": {
+    "AdapterProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "source_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "boundary": {
+          "minLength": 1,
+          "title": "Boundary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "source_digest",
+        "boundary"
+      ],
+      "title": "AdapterProvenanceV2",
+      "type": "object"
+    },
+    "ArtifactDescriptorV2": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "phase": {
+          "$ref": "#/$defs/ArtifactPhase"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "serialization": {
+          "$ref": "#/$defs/ArtifactSerialization"
+        },
+        "digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "byte_size": {
+          "minimum": 0,
+          "title": "Byte Size",
+          "type": "integer"
+        },
+        "schema_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schema Version"
+        }
+      },
+      "required": [
+        "path",
+        "role",
+        "phase",
+        "media_type",
+        "serialization",
+        "digest",
+        "byte_size"
+      ],
+      "title": "ArtifactDescriptorV2",
+      "type": "object"
+    },
+    "ArtifactPhase": {
+      "enum": [
+        "product",
+        "evaluation"
+      ],
+      "title": "ArtifactPhase",
+      "type": "string"
+    },
+    "ArtifactSerialization": {
+      "enum": [
+        "canonical_json_v1",
+        "raw_bytes"
+      ],
+      "title": "ArtifactSerialization",
+      "type": "string"
+    },
+    "BenchmarkIdentityV2": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "package_version": {
+          "minLength": 1,
+          "title": "Package Version",
+          "type": "string"
+        },
+        "public_root_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "evaluator_root_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "identity_access_universe_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DigestV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "policy_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DigestV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "cell_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DigestV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "family",
+        "version",
+        "package_version",
+        "public_root_digest",
+        "evaluator_root_digest"
+      ],
+      "title": "BenchmarkIdentityV2",
+      "type": "object"
+    },
+    "BuildEnvironmentV2": {
+      "additionalProperties": false,
+      "properties": {
+        "synthworld": {
+          "$ref": "#/$defs/RepositoryProvenanceV2"
+        },
+        "dependency_lock_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "runtime_identifier": {
+          "minLength": 1,
+          "title": "Runtime Identifier",
+          "type": "string"
+        },
+        "platform_identifier": {
+          "minLength": 1,
+          "title": "Platform Identifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "synthworld",
+        "dependency_lock_digest",
+        "runtime_identifier",
+        "platform_identifier"
+      ],
+      "title": "BuildEnvironmentV2",
+      "type": "object"
+    },
+    "ComponentArtifactKindV2": {
+      "enum": [
+        "source",
+        "image",
+        "package",
+        "executable"
+      ],
+      "title": "ComponentArtifactKindV2",
+      "type": "string"
+    },
+    "ConfigurationEntryV2": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "ConfigurationEntryV2",
+      "type": "object"
+    },
+    "ConfigurationObservabilityV2": {
+      "enum": [
+        "observed",
+        "partial",
+        "not_exposed"
+      ],
+      "title": "ConfigurationObservabilityV2",
+      "type": "string"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "EvaluationStatus": {
+      "enum": [
+        "evaluated",
+        "invalid_submission",
+        "not_evaluated"
+      ],
+      "title": "EvaluationStatus",
+      "type": "string"
+    },
+    "EvidenceClaimV2": {
+      "enum": [
+        "canonical_conformance",
+        "variant_robustness",
+        "generated_transfer_evidence",
+        "live_lab_conformance"
+      ],
+      "title": "EvidenceClaimV2",
+      "type": "string"
+    },
+    "ExecutionStatus": {
+      "enum": [
+        "succeeded",
+        "failed"
+      ],
+      "title": "ExecutionStatus",
+      "type": "string"
+    },
+    "ManagedServiceComponentProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "component_type": {
+          "const": "managed_service",
+          "default": "managed_service",
+          "title": "Component Type",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "product": {
+          "minLength": 1,
+          "title": "Product",
+          "type": "string"
+        },
+        "release_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Release Identifier"
+        },
+        "build_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Build Identifier"
+        },
+        "cell_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cell Identifier"
+        },
+        "region_identifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Region Identifier"
+        },
+        "configuration_observability": {
+          "$ref": "#/$defs/ConfigurationObservabilityV2"
+        },
+        "configuration_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DigestV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "observed_configuration_fields": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Observed Configuration Fields",
+          "type": "array"
+        },
+        "configuration_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Configuration Evidence Refs",
+          "type": "array"
+        },
+        "configuration_capture_limitation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Configuration Capture Limitation"
+        },
+        "version_observability": {
+          "$ref": "#/$defs/VersionObservabilityV2"
+        },
+        "version_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Version Evidence Refs",
+          "type": "array"
+        },
+        "replayability": {
+          "enum": [
+            "configuration_only",
+            "limited",
+            "not_replayable"
+          ],
+          "title": "Replayability",
+          "type": "string"
+        },
+        "replayability_limitation": {
+          "minLength": 1,
+          "title": "Replayability Limitation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component_id",
+        "role",
+        "provider",
+        "product",
+        "configuration_observability",
+        "version_observability",
+        "replayability",
+        "replayability_limitation"
+      ],
+      "title": "ManagedServiceComponentProvenanceV2",
+      "type": "object"
+    },
+    "ReferenceComponentProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "artifact_kind": {
+          "$ref": "#/$defs/ComponentArtifactKindV2"
+        },
+        "artifact_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "dependency_lock_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "configuration_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "tree_state": {
+          "$ref": "#/$defs/TreeState"
+        },
+        "tree_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DigestV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "replayability": {
+          "$ref": "#/$defs/ReplayabilityV2"
+        },
+        "replayability_limitation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replayability Limitation"
+        },
+        "component_type": {
+          "const": "reference",
+          "default": "reference",
+          "title": "Component Type",
+          "type": "string"
+        },
+        "is_reference_implementation": {
+          "const": true,
+          "default": true,
+          "title": "Is Reference Implementation",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "component_id",
+        "role",
+        "name",
+        "version",
+        "artifact_kind",
+        "artifact_digest",
+        "dependency_lock_digest",
+        "configuration_digest",
+        "tree_state",
+        "replayability"
+      ],
+      "title": "ReferenceComponentProvenanceV2",
+      "type": "object"
+    },
+    "ReplayabilityV2": {
+      "enum": [
+        "exact",
+        "configuration_only",
+        "limited",
+        "not_replayable"
+      ],
+      "title": "ReplayabilityV2",
+      "type": "string"
+    },
+    "RepositoryProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "revision": {
+          "minLength": 1,
+          "title": "Revision",
+          "type": "string"
+        },
+        "tree_state": {
+          "$ref": "#/$defs/TreeState"
+        },
+        "tree_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DigestV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "name",
+        "revision",
+        "tree_state"
+      ],
+      "title": "RepositoryProvenanceV2",
+      "type": "object"
+    },
+    "RunMetadataV2": {
+      "additionalProperties": false,
+      "properties": {
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "operator_id": {
+          "minLength": 1,
+          "title": "Operator Id",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string",
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d+)?(Z|[+-]00:00)$"
+        },
+        "completed_at": {
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string",
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d+)?(Z|[+-]00:00)$"
+        }
+      },
+      "required": [
+        "run_id",
+        "operator_id",
+        "started_at",
+        "completed_at"
+      ],
+      "title": "RunMetadataV2",
+      "type": "object"
+    },
+    "SelfHostedComponentProvenanceV2": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        },
+        "artifact_kind": {
+          "$ref": "#/$defs/ComponentArtifactKindV2"
+        },
+        "artifact_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "dependency_lock_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "configuration_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "tree_state": {
+          "$ref": "#/$defs/TreeState"
+        },
+        "tree_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DigestV2"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "replayability": {
+          "$ref": "#/$defs/ReplayabilityV2"
+        },
+        "replayability_limitation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replayability Limitation"
+        },
+        "component_type": {
+          "const": "self_hosted",
+          "default": "self_hosted",
+          "title": "Component Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component_id",
+        "role",
+        "name",
+        "version",
+        "artifact_kind",
+        "artifact_digest",
+        "dependency_lock_digest",
+        "configuration_digest",
+        "tree_state",
+        "replayability"
+      ],
+      "title": "SelfHostedComponentProvenanceV2",
+      "type": "object"
+    },
+    "SerializationConventionV2": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "const": "synthworld-canonical-json-v1",
+          "default": "synthworld-canonical-json-v1",
+          "title": "Name",
+          "type": "string"
+        },
+        "encoding": {
+          "const": "UTF-8",
+          "default": "UTF-8",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "object_key_order": {
+          "const": "lexicographic",
+          "default": "lexicographic",
+          "title": "Object Key Order",
+          "type": "string"
+        },
+        "line_endings": {
+          "const": "LF",
+          "default": "LF",
+          "title": "Line Endings",
+          "type": "string"
+        },
+        "trailing_newline_count": {
+          "const": 1,
+          "default": 1,
+          "title": "Trailing Newline Count",
+          "type": "integer"
+        },
+        "raw_product_output_preserved": {
+          "const": true,
+          "default": true,
+          "title": "Raw Product Output Preserved",
+          "type": "boolean"
+        }
+      },
+      "title": "SerializationConventionV2",
+      "type": "object"
+    },
+    "TreeState": {
+      "description": "Whether source provenance names a clean, dirty, or unavailable tree.",
+      "enum": [
+        "clean",
+        "dirty",
+        "unknown"
+      ],
+      "title": "TreeState",
+      "type": "string"
+    },
+    "VersionBindingV2": {
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "version"
+      ],
+      "title": "VersionBindingV2",
+      "type": "object"
+    },
+    "VersionObservabilityV2": {
+      "enum": [
+        "observed",
+        "not_exposed"
+      ],
+      "title": "VersionObservabilityV2",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "benchmark": {
+      "$ref": "#/$defs/BenchmarkIdentityV2"
+    },
+    "build_environment": {
+      "$ref": "#/$defs/BuildEnvironmentV2"
+    },
+    "run": {
+      "$ref": "#/$defs/RunMetadataV2"
+    },
+    "schema_versions": {
+      "items": {
+        "$ref": "#/$defs/VersionBindingV2"
+      },
+      "minItems": 1,
+      "title": "Schema Versions",
+      "type": "array"
+    },
+    "scoring_formula_versions": {
+      "items": {
+        "$ref": "#/$defs/VersionBindingV2"
+      },
+      "minItems": 1,
+      "title": "Scoring Formula Versions",
+      "type": "array"
+    },
+    "generator_configuration": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ConfigurationEntryV2"
+      },
+      "title": "Generator Configuration",
+      "type": "array"
+    },
+    "event_schedule": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ConfigurationEntryV2"
+      },
+      "title": "Event Schedule",
+      "type": "array"
+    },
+    "adapter": {
+      "$ref": "#/$defs/AdapterProvenanceV2"
+    },
+    "systems_under_test": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "managed_service": "#/$defs/ManagedServiceComponentProvenanceV2",
+            "reference": "#/$defs/ReferenceComponentProvenanceV2",
+            "self_hosted": "#/$defs/SelfHostedComponentProvenanceV2"
+          },
+          "propertyName": "component_type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/SelfHostedComponentProvenanceV2"
+          },
+          {
+            "$ref": "#/$defs/ManagedServiceComponentProvenanceV2"
+          },
+          {
+            "$ref": "#/$defs/ReferenceComponentProvenanceV2"
+          }
+        ]
+      },
+      "minItems": 1,
+      "title": "Systems Under Test",
+      "type": "array"
+    },
+    "digest_algorithm": {
+      "const": "sha256",
+      "default": "sha256",
+      "title": "Digest Algorithm",
+      "type": "string"
+    },
+    "serialization": {
+      "$ref": "#/$defs/SerializationConventionV2",
+      "default": {
+        "name": "synthworld-canonical-json-v1",
+        "encoding": "UTF-8",
+        "object_key_order": "lexicographic",
+        "line_endings": "LF",
+        "trailing_newline_count": 1,
+        "raw_product_output_preserved": true
+      }
+    },
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/ArtifactDescriptorV2"
+      },
+      "minItems": 1,
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "execution_status": {
+      "$ref": "#/$defs/ExecutionStatus"
+    },
+    "evaluation_status": {
+      "$ref": "#/$defs/EvaluationStatus"
+    },
+    "evidence_claim": {
+      "$ref": "#/$defs/EvidenceClaimV2"
+    }
+  },
+  "required": [
+    "benchmark",
+    "build_environment",
+    "run",
+    "schema_versions",
+    "scoring_formula_versions",
+    "adapter",
+    "systems_under_test",
+    "artifacts",
+    "execution_status",
+    "evaluation_status",
+    "evidence_claim"
+  ],
+  "title": "RunReceiptManifestV2",
+  "type": "object"
+}

@@ -1,0 +1,468 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/agent-authority-lab-report.schema.json",
+  "x-generated-from": "synthworld.agent_authority.models.AgentAuthorityLabReportV1",
+  "x-generated-by": "agent-authority-contract/tools/generate_protocol_schemas.py",
+  "x-regenerate-with": "uv run python agent-authority-contract/tools/generate_protocol_schemas.py",
+  "$defs": {
+    "AddedLatencyMeasurementV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "sut_stage_id": {
+          "minLength": 1,
+          "title": "Sut Stage Id",
+          "type": "string"
+        },
+        "baseline_stage_id": {
+          "minLength": 1,
+          "title": "Baseline Stage Id",
+          "type": "string"
+        },
+        "statistic": {
+          "$ref": "#/$defs/LatencyStatistic"
+        },
+        "added_latency_ns": {
+          "title": "Added Latency Ns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sut_stage_id",
+        "baseline_stage_id",
+        "statistic",
+        "added_latency_ns"
+      ],
+      "title": "AddedLatencyMeasurementV1",
+      "type": "object"
+    },
+    "AgentAuthorityControlId": {
+      "enum": [
+        "SW-AA-C01",
+        "SW-AA-C02",
+        "SW-AA-C03",
+        "SW-AA-C04",
+        "SW-AA-C05",
+        "SW-AA-C06",
+        "SW-AA-C07",
+        "SW-AA-C08",
+        "SW-AA-C09",
+        "SW-AA-C10",
+        "SW-AA-C11",
+        "SW-AA-C12",
+        "SW-AA-C13",
+        "SW-AA-C14",
+        "SW-AA-C15",
+        "SW-AA-C16",
+        "SW-AA-L01",
+        "SW-AA-L02",
+        "SW-AA-L03",
+        "SW-AA-L04",
+        "SW-AA-L05",
+        "SW-AA-L06",
+        "SW-AA-L07",
+        "SW-AA-L08"
+      ],
+      "title": "AgentAuthorityControlId",
+      "type": "string"
+    },
+    "AgentAuthoritySecurityMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "control_id": {
+          "$ref": "#/$defs/AgentAuthorityControlId"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "empty_behaviour": {
+          "$ref": "#/$defs/MetricEmptyBehaviour"
+        }
+      },
+      "required": [
+        "control_id",
+        "name",
+        "value",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning",
+        "empty_behaviour"
+      ],
+      "title": "AgentAuthoritySecurityMetricV1",
+      "type": "object"
+    },
+    "CompatibilityCoverageReportV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "coverage_key": {
+          "minLength": 1,
+          "title": "Coverage Key",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CompatibilityStatus"
+        },
+        "nondominated_minima": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Nondominated Minima",
+          "type": "array"
+        },
+        "limitation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limitation"
+        }
+      },
+      "required": [
+        "coverage_key",
+        "status"
+      ],
+      "title": "CompatibilityCoverageReportV1",
+      "type": "object"
+    },
+    "CompatibilityStatus": {
+      "enum": [
+        "measured",
+        "unsupported",
+        "incomplete",
+        "not_attempted"
+      ],
+      "title": "CompatibilityStatus",
+      "type": "string"
+    },
+    "FindingStatus": {
+      "enum": [
+        "pass",
+        "fail",
+        "inconclusive",
+        "not_executed"
+      ],
+      "title": "FindingStatus",
+      "type": "string"
+    },
+    "LatencyStatistic": {
+      "enum": [
+        "p50",
+        "p95",
+        "p99"
+      ],
+      "title": "LatencyStatistic",
+      "type": "string"
+    },
+    "MetricEmptyBehaviour": {
+      "enum": [
+        "nonempty",
+        "null_if_empty"
+      ],
+      "title": "MetricEmptyBehaviour",
+      "type": "string"
+    },
+    "OperationalRatioV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "numerator_meaning": {
+          "minLength": 1,
+          "title": "Numerator Meaning",
+          "type": "string"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator",
+        "numerator_meaning",
+        "denominator_meaning"
+      ],
+      "title": "OperationalRatioV1",
+      "type": "object"
+    },
+    "OperationalStageReportV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "stage_id": {
+          "minLength": 1,
+          "title": "Stage Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/OperationalStageStatus"
+        },
+        "latency_ns": {
+          "default": [],
+          "items": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/LatencyStatistic"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "title": "Latency Ns",
+          "type": "array"
+        },
+        "failure_rate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperationalRatioV1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "throughput": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperationalRatioV1"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "limitation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limitation"
+        }
+      },
+      "required": [
+        "stage_id",
+        "status"
+      ],
+      "title": "OperationalStageReportV1",
+      "type": "object"
+    },
+    "OperationalStageStatus": {
+      "enum": [
+        "complete",
+        "gap"
+      ],
+      "title": "OperationalStageStatus",
+      "type": "string"
+    },
+    "StimulusFindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "stimulus_id": {
+          "minLength": 1,
+          "title": "Stimulus Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/AgentAuthorityControlId"
+        },
+        "status": {
+          "$ref": "#/$defs/FindingStatus"
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure Code"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "stimulus_id",
+        "control_id",
+        "status"
+      ],
+      "title": "StimulusFindingV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/StimulusFindingV1"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "security_metrics": {
+      "items": {
+        "$ref": "#/$defs/AgentAuthoritySecurityMetricV1"
+      },
+      "title": "Security Metrics",
+      "type": "array"
+    },
+    "operational_stages": {
+      "items": {
+        "$ref": "#/$defs/OperationalStageReportV1"
+      },
+      "title": "Operational Stages",
+      "type": "array"
+    },
+    "added_latency": {
+      "items": {
+        "$ref": "#/$defs/AddedLatencyMeasurementV1"
+      },
+      "title": "Added Latency",
+      "type": "array"
+    },
+    "compatibility": {
+      "items": {
+        "$ref": "#/$defs/CompatibilityCoverageReportV1"
+      },
+      "title": "Compatibility",
+      "type": "array"
+    },
+    "limitations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "findings",
+    "security_metrics",
+    "operational_stages",
+    "added_latency",
+    "compatibility"
+  ],
+  "title": "AgentAuthorityLabReportV1",
+  "type": "object"
+}
