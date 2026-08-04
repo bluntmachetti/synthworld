@@ -35,16 +35,37 @@ by the same route. A type signature enforces that; a test would only sample it.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from enum import StrEnum
 from hashlib import blake2b
+from math import log2
 from typing import Literal
 
 from synthworld.ambiguity import PairDisposition
-from synthworld.connection import PublicIdentityAttributeKind
 
 AMBIGUITY_GRAMMAR_VERSION: Literal["1.0.0"] = "1.0.0"
 
-_K = PublicIdentityAttributeKind
+
+class EvidenceKind(StrEnum):
+    """What a pair can be compared on.
+
+    Not `PublicIdentityAttributeKind`. That enum is v1's *storage*, and it has no given
+    name, because v1 keeps given names inside a display string. A rule keyed on it
+    therefore cannot see the only thing distinguishing twins from one person: the
+    canonical twins pair agrees on family name, birth date, address and school year, and
+    differs on nothing else a v1 attribute records. The first version of this module
+    scored it +0.97 and called it a merge.
+    """
+
+    GIVEN_NAME = "given_name"
+    FAMILY_NAME = "family_name"
+    DATE_OF_BIRTH = "date_of_birth"
+    EMAIL = "email"
+    PHONE = "phone"
+    USERNAME = "username"
+    FULL_ADDRESS = "full_address"
+    EMPLOYER = "employer"
+    SCHOOL_YEAR = "school_year"
 
 
 class Relation(StrEnum):
@@ -63,82 +84,119 @@ class Relation(StrEnum):
     LOPSIDED = "lopsided"
 
 
-#: How much one kind agreeing is worth, and how readily unrelated people share it.
+#: Fellegi-Sunter parameters per kind: `(m, u)`, each `(equal, near, far)`.
 #:
-#: `weight` is evidence toward one entity when the kind agrees. `shareability` is how
-#: often unrelated people legitimately share it: a household email is shared far more
-#: readily than a national identifier, so its agreement says less. Both are declared
-#: here, reviewed, and used by one rule - rather than each scenario asserting its own
-#: answer, which is what made v1 a table.
-_KIND_EVIDENCE: dict[PublicIdentityAttributeKind, tuple[float, float]] = {
-    _K.PHONE: (0.65, 0.35),
-    _K.EMAIL: (0.70, 0.30),
-    _K.USERNAME: (0.55, 0.40),
-    _K.FULL_ADDRESS: (0.55, 0.45),
-    _K.DATE_OF_BIRTH: (0.45, 0.25),
-    _K.FAMILY_NAME: (0.30, 0.55),
-    _K.EMPLOYER: (0.35, 0.50),
-    _K.SCHOOL_YEAR: (0.35, 0.45),
+#: `m` is the probability of an outcome given the two records are one person; `u` the
+#: probability given they are not. The weight of an outcome is `log2(m / u)` - positive
+#: when it is likelier under one person, negative when likelier under two.
+#:
+#: A first version used one number per kind and forced disagreement to be the exact
+#: negative of agreement. Real linkage is not symmetric: the ONS worked example gives a
+#: surname `+7.11 / -1.66` and a birth date `+6.01 / -6.06`. People change email
+#: providers and move house, so those disagreements are weak evidence; almost nobody
+#: changes their birth date, so that disagreement is strong. One number cannot say both,
+#: and the old table made a differing email the strongest negative in the system while
+#: its own comment said such a difference "says almost nothing".
+#:
+#: `u` is estimated over *this pack's* non-match population, which is the part that
+#: matters and the part a general-purpose table would get wrong. The negatives here are
+#: deliberately households, twins, colleagues and classmates - not strangers drawn at
+#: random. Two people in this corpus sharing a surname or an address is unremarkable, so
+#: those agreements are weak; a shared birth date is still rare, so it stays strong.
+_Params = tuple[tuple[float, float, float], tuple[float, float, float]]
+
+_FS: dict[EvidenceKind, _Params] = {
+    EvidenceKind.GIVEN_NAME: ((0.75, 0.20, 0.05), (0.03, 0.07, 0.90)),
+    EvidenceKind.FAMILY_NAME: ((0.85, 0.10, 0.05), (0.55, 0.05, 0.40)),
+    EvidenceKind.DATE_OF_BIRTH: ((0.93, 0.05, 0.02), (0.06, 0.02, 0.92)),
+    EvidenceKind.EMAIL: ((0.70, 0.20, 0.10), (0.15, 0.05, 0.80)),
+    EvidenceKind.PHONE: ((0.72, 0.18, 0.10), (0.12, 0.03, 0.85)),
+    EvidenceKind.USERNAME: ((0.80, 0.15, 0.05), (0.10, 0.05, 0.85)),
+    EvidenceKind.FULL_ADDRESS: ((0.60, 0.25, 0.15), (0.35, 0.10, 0.55)),
+    EvidenceKind.EMPLOYER: ((0.55, 0.20, 0.25), (0.30, 0.10, 0.60)),
+    EvidenceKind.SCHOOL_YEAR: ((0.75, 0.15, 0.10), (0.25, 0.15, 0.60)),
 }
 
-#: Above this the evidence justifies merging; below the negative of it, separating;
-#: between them it justifies neither and `insufficient` is the honest answer.
+#: Evidence whose contradiction refuses a merge however much else agrees.
 #:
-#: Deliberately wide. A narrow band would make `insufficient` a rounding artefact of two
-#: thresholds rather than a real region, and the whole point of the third disposition is
-#: that some evidence genuinely settles nothing.
+#: An additive score cannot express this. Making one field outweigh the sum of four
+#: others needs a weight so large it distorts every vector the field appears in, and
+#: real resolvers carry rules of exactly this shape instead. Twins are the case: they
+#: agree on family name, birth date, address and school year, and the given name is all
+#: that says they are two people.
+#:
+#: Deliberately only the given name. A differing birth date does *not* veto, because the
+#: canonical `partial_with_contradiction` case has one and is `insufficient` rather than
+#: `separate` - a contradiction there is reason to withhold judgement, not to conclude.
+_VETO: frozenset[EvidenceKind] = frozenset({EvidenceKind.GIVEN_NAME})
+
+_INDEX = {Relation.EQUAL: 0, Relation.NEAR: 1, Relation.FAR: 2}
+
 #: Interchangeable surface forms. Every one is reachable for every value regardless of
 #: relation, which is what stops a form naming its relation.
 _DOMAINS = ("example.test", "mail.example.test", "example.invalid")
+_GIVEN = (
+    "Ada",
+    "Bilal",
+    "Chen",
+    "Dara",
+    "Esme",
+    "Faisal",
+    "Gita",
+    "Hugo",
+    "Imani",
+    "Jonas",
+    "Keira",
+    "Luis",
+    "Mina",
+    "Noor",
+    "Orla",
+    "Pavel",
+)
 _TOWNS = ("Testville", "Sampleton", "Exampleford")
 
-_MERGE_THRESHOLD = 0.55
-_SEPARATE_THRESHOLD = -0.35
+#: Log-odds in bits. Zero is the point of indifference, so a band around it is where the
+#: evidence genuinely settles nothing rather than where two thresholds happen to sit.
+_MERGE_BITS = 3.0
+_SEPARATE_BITS = -3.0
 
 
-def _contribution(kind: PublicIdentityAttributeKind, relation: Relation) -> float:
-    """What one kind in one relation contributes toward merging.
+def weight_of(kind: EvidenceKind, relation: Relation) -> float:
+    """The log-odds contribution of one outcome, in bits.
 
-    Positive pulls toward one entity, negative toward two. `NEAR` is deliberately
-    positive but weaker than `EQUAL`: continuity is real evidence, and weaker than
-    identity. `FAR` is negative in proportion to how *rarely* the kind is shared —
-    two people differing on a household email says almost nothing, differing on a
-    national identifier says a great deal.
+    `LOPSIDED` contributes nothing: one record carrying an attribute the other lacks is
+    missingness, not disagreement, and scoring it as either would punish sparse records
+    for being sparse. That is the standard treatment and it is the one number in this
+    module a reviewer signed off without argument.
     """
 
-    weight, shareability = _KIND_EVIDENCE[kind]
-    if relation is Relation.EQUAL:
-        return weight * (1.0 - shareability)
-    if relation is Relation.NEAR:
-        return weight * (1.0 - shareability) * 0.6
-    if relation is Relation.FAR:
-        return -weight * (1.0 - shareability)
-    return 0.0
+    if relation is Relation.LOPSIDED:
+        return 0.0
+    m, u = _FS[kind]
+    return log2(m[_INDEX[relation]] / u[_INDEX[relation]])
 
 
-def disposition_of(
-    relations: dict[PublicIdentityAttributeKind, Relation],
-) -> PairDisposition:
+def disposition_of(relations: Mapping[EvidenceKind, Relation]) -> PairDisposition:
     """What the public evidence justifies, read off the evidence and nothing else.
 
-    Takes no scenario, no archetype name and no `same_entity`. There is no argument it
-    could read a label from, which is the property that stops the disposition being a
-    lookup on the case — and the reason two pairs with the same attribute kinds can
-    come out differently when their *values* relate differently.
+    Takes no scenario, no archetype and no `same_entity`. There is no argument it could
+    read a label from, which is what stops the disposition being a lookup on the case.
     """
 
     if not relations:
         return PairDisposition.INSUFFICIENT
-    total = sum(_contribution(kind, relation) for kind, relation in relations.items())
-    if total >= _MERGE_THRESHOLD:
+    if any(relations.get(kind) is Relation.FAR for kind in _VETO):
+        return PairDisposition.SEPARATE
+    total = sum(weight_of(kind, relation) for kind, relation in relations.items())
+    if total >= _MERGE_BITS:
         return PairDisposition.MERGE
-    if total <= _SEPARATE_THRESHOLD:
+    if total <= _SEPARATE_BITS:
         return PairDisposition.SEPARATE
     return PairDisposition.INSUFFICIENT
 
 
 def kind_fingerprint(
-    relations: dict[PublicIdentityAttributeKind, Relation],
+    relations: Mapping[EvidenceKind, Relation],
 ) -> tuple[tuple[str, bool], ...]:
     """What a kind-level decoder sees: which kinds, and whether each agrees.
 
@@ -177,7 +235,7 @@ def _variant(seed: int, purpose: str, slot: int, key: bytes, count: int) -> int:
 
 
 def render_relation(
-    kind: PublicIdentityAttributeKind,
+    kind: EvidenceKind,
     relation: Relation,
     *,
     seed: int,
@@ -227,7 +285,7 @@ def render_relation(
     )
 
 
-def _surface(kind: PublicIdentityAttributeKind, identity: int, form: int) -> str:
+def _surface(kind: EvidenceKind, identity: int, form: int) -> str:
     """One value, from an identity component and an interchangeable surface form.
 
     Every form is reachable for every value. Two values sharing an identity and
@@ -236,7 +294,11 @@ def _surface(kind: PublicIdentityAttributeKind, identity: int, form: int) -> str
     means nothing.
     """
 
-    if kind is _K.PHONE:
+    if kind is EvidenceKind.GIVEN_NAME:
+        given = _GIVEN[identity % len(_GIVEN)]
+        return (given, given.upper(), f"{given[0]}.")[form]
+
+    if kind is EvidenceKind.PHONE:
         digits = f"{identity % 100 + 100:04d}"
         return (
             f"+1-212-555-{digits}",
@@ -244,20 +306,20 @@ def _surface(kind: PublicIdentityAttributeKind, identity: int, form: int) -> str
             f"001 212 555 {digits}",
         )[form]
 
-    if kind is _K.EMAIL:
+    if kind is EvidenceKind.EMAIL:
         local = f"user{identity % 9000 + 1000:04d}"
         return f"{local}@{_DOMAINS[form]}"
 
-    if kind is _K.USERNAME:
+    if kind is EvidenceKind.USERNAME:
         handle = f"handle{identity % 9000 + 1000:04d}"
         return (handle, f"{handle}_", f"{handle}.")[form]
 
-    if kind is _K.FULL_ADDRESS:
+    if kind is EvidenceKind.FULL_ADDRESS:
         house, street = identity % 200 + 1, identity % 900 + 100
         town = _TOWNS[form]
         return f"{house}|Example Street {street}|{town}|00000|ZZ"
 
-    if kind is _K.DATE_OF_BIRTH:
+    if kind is EvidenceKind.DATE_OF_BIRTH:
         year, month, day = 1950 + identity % 50, identity % 12 + 1, identity % 27 + 1
         return (
             f"{year:04d}-{month:02d}-{day:02d}",
@@ -265,11 +327,11 @@ def _surface(kind: PublicIdentityAttributeKind, identity: int, form: int) -> str
             f"{year:04d}/{month:02d}/{day:02d}",
         )[form]
 
-    if kind is _K.FAMILY_NAME:
+    if kind is EvidenceKind.FAMILY_NAME:
         name = f"Surname{identity % 9000 + 1000:04d}"
         return (name, name.upper(), f"{name}-{name}")[form]
 
-    if kind is _K.EMPLOYER:
+    if kind is EvidenceKind.EMPLOYER:
         company = f"Example Works {identity % 9000 + 1000:04d}"
         return (company, f"{company} Ltd", f"{company} Limited")[form]
 
@@ -284,8 +346,10 @@ def _surface(kind: PublicIdentityAttributeKind, identity: int, form: int) -> str
 
 __all__ = [
     "AMBIGUITY_GRAMMAR_VERSION",
+    "EvidenceKind",
     "Relation",
     "disposition_of",
     "kind_fingerprint",
     "render_relation",
+    "weight_of",
 ]

@@ -5,22 +5,32 @@ from __future__ import annotations
 import inspect
 from collections import Counter, defaultdict
 from itertools import product
+from unicodedata import normalize
 
 import pytest
 
-from synthworld.ambiguity import PairDisposition
+from synthworld.ambiguity import (
+    SCENARIO_DISPOSITIONS,
+    PairDisposition,
+    ScenarioKind,
+)
+from synthworld.ambiguity_generator import _drafts
+from synthworld.ambiguity_grammar import (
+    EvidenceKind as K,
+)
 from synthworld.ambiguity_grammar import (
     Relation,
     disposition_of,
     kind_fingerprint,
     render_relation,
+    weight_of,
 )
-from synthworld.connection import PublicIdentityAttributeKind as K
 
 #: Every kind the grammar renders. The enumeration test below is combinatorial, so it
 #: uses a subset; the rendering tests must cover all of them, or a kind can ship with a
 #: near form nobody ever compared against its far form.
 _RENDERED = (
+    K.GIVEN_NAME,
     K.PHONE,
     K.EMAIL,
     K.USERNAME,
@@ -74,17 +84,24 @@ def test_one_fingerprint_can_carry_more_than_one_disposition() -> None:
 def test_the_archetype_that_motivated_the_grammar() -> None:
     """A recycled number against a person who moved and kept theirs.
 
-    Identical at the kind level - phone agrees, email and address differ - and opposite
-    in what they justify. v1 could not express the difference, so it asserted the
-    answer per scenario, which is precisely what made the pack a lookup table.
+    Identical at the kind level - phone agrees, name, email and address differ - and
+    opposite in what they justify. v1 could not express the difference, so it asserted
+    the answer per scenario, which is precisely what made the pack a lookup table.
+
+    The fingerprint records *whether* a kind agreed, so `Rob`/`Robert` and `Ada`/`Bilal`
+    are both "the name differs" to it, and the two pairs are indistinguishable. Only the
+    NEAR/FAR distinction separates them, and only the veto turns a contradicted given
+    name into a refusal however much else agrees.
     """
 
     recycled = {
+        K.GIVEN_NAME: Relation.FAR,
         K.PHONE: Relation.EQUAL,
         K.EMAIL: Relation.FAR,
         K.FULL_ADDRESS: Relation.FAR,
     }
     moved = {
+        K.GIVEN_NAME: Relation.NEAR,
         K.PHONE: Relation.EQUAL,
         K.EMAIL: Relation.NEAR,
         K.FULL_ADDRESS: Relation.NEAR,
@@ -196,6 +213,17 @@ def _similarity(kind: K, left: str, right: str) -> float:
     relation is only visible after normalisation nobody performs, it is decoration.
     """
 
+    if kind is K.GIVEN_NAME:
+        # `A.` against `Ada` is the fourth time this comparison, not the rendering, was
+        # the thing at fault. An initial is a real near form - records store them
+        # constantly - and every resolver has an initial rule, so a comparison without
+        # one calls a genuine near pair far.
+        def initial(value: str) -> str:
+            return value.casefold()[:1]
+
+        if len(left.rstrip(".")) == 1 or len(right.rstrip(".")) == 1:
+            return 1.0 if initial(left) == initial(right) else 0.0
+
     if kind is K.PHONE:
 
         def digits(value: str) -> str:
@@ -257,3 +285,121 @@ def test_a_lopsided_attribute_is_neither_evidence_nor_a_fingerprint() -> None:
 
     assert disposition_of(with_lopsided) is disposition_of(without)
     assert kind_fingerprint(with_lopsided) == kind_fingerprint(without)
+
+
+def _projected() -> list[tuple[ScenarioKind, dict[K, Relation]]]:
+    """Every canonical v1 pair, read as relations by something that cannot see labels.
+
+    This is the join between the two worlds. v1 asserts a disposition per scenario by
+    hand; the grammar derives one from evidence. Projecting the real pack - not a
+    transcription of it - is what stops the two drifting apart silently, and it means a
+    change to a canonical pair shows up here as a disagreement rather than as nothing.
+
+    The projection reads only public attributes and display names, exactly what a
+    resolver under test gets.
+    """
+
+    def folds_together(left: str, right: str) -> bool:
+        # Transliteration is planted deliberately: `Sørensen` and `Sorensen` are one
+        # surname, and reading that as FAR is a projection bug rather than a parameter
+        # problem. `synthworld.ambiguity_variants._ascii_fold` cannot be reused here
+        # because it drops these letters entirely - NFKD leaves them atomic, so
+        # `ascii/ignore` deletes them and `Sørensen` becomes `srensen`. That is #78.
+        atomic = str.maketrans(
+            {"ø": "o", "Ø": "O", "ł": "l", "Ł": "L", "đ": "d", "æ": "ae"}
+        )
+
+        def fold(value: str) -> str:
+            folded = value.translate(atomic)
+            return (
+                normalize("NFKD", folded).encode("ascii", "ignore").decode().casefold()
+            )
+
+        return fold(left) == fold(right)
+
+    def relate(left: str | None, right: str | None) -> Relation:
+        if left is None or right is None:
+            return Relation.LOPSIDED
+        if left == right or folds_together(left, right):
+            return Relation.EQUAL
+        return Relation.FAR
+
+    drafts = _drafts()
+    projected = []
+    for index in range(0, len(drafts), 2):
+        left, right = drafts[index], drafts[index + 1]
+        left_values = {item.kind.value: item.value for item in left.attributes}
+        right_values = {item.kind.value: item.value for item in right.attributes}
+        relations = {
+            K(name): relate(left_values.get(name), right_values.get(name))
+            for name in set(left_values) | set(right_values)
+            if name in set(K)
+        }
+        # v1 has no given-name attribute: it keeps given names inside a display string.
+        # Recovering it is not a convenience - it is the only evidence separating the
+        # twins pair from one person, and a rule blind to it scores them +0.97.
+        left_given, right_given = (
+            left.display_name.split()[0],
+            right.display_name.split()[0],
+        )
+        stem = left_given.rstrip(".")
+        if left_given == right_given or folds_together(left_given, right_given):
+            relations[K.GIVEN_NAME] = Relation.EQUAL
+        elif stem and right_given.startswith(stem):
+            relations[K.GIVEN_NAME] = Relation.NEAR  # `H.` against `Helen`
+        else:
+            relations[K.GIVEN_NAME] = Relation.FAR
+        projected.append((left.scenario, relations))
+    return projected
+
+
+#: The two the derived rule reads differently from v1's hand-written answer, and why
+#: they are not fixed by moving numbers. Tracked as #77.
+#:
+#: `same_name_and_date_of_birth` is two people agreeing on given name, family name and
+#: birth date and differing on nothing else recorded. v1 calls that `separate` because
+#: it planted two people; the evidence says merge, and any honest resolver would say
+#: merge too. The disagreement is with the *scenario*, not with the rule: the pair
+#: carries no evidence of being two people, so the label is unearned.
+#:
+#: `contradictory_strong_identifiers` v1 calls `separate` and the rule calls
+#: `insufficient` - contradiction between strong identifiers is a reason to withhold,
+#: which is exactly what `partial_with_contradiction` is labelled.
+#:
+#: Both could be forced by tuning. With fifty-four parameters against fifteen
+#: constraints that is fitting, not calibration, and it would buy 15/15 by making the
+#: numbers describe this pack rather than record linkage.
+_KNOWN_DISAGREEMENTS = frozenset(
+    {
+        ScenarioKind.SAME_NAME_AND_DATE_OF_BIRTH,
+        ScenarioKind.CONTRADICTORY_STRONG_IDENTIFIERS,
+    }
+)
+
+
+def test_the_derived_rule_reproduces_the_hand_written_answers() -> None:
+    """Thirteen of fifteen, with the other two named rather than absorbed.
+
+    The point of #62 is that a disposition should follow from evidence instead of being
+    asserted per scenario. That is only worth anything if the derived answers are the
+    same answers - a rule free to disagree everywhere has not replaced the lookup table,
+    it has replaced the pack.
+    """
+
+    disagreed = {
+        scenario
+        for scenario, relations in _projected()
+        if disposition_of(relations) is not SCENARIO_DISPOSITIONS[scenario]
+    }
+
+    assert disagreed == _KNOWN_DISAGREEMENTS
+
+
+@pytest.mark.parametrize("kind", sorted(K, key=lambda item: item.value))
+def test_every_kind_prefers_agreement_to_contradiction(kind: K) -> None:
+    """A kind whose FAR outscored its EQUAL would be evidence read backwards."""
+
+    assert weight_of(kind, Relation.EQUAL) > weight_of(kind, Relation.FAR)
+    assert weight_of(kind, Relation.EQUAL) > 0.0
+    assert weight_of(kind, Relation.FAR) < 0.0
+    assert weight_of(kind, Relation.LOPSIDED) == 0.0
