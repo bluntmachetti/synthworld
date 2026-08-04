@@ -160,10 +160,26 @@ def disposition_of(relations: Mapping[EvidenceKind, Relation]) -> PairDispositio
     if not relations:
         return PairDisposition.INSUFFICIENT
     weights = {kind: weight_of(kind, relation) for kind, relation in relations.items()}
+    total = sum(weights.values())
     if any(relations.get(kind) is Relation.FAR for kind in _VETO):
         # A veto refuses the merge. Whether it also concludes *separate* depends on how
         # much is arguing the other way: a contradicted given name against a shared
         # email, phone and username is a pair to withhold on, not one to decide.
+        #
+        # But only when the rest of the evidence has not already settled it. A first
+        # version compared the *positive* support alone and ignored every contradiction
+        # beside it, so a pair with a differing birth date, email, surname and address
+        # still returned `insufficient` because three identifiers happened to agree.
+        # 1,199 vectors did that, the worst at -9.184 bits - overwhelming evidence of
+        # two people, reported as undecidable.
+        #
+        # Checking the net first also restores monotonicity. Improving the given name
+        # from FAR to NEAR lifts the veto and moves to the branch below, and that used
+        # to turn `insufficient` into `separate` - an improvement in the evidence making
+        # the verdict worse. It cannot now: the veto only withholds when the net is
+        # already above the separate threshold, and improving a relation only raises it.
+        if total <= _SEPARATE_BITS:
+            return PairDisposition.SEPARATE
         supporting = sum(
             weight
             for kind, weight in weights.items()
@@ -174,7 +190,6 @@ def disposition_of(relations: Mapping[EvidenceKind, Relation]) -> PairDispositio
             if supporting >= _VETO_YIELDS_ABOVE
             else PairDisposition.SEPARATE
         )
-    total = sum(weights.values())
     if total >= _MERGE_BITS and sum(1 for w in weights.values() if w > 0) >= (
         _MERGE_NEEDS_CORROBORATION
     ):

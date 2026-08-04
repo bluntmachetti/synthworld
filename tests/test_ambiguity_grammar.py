@@ -712,3 +712,69 @@ def test_no_relation_is_worth_exactly_nothing() -> None:
     for kind in sorted(K):
         for relation in (Relation.EQUAL, Relation.NEAR, Relation.FAR):
             assert weight_of(kind, relation) != 0.0, (kind.value, relation.value)
+
+
+#: A subset small enough to enumerate in a suite that runs in seconds, chosen to include
+#: the veto kind and both a strong and a weak identifier on either side of it. The full
+#: 4^9 enumeration finds nothing this misses; it takes minutes, so it is not run here.
+_ENUMERATED = (
+    K.GIVEN_NAME,
+    K.DATE_OF_BIRTH,
+    K.USERNAME,
+    K.FAMILY_NAME,
+    K.EMPLOYER,
+)
+_BETTER = {Relation.FAR: Relation.NEAR, Relation.NEAR: Relation.EQUAL}
+_RANK = {
+    PairDisposition.SEPARATE: 0,
+    PairDisposition.INSUFFICIENT: 1,
+    PairDisposition.MERGE: 2,
+}
+
+
+def test_better_evidence_never_gives_a_worse_verdict() -> None:
+    """Improving one comparison must never move the answer away from merge.
+
+    It could. `given_name` FAR -> NEAR lifts the veto and moves the pair to the ordinary
+    branch, and that turned `insufficient` into `separate` - the evidence got better and
+    the verdict got worse. Two branches with different logic will do that at the seam
+    between them unless the seam is checked, and only an enumeration checks it.
+    """
+
+    for combination in product(
+        (Relation.EQUAL, Relation.NEAR, Relation.FAR, Relation.LOPSIDED),
+        repeat=len(_ENUMERATED),
+    ):
+        vector = dict(zip(_ENUMERATED, combination, strict=True))
+        before = disposition_of(vector)
+        for kind, relation in vector.items():
+            if relation not in _BETTER:
+                continue
+            after = disposition_of(vector | {kind: _BETTER[relation]})
+
+            assert _RANK[after] >= _RANK[before], (kind.value, vector, before, after)
+
+
+def test_a_veto_does_not_withhold_when_the_evidence_has_already_settled_it() -> None:
+    """Overwhelming evidence of two people is `separate`, not `undecidable`.
+
+    The veto-yield rule compared the *positive* support alone and ignored every
+    contradiction beside it, so this pair - differing birth date, email, surname and
+    address, at -9.184 bits overall - came back `insufficient` because three identifiers
+    happened to agree. 1,199 vectors did that.
+    """
+
+    overwhelming = {
+        K.GIVEN_NAME: Relation.FAR,
+        K.DATE_OF_BIRTH: Relation.FAR,
+        K.EMAIL: Relation.FAR,
+        K.FAMILY_NAME: Relation.FAR,
+        K.FULL_ADDRESS: Relation.FAR,
+        K.EMPLOYER: Relation.EQUAL,
+        K.PHONE: Relation.EQUAL,
+        K.SCHOOL_YEAR: Relation.EQUAL,
+        K.USERNAME: Relation.EQUAL,
+    }
+
+    assert sum(weight_of(kind, r) for kind, r in overwhelming.items()) < -9.0
+    assert disposition_of(overwhelming) is PairDisposition.SEPARATE
