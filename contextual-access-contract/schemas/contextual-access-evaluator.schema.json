@@ -1,0 +1,877 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-evaluator.schema.json",
+  "x-generated-from": "synthworld.contextual_access.models.ContextualAccessEvaluatorV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "BusinessJustificationContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "business_justification",
+          "default": "business_justification",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "justification_kind": {
+          "$ref": "#/$defs/BusinessJustificationKind"
+        },
+        "approval_evidence_id": {
+          "title": "Approval Evidence Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "asset_id",
+        "action",
+        "justification_kind",
+        "approval_evidence_id",
+        "valid_from_tick"
+      ],
+      "title": "BusinessJustificationContextV1",
+      "type": "object"
+    },
+    "BusinessJustificationKind": {
+      "enum": [
+        "case_assignment",
+        "change_approval",
+        "emergency_access"
+      ],
+      "title": "BusinessJustificationKind",
+      "type": "string"
+    },
+    "CaseAssignmentContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "case_assignment",
+          "default": "case_assignment",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "work_item_id": {
+          "title": "Work Item Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "assignment_state": {
+          "$ref": "#/$defs/CaseAssignmentState"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "work_item_id",
+        "asset_id",
+        "assignment_state",
+        "valid_from_tick"
+      ],
+      "title": "CaseAssignmentContextV1",
+      "type": "object"
+    },
+    "CaseAssignmentState": {
+      "enum": [
+        "assigned",
+        "unassigned"
+      ],
+      "title": "CaseAssignmentState",
+      "type": "string"
+    },
+    "ContextualAccessCaseTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "canonical": {
+          "$ref": "#/$defs/ContextualDecisionTruthV1"
+        },
+        "presented_feed": {
+          "$ref": "#/$defs/ContextualDecisionTruthV1"
+        },
+        "stale_context": {
+          "title": "Stale Context",
+          "type": "boolean"
+        },
+        "required_evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "request_id",
+        "canonical",
+        "presented_feed",
+        "stale_context",
+        "required_evidence_refs"
+      ],
+      "title": "ContextualAccessCaseTruthV1",
+      "type": "object"
+    },
+    "ContextualAccessTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "public_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "benchmark_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "checkpoints": {
+          "items": {
+            "$ref": "#/$defs/ContextualCheckpointV1"
+          },
+          "title": "Checkpoints",
+          "type": "array"
+        },
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/ContextualAccessCaseTruthV1"
+          },
+          "title": "Cases",
+          "type": "array"
+        },
+        "case_labels": {
+          "items": {
+            "$ref": "#/$defs/ContextualCaseLabelV1"
+          },
+          "title": "Case Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "public_digest",
+        "benchmark_digest",
+        "checkpoints",
+        "cases",
+        "case_labels"
+      ],
+      "title": "ContextualAccessTruthV1",
+      "type": "object"
+    },
+    "ContextualCaseKind": {
+      "enum": [
+        "static_allow",
+        "static_deny",
+        "assignment_removed",
+        "on_call_expired",
+        "device_degraded",
+        "risk_elevated",
+        "justification_expired",
+        "delayed_delivery",
+        "duplicate_delivery",
+        "out_of_order_delivery"
+      ],
+      "title": "ContextualCaseKind",
+      "type": "string"
+    },
+    "ContextualCaseLabelV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ContextualCaseKind"
+        },
+        "transition_event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Transition Event Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "request_id",
+        "kind",
+        "transition_event_ids"
+      ],
+      "title": "ContextualCaseLabelV1",
+      "type": "object"
+    },
+    "ContextualCheckpointV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "event_count": {
+          "minimum": 0,
+          "title": "Event Count",
+          "type": "integer"
+        },
+        "event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "latest_facts": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "business_justification": "#/$defs/BusinessJustificationContextV1",
+                "case_assignment": "#/$defs/CaseAssignmentContextV1",
+                "device_posture": "#/$defs/DevicePostureContextV1",
+                "on_call": "#/$defs/OnCallContextV1",
+                "risk_signal": "#/$defs/RiskSignalContextV1"
+              },
+              "propertyName": "fact_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/CaseAssignmentContextV1"
+              },
+              {
+                "$ref": "#/$defs/OnCallContextV1"
+              },
+              {
+                "$ref": "#/$defs/DevicePostureContextV1"
+              },
+              {
+                "$ref": "#/$defs/RiskSignalContextV1"
+              },
+              {
+                "$ref": "#/$defs/BusinessJustificationContextV1"
+              }
+            ]
+          },
+          "title": "Latest Facts",
+          "type": "array"
+        },
+        "state_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        }
+      },
+      "required": [
+        "event_count",
+        "event_ids",
+        "latest_facts",
+        "state_digest"
+      ],
+      "title": "ContextualCheckpointV1",
+      "type": "object"
+    },
+    "ContextualDecisionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "applicable_policy_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Applicable Policy Ids",
+          "type": "array"
+        },
+        "predicate_outcomes": {
+          "items": {
+            "$ref": "#/$defs/ContextualPredicateOutcomeV1"
+          },
+          "title": "Predicate Outcomes",
+          "type": "array"
+        },
+        "rule_outcomes": {
+          "items": {
+            "$ref": "#/$defs/ContextualRuleOutcomeV1"
+          },
+          "title": "Rule Outcomes",
+          "type": "array"
+        },
+        "deny_override_conflict": {
+          "title": "Deny Override Conflict",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "decision",
+        "applicable_policy_ids",
+        "predicate_outcomes",
+        "rule_outcomes",
+        "deny_override_conflict"
+      ],
+      "title": "ContextualDecisionTruthV1",
+      "type": "object"
+    },
+    "ContextualPredicateOutcomeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "policy_id": {
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "predicate_id": {
+          "title": "Predicate Id",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/ContextualPredicateTruth"
+        }
+      },
+      "required": [
+        "policy_id",
+        "rule_id",
+        "predicate_id",
+        "outcome"
+      ],
+      "title": "ContextualPredicateOutcomeV1",
+      "type": "object"
+    },
+    "ContextualPredicateTruth": {
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "ContextualPredicateTruth",
+      "type": "string"
+    },
+    "ContextualRuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "ContextualRuleEffect",
+      "type": "string"
+    },
+    "ContextualRuleOutcomeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "policy_id": {
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "effect": {
+          "$ref": "#/$defs/ContextualRuleEffect"
+        },
+        "outcome": {
+          "$ref": "#/$defs/ContextualPredicateTruth"
+        },
+        "matched": {
+          "title": "Matched",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "policy_id",
+        "rule_id",
+        "effect",
+        "outcome",
+        "matched"
+      ],
+      "title": "ContextualRuleOutcomeV1",
+      "type": "object"
+    },
+    "DevicePosture": {
+      "enum": [
+        "trusted",
+        "noncompliant",
+        "unknown"
+      ],
+      "title": "DevicePosture",
+      "type": "string"
+    },
+    "DevicePostureContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "device_posture",
+          "default": "device_posture",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "device_id": {
+          "title": "Device Id",
+          "type": "string"
+        },
+        "posture": {
+          "$ref": "#/$defs/DevicePosture"
+        },
+        "observed_at_tick": {
+          "minimum": 0,
+          "title": "Observed At Tick",
+          "type": "integer"
+        },
+        "expires_at_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "device_id",
+        "posture",
+        "observed_at_tick"
+      ],
+      "title": "DevicePostureContextV1",
+      "type": "object"
+    },
+    "OnCallContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "on_call",
+          "default": "on_call",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "duty_scope_id": {
+          "title": "Duty Scope Id",
+          "type": "string"
+        },
+        "duty_state": {
+          "$ref": "#/$defs/OnCallState"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "duty_scope_id",
+        "duty_state",
+        "valid_from_tick"
+      ],
+      "title": "OnCallContextV1",
+      "type": "object"
+    },
+    "OnCallState": {
+      "enum": [
+        "on_call",
+        "off_call"
+      ],
+      "title": "OnCallState",
+      "type": "string"
+    },
+    "RiskLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "unknown"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RiskSignalContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "risk_signal",
+          "default": "risk_signal",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "signal_source_id": {
+          "title": "Signal Source Id",
+          "type": "string"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "effective_from_tick": {
+          "minimum": 0,
+          "title": "Effective From Tick",
+          "type": "integer"
+        },
+        "expires_at_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "signal_source_id",
+        "risk_level",
+        "effective_from_tick"
+      ],
+      "title": "RiskSignalContextV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "public_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "truth": {
+      "$ref": "#/$defs/ContextualAccessTruthV1"
+    }
+  },
+  "required": [
+    "public_digest",
+    "truth"
+  ],
+  "title": "ContextualAccessEvaluatorV1",
+  "type": "object"
+}

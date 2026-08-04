@@ -274,10 +274,13 @@ The projection package performs deterministic data conversion only:
 - OpenFGA maps the bounded compiled ReBAC subset. Group usersets appear only at
   this projection boundary; snapshot and validity limitations are explicit and
   an OpenFGA runtime remains an external system under test.
-- Shared Signals/CAEP has a versioned mapping/support profile only. It emits no
-  events in PR4. PR7 must build its schedule view on the shipped
-  `synthworld.temporal` v1.1 integer-tick contract; it may not introduce UTC or a
-  second logical clock.
+- Shared Signals/CAEP v1 remains the historical PR4 mapping/support declaration
+  pinned to the then-reviewed temporal 1.1 contract and emits no events. PR7 does
+  not mutate that independently versioned schema. The additive contextual
+  projection is published under `contextual-access-contract/`; it selects the
+  shipped `synthworld.temporal` 1.2 tick contract, uses custom contextual event
+  identifiers rather than mislabeling domain changes as standardized CAEP event
+  types, and introduces neither UTC nor a second logical clock.
 
 Every target emits a complete support matrix with one `exact`, `approximated`,
 or `unsupported` row per exercised native feature, a mandatory semantic delta

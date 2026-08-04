@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-prediction.schema.json",
+  "x-generated-from": "synthworld.contextual_access.models.ContextualAccessPredictionV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "ContextualAccessTraceRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "benchmark_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "predicate_outcomes": {
+          "items": {
+            "$ref": "#/$defs/ContextualPredicatePredictionV1"
+          },
+          "title": "Predicate Outcomes",
+          "type": "array"
+        },
+        "applied_event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Applied Event Ids",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "benchmark_digest",
+        "request_id",
+        "decision",
+        "predicate_outcomes",
+        "applied_event_ids",
+        "evidence_refs"
+      ],
+      "title": "ContextualAccessTraceRowV1",
+      "type": "object"
+    },
+    "ContextualPredicatePredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "predicate_id": {
+          "minLength": 1,
+          "title": "Predicate Id",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/ContextualPredicateTruth"
+        }
+      },
+      "required": [
+        "predicate_id",
+        "outcome"
+      ],
+      "title": "ContextualPredicatePredictionV1",
+      "type": "object"
+    },
+    "ContextualPredicateTruth": {
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "ContextualPredicateTruth",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "benchmark_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ContextualAccessTraceRowV1"
+      },
+      "minItems": 1,
+      "title": "Rows",
+      "type": "array"
+    }
+  },
+  "required": [
+    "benchmark_digest",
+    "rows"
+  ],
+  "title": "ContextualAccessPredictionV1",
+  "type": "object"
+}

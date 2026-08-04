@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-object-registry.schema.json",
+  "x-generated-from": "synthworld.contextual_access.models.ContextualObjectRegistryV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "ContextualObjectKind": {
+      "enum": [
+        "work_item",
+        "duty_scope",
+        "device",
+        "signal_source",
+        "approval_evidence"
+      ],
+      "title": "ContextualObjectKind",
+      "type": "string"
+    },
+    "ContextualObjectV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ContextualObjectKind"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "minLength": 1,
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "display_label": {
+          "minLength": 1,
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "tenant_id",
+        "organisation_id",
+        "display_label"
+      ],
+      "title": "ContextualObjectV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "objects": {
+      "items": {
+        "$ref": "#/$defs/ContextualObjectV1"
+      },
+      "minItems": 1,
+      "title": "Objects",
+      "type": "array"
+    }
+  },
+  "required": [
+    "objects"
+  ],
+  "title": "ContextualObjectRegistryV1",
+  "type": "object"
+}

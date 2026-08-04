@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/temporal-schedule-v1.schema.json",
+  "x-generated-from": "synthworld.temporal_schedule.TemporalScheduleV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "TemporalEventEnvelopeV1": {
+      "additionalProperties": false,
+      "description": "One payload digest positioned on the sole integer-tick schedule.",
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "effective_tick": {
+          "minimum": 0,
+          "title": "Effective Tick",
+          "type": "integer"
+        },
+        "event_index": {
+          "minimum": 0,
+          "title": "Event Index",
+          "type": "integer"
+        },
+        "event_schedule_version": {
+          "minLength": 1,
+          "title": "Event Schedule Version",
+          "type": "string"
+        },
+        "payload_family": {
+          "$ref": "#/$defs/TemporalPayloadFamilyV1"
+        },
+        "payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Payload Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "effective_tick",
+        "event_index",
+        "event_schedule_version",
+        "payload_family",
+        "payload_sha256"
+      ],
+      "title": "TemporalEventEnvelopeV1",
+      "type": "object"
+    },
+    "TemporalPayloadFamilyV1": {
+      "description": "The two concrete payload families that justify schedule view v1.",
+      "enum": [
+        "privacy_1_2",
+        "contextual_access_1_0"
+      ],
+      "title": "TemporalPayloadFamilyV1",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Canonical persisted wrapper for a v1 schedule view.",
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "event_schedule_version": {
+      "minLength": 1,
+      "title": "Event Schedule Version",
+      "type": "string"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/TemporalEventEnvelopeV1"
+      },
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "event_schedule_version",
+    "events"
+  ],
+  "title": "TemporalScheduleV1",
+  "type": "object"
+}

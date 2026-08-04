@@ -45,6 +45,18 @@ from synthworld.connection_serialization import (
     connection_benchmark_to_json,
     public_connection_corpus_to_json,
 )
+from synthworld.contextual_access import (
+    ContextualAccessArtifactError,
+    ContextualAccessEvaluationError,
+    ContextualAccessRunPlanV1,
+    contextual_access_trace_from_jsonl,
+    evaluate_contextual_access_prediction,
+    export_contextual_access_benchmark,
+    load_evaluator_contextual_access_benchmark,
+    load_public_contextual_access_benchmark,
+    reference_contextual_access,
+    validate_contextual_access_trace_jsonl,
+)
 from synthworld.corpus_metrics import evaluate_corpus
 from synthworld.corpus_serialization import corpus_to_json
 from synthworld.enterprise.compiler import (
@@ -179,6 +191,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "validate":
+        if args.task == "contextual-access-run-plan":
+            try:
+                ContextualAccessRunPlanV1.model_validate_json(
+                    args.input.read_text(encoding="utf-8-sig")
+                )
+            except (OSError, UnicodeDecodeError, ValidationError) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            print("contextual-access-run-plan: structurally valid")
+            return 0
+
         if args.task == "agent-authority-run-plan":
             try:
                 AgentAuthorityRunPlanV1.model_validate_json(
@@ -230,6 +253,35 @@ def main(argv: Sequence[str] | None = None) -> int:
                     f"issues={len(enterprise_validation.issues)}"
                 )
             return 0 if enterprise_validation.valid else 1
+
+        if args.task == "contextual-access-trace":
+            try:
+                contextual_public = load_public_contextual_access_benchmark(
+                    args.benchmark_root
+                )
+                contextual_validation = validate_contextual_access_trace_jsonl(
+                    args.predictions.read_text(encoding="utf-8-sig"),
+                    public=contextual_public,
+                )
+            except (
+                OSError,
+                UnicodeDecodeError,
+                ContextualAccessArtifactError,
+                ValidationError,
+            ) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            if args.json:
+                print(contextual_validation.model_dump_json(indent=2))
+            else:
+                verdict = "valid" if contextual_validation.valid else "invalid"
+                print(
+                    f"contextual-access-trace: {verdict}; "
+                    f"rows={contextual_validation.row_count}, "
+                    f"expected={contextual_validation.expected_request_count}, "
+                    f"issues={len(contextual_validation.issues)}"
+                )
+            return 0 if contextual_validation.valid else 1
 
         # Its own try block: the evaluate handler below guards a different set of
         # calls, and this path raises different things. Narrow on purpose - catching
@@ -296,6 +348,34 @@ def main(argv: Sequence[str] | None = None) -> int:
                 else:
                     print(enterprise_report.model_dump_json(indent=2))
                 return 0
+            elif args.task == "contextual-access":
+                if args.benchmark_root is None:
+                    raise ContextualAccessEvaluationError(
+                        "--benchmark-root is required for contextual-access evaluation"
+                    )
+                contextual_public = load_public_contextual_access_benchmark(
+                    args.benchmark_root
+                )
+                contextual_evaluator = load_evaluator_contextual_access_benchmark(
+                    args.benchmark_root
+                )
+                contextual_report = evaluate_contextual_access_prediction(
+                    public=contextual_public,
+                    evaluator=contextual_evaluator,
+                    prediction=contextual_access_trace_from_jsonl(text),
+                )
+                if args.summary:
+                    for metric in contextual_report.metrics:
+                        value = (
+                            "null" if metric.value is None else f"{metric.value:.4f}"
+                        )
+                        print(
+                            f"{metric.family:>26}  {metric.name:<48} "
+                            f"{value:>6} n={metric.denominator}"
+                        )
+                else:
+                    print(contextual_report.model_dump_json(indent=2))
+                return 0
             elif args.task == "extraction":
                 report = evaluate_extraction(
                     ExtractionPredictionSet.model_validate_json(text),
@@ -330,6 +410,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             EvaluationInputError,
             EnterpriseAgenticArtifactError,
             EnterpriseAgenticEvaluationError,
+            ContextualAccessArtifactError,
+            ContextualAccessEvaluationError,
         ) as error:
             print(str(error), file=sys.stderr)
             return 1
@@ -365,6 +447,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(
             "Enterprise-agentic smoke pack ready: "
             f"{len(enterprise_agentic.evaluator.truth.cases)} cases -> {args.output}"
+        )
+        return 0
+
+    if args.command == "generate-contextual-access":
+        contextual = reference_contextual_access(seed=args.seed)
+        try:
+            export_contextual_access_benchmark(
+                args.output,
+                public=contextual.public,
+                evaluator=contextual.evaluator,
+            )
+        except (OSError, ContextualAccessArtifactError) as error:
+            print(str(error), file=sys.stderr)
+            return 1
+        print(
+            "Contextual-access smoke pack ready: "
+            f"{len(contextual.evaluator.truth.cases)} cases -> {args.output}"
         )
         return 0
 
@@ -693,6 +792,16 @@ def _parser() -> argparse.ArgumentParser:
     )
     generate_enterprise_agentic.add_argument("--output", type=Path, required=True)
 
+    generate_contextual_access = subparsers.add_parser(
+        "generate-contextual-access",
+        help="write the fixed-universe contextual-access smoke artifact trees",
+    )
+    _add_seed_argument(generate_contextual_access)
+    generate_contextual_access.add_argument(
+        "--tier", choices=("smoke",), default="smoke"
+    )
+    generate_contextual_access.add_argument("--output", type=Path, required=True)
+
     validate = subparsers.add_parser(
         "validate",
         help="check a submission's shape before scoring, without answer-key truth",
@@ -730,6 +839,18 @@ def _parser() -> argparse.ArgumentParser:
     enterprise_agentic_trace.add_argument("--predictions", type=Path, required=True)
     enterprise_agentic_trace.add_argument("--benchmark-root", type=Path, required=True)
     enterprise_agentic_trace.add_argument("--json", action="store_true")
+    contextual_run_plan = validation_tasks.add_parser(
+        "contextual-access-run-plan",
+        help="structurally validate a pre-execution contextual-access run plan",
+    )
+    contextual_run_plan.add_argument("--input", type=Path, required=True)
+    contextual_trace = validation_tasks.add_parser(
+        "contextual-access-trace",
+        help="validate a contextual-access JSONL trace against public input",
+    )
+    contextual_trace.add_argument("--predictions", type=Path, required=True)
+    contextual_trace.add_argument("--benchmark-root", type=Path, required=True)
+    contextual_trace.add_argument("--json", action="store_true")
 
     evaluate = subparsers.add_parser(
         "evaluate",
@@ -740,6 +861,7 @@ def _parser() -> argparse.ArgumentParser:
         choices=[
             "agentic",
             "enterprise-agentic",
+            "contextual-access",
             "extraction",
             "broker",
             "entity-resolution",
@@ -774,7 +896,7 @@ def _parser() -> argparse.ArgumentParser:
     evaluate.add_argument(
         "--benchmark-root",
         type=Path,
-        help="enterprise-agentic public/evaluator artifact root",
+        help="enterprise-agentic or contextual-access artifact root",
     )
     return parser
 

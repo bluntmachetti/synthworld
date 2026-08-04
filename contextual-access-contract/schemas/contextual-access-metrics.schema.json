@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-metrics.schema.json",
+  "x-generated-from": "synthworld.contextual_access.models.ContextualAccessMetricsV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "EnterpriseAuthorizationMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "empty_behaviour": {
+          "$ref": "#/$defs/MetricEmptyBehaviour"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "family",
+        "name",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning",
+        "empty_behaviour",
+        "value"
+      ],
+      "title": "EnterpriseAuthorizationMetricV1",
+      "type": "object"
+    },
+    "MetricEmptyBehaviour": {
+      "enum": [
+        "nonempty",
+        "null_if_empty"
+      ],
+      "title": "MetricEmptyBehaviour",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "benchmark_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "truth_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+      },
+      "title": "Metrics",
+      "type": "array"
+    }
+  },
+  "required": [
+    "benchmark_digest",
+    "truth_digest",
+    "metrics"
+  ],
+  "title": "ContextualAccessMetricsV1",
+  "type": "object"
+}
