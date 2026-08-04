@@ -10,6 +10,8 @@ honest about the three things the pack punishes pretending about:
 
 - it attributes only listings whose public record can settle attribution, abstaining on
   bare ones rather than guessing;
+- it requests removal only for listings it itself attributed, because the pack
+  contains a stranger's record and prices asking for its removal;
 - it believes a removal only after a published confirmation, and keeps watching
   afterwards, alerting if the listing reappears in later events;
 - it predicts propagation to complete a fixed grace period after confirmation, rather
@@ -85,7 +87,11 @@ def assess(timeline: PublicTimeline) -> BrokerAssessment:
             # as an unwarranted decision, not a brave one.
             concerns_subject=attributed(reference),
             believed_removed=gone,
-            requested_removal=True,
+            # Request only what the adapter itself attributed. Requesting everything
+            # maximises recall and is exactly what `unwarranted_requests` prices: the
+            # pack contains a stranger's listing, and asking a broker to remove it is
+            # the conduct a removal product must not learn.
+            requested_removal=attributed(reference) is True,
             believed_propagated=False,
             reappearance_alerted=back,
             expected_propagation_complete_by=(

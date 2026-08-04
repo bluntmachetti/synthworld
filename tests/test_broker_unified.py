@@ -40,9 +40,11 @@ def test_the_unified_report_carries_every_family_once() -> None:
         "discovery",
         "attribution",
         "request_conduct",
+        "request_conduct",
         "removal",
         "propagation",
         "propagation",
+        "recurrence",
         "recurrence",
     ]
     assert all(metric.support_meaning for metric in report.metrics)
@@ -72,6 +74,79 @@ def test_the_projection_never_disagrees_with_the_native_report() -> None:
     assert (
         by_name["propagation_lag_mean_error"].support == native.propagation_lag.support
     )
+
+
+def test_the_precision_halves_separate_a_spammer_from_a_careful_system() -> None:
+    """The review finding this codifies: recall alone teaches greed.
+
+    Requesting everything and alerting on everything maximises both recall metrics.
+    The native report prices that with `unwarranted_requests` and
+    `false_recurrence_alerts`, and a first projection dropped both - so through the
+    CLI, the spammer and the careful system were indistinguishable.
+    """
+
+    world = generate_temporal_world(seed=_SEED)
+    timeline = materialise(world, as_of=world.horizon)
+    careful = match_on_published_evidence(timeline)
+    spammer = careful.model_copy(
+        update={
+            "listings": tuple(
+                item.model_copy(
+                    update={
+                        "requested_removal": True,
+                        "reappearance_alerted": True,
+                        # A listing cannot coherently be believed removed and
+                        # reported back; the spammer keeps coherent and greedy.
+                        "believed_removed": False,
+                    }
+                )
+                for item in careful.listings
+            )
+        }
+    )
+
+    careful_by = {
+        m.name: m for m in evaluate_broker_removal(careful, seed=_SEED).metrics
+    }
+    spam_by = {m.name: m for m in evaluate_broker_removal(spammer, seed=_SEED).metrics}
+
+    assert spam_by["recurrence_recall"].value == careful_by["recurrence_recall"].value
+    assert spam_by["false_recurrence_alerts"].value is not None
+    assert careful_by["false_recurrence_alerts"].value is not None
+    assert (
+        spam_by["false_recurrence_alerts"].value
+        > careful_by["false_recurrence_alerts"].value
+    )
+    assert spam_by["unwarranted_requests"].value is not None
+    assert careful_by["unwarranted_requests"].value is not None
+    assert (
+        spam_by["unwarranted_requests"].value
+        >= careful_by["unwarranted_requests"].value
+    )
+
+
+def test_an_assessment_of_unknown_listings_is_a_unified_input_error() -> None:
+    """`BrokerEvaluationError` becomes `EvaluationInputError` at the boundary.
+
+    The CLI catches the unified type; before the translation, a structurally valid
+    assessment naming an undiscovered listing escaped as a raw traceback.
+    """
+
+    world = generate_temporal_world(seed=_SEED)
+    timeline = materialise(world, as_of=world.horizon)
+    doctored = match_on_published_evidence(timeline).model_copy(
+        update={
+            "listings": tuple(
+                item.model_copy(update={"listing_ref": f"unknown-{index}"})
+                for index, item in enumerate(
+                    match_on_published_evidence(timeline).listings
+                )
+            )
+        }
+    )
+
+    with pytest.raises(EvaluationInputError):
+        evaluate_broker_removal(doctored, seed=_SEED)
 
 
 def test_a_tick_beyond_the_horizon_is_refused_before_scoring() -> None:

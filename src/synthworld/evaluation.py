@@ -33,6 +33,7 @@ from pydantic import Field, model_validator
 from synthworld.broker_metrics import (
     BROKER_SCORING_VERSION,
     BrokerAssessment,
+    BrokerEvaluationError,
     evaluate_broker_assessment,
 )
 from synthworld.connection import (
@@ -883,9 +884,15 @@ def evaluate_broker_removal(
             "the assessment is for a tick after the world's horizon"
         )
     timeline = materialise(world, as_of=assessment.as_of)
-    native = evaluate_broker_assessment(
-        assessment, timeline=timeline, truth=world.truth
-    )
+    try:
+        native = evaluate_broker_assessment(
+            assessment, timeline=timeline, truth=world.truth
+        )
+    except BrokerEvaluationError as error:
+        # One error type at the unified boundary, whatever the task. The broker
+        # scorer's messages are public-safe by construction, so passing one through
+        # changes the exception's face without changing what it says.
+        raise EvaluationInputError(str(error)) from error
 
     def carried(name: str, metric: DenominatedMetric, family: str) -> TaskMetric:
         return TaskMetric(
@@ -900,6 +907,19 @@ def evaluate_broker_removal(
         carried("discovery_coverage", native.discovery_coverage, "discovery"),
         carried("attribution_accuracy", native.attribution_accuracy, "attribution"),
         carried("request_recall", native.request_recall, "request_conduct"),
+        # The precision halves ride along, or the projection teaches greed. Recall
+        # alone is maximised by requesting everything and alerting on everything; the
+        # native report documents each pair as "read together or not at all", and a
+        # projection that dropped one half made a spammer indistinguishable from a
+        # careful system through the CLI. Counts, not rates - the native report
+        # defines no rate, and this projection recomputes nothing.
+        TaskMetric(
+            name="unwarranted_requests",
+            value=float(native.unwarranted_requests),
+            support=native.discoverable_count,
+            family="request_conduct",
+            support_meaning="listings the timeline has discovered",
+        ),
         carried("completion_accuracy", native.completion_accuracy, "removal"),
         carried("propagation_accuracy", native.propagation_accuracy, "propagation"),
         TaskMetric(
@@ -910,6 +930,13 @@ def evaluate_broker_removal(
             support_meaning=native.propagation_lag.support_meaning,
         ),
         carried("recurrence_recall", native.recurrence_recall, "recurrence"),
+        TaskMetric(
+            name="false_recurrence_alerts",
+            value=float(native.false_recurrence_alerts),
+            support=native.discoverable_count,
+            family="recurrence",
+            support_meaning="listings the timeline has discovered",
+        ),
     )
     return EvaluationReport(
         scoring_version=BROKER_SCORING_VERSION,
