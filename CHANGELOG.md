@@ -29,6 +29,11 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   New modules: `ambiguity_evidence`, `ambiguity_surfaces`, `ambiguity_channel`,
   `ambiguity_floor`, with v2 serialization/metrics/baselines support and
   `examples/compute_ambiguity_floor.py`.
+- The 12-case authority-change governance conformance fixture from #73 is now an
+  additive frozen benchmark. Its public and evaluator payloads remain physically
+  separate; their visibility manifests and exact raw bytes are path-bound by a
+  packaged `SHA256SUMS`, verified by the packaged loader API, regeneration tests,
+  and isolated-wheel checks. No existing golden bytes changed.
 - The broker-removal pack is scored through the unified evaluator: `evaluate_broker_removal`
   projects each family's headline ratio into the standard `EvaluationReport`, the CLI gains
   `synthworld evaluate broker`, and `examples/evaluate_broker_adapter.py` is the worked

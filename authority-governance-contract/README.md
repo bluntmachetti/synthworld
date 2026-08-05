@@ -10,8 +10,11 @@ The `1.0.0` fixture contains 12 hand-inspectable cases covering a valid grant,
 wrong and expired approvers, approved-versus-enacted scope drift, denied-but-
 enacted authority, an emergency exception, decision-time policy selection,
 missing retained evidence, supersession linkage, revocation timing drift,
-conflicting decisions, and a structurally valid unauthorized change. These are
-generated contract examples, not frozen benchmark goldens.
+conflicting decisions, and a structurally valid unauthorized change. The
+examples remain generated contract documentation. The byte-identical
+public/evaluator fixture is frozen separately under
+`synthworld.benchmarks/authority-governance-v1`, where a root `SHA256SUMS`
+binds both payloads and both visibility manifests.
 
 ## One clock and deterministic precedence
 

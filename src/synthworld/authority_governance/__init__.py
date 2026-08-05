@@ -26,10 +26,12 @@ from synthworld.authority_governance.replay import (
 )
 from synthworld.authority_governance.serialization import (
     EVALUATOR_AUTHORITY_GOVERNANCE_PATH,
+    GOLDEN_AUTHORITY_GOVERNANCE_DIRECTORY,
     PUBLIC_AUTHORITY_GOVERNANCE_PATH,
     AuthorityGovernanceArtifactError,
     export_authority_governance_benchmark,
     load_evaluator_authority_governance_benchmark,
+    load_golden_authority_governance_benchmark,
     load_public_authority_governance_benchmark,
 )
 
@@ -37,6 +39,7 @@ __all__ = [
     *_model_exports,
     "AUTHORITY_GOVERNANCE_BASELINES",
     "EVALUATOR_AUTHORITY_GOVERNANCE_PATH",
+    "GOLDEN_AUTHORITY_GOVERNANCE_DIRECTORY",
     "PUBLIC_AUTHORITY_GOVERNANCE_PATH",
     "REFERENCE_GOVERNANCE_SCHEDULE_VERSION",
     "AuthorityGovernanceArtifactError",
@@ -48,6 +51,7 @@ __all__ = [
     "controlling_governance_decision",
     "evaluate_authority_governance_prediction",
     "export_authority_governance_benchmark",
+    "load_golden_authority_governance_benchmark",
     "load_evaluator_authority_governance_benchmark",
     "load_public_authority_governance_benchmark",
     "materialize_authority_state",

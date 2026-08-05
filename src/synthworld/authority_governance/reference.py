@@ -74,7 +74,7 @@ class _CaseSpec:
 
 
 def reference_authority_governance() -> ReferenceAuthorityGovernanceV1:
-    """Build the deterministic conformance fixture without freezing a golden."""
+    """Build the deterministic source fixture used by contracts and the golden."""
 
     initial_state = AuthorityStateV1(
         authorities=(_authority("03", broad=True), _authority("10", broad=True))

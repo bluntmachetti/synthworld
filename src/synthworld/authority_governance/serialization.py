@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import re
 import stat
+from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Literal
 
@@ -12,6 +15,7 @@ from synthworld.authority_governance.models import (
     AuthorityGovernanceEvaluatorV1,
     AuthorityGovernancePublicV1,
 )
+from synthworld.authority_governance.reference import ReferenceAuthorityGovernanceV1
 from synthworld.authority_governance.replay import (
     AuthorityGovernanceIntegrityError,
     validate_authority_governance_evaluator,
@@ -26,6 +30,15 @@ from synthworld.enterprise.models import (
 PUBLIC_AUTHORITY_GOVERNANCE_PATH = "public/authority-governance-input.json"
 EVALUATOR_AUTHORITY_GOVERNANCE_PATH = "evaluator/authority-governance-evaluator.json"
 MANIFEST_NAME = "manifest.json"
+GOLDEN_AUTHORITY_GOVERNANCE_DIRECTORY = "authority-governance-v1"
+_GOLDEN_CHECKSUM_NAME = "SHA256SUMS"
+_GOLDEN_ARTIFACT_PATHS = (
+    EVALUATOR_AUTHORITY_GOVERNANCE_PATH,
+    "evaluator/manifest.json",
+    PUBLIC_AUTHORITY_GOVERNANCE_PATH,
+    "public/manifest.json",
+)
+_LOWERCASE_SHA256 = re.compile(r"[0-9a-f]{64}").fullmatch
 
 
 class AuthorityGovernanceArtifactError(ValueError):
@@ -109,6 +122,19 @@ def load_evaluator_authority_governance_benchmark(
             "authority-governance evaluator bindings are invalid"
         ) from error
     return evaluator
+
+
+def load_golden_authority_governance_benchmark() -> ReferenceAuthorityGovernanceV1:
+    """Load the packaged #73 fixture after verifying every frozen byte."""
+
+    resource = files("synthworld.benchmarks").joinpath(
+        GOLDEN_AUTHORITY_GOVERNANCE_DIRECTORY
+    )
+    with as_file(resource) as root:
+        _verify_golden_tree(root)
+        public = load_public_authority_governance_benchmark(root)
+        evaluator = load_evaluator_authority_governance_benchmark(root)
+    return ReferenceAuthorityGovernanceV1(public=public, evaluator=evaluator)
 
 
 def _manifest(
@@ -209,11 +235,86 @@ def _write_new(path: Path, payload: bytes) -> None:
         destination.write(payload)
 
 
+def _verify_golden_tree(root: Path) -> None:
+    """Verify the frozen root inventory and its path-bound raw-byte checksums."""
+
+    try:
+        if not stat.S_ISDIR(root.lstat().st_mode):
+            raise AuthorityGovernanceArtifactError(
+                "frozen authority-governance root is not a real directory"
+            )
+        entries = {item.name: item for item in root.iterdir()}
+        if set(entries) != {"public", "evaluator", _GOLDEN_CHECKSUM_NAME}:
+            raise AuthorityGovernanceArtifactError(
+                "frozen authority-governance root inventory differs"
+            )
+        if (
+            not stat.S_ISDIR(entries["public"].lstat().st_mode)
+            or not stat.S_ISDIR(entries["evaluator"].lstat().st_mode)
+            or not stat.S_ISREG(entries[_GOLDEN_CHECKSUM_NAME].lstat().st_mode)
+        ):
+            raise AuthorityGovernanceArtifactError(
+                "frozen authority-governance root contains a non-regular entry"
+            )
+        manifest = entries[_GOLDEN_CHECKSUM_NAME].read_bytes()
+    except OSError as error:
+        raise AuthorityGovernanceArtifactError(
+            "frozen authority-governance root is unreadable"
+        ) from error
+
+    expected = _parse_golden_checksums(manifest)
+    for relative_path in _GOLDEN_ARTIFACT_PATHS:
+        artifact = root.joinpath(*relative_path.split("/"))
+        try:
+            if not stat.S_ISREG(artifact.lstat().st_mode):
+                raise AuthorityGovernanceArtifactError(
+                    "frozen authority-governance artifact is not a regular file"
+                )
+            actual = hashlib.sha256(artifact.read_bytes()).hexdigest()
+        except OSError as error:
+            raise AuthorityGovernanceArtifactError(
+                "frozen authority-governance artifact is unreadable"
+            ) from error
+        if actual != expected[relative_path]:
+            raise AuthorityGovernanceArtifactError(
+                "frozen authority-governance artifact checksum differs"
+            )
+
+
+def _parse_golden_checksums(payload: bytes) -> dict[str, str]:
+    try:
+        text = payload.decode("ascii")
+    except UnicodeDecodeError as error:
+        raise AuthorityGovernanceArtifactError(
+            "frozen authority-governance checksum manifest is invalid"
+        ) from error
+    lines = text.splitlines()
+    if payload != ("\n".join(lines) + "\n").encode("ascii"):
+        raise AuthorityGovernanceArtifactError(
+            "frozen authority-governance checksum manifest is not canonical"
+        )
+    rows = tuple(line.split("  ") for line in lines)
+    if any(len(fields) != 2 for fields in rows):
+        raise AuthorityGovernanceArtifactError(
+            "frozen authority-governance checksum manifest is invalid"
+        )
+    parsed = tuple((fields[0], fields[1]) for fields in rows)
+    if tuple(path for _, path in parsed) != _GOLDEN_ARTIFACT_PATHS or any(
+        _LOWERCASE_SHA256(digest) is None for digest, _ in parsed
+    ):
+        raise AuthorityGovernanceArtifactError(
+            "frozen authority-governance checksum manifest is invalid"
+        )
+    return {path: digest for digest, path in parsed}
+
+
 __all__ = [
     "EVALUATOR_AUTHORITY_GOVERNANCE_PATH",
+    "GOLDEN_AUTHORITY_GOVERNANCE_DIRECTORY",
     "PUBLIC_AUTHORITY_GOVERNANCE_PATH",
     "AuthorityGovernanceArtifactError",
     "export_authority_governance_benchmark",
     "load_evaluator_authority_governance_benchmark",
+    "load_golden_authority_governance_benchmark",
     "load_public_authority_governance_benchmark",
 ]
