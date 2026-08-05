@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/continuous-assurance-contract/schemas/continuous-assurance-config.schema.json",
+  "x-generated-from": "synthworld.continuous_assurance.models.ContinuousAssuranceConfigV1",
+  "x-generated-by": "continuous-assurance-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python continuous-assurance-contract/tools/generate_contract.py",
+  "$defs": {
+    "ContinuousAssuranceTier": {
+      "enum": [
+        "smoke",
+        "standard",
+        "longitudinal",
+        "held_out"
+      ],
+      "title": "ContinuousAssuranceTier",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Explicit private generation inputs; only selected projections are public.",
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "tier": {
+      "$ref": "#/$defs/ContinuousAssuranceTier",
+      "default": "smoke"
+    },
+    "seed": {
+      "default": 20260804,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "risk_threshold": {
+      "default": 70,
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Risk Threshold",
+      "type": "integer"
+    },
+    "justification_kind": {
+      "default": "business_need",
+      "enum": [
+        "business_need",
+        "case_assignment",
+        "emergency_access"
+      ],
+      "title": "Justification Kind",
+      "type": "string"
+    }
+  },
+  "title": "ContinuousAssuranceConfigV1",
+  "type": "object"
+}

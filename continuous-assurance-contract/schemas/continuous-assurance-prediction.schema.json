@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/continuous-assurance-contract/schemas/continuous-assurance-prediction.schema.json",
+  "x-generated-from": "synthworld.continuous_assurance.models.ContinuousAssurancePredictionV1",
+  "x-generated-by": "continuous-assurance-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python continuous-assurance-contract/tools/generate_contract.py",
+  "$defs": {
+    "AssuranceDriftKind": {
+      "enum": [
+        "credential",
+        "delegation",
+        "entitlement",
+        "evidence",
+        "owner",
+        "policy"
+      ],
+      "title": "AssuranceDriftKind",
+      "type": "string"
+    },
+    "ContinuousAssurancePredictionRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "predicted_drift_kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssuranceDriftKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "finding_opened_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Opened Tick"
+        },
+        "finding_cleared_ticks": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Finding Cleared Ticks",
+          "type": "array"
+        },
+        "recurrence_opened_ticks": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Recurrence Opened Ticks",
+          "type": "array"
+        },
+        "remediation_complete": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Remediation Complete"
+        },
+        "evidence_continuous": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Continuous"
+        }
+      },
+      "required": [
+        "case_id"
+      ],
+      "title": "ContinuousAssurancePredictionRowV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssurancePredictionRowV1"
+      },
+      "minItems": 1,
+      "title": "Rows",
+      "type": "array"
+    }
+  },
+  "required": [
+    "rows"
+  ],
+  "title": "ContinuousAssurancePredictionV1",
+  "type": "object"
+}

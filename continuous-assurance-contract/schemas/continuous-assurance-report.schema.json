@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/continuous-assurance-contract/schemas/continuous-assurance-report.schema.json",
+  "x-generated-from": "synthworld.continuous_assurance.models.ContinuousAssuranceReportV1",
+  "x-generated-by": "continuous-assurance-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python continuous-assurance-contract/tools/generate_contract.py",
+  "$defs": {
+    "ContinuousAssuranceCaseFindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "detection_correct": {
+          "title": "Detection Correct",
+          "type": "boolean"
+        },
+        "classification_correct": {
+          "title": "Classification Correct",
+          "type": "boolean"
+        },
+        "opening_tick_correct": {
+          "title": "Opening Tick Correct",
+          "type": "boolean"
+        },
+        "clearing_tick_correct": {
+          "title": "Clearing Tick Correct",
+          "type": "boolean"
+        },
+        "recurrence_correct": {
+          "title": "Recurrence Correct",
+          "type": "boolean"
+        },
+        "remediation_correct": {
+          "title": "Remediation Correct",
+          "type": "boolean"
+        },
+        "evidence_continuity_correct": {
+          "title": "Evidence Continuity Correct",
+          "type": "boolean"
+        },
+        "checkpoint_state_correct": {
+          "title": "Checkpoint State Correct",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "detection_correct",
+        "classification_correct",
+        "opening_tick_correct",
+        "clearing_tick_correct",
+        "recurrence_correct",
+        "remediation_correct",
+        "evidence_continuity_correct",
+        "checkpoint_state_correct"
+      ],
+      "title": "ContinuousAssuranceCaseFindingV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceEmptyBehavior": {
+      "enum": [
+        "null_if_empty"
+      ],
+      "title": "ContinuousAssuranceEmptyBehavior",
+      "type": "string"
+    },
+    "ContinuousAssuranceMetricAggregation": {
+      "enum": [
+        "mean_ticks",
+        "ratio"
+      ],
+      "title": "ContinuousAssuranceMetricAggregation",
+      "type": "string"
+    },
+    "ContinuousAssuranceMetricFamily": {
+      "enum": [
+        "classification",
+        "detection",
+        "evidence",
+        "recurrence",
+        "remediation",
+        "staleness"
+      ],
+      "title": "ContinuousAssuranceMetricFamily",
+      "type": "string"
+    },
+    "ContinuousAssuranceMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "family": {
+          "$ref": "#/$defs/ContinuousAssuranceMetricFamily"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "aggregation": {
+          "$ref": "#/$defs/ContinuousAssuranceMetricAggregation"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "empty_behavior": {
+          "$ref": "#/$defs/ContinuousAssuranceEmptyBehavior",
+          "default": "null_if_empty"
+        }
+      },
+      "required": [
+        "family",
+        "name",
+        "aggregation",
+        "value",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning"
+      ],
+      "title": "ContinuousAssuranceMetricV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scoring_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Scoring Version",
+      "type": "string"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceCaseFindingV1"
+      },
+      "minItems": 1,
+      "title": "Findings",
+      "type": "array"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceMetricV1"
+      },
+      "minItems": 1,
+      "title": "Metrics",
+      "type": "array"
+    }
+  },
+  "required": [
+    "findings",
+    "metrics"
+  ],
+  "title": "ContinuousAssuranceReportV1",
+  "type": "object"
+}

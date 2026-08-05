@@ -60,6 +60,16 @@ from synthworld.contextual_access import (
     reference_contextual_access,
     validate_contextual_access_trace_jsonl,
 )
+from synthworld.continuous_assurance import (
+    ContinuousAssuranceArtifactError,
+    ContinuousAssuranceEvaluationError,
+    ContinuousAssurancePredictionV1,
+    evaluate_continuous_assurance_prediction,
+    export_continuous_assurance_benchmark,
+    load_evaluator_continuous_assurance_benchmark,
+    load_public_continuous_assurance_benchmark,
+    reference_continuous_assurance,
+)
 from synthworld.corpus_metrics import evaluate_corpus
 from synthworld.corpus_serialization import corpus_to_json
 from synthworld.enterprise.compiler import (
@@ -391,6 +401,40 @@ def main(argv: Sequence[str] | None = None) -> int:
                 else:
                     print(contextual_report.model_dump_json(indent=2))
                 return 0
+            elif args.task == "continuous-assurance":
+                if args.benchmark_root is None:
+                    raise ContinuousAssuranceEvaluationError(
+                        "--benchmark-root is required for continuous-assurance "
+                        "evaluation"
+                    )
+                assurance_public = load_public_continuous_assurance_benchmark(
+                    args.benchmark_root
+                )
+                assurance_evaluator = load_evaluator_continuous_assurance_benchmark(
+                    args.benchmark_root
+                )
+                assurance_report = evaluate_continuous_assurance_prediction(
+                    public=assurance_public,
+                    evaluator=assurance_evaluator,
+                    prediction=ContinuousAssurancePredictionV1.model_validate_json(
+                        text
+                    ),
+                )
+                if args.summary:
+                    for assurance_metric in assurance_report.metrics:
+                        value = (
+                            "null"
+                            if assurance_metric.value is None
+                            else f"{assurance_metric.value:.4f}"
+                        )
+                        print(
+                            f"{assurance_metric.family:>26}  "
+                            f"{assurance_metric.name:<48} "
+                            f"{value:>6} n={assurance_metric.denominator}"
+                        )
+                else:
+                    print(assurance_report.model_dump_json(indent=2))
+                return 0
             elif args.task == "extraction":
                 report = evaluate_extraction(
                     ExtractionPredictionSet.model_validate_json(text),
@@ -427,6 +471,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             EnterpriseAgenticEvaluationError,
             ContextualAccessArtifactError,
             ContextualAccessEvaluationError,
+            ContinuousAssuranceArtifactError,
+            ContinuousAssuranceEvaluationError,
         ) as error:
             print(str(error), file=sys.stderr)
             return 1
@@ -480,6 +526,35 @@ def main(argv: Sequence[str] | None = None) -> int:
             "Contextual-access smoke pack ready: "
             f"{len(contextual.evaluator.truth.cases)} cases -> {args.output}"
         )
+        return 0
+
+    if args.command == "generate-continuous-assurance":
+        try:
+            assurance = reference_continuous_assurance(
+                tier=args.tier,
+                seed=args.seed,
+                risk_threshold=args.risk_threshold,
+                justification_kind=args.justification_kind,
+            )
+            export_continuous_assurance_benchmark(
+                args.output,
+                public=assurance.public,
+                evaluator=assurance.evaluator,
+            )
+        except (OSError, ValidationError, ContinuousAssuranceArtifactError) as error:
+            print(str(error), file=sys.stderr)
+            return 1
+        print(
+            "Continuous-assurance pack ready: "
+            f"tier={assurance.config.tier.value}, "
+            f"{len(assurance.evaluator.truth)} cases -> {args.output}"
+        )
+        if assurance.config.tier.value == "held_out":
+            print(
+                "Held-out is a generation profile, not a secrecy claim; withhold "
+                "the configuration and apply operator-approved key custody for a "
+                "competitive evaluation."
+            )
         return 0
 
     if args.command == "generate-connection-benchmark":
@@ -817,6 +892,24 @@ def _parser() -> argparse.ArgumentParser:
     )
     generate_contextual_access.add_argument("--output", type=Path, required=True)
 
+    generate_continuous_assurance = subparsers.add_parser(
+        "generate-continuous-assurance",
+        help="write a digest-bound longitudinal identity-assurance pack",
+    )
+    _add_seed_argument(generate_continuous_assurance)
+    generate_continuous_assurance.add_argument(
+        "--tier",
+        choices=("smoke", "standard", "longitudinal", "held_out"),
+        default="smoke",
+    )
+    generate_continuous_assurance.add_argument("--risk-threshold", type=int, default=70)
+    generate_continuous_assurance.add_argument(
+        "--justification-kind",
+        choices=("business_need", "case_assignment", "emergency_access"),
+        default="business_need",
+    )
+    generate_continuous_assurance.add_argument("--output", type=Path, required=True)
+
     validate = subparsers.add_parser(
         "validate",
         help="check a submission's shape before scoring, without answer-key truth",
@@ -882,6 +975,7 @@ def _parser() -> argparse.ArgumentParser:
             "agentic",
             "enterprise-agentic",
             "contextual-access",
+            "continuous-assurance",
             "extraction",
             "broker",
             "entity-resolution",
@@ -916,7 +1010,10 @@ def _parser() -> argparse.ArgumentParser:
     evaluate.add_argument(
         "--benchmark-root",
         type=Path,
-        help="enterprise-agentic or contextual-access artifact root",
+        help=(
+            "enterprise-agentic, contextual-access, or continuous-assurance "
+            "artifact root"
+        ),
     )
     return parser
 
