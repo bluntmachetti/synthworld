@@ -29,6 +29,12 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   New modules: `ambiguity_evidence`, `ambiguity_surfaces`, `ambiguity_channel`,
   `ambiguity_floor`, with v2 serialization/metrics/baselines support and
   `examples/compute_ambiguity_floor.py`.
+- Agent-authority observation schema `2.0.0` corrects L06 clock semantics without
+  changing the frozen observation-v1 schema. It records one explicit monotonic
+  revocation epoch, non-negative acknowledgement offsets, and signed send/completion
+  offsets so pre-revocation in-flight requests are representable. Receipt validation
+  dispatches v1/v2 observations and binds them to scoring formulas `1.0.0`/`2.0.0`;
+  migration guidance forbids guessing offsets from ambiguous v1 rows.
 - The 12-case authority-change governance conformance fixture from #73 is now an
   additive frozen benchmark. Its public and evaluator payloads remain physically
   separate; their visibility manifests and exact raw bytes are path-bound by a

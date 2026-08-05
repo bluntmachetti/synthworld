@@ -19,7 +19,8 @@ remaining docs are the two narrative files listed below.
 | `schemas/observed-action-trace.schema.json` | Generated from the model |
 | `schemas/agentic-trace-submission.schema.json` | Generated from the model |
 | `schemas/agent-authority-run-plan.schema.json` | Generated executable preflight contract v1 |
-| `schemas/agent-authority-observations.schema.json` | Generated post-execution evidence contract v1 |
+| `schemas/agent-authority-observations.schema.json` | Frozen generated post-execution evidence contract v1 |
+| `schemas/agent-authority-observations-v2.schema.json` | Generated observation v2 with signed, revocation-relative L06 timing |
 | `schemas/run-receipt-manifest-v2.schema.json` | Generated generic receipt v2 contract |
 | `schemas/run-manifest.schema.json` | Superseded `0.1.0-draft`, retained only for migration identification |
 | `tools/generate_trace_schema.py` | Working; `--check` drift gate runs in `make ci` |
@@ -59,6 +60,20 @@ runs use one generic receipt lineage: frozen receipt v1 for existing ambiguity r
 and explicit receipt v2 for composed/self-hosted/managed systems. Agent-authority
 fields live in separate generated pre-execution run-plan and post-execution
 observation schemas.
+
+Observation v2 is a narrow L06 correction. Run plan, stimulus, truth, report, and
+generic receipt schemas remain unchanged. V2 renames the L06 epoch to
+`revocation_epoch_monotonic_ns`; acknowledgement, send, and completion fields are
+offsets from that one epoch. Attempt offsets are signed, acknowledgements are
+non-negative, and completion cannot precede send. The receipt binds observation v1
+to scoring formula `1.0.0` and observation v2 to scoring formula `2.0.0`.
+
+Do not mechanically relabel an observation-v1 document as v2. V1 records a
+`revocation_epoch_ns`, but its non-negative attempt values were compared directly
+with the bound without subtracting that epoch. Stored rows therefore do not prove
+whether their elapsed values were run-relative or revocation-relative. New live L06
+runs must use v2; existing v1 receipts remain loadable and replay under their frozen
+semantics. See `docs/observation-v2-migration.md`.
 
 The executable builder writes and validates `context/run-plan.json` before calling
 an adapter or product. It then binds the plan, stimulus set, exact product input,
@@ -102,7 +117,9 @@ An emitted L06 observation is structurally required to contain post-bound traffi
 so its false-allow denominator cannot be empty. If the complete L06 observation is
 absent, the finding is `not_executed` and that metric alone uses the explicit
 `null_if_empty` state rather than treating missing evidence as a zero false-allow
-rate.
+rate. Under observation v2, an attempt is post-bound exactly when
+`sent_offset_ns > bound_ns`; negative offsets preserve attempts that were already in
+flight when revocation was issued without misclassifying them as post-bound sends.
 
 SynthWorld supplies contracts and deterministic fake protocol fixtures only.
 External adapters own vendor API calls, credentials, tenant configuration, fault

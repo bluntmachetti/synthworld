@@ -23,6 +23,7 @@ from synthworld.agent_authority.models import (
     AgentAuthorityRunObservationsV1,
     AgentAuthorityRunPlanV1,
 )
+from synthworld.agent_authority.models_v2 import AgentAuthorityRunObservationsV2
 from synthworld.assurance.models_v2 import ExecutionReceiptV2, RunReceiptManifestV2
 
 SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
@@ -35,6 +36,7 @@ _UTC_TIMESTAMP_PATTERN = (
 MODELS: tuple[tuple[str, type[BaseModel]], ...] = (
     ("agent-authority-run-plan", AgentAuthorityRunPlanV1),
     ("agent-authority-observations", AgentAuthorityRunObservationsV1),
+    ("agent-authority-observations-v2", AgentAuthorityRunObservationsV2),
     ("agent-authority-lab-truth", AgentAuthorityLabTruthV1),
     ("agent-authority-lab-report", AgentAuthorityLabReportV1),
     ("execution-receipt-v2", ExecutionReceiptV2),

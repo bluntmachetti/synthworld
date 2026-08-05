@@ -9,9 +9,12 @@ from synthworld.agent_authority.migration import (
 )
 from synthworld.agent_authority.models import *  # noqa: F403
 from synthworld.agent_authority.models import __all__ as _model_exports
+from synthworld.agent_authority.models_v2 import *  # noqa: F403
+from synthworld.agent_authority.models_v2 import __all__ as _model_v2_exports
 
 __all__ = [
     *_model_exports,
+    *_model_v2_exports,
     "LEGACY_RUN_MANIFEST_VERSION",
     "LegacyDraftFieldV1",
     "LegacyDraftMigrationError",

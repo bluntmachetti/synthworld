@@ -26,10 +26,16 @@ from synthworld.agent_authority.models import (
     validate_observation_references,
     validate_run_plan_references,
 )
+from synthworld.agent_authority.models_v2 import (
+    AGENT_AUTHORITY_OBSERVATIONS_SCHEMA_VERSION_V2,
+    AgentAuthorityRunObservationsV2,
+    validate_observation_references_v2,
+)
 from synthworld.agent_authority.scoring import (
     evaluate_agent_authority_lab,
     validate_agent_authority_truth,
 )
+from synthworld.agent_authority.scoring_v2 import evaluate_agent_authority_lab_v2
 from synthworld.assurance.models import (
     ArtifactPhase,
     ArtifactSerialization,
@@ -77,6 +83,7 @@ OBSERVATIONS_PATH = "observations/agent-authority.json"
 TRUTH_PATH = "evaluator/agent-authority-truth.json"
 EVALUATION_PATH = "evaluation/agent-authority-report.json"
 AGENT_AUTHORITY_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
+AGENT_AUTHORITY_SCORING_VERSION_V2: Literal["2.0.0"] = "2.0.0"
 
 _ROLE_PATHS = {
     "agent_authority_run_plan": RUN_PLAN_PATH,
@@ -89,9 +96,12 @@ _ROLE_PATHS = {
     "agent_authority_evaluation": EVALUATION_PATH,
 }
 
+AgentAuthorityRunObservations = (
+    AgentAuthorityRunObservationsV1 | AgentAuthorityRunObservationsV2
+)
 ObservationNormalizer = Callable[
     [bytes, AgentAuthorityRunPlanV1, AgentAuthorityStimulusSetV1],
-    AgentAuthorityRunObservationsV1,
+    AgentAuthorityRunObservations,
 ]
 TruthLoader = Callable[[], AgentAuthorityLabTruthV1]
 
@@ -235,7 +245,7 @@ def build_agent_authority_run_receipt(
         pre_execution_artifacts.run_plan,
         pre_execution_artifacts.stimuli,
     )
-    validate_observation_references(
+    _validate_observation_references_dispatched(
         pre_execution_artifacts.run_plan,
         pre_execution_artifacts.stimuli,
         observations,
@@ -252,7 +262,7 @@ def build_agent_authority_run_receipt(
         truth,
     )
     write_canonical_model(root / TRUTH_PATH, truth)
-    report = evaluate_agent_authority_lab(
+    report = _evaluate_agent_authority_lab_dispatched(
         pre_execution_artifacts.run_plan,
         pre_execution_artifacts.stimuli,
         observations,
@@ -261,7 +271,8 @@ def build_agent_authority_run_receipt(
     )
     write_canonical_model(root / EVALUATION_PATH, report)
 
-    specs = _artifact_specs(metadata)
+    specs = _artifact_specs(metadata, observations.schema_version)
+    scoring_version = _scoring_version(observations)
     manifest = RunReceiptManifestV2(
         benchmark=metadata.benchmark,
         build_environment=metadata.build_environment,
@@ -270,7 +281,7 @@ def build_agent_authority_run_receipt(
         scoring_formula_versions=(
             VersionBindingV2(
                 role="agent_authority_lab",
-                version=AGENT_AUTHORITY_SCORING_VERSION,
+                version=scoring_version,
             ),
         ),
         generator_configuration=metadata.generator_configuration,
@@ -313,11 +324,6 @@ def validate_agent_authority_run_receipt(
     }
     if declared_schemas != expected_schemas:
         raise ReceiptIntegrityError("manifest schema bindings differ from artifacts")
-    if {item.role: item.version for item in manifest.scoring_formula_versions} != {
-        "agent_authority_lab": AGENT_AUTHORITY_SCORING_VERSION
-    }:
-        raise ReceiptIntegrityError("manifest scoring formula binding is incorrect")
-
     plan = _read_model(root, RUN_PLAN_PATH, AgentAuthorityRunPlanV1)
     product_input = _read_model(root, PRODUCT_INPUT_PATH, AgentAuthorityProductInputV1)
     parsed_execution = parse_execution_receipt((root / EXECUTION_PATH).read_bytes())
@@ -325,13 +331,24 @@ def validate_agent_authority_run_receipt(
         raise ReceiptIntegrityError("agent-authority receipt requires execution v2")
     execution = parsed_execution
     stimuli = AgentAuthorityStimulusSetV1(stimuli=product_input.stimuli)
-    observations = _read_model(root, OBSERVATIONS_PATH, AgentAuthorityRunObservationsV1)
+    observations = _read_observations(root)
     truth = _read_model(root, TRUTH_PATH, AgentAuthorityLabTruthV1)
     report = _read_model(root, EVALUATION_PATH, AgentAuthorityLabReportV1)
+    if (
+        descriptors["agent_authority_observations"].schema_version
+        != observations.schema_version
+    ):
+        raise ReceiptIntegrityError(
+            "observation artifact schema binding differs from its payload"
+        )
+    if {item.role: item.version for item in manifest.scoring_formula_versions} != {
+        "agent_authority_lab": _scoring_version(observations)
+    }:
+        raise ReceiptIntegrityError("manifest scoring formula binding is incorrect")
 
     try:
         validate_run_plan_references(plan, stimuli, manifest.systems_under_test)
-        validate_observation_references(
+        _validate_observation_references_dispatched(
             plan, stimuli, observations, manifest.systems_under_test
         )
         validate_agent_authority_truth(plan, stimuli, truth)
@@ -390,7 +407,7 @@ def validate_agent_authority_run_receipt(
             raise ReceiptIntegrityError(
                 "observations differ from normalized product output"
             )
-    expected_report = evaluate_agent_authority_lab(
+    expected_report = _evaluate_agent_authority_lab_dispatched(
         plan, stimuli, observations, truth, manifest.systems_under_test
     )
     if report != expected_report:
@@ -398,8 +415,67 @@ def validate_agent_authority_run_receipt(
     return manifest
 
 
+def _validate_observation_references_dispatched(
+    plan: AgentAuthorityRunPlanV1,
+    stimuli: AgentAuthorityStimulusSetV1,
+    observations: AgentAuthorityRunObservations,
+    systems: tuple[SystemComponentProvenanceV2, ...],
+) -> None:
+    if isinstance(observations, AgentAuthorityRunObservationsV2):
+        validate_observation_references_v2(plan, stimuli, observations, systems)
+        return
+    validate_observation_references(plan, stimuli, observations, systems)
+
+
+def _evaluate_agent_authority_lab_dispatched(
+    plan: AgentAuthorityRunPlanV1,
+    stimuli: AgentAuthorityStimulusSetV1,
+    observations: AgentAuthorityRunObservations,
+    truth: AgentAuthorityLabTruthV1,
+    systems: tuple[SystemComponentProvenanceV2, ...],
+) -> AgentAuthorityLabReportV1:
+    if isinstance(observations, AgentAuthorityRunObservationsV2):
+        return evaluate_agent_authority_lab_v2(
+            plan, stimuli, observations, truth, systems
+        )
+    return evaluate_agent_authority_lab(plan, stimuli, observations, truth, systems)
+
+
+def _scoring_version(observations: AgentAuthorityRunObservations) -> str:
+    if isinstance(observations, AgentAuthorityRunObservationsV2):
+        return AGENT_AUTHORITY_SCORING_VERSION_V2
+    return AGENT_AUTHORITY_SCORING_VERSION
+
+
+def _read_observations(root: Path) -> AgentAuthorityRunObservations:
+    payload = (root / OBSERVATIONS_PATH).read_bytes()
+    # validate_manifest_v2 has already asserted canonical UTF-8 JSON bytes.
+    document = json.loads(payload)
+    if not isinstance(document, dict):
+        raise ReceiptIntegrityError(
+            "agent-authority observations do not match a supported schema"
+        )
+    version = document.get("schema_version")
+    if version == AGENT_AUTHORITY_OBSERVATIONS_SCHEMA_VERSION:
+        return _model_from_canonical_bytes(
+            payload,
+            AgentAuthorityRunObservationsV1,
+            OBSERVATIONS_PATH,
+        )
+    if version == AGENT_AUTHORITY_OBSERVATIONS_SCHEMA_VERSION_V2:
+        return _model_from_canonical_bytes(
+            payload,
+            AgentAuthorityRunObservationsV2,
+            OBSERVATIONS_PATH,
+        )
+    raise ReceiptIntegrityError(
+        "agent-authority observations use an unsupported schema version"
+    )
+
+
 def _artifact_specs(
     metadata: AgentAuthorityRunMetadataV1,
+    observations_schema_version: str = AGENT_AUTHORITY_OBSERVATIONS_SCHEMA_VERSION,
 ) -> tuple[ArtifactSpecV2, ...]:
     canonical = ArtifactSerialization.CANONICAL_JSON_V1
     return (
@@ -449,7 +525,7 @@ def _artifact_specs(
             phase=ArtifactPhase.PRODUCT,
             media_type="application/json",
             serialization=canonical,
-            schema_version=AGENT_AUTHORITY_OBSERVATIONS_SCHEMA_VERSION,
+            schema_version=observations_schema_version,
         ),
         ArtifactSpecV2(
             path=TRUTH_PATH,
@@ -570,12 +646,14 @@ def _read_model[ModelT: BaseModel](
 
 __all__ = [
     "AGENT_AUTHORITY_SCORING_VERSION",
+    "AGENT_AUTHORITY_SCORING_VERSION_V2",
     "EVALUATION_PATH",
     "OBSERVATIONS_PATH",
     "RUN_PLAN_PATH",
     "TRUTH_PATH",
     "AgentAuthorityPreExecutionArtifactsV1",
     "AgentAuthorityRunMetadataV1",
+    "AgentAuthorityRunObservations",
     "ObservationNormalizer",
     "TruthLoader",
     "build_agent_authority_run_receipt",
