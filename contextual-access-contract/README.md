@@ -24,7 +24,7 @@ file is preserved byte-for-byte at SHA-256
 | `synthworld.temporal` `1.2.0` | native privacy payload | integer `tick`; canonical `(tick,event_id)` prefixes | unchanged; no schedule fields are retrofitted |
 | `TemporalEventEnvelopeV1` `1.0.0` | `privacy_1_2` | projects privacy `id/tick`; derived contiguous index | adapter view only; native privacy bytes remain unchanged |
 | `TemporalEventEnvelopeV1` `1.0.0` | `contextual_access_1_0` | projects contextual `id/effective_tick`; derived contiguous index | separately typed payload joined by event ID |
-| future PR8 envelope v2 | not yet shipped | must preserve tick/order/digest/index semantics | governance requires an additive version; v1 is never widened |
+| `TemporalEventEnvelopeV2` `2.0.0` | `privacy_1_2`, `contextual_access_1_0`, or `governance_1_0` | preserves V1 tick/order/digest/index semantics | additive governance transition; v1 remains closed and independently loadable |
 
 Integer tick is the only deterministic world clock. `event_index` is a proof of
 canonical position, not time. Generated benchmark artifacts contain no UTC.
@@ -92,9 +92,25 @@ Receipt-v2 consumers use these exact family roles and paths:
 | `contextual_access_run_truth` | `evaluator/contextual-access-run-truth.json` | evaluation |
 | `contextual_access_evaluation` | `evaluation/contextual-access-report.json` | evaluation |
 
-The generic receipt-v2 source/input/output/execution paths remain unchanged.
-PR8 owns the deterministic fake-adapter receipt lifecycle and instrumented
-reference-deployment gate. No vendor API or runtime integration ships here.
+The generic receipt-v2 source/input/output/execution paths remain unchanged. The
+deterministic reference adapter now executes preflight, product-before-truth
+staging, every observation variant, all four phases, synchronization faults, and
+every scorer denominator through a replay-validated receipt. It proves only the
+family's schema, staging, and scorer conformance. No vendor API or runtime
+integration ships here.
+
+| Acceptance surface | State | Claim permitted |
+|---|---|---|
+| Deterministic contextual fake | Complete | Protocol/scorer conformance |
+| Deterministic agent-authority fake | Complete | Protocol/scorer conformance |
+| Instrumented disposable reference deployment | Not executed in core | None yet for `live_lab_conformance` or operational reporting |
+| SGNL pilot | External milestone after the reference-deployment gate | None yet for SGNL behaviour or enforcement |
+
+Live-lab readiness requires a separately executed, instrumented disposable
+deployment with receipt-bound evidence. A managed-service decision is not by
+itself enforcement proof: the protected enforcement point and target side effect
+must be observed independently. Key custody for held-out or comparative runs is
+also an operator concern and is not supplied by these deterministic fixtures.
 
 Generate or verify schemas and examples with:
 

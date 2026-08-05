@@ -34,6 +34,9 @@ from synthworld.agentic.trace_validation import (
     validate_trace_jsonl,
 )
 from synthworld.assurance.agent_authority import validate_agent_authority_run_receipt
+from synthworld.assurance.contextual_access import (
+    validate_contextual_access_run_receipt,
+)
 from synthworld.assurance.receipt import ReceiptIntegrityError
 from synthworld.broker_metrics import BrokerAssessment
 from synthworld.connection_generator import (
@@ -221,6 +224,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 return 1
             print(
                 "agent-authority-receipt: valid "
+                f"({len(manifest.artifacts)} bound artifacts)"
+            )
+            return 0
+
+        if args.task == "contextual-access-receipt":
+            try:
+                manifest = validate_contextual_access_run_receipt(args.input)
+            except (OSError, UnicodeDecodeError, ReceiptIntegrityError) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            print(
+                "contextual-access-receipt: valid "
                 f"({len(manifest.artifacts)} bound artifacts)"
             )
             return 0
@@ -844,6 +859,11 @@ def _parser() -> argparse.ArgumentParser:
         help="structurally validate a pre-execution contextual-access run plan",
     )
     contextual_run_plan.add_argument("--input", type=Path, required=True)
+    contextual_receipt = validation_tasks.add_parser(
+        "contextual-access-receipt",
+        help="validate a contextual-access receipt directory",
+    )
+    contextual_receipt.add_argument("--input", type=Path, required=True)
     contextual_trace = validation_tasks.add_parser(
         "contextual-access-trace",
         help="validate a contextual-access JSONL trace against public input",

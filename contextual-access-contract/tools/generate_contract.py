@@ -11,6 +11,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from synthworld.assurance.contextual_access import ContextualAccessProductInputV1
+from synthworld.assurance.receipt_v2 import digest_bytes_v2
 from synthworld.contextual_access.metrics import (
     evaluate_contextual_access_prediction,
     perfect_contextual_access_prediction,
@@ -59,6 +61,7 @@ MODELS: tuple[tuple[str, type[BaseModel]], ...] = (
     ("contextual-access-prediction", ContextualAccessPredictionV1),
     ("contextual-access-metrics", ContextualAccessMetricsV1),
     ("contextual-access-run-plan", ContextualAccessRunPlanV1),
+    ("contextual-access-product-input", ContextualAccessProductInputV1),
     ("contextual-access-observations", ContextualAccessObservationsV1),
     ("contextual-access-run-truth", ContextualAccessRunTruthV1),
     ("contextual-access-report", ContextualAccessReportV1),
@@ -100,6 +103,13 @@ def expected_files() -> dict[Path, bytes]:
         prediction=prediction,
     )
     run = reference_contextual_access_run()
+    product_input = ContextualAccessProductInputV1(
+        run_plan_digest=digest_bytes_v2(canonical_json_bytes(run.plan)),
+        contextual_public_digest=digest_bytes_v2(
+            canonical_json_bytes(benchmark.public)
+        ),
+        public=benchmark.public,
+    )
     shared_signals_profile = contextual_shared_signals_mapping_profile_v1()
     shared_signals_projection = project_contextual_shared_signals(
         benchmark.public,
@@ -112,6 +122,7 @@ def expected_files() -> dict[Path, bytes]:
         ("contextual-access-prediction.json", prediction),
         ("contextual-access-metrics.json", metrics),
         ("contextual-access-run-plan.json", run.plan),
+        ("contextual-access-product-input.json", product_input),
         ("contextual-access-observations.json", run.observations),
         ("contextual-access-run-truth.json", run.truth),
         ("contextual-access-report.json", run.report),
