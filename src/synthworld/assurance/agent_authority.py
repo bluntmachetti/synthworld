@@ -226,7 +226,7 @@ def build_agent_authority_run_receipt(
     """Execute product first, normalize observations, then load and score truth."""
 
     _validate_metadata_bindings(pre_execution_artifacts.run_plan, metadata)
-    execution = run_product_stage_with_preflight(
+    run_product_stage_with_preflight(
         root,
         systems_under_test=metadata.systems_under_test,
         pre_execution_artifacts=pre_execution_artifacts,
@@ -236,8 +236,39 @@ def build_agent_authority_run_receipt(
         adapter_provenance=metadata.adapter,
         callable_identifier=metadata.callable_identifier,
     )
-    if execution.status is not ExecutionStatus.SUCCEEDED:
-        raise ReceiptIntegrityError("a failed product execution cannot be evaluated")
+    return finalize_agent_authority_run_receipt(
+        root,
+        pre_execution_artifacts=pre_execution_artifacts,
+        adapter=adapter,
+        observation_normalizer=observation_normalizer,
+        truth_loader=truth_loader,
+        metadata=metadata,
+    )
+
+
+def finalize_agent_authority_run_receipt(
+    root: Path,
+    *,
+    pre_execution_artifacts: AgentAuthorityPreExecutionArtifactsV1,
+    adapter: PublicAdapter,
+    observation_normalizer: ObservationNormalizer,
+    truth_loader: TruthLoader,
+    metadata: AgentAuthorityRunMetadataV1,
+) -> RunReceiptManifestV2:
+    """Evaluate a successful, fully attributed product stage and seal its receipt.
+
+    This two-phase entry point lets a live runner construct ``metadata.run`` only
+    after the external execution has completed.  It replays and validates every
+    public product-stage binding before evaluator truth is loaded.
+    """
+
+    _validate_metadata_bindings(pre_execution_artifacts.run_plan, metadata)
+    execution = _validate_staged_product_execution(
+        root,
+        pre_execution_artifacts=pre_execution_artifacts,
+        adapter=adapter,
+        metadata=metadata,
+    )
 
     raw_output = (root / PRODUCT_OUTPUT_PATH).read_bytes()
     observations = observation_normalizer(
@@ -299,6 +330,103 @@ def build_agent_authority_run_receipt(
         adapter=adapter,
         observation_normalizer=observation_normalizer,
     )
+
+
+def _validate_staged_product_execution(
+    root: Path,
+    *,
+    pre_execution_artifacts: AgentAuthorityPreExecutionArtifactsV1,
+    adapter: PublicAdapter,
+    metadata: AgentAuthorityRunMetadataV1,
+) -> ExecutionReceiptV2:
+    """Validate all pre-evaluation artifacts without reading evaluator truth."""
+
+    required_paths = (
+        RUN_PLAN_PATH,
+        SOURCE_PUBLIC_PATH,
+        PRODUCT_INPUT_PATH,
+        PRODUCT_OUTPUT_PATH,
+        EXECUTION_PATH,
+    )
+    missing_paths = tuple(
+        path for path in required_paths if not (root / path).is_file()
+    )
+    if missing_paths:
+        raise ReceiptIntegrityError("the staged product execution is incomplete")
+
+    plan = _read_model(root, RUN_PLAN_PATH, AgentAuthorityRunPlanV1)
+    if plan != pre_execution_artifacts.run_plan:
+        raise ReceiptIntegrityError("staged run plan differs from preflight")
+    product_input = _read_model(root, PRODUCT_INPUT_PATH, AgentAuthorityProductInputV1)
+    stimuli = AgentAuthorityStimulusSetV1(stimuli=product_input.stimuli)
+    if stimuli != pre_execution_artifacts.stimuli:
+        raise ReceiptIntegrityError("staged product stimuli differ from preflight")
+
+    source_public = (root / SOURCE_PUBLIC_PATH).read_bytes()
+    _assert_canonical_json_bytes(source_public, "source public input")
+    adapted_stimuli = _model_from_canonical_bytes(
+        adapter(source_public),
+        AgentAuthorityStimulusSetV1,
+        "adapter stimulus set",
+    )
+    if adapted_stimuli != stimuli:
+        raise ReceiptIntegrityError("product stimuli differ from adapter output")
+
+    parsed_execution = parse_execution_receipt((root / EXECUTION_PATH).read_bytes())
+    if not isinstance(parsed_execution, ExecutionReceiptV2):
+        raise ReceiptIntegrityError("agent-authority receipt requires execution v2")
+    execution = parsed_execution
+    if execution.status is not ExecutionStatus.SUCCEEDED:
+        raise ReceiptIntegrityError("a failed product execution cannot be evaluated")
+
+    run_plan_digest = digest_bytes_v2((root / RUN_PLAN_PATH).read_bytes())
+    calculated_stimulus_digest = stimulus_set_digest(stimuli)
+    expected_input = AgentAuthorityProductInputV1(
+        run_plan_digest=run_plan_digest,
+        stimuli=stimuli.stimuli,
+        stimulus_digest=calculated_stimulus_digest,
+    )
+    if product_input != expected_input:
+        raise ReceiptIntegrityError("staged product input bindings are invalid")
+
+    component_ids = tuple(item.component_id for item in metadata.systems_under_test)
+    if execution.systems_under_test != component_ids:
+        raise ReceiptIntegrityError("execution systems differ from run metadata")
+    execution_adapter = (
+        execution.boundary,
+        execution.callable_identifier,
+        execution.adapter_name,
+        execution.adapter_version,
+        execution.adapter_source_digest,
+    )
+    metadata_adapter = (
+        metadata.adapter.boundary,
+        metadata.callable_identifier,
+        metadata.adapter.name,
+        metadata.adapter.version,
+        metadata.adapter.source_digest,
+    )
+    if execution_adapter != metadata_adapter:
+        raise ReceiptIntegrityError(
+            "execution adapter provenance differs from metadata"
+        )
+    execution_digests = (
+        execution.run_plan_digest,
+        execution.stimulus_digest,
+        execution.source_public_digest,
+        execution.product_input_digest,
+        execution.product_output_digest,
+    )
+    staged_digests = (
+        run_plan_digest,
+        calculated_stimulus_digest,
+        digest_bytes_v2(source_public),
+        digest_bytes_v2((root / PRODUCT_INPUT_PATH).read_bytes()),
+        digest_bytes_v2((root / PRODUCT_OUTPUT_PATH).read_bytes()),
+    )
+    if execution_digests != staged_digests:
+        raise ReceiptIntegrityError("execution artifact digest bindings disagree")
+    return execution
 
 
 def validate_agent_authority_run_receipt(
@@ -657,6 +785,7 @@ __all__ = [
     "ObservationNormalizer",
     "TruthLoader",
     "build_agent_authority_run_receipt",
+    "finalize_agent_authority_run_receipt",
     "run_product_stage_with_preflight",
     "stimulus_set_digest",
     "validate_agent_authority_run_receipt",

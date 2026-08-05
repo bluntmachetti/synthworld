@@ -10,6 +10,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
+from synthworld.agent_authority.cases import AgentAuthorityStimulusSetV1
 from synthworld.agent_authority.models import (
     AgentAuthorityLabReportV1,
     AgentAuthorityLabTruthV1,
@@ -33,6 +34,7 @@ from synthworld.assurance.agent_authority import (
     AgentAuthorityPreExecutionArtifactsV1,
     AgentAuthorityRunMetadataV1,
     build_agent_authority_run_receipt,
+    finalize_agent_authority_run_receipt,
     run_product_stage_with_preflight,
     validate_agent_authority_run_receipt,
 )
@@ -225,6 +227,223 @@ def _build(root: Path, metadata: AgentAuthorityRunMetadataV1) -> RunReceiptManif
         truth_loader=reference_truth,
         metadata=metadata,
     )
+
+
+def test_two_phase_finalizer_attributes_run_after_product_execution(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "two-phase"
+    observations = reference_observations()
+    execution = _preflight(
+        root,
+        runner=lambda _input, output: (
+            output.write_bytes(canonical_json_bytes(observations)) and 0
+        ),
+    )
+    assert execution.status is ExecutionStatus.SUCCEEDED
+
+    metadata = reference_metadata().model_copy(
+        update={"callable_identifier": "tests.fake"}
+    )
+    completed_run = metadata.run.model_copy(
+        update={"completed_at": metadata.run.completed_at.replace(minute=2)}
+    )
+    manifest = finalize_agent_authority_run_receipt(
+        root,
+        pre_execution_artifacts=AgentAuthorityPreExecutionArtifactsV1(
+            reference_plan(), reference_stimuli()
+        ),
+        adapter=lambda payload: payload,
+        observation_normalizer=lambda payload, _plan, _stimuli: (
+            AgentAuthorityRunObservationsV1.model_validate_json(payload)
+        ),
+        truth_loader=reference_truth,
+        metadata=metadata.model_copy(update={"run": completed_run}),
+    )
+
+    assert manifest.run.completed_at == completed_run.completed_at
+    assert manifest.evaluation_status is EvaluationStatus.EVALUATED
+
+
+def _stage_for_finalizer(root: Path) -> None:
+    observations = reference_observations()
+
+    def runner(_input: Path, output: Path) -> int:
+        output.write_bytes(canonical_json_bytes(observations))
+        return 0
+
+    _preflight(root, runner=runner)
+
+
+def _finalize_staged(
+    root: Path,
+    *,
+    adapter: Callable[[bytes], bytes] | None = None,
+) -> RunReceiptManifestV2:
+    metadata = reference_metadata().model_copy(
+        update={"callable_identifier": "tests.fake"}
+    )
+    return finalize_agent_authority_run_receipt(
+        root,
+        pre_execution_artifacts=AgentAuthorityPreExecutionArtifactsV1(
+            reference_plan(), reference_stimuli()
+        ),
+        adapter=(lambda payload: payload) if adapter is None else adapter,
+        observation_normalizer=lambda payload, _plan, _stimuli: (
+            AgentAuthorityRunObservationsV1.model_validate_json(payload)
+        ),
+        truth_loader=reference_truth,
+        metadata=metadata,
+    )
+
+
+def _changed_stimuli() -> AgentAuthorityStimulusSetV1:
+    stimuli = reference_stimuli()
+    first = stimuli.stimuli[0]
+    changed_payload = first.payload.model_copy(
+        update={"runtime_handle": "runtime:changed"}
+    )
+    changed_first = first.model_copy(update={"payload": changed_payload})
+    return AgentAuthorityStimulusSetV1(stimuli=(changed_first, *stimuli.stimuli[1:]))
+
+
+def test_finalizer_rejects_an_incomplete_product_stage_before_truth(
+    tmp_path: Path,
+) -> None:
+    truth_called = False
+    metadata = reference_metadata().model_copy(
+        update={"callable_identifier": "tests.fake"}
+    )
+
+    def truth_loader() -> AgentAuthorityLabTruthV1:
+        nonlocal truth_called
+        truth_called = True
+        return reference_truth()
+
+    with pytest.raises(ReceiptIntegrityError, match="execution is incomplete"):
+        finalize_agent_authority_run_receipt(
+            tmp_path / "missing",
+            pre_execution_artifacts=AgentAuthorityPreExecutionArtifactsV1(
+                reference_plan(), reference_stimuli()
+            ),
+            adapter=lambda payload: payload,
+            observation_normalizer=lambda _payload, _plan, _stimuli: (
+                reference_observations()
+            ),
+            truth_loader=truth_loader,
+            metadata=metadata,
+        )
+    assert not truth_called
+
+
+def test_finalizer_rejects_changed_plan_stimuli_and_adapter(tmp_path: Path) -> None:
+    plan_root = tmp_path / "plan"
+    _stage_for_finalizer(plan_root)
+    changed_plan = reference_plan().model_copy(
+        update={"event_schedule_version": "changed"}
+    )
+    (plan_root / RUN_PLAN_PATH).write_bytes(canonical_json_bytes(changed_plan))
+    with pytest.raises(ReceiptIntegrityError, match="run plan differs"):
+        _finalize_staged(plan_root)
+
+    stimuli_root = tmp_path / "stimuli"
+    _stage_for_finalizer(stimuli_root)
+    product_input = AgentAuthorityProductInputV1.model_validate_json(
+        (stimuli_root / PRODUCT_INPUT_PATH).read_bytes()
+    )
+    changed = _changed_stimuli()
+    (stimuli_root / PRODUCT_INPUT_PATH).write_bytes(
+        canonical_json_bytes(
+            product_input.model_copy(update={"stimuli": changed.stimuli})
+        )
+    )
+    with pytest.raises(ReceiptIntegrityError, match="stimuli differ"):
+        _finalize_staged(stimuli_root)
+
+    adapter_root = tmp_path / "adapter"
+    _stage_for_finalizer(adapter_root)
+    with pytest.raises(ReceiptIntegrityError, match="adapter output"):
+        _finalize_staged(
+            adapter_root,
+            adapter=lambda _payload: canonical_json_bytes(_changed_stimuli()),
+        )
+
+
+def test_finalizer_rejects_wrong_execution_version_and_input_binding(
+    tmp_path: Path,
+) -> None:
+    version_root = tmp_path / "version"
+    _stage_for_finalizer(version_root)
+    zero_v1 = Digest(value="0" * 64)
+    execution_v1 = ExecutionReceipt(
+        boundary="legacy",
+        callable_identifier="legacy.callable",
+        adapter_name="legacy",
+        adapter_version="1.0.0",
+        adapter_source_digest=zero_v1,
+        source_public_digest=zero_v1,
+        product_input_digest=zero_v1,
+        product_output_digest=zero_v1,
+        exit_code=0,
+        status=ExecutionStatus.SUCCEEDED,
+    )
+    (version_root / EXECUTION_PATH).write_bytes(canonical_json_bytes(execution_v1))
+    with pytest.raises(ReceiptIntegrityError, match="requires execution v2"):
+        _finalize_staged(version_root)
+
+    input_root = tmp_path / "input"
+    _stage_for_finalizer(input_root)
+    product_input = AgentAuthorityProductInputV1.model_validate_json(
+        (input_root / PRODUCT_INPUT_PATH).read_bytes()
+    )
+    zero_v2 = DigestV2(value="0" * 64)
+    (input_root / PRODUCT_INPUT_PATH).write_bytes(
+        canonical_json_bytes(
+            product_input.model_copy(update={"run_plan_digest": zero_v2})
+        )
+    )
+    with pytest.raises(ReceiptIntegrityError, match="input bindings"):
+        _finalize_staged(input_root)
+
+
+def test_finalizer_rejects_execution_system_provenance_and_digest_drift(
+    tmp_path: Path,
+) -> None:
+    systems_root = tmp_path / "systems"
+    _stage_for_finalizer(systems_root)
+    execution = ExecutionReceiptV2.model_validate_json(
+        (systems_root / EXECUTION_PATH).read_bytes()
+    )
+    changed_systems = execution.model_copy(
+        update={"systems_under_test": execution.systems_under_test[:1]}
+    )
+    (systems_root / EXECUTION_PATH).write_bytes(canonical_json_bytes(changed_systems))
+    with pytest.raises(ReceiptIntegrityError, match="systems differ"):
+        _finalize_staged(systems_root)
+
+    provenance_root = tmp_path / "provenance"
+    _stage_for_finalizer(provenance_root)
+    execution = ExecutionReceiptV2.model_validate_json(
+        (provenance_root / EXECUTION_PATH).read_bytes()
+    )
+    changed_provenance = execution.model_copy(update={"boundary": "changed"})
+    (provenance_root / EXECUTION_PATH).write_bytes(
+        canonical_json_bytes(changed_provenance)
+    )
+    with pytest.raises(ReceiptIntegrityError, match="provenance differs"):
+        _finalize_staged(provenance_root)
+
+    digest_root = tmp_path / "digest"
+    _stage_for_finalizer(digest_root)
+    execution = ExecutionReceiptV2.model_validate_json(
+        (digest_root / EXECUTION_PATH).read_bytes()
+    )
+    changed_digest = execution.model_copy(
+        update={"product_output_digest": DigestV2(value="0" * 64)}
+    )
+    (digest_root / EXECUTION_PATH).write_bytes(canonical_json_bytes(changed_digest))
+    with pytest.raises(ReceiptIntegrityError, match="digest bindings"):
+        _finalize_staged(digest_root)
 
 
 def test_builder_stops_after_failed_product_execution(tmp_path: Path) -> None:

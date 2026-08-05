@@ -29,6 +29,15 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   New modules: `ambiguity_evidence`, `ambiguity_surfaces`, `ambiguity_channel`,
   `ambiguity_floor`, with v2 serialization/metrics/baselines support and
   `examples/compute_ambiguity_floor.py`.
+- An opt-in disposable agent-authority reference deployment now executes the
+  public enterprise-agentic smoke world across isolated Docker networks. It
+  produces live observation-v2 receipts covering L01-L06, the exact declared
+  L07 baseline/SUT inventory, and measured/unsupported L08 targets, while
+  keeping runtime credentials in a destroyed named volume and scanning canary
+  and token markers out of receipts, logs, and container metadata. A new
+  two-phase receipt finalizer lets live runners record completion metadata only
+  after external execution without exposing evaluator truth before product
+  output is durably staged.
 - Agent-authority observation schema `2.0.0` corrects L06 clock semantics without
   changing the frozen observation-v1 schema. It records one explicit monotonic
   revocation epoch, non-negative acknowledgement offsets, and signed send/completion

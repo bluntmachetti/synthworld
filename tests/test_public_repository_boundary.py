@@ -40,6 +40,10 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         # to say whose integration pattern it demonstrates - reviewed 2026-08-04 with
         # PR #95, which is the review this allowlist exists to force.
         Path("examples/evaluate_broker_adapter.py"),
+        # The external reference runner reads only the public distribution version
+        # for receipt provenance; it imports no consumer code or private symbols.
+        # Reviewed with the live reference-deployment slice on 2026-08-05.
+        Path("agent-authority-contract/reference-deployment/run.py"),
         Path("Makefile"),
         Path("README.md"),
         Path("ROADMAP.md"),

@@ -4,9 +4,10 @@ The external contract for evaluating agent-authority systems against SynthWorld
 worlds: what can be tested, what a system under test must emit, and what a result
 must record to be reproducible.
 
-This directory is **documentation and data only**. Nothing here is imported by
-the `synthworld` package, and no runtime dependency is added by it — the YAML is
-read by people and by external tooling, not by the library.
+This directory is the external contract and its opt-in tooling. Nothing here is
+imported by the `synthworld` package and no runtime dependency is added to the
+library. The disposable reference deployment is an external Docker harness,
+while the YAML and schemas remain human- and tool-readable contract artifacts.
 
 ## Status
 
@@ -30,6 +31,7 @@ remaining docs are the two narrative files listed below.
 | `synthworld validate agent-authority-receipt` | Shipped — validates the complete digest-bound receipt |
 | `examples/` (design-intent traces) | Generated for three pattern classes |
 | `adapter-template/` | Working; runs and produces a valid trace as shipped |
+| `reference-deployment/` | Working opt-in live Compose lab; observation v2, full L01-L06, exact L07, measured/unsupported L08 |
 | `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
@@ -83,6 +85,12 @@ target, performance baseline, and compatibility target must resolve before
 execution. Bounds and coverage denominators therefore cannot be invented after a
 result is visible.
 
+Live runners may split this into two explicit phases: execute the preflight-bound
+product stage first, then construct completion metadata and call the receipt
+finalizer. The finalizer replays every public artifact and execution binding before
+it loads evaluator truth. This prevents a live run from declaring a completion
+timestamp before the external deployment has actually finished.
+
 Receipt v2 distinguishes self-hosted, reference, and managed-service provenance.
 Managed services explicitly say whether configuration and version data is observed,
 partial, or not exposed; missing SaaS internals are never represented by fabricated
@@ -121,10 +129,12 @@ rate. Under observation v2, an attempt is post-bound exactly when
 `sent_offset_ns > bound_ns`; negative offsets preserve attempts that were already in
 flight when revocation was issued without misclassifying them as post-bound sends.
 
-SynthWorld supplies contracts and deterministic fake protocol fixtures only.
-External adapters own vendor API calls, credentials, tenant configuration, fault
-injection, and live evidence collection. The reference fixture exercises every
-L01–L08 record shape but makes no live-control or vendor-performance claim.
+The SynthWorld package supplies contracts and deterministic fake protocol fixtures;
+it performs no vendor API calls. The opt-in `reference-deployment/` harness remains
+outside package core and proves only its own live protocol execution. Vendor adapters
+still own credentials, tenant configuration, fault injection, and evidence collection.
+The deterministic fake fixture exercises every L01–L08 record shape but makes no
+live-control or vendor-performance claim.
 
 ### `format` is decorative — read this before trusting a validator
 

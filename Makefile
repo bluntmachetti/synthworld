@@ -1,9 +1,12 @@
-.PHONY: baselines ci examples install lint metrics package schemas test typecheck
+.PHONY: baselines ci examples install lint metrics package reference-lab schemas test typecheck
 
 UV := uv
 SEED := 20260719
 PERSONAS := 10
 GENERATED_PERSONAS := 100
+REFERENCE_LAB_OUTPUT ?= .local-assurance/reference-live
+REFERENCE_LAB_RUN_ID ?= reference-live
+REFERENCE_LAB_OPERATOR ?= local-operator
 PROJECT_VERSION := $(shell $(UV) version --short)
 WHEEL := dist/idcognito_synthworld-$(PROJECT_VERSION)-py3-none-any.whl
 
@@ -46,6 +49,9 @@ examples:
 	$(UV) run python examples/evaluate_all.py --seed $(SEED) --persona-count $(PERSONAS)
 	$(UV) run python examples/evaluate_broker_adapter.py --seed $(SEED)
 
+reference-lab:
+	$(UV) run python agent-authority-contract/reference-deployment/run.py --output $(REFERENCE_LAB_OUTPUT) --run-id $(REFERENCE_LAB_RUN_ID) --operator-id $(REFERENCE_LAB_OPERATOR)
+
 baselines:
 	$(UV) run python examples/generate_benchmarks_doc.py --check
 	$(UV) run python -c "from synthworld.ambiguity_baselines import AMBIGUITY_BASELINES, run_ambiguity_baseline; rows=[(name, run_ambiguity_baseline(fn)) for name, fn in AMBIGUITY_BASELINES]; assert len(rows) == 3; assert all(m.false_merges + m.false_splits + m.unwarranted_decisions > 0 for _, m in rows), 'a baseline resolved the ambiguity pack'; assert any(m.coverage < 1.0 for _, m in rows), 'no baseline abstains, so abstention is unscored'; print('\n'.join(f'{name}: coverage={m.coverage:.2f} decided_precision={m.decided_precision} false_merges={m.false_merges} false_splits={m.false_splits} unwarranted={m.unwarranted_decisions}' for name, m in rows))"
@@ -56,6 +62,7 @@ baselines:
 	$(UV) run python -c "from synthworld.continuous_assurance import CONTINUOUS_ASSURANCE_BASELINES, evaluate_continuous_assurance_prediction, reference_continuous_assurance; b=reference_continuous_assurance(); rows=[(n,evaluate_continuous_assurance_prediction(public=b.public,evaluator=b.evaluator,prediction=f(b.public))) for n,f in CONTINUOUS_ASSURANCE_BASELINES]; values=lambda r:{m.name:m.value for m in r.metrics}; assert values(rows[0][1])['finding_detection_recall'] < 1.0; assert values(rows[1][1])['pre_observation_opening_rate'] > 0.0; assert values(rows[2][1])['stale_finding_duration_mean_ticks'] > 0.0; print(chr(10).join(f'{n}: recall={values(r)[\"finding_detection_recall\"]} pre_observation={values(r)[\"pre_observation_opening_rate\"]} stale_ticks={values(r)[\"stale_finding_duration_mean_ticks\"]}' for n,r in rows))"
 
 schemas:
+	$(UV) run python agent-authority-contract/reference-deployment/run.py --check-contract
 	$(UV) run python agent-authority-contract/tools/generate_trace_schema.py --check
 	$(UV) run python agent-authority-contract/tools/generate_protocol_schemas.py --check
 	$(UV) run python enterprise-identity-access-contract/tools/generate_contract.py --check
