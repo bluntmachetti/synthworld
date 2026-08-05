@@ -29,6 +29,12 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   New modules: `ambiguity_evidence`, `ambiguity_surfaces`, `ambiguity_channel`,
   `ambiguity_floor`, with v2 serialization/metrics/baselines support and
   `examples/compute_ambiguity_floor.py`.
+- Contextual-access receipts now expose the same explicit two-phase live-run
+  boundary as agent-authority receipts. External runners may finish and attribute
+  the product stage before constructing completion metadata; the finalizer then
+  replays the plan, public input, adapter, component inventory, provenance, and
+  artifact digests before evaluator truth is loaded. Existing deterministic
+  contextual receipt bytes remain unchanged.
 - An opt-in disposable agent-authority reference deployment now executes the
   public enterprise-agentic smoke world across isolated Docker networks. It
   produces live observation-v2 receipts covering L01-L06, the exact declared

@@ -99,11 +99,19 @@ every scorer denominator through a replay-validated receipt. It proves only the
 family's schema, staging, and scorer conformance. No vendor API or runtime
 integration ships here.
 
+Live contextual runners use the same boundary in two explicit phases: stage the
+preflight-bound product execution first, then construct completion metadata and
+call the contextual finalizer. Before evaluator truth is loaded, the finalizer
+replays the run plan, public input, adapter output, component inventory,
+provenance, product-input binding, and every staged artifact digest. This permits
+honest post-execution timestamps without weakening the product/evaluator split.
+
 | Acceptance surface | State | Claim permitted |
 |---|---|---|
 | Deterministic contextual fake | Complete | Protocol/scorer conformance |
 | Deterministic agent-authority fake | Complete | Protocol/scorer conformance |
-| Instrumented disposable reference deployment | Not executed in core | None yet for `live_lab_conformance` or operational reporting |
+| Agent-authority disposable reference deployment | Complete as an opt-in external harness | Reference-configuration `live_lab_conformance` only |
+| Contextual live reference deployment | Not executed | No live contextual or vendor claim |
 | SGNL pilot | External milestone after the reference-deployment gate | None yet for SGNL behaviour or enforcement |
 
 Live-lab readiness requires a separately executed, instrumented disposable

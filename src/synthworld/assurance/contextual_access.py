@@ -234,7 +234,7 @@ def build_contextual_access_run_receipt(
         pre_execution_artifacts.public,
         metadata,
     )
-    execution = run_contextual_product_stage_with_preflight(
+    run_contextual_product_stage_with_preflight(
         root,
         systems_under_test=metadata.systems_under_test,
         pre_execution_artifacts=pre_execution_artifacts,
@@ -244,8 +244,43 @@ def build_contextual_access_run_receipt(
         adapter_provenance=metadata.adapter,
         callable_identifier=metadata.callable_identifier,
     )
-    if execution.status is not ExecutionStatus.SUCCEEDED:
-        raise ReceiptIntegrityError("a failed contextual execution cannot be evaluated")
+    return finalize_contextual_access_run_receipt(
+        root,
+        pre_execution_artifacts=pre_execution_artifacts,
+        adapter=adapter,
+        observation_normalizer=observation_normalizer,
+        truth_loader=truth_loader,
+        metadata=metadata,
+    )
+
+
+def finalize_contextual_access_run_receipt(
+    root: Path,
+    *,
+    pre_execution_artifacts: ContextualAccessPreExecutionArtifactsV1,
+    adapter: PublicAdapter,
+    observation_normalizer: ContextualObservationNormalizer,
+    truth_loader: ContextualTruthLoader,
+    metadata: ContextualAccessRunMetadataV1,
+) -> RunReceiptManifestV2:
+    """Evaluate a successful attributed product stage and seal its receipt.
+
+    Live runners use this second phase to construct completion metadata only
+    after external execution finishes. Every public product-stage binding is
+    replayed before evaluator truth is loaded.
+    """
+
+    _validate_metadata_bindings(
+        pre_execution_artifacts.run_plan,
+        pre_execution_artifacts.public,
+        metadata,
+    )
+    execution = _validate_staged_contextual_execution(
+        root,
+        pre_execution_artifacts=pre_execution_artifacts,
+        adapter=adapter,
+        metadata=metadata,
+    )
 
     plan = pre_execution_artifacts.run_plan
     public = pre_execution_artifacts.public
@@ -293,6 +328,123 @@ def build_contextual_access_run_receipt(
         adapter=adapter,
         observation_normalizer=observation_normalizer,
     )
+
+
+def _validate_staged_contextual_execution(
+    root: Path,
+    *,
+    pre_execution_artifacts: ContextualAccessPreExecutionArtifactsV1,
+    adapter: PublicAdapter,
+    metadata: ContextualAccessRunMetadataV1,
+) -> ExecutionReceiptV2:
+    """Validate all pre-evaluation artifacts without reading evaluator truth."""
+
+    required_paths = (
+        CONTEXTUAL_RUN_PLAN_PATH,
+        SOURCE_PUBLIC_PATH,
+        PRODUCT_INPUT_PATH,
+        PRODUCT_OUTPUT_PATH,
+        EXECUTION_PATH,
+    )
+    if any(not (root / path).is_file() for path in required_paths):
+        raise ReceiptIntegrityError("the staged contextual execution is incomplete")
+
+    plan = _read_model(root, CONTEXTUAL_RUN_PLAN_PATH, ContextualAccessRunPlanV1)
+    if plan != pre_execution_artifacts.run_plan:
+        raise ReceiptIntegrityError("staged contextual run plan differs from preflight")
+    source = (root / SOURCE_PUBLIC_PATH).read_bytes()
+    public = _model_from_canonical_bytes(
+        source,
+        ContextualAccessPublicV1,
+        "contextual source public input",
+    )
+    if public != pre_execution_artifacts.public:
+        raise ReceiptIntegrityError(
+            "staged contextual public input differs from preflight"
+        )
+    try:
+        validate_contextual_run_plan(
+            plan,
+            public=public,
+            systems_under_test=metadata.systems_under_test,
+        )
+    except ContextualProtocolError as error:
+        raise ReceiptIntegrityError(
+            "staged contextual plan relationships are invalid"
+        ) from error
+
+    adapted_public = _model_from_canonical_bytes(
+        adapter(source),
+        ContextualAccessPublicV1,
+        "contextual adapter public input",
+    )
+    if adapted_public != public:
+        raise ReceiptIntegrityError(
+            "contextual product input differs from adapter output"
+        )
+
+    product_input = _read_model(
+        root,
+        PRODUCT_INPUT_PATH,
+        ContextualAccessProductInputV1,
+    )
+    parsed_execution = parse_execution_receipt((root / EXECUTION_PATH).read_bytes())
+    if not isinstance(parsed_execution, ExecutionReceiptV2):
+        raise ReceiptIntegrityError("contextual-access receipt requires execution v2")
+    execution = parsed_execution
+    if execution.status is not ExecutionStatus.SUCCEEDED:
+        raise ReceiptIntegrityError("a failed contextual execution cannot be evaluated")
+
+    plan_digest = digest_bytes_v2((root / CONTEXTUAL_RUN_PLAN_PATH).read_bytes())
+    public_digest = digest_bytes_v2(source)
+    expected_input = ContextualAccessProductInputV1(
+        run_plan_digest=plan_digest,
+        contextual_public_digest=public_digest,
+        public=public,
+    )
+    if product_input != expected_input:
+        raise ReceiptIntegrityError(
+            "staged contextual product input bindings are invalid"
+        )
+
+    component_ids = tuple(item.component_id for item in metadata.systems_under_test)
+    if execution.systems_under_test != component_ids:
+        raise ReceiptIntegrityError("execution systems differ from run metadata")
+    execution_adapter = (
+        execution.boundary,
+        execution.callable_identifier,
+        execution.adapter_name,
+        execution.adapter_version,
+        execution.adapter_source_digest,
+    )
+    metadata_adapter = (
+        metadata.adapter.boundary,
+        metadata.callable_identifier,
+        metadata.adapter.name,
+        metadata.adapter.version,
+        metadata.adapter.source_digest,
+    )
+    if execution_adapter != metadata_adapter:
+        raise ReceiptIntegrityError(
+            "execution adapter provenance differs from metadata"
+        )
+    execution_digests = (
+        execution.run_plan_digest,
+        execution.stimulus_digest,
+        execution.source_public_digest,
+        execution.product_input_digest,
+        execution.product_output_digest,
+    )
+    staged_digests = (
+        plan_digest,
+        public_digest,
+        public_digest,
+        digest_bytes_v2((root / PRODUCT_INPUT_PATH).read_bytes()),
+        digest_bytes_v2((root / PRODUCT_OUTPUT_PATH).read_bytes()),
+    )
+    if execution_digests != staged_digests:
+        raise ReceiptIntegrityError("execution artifact digest bindings disagree")
+    return execution
 
 
 def validate_contextual_access_run_receipt(
@@ -587,6 +739,7 @@ __all__ = [
     "ContextualObservationNormalizer",
     "ContextualTruthLoader",
     "build_contextual_access_run_receipt",
+    "finalize_contextual_access_run_receipt",
     "run_contextual_product_stage_with_preflight",
     "validate_contextual_access_run_receipt",
 ]

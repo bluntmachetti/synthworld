@@ -16,6 +16,7 @@ from synthworld.assurance.contextual_access import (
     ContextualAccessProductInputV1,
     ContextualAccessRunMetadataV1,
     build_contextual_access_run_receipt,
+    finalize_contextual_access_run_receipt,
     run_contextual_product_stage_with_preflight,
     validate_contextual_access_run_receipt,
 )
@@ -36,6 +37,7 @@ from synthworld.assurance.receipt import (
     EXECUTION_PATH,
     MANIFEST_PATH,
     PRODUCT_INPUT_PATH,
+    SOURCE_PUBLIC_PATH,
     ProductStageError,
     ReceiptIntegrityError,
     canonical_json_bytes,
@@ -374,6 +376,206 @@ def test_builder_stages_observations_before_truth_and_checks_evaluator_digest(
         _build(tmp_path / "bad-evaluator", run, bad)
 
 
+def test_two_phase_finalizer_attributes_contextual_run_after_execution(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+    root = tmp_path / "two-phase"
+    execution = _preflight(root, run=run)
+    assert execution.status is ExecutionStatus.SUCCEEDED
+    metadata = _finalizer_metadata(run)
+    completed_run = metadata.run.model_copy(
+        update={"completed_at": metadata.run.completed_at.replace(minute=2)}
+    )
+
+    manifest = _finalize_staged(
+        root,
+        run=run,
+        metadata=metadata.model_copy(update={"run": completed_run}),
+    )
+
+    assert manifest.run.completed_at == completed_run.completed_at
+    assert manifest.evaluation_status is EvaluationStatus.EVALUATED
+
+
+def test_contextual_finalizer_rejects_incomplete_stage_before_truth(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+    truth_called = False
+
+    def truth_loader() -> ContextualAccessEvaluatorV1:
+        nonlocal truth_called
+        truth_called = True
+        return run.benchmark.evaluator
+
+    with pytest.raises(ReceiptIntegrityError, match="execution is incomplete"):
+        finalize_contextual_access_run_receipt(
+            tmp_path / "missing",
+            pre_execution_artifacts=ContextualAccessPreExecutionArtifactsV1(
+                run.plan,
+                run.benchmark.public,
+            ),
+            adapter=lambda payload: payload,
+            observation_normalizer=lambda _payload, _plan, _public: run.observations,
+            truth_loader=truth_loader,
+            metadata=_finalizer_metadata(run),
+        )
+    assert not truth_called
+
+
+def test_contextual_finalizer_rejects_plan_public_and_adapter_drift(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+
+    plan_root = tmp_path / "plan"
+    _preflight(plan_root, run=run)
+    changed_plan = run.plan.model_copy(update={"event_schedule_version": "changed"})
+    (plan_root / CONTEXTUAL_RUN_PLAN_PATH).write_bytes(
+        canonical_json_bytes(changed_plan)
+    )
+    with pytest.raises(ReceiptIntegrityError, match="run plan differs"):
+        _finalize_staged(plan_root, run=run)
+
+    public_root = tmp_path / "public"
+    _preflight(public_root, run=run)
+    other_public = reference_contextual_access(seed=2).public
+    (public_root / SOURCE_PUBLIC_PATH).write_bytes(canonical_json_bytes(other_public))
+    with pytest.raises(ReceiptIntegrityError, match="public input differs"):
+        _finalize_staged(public_root, run=run)
+
+    adapter_root = tmp_path / "adapter"
+    _preflight(adapter_root, run=run)
+    with pytest.raises(ReceiptIntegrityError, match="adapter output"):
+        _finalize_staged(
+            adapter_root,
+            run=run,
+            adapter=lambda _payload: canonical_json_bytes(other_public),
+        )
+
+
+def test_contextual_finalizer_rejects_invalid_staged_plan_relationships(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+    root = tmp_path / "relationships"
+    _preflight(root, run=run)
+    invalid_plan = run.plan.model_copy(update={"sut_component_ids": ("unknown",)})
+    plan_bytes = canonical_json_bytes(invalid_plan)
+    (root / CONTEXTUAL_RUN_PLAN_PATH).write_bytes(plan_bytes)
+    plan_digest = digest_bytes_v2(plan_bytes)
+    product_input = ContextualAccessProductInputV1.model_validate_json(
+        (root / PRODUCT_INPUT_PATH).read_bytes()
+    ).model_copy(update={"run_plan_digest": plan_digest})
+    product_input_bytes = canonical_json_bytes(product_input)
+    (root / PRODUCT_INPUT_PATH).write_bytes(product_input_bytes)
+    execution = ExecutionReceiptV2.model_validate_json(
+        (root / EXECUTION_PATH).read_bytes()
+    ).model_copy(
+        update={
+            "run_plan_digest": plan_digest,
+            "product_input_digest": digest_bytes_v2(product_input_bytes),
+        }
+    )
+    (root / EXECUTION_PATH).write_bytes(canonical_json_bytes(execution))
+
+    with pytest.raises(ReceiptIntegrityError, match="relationships are invalid"):
+        _finalize_staged(
+            root,
+            run=run,
+            pre_execution_artifacts=ContextualAccessPreExecutionArtifactsV1(
+                invalid_plan,
+                run.benchmark.public,
+            ),
+        )
+
+
+def test_contextual_finalizer_rejects_execution_version_and_input_binding(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+    version_root = tmp_path / "version"
+    _preflight(version_root, run=run)
+    zero_v1 = Digest(value="0" * 64)
+    execution_v1 = ExecutionReceipt(
+        boundary="legacy",
+        callable_identifier="legacy.callable",
+        adapter_name="legacy",
+        adapter_version="1.0.0",
+        adapter_source_digest=zero_v1,
+        source_public_digest=zero_v1,
+        product_input_digest=zero_v1,
+        product_output_digest=zero_v1,
+        exit_code=0,
+        status=ExecutionStatus.SUCCEEDED,
+    )
+    (version_root / EXECUTION_PATH).write_bytes(canonical_json_bytes(execution_v1))
+    with pytest.raises(ReceiptIntegrityError, match="requires execution v2"):
+        _finalize_staged(version_root, run=run)
+
+    input_root = tmp_path / "input"
+    _preflight(input_root, run=run)
+    product_input = ContextualAccessProductInputV1.model_validate_json(
+        (input_root / PRODUCT_INPUT_PATH).read_bytes()
+    )
+    (input_root / PRODUCT_INPUT_PATH).write_bytes(
+        canonical_json_bytes(
+            product_input.model_copy(
+                update={"run_plan_digest": DigestV2(value="0" * 64)}
+            )
+        )
+    )
+    with pytest.raises(ReceiptIntegrityError, match="input bindings"):
+        _finalize_staged(input_root, run=run)
+
+
+def test_contextual_finalizer_rejects_system_provenance_and_digest_drift(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+    systems_root = tmp_path / "systems"
+    _preflight(systems_root, run=run)
+    execution = ExecutionReceiptV2.model_validate_json(
+        (systems_root / EXECUTION_PATH).read_bytes()
+    )
+    (systems_root / EXECUTION_PATH).write_bytes(
+        canonical_json_bytes(
+            execution.model_copy(
+                update={"systems_under_test": execution.systems_under_test[:1]}
+            )
+        )
+    )
+    with pytest.raises(ReceiptIntegrityError, match="systems differ"):
+        _finalize_staged(systems_root, run=run)
+
+    provenance_root = tmp_path / "provenance"
+    _preflight(provenance_root, run=run)
+    execution = ExecutionReceiptV2.model_validate_json(
+        (provenance_root / EXECUTION_PATH).read_bytes()
+    )
+    (provenance_root / EXECUTION_PATH).write_bytes(
+        canonical_json_bytes(execution.model_copy(update={"boundary": "changed"}))
+    )
+    with pytest.raises(ReceiptIntegrityError, match="provenance differs"):
+        _finalize_staged(provenance_root, run=run)
+
+    digest_root = tmp_path / "digest"
+    _preflight(digest_root, run=run)
+    execution = ExecutionReceiptV2.model_validate_json(
+        (digest_root / EXECUTION_PATH).read_bytes()
+    )
+    (digest_root / EXECUTION_PATH).write_bytes(
+        canonical_json_bytes(
+            execution.model_copy(
+                update={"product_output_digest": DigestV2(value="0" * 64)}
+            )
+        )
+    )
+    with pytest.raises(ReceiptIntegrityError, match="digest bindings"):
+        _finalize_staged(digest_root, run=run)
+
+
 def test_validator_rejects_role_schema_scoring_and_execution_version(
     receipt_template: Path, tmp_path: Path
 ) -> None:
@@ -678,6 +880,41 @@ def _preflight(
         runner=default_runner if runner is None else runner,
         adapter_provenance=reference_contextual_receipt_metadata(selected).adapter,
         callable_identifier="tests.contextual.fake",
+    )
+
+
+def _finalizer_metadata(
+    run: ReferenceContextualRunV1,
+) -> ContextualAccessRunMetadataV1:
+    return reference_contextual_receipt_metadata(run).model_copy(
+        update={"callable_identifier": "tests.contextual.fake"}
+    )
+
+
+def _finalize_staged(
+    root: Path,
+    *,
+    run: ReferenceContextualRunV1,
+    adapter: Callable[[bytes], bytes] | None = None,
+    metadata: ContextualAccessRunMetadataV1 | None = None,
+    pre_execution_artifacts: ContextualAccessPreExecutionArtifactsV1 | None = None,
+) -> RunReceiptManifestV2:
+    return finalize_contextual_access_run_receipt(
+        root,
+        pre_execution_artifacts=(
+            ContextualAccessPreExecutionArtifactsV1(
+                run.plan,
+                run.benchmark.public,
+            )
+            if pre_execution_artifacts is None
+            else pre_execution_artifacts
+        ),
+        adapter=(lambda payload: payload) if adapter is None else adapter,
+        observation_normalizer=lambda payload, _plan, _public: (
+            ContextualAccessObservationsV1.model_validate_json(payload)
+        ),
+        truth_loader=lambda: run.benchmark.evaluator,
+        metadata=_finalizer_metadata(run) if metadata is None else metadata,
     )
 
 
