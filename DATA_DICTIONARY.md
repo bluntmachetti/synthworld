@@ -315,21 +315,40 @@ Stated precisely, for a pack generated with an unpublished key:
   and that is the point — see below.
 
 **What v2 does and does not measure — read this before using it.** The *construction*
-above is sound and measured: labels derive from evidence, metadata carries nothing (a
-metadata-only attacker scores 0.484 against a 0.504 majority baseline — chance), and
-class balance is asserted. The *surfaces* are placeholders: every rendered value encodes
-its identity index in cleartext, so a ~30-line normaliser recovers every relation
-exactly and scores **1.0000** on held-out-key packs. A successor design with realistic
-pools and edit damage was adversarially reviewed and also fell — pool inversion 0.9967,
-pool-membership alone 0.88–0.90, a one-bit `display_name ==` classifier 0.8096 — and
-was closed unmerged. **Do not use v2 to rank resolvers.** It is a calibrated,
-leak-free scaffold whose difficulty work is tracked in #80, where a reviewed
-structured-noise design with a computed error floor is parked awaiting implementation.
+is sound and measured: labels derive from evidence, metadata carries nothing (a
+metadata-only attacker scores at chance), and class balance is asserted. Since #80 the
+*surfaces* are no longer placeholders. Each kind draws a base from a pool arranged in
+**confusable clusters** (`Sorensen`/`Sorenson`/`Soerensen`, one phone line with two
+digits transposed, a day and a month swapped); `EQUAL` and `NEAR` share the base while
+`FAR` redraws from a stationary mixture that lands inside the cluster with probability
+`w`. Every rendered value then passes through one **structured-noise operator** —
+transposition, deletion, doubling, keyboard slip, transliteration/nickname variant, or
+nothing — applied per side, identically under every relation, so `FAR` pairs sit in the
+same edit neighbourhoods as `NEAR` pairs. Recovering the *identity* is free and
+expected — a public deterministic pool is enumerable and inversion is a lookup — but it
+does not recover the *relation*, which is carried by overlapping distance distributions.
 
-One clarification the failures made precise: **a key conceals which sample was drawn,
-never the law.** Keying prevents recomputation of metadata free choices; it cannot make
-published evidence harder to decode, because the generator, pools and format strings
-are public source and the reachable value set is enumerable offline.
+The difficulty is therefore not claimed but **computed**: the pack publishes its
+**genie floor**, the Bayes error of the generator itself — the accuracy of an optimal
+solver holding the public law, the observed comparable structure and the true
+prevalence. It is estimated with a stated method and N, with a Wilson confidence
+interval, and keyed to a digest of every decision-relevant constant, so any parameter
+move invalidates the number loudly. An accuracy is only readable against that ceiling:
+a score at `1 − floor` has read all the evidence there is, and a score above it is
+exploiting signal the model says should not exist. The enumerated channel invariants —
+stationarity of the `FAR` kernel, an identical one-value marginal under every relation,
+a per-base sibling-landing mass above the gate, form bijectivity/separation, and the
+artifact-factorization check — are asserted in the suite rather than sampled, and the
+technique premium (the gap between the ceiling and the best solver that only ever sees
+per-kind normalised exact match) is gated to stay positive, so real resolution technique
+is rewarded rather than anti-taught.
+
+One clarification the earlier failures made precise, and the design now leans on: **a key
+conceals which sample was drawn, never the law.** Keying prevents recomputation of
+metadata free choices; it cannot make published evidence harder to decode, because the
+generator, pools and format strings are public source and the reachable value set is
+enumerable offline. Difficulty therefore comes from the overlap geometry and the noise
+law, and is quantified by the floor rather than asserted.
 
 Two consequences worth stating plainly. **`disposition` and `same_entity` are allowed
 to differ.** The disposition is what the public evidence justifies; `same_entity` is

@@ -39,6 +39,19 @@ Both baselines consume only the public bundle. Always-deny shows why accuracy al
 | Audit-time current state | provenance_exact_match | 0.4545 | 11 |
 | Audit-time current state | provenance_precision | 0.9714 | 35 |
 
+## Ambiguity v2 error floor
+
+The v2 pack's difficulty is computed, not claimed: its **genie floor** is the Bayes error of the generator itself - the accuracy of an optimal solver holding the public law, the observed comparable structure and the true prevalence. A resolver's disposition accuracy is only readable against the ceiling `1 - floor`; a score above it is exploiting signal the model says should not exist.
+
+- Published floor: **0.1108** (±0.0094, 95% Wilson interval)
+- Ceiling `1 - floor`: **0.8892**
+- Technique premium: **0.0698** (gate ≥ 0.05)
+- Floor band: [0.08, 0.12]
+- Estimated over 4286 pairs from 60 seeds
+- Decision digest: `f2c68dd5c7f9ed1d49d63af182ce339c`
+
+The digest binds these numbers to every decision-relevant constant; any parameter move invalidates them until `examples/compute_ambiguity_floor.py` is rerun.
+
 ## Why SynthWorld, not a row generator
 
 | | Row-oriented fake data (Faker/SDV) | SynthWorld |

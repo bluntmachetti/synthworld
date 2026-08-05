@@ -35,7 +35,13 @@ from synthworld.ambiguity import (
     PublicAmbiguityTask,
     ScenarioKind,
 )
-from synthworld.ambiguity_serialization import DispositionTruth
+from synthworld.ambiguity_floor import FLOOR_PUBLICATION, floor_digest
+from synthworld.ambiguity_serialization import (
+    AmbiguityV2DispositionTruth,
+    AmbiguityV2PairTruth,
+    DispositionTruth,
+)
+from synthworld.ambiguity_v2 import PublicAmbiguityTaskV2
 from synthworld.models import SyntheticModel
 
 #: Below this many pairs a slice is reported but must not be concluded from. The
@@ -364,14 +370,150 @@ def evaluate_ambiguity_predictions(
     )
 
 
+#: Scoring version for the v2 disposition evaluator. Separate from v1's because the
+#: v2 report names the pack's computed floor - a number v1 has no analogue of.
+AMBIGUITY_V2_DISPOSITION_SCORING_VERSION: Literal["1.0.0"] = "1.0.0"
+
+
+class AmbiguityV2DispositionMetrics(SyntheticModel):
+    """Evidence-policy scores for a generated v2 pack, with its ceiling attached.
+
+    The aggregate is still deliberately absent: coverage, precision, recall, and the
+    three counted harms stand on their own. What v2 adds is the *floor*: the Bayes
+    error of the pack's own generator, published with a confidence interval and keyed
+    to a digest of the constants it was computed under. An accuracy is only readable
+    against that ceiling - a score above ``1 - pack_floor`` is not a resolver doing
+    well, it is a resolver exploiting signal the model says should not be there.
+    """
+
+    schema_version: Literal["1.0.0"] = "1.0.0"
+    scoring_version: Literal["1.0.0"] = AMBIGUITY_V2_DISPOSITION_SCORING_VERSION
+    task: Literal["ambiguity_v2_evidence_disposition"] = (
+        "ambiguity_v2_evidence_disposition"
+    )
+    seed: int
+    public_schema_version: str
+    submission_schema_version: str
+    disposition_truth_schema_version: str
+    #: The published Bayes error of this pack's generator, and the digest binding it
+    #: to the constants it was computed from. `1 - pack_floor` is the ceiling any
+    #: honest resolver approaches and none crosses.
+    pack_floor: float
+    floor_digest: str
+    pair_count: int
+    decided_count: int
+    abstained_count: int
+    decidable_count: int
+    correct_decided_count: int
+    coverage: float
+    decided_precision: float | None
+    decided_recall: float | None
+    false_merges: int
+    false_splits: int
+    unwarranted_decisions: int
+
+
+def evaluate_ambiguity_v2_dispositions(
+    predictions: Iterable[PairPrediction],
+    *,
+    public: PublicAmbiguityTaskV2,
+    truth: AmbiguityV2DispositionTruth,
+) -> AmbiguityV2DispositionMetrics:
+    """Score pair decisions on a generated v2 pack against its disposition truth.
+
+    v2 has no scenarios - there is no case list for a slice to be named after - so
+    the report counts the same harms without a per-scenario breakdown, and carries
+    the pack's floor so the numbers can be read against the ceiling.
+    """
+
+    truth_pairs: dict[tuple[UUID, UUID], AmbiguityV2PairTruth] = {
+        _key(item.left_record_id, item.right_record_id): item for item in truth.pairs
+    }
+    if len(truth_pairs) != len(truth.pairs):
+        raise AmbiguityEvaluationError("disposition truth contains a duplicate pair")
+    public_keys = [
+        _key(item.left_record_id, item.right_record_id)
+        for item in public.pairs_to_decide
+    ]
+    if not public_keys:
+        raise AmbiguityEvaluationError("the public task contains no record pairs")
+    if len(public_keys) != len(set(public_keys)):
+        raise AmbiguityEvaluationError("the public task contains a duplicate pair")
+    public_record_ids = {item.id for item in public.corpus.identity_records}
+    if any(not set(key) <= public_record_ids for key in public_keys):
+        raise AmbiguityEvaluationError(
+            "the public task pair list references a non-public record"
+        )
+    if set(public_keys) != set(truth_pairs):
+        raise AmbiguityEvaluationError(
+            "disposition truth must cover exactly the public task pairs"
+        )
+
+    prediction_items = tuple(predictions)
+    if not prediction_items:
+        raise AmbiguityEvaluationError("no predictions were submitted")
+    submitted: dict[tuple[UUID, UUID], PairDisposition] = {}
+    for prediction in prediction_items:
+        key = _key(prediction.left_record_id, prediction.right_record_id)
+        if key in submitted:
+            raise AmbiguityEvaluationError("a record pair was submitted twice")
+        submitted[key] = prediction.disposition
+    if set(submitted) != set(truth_pairs):
+        raise AmbiguityEvaluationError(
+            "predictions must cover exactly the benchmark's record pairs"
+        )
+
+    false_merges = false_splits = unwarranted = decided = correct_decided = 0
+    decidable = 0
+    for key, expected in truth_pairs.items():
+        predicted = submitted[key]
+        if expected.disposition is not PairDisposition.INSUFFICIENT:
+            decidable += 1
+        if predicted is PairDisposition.INSUFFICIENT:
+            continue
+        decided += 1
+        if predicted is expected.disposition:
+            correct_decided += 1
+        elif expected.disposition is PairDisposition.INSUFFICIENT:
+            unwarranted += 1
+        elif predicted is PairDisposition.MERGE:
+            false_merges += 1
+        else:
+            false_splits += 1
+
+    total = len(truth_pairs)
+    return AmbiguityV2DispositionMetrics(
+        seed=public.corpus.seed,
+        public_schema_version=public.schema_version,
+        submission_schema_version=prediction_items[0].schema_version,
+        disposition_truth_schema_version=truth.schema_version,
+        pack_floor=FLOOR_PUBLICATION.floor,
+        floor_digest=floor_digest(),
+        pair_count=total,
+        decided_count=decided,
+        abstained_count=total - decided,
+        decidable_count=decidable,
+        correct_decided_count=correct_decided,
+        coverage=decided / total,
+        decided_precision=correct_decided / decided if decided else None,
+        decided_recall=correct_decided / decidable if decidable else None,
+        false_merges=false_merges,
+        false_splits=false_splits,
+        unwarranted_decisions=unwarranted,
+    )
+
+
 __all__ = [
     "AMBIGUITY_DISPOSITION_SCORING_VERSION",
+    "AMBIGUITY_V2_DISPOSITION_SCORING_VERSION",
     "MINIMUM_SCENARIO_SUPPORT",
     "AmbiguityDispositionMetrics",
     "AmbiguityEvaluationError",
     "AmbiguityMetrics",
+    "AmbiguityV2DispositionMetrics",
     "ClusterMetrics",
     "ScenarioOutcome",
     "evaluate_ambiguity_dispositions",
     "evaluate_ambiguity_predictions",
+    "evaluate_ambiguity_v2_dispositions",
 ]
