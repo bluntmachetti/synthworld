@@ -330,18 +330,21 @@ does not recover the *relation*, which is carried by overlapping distance distri
 
 The difficulty is therefore not claimed but **computed**: the pack publishes its
 **genie floor**, the Bayes error of the generator itself — the accuracy of an optimal
-solver holding the public law, the observed comparable structure and the true
-prevalence. It is estimated with a stated method and N, with a Wilson confidence
-interval, and keyed to a digest of every decision-relevant constant, so any parameter
-move invalidates the number loudly. An accuracy is only readable against that ceiling:
-a score at `1 − floor` has read all the evidence there is, and a score above it is
-exploiting signal the model says should not exist. The enumerated channel invariants —
-stationarity of the `FAR` kernel, an identical one-value marginal under every relation,
-a per-base sibling-landing mass above the gate, form bijectivity/separation, and the
-artifact-factorization check — are asserted in the suite rather than sampled, and the
-technique premium (the gap between the ceiling and the best solver that only ever sees
-per-kind normalised exact match) is gated to stay positive, so real resolution technique
-is rewarded rather than anti-taught.
+solver restricted to the modelled observation (the rendered values, the comparable
+structure and the true prevalence) and holding the public law. It is estimated with a
+stated method and N, with a Wilson confidence interval, and keyed to a digest of every
+decision-relevant constant, so any parameter move invalidates the number loudly. Read
+the pack as a **hardness certificate**, not a capability leaderboard: the ceiling
+`1 − floor` is the most any system can achieve, and transcribing the published rule
+already reaches it, so the informative number is a resolver's **gap to the genie**. A
+score above the ceiling is exploiting signal the model says should not exist; a score
+within the genie's confidence interval is, statistically, at ceiling. The enumerated
+channel invariants — stationarity of the `FAR` kernel, an identical one-value marginal
+under every relation, a per-base sibling-landing mass above the gate, form
+bijectivity/separation, and the artifact-factorization check — are asserted in the
+suite rather than sampled, and the technique premium (the gap between the ceiling and
+the best solver that only ever sees per-kind normalised exact match) is gated to stay
+positive, so real resolution technique is rewarded rather than anti-taught.
 
 One clarification the earlier failures made precise, and the design now leans on: **a key
 conceals which sample was drawn, never the law.** Keying prevents recomputation of

@@ -183,10 +183,15 @@ def _render_ambiguity_floor_section() -> str:
             "",
             "The v2 pack's difficulty is computed, not claimed: its **genie "
             "floor** is the Bayes error of the generator itself - the accuracy of "
-            "an optimal solver holding the public law, the observed comparable "
-            "structure and the true prevalence. A resolver's disposition accuracy "
-            "is only readable against the ceiling `1 - floor`; a score above it is "
-            "exploiting signal the model says should not exist.",
+            "an optimal solver restricted to the modelled observation (the rendered "
+            "values, the comparable structure and the true prevalence) and holding "
+            "the public law. Read the pack as a **hardness certificate**, not a "
+            "capability leaderboard: the ceiling `1 - floor` is the most any system "
+            "can achieve, and transcribing the published rule already reaches it, so "
+            "the informative number is a resolver's **gap to the genie**. A score "
+            "above the ceiling is exploiting signal the model says should not exist; "
+            "a score within the genie's confidence interval is, statistically, at "
+            "ceiling.",
             "",
             f"- Published floor: **{FLOOR_PUBLICATION.floor:.4f}** "
             f"(±{FLOOR_PUBLICATION.floor_half_width:.4f}, 95% Wilson interval)",

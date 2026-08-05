@@ -15,11 +15,12 @@ the signature says so. `FAR` pairs therefore sit in the same edit neighbourhoods
 relation, because the distance distributions overlap by construction of the pool.
 
 What that costs is stated here too: the error floor is not closed-form. It is the
-Bayes error of this very generator - the accuracy of a genie holding the public law
-and the true prevalence - and it is computed by enumeration of the per-kind laws plus
-Monte Carlo over pairs, with a published confidence interval. The published numbers
-are keyed to a digest of every decision-relevant constant, so any parameter move
-invalidates them loudly instead of silently.
+Bayes error of this very generator - the accuracy of a genie restricted to the
+modelled observation and holding the public law and the true prevalence - and it is
+computed by enumeration of the per-kind laws plus Monte Carlo over pairs, with a
+published confidence interval. The published numbers are keyed to a digest of every
+decision-relevant constant, so any parameter move invalidates them loudly instead of
+silently.
 
 The module sits *below* the grammar: it knows pools, noise, kernels and likelihoods,
 and it takes the decision rule as data. It never imports the rule, which keeps the

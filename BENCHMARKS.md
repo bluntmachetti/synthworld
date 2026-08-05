@@ -41,13 +41,13 @@ Both baselines consume only the public bundle. Always-deny shows why accuracy al
 
 ## Ambiguity v2 error floor
 
-The v2 pack's difficulty is computed, not claimed: its **genie floor** is the Bayes error of the generator itself - the accuracy of an optimal solver holding the public law, the observed comparable structure and the true prevalence. A resolver's disposition accuracy is only readable against the ceiling `1 - floor`; a score above it is exploiting signal the model says should not exist.
+The v2 pack's difficulty is computed, not claimed: its **genie floor** is the Bayes error of the generator itself - the accuracy of an optimal solver restricted to the modelled observation (the rendered values, the comparable structure and the true prevalence) and holding the public law. Read the pack as a **hardness certificate**, not a capability leaderboard: the ceiling `1 - floor` is the most any system can achieve, and transcribing the published rule already reaches it, so the informative number is a resolver's **gap to the genie**. A score above the ceiling is exploiting signal the model says should not exist; a score within the genie's confidence interval is, statistically, at ceiling.
 
-- Published floor: **0.1108** (±0.0094, 95% Wilson interval)
-- Ceiling `1 - floor`: **0.8892**
-- Technique premium: **0.0698** (gate ≥ 0.05)
+- Published floor: **0.1098** (±0.0073, 95% Wilson interval)
+- Ceiling `1 - floor`: **0.8902**
+- Technique premium: **0.0728** (gate ≥ 0.05)
 - Floor band: [0.08, 0.12]
-- Estimated over 4286 pairs from 60 seeds
+- Estimated over 7030 pairs from 100 seeds
 - Decision digest: `f2c68dd5c7f9ed1d49d63af182ce339c`
 
 The digest binds these numbers to every decision-relevant constant; any parameter move invalidates them until `examples/compute_ambiguity_floor.py` is rerun.

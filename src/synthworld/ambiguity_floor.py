@@ -1,9 +1,10 @@
 """The ambiguity pack's computed error floor, and the gates that bind it.
 
 Issue #80's deliverable is a number with a method: the Bayes error of this generator
-- the accuracy of a genie holding the public law, the observed comparable structure
-and the true prevalence - computed rather than claimed, published with a confidence
-interval, and keyed to a digest of every constant that can move it.
+- the accuracy of a genie restricted to the modelled observation (the rendered values,
+the comparable structure and the true prevalence) and holding the public law -
+computed rather than claimed, published with a confidence interval, and keyed to a
+digest of every constant that can move it.
 
 This module is the machinery. It sits above the channel, the grammar and the
 generator, because the floor is a fact about all three at once: the channel supplies
@@ -466,14 +467,14 @@ def floor_digest() -> str:
 #: digest check fails until the floor is recomputed. The estimate is over
 #: `pair_count` pairs - pack generation is deterministic, so the number replays.
 FLOOR_PUBLICATION = FloorPublication(
-    floor=0.1108,
-    floor_half_width=0.0094,
-    c0_accuracy=0.693,
-    c1_accuracy=0.7142,
-    genie_ceiling=0.8892,
-    technique_premium=0.0698,
-    pair_count=4286,
-    seed_count=60,
+    floor=0.1098,
+    floor_half_width=0.0073,
+    c0_accuracy=0.6883,
+    c1_accuracy=0.711,
+    genie_ceiling=0.8902,
+    technique_premium=0.0728,
+    pair_count=7030,
+    seed_count=100,
     digest="f2c68dd5c7f9ed1d49d63af182ce339c",
 )
 
@@ -499,6 +500,12 @@ def evaluate_gates(estimate: FloorEstimate) -> GateReport:
     gates 5 and 6 are the enumerated channel invariants; all are joined at the
     publication step.
 
+    Gate 1 reads the *interval*, not the point estimate: the claim is that the floor
+    sits in the credible band, and a confidence interval poking over the edge does not
+    establish that. The gate therefore asserts the whole Wilson interval lies inside
+    the band, which is why the publication is recomputed with enough seeds for the
+    interval to sit clear of both edges.
+
     `delta` is ``max(0.05, 2 * epsilon)`` with ``epsilon`` the Wilson half-width of
     the floor estimate at this N - the margin the gate reads, derived from the stated
     CI rather than approximated.
@@ -510,7 +517,7 @@ def evaluate_gates(estimate: FloorEstimate) -> GateReport:
     ceiling = estimate.accuracy("genie")
     c1_accuracy = estimate.accuracy("c1")
     return GateReport(
-        floor_in_band=FLOOR_BAND[0] <= estimate.floor <= FLOOR_BAND[1],
+        floor_in_band=FLOOR_BAND[0] <= low and high <= FLOOR_BAND[1],
         c1_gap_holds=c1_accuracy <= ceiling - delta,
         premium_holds=ceiling - estimate.accuracy("premium") >= MINIMUM_PREMIUM,
         floor=estimate.floor,

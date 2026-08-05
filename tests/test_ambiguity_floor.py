@@ -1,11 +1,12 @@
 """What the computed floor has to prove: the number, the gates, and the digest.
 
 The floor is the Bayes error of the shipped generator - the accuracy of a genie
-holding the public law, the observed comparable structure and the true prevalence.
-This module pins it three ways: the machinery is correct on controlled pairs, the
-estimate replays deterministically at toy scale through the same code path the
-publication uses, and the published numbers satisfy the gates of issue #80 under a
-digest that binds them to every decision-relevant constant.
+restricted to the modelled observation (the rendered values, the comparable structure
+and the true prevalence) and holding the public law. This module pins it three ways:
+the machinery is correct on controlled pairs, the estimate replays deterministically
+at toy scale through the same code path the publication uses, and the published
+numbers satisfy the gates of issue #80 under a digest that binds them to every
+decision-relevant constant.
 """
 
 from __future__ import annotations
@@ -164,13 +165,16 @@ def test_decision_inputs_are_deterministic_and_sensitive() -> None:
 def test_the_published_floor_satisfies_the_gates() -> None:
     """The standing gate of issue #80, read off the publication.
 
-    The floor sits in the credible band, the technique premium clears its minimum,
-    and the digest binds the numbers to the constants they were computed under. If a
-    decision-relevant constant moves, the digest check fails until the floor is
-    recomputed - loudly, not silently.
+    The floor's whole Wilson interval sits in the credible band - a confidence
+    interval poking over the edge would not establish the claim - the technique
+    premium clears its minimum, and the digest binds the numbers to the constants
+    they were computed under. If a decision-relevant constant moves, the digest check
+    fails until the floor is recomputed - loudly, not silently.
     """
 
-    assert FLOOR_BAND[0] <= FLOOR_PUBLICATION.floor <= FLOOR_BAND[1]
+    low = FLOOR_PUBLICATION.floor - FLOOR_PUBLICATION.floor_half_width
+    high = FLOOR_PUBLICATION.floor + FLOOR_PUBLICATION.floor_half_width
+    assert FLOOR_BAND[0] <= low and high <= FLOOR_BAND[1]
     assert FLOOR_PUBLICATION.technique_premium >= MINIMUM_PREMIUM
     assert FLOOR_PUBLICATION.genie_ceiling == pytest.approx(
         1.0 - FLOOR_PUBLICATION.floor, abs=1e-6
