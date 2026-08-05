@@ -15,13 +15,17 @@ from synthworld.ambiguity import (
     PairDisposition,
     ScenarioKind,
 )
+from synthworld.ambiguity_channel import (
+    render_relation as _channel_render_relation,
+)
+from synthworld.ambiguity_channel import (
+    render_value as _channel_render_value,
+)
 from synthworld.ambiguity_generator import _drafts
 from synthworld.ambiguity_grammar import (
     _FS,
-    _SPACE,
     Relation,
     _Params,
-    _surface,
     disposition_of,
     kind_fingerprint,
     render_relation,
@@ -196,7 +200,13 @@ def test_nothing_that_makes_a_value_can_see_the_answer() -> None:
     """
 
     forbidden = {"disposition", "scenario", "same_entity", "archetype", "label"}
-    for maker in (render_relation, render_value, _surface, disposition_of):
+    for maker in (
+        render_relation,
+        render_value,
+        _channel_render_relation,
+        _channel_render_value,
+        disposition_of,
+    ):
         parameters = set(inspect.signature(maker).parameters)
         assert not parameters & forbidden, maker.__name__
 
@@ -207,87 +217,6 @@ def test_nothing_that_makes_a_value_can_see_the_answer() -> None:
         "key",
         "slot",
     }
-
-
-@pytest.mark.parametrize("kind", _RENDERED)
-@pytest.mark.parametrize("relation", (Relation.EQUAL, Relation.NEAR, Relation.FAR))
-def test_rendered_values_stand_in_the_relation_they_claim(
-    kind: K, relation: Relation
-) -> None:
-    left, right = render_relation(kind, relation, seed=7, key=b"", slot=0)
-
-    assert left and right
-    if relation is Relation.EQUAL:
-        assert left == right
-    else:
-        assert left != right
-
-
-def _similarity(kind: K, left: str, right: str) -> float:
-    """How alike two values look to a competent resolver, per kind.
-
-    Two earlier versions of this were wrong in instructive ways. A shared *prefix* is
-    the wrong tool for structured values - an address is
-    `house|street|town|postcode|country`, so a near pair differing only in house number
-    shares no prefix while agreeing on everything that matters. Raw *token overlap* is
-    the wrong tool for phone numbers, where the near case is one line written two ways
-    and reformatting changes more tokens than changing the number does.
-
-    So the comparison normalises the way a matcher would before comparing - digits for
-    phone numbers, which is what `_attribute_collision_key` in `ambiguity_variants`
-    already does. That is a real preprocessing step, not a thumb on the scale: if a
-    relation is only visible after normalisation nobody performs, it is decoration.
-    """
-
-    if kind is K.GIVEN_NAME:
-        # `A.` against `Ada` is the fourth time this comparison, not the rendering, was
-        # the thing at fault. An initial is a real near form - records store them
-        # constantly - and every resolver has an initial rule, so a comparison without
-        # one calls a genuine near pair far.
-        def initial(value: str) -> str:
-            return value.casefold()[:1]
-
-        if len(left.rstrip(".")) == 1 or len(right.rstrip(".")) == 1:
-            return 1.0 if initial(left) == initial(right) else 0.0
-
-    if kind is K.PHONE:
-
-        def digits(value: str) -> str:
-            # `00` is the international dialling prefix and `+` means the same thing,
-            # so a normaliser that does not fold them reports the same line as two.
-            # Standard E.164 handling; the surface forms deliberately include both.
-            found = "".join(item for item in value if item.isdigit())
-            return found[2:] if found.startswith("00") else found
-
-        return 1.0 if digits(left) == digits(right) else 0.0
-
-    def tokens(value: str) -> set[str]:
-        # Every separator these surface forms use. They were added one at a time, each
-        # because a near pair scored as far without it - and each time the rendering was
-        # right and this comparison was wrong.
-        for separator in ("|", "@", "-", " ", "_", "/", "."):
-            value = value.replace(separator, "\x00")
-        return {item for item in value.split("\x00") if item}
-
-    one, other = tokens(left.casefold()), tokens(right.casefold())
-    union = one | other
-    return len(one & other) / len(union) if union else 0.0
-
-
-def test_near_is_visibly_nearer_than_far() -> None:
-    """Otherwise the distinction is a label rather than something a resolver can read.
-
-    Measured with a token comparison a real matcher would plausibly use. If continuity
-    is invisible to that, it is invisible to a system under test and the relation is
-    decoration.
-    """
-
-    for kind in _RENDERED:
-        left, near = render_relation(kind, Relation.NEAR, seed=11, key=b"", slot=0)
-        also_left, far = render_relation(kind, Relation.FAR, seed=11, key=b"", slot=0)
-
-        assert left == also_left
-        assert _similarity(kind, left, near) > _similarity(kind, left, far), kind.value
 
 
 def test_rendering_replays_and_is_keyed() -> None:
@@ -450,30 +379,6 @@ def test_every_kind_prefers_agreement_to_contradiction(kind: K) -> None:
     assert weight_of(kind, Relation.LOPSIDED) == 0.0
 
 
-@pytest.mark.parametrize("kind", sorted(K))
-def test_a_surface_names_exactly_one_value(kind: K) -> None:
-    """`FAR` means "these differ", so two indices must not render the same string.
-
-    They did. `_surface` reduced a 64-bit draw with `% 16` for given names and `% 100`
-    for phones, and `FAR` drew its second index independently, so the two collided and
-    the pair rendered identical values under a truth that said they differed. 61 in 3000
-    given-name pairs, 10 phones, 3 addresses. A label contradicted by its own data is
-    the defect this module exists to remove, and it arrived through the renderer rather
-    than through a scenario table.
-    """
-
-    rendered = {_surface(kind, index, 0) for index in range(_SPACE[kind])}
-
-    assert len(rendered) == _SPACE[kind]
-
-
-@pytest.mark.parametrize("kind", sorted(K))
-def test_far_never_renders_two_equal_values(kind: K) -> None:
-    for seed in range(400):
-        left, right = render_relation(kind, Relation.FAR, seed=seed, key=b"k", slot=0)
-        assert left != right, (kind.value, seed)
-
-
 def test_a_row_that_is_not_a_distribution_is_refused() -> None:
     """Otherwise the generator and the scorer disagree with no symptom anywhere.
 
@@ -560,16 +465,19 @@ def test_rendering_an_absence_as_a_comparison_is_refused(kind: K) -> None:
 
 @pytest.mark.parametrize("kind", sorted(K))
 def test_a_one_sided_value_is_drawn_from_the_same_pool_as_a_paired_one(kind: K) -> None:
-    """Otherwise "the other record lacks this" is readable from the value itself."""
+    """Otherwise "the other record lacks this" is readable from the value itself.
 
-    one_sided = {render_value(kind, seed=seed, key=b"k", slot=0) for seed in range(200)}
-    paired = {
-        value
-        for seed in range(200)
-        for value in render_relation(kind, Relation.EQUAL, seed=seed, key=b"k", slot=0)
-    }
+    The one-sided draw uses the same purposes as a pair's first side, so it is the
+    same law. Compared against a `NEAR` pair, whose first side never shares a noise
+    draw, the equality is byte-for-byte.
+    """
 
-    assert one_sided == paired
+    for seed in range(40):
+        one_sided = render_value(kind, seed=seed, key=b"k", slot=0)
+        paired_left = render_relation(kind, Relation.NEAR, seed=seed, key=b"k", slot=0)[
+            0
+        ]
+        assert one_sided == paired_left, (kind.value, seed)
 
 
 def test_one_agreeing_field_is_never_enough_to_merge() -> None:

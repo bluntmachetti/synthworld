@@ -18,11 +18,17 @@ A held-out seed does not conceal a key - the seed is serialized in the artifact,
 the key is a separate secret that is never serialized at all. What an unpublished
 *key* conceals is the *values*, since every draw here is keyed.
 
-Neither conceals the rule. :func:`disposition_of` is published, and a solver that
-recovers the relations from the rendered values and applies it should score perfectly.
-That is the intended difficulty: reading `Sørensen` against `Sorensen`, one phone line
-written three ways, an initial against a full name, and a field one record carries and
-the other does not - rather than guessing a hidden mapping.
+Neither conceals the rule, and since #80 the rule is not the ceiling either.
+:func:`disposition_of` is published, but the rendered values are a structured-noise
+channel: identity recovery from them is free and expected - the pools are public and
+inversion is a lookup - while the *relation* is carried by overlapping distance
+distributions that no reading of the values resolves perfectly. The Bayes error of
+that overlap is computed, published and keyed to every decision-relevant constant in
+`ambiguity_channel`. A solver that recovers relations optimally and applies the rule
+scores at the ceiling, `1 - floor`; the intended difficulty is reading `Sørensen`
+against `Sorensen`, one phone line written three ways, an initial against a full
+name, and a field one record carries and the other does not - knowing that a residue
+of pairs is genuinely undecidable from any observation the pack can emit.
 """
 
 from __future__ import annotations
@@ -78,6 +84,11 @@ _COMPLETENESS = (0.05, 0.85)
 #: levers are used together - see `_MERGE_BITS`.
 _PAIRS = (50, 90)
 _DISTRACTORS = (8, 30)
+
+#: Probability a comparable, non-name kind is carried by one record side. Named rather
+#: than inlined because it is decision-relevant: it shapes the comparable structures
+#: the floor is conditioned on, so the floor's digest keys to it.
+_CARRIED_RATE = 0.82
 
 
 def _between(
@@ -147,7 +158,7 @@ def _carried(
         kind
         for kind in kinds
         if kind in _IN_NAME
-        or _fraction(seed, f"carries:{kind.value}:{side}", slot, key) < 0.82
+        or _fraction(seed, f"carries:{kind.value}:{side}", slot, key) < _CARRIED_RATE
     )
     # Every record needs at least one attribute, and the names are not attributes. The
     # fallback has to come from `kinds` rather than being a fixed kind: a constant would
@@ -261,7 +272,12 @@ def _record(
         id=record_id,
         source_type=source,
         source_url=f"https://{source.value}.example.test/{record_id}",
-        display_name=f"{given} {family}",
+        # `family, given` - the format issue #86 moved to. The two name kinds are
+        # scored as separate evidence, so the boundary between them must be readable
+        # off the value; `given family` lost it whenever a pool entry carried a space.
+        # No name rendering this pack can reach contains `", "`: the name cores are
+        # letters only, asserted where the pools live.
+        display_name=f"{family}, {given}",
         confidence=0.6 + _fraction(seed, f"record-conf:{side}", slot, key) * 0.35,
         attributes=attributes,
     )

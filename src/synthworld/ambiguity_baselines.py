@@ -15,8 +15,12 @@ from synthworld.ambiguity import PairDisposition, PairPrediction
 from synthworld.ambiguity_generator import generate_ambiguity_benchmark
 from synthworld.ambiguity_metrics import (
     AmbiguityMetrics,
+    AmbiguityV2DispositionMetrics,
     evaluate_ambiguity_predictions,
+    evaluate_ambiguity_v2_dispositions,
 )
+from synthworld.ambiguity_serialization import ambiguity_v2_truths
+from synthworld.ambiguity_v2_generator import generate_ambiguity_v2_pack
 from synthworld.connection import PublicIdentityRecord
 
 AMBIGUITY_BASELINE_SEED = 20_260_731
@@ -119,11 +123,59 @@ AMBIGUITY_BASELINES: tuple[
 )
 
 
+# ---------------------------------------------------------------------------
+# v2 baselines. The same three decision functions run against a generated v2
+# pack, scored against the pack's derived disposition truth. Their point is the
+# same as v1's - to show what the pack measures, not to rank resolvers - but a
+# v2 score is only readable against the ceiling `1 - pack_floor`, which the
+# evaluator attaches.
+# ---------------------------------------------------------------------------
+
+#: The seed and key the documented v2 baseline rows are generated under. Stated,
+#: not hidden: these packs are auditable, and a key kept only in this module
+#: protects nothing the floor publication does not already make public.
+AMBIGUITY_V2_BASELINE_SEED = 20_260_804
+AMBIGUITY_V2_BASELINE_KEY = b"synthworld-v2-baselines"
+
+
+def run_ambiguity_v2_baseline(
+    decide: Callable[[PublicIdentityRecord, PublicIdentityRecord], PairDisposition],
+    *,
+    seed: int = AMBIGUITY_V2_BASELINE_SEED,
+    key: bytes = AMBIGUITY_V2_BASELINE_KEY,
+) -> AmbiguityV2DispositionMetrics:
+    """Score one decision function over a generated v2 pack."""
+
+    task, truths = generate_ambiguity_v2_pack(seed=seed, key=key)
+    disposition_truth, _ = ambiguity_v2_truths(task, truths)
+    records = {item.id: item for item in task.corpus.identity_records}
+    predictions = [
+        PairPrediction(
+            left_record_id=pair.left_record_id,
+            right_record_id=pair.right_record_id,
+            disposition=decide(
+                records[pair.left_record_id], records[pair.right_record_id]
+            ),
+        )
+        for pair in task.pairs_to_decide
+    ]
+    return evaluate_ambiguity_v2_dispositions(
+        predictions, public=task, truth=disposition_truth
+    )
+
+
+AMBIGUITY_V2_BASELINES = AMBIGUITY_BASELINES
+
+
 __all__ = [
     "AMBIGUITY_BASELINES",
     "AMBIGUITY_BASELINE_SEED",
+    "AMBIGUITY_V2_BASELINES",
+    "AMBIGUITY_V2_BASELINE_KEY",
+    "AMBIGUITY_V2_BASELINE_SEED",
     "exact_strong_identifier",
     "normalised_name_or_address",
     "precision_first",
     "run_ambiguity_baseline",
+    "run_ambiguity_v2_baseline",
 ]

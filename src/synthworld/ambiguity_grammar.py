@@ -18,7 +18,7 @@ show continuity, a house number changing on one street, an email local-part surv
 change of provider. With it, the two cases have the same fingerprint and different
 evidence, and a resolver has to read the values.
 
-Two design rules carry the module.
+Three design rules carry the module.
 
 **The label is derived, never sampled alongside the evidence.** :func:`disposition_of`
 takes a relation vector and nothing else. ``same_entity`` is a fact about the world and
@@ -31,57 +31,49 @@ a seed, a key and a slot. There is no parameter it could read a disposition from
 the eight metadata channels closed in #59 — ordering, name pools, identifiers, sources,
 repetition counts, attribute counts, locality tokens, multiplicity — cannot recur here
 by the same route. A type signature enforces that; a test would only sample it.
+
+**Rendering is a channel, not a codebook.** Since #80, :func:`render_relation`
+delegates to :mod:`synthworld.ambiguity_channel`: each side draws a base from the
+kind's confusable cluster, applies relation-independent noise, and wraps the result in
+a form. The relations are latent states of the world; ``EQUAL`` is *one value,
+transcribed once per record* — rendered byte-identically only with probability
+``sigma`` — and ``NEAR`` is *the same value, transcribed twice independently*.
+Identity recovery from the rendered values is free and expected, because a public
+deterministic pool is enumerable; what is not free is the relation, which is carried
+by overlapping distance distributions. The Bayes error of that overlap — the genie
+floor — is computed, published and keyed to every decision-relevant constant in
+:mod:`synthworld.ambiguity_channel`. A solver reaching the ceiling has read all the
+evidence there is; none can cross it without exploiting a channel the model missed,
+which the enumerated invariants exist to catch.
 """
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from enum import StrEnum
+from collections.abc import Iterator, Mapping
 from hashlib import blake2b
+from itertools import product
 from math import isfinite, log2
 from typing import Literal
 
 from synthworld.ambiguity import PairDisposition
+from synthworld.ambiguity_channel import (
+    render_relation as _channel_render_relation,
+)
+from synthworld.ambiguity_channel import (
+    render_value as _channel_render_value,
+)
+from synthworld.ambiguity_evidence import INDEX, ORDER, EvidenceKind, Relation
 
-AMBIGUITY_GRAMMAR_VERSION: Literal["1.0.0"] = "1.0.0"
-
-
-class EvidenceKind(StrEnum):
-    """What a pair can be compared on.
-
-    Not `PublicIdentityAttributeKind`. That enum is v1's *storage*, and it has no given
-    name, because v1 keeps given names inside a display string. A rule keyed on it
-    therefore cannot see the only thing distinguishing twins from one person: the
-    canonical twins pair agrees on family name, birth date, address and school year, and
-    differs on nothing else a v1 attribute records. The first version of this module
-    scored it +0.97 and called it a merge.
-    """
-
-    GIVEN_NAME = "given_name"
-    FAMILY_NAME = "family_name"
-    DATE_OF_BIRTH = "date_of_birth"
-    EMAIL = "email"
-    PHONE = "phone"
-    USERNAME = "username"
-    FULL_ADDRESS = "full_address"
-    EMPLOYER = "employer"
-    SCHOOL_YEAR = "school_year"
+AMBIGUITY_GRAMMAR_VERSION: Literal["2.0.0"] = "2.0.0"
 
 
-class Relation(StrEnum):
-    """How one attribute relates across the two records of a pair."""
-
-    #: Byte-identical. Strong evidence of one entity for a rarely-shared kind, and
-    #: nearly none for a kind households share.
-    EQUAL = "equal"
-    #: Different values that show continuity - one street with another house number, a
-    #: local-part surviving a change of provider. The word v1 could not say, and the
-    #: reason two cases can share a fingerprint and differ in what they justify.
-    NEAR = "near"
-    #: Different, with nothing connecting them.
-    FAR = "far"
-    #: Present on one record only. Not evidence either way; its absence is the point.
-    LOPSIDED = "lopsided"
+def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
+    material = "".join(
+        f"{len(part)}:{part}" for part in (str(seed), purpose, str(index))
+    )
+    return int.from_bytes(
+        blake2b(material.encode(), digest_size=8, key=key).digest(), "big"
+    )
 
 
 #: Fellegi-Sunter parameters per kind: `(m, u)`, each `(equal, near, far)`.
@@ -138,32 +130,6 @@ _FS: dict[EvidenceKind, _Params] = {
 #: canonical `partial_with_contradiction` case has one and is `insufficient` rather than
 #: `separate` - a contradiction there is reason to withhold judgement, not to conclude.
 _VETO: frozenset[EvidenceKind] = frozenset({EvidenceKind.GIVEN_NAME})
-
-_ORDER = (Relation.EQUAL, Relation.NEAR, Relation.FAR)
-_INDEX = {relation: index for index, relation in enumerate(_ORDER)}
-
-#: Interchangeable surface forms. Every one is reachable for every value regardless of
-#: relation, which is what stops a form naming its relation.
-_DOMAINS = ("example.test", "mail.example.test", "example.invalid")
-_GIVEN = (
-    "Ada",
-    "Bilal",
-    "Chen",
-    "Dara",
-    "Esme",
-    "Faisal",
-    "Gita",
-    "Hugo",
-    "Imani",
-    "Jonas",
-    "Keira",
-    "Luis",
-    "Mina",
-    "Noor",
-    "Orla",
-    "Pavel",
-)
-_TOWNS = ("Testville", "Sampleton", "Exampleford")
 
 #: Log-odds in bits. Zero is the point of indifference, so a band around it is where the
 #: evidence genuinely settles nothing rather than where two thresholds happen to sit.
@@ -229,7 +195,7 @@ def weight_of(kind: EvidenceKind, relation: Relation) -> float:
     if relation is Relation.LOPSIDED:
         return 0.0
     m, u = _FS[kind]
-    return log2(m[_INDEX[relation]] / u[_INDEX[relation]])
+    return log2(m[INDEX[relation]] / u[INDEX[relation]])
 
 
 def disposition_of(relations: Mapping[EvidenceKind, Relation]) -> PairDisposition:
@@ -302,7 +268,7 @@ def validate_parameters(table: Mapping[EvidenceKind, _Params]) -> None:
             # negative mass makes `log2(m/u)` a domain error or a nonsense weight, and a
             # NaN makes every comparison against it false, so `sample_relation`
             # would fall through to the last outcome for that entire kind.
-            if len(row) != len(_ORDER):
+            if len(row) != len(ORDER):
                 raise ValueError(f"{kind.value} needs one probability per outcome")
             if not all(isfinite(mass) and 0.0 < mass <= 1.0 for mass in row):
                 # Strictly positive, not merely non-negative. A zero mass passes every
@@ -365,11 +331,11 @@ def sample_relation(
     # It also removes any dependence on the row summing to exactly 1.0 in floating
     # point, which `validate_parameters` only guarantees to within 1e-9.
     running = 0.0
-    for outcome, mass in zip(_ORDER[:-1], row[:-1], strict=True):
+    for outcome, mass in zip(ORDER[:-1], row[:-1], strict=True):
         running += mass
         if point < running:
             return outcome
-    return _ORDER[-1]
+    return ORDER[-1]
 
 
 def kind_fingerprint(
@@ -392,23 +358,27 @@ def kind_fingerprint(
     )
 
 
-def _draw(seed: int, purpose: str, index: int, key: bytes) -> int:
-    material = "".join(
-        f"{len(part)}:{part}" for part in (str(seed), purpose, str(index))
-    )
-    return int.from_bytes(
-        blake2b(material.encode(), digest_size=8, key=key).digest(), "big"
-    )
+def relation_vectors(
+    kinds: tuple[EvidenceKind, ...],
+) -> Iterator[tuple[tuple[Relation, ...], PairDisposition, float, float]]:
+    """Every relation vector over `kinds`, with what the rule reads off it.
 
-
-def _variant(seed: int, purpose: str, slot: int, key: bytes, count: int) -> int:
-    """Pick one of `count` interchangeable surface forms for a value.
-
-    Drawn per *value*, never per relation. That distinction is the whole of the fix
-    below: if a form belongs to a relation, the relation is written on the value.
+    Yields `(relations, disposition, m_weight, u_weight)`: the disposition the rule
+    derives, and the probability the Fellegi-Sunter table assigns the vector given one
+    person and given two. The floor computation enumerates these rather than sampling
+    them - at most ``3 ** len(kinds)`` - so the genie's posterior is exact over the
+    latent space, and a rule change moves every vector it touches.
     """
 
-    return _draw(seed, f"form:{purpose}", slot, key) % count
+    for combination in product(ORDER, repeat=len(kinds)):
+        relations = dict(zip(kinds, combination, strict=True))
+        m_weight = 1.0
+        u_weight = 1.0
+        for kind, relation in relations.items():
+            m_row, u_row = _FS[kind]
+            m_weight *= m_row[INDEX[relation]]
+            u_weight *= u_row[INDEX[relation]]
+        yield combination, disposition_of(relations), m_weight, u_weight
 
 
 def render_relation(
@@ -421,168 +391,45 @@ def render_relation(
 ) -> tuple[str, str]:
     """Two safely fictional values standing in the requested relation.
 
-    Both values are drawn from **one** distribution of surface forms. The relation
-    decides how they relate to each other and never how either one looks, so no single
-    value carries its relation and a reader must compare the pair to learn anything.
-
-    That is not where this started. A first version gave each relation its own surface
-    marker - `mail.example.test` only for NEAR, `example.invalid` only for FAR, a
-    parenthesised phone only for NEAR, `Sampleton` only for a FAR address, a
-    `(Division N)` suffix only for a NEAR employer. Six of eight kinds were affected,
-    and a decoder classifying each value *in isolation* recovered the relation on 1200
-    of 1200 renderings - then ran the public :func:`disposition_of` to get the answer.
-    The key did not help, because nothing was being recomputed: the answer was written
-    on the surface. Making the pack a lookup table one level down is exactly the defect
-    #62 exists to remove.
-
-    The signature guarantee - no label parameter - was real and insufficient. It stops
-    the label flowing in; it cannot stop the *relation* being stamped on the way out,
-    and the relation determines the label. What closes it is that every free choice is
-    drawn per value from a shared pool: an `example.invalid` address is as likely on a
-    merge pair as on a separate one.
+    Delegates to the structured-noise channel: both sides draw from **one** law of
+    bases, noise and forms, and the relation decides only which base the second side
+    carries and whether `EQUAL` shares its noise draw. No single value carries its
+    relation, and a reader must compare the pair to learn anything - and even then the
+    answer is only ever probable, because `FAR` pairs land inside the same edit
+    neighbourhoods as `NEAR` ones. The Bayes error of that overlap is the pack's
+    published floor.
     """
 
-    space = _SPACE[kind]
-    if relation is Relation.LOPSIDED:
-        # An absence is not a comparison, so there is no pair of values to render. The
-        # old behaviour was to treat it as "not FAR" and return two values that stood in
-        # no stated relation at all - a caller asking for missingness got a NEAR-ish
-        # pair, and the contract that a rendered pair stands in the relation it claims
-        # quietly did not hold for a quarter of the vocabulary. Use `render_value`.
-        raise ValueError("LOPSIDED is an absence, not a comparison: use render_value")
-
-    left_seed = _draw(seed, f"{kind.value}:identity", slot, key) % space
-    # The identity component is what NEAR preserves and FAR does not. The form is a
-    # free choice drawn independently for each side, so it carries nothing.
-    #
-    # FAR steps to a *different* index rather than drawing a second one. Drawing
-    # independently let the two collide, and `_surface` maps an index to one value, so
-    # a collision rendered a FAR pair as two identical strings - a pair whose truth
-    # says "these differ" and whose data says they are the same. Measured at 61 in 3000
-    # for given names, 10 for phones and 3 for addresses. That is the defect this whole
-    # module exists to remove, arriving through the renderer instead of through a
-    # scenario table, and no amount of care about labels would have caught it.
-    right_seed = (
-        left_seed
-        if relation is not Relation.FAR
-        else (
-            left_seed + 1 + _draw(seed, f"{kind.value}:other", slot, key) % (space - 1)
-        )
-        % space
-    )
-    left_form = _variant(seed, f"{kind.value}:left", slot, key, 3)
-    right_form = (
-        left_form
-        if relation is Relation.EQUAL
-        else _variant(seed, f"{kind.value}:right", slot, key, 3)
-    )
-    if relation is Relation.NEAR and right_form == left_form:
-        # NEAR must differ somewhere, or it renders identical to EQUAL.
-        right_form = (right_form + 1) % 3
-    return (
-        _surface(kind, left_seed, left_form),
-        _surface(kind, right_seed, right_form),
-    )
-
-
-#: How many distinct values each kind can render. `_surface` must be injective over
-#: `range(_SPACE[kind])`, because `render_relation` relies on two different indices
-#: producing two different strings to make FAR mean what it says.
-_SPACE: dict[EvidenceKind, int] = {
-    EvidenceKind.GIVEN_NAME: 16,
-    EvidenceKind.FAMILY_NAME: 9000,
-    EvidenceKind.DATE_OF_BIRTH: 50 * 12 * 27,
-    EvidenceKind.EMAIL: 9000,
-    EvidenceKind.PHONE: 9000,
-    EvidenceKind.USERNAME: 9000,
-    EvidenceKind.FULL_ADDRESS: 200 * 900,
-    EvidenceKind.EMPLOYER: 9000,
-    EvidenceKind.SCHOOL_YEAR: 900 * 30,
-}
+    return _channel_render_relation(kind, relation, seed=seed, key=key, slot=slot)
 
 
 def render_value(kind: EvidenceKind, *, seed: int, key: bytes, slot: int) -> str:
     """One value for a kind only one record carries.
 
-    Drawn from exactly the same identity and form pools as either half of a rendered
-    pair, so a one-sided value is not distinguishable from a two-sided one. Anything
-    else would make "the other record lacks this" readable from the value itself, and
-    which fields a record happens to carry would start carrying something.
+    Drawn from exactly the same law as either half of a rendered pair, so a one-sided
+    value is not distinguishable from a two-sided one. Anything else would make "the
+    other record lacks this" readable from the value itself, and which fields a record
+    happens to carry would start carrying something.
     """
 
-    return _surface(
-        kind,
-        _draw(seed, f"{kind.value}:identity", slot, key) % _SPACE[kind],
-        _variant(seed, f"{kind.value}:left", slot, key, 3),
-    )
-
-
-def _surface(kind: EvidenceKind, identity: int, form: int) -> str:
-    """One value, from an identity component and an interchangeable surface form.
-
-    Every form is reachable for every value. Two values sharing an identity and
-    differing in form are `NEAR`; sharing both are `EQUAL`; sharing neither are `FAR`.
-    A reader holding one value alone sees an identity it cannot place and a form that
-    means nothing.
-    """
-
-    if kind is EvidenceKind.GIVEN_NAME:
-        given = _GIVEN[identity]
-        return (given, given.upper(), f"{given[0]}.")[form]
-
-    if kind is EvidenceKind.PHONE:
-        digits = f"{identity + 1000:04d}"
-        return (
-            f"+1-212-555-{digits}",
-            f"+1 (212) 555 {digits}",
-            f"001 212 555 {digits}",
-        )[form]
-
-    if kind is EvidenceKind.EMAIL:
-        local = f"user{identity + 1000:04d}"
-        return f"{local}@{_DOMAINS[form]}"
-
-    if kind is EvidenceKind.USERNAME:
-        handle = f"handle{identity + 1000:04d}"
-        return (handle, f"{handle}_", f"{handle}.")[form]
-
-    if kind is EvidenceKind.FULL_ADDRESS:
-        house, street = identity % 200 + 1, identity // 200 + 100
-        town = _TOWNS[form]
-        return f"{house}|Example Street {street}|{town}|00000|ZZ"
-
-    if kind is EvidenceKind.DATE_OF_BIRTH:
-        year = 1950 + identity // (12 * 27)
-        month, day = identity // 27 % 12 + 1, identity % 27 + 1
-        return (
-            f"{year:04d}-{month:02d}-{day:02d}",
-            f"{day:02d}/{month:02d}/{year:04d}",
-            f"{year:04d}/{month:02d}/{day:02d}",
-        )[form]
-
-    if kind is EvidenceKind.FAMILY_NAME:
-        name = f"Surname{identity + 1000:04d}"
-        return (name, name.upper(), f"{name}-{name}")[form]
-
-    if kind is EvidenceKind.EMPLOYER:
-        company = f"Example Works {identity + 1000:04d}"
-        return (company, f"{company} Ltd", f"{company} Limited")[form]
-
-    institution = f"Sample Academy {identity % 900 + 100:03d}"
-    year = 1990 + identity // 900
-    return (
-        f"{institution}|{year}",
-        f"{institution.upper()}|{year}",
-        f"{institution} |{year}",
-    )[form]
+    return _channel_render_value(kind, seed=seed, key=key, slot=slot)
 
 
 __all__ = [
     "AMBIGUITY_GRAMMAR_VERSION",
+    "_FS",
+    "_MERGE_BITS",
+    "_MERGE_NEEDS_CORROBORATION",
+    "_SEPARATE_BITS",
+    "_SOURCES",
+    "_VETO",
+    "_VETO_YIELDS_ABOVE",
     "EvidenceKind",
     "Relation",
+    "_draw",
     "disposition_of",
     "kind_fingerprint",
+    "relation_vectors",
     "render_relation",
     "render_value",
     "sample_relation",

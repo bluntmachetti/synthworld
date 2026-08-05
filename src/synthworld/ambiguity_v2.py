@@ -23,8 +23,10 @@ Three properties follow from the construction rather than from tests:
   forbade the difference, which is why it could not represent two people who look
   identical on paper - and why #77 exists.
 - A held-out seed conceals the *values*, not the rule. `disposition_of` is public on
-  purpose: recovering relations from rendered values is the task, and a resolver that
-  does it perfectly should score perfectly.
+  purpose, and since #80 the rule is not the ceiling: the rendered values are a
+  structured-noise channel whose Bayes error is computed and published, so recovering
+  relations from them is the task and doing it *optimally* scores `1 - floor` — a
+  residue of pairs is genuinely undecidable from any observation the pack can emit.
 """
 
 from __future__ import annotations
@@ -41,7 +43,7 @@ from synthworld.ambiguity_grammar import EvidenceKind, Relation, disposition_of
 from synthworld.connection import PublicConnectionCorpus
 from synthworld.models import SyntheticModel
 
-AMBIGUITY_V2_SCHEMA_VERSION: Literal["2.0.0"] = "2.0.0"
+AMBIGUITY_V2_SCHEMA_VERSION: Literal["2.1.0"] = "2.1.0"
 
 
 class DerivedPairTruth(SyntheticModel):
@@ -123,7 +125,7 @@ class PublicAmbiguityTaskV2(SyntheticModel):
     signal and let a solver bound a record by how often it was asked about.
     """
 
-    schema_version: Literal["2.0.0"] = AMBIGUITY_V2_SCHEMA_VERSION
+    schema_version: Literal["2.1.0"] = AMBIGUITY_V2_SCHEMA_VERSION
     corpus: PublicConnectionCorpus
     pairs_to_decide: tuple[PublicRecordPair, ...] = Field(min_length=1)
 

@@ -41,6 +41,11 @@ from synthworld import (
     generate_exposure_corpus,
     run_all_baselines,
 )
+from synthworld.ambiguity_floor import (
+    FLOOR_BAND,
+    FLOOR_PUBLICATION,
+    MINIMUM_PREMIUM,
+)
 
 _OUTPUT_PATH = Path(__file__).resolve().parents[1] / "BENCHMARKS.md"
 
@@ -76,6 +81,7 @@ def render_benchmarks_doc() -> str:
         _render_reproduce_section(),
         _render_baseline_section(baseline_results),
         _render_agentic_baseline_section(agentic_results),
+        _render_ambiguity_floor_section(),
         _render_comparison_section(),
         _render_visuals_section(connection_benchmark, exposure_corpus),
         _render_limits_section(),
@@ -156,6 +162,50 @@ def _render_agentic_baseline_section(
             header,
             divider,
             *rows,
+        ]
+    )
+
+
+def _render_ambiguity_floor_section() -> str:
+    """Render the published ambiguity v2 error floor, a build-time constant.
+
+    The number is not recomputed here: it is pinned in `ambiguity_floor.
+    FLOOR_PUBLICATION` by `examples/compute_ambiguity_floor.py`, and the suite's
+    digest check fails if any decision-relevant constant moves without a
+    recomputation. This only reads the pin, so the doc and the suite agree by
+    construction.
+    """
+
+    low, high = FLOOR_BAND
+    return "\n".join(
+        [
+            "## Ambiguity v2 error floor",
+            "",
+            "The v2 pack's difficulty is computed, not claimed: its **genie "
+            "floor** is the Bayes error of the generator itself - the accuracy of "
+            "an optimal solver restricted to the modelled observation (the rendered "
+            "values, the comparable structure and the true prevalence) and holding "
+            "the public law. Read the pack as a **hardness certificate**, not a "
+            "capability leaderboard: the ceiling `1 - floor` is the most any system "
+            "can achieve, and transcribing the published rule already reaches it, so "
+            "the informative number is a resolver's **gap to the genie**. A score "
+            "above the ceiling is exploiting signal the model says should not exist; "
+            "a score within the genie's confidence interval is, statistically, at "
+            "ceiling.",
+            "",
+            f"- Published floor: **{FLOOR_PUBLICATION.floor:.4f}** "
+            f"(±{FLOOR_PUBLICATION.floor_half_width:.4f}, 95% Wilson interval)",
+            f"- Ceiling `1 - floor`: **{FLOOR_PUBLICATION.genie_ceiling:.4f}**",
+            f"- Technique premium: **{FLOOR_PUBLICATION.technique_premium:.4f}** "
+            f"(gate ≥ {MINIMUM_PREMIUM})",
+            f"- Floor band: [{low}, {high}]",
+            f"- Estimated over {FLOOR_PUBLICATION.pair_count} pairs from "
+            f"{FLOOR_PUBLICATION.seed_count} seeds",
+            f"- Decision digest: `{FLOOR_PUBLICATION.digest}`",
+            "",
+            "The digest binds these numbers to every decision-relevant constant; "
+            "any parameter move invalidates them until `examples/"
+            "compute_ambiguity_floor.py` is rerun.",
         ]
     )
 

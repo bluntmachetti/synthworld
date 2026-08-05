@@ -290,7 +290,7 @@ def test_public_pairs_are_projected_in_canonical_order() -> None:
 def test_the_schema_version_is_declared() -> None:
     task, _ = generate_ambiguity_v2_pack(seed=1, key=_KEY)
 
-    assert task.schema_version == AMBIGUITY_V2_SCHEMA_VERSION == "2.0.0"
+    assert task.schema_version == AMBIGUITY_V2_SCHEMA_VERSION == "2.1.0"
     assert isinstance(task.corpus, PublicConnectionCorpus)
 
 

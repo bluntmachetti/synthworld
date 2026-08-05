@@ -11,6 +11,24 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
+- **The ambiguity v2 pack gets its difficulty from a computed error floor, not a
+  codebook (#80).** The v1-style surfaces encoded each identity index in cleartext, so a
+  ~30-line normaliser recovered every relation and scored 1.0000; two successor designs
+  fell to pool inversion. The fix follows the reviewed plan: each kind draws a base from
+  a pool of **confusable clusters** (`Sorensen`/`Sorenson`/`Soerensen`, a transposed
+  phone, a swapped day/month), `EQUAL`/`NEAR` share the base while `FAR` redraws from a
+  **stationary** mixture, and every value passes through one **structured-noise operator**
+  applied identically under every relation. Identity recovery stays free and expected;
+  the *relation* is carried by overlapping distance distributions. The pack publishes its
+  **genie floor** — the Bayes error of the generator, estimated with a stated N and
+  Wilson interval and keyed to a digest of every decision-relevant constant — plus the
+  enumerated channel invariants (kernel stationarity, an identical one-value marginal
+  under every relation, a per-base sibling-landing mass gate, form bijectivity and
+  constant cross-form distance, and an artifact-factorization check) and a gated
+  technique premium, so real resolution technique is rewarded rather than anti-taught.
+  New modules: `ambiguity_evidence`, `ambiguity_surfaces`, `ambiguity_channel`,
+  `ambiguity_floor`, with v2 serialization/metrics/baselines support and
+  `examples/compute_ambiguity_floor.py`.
 - The broker-removal pack is scored through the unified evaluator: `evaluate_broker_removal`
   projects each family's headline ratio into the standard `EvaluationReport`, the CLI gains
   `synthworld evaluate broker`, and `examples/evaluate_broker_adapter.py` is the worked
@@ -26,6 +44,16 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Changed
 
+- **Ambiguity grammar `2.0.0`, v2 schema `2.1.0`.** `render_relation`/`render_value`
+  delegate to the structured-noise channel; the old `_SPACE`/`_surface` codebook is gone.
+  `Relation.EQUAL` no longer means "byte-identical" — it is one value transcribed once
+  per record, rendered identically only with probability `sigma` — and the charter
+  docstrings that claimed otherwise are rewritten. The v1 pack and its frozen artifacts
+  are untouched and stay byte-identical.
+- **`display_name` renders `family, given` (#86).** The two name kinds are scored as
+  separate evidence, so the boundary between them must be readable off the value; the
+  old `given family` lost it whenever a pool entry carried a space. No rendered name
+  contains `", "`, so the split is unambiguous.
 - **Temporal schema `1.2.0`.** `ListingTruth.downstream_refs` (bare strings) becomes
   `downstream_copies` with per-copy removal ticks, and a recorded reappearance must now
   coincide with a published `LISTING_REAPPEARED` event - truth that disagrees with the

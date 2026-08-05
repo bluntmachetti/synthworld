@@ -152,6 +152,16 @@ one, so existing fixtures and checksums stay byte-identical. Track that work in
 [issue #43](https://github.com/bluntmachetti/synthworld/issues/43); the adversarial
 identity cases that go with it are [issue #41](https://github.com/bluntmachetti/synthworld/issues/41).
 
+The generated **v2 pack** goes further (#80): instead of a codebook of cleartext
+identity indices, each value is drawn from a pool of confusable clusters and passed
+through a structured-noise operator applied identically under every relation, so
+identity recovery stays free but the *relation* is carried only by overlapping distance
+distributions. Its difficulty is therefore a computed **genie floor** — the Bayes error
+of the generator itself, published with a confidence interval and keyed to a digest of
+every decision-relevant constant — rather than a claim. See
+[DATA_DICTIONARY.md](DATA_DICTIONARY.md) and [BENCHMARKS.md](BENCHMARKS.md) for the
+published number and the enumerated channel invariants that back it.
+
 The core-world, exposure-corpus, extraction-corpus, connection-benchmark,
 risk-benchmark, and agentic schemas are independently versioned `1.0.0`
 contracts. See
