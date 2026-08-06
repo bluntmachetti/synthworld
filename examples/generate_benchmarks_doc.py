@@ -41,10 +41,30 @@ from synthworld import (
     generate_exposure_corpus,
     run_all_baselines,
 )
+from synthworld.agentic.enterprise import (
+    ENTERPRISE_AGENTIC_BASELINES,
+    evaluate_enterprise_agentic_prediction,
+    reference_enterprise_agentic,
+)
 from synthworld.ambiguity_floor import (
     FLOOR_BAND,
     FLOOR_PUBLICATION,
     MINIMUM_PREMIUM,
+)
+from synthworld.authority_governance import (
+    AUTHORITY_GOVERNANCE_BASELINES,
+    evaluate_authority_governance_prediction,
+    reference_authority_governance,
+)
+from synthworld.contextual_access import (
+    CONTEXTUAL_ACCESS_BASELINES,
+    evaluate_contextual_access_prediction,
+    reference_contextual_access,
+)
+from synthworld.continuous_assurance import (
+    CONTINUOUS_ASSURANCE_BASELINES,
+    evaluate_continuous_assurance_prediction,
+    reference_continuous_assurance,
 )
 
 _OUTPUT_PATH = Path(__file__).resolve().parents[1] / "BENCHMARKS.md"
@@ -81,6 +101,7 @@ def render_benchmarks_doc() -> str:
         _render_reproduce_section(),
         _render_baseline_section(baseline_results),
         _render_agentic_baseline_section(agentic_results),
+        _render_enterprise_baseline_section(),
         _render_ambiguity_floor_section(),
         _render_comparison_section(),
         _render_visuals_section(connection_benchmark, exposure_corpus),
@@ -161,6 +182,150 @@ def _render_agentic_baseline_section(
             "",
             header,
             divider,
+            *rows,
+        ]
+    )
+
+
+_ENTERPRISE_METRICS: dict[str, tuple[str, ...]] = {
+    "Enterprise agentic": (
+        "enterprise_decision_accuracy",
+        "final_decision_accuracy",
+        "failure_reason_exact_match",
+        "delegation_gate_accuracy",
+    ),
+    "Contextual access": (
+        "decision_accuracy",
+        "stale_context_decision_accuracy",
+        "canonical_event_application_exact_match",
+        "predicate_outcome_accuracy",
+    ),
+    "Authority-change governance": (
+        "governance_authorisation_accuracy",
+        "structured_rationale_accuracy",
+        "policy_control_accuracy",
+    ),
+    "Continuous assurance": (
+        "drift_classification_accuracy",
+        "finding_detection_recall",
+        "false_negative_rate",
+    ),
+}
+
+
+def _enterprise_family_rows(
+    family: str, scored: tuple[tuple[str, object], ...]
+) -> list[str]:
+    """Render one row per (baseline, selected metric) for an enterprise family."""
+
+    wanted = _ENTERPRISE_METRICS[family]
+    rows: list[str] = []
+    for baseline_name, report in scored:
+        metrics = {m.name: m for m in report.metrics}  # type: ignore[attr-defined]
+        for name in wanted:
+            metric = metrics.get(name)
+            if metric is None:
+                continue
+            value = "undefined" if metric.value is None else str(round(metric.value, 4))
+            rows.append(
+                f"| {family} | {baseline_name} | {name} | {value} "
+                f"| {metric.denominator} |"
+            )
+    return rows
+
+
+def _score_enterprise_families() -> list[str]:
+    """Run every shipped enterprise baseline and render the selected metrics."""
+
+    agentic = reference_enterprise_agentic()
+    contextual = reference_contextual_access()
+    governance = reference_authority_governance()
+    assurance = reference_continuous_assurance()
+
+    rows: list[str] = []
+    rows += _enterprise_family_rows(
+        "Enterprise agentic",
+        tuple(
+            (
+                name,
+                evaluate_enterprise_agentic_prediction(
+                    public=agentic.public,
+                    evaluator=agentic.evaluator,
+                    prediction=build(agentic.evaluator),
+                ),
+            )
+            for name, build in ENTERPRISE_AGENTIC_BASELINES
+        ),
+    )
+    rows += _enterprise_family_rows(
+        "Contextual access",
+        tuple(
+            (
+                name,
+                evaluate_contextual_access_prediction(
+                    public=contextual.public,
+                    evaluator=contextual.evaluator,
+                    prediction=build(
+                        public=contextual.public, evaluator=contextual.evaluator
+                    ),
+                ),
+            )
+            for name, build in CONTEXTUAL_ACCESS_BASELINES
+        ),
+    )
+    rows += _enterprise_family_rows(
+        "Authority-change governance",
+        tuple(
+            (
+                name,
+                evaluate_authority_governance_prediction(
+                    public=governance.public,
+                    evaluator=governance.evaluator,
+                    prediction=build(governance.public),
+                ),
+            )
+            for name, build in AUTHORITY_GOVERNANCE_BASELINES
+        ),
+    )
+    rows += _enterprise_family_rows(
+        "Continuous assurance",
+        tuple(
+            (
+                name,
+                evaluate_continuous_assurance_prediction(
+                    public=assurance.public,
+                    evaluator=assurance.evaluator,
+                    prediction=build(assurance.public),
+                ),
+            )
+            for name, build in CONTINUOUS_ASSURANCE_BASELINES
+        ),
+    )
+    return rows
+
+
+def _render_enterprise_baseline_section() -> str:
+    """Render enterprise-family baselines, computed rather than transcribed."""
+
+    rows = _score_enterprise_families()
+    return "\n".join(
+        [
+            "## Enterprise authorization baselines",
+            "",
+            "Each of these consumes the shipped reference pack for its family "
+            "and deliberately fails one dimension, so the score shows what the "
+            "dimension detects. Only the metrics that separate the baselines "
+            "are listed; every family publishes more, each with its own "
+            "denominator and no aggregate.",
+            "",
+            "The reference packs are conformance fixtures, not statistical "
+            "benchmarks — denominators here are in the tens, and their "
+            "evaluator answer keys ship in the contract packages. A perfect "
+            "score is evidence that an adapter conforms, never that a system "
+            "generalises.",
+            "",
+            "| Family | Baseline | Metric | Score | Support |",
+            "|---|---|---|---|---|",
             *rows,
         ]
     )

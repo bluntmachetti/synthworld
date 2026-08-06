@@ -39,6 +39,65 @@ Both baselines consume only the public bundle. Always-deny shows why accuracy al
 | Audit-time current state | provenance_exact_match | 0.4545 | 11 |
 | Audit-time current state | provenance_precision | 0.9714 | 35 |
 
+## Enterprise authorization baselines
+
+Each of these consumes the shipped reference pack for its family and deliberately fails one dimension, so the score shows what the dimension detects. Only the metrics that separate the baselines are listed; every family publishes more, each with its own denominator and no aggregate.
+
+The reference packs are conformance fixtures, not statistical benchmarks — denominators here are in the tens, and their evaluator answer keys ship in the contract packages. A perfect score is evidence that an adapter conforms, never that a system generalises.
+
+| Family | Baseline | Metric | Score | Support |
+|---|---|---|---|---|
+| Enterprise agentic | Enterprise decision only | enterprise_decision_accuracy | 1.0 | 20 |
+| Enterprise agentic | Enterprise decision only | final_decision_accuracy | 0.3 | 20 |
+| Enterprise agentic | Enterprise decision only | failure_reason_exact_match | 0.3 | 20 |
+| Enterprise agentic | Enterprise decision only | delegation_gate_accuracy | 0.6 | 10 |
+| Enterprise agentic | Union owner authority | enterprise_decision_accuracy | 1.0 | 20 |
+| Enterprise agentic | Union owner authority | final_decision_accuracy | 0.95 | 20 |
+| Enterprise agentic | Union owner authority | failure_reason_exact_match | 0.95 | 20 |
+| Enterprise agentic | Union owner authority | delegation_gate_accuracy | 1.0 | 10 |
+| Enterprise agentic | Ignore lifecycle and revocation | enterprise_decision_accuracy | 1.0 | 20 |
+| Enterprise agentic | Ignore lifecycle and revocation | final_decision_accuracy | 0.85 | 20 |
+| Enterprise agentic | Ignore lifecycle and revocation | failure_reason_exact_match | 0.85 | 20 |
+| Enterprise agentic | Ignore lifecycle and revocation | delegation_gate_accuracy | 0.9 | 10 |
+| Enterprise agentic | Discard retained evidence | enterprise_decision_accuracy | 1.0 | 20 |
+| Enterprise agentic | Discard retained evidence | final_decision_accuracy | 1.0 | 20 |
+| Enterprise agentic | Discard retained evidence | failure_reason_exact_match | 1.0 | 20 |
+| Enterprise agentic | Discard retained evidence | delegation_gate_accuracy | 1.0 | 10 |
+| Contextual access | Ignore contextual predicates | decision_accuracy | 1.0 | 10 |
+| Contextual access | Ignore contextual predicates | stale_context_decision_accuracy | 1.0 | 1 |
+| Contextual access | Ignore contextual predicates | canonical_event_application_exact_match | 1.0 | 10 |
+| Contextual access | Ignore contextual predicates | predicate_outcome_accuracy | 0.3429 | 70 |
+| Contextual access | Trust presented feed | decision_accuracy | 0.9 | 10 |
+| Contextual access | Trust presented feed | stale_context_decision_accuracy | 0.0 | 1 |
+| Contextual access | Trust presented feed | canonical_event_application_exact_match | 1.0 | 10 |
+| Contextual access | Trust presented feed | predicate_outcome_accuracy | 0.9857 | 70 |
+| Contextual access | Initial snapshot only | decision_accuracy | 0.5 | 10 |
+| Contextual access | Initial snapshot only | stale_context_decision_accuracy | 0.0 | 1 |
+| Contextual access | Initial snapshot only | canonical_event_application_exact_match | 0.2 | 10 |
+| Contextual access | Initial snapshot only | predicate_outcome_accuracy | 0.9143 | 70 |
+| Contextual access | Drop delayed events | decision_accuracy | 0.9 | 10 |
+| Contextual access | Drop delayed events | stale_context_decision_accuracy | 0.0 | 1 |
+| Contextual access | Drop delayed events | canonical_event_application_exact_match | 0.2 | 10 |
+| Contextual access | Drop delayed events | predicate_outcome_accuracy | 0.9857 | 70 |
+| Authority-change governance | Final state implies valid | governance_authorisation_accuracy | 0.4167 | 12 |
+| Authority-change governance | Final state implies valid | structured_rationale_accuracy | 1.0 | 12 |
+| Authority-change governance | Final state implies valid | policy_control_accuracy | 1.0 | 12 |
+| Authority-change governance | Trust recorded approval | governance_authorisation_accuracy | 0.6667 | 12 |
+| Authority-change governance | Trust recorded approval | structured_rationale_accuracy | 1.0 | 12 |
+| Authority-change governance | Trust recorded approval | policy_control_accuracy | 1.0 | 12 |
+| Authority-change governance | Use latest policy | governance_authorisation_accuracy | 0.6667 | 12 |
+| Authority-change governance | Use latest policy | structured_rationale_accuracy | 0.3333 | 12 |
+| Authority-change governance | Use latest policy | policy_control_accuracy | 0.3333 | 12 |
+| Continuous assurance | Latest observed state | drift_classification_accuracy | 0.1429 | 7 |
+| Continuous assurance | Latest observed state | finding_detection_recall | 0.1429 | 7 |
+| Continuous assurance | Latest observed state | false_negative_rate | 0.8571 | 7 |
+| Continuous assurance | Effective time is detection time | drift_classification_accuracy | 1.0 | 7 |
+| Continuous assurance | Effective time is detection time | finding_detection_recall | 0.0 | 7 |
+| Continuous assurance | Effective time is detection time | false_negative_rate | 1.0 | 7 |
+| Continuous assurance | Never clear findings | drift_classification_accuracy | 1.0 | 7 |
+| Continuous assurance | Never clear findings | finding_detection_recall | 1.0 | 7 |
+| Continuous assurance | Never clear findings | false_negative_rate | 0.0 | 7 |
+
 ## Ambiguity v2 error floor
 
 The v2 pack's difficulty is computed, not claimed: its **genie floor** is the Bayes error of the generator itself - the accuracy of an optimal solver restricted to the modelled observation (the rendered values, the comparable structure and the true prevalence) and holding the public law. Read the pack as a **hardness certificate**, not a capability leaderboard: the ceiling `1 - floor` is the most any system can achieve, and transcribing the published rule already reaches it, so the informative number is a resolver's **gap to the genie**. A score above the ceiling is exploiting signal the model says should not exist; a score within the genie's confidence interval is, statistically, at ceiling.
