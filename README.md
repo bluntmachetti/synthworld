@@ -201,9 +201,10 @@ product or model without first projecting only its page fields.
 
 ## Enterprise identity and access
 
-**Identity tells you who holds an entitlement. The enterprise surface evaluates
-whether a system reaches the correct authorization decision — and whether it can
-still show which rule, role, relationship, or delegation produced it.**
+**Identity tells you who holds an entitlement. The enterprise surface asks harder
+questions: did a system reach the correct authorization decision, can it still
+show which rule, role, relationship, or delegation produced it, can it explain why
+an authority changed, and does it notice when access drifts over time.**
 
 The surface is two things, and it matters which one you are using.
 
@@ -219,10 +220,11 @@ public universe carries no `principal_id` on an account.
 built-in reference packs. **No CLI command takes a universe you compiled.**
 `generate-enterprise-agentic` and `generate-contextual-access` re-derive the
 pinned reference universe and abort if its digest has moved;
-`generate-continuous-assurance` builds from the shipped reference sources; the
-authority-change governance pack is self-contained. So the three-command
-quickstart below gives you a universe and its binding truth — it does not, on
-its own, give you the oracles.
+`generate-continuous-assurance` builds from the shipped reference sources. The
+identity-fabric and authority-change governance packs have no command line at all
+and are reached only through the Python API. So the three-command quickstart below
+gives you a universe and its binding truth — it does not, on its own, give you the
+oracles.
 
 The Python API is the bridge, partially. The RBAC, ABAC, and ReBAC truth
 compilers, the evaluation-corpus compiler, the SCIM/OpenFGA/AuthZEN projections,
@@ -257,16 +259,22 @@ Compilation is deterministic: the same import at the same seed, compiler
 version, and selector algorithm version reproduces the universe and the binding
 truth byte for byte.
 
-The seed does two different things, and only one of them is cosmetic.
-Structural identifiers — tenant, organisation, unit, principal, group, role,
-authorization target, and permission — derive from the namespace salt and your
-logical keys, not from the seed. Across two seeds those records stay byte-identical.
-But the seed also selects *which* principals receive accounts and access atoms,
-so it changes the world's content, not just its labels. Account identifiers embed
-the selected principal slot and change with the seed, and an access atom whose
-subject is an account inherits that: in the shipped smoke blueprint, all twelve
-principal-subject atom IDs held across seeds while two of the four
-account-subject atom IDs moved.
+The seed changes the world's content, not merely its labels. Structural
+identifiers — tenant, organisation, unit, principal, group, role, authorization
+target, and permission — derive from the namespace salt and your logical keys, and
+do not depend on the seed at all; across two seeds those records stay
+byte-identical. What the seed does decide is *which* principals are allocated
+accounts. Account identifiers embed the selected principal slot, so they move with
+the seed, and any access atom whose subject is an account inherits that: in the
+shipped smoke blueprint, all twelve principal-subject atom IDs held across seeds
+while two of the four account-subject atom IDs moved.
+
+That allocation is the account-to-principal binding the evaluator tree holds, and
+it is protected by the **salt**, not by withholding. Slot selection hashes the
+blueprint namespace — derived from your 64-hex salt — together with a logical
+population key, and the public universe carries neither. The `seed` field in the
+public universe is therefore harmless on its own. Leak the salt and the blueprint,
+however, and the binding becomes recomputable from public data.
 
 The `--seed` flag on `generate-enterprise-agentic` and
 `generate-contextual-access` is a different knob again. Those packs are pinned to
@@ -285,6 +293,11 @@ and the mix of case kinds.
 | Authority-change governance | Whether you can reconstruct why an authority change happened, under the policy in force at decision time | its own self-contained world — not the enterprise universe | Python: `synthworld.authority_governance` |
 | Continuous assurance | Whether identity and authority drift is detected, classified, cleared, and not silently reopened over time | shipped reference sources | `generate-continuous-assurance`, `evaluate continuous-assurance` |
 | Standards projections | SCIM, AuthZEN, and OpenFGA shapes; Shared Signals/CAEP is a mapping declaration that emits no enterprise events. Each ships a support matrix classifying every mapping `exact`, `approximated`, or `unsupported` | any universe, plus the kernel or truth each projection needs | Python: `synthworld.enterprise.projections` |
+
+Two support taxonomies appear below and they are not the same vocabulary. The
+enterprise projections above classify each mapping `exact`, `approximated`, or
+`unsupported`. The separate contextual-access Shared Signals projection uses its
+own single-valued `classification` field, whose only member is `custom_profile`.
 
 The contract packages are the normative documentation for this surface and
 describe each family's schemas, budgets, and boundaries in full:
@@ -315,9 +328,11 @@ generated JSON Schemas and examples, regenerated and checked by
   `contextual-access-evaluator.json`, `continuous-assurance-evaluator.json`, and
   `authority-governance-evaluator.json`. Treat every shipped reference pack's
   truth as public.
-- **Tiers govern assurance cadence, not world scale.** Enterprise agentic and
-  contextual access expose `smoke` only; identity fabric has no tier at all.
-  Continuous assurance's `smoke`, `standard`, `longitudinal`, and `held_out`
+- **No tier grows the world.** Enterprise agentic and contextual access expose
+  `smoke` only, and identity fabric has no tier at all, so for three of the five
+  families the question does not arise. Continuous assurance is the one family
+  with a tier ladder, and it governs assurance cadence rather than world scale:
+  its `smoke`, `standard`, `longitudinal`, and `held_out`
   profiles repeat a fixed eight-template cycle — 8, 24, 48, and 24 cases — over
   the shipped source records. `held_out` additionally permutes template order,
   and the source record each case binds to is indexed by seed, `--risk-threshold`,
