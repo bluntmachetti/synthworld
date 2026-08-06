@@ -180,9 +180,10 @@ class ManagedServiceComponentProvenanceV2(ReceiptModelV2):
                     "and limitation"
                 )
         else:
-            if has_digest or has_fields:
+            if has_digest or has_fields or has_evidence:
                 raise ValueError(
-                    "not-exposed configuration forbids a digest and observed fields"
+                    "not-exposed configuration forbids a digest, observed fields, "
+                    "and evidence"
                 )
             if not has_limitation:
                 raise ValueError(
@@ -197,9 +198,11 @@ class ManagedServiceComponentProvenanceV2(ReceiptModelV2):
                 )
             if not self.version_evidence_refs:
                 raise ValueError("observed version requires evidence")
-        elif any(item is not None for item in version_ids):
+        elif (
+            any(item is not None for item in version_ids) or self.version_evidence_refs
+        ):
             raise ValueError(
-                "not-exposed version forbids release and build identifiers"
+                "not-exposed version forbids release/build identifiers and evidence"
             )
         return self
 
@@ -295,6 +298,13 @@ class ArtifactDescriptorV2(ReceiptModelV2):
 
 
 class ExecutionReceiptV2(ReceiptModelV2):
+    """One adapter/product execution stage.
+
+    ``stimulus_digest`` binds the executed stimulus set.  Lineages without a
+    stimulus set (the contextual lineage executes a public input directly)
+    must leave it unset rather than borrowing another artifact's digest.
+    """
+
     schema_version: Literal["2.0.0"] = EXECUTION_RECEIPT_SCHEMA_VERSION_V2
     boundary: str = Field(min_length=1)
     callable_identifier: str = Field(min_length=1)
@@ -303,7 +313,7 @@ class ExecutionReceiptV2(ReceiptModelV2):
     adapter_source_digest: DigestV2
     systems_under_test: tuple[str, ...] = Field(min_length=1)
     run_plan_digest: DigestV2
-    stimulus_digest: DigestV2
+    stimulus_digest: DigestV2 | None = None
     source_public_digest: DigestV2
     product_input_digest: DigestV2
     product_output_digest: DigestV2
@@ -331,7 +341,7 @@ class RunReceiptManifestV2(ReceiptModelV2):
     build_environment: BuildEnvironmentV2
     run: RunMetadataV2
     schema_versions: tuple[VersionBindingV2, ...] = Field(min_length=1)
-    scoring_formula_versions: tuple[VersionBindingV2, ...] = Field(min_length=1)
+    scoring_formula_versions: tuple[VersionBindingV2, ...] = ()
     generator_configuration: tuple[ConfigurationEntryV2, ...] = ()
     event_schedule: tuple[ConfigurationEntryV2, ...] = ()
     adapter: AdapterProvenanceV2
@@ -360,11 +370,43 @@ class RunReceiptManifestV2(ReceiptModelV2):
         )
         if "manifest.json" in {item.path for item in self.artifacts}:
             raise ValueError("manifest.json cannot contain its own digest")
+        validate_evidence_claim_support(self.evidence_claim, self.systems_under_test)
+        if (self.execution_status is ExecutionStatus.FAILED) is not (
+            self.evaluation_status is EvaluationStatus.NOT_EVALUATED
+        ):
+            raise ValueError(
+                "failed executions are unevaluated and evaluated runs succeeded"
+            )
+        if self.evaluation_status is EvaluationStatus.EVALUATED:
+            if not self.scoring_formula_versions:
+                raise ValueError("an evaluated receipt must bind its scoring formulas")
+        elif self.scoring_formula_versions:
+            raise ValueError("an unevaluated receipt must not bind scoring formulas")
         return self
 
 
 def _present(value: str | None) -> bool:
     return value is not None and bool(value.strip())
+
+
+def validate_evidence_claim_support(
+    evidence_claim: EvidenceClaimV2,
+    systems_under_test: tuple[SystemComponentProvenanceV2, ...],
+) -> None:
+    """Reject evidence claims that the systems under test cannot support.
+
+    A live-lab conformance claim requires at least one deployed system
+    (self-hosted or managed service); reference-only runs are offline by
+    construction and cannot support it.
+    """
+
+    if evidence_claim is EvidenceClaimV2.LIVE_LAB_CONFORMANCE and all(
+        isinstance(system, ReferenceComponentProvenanceV2)
+        for system in systems_under_test
+    ):
+        raise ValueError(
+            "live lab conformance requires at least one deployed system under test"
+        )
 
 
 def _unique(values: tuple[str, ...], description: str) -> None:
@@ -405,4 +447,5 @@ __all__ = [
     "SystemComponentProvenanceV2",
     "VersionBindingV2",
     "VersionObservabilityV2",
+    "validate_evidence_claim_support",
 ]

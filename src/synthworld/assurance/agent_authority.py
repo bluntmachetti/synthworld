@@ -56,6 +56,7 @@ from synthworld.assurance.models_v2 import (
     RunReceiptManifestV2,
     SystemComponentProvenanceV2,
     VersionBindingV2,
+    validate_evidence_claim_support,
 )
 from synthworld.assurance.receipt import (
     EXECUTION_PATH,
@@ -96,6 +97,14 @@ _ROLE_PATHS = {
     "agent_authority_evaluation": EVALUATION_PATH,
 }
 
+_FAILED_ROLE_PATHS = {
+    "agent_authority_run_plan": RUN_PLAN_PATH,
+    "source_public": SOURCE_PUBLIC_PATH,
+    "product_input": PRODUCT_INPUT_PATH,
+    "product_output": PRODUCT_OUTPUT_PATH,
+    "execution": EXECUTION_PATH,
+}
+
 AgentAuthorityRunObservations = (
     AgentAuthorityRunObservationsV1 | AgentAuthorityRunObservationsV2
 )
@@ -130,6 +139,7 @@ class AgentAuthorityRunMetadataV1(AgentAuthorityOperatorModel):
         component_ids = tuple(item.component_id for item in self.systems_under_test)
         if component_ids != tuple(sorted(set(component_ids))):
             raise ValueError("systems under test must be sorted and unique")
+        validate_evidence_claim_support(self.evidence_claim, self.systems_under_test)
         return self
 
 
@@ -223,10 +233,10 @@ def build_agent_authority_run_receipt(
     truth_loader: TruthLoader,
     metadata: AgentAuthorityRunMetadataV1,
 ) -> RunReceiptManifestV2:
-    """Execute product first, normalize observations, then load and score truth."""
+    """Execute the product stage, then seal an honest success or failure receipt."""
 
     _validate_metadata_bindings(pre_execution_artifacts.run_plan, metadata)
-    run_product_stage_with_preflight(
+    execution = run_product_stage_with_preflight(
         root,
         systems_under_test=metadata.systems_under_test,
         pre_execution_artifacts=pre_execution_artifacts,
@@ -236,6 +246,13 @@ def build_agent_authority_run_receipt(
         adapter_provenance=metadata.adapter,
         callable_identifier=metadata.callable_identifier,
     )
+    if execution.status is ExecutionStatus.FAILED:
+        return finalize_failed_agent_authority_run_receipt(
+            root,
+            pre_execution_artifacts=pre_execution_artifacts,
+            adapter=adapter,
+            metadata=metadata,
+        )
     return finalize_agent_authority_run_receipt(
         root,
         pre_execution_artifacts=pre_execution_artifacts,
@@ -269,6 +286,8 @@ def finalize_agent_authority_run_receipt(
         adapter=adapter,
         metadata=metadata,
     )
+    if execution.status is not ExecutionStatus.SUCCEEDED:
+        raise ReceiptIntegrityError("a failed product execution cannot be evaluated")
 
     raw_output = (root / PRODUCT_OUTPUT_PATH).read_bytes()
     observations = observation_normalizer(
@@ -332,6 +351,51 @@ def finalize_agent_authority_run_receipt(
     )
 
 
+def finalize_failed_agent_authority_run_receipt(
+    root: Path,
+    *,
+    pre_execution_artifacts: AgentAuthorityPreExecutionArtifactsV1,
+    adapter: PublicAdapter,
+    metadata: AgentAuthorityRunMetadataV1,
+) -> RunReceiptManifestV2:
+    """Seal an honest receipt for a failed product execution, without evaluation.
+
+    A failed run still produces trustworthy evidence: the manifest records the
+    failure and never loads evaluator truth, so an assurance corpus can no
+    longer be structurally biased toward successful runs.
+    """
+
+    _validate_metadata_bindings(pre_execution_artifacts.run_plan, metadata)
+    execution = _validate_staged_product_execution(
+        root,
+        pre_execution_artifacts=pre_execution_artifacts,
+        adapter=adapter,
+        metadata=metadata,
+    )
+    if execution.status is not ExecutionStatus.FAILED:
+        raise ReceiptIntegrityError(
+            "a successful product execution cannot be sealed as failed"
+        )
+
+    specs = _product_stage_artifact_specs(metadata)
+    manifest = RunReceiptManifestV2(
+        benchmark=metadata.benchmark,
+        build_environment=metadata.build_environment,
+        run=metadata.run,
+        schema_versions=_schema_versions(specs),
+        generator_configuration=metadata.generator_configuration,
+        event_schedule=metadata.event_schedule,
+        adapter=metadata.adapter,
+        systems_under_test=metadata.systems_under_test,
+        artifacts=tuple(describe_artifact_v2(root, spec) for spec in specs),
+        execution_status=execution.status,
+        evaluation_status=EvaluationStatus.NOT_EVALUATED,
+        evidence_claim=metadata.evidence_claim,
+    )
+    write_manifest_last_v2(root, manifest)
+    return validate_agent_authority_run_receipt(root, adapter=adapter)
+
+
 def _validate_staged_product_execution(
     root: Path,
     *,
@@ -376,8 +440,6 @@ def _validate_staged_product_execution(
     if not isinstance(parsed_execution, ExecutionReceiptV2):
         raise ReceiptIntegrityError("agent-authority receipt requires execution v2")
     execution = parsed_execution
-    if execution.status is not ExecutionStatus.SUCCEEDED:
-        raise ReceiptIntegrityError("a failed product execution cannot be evaluated")
 
     run_plan_digest = digest_bytes_v2((root / RUN_PLAN_PATH).read_bytes())
     calculated_stimulus_digest = stimulus_set_digest(stimuli)
@@ -438,6 +500,8 @@ def validate_agent_authority_run_receipt(
     """Validate the complete receipt and replay supplied public transformations."""
 
     manifest = validate_manifest_v2(root)
+    if manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED:
+        return _validate_failed_agent_authority_receipt(root, manifest, adapter=adapter)
     role_paths = {item.role: item.path for item in manifest.artifacts}
     if role_paths != _ROLE_PATHS:
         raise ReceiptIntegrityError(
@@ -514,8 +578,6 @@ def validate_agent_authority_run_receipt(
         or execution.status is not manifest.execution_status
     ):
         raise ReceiptIntegrityError("execution provenance differs from manifest")
-    if manifest.evaluation_status is not EvaluationStatus.EVALUATED:
-        raise ReceiptIntegrityError("a complete agent-authority receipt is evaluated")
     _validate_manifest_benchmark(plan, manifest)
 
     source = (root / SOURCE_PUBLIC_PATH).read_bytes()
@@ -540,6 +602,88 @@ def validate_agent_authority_run_receipt(
     )
     if report != expected_report:
         raise ReceiptIntegrityError("agent-authority evaluation does not replay")
+    return manifest
+
+
+def _validate_failed_agent_authority_receipt(
+    root: Path,
+    manifest: RunReceiptManifestV2,
+    *,
+    adapter: PublicAdapter | None,
+) -> RunReceiptManifestV2:
+    """Validate an honest failed-run receipt, which carries no evaluation side."""
+
+    role_paths = {item.role: item.path for item in manifest.artifacts}
+    if role_paths != _FAILED_ROLE_PATHS:
+        raise ReceiptIntegrityError(
+            "a failed agent-authority receipt carries the wrong product artifacts"
+        )
+    descriptors = {item.role: item for item in manifest.artifacts}
+    declared_schemas = {item.role: item.version for item in manifest.schema_versions}
+    expected_schemas = {"run_receipt": manifest.schema_version} | {
+        item.role: item.schema_version
+        for item in manifest.artifacts
+        if item.schema_version is not None
+    }
+    if declared_schemas != expected_schemas:
+        raise ReceiptIntegrityError("manifest schema bindings differ from artifacts")
+
+    plan = _read_model(root, RUN_PLAN_PATH, AgentAuthorityRunPlanV1)
+    product_input = _read_model(root, PRODUCT_INPUT_PATH, AgentAuthorityProductInputV1)
+    parsed_execution = parse_execution_receipt((root / EXECUTION_PATH).read_bytes())
+    if not isinstance(parsed_execution, ExecutionReceiptV2):
+        raise ReceiptIntegrityError("agent-authority receipt requires execution v2")
+    execution = parsed_execution
+    if execution.status is not ExecutionStatus.FAILED:
+        raise ReceiptIntegrityError("a failed receipt requires a failed execution")
+    stimuli = AgentAuthorityStimulusSetV1(stimuli=product_input.stimuli)
+
+    try:
+        validate_run_plan_references(plan, stimuli, manifest.systems_under_test)
+    except ValueError as error:
+        raise ReceiptIntegrityError(
+            "agent-authority artifact relationships are invalid"
+        ) from error
+
+    plan_digest = descriptors["agent_authority_run_plan"].digest
+    calculated_stimulus_digest = stimulus_set_digest(stimuli)
+    if not (product_input.run_plan_digest == execution.run_plan_digest == plan_digest):
+        raise ReceiptIntegrityError("run-plan digest bindings disagree")
+    if not (
+        plan.stimulus_set_digest
+        == product_input.stimulus_digest
+        == execution.stimulus_digest
+        == calculated_stimulus_digest
+    ):
+        raise ReceiptIntegrityError("stimulus digest bindings disagree")
+    if (
+        execution.source_public_digest != descriptors["source_public"].digest
+        or execution.product_input_digest != descriptors["product_input"].digest
+        or execution.product_output_digest != descriptors["product_output"].digest
+    ):
+        raise ReceiptIntegrityError("execution artifact digests differ from manifest")
+    expected_system_ids = tuple(
+        item.component_id for item in manifest.systems_under_test
+    )
+    if execution.systems_under_test != expected_system_ids:
+        raise ReceiptIntegrityError("execution systems differ from manifest")
+    if (
+        execution.boundary != manifest.adapter.boundary
+        or execution.adapter_name != manifest.adapter.name
+        or execution.adapter_version != manifest.adapter.version
+        or execution.adapter_source_digest != manifest.adapter.source_digest
+    ):
+        raise ReceiptIntegrityError("execution provenance differs from manifest")
+    _validate_manifest_benchmark(plan, manifest)
+
+    if adapter is not None:
+        adapted = _model_from_canonical_bytes(
+            adapter((root / SOURCE_PUBLIC_PATH).read_bytes()),
+            AgentAuthorityStimulusSetV1,
+            "adapter stimulus set",
+        )
+        if adapted != stimuli:
+            raise ReceiptIntegrityError("product stimuli differ from adapter output")
     return manifest
 
 
@@ -601,9 +745,8 @@ def _read_observations(root: Path) -> AgentAuthorityRunObservations:
     )
 
 
-def _artifact_specs(
+def _product_stage_artifact_specs(
     metadata: AgentAuthorityRunMetadataV1,
-    observations_schema_version: str = AGENT_AUTHORITY_OBSERVATIONS_SCHEMA_VERSION,
 ) -> tuple[ArtifactSpecV2, ...]:
     canonical = ArtifactSerialization.CANONICAL_JSON_V1
     return (
@@ -647,6 +790,16 @@ def _artifact_specs(
             serialization=canonical,
             schema_version=EXECUTION_RECEIPT_SCHEMA_VERSION_V2,
         ),
+    )
+
+
+def _artifact_specs(
+    metadata: AgentAuthorityRunMetadataV1,
+    observations_schema_version: str = AGENT_AUTHORITY_OBSERVATIONS_SCHEMA_VERSION,
+) -> tuple[ArtifactSpecV2, ...]:
+    canonical = ArtifactSerialization.CANONICAL_JSON_V1
+    return (
+        *_product_stage_artifact_specs(metadata),
         ArtifactSpecV2(
             path=OBSERVATIONS_PATH,
             role="agent_authority_observations",
@@ -786,6 +939,7 @@ __all__ = [
     "TruthLoader",
     "build_agent_authority_run_receipt",
     "finalize_agent_authority_run_receipt",
+    "finalize_failed_agent_authority_run_receipt",
     "run_product_stage_with_preflight",
     "stimulus_set_digest",
     "validate_agent_authority_run_receipt",

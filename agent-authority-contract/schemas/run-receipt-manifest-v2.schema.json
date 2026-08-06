@@ -819,10 +819,10 @@
       "type": "array"
     },
     "scoring_formula_versions": {
+      "default": [],
       "items": {
         "$ref": "#/$defs/VersionBindingV2"
       },
-      "minItems": 1,
       "title": "Scoring Formula Versions",
       "type": "array"
     },
@@ -911,7 +911,6 @@
     "build_environment",
     "run",
     "schema_versions",
-    "scoring_formula_versions",
     "adapter",
     "systems_under_test",
     "artifacts",

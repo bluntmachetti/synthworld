@@ -17,6 +17,7 @@ from synthworld.assurance.contextual_access import (
     ContextualAccessRunMetadataV1,
     build_contextual_access_run_receipt,
     finalize_contextual_access_run_receipt,
+    finalize_failed_contextual_access_run_receipt,
     run_contextual_product_stage_with_preflight,
     validate_contextual_access_run_receipt,
 )
@@ -25,10 +26,15 @@ from synthworld.assurance.models import (
     EvaluationStatus,
     ExecutionReceipt,
     ExecutionStatus,
+    TreeState,
 )
 from synthworld.assurance.models_v2 import (
+    ComponentArtifactKindV2,
     DigestV2,
+    EvidenceClaimV2,
     ExecutionReceiptV2,
+    ReferenceComponentProvenanceV2,
+    ReplayabilityV2,
     RunReceiptManifestV2,
     SystemComponentProvenanceV2,
     VersionBindingV2,
@@ -42,7 +48,7 @@ from synthworld.assurance.receipt import (
     ReceiptIntegrityError,
     canonical_json_bytes,
 )
-from synthworld.assurance.receipt_v2 import digest_bytes_v2
+from synthworld.assurance.receipt_v2 import digest_bytes_v2, parse_execution_receipt
 from synthworld.cli import main
 from synthworld.contextual_access.models import (
     ContextualAccessEvaluatorV1,
@@ -285,7 +291,9 @@ def test_builder_rejects_metadata_mismatches_before_execution(tmp_path: Path) ->
         assert not (tmp_path / field).exists()
 
 
-def test_builder_stops_after_failed_execution_before_truth(tmp_path: Path) -> None:
+def test_builder_seals_an_honest_receipt_after_failed_execution(
+    tmp_path: Path,
+) -> None:
     run = reference_contextual_access_run()
     truth_called = False
 
@@ -299,22 +307,33 @@ def test_builder_stops_after_failed_execution_before_truth(tmp_path: Path) -> No
         return run.benchmark.evaluator
 
     root = tmp_path / "failed"
-    with pytest.raises(ReceiptIntegrityError, match="failed contextual execution"):
-        build_contextual_access_run_receipt(
-            root,
-            pre_execution_artifacts=ContextualAccessPreExecutionArtifactsV1(
-                run.plan, run.benchmark.public
-            ),
-            source_public=canonical_json_bytes(run.benchmark.public),
-            adapter=lambda payload: payload,
-            runner=runner,
-            observation_normalizer=lambda _payload, _plan, _public: run.observations,
-            truth_loader=truth_loader,
-            metadata=reference_contextual_receipt_metadata(run),
-        )
+    manifest = build_contextual_access_run_receipt(
+        root,
+        pre_execution_artifacts=ContextualAccessPreExecutionArtifactsV1(
+            run.plan, run.benchmark.public
+        ),
+        source_public=canonical_json_bytes(run.benchmark.public),
+        adapter=lambda payload: payload,
+        runner=runner,
+        observation_normalizer=lambda _payload, _plan, _public: run.observations,
+        truth_loader=truth_loader,
+        metadata=reference_contextual_receipt_metadata(run),
+    )
     assert not truth_called
+    assert manifest.execution_status is ExecutionStatus.FAILED
+    assert manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED
+    assert not manifest.scoring_formula_versions
     assert (root / EXECUTION_PATH).is_file()
+    assert (root / MANIFEST_PATH).is_file()
+    assert not (root / CONTEXTUAL_OBSERVATIONS_PATH).exists()
     assert not (root / CONTEXTUAL_RUN_TRUTH_PATH).exists()
+    assert not (root / CONTEXTUAL_REPORT_PATH).exists()
+
+    validated = validate_contextual_access_run_receipt(
+        root, adapter=lambda payload: payload
+    )
+    assert validated == manifest
+    assert validate_contextual_access_run_receipt(root) == manifest
 
 
 def test_builder_stages_observations_before_truth_and_checks_evaluator_digest(
@@ -683,15 +702,6 @@ def test_validator_rejects_plan_public_and_product_input_bindings(
             ),
         ),
         (
-            "execution-stimulus",
-            lambda root: _mutate_execution(
-                root,
-                lambda item: item.model_copy(
-                    update={"stimulus_digest": DigestV2(value="7" * 64)}
-                ),
-            ),
-        ),
-        (
             "execution-source",
             lambda root: _mutate_execution(
                 root,
@@ -706,6 +716,16 @@ def test_validator_rejects_plan_public_and_product_input_bindings(
         mutate(root)
         with pytest.raises(ReceiptIntegrityError, match="public digest"):
             validate_contextual_access_run_receipt(root)
+
+    stimulus = _copy_receipt(receipt_template, tmp_path / "execution-stimulus")
+    _mutate_execution(
+        stimulus,
+        lambda item: item.model_copy(
+            update={"stimulus_digest": DigestV2(value="7" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="no stimulus set"):
+        validate_contextual_access_run_receipt(stimulus)
 
     root = _copy_receipt(receipt_template, tmp_path / "inline-public")
     other = reference_contextual_access(seed=2).public
@@ -746,10 +766,14 @@ def test_validator_rejects_system_status_run_and_benchmark_root_mismatches(
     _write_manifest(
         evaluation,
         manifest.model_copy(
-            update={"evaluation_status": EvaluationStatus.NOT_EVALUATED}
+            update={
+                "execution_status": ExecutionStatus.FAILED,
+                "evaluation_status": EvaluationStatus.NOT_EVALUATED,
+                "scoring_formula_versions": (),
+            }
         ),
     )
-    with pytest.raises(ReceiptIntegrityError, match="receipt is evaluated"):
+    with pytest.raises(ReceiptIntegrityError, match="wrong product artifacts"):
         validate_contextual_access_run_receipt(evaluation)
 
     run_id = _copy_receipt(receipt_template, tmp_path / "run-id")
@@ -1005,3 +1029,281 @@ def _rebind_execution_product_input(root: Path) -> None:
             }
         ),
     )
+
+
+def _reference_only_system() -> ReferenceComponentProvenanceV2:
+    return ReferenceComponentProvenanceV2(
+        component_id="component-reference",
+        role="reference",
+        name="reference implementation",
+        version="1.0.0",
+        artifact_kind=ComponentArtifactKindV2.SOURCE,
+        artifact_digest=DigestV2(value="1" * 64),
+        dependency_lock_digest=DigestV2(value="2" * 64),
+        configuration_digest=DigestV2(value="3" * 64),
+        tree_state=TreeState.CLEAN,
+        replayability=ReplayabilityV2.EXACT,
+    )
+
+
+def test_contextual_metadata_rejects_live_claims_without_deployed_systems() -> None:
+    run = reference_contextual_access_run()
+    metadata = reference_contextual_receipt_metadata(run)
+
+    def build_metadata(claim: EvidenceClaimV2) -> ContextualAccessRunMetadataV1:
+        return ContextualAccessRunMetadataV1(
+            evidence_claim=claim,
+            callable_identifier=metadata.callable_identifier,
+            source_public_schema_version=metadata.source_public_schema_version,
+            product_output_schema_version=metadata.product_output_schema_version,
+            benchmark=metadata.benchmark,
+            build_environment=metadata.build_environment,
+            run=metadata.run,
+            adapter=metadata.adapter,
+            systems_under_test=(_reference_only_system(),),
+            generator_configuration=metadata.generator_configuration,
+            event_schedule=metadata.event_schedule,
+        )
+
+    with pytest.raises(ValidationError, match="deployed system"):
+        build_metadata(EvidenceClaimV2.LIVE_LAB_CONFORMANCE)
+    accepted = build_metadata(EvidenceClaimV2.CANONICAL_CONFORMANCE)
+    assert accepted.evidence_claim is EvidenceClaimV2.CANONICAL_CONFORMANCE
+
+
+def test_contextual_failed_finalizer_seals_staged_failures_and_rejects_successes(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+    pre_execution = ContextualAccessPreExecutionArtifactsV1(
+        run.plan, run.benchmark.public
+    )
+
+    def failed_runner(_input: Path, output: Path) -> int:
+        output.write_bytes(b"failed\n")
+        return 7
+
+    failed_root = tmp_path / "failed-stage"
+    _preflight(failed_root, run=run, runner=failed_runner)
+    manifest = finalize_failed_contextual_access_run_receipt(
+        failed_root,
+        pre_execution_artifacts=pre_execution,
+        adapter=lambda payload: payload,
+        metadata=_finalizer_metadata(run),
+    )
+    assert manifest.execution_status is ExecutionStatus.FAILED
+    assert manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED
+
+    with pytest.raises(ReceiptIntegrityError, match="cannot be evaluated"):
+        _finalize_staged(failed_root, run=run)
+
+    success_root = tmp_path / "success-stage"
+    _preflight(success_root, run=run)
+    with pytest.raises(ReceiptIntegrityError, match="cannot be sealed as failed"):
+        finalize_failed_contextual_access_run_receipt(
+            success_root,
+            pre_execution_artifacts=pre_execution,
+            adapter=lambda payload: payload,
+            metadata=_finalizer_metadata(run),
+        )
+
+    tampered = tmp_path / "stimulus-tampered"
+    _preflight(tampered, run=run, runner=failed_runner)
+    staged_execution = parse_execution_receipt((tampered / EXECUTION_PATH).read_bytes())
+    assert isinstance(staged_execution, ExecutionReceiptV2)
+    (tampered / EXECUTION_PATH).write_bytes(
+        canonical_json_bytes(
+            staged_execution.model_copy(
+                update={"stimulus_digest": DigestV2(value="9" * 64)}
+            )
+        )
+    )
+    with pytest.raises(ReceiptIntegrityError, match="no stimulus set"):
+        finalize_failed_contextual_access_run_receipt(
+            tampered,
+            pre_execution_artifacts=pre_execution,
+            adapter=lambda payload: payload,
+            metadata=_finalizer_metadata(run),
+        )
+
+
+def test_contextual_validator_rejects_every_failed_receipt_tamper_position(
+    tmp_path: Path,
+) -> None:
+    run = reference_contextual_access_run()
+
+    def _build_failed(root: Path) -> RunReceiptManifestV2:
+        def runner(_input: Path, output: Path) -> int:
+            output.write_bytes(b"failed\n")
+            return 7
+
+        return build_contextual_access_run_receipt(
+            root,
+            pre_execution_artifacts=ContextualAccessPreExecutionArtifactsV1(
+                run.plan, run.benchmark.public
+            ),
+            source_public=canonical_json_bytes(run.benchmark.public),
+            adapter=lambda payload: payload,
+            runner=runner,
+            observation_normalizer=lambda _payload, _plan, _public: run.observations,
+            truth_loader=lambda: run.benchmark.evaluator,
+            metadata=reference_contextual_receipt_metadata(run),
+        )
+
+    template = tmp_path / "template"
+    _build_failed(template)
+
+    def _copy(name: str) -> Path:
+        root = tmp_path / name
+        shutil.copytree(template, root)
+        return root
+
+    roles = _copy("roles")
+    manifest = _manifest(roles)
+    swapped = manifest.artifacts[-1].model_copy(update={"role": "bogus"})
+    _write_manifest(
+        roles,
+        manifest.model_copy(update={"artifacts": (*manifest.artifacts[:-1], swapped)}),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="wrong product artifacts"):
+        validate_contextual_access_run_receipt(roles)
+
+    schemas = _copy("schemas")
+    manifest = _manifest(schemas)
+    _write_manifest(
+        schemas,
+        manifest.model_copy(update={"schema_versions": manifest.schema_versions[1:]}),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="schema bindings"):
+        validate_contextual_access_run_receipt(schemas)
+
+    version = _copy("execution-version")
+    _write_model_and_reindex(
+        version,
+        EXECUTION_PATH,
+        ExecutionReceipt(
+            boundary="b",
+            callable_identifier="c",
+            adapter_name="n",
+            adapter_version="v",
+            adapter_source_digest=Digest(value="1" * 64),
+            source_public_digest=Digest(value="2" * 64),
+            product_input_digest=Digest(value="3" * 64),
+            product_output_digest=Digest(value="4" * 64),
+            exit_code=7,
+            status=ExecutionStatus.FAILED,
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="requires execution v2"):
+        validate_contextual_access_run_receipt(version)
+
+    succeeded = _copy("execution-succeeded")
+    _mutate_execution(
+        succeeded,
+        lambda item: item.model_copy(
+            update={"exit_code": 0, "status": ExecutionStatus.SUCCEEDED}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="requires a failed execution"):
+        validate_contextual_access_run_receipt(succeeded)
+
+    stimulus = _copy("execution-stimulus")
+    _mutate_execution(
+        stimulus,
+        lambda item: item.model_copy(
+            update={"stimulus_digest": DigestV2(value="9" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="no stimulus set"):
+        validate_contextual_access_run_receipt(stimulus)
+
+    references = _copy("references")
+    manifest = _manifest(references)
+    _write_manifest(
+        references,
+        manifest.model_copy(
+            update={"systems_under_test": (manifest.systems_under_test[0],)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="relationships are invalid"):
+        validate_contextual_access_run_receipt(references)
+
+    plan_digest = _copy("plan-digest")
+    _mutate_execution(
+        plan_digest,
+        lambda item: item.model_copy(
+            update={"run_plan_digest": DigestV2(value="9" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="run-plan digest"):
+        validate_contextual_access_run_receipt(plan_digest)
+
+    public_digest = _copy("public-digest")
+    _mutate_product_input(
+        public_digest,
+        lambda item: item.model_copy(
+            update={"contextual_public_digest": DigestV2(value="9" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="public digest"):
+        validate_contextual_access_run_receipt(public_digest)
+
+    inline_public = _copy("inline-public")
+    _mutate_product_input(
+        inline_public,
+        lambda item: item.model_copy(
+            update={"public": reference_contextual_access(seed=2).public}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="product input differs"):
+        validate_contextual_access_run_receipt(inline_public)
+
+    artifact_digest = _copy("artifact-digest")
+    _mutate_execution(
+        artifact_digest,
+        lambda item: item.model_copy(
+            update={"product_output_digest": DigestV2(value="9" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="artifact digests differ"):
+        validate_contextual_access_run_receipt(artifact_digest)
+
+    systems = _copy("systems")
+    _mutate_execution(
+        systems,
+        lambda item: item.model_copy(
+            update={"systems_under_test": (*item.systems_under_test, "zz-extra")}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="systems differ"):
+        validate_contextual_access_run_receipt(systems)
+
+    provenance = _copy("provenance")
+    _mutate_execution(
+        provenance, lambda item: item.model_copy(update={"boundary": "different"})
+    )
+    with pytest.raises(ReceiptIntegrityError, match="provenance differs"):
+        validate_contextual_access_run_receipt(provenance)
+
+    benchmark = _copy("benchmark")
+    manifest = _manifest(benchmark)
+    _write_manifest(
+        benchmark,
+        manifest.model_copy(
+            update={
+                "benchmark": manifest.benchmark.model_copy(
+                    update={"family": "different"}
+                )
+            }
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="benchmark identity"):
+        validate_contextual_access_run_receipt(benchmark)
+
+    replay = _copy("adapter-replay")
+    other_public = reference_contextual_access(seed=2).public
+    with pytest.raises(ReceiptIntegrityError, match="adapter output"):
+        validate_contextual_access_run_receipt(
+            replay,
+            adapter=lambda _payload: canonical_json_bytes(other_public),
+        )

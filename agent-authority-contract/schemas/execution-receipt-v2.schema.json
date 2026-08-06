@@ -36,6 +36,7 @@
     }
   },
   "additionalProperties": false,
+  "description": "One adapter/product execution stage.\n\n``stimulus_digest`` binds the executed stimulus set.  Lineages without a\nstimulus set (the contextual lineage executes a public input directly)\nmust leave it unset rather than borrowing another artifact's digest.",
   "properties": {
     "schema_version": {
       "const": "2.0.0",
@@ -78,7 +79,15 @@
       "$ref": "#/$defs/DigestV2"
     },
     "stimulus_digest": {
-      "$ref": "#/$defs/DigestV2"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DigestV2"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "source_public_digest": {
       "$ref": "#/$defs/DigestV2"
@@ -105,7 +114,6 @@
     "adapter_source_digest",
     "systems_under_test",
     "run_plan_digest",
-    "stimulus_digest",
     "source_public_digest",
     "product_input_digest",
     "product_output_digest",

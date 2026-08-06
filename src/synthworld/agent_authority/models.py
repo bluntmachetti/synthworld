@@ -212,7 +212,13 @@ class AgentAuthorityRunPlanV1(AgentAuthorityOperatorModel):
 
 
 class AgentAuthorityProductInputV1(AgentAuthorityOperatorModel):
-    """Exact adapter-facing envelope; intentionally has no synthetic marker."""
+    """Product-input envelope the testbed stages before execution.
+
+    The testbed synthesizes this envelope from the preflight run plan and
+    stimulus set; the adapter never produces it.  Adapter output is replayed
+    separately and must equal the declared stimulus set before this envelope
+    is written.  Intentionally has no synthetic marker.
+    """
 
     run_plan_digest: DigestV2
     schema_version: Literal["1.0.0"] = AGENT_AUTHORITY_PRODUCT_INPUT_SCHEMA_VERSION

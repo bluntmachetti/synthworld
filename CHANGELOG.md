@@ -29,6 +29,18 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   New modules: `ambiguity_evidence`, `ambiguity_surfaces`, `ambiguity_channel`,
   `ambiguity_floor`, with v2 serialization/metrics/baselines support and
   `examples/compute_ambiguity_floor.py`.
+- Agent-authority and contextual-access receipt builders now seal honest
+  failed-run receipts: a failed product execution produces a manifest with
+  `execution_status=failed` and `evaluation_status=not_evaluated` that binds
+  only the product-stage artifacts and never loads evaluator truth, so an
+  assurance corpus can no longer be structurally biased toward successful runs.
+  Receipt validation enforces the paired statuses and the product-only artifact
+  inventory, and run manifests whose evidence claim is not supported by the
+  systems under test (live-lab claims with reference-only components) are
+  rejected. Managed-service provenance in `not_exposed` observability states
+  additionally forbids evidence references, and the contextual execution
+  receipt leaves `stimulus_digest` unset because that lineage executes the
+  public input directly.
 - Contextual-access receipts now expose the same explicit two-phase live-run
   boundary as agent-authority receipts. External runners may finish and attribute
   the product stage before constructing completion metadata; the finalizer then

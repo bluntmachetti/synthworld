@@ -24,10 +24,13 @@ from synthworld.assurance.models import (
 )
 from synthworld.assurance.models_v2 import (
     ArtifactDescriptorV2,
+    ComponentArtifactKindV2,
     ConfigurationObservabilityV2,
     DigestV2,
+    EvidenceClaimV2,
     ExecutionReceiptV2,
     ManagedServiceComponentProvenanceV2,
+    ReferenceComponentProvenanceV2,
     ReplayabilityV2,
     RepositoryProvenanceV2,
     RunReceiptManifestV2,
@@ -165,6 +168,16 @@ def test_managed_service_provenance_closes_configuration_and_version_states() ->
     )
     _reject(hidden, "nonblank", observed_configuration_fields=("",))
     _reject(hidden, "not-exposed version forbids", release_identifier="release")
+    _reject(
+        hidden,
+        "not-exposed configuration forbids",
+        configuration_evidence_refs=("evidence:hidden-config",),
+    )
+    _reject(
+        hidden,
+        "not-exposed version forbids",
+        version_evidence_refs=("evidence:hidden-version",),
+    )
 
     observed_config = _managed_base() | {
         "configuration_observability": ConfigurationObservabilityV2.OBSERVED,
@@ -298,6 +311,61 @@ def test_manifest_v2_rejects_duplicate_indexes_and_self_inventory(
     )
     self_descriptor = first_artifact.model_copy(update={"path": MANIFEST_PATH})
     _reject(manifest, "cannot contain its own digest", artifacts=(self_descriptor,))
+
+
+def _reference_system() -> ReferenceComponentProvenanceV2:
+    return ReferenceComponentProvenanceV2(
+        component_id="component-reference",
+        role="reference",
+        name="reference implementation",
+        version="1.0.0",
+        artifact_kind=ComponentArtifactKindV2.SOURCE,
+        artifact_digest=DigestV2(value="1" * 64),
+        dependency_lock_digest=DigestV2(value="2" * 64),
+        configuration_digest=DigestV2(value="3" * 64),
+        tree_state=TreeState.CLEAN,
+        replayability=ReplayabilityV2.EXACT,
+    )
+
+
+def test_manifest_v2_pairs_claims_statuses_and_scoring(v2_receipt: Path) -> None:
+    manifest = _manifest(v2_receipt)
+
+    _reject(
+        manifest,
+        "deployed system",
+        evidence_claim=EvidenceClaimV2.LIVE_LAB_CONFORMANCE,
+        systems_under_test=(_reference_system(),),
+    )
+    offline = manifest.model_copy(
+        update={
+            "evidence_claim": EvidenceClaimV2.CANONICAL_CONFORMANCE,
+            "systems_under_test": (_reference_system(),),
+        }
+    )
+    RunReceiptManifestV2.model_validate(offline.model_dump(mode="json"))
+    live = manifest.model_copy(
+        update={"evidence_claim": EvidenceClaimV2.LIVE_LAB_CONFORMANCE}
+    )
+    RunReceiptManifestV2.model_validate(live.model_dump(mode="json"))
+
+    _reject(
+        manifest,
+        "failed executions are unevaluated",
+        execution_status=ExecutionStatus.FAILED,
+    )
+    _reject(
+        manifest,
+        "failed executions are unevaluated",
+        evaluation_status=EvaluationStatus.NOT_EVALUATED,
+    )
+    _reject(manifest, "must bind its scoring formulas", scoring_formula_versions=())
+    _reject(
+        manifest,
+        "must not bind scoring formulas",
+        execution_status=ExecutionStatus.FAILED,
+        evaluation_status=EvaluationStatus.NOT_EVALUATED,
+    )
 
 
 def test_receipt_v2_digest_description_and_manifest_write_precondition(

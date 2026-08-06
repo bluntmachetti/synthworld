@@ -2215,7 +2215,7 @@
     }
   },
   "additionalProperties": false,
-  "description": "Exact contextual adapter-facing envelope staged before execution.",
+  "description": "Product-input envelope the testbed stages before execution.\n\nThe testbed synthesizes this envelope from the preflight artifacts; the\nadapter never produces it.  Adapter output is replayed separately and must\nequal ``public`` before this envelope is written.",
   "properties": {
     "schema_version": {
       "const": "1.0.0",

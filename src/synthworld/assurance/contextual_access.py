@@ -29,6 +29,7 @@ from synthworld.assurance.models_v2 import (
     RunReceiptManifestV2,
     SystemComponentProvenanceV2,
     VersionBindingV2,
+    validate_evidence_claim_support,
 )
 from synthworld.assurance.receipt import (
     EXECUTION_PATH,
@@ -89,6 +90,14 @@ _ROLE_PATHS = {
     "contextual_access_evaluation": CONTEXTUAL_REPORT_PATH,
 }
 
+_FAILED_ROLE_PATHS = {
+    "contextual_access_run_plan": CONTEXTUAL_RUN_PLAN_PATH,
+    "source_public": SOURCE_PUBLIC_PATH,
+    "product_input": PRODUCT_INPUT_PATH,
+    "product_output": PRODUCT_OUTPUT_PATH,
+    "execution": EXECUTION_PATH,
+}
+
 ContextualObservationNormalizer = Callable[
     [bytes, ContextualAccessRunPlanV1, ContextualAccessPublicV1],
     ContextualAccessObservationsV1,
@@ -97,7 +106,12 @@ ContextualTruthLoader = Callable[[], ContextualAccessEvaluatorV1]
 
 
 class ContextualAccessProductInputV1(EnterpriseOperatorModel):
-    """Exact contextual adapter-facing envelope staged before execution."""
+    """Product-input envelope the testbed stages before execution.
+
+    The testbed synthesizes this envelope from the preflight artifacts; the
+    adapter never produces it.  Adapter output is replayed separately and must
+    equal ``public`` before this envelope is written.
+    """
 
     schema_version: Literal["1.0.0"] = CONTEXTUAL_PRODUCT_INPUT_SCHEMA_VERSION
     run_plan_digest: DigestV2
@@ -129,6 +143,7 @@ class ContextualAccessRunMetadataV1(EnterpriseOperatorModel):
         component_ids = tuple(item.component_id for item in self.systems_under_test)
         if component_ids != tuple(sorted(set(component_ids))):
             raise ValueError("contextual systems under test must be sorted and unique")
+        validate_evidence_claim_support(self.evidence_claim, self.systems_under_test)
         return self
 
 
@@ -205,7 +220,9 @@ def run_contextual_product_stage_with_preflight(
         adapter_source_digest=adapter_provenance.source_digest,
         systems_under_test=component_ids,
         run_plan_digest=plan_digest,
-        stimulus_digest=public_digest,
+        # The contextual lineage executes the public input directly and has no
+        # stimulus set, so no stimulus digest may be bound here.
+        stimulus_digest=None,
         source_public_digest=public_digest,
         product_input_digest=digest_bytes_v2((root / PRODUCT_INPUT_PATH).read_bytes()),
         product_output_digest=digest_bytes_v2(output_path.read_bytes()),
@@ -227,14 +244,14 @@ def build_contextual_access_run_receipt(
     truth_loader: ContextualTruthLoader,
     metadata: ContextualAccessRunMetadataV1,
 ) -> RunReceiptManifestV2:
-    """Execute and stage product artifacts before loading evaluator truth."""
+    """Execute the product stage, then seal an honest success or failure receipt."""
 
     _validate_metadata_bindings(
         pre_execution_artifacts.run_plan,
         pre_execution_artifacts.public,
         metadata,
     )
-    run_contextual_product_stage_with_preflight(
+    execution = run_contextual_product_stage_with_preflight(
         root,
         systems_under_test=metadata.systems_under_test,
         pre_execution_artifacts=pre_execution_artifacts,
@@ -244,6 +261,13 @@ def build_contextual_access_run_receipt(
         adapter_provenance=metadata.adapter,
         callable_identifier=metadata.callable_identifier,
     )
+    if execution.status is ExecutionStatus.FAILED:
+        return finalize_failed_contextual_access_run_receipt(
+            root,
+            pre_execution_artifacts=pre_execution_artifacts,
+            adapter=adapter,
+            metadata=metadata,
+        )
     return finalize_contextual_access_run_receipt(
         root,
         pre_execution_artifacts=pre_execution_artifacts,
@@ -281,6 +305,8 @@ def finalize_contextual_access_run_receipt(
         adapter=adapter,
         metadata=metadata,
     )
+    if execution.status is not ExecutionStatus.SUCCEEDED:
+        raise ReceiptIntegrityError("a failed contextual execution cannot be evaluated")
 
     plan = pre_execution_artifacts.run_plan
     public = pre_execution_artifacts.public
@@ -328,6 +354,54 @@ def finalize_contextual_access_run_receipt(
         adapter=adapter,
         observation_normalizer=observation_normalizer,
     )
+
+
+def finalize_failed_contextual_access_run_receipt(
+    root: Path,
+    *,
+    pre_execution_artifacts: ContextualAccessPreExecutionArtifactsV1,
+    adapter: PublicAdapter,
+    metadata: ContextualAccessRunMetadataV1,
+) -> RunReceiptManifestV2:
+    """Seal an honest receipt for a failed contextual execution, without evaluation.
+
+    The manifest records the failure and never loads evaluator truth, so an
+    assurance corpus cannot be structurally biased toward successful runs.
+    """
+
+    _validate_metadata_bindings(
+        pre_execution_artifacts.run_plan,
+        pre_execution_artifacts.public,
+        metadata,
+    )
+    execution = _validate_staged_contextual_execution(
+        root,
+        pre_execution_artifacts=pre_execution_artifacts,
+        adapter=adapter,
+        metadata=metadata,
+    )
+    if execution.status is not ExecutionStatus.FAILED:
+        raise ReceiptIntegrityError(
+            "a successful contextual execution cannot be sealed as failed"
+        )
+
+    specs = _product_stage_artifact_specs(metadata)
+    manifest = RunReceiptManifestV2(
+        benchmark=metadata.benchmark,
+        build_environment=metadata.build_environment,
+        run=metadata.run,
+        schema_versions=_schema_versions(specs),
+        generator_configuration=metadata.generator_configuration,
+        event_schedule=metadata.event_schedule,
+        adapter=metadata.adapter,
+        systems_under_test=metadata.systems_under_test,
+        artifacts=tuple(describe_artifact_v2(root, spec) for spec in specs),
+        execution_status=execution.status,
+        evaluation_status=EvaluationStatus.NOT_EVALUATED,
+        evidence_claim=metadata.evidence_claim,
+    )
+    write_manifest_last_v2(root, manifest)
+    return validate_contextual_access_run_receipt(root, adapter=adapter)
 
 
 def _validate_staged_contextual_execution(
@@ -392,8 +466,10 @@ def _validate_staged_contextual_execution(
     if not isinstance(parsed_execution, ExecutionReceiptV2):
         raise ReceiptIntegrityError("contextual-access receipt requires execution v2")
     execution = parsed_execution
-    if execution.status is not ExecutionStatus.SUCCEEDED:
-        raise ReceiptIntegrityError("a failed contextual execution cannot be evaluated")
+    if execution.stimulus_digest is not None:
+        raise ReceiptIntegrityError(
+            "the contextual lineage has no stimulus set to bind"
+        )
 
     plan_digest = digest_bytes_v2((root / CONTEXTUAL_RUN_PLAN_PATH).read_bytes())
     public_digest = digest_bytes_v2(source)
@@ -430,14 +506,12 @@ def _validate_staged_contextual_execution(
         )
     execution_digests = (
         execution.run_plan_digest,
-        execution.stimulus_digest,
         execution.source_public_digest,
         execution.product_input_digest,
         execution.product_output_digest,
     )
     staged_digests = (
         plan_digest,
-        public_digest,
         public_digest,
         digest_bytes_v2((root / PRODUCT_INPUT_PATH).read_bytes()),
         digest_bytes_v2((root / PRODUCT_OUTPUT_PATH).read_bytes()),
@@ -456,6 +530,8 @@ def validate_contextual_access_run_receipt(
     """Validate inventory, bindings, and deterministic evaluation replay."""
 
     manifest = validate_manifest_v2(root)
+    if manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED:
+        return _validate_failed_contextual_receipt(root, manifest, adapter=adapter)
     role_paths = {item.role: item.path for item in manifest.artifacts}
     if role_paths != _ROLE_PATHS:
         raise ReceiptIntegrityError(
@@ -508,9 +584,12 @@ def validate_contextual_access_run_receipt(
     public_digest = digest_bytes_v2(source)
     if not (product_input.run_plan_digest == execution.run_plan_digest == plan_digest):
         raise ReceiptIntegrityError("contextual run-plan digest bindings disagree")
+    if execution.stimulus_digest is not None:
+        raise ReceiptIntegrityError(
+            "the contextual lineage has no stimulus set to bind"
+        )
     if not (
         product_input.contextual_public_digest
-        == execution.stimulus_digest
         == execution.source_public_digest
         == public_digest
         == descriptors["source_public"].digest
@@ -536,8 +615,6 @@ def validate_contextual_access_run_receipt(
         or execution.status is not manifest.execution_status
     ):
         raise ReceiptIntegrityError("execution provenance differs from manifest")
-    if manifest.evaluation_status is not EvaluationStatus.EVALUATED:
-        raise ReceiptIntegrityError("a complete contextual receipt is evaluated")
     _validate_manifest_benchmark(plan, public, truth, manifest)
 
     if adapter is not None:
@@ -564,7 +641,105 @@ def validate_contextual_access_run_receipt(
     return manifest
 
 
-def _artifact_specs(
+def _validate_failed_contextual_receipt(
+    root: Path,
+    manifest: RunReceiptManifestV2,
+    *,
+    adapter: PublicAdapter | None,
+) -> RunReceiptManifestV2:
+    """Validate an honest failed contextual receipt, which carries no evaluation."""
+
+    role_paths = {item.role: item.path for item in manifest.artifacts}
+    if role_paths != _FAILED_ROLE_PATHS:
+        raise ReceiptIntegrityError(
+            "a failed contextual-access receipt carries the wrong product artifacts"
+        )
+    descriptors = {item.role: item for item in manifest.artifacts}
+    declared_schemas = {item.role: item.version for item in manifest.schema_versions}
+    expected_schemas = {"run_receipt": manifest.schema_version} | {
+        item.role: item.schema_version
+        for item in manifest.artifacts
+        if item.schema_version is not None
+    }
+    if declared_schemas != expected_schemas:
+        raise ReceiptIntegrityError("manifest schema bindings differ from artifacts")
+
+    plan = _read_model(root, CONTEXTUAL_RUN_PLAN_PATH, ContextualAccessRunPlanV1)
+    source = (root / SOURCE_PUBLIC_PATH).read_bytes()
+    public = _model_from_canonical_bytes(
+        source, ContextualAccessPublicV1, "contextual source public input"
+    )
+    product_input = _read_model(
+        root, PRODUCT_INPUT_PATH, ContextualAccessProductInputV1
+    )
+    parsed_execution = parse_execution_receipt((root / EXECUTION_PATH).read_bytes())
+    if not isinstance(parsed_execution, ExecutionReceiptV2):
+        raise ReceiptIntegrityError("contextual-access receipt requires execution v2")
+    execution = parsed_execution
+    if execution.status is not ExecutionStatus.FAILED:
+        raise ReceiptIntegrityError("a failed receipt requires a failed execution")
+    if execution.stimulus_digest is not None:
+        raise ReceiptIntegrityError(
+            "the contextual lineage has no stimulus set to bind"
+        )
+
+    try:
+        validate_contextual_run_plan(
+            plan,
+            public=public,
+            systems_under_test=manifest.systems_under_test,
+        )
+    except ContextualProtocolError as error:
+        raise ReceiptIntegrityError(
+            "contextual-access artifact relationships are invalid"
+        ) from error
+
+    plan_digest = descriptors["contextual_access_run_plan"].digest
+    public_digest = digest_bytes_v2(source)
+    if not (product_input.run_plan_digest == execution.run_plan_digest == plan_digest):
+        raise ReceiptIntegrityError("contextual run-plan digest bindings disagree")
+    if not (
+        product_input.contextual_public_digest
+        == execution.source_public_digest
+        == public_digest
+        == descriptors["source_public"].digest
+    ):
+        raise ReceiptIntegrityError("contextual public digest bindings disagree")
+    if product_input.public != public:
+        raise ReceiptIntegrityError("contextual product input differs from source")
+    if (
+        execution.product_input_digest != descriptors["product_input"].digest
+        or execution.product_output_digest != descriptors["product_output"].digest
+    ):
+        raise ReceiptIntegrityError("execution artifact digests differ from manifest")
+    expected_system_ids = tuple(
+        item.component_id for item in manifest.systems_under_test
+    )
+    if execution.systems_under_test != expected_system_ids:
+        raise ReceiptIntegrityError("execution systems differ from manifest")
+    if (
+        execution.boundary != manifest.adapter.boundary
+        or execution.adapter_name != manifest.adapter.name
+        or execution.adapter_version != manifest.adapter.version
+        or execution.adapter_source_digest != manifest.adapter.source_digest
+    ):
+        raise ReceiptIntegrityError("execution provenance differs from manifest")
+    _validate_manifest_benchmark_without_truth(plan, public, manifest)
+
+    if adapter is not None:
+        adapted_public = _model_from_canonical_bytes(
+            adapter(source),
+            ContextualAccessPublicV1,
+            "contextual adapter public input",
+        )
+        if adapted_public != public:
+            raise ReceiptIntegrityError(
+                "contextual product input differs from adapter output"
+            )
+    return manifest
+
+
+def _product_stage_artifact_specs(
     metadata: ContextualAccessRunMetadataV1,
 ) -> tuple[ArtifactSpecV2, ...]:
     canonical = ArtifactSerialization.CANONICAL_JSON_V1
@@ -609,6 +784,15 @@ def _artifact_specs(
             serialization=canonical,
             schema_version=EXECUTION_RECEIPT_SCHEMA_VERSION_V2,
         ),
+    )
+
+
+def _artifact_specs(
+    metadata: ContextualAccessRunMetadataV1,
+) -> tuple[ArtifactSpecV2, ...]:
+    canonical = ArtifactSerialization.CANONICAL_JSON_V1
+    return (
+        *_product_stage_artifact_specs(metadata),
         ArtifactSpecV2(
             path=CONTEXTUAL_OBSERVATIONS_PATH,
             role="contextual_access_observations",
@@ -663,15 +847,19 @@ def _validate_manifest_benchmark(
     truth: ContextualAccessRunTruthV1,
     manifest: RunReceiptManifestV2,
 ) -> None:
+    _validate_manifest_benchmark_without_truth(plan, public, manifest)
+    if manifest.benchmark.evaluator_root_digest != truth.evaluator_digest:
+        raise ReceiptIntegrityError("contextual benchmark roots differ from artifacts")
+
+
+def _validate_manifest_benchmark_without_truth(
+    plan: ContextualAccessRunPlanV1,
+    public: ContextualAccessPublicV1,
+    manifest: RunReceiptManifestV2,
+) -> None:
     if manifest.run.run_id != plan.run_id:
         raise ReceiptIntegrityError("manifest run identifier differs from the plan")
     _validate_benchmark_identity(plan, public, manifest.benchmark)
-    if (
-        manifest.benchmark.evaluator_root_digest != truth.evaluator_digest
-        or manifest.benchmark.public_root_digest
-        != digest_bytes_v2(canonical_json_bytes(public))
-    ):
-        raise ReceiptIntegrityError("contextual benchmark roots differ from artifacts")
 
 
 def _validate_benchmark_identity(
@@ -740,6 +928,7 @@ __all__ = [
     "ContextualTruthLoader",
     "build_contextual_access_run_receipt",
     "finalize_contextual_access_run_receipt",
+    "finalize_failed_contextual_access_run_receipt",
     "run_contextual_product_stage_with_preflight",
     "validate_contextual_access_run_receipt",
 ]

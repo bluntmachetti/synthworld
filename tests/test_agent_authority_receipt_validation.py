@@ -35,6 +35,7 @@ from synthworld.assurance.agent_authority import (
     AgentAuthorityRunMetadataV1,
     build_agent_authority_run_receipt,
     finalize_agent_authority_run_receipt,
+    finalize_failed_agent_authority_run_receipt,
     run_product_stage_with_preflight,
     validate_agent_authority_run_receipt,
 )
@@ -43,10 +44,15 @@ from synthworld.assurance.models import (
     EvaluationStatus,
     ExecutionReceipt,
     ExecutionStatus,
+    TreeState,
 )
 from synthworld.assurance.models_v2 import (
+    ComponentArtifactKindV2,
     DigestV2,
+    EvidenceClaimV2,
     ExecutionReceiptV2,
+    ReferenceComponentProvenanceV2,
+    ReplayabilityV2,
     RunReceiptManifestV2,
     SystemComponentProvenanceV2,
     VersionBindingV2,
@@ -446,7 +452,9 @@ def test_finalizer_rejects_execution_system_provenance_and_digest_drift(
         _finalize_staged(digest_root)
 
 
-def test_builder_stops_after_failed_product_execution(tmp_path: Path) -> None:
+def test_builder_seals_an_honest_receipt_after_failed_product_execution(
+    tmp_path: Path,
+) -> None:
     truth_called = False
 
     def runner(_input: Path, output: Path) -> int:
@@ -458,24 +466,282 @@ def test_builder_stops_after_failed_product_execution(tmp_path: Path) -> None:
         truth_called = True
         return reference_truth()
 
-    with pytest.raises(ReceiptIntegrityError, match="failed product execution"):
-        build_agent_authority_run_receipt(
-            tmp_path / "failed",
-            pre_execution_artifacts=AgentAuthorityPreExecutionArtifactsV1(
-                reference_plan(), reference_stimuli()
-            ),
-            source_public=canonical_json_bytes(reference_stimuli()),
-            adapter=lambda payload: payload,
-            runner=runner,
+    manifest = build_agent_authority_run_receipt(
+        tmp_path / "failed",
+        pre_execution_artifacts=AgentAuthorityPreExecutionArtifactsV1(
+            reference_plan(), reference_stimuli()
+        ),
+        source_public=canonical_json_bytes(reference_stimuli()),
+        adapter=lambda payload: payload,
+        runner=runner,
+        observation_normalizer=lambda _payload, _plan, _stimuli: (
+            reference_observations()
+        ),
+        truth_loader=truth_loader,
+        metadata=reference_metadata(),
+    )
+    assert not truth_called
+    assert manifest.execution_status is ExecutionStatus.FAILED
+    assert manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED
+    assert not manifest.scoring_formula_versions
+    assert (tmp_path / "failed" / EXECUTION_PATH).is_file()
+    assert (tmp_path / "failed" / MANIFEST_PATH).is_file()
+    assert not (tmp_path / "failed" / OBSERVATIONS_PATH).exists()
+    assert not (tmp_path / "failed" / TRUTH_PATH).exists()
+    assert not (tmp_path / "failed" / EVALUATION_PATH).exists()
+
+    validated = validate_agent_authority_run_receipt(
+        tmp_path / "failed", adapter=lambda payload: payload
+    )
+    assert validated == manifest
+    assert validate_agent_authority_run_receipt(tmp_path / "failed") == manifest
+
+
+def _reference_only_system() -> ReferenceComponentProvenanceV2:
+    return ReferenceComponentProvenanceV2(
+        component_id="component-reference",
+        role="reference",
+        name="reference implementation",
+        version="1.0.0",
+        artifact_kind=ComponentArtifactKindV2.SOURCE,
+        artifact_digest=DigestV2(value="1" * 64),
+        dependency_lock_digest=DigestV2(value="2" * 64),
+        configuration_digest=DigestV2(value="3" * 64),
+        tree_state=TreeState.CLEAN,
+        replayability=ReplayabilityV2.EXACT,
+    )
+
+
+def test_metadata_rejects_live_claims_without_deployed_systems() -> None:
+    metadata = reference_metadata()
+    document = metadata.model_dump(mode="json")
+    document["evidence_claim"] = EvidenceClaimV2.LIVE_LAB_CONFORMANCE.value
+    document["systems_under_test"] = [_reference_only_system().model_dump(mode="json")]
+    with pytest.raises(ValidationError, match="deployed system"):
+        AgentAuthorityRunMetadataV1.model_validate(document)
+
+    document["evidence_claim"] = EvidenceClaimV2.CANONICAL_CONFORMANCE.value
+    assert AgentAuthorityRunMetadataV1.model_validate(document).evidence_claim is (
+        EvidenceClaimV2.CANONICAL_CONFORMANCE
+    )
+
+
+def _stage_failed(root: Path) -> None:
+    _preflight(
+        root,
+        runner=lambda _input, output: (
+            output.write_bytes(b"failed product output\n") or 7
+        ),
+    )
+
+
+def _failed_finalize_kwargs() -> dict[str, object]:
+    return {
+        "pre_execution_artifacts": AgentAuthorityPreExecutionArtifactsV1(
+            reference_plan(), reference_stimuli()
+        ),
+        "adapter": (lambda payload: payload),
+        "metadata": reference_metadata().model_copy(
+            update={"callable_identifier": "tests.fake"}
+        ),
+    }
+
+
+def test_failed_finalizer_seals_staged_failures_and_rejects_successes(
+    tmp_path: Path,
+) -> None:
+    failed_root = tmp_path / "failed-stage"
+    _stage_failed(failed_root)
+    manifest = finalize_failed_agent_authority_run_receipt(
+        failed_root,
+        **_failed_finalize_kwargs(),  # type: ignore[arg-type]
+    )
+    assert manifest.execution_status is ExecutionStatus.FAILED
+    assert manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED
+
+    with pytest.raises(ReceiptIntegrityError, match="cannot be evaluated"):
+        finalize_agent_authority_run_receipt(
+            failed_root,
             observation_normalizer=lambda _payload, _plan, _stimuli: (
                 reference_observations()
             ),
-            truth_loader=truth_loader,
-            metadata=reference_metadata(),
+            truth_loader=reference_truth,
+            **_failed_finalize_kwargs(),  # type: ignore[arg-type]
         )
-    assert not truth_called
-    assert (tmp_path / "failed" / EXECUTION_PATH).is_file()
-    assert not (tmp_path / "failed" / TRUTH_PATH).exists()
+
+    success_root = tmp_path / "success-stage"
+    _stage_for_finalizer(success_root)
+    with pytest.raises(ReceiptIntegrityError, match="cannot be sealed as failed"):
+        finalize_failed_agent_authority_run_receipt(
+            success_root,
+            **_failed_finalize_kwargs(),  # type: ignore[arg-type]
+        )
+
+
+def _build_failed_receipt(root: Path) -> RunReceiptManifestV2:
+    def runner(_input: Path, output: Path) -> int:
+        output.write_bytes(b"failed product output\n")
+        return 7
+
+    return build_agent_authority_run_receipt(
+        root,
+        pre_execution_artifacts=AgentAuthorityPreExecutionArtifactsV1(
+            reference_plan(), reference_stimuli()
+        ),
+        source_public=canonical_json_bytes(reference_stimuli()),
+        adapter=lambda payload: payload,
+        runner=runner,
+        observation_normalizer=lambda _payload, _plan, _stimuli: (
+            reference_observations()
+        ),
+        truth_loader=reference_truth,
+        metadata=reference_metadata(),
+    )
+
+
+def test_validator_rejects_every_failed_receipt_tamper_position(
+    tmp_path: Path,
+) -> None:
+    template = tmp_path / "template"
+    _build_failed_receipt(template)
+
+    def _copy(name: str) -> Path:
+        root = tmp_path / name
+        shutil.copytree(template, root)
+        return root
+
+    roles = _copy("roles")
+    manifest = _manifest(roles)
+    swapped = manifest.artifacts[-1].model_copy(update={"role": "bogus"})
+    _write_manifest(
+        roles,
+        manifest.model_copy(update={"artifacts": (*manifest.artifacts[:-1], swapped)}),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="wrong product artifacts"):
+        validate_agent_authority_run_receipt(roles)
+
+    schemas = _copy("schemas")
+    manifest = _manifest(schemas)
+    _write_manifest(
+        schemas,
+        manifest.model_copy(update={"schema_versions": manifest.schema_versions[1:]}),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="schema bindings"):
+        validate_agent_authority_run_receipt(schemas)
+
+    version = _copy("execution-version")
+    _write_model_and_reindex(
+        version,
+        EXECUTION_PATH,
+        ExecutionReceipt(
+            boundary="b",
+            callable_identifier="c",
+            adapter_name="n",
+            adapter_version="v",
+            adapter_source_digest=Digest(value="1" * 64),
+            source_public_digest=Digest(value="2" * 64),
+            product_input_digest=Digest(value="3" * 64),
+            product_output_digest=Digest(value="4" * 64),
+            exit_code=7,
+            status=ExecutionStatus.FAILED,
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="requires execution v2"):
+        validate_agent_authority_run_receipt(version)
+
+    succeeded = _copy("execution-succeeded")
+    _mutate_execution(
+        succeeded,
+        lambda item: item.model_copy(
+            update={"exit_code": 0, "status": ExecutionStatus.SUCCEEDED}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="requires a failed execution"):
+        validate_agent_authority_run_receipt(succeeded)
+
+    references = _copy("references")
+    manifest = _manifest(references)
+    _write_manifest(
+        references,
+        manifest.model_copy(
+            update={"systems_under_test": (manifest.systems_under_test[0],)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="relationships are invalid"):
+        validate_agent_authority_run_receipt(references)
+
+    plan_digest = _copy("plan-digest")
+    _mutate_execution(
+        plan_digest,
+        lambda item: item.model_copy(
+            update={"run_plan_digest": DigestV2(value="9" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="run-plan digest"):
+        validate_agent_authority_run_receipt(plan_digest)
+
+    stimulus = _copy("stimulus-digest")
+    _mutate_product_input(
+        stimulus,
+        lambda item: item.model_copy(
+            update={"stimulus_digest": DigestV2(value="9" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="stimulus digest"):
+        validate_agent_authority_run_receipt(stimulus)
+
+    artifact_digest = _copy("artifact-digest")
+    _mutate_execution(
+        artifact_digest,
+        lambda item: item.model_copy(
+            update={"source_public_digest": DigestV2(value="9" * 64)}
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="artifact digests differ"):
+        validate_agent_authority_run_receipt(artifact_digest)
+
+    systems = _copy("systems")
+    _mutate_execution(
+        systems,
+        lambda item: item.model_copy(
+            update={
+                "systems_under_test": (
+                    *item.systems_under_test,
+                    "zz-extra",
+                )
+            }
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="systems differ"):
+        validate_agent_authority_run_receipt(systems)
+
+    provenance = _copy("provenance")
+    _mutate_execution(
+        provenance, lambda item: item.model_copy(update={"boundary": "different"})
+    )
+    with pytest.raises(ReceiptIntegrityError, match="provenance differs"):
+        validate_agent_authority_run_receipt(provenance)
+
+    benchmark = _copy("benchmark")
+    manifest = _manifest(benchmark)
+    _write_manifest(
+        benchmark,
+        manifest.model_copy(
+            update={
+                "benchmark": manifest.benchmark.model_copy(
+                    update={"family": "different"}
+                )
+            }
+        ),
+    )
+    with pytest.raises(ReceiptIntegrityError, match="benchmark identity"):
+        validate_agent_authority_run_receipt(benchmark)
+
+    replay = _copy("adapter-replay")
+    with pytest.raises(ReceiptIntegrityError, match="stimuli differ"):
+        validate_agent_authority_run_receipt(
+            replay, adapter=lambda _payload: canonical_json_bytes(_changed_stimuli())
+        )
 
 
 def test_builder_stages_observations_before_loading_truth(tmp_path: Path) -> None:
@@ -745,10 +1011,14 @@ def test_validator_rejects_system_evaluation_and_manifest_identity_mismatches(
     _write_manifest(
         evaluation,
         manifest.model_copy(
-            update={"evaluation_status": EvaluationStatus.NOT_EVALUATED}
+            update={
+                "execution_status": ExecutionStatus.FAILED,
+                "evaluation_status": EvaluationStatus.NOT_EVALUATED,
+                "scoring_formula_versions": (),
+            }
         ),
     )
-    with pytest.raises(ReceiptIntegrityError, match="receipt is evaluated"):
+    with pytest.raises(ReceiptIntegrityError, match="wrong product artifacts"):
         validate_agent_authority_run_receipt(evaluation)
 
     run_id = _copy_receipt(receipt_template, tmp_path / "run-id")
