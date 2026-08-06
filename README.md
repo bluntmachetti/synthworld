@@ -265,9 +265,11 @@ target, and permission — derive from the namespace salt and your logical keys,
 do not depend on the seed at all; across two seeds those records stay
 byte-identical. What the seed does decide is *which* principals are allocated
 accounts. Account identifiers embed the selected principal slot, so they move with
-the seed, and any access atom whose subject is an account inherits that: in the
-shipped smoke blueprint, all twelve principal-subject atom IDs held across seeds
-while two of the four account-subject atom IDs moved.
+the seed, and any access atom whose subject is an account inherits that. How many
+records move depends on your salt and on which two seeds you compare — on the
+reference import, seeds 111 and 222 move every account while 20260804 and 999 move
+half of them — so treat the mechanism as the invariant, not any particular count.
+What holds in every case is that principal-subject records do not move.
 
 That allocation is the account-to-principal binding the evaluator tree holds, and
 it is protected by the **salt**, not by withholding. Slot selection hashes the

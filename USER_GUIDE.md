@@ -651,13 +651,13 @@ identical bytes — but that equivalence is not a general guarantee, because the
 hardcodes `account_observations` and `direct_entitlements` to empty lists (see the limits
 below). A YAML or JSON blueprint that uses either cannot be round-tripped through CSV.
 
-### Validation returns every error at once
+### Validation reports every error in a stage, not the first one
 
 `validate-enterprise-access` exits `0` on a valid import and `1` otherwise, printing one
 diagnostic per line to stderr in the form `<code> <file:row:column>: <message>`. Add
-`--json` for the full `EnterpriseIdentityAccessValidationReportV1`. It does not stop at the
-first problem. A blueprint whose only content is a `blueprint_key` set to an email address
-produces all six of these at once:
+`--json` for the full `EnterpriseIdentityAccessValidationReportV1`. Within a stage it does
+not stop at the first problem. A blueprint whose only content is a `blueprint_key` set to an
+email address produces all six of these at once:
 
 ```text
 model_validation blueprint.blueprint_key: Value error, person_level_email_forbidden
@@ -731,10 +731,14 @@ At a fixed salt, tenant, organisation, unit, principal, group, role, authorizati
 and permission identifiers do not depend on the seed.
 
 Account allocation *is* seed-driven — the seed ranks principal slots — and that choice
-cascades. Compiling the scaffolded reference blueprint at the same salt under two seeds
-changes `accounts` (2 of 4), `access_subjects` (2 of 10), `access_atoms` (2 of 16), and
-`relationship_anchors` (2 of 16). Every changed record is one whose subject or entity is an
-account, so an access-atom identifier is seed-stable only when its subject is a principal.
+cascades into `accounts`, `access_subjects`, `access_atoms`, and `relationship_anchors`.
+Every changed record is one whose subject or entity is an account, so an access-atom
+identifier is seed-stable only when its subject is a principal.
+
+How many records move depends on your salt and on which two seeds you compare, so do not
+treat any particular count as a property of the format. On the reference import, seeds 111
+and 222 move all 4 accounts and the 4 subjects, atoms, and anchors that hang off them, while
+seeds 20260804 and 999 move only 2 of the 4. Principals do not move in either case.
 
 Adding an unrelated template does not remap existing identifiers. But generated
 `display_label` values are positional over the canonical key order, so a template that sorts
@@ -834,9 +838,11 @@ actual = project_openfga(
 One projection covers exactly one source layer, so seeing both takes two calls.
 
 Two cautions. First, **the input is compiled truth**, not a public artifact —
-`CompiledEnterpriseRebacTruthV1` is evaluator-side, so an OpenFGA projection is derived from
-truth and is not automatically safe to hand to a system under test. Second, each emitted
-tuple carries `native_snapshot_id`, `native_revision_id`, `native_valid_from_tick`, and
+`CompiledEnterpriseRebacTruthV1` is evaluator-side. Because the tuples are derived from it,
+treat the projection's *output* as evaluator-side too unless you have checked what your
+chosen source layer exposes: an `actual` projection describes the access that really holds,
+which is part of what a system under test is meant to work out. Second, each emitted tuple
+carries `native_snapshot_id`, `native_revision_id`, `native_valid_from_tick`, and
 `native_valid_until_tick` as inert metadata that no OpenFGA runtime enforces.
 
 ### AuthZEN
@@ -854,8 +860,10 @@ projection = project_authzen(
 
 One request per call — there is no batch or evaluations-endpoint shape.
 
-The projection **embeds no expected decision**. That is what makes it safe to hand to a
-system under test while the corpus's expected decision stays evaluator-side.
+The projection **embeds no expected decision**, which is what lets you hand it to a system
+under test while the corpus's expected decision stays evaluator-side. That statement is
+about the decision field specifically; if you extend the projection or add context of your
+own, re-check what you are carrying across.
 
 If your system under test returns a decision, record it as a separate observation.
 Normalisation is deliberately lossy: only `allow` and `deny` normalise to a decision, while
