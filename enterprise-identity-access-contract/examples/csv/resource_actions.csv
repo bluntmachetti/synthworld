@@ -1,0 +1,3 @@
+resource_set_key,action
+resource-customer-api,read
+resource-customer-api,write

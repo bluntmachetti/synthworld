@@ -1,0 +1,479 @@
+{
+  "$defs": {
+    "AllSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "all",
+          "default": "all",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "AllSelectorV1",
+      "type": "object"
+    },
+    "CountSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "count",
+          "default": "count",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "CountSelectorV1",
+      "type": "object"
+    },
+    "FractionSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "fraction",
+          "default": "fraction",
+          "title": "Kind",
+          "type": "string"
+        },
+        "numerator": {
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "title": "FractionSelectorV1",
+      "type": "object"
+    },
+    "GroupTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "owner_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Unit Key"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key"
+      ],
+      "title": "GroupTemplateV1",
+      "type": "object"
+    },
+    "OrganisationTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key"
+      ],
+      "title": "OrganisationTemplateV1",
+      "type": "object"
+    },
+    "PopulationTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "population_kind": {
+          "$ref": "#/$defs/PrincipalKind"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        },
+        "unit_key": {
+          "title": "Unit Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key",
+        "unit_key",
+        "population_kind",
+        "count"
+      ],
+      "title": "PopulationTemplateV1",
+      "type": "object"
+    },
+    "PrincipalKind": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "PrincipalSubjectAccessAtomRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "resource_set_key": {
+          "title": "Resource Set Key",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "rule_key",
+        "population_key",
+        "resource_set_key",
+        "action",
+        "selector"
+      ],
+      "title": "PrincipalSubjectAccessAtomRuleV1",
+      "type": "object"
+    },
+    "ResourceSetTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "instance_count": {
+          "exclusiveMinimum": 0,
+          "title": "Instance Count",
+          "type": "integer"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "owner_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Unit Key"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/TargetKind"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key",
+        "target_kind",
+        "instance_count",
+        "actions"
+      ],
+      "title": "ResourceSetTemplateV1",
+      "type": "object"
+    },
+    "RoleTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "owner_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Unit Key"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key"
+      ],
+      "title": "RoleTemplateV1",
+      "type": "object"
+    },
+    "TargetKind": {
+      "enum": [
+        "application",
+        "api",
+        "tool",
+        "data_store",
+        "environment"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    },
+    "TenantTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "TenantTemplateV1",
+      "type": "object"
+    },
+    "UnitKind": {
+      "enum": [
+        "division",
+        "department",
+        "team"
+      ],
+      "title": "UnitKind",
+      "type": "string"
+    },
+    "UnitTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "parent_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Unit Key"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        },
+        "unit_kind": {
+          "$ref": "#/$defs/UnitKind"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key",
+        "unit_kind"
+      ],
+      "title": "UnitTemplateV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "blueprint_key": {
+      "title": "Blueprint Key",
+      "type": "string"
+    },
+    "groups": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GroupTemplateV1"
+      },
+      "title": "Groups",
+      "type": "array"
+    },
+    "id_namespace_salt": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Id Namespace Salt",
+      "type": "string"
+    },
+    "organisations": {
+      "items": {
+        "$ref": "#/$defs/OrganisationTemplateV1"
+      },
+      "minItems": 1,
+      "title": "Organisations",
+      "type": "array"
+    },
+    "populations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PopulationTemplateV1"
+      },
+      "title": "Populations",
+      "type": "array"
+    },
+    "principal_access_atom_rules": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PrincipalSubjectAccessAtomRuleV1"
+      },
+      "title": "Principal Access Atom Rules",
+      "type": "array"
+    },
+    "resource_sets": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ResourceSetTemplateV1"
+      },
+      "title": "Resource Sets",
+      "type": "array"
+    },
+    "roles": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RoleTemplateV1"
+      },
+      "title": "Roles",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "tenants": {
+      "items": {
+        "$ref": "#/$defs/TenantTemplateV1"
+      },
+      "minItems": 1,
+      "title": "Tenants",
+      "type": "array"
+    },
+    "units": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/UnitTemplateV1"
+      },
+      "title": "Units",
+      "type": "array"
+    }
+  },
+  "required": [
+    "blueprint_key",
+    "id_namespace_salt",
+    "tenants",
+    "organisations"
+  ],
+  "title": "EnterpriseIdentityAccessBlueprintV1",
+  "type": "object"
+}

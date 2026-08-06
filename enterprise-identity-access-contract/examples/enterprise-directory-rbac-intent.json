@@ -1,0 +1,223 @@
+{
+  "approved_exceptions": [
+    {
+      "access_atom_ids": [
+        "572d0cac-3a92-58a1-bd29-efda2bcd1202"
+      ],
+      "exception_id": "approved-account-write",
+      "owner_principal_id": "27bec596-b170-53f1-9d25-8031a404dbb9",
+      "reason": "business_need",
+      "subject_id": "de9885f7-7619-5cd9-9e2c-53831ac2e096",
+      "valid_from_tick": 0,
+      "valid_until_tick": 1
+    }
+  ],
+  "birthright_rules": [
+    {
+      "assignments": [
+        {
+          "access_atom_ids": [
+            "00c9285f-3fea-5fc0-9e26-c9c00a8c4f83"
+          ],
+          "assignment_id": "one-agent-platform-group",
+          "target_id": "9b4b0db9-8ad8-5b12-a4cb-3b5564b5dd98",
+          "target_kind": "group"
+        }
+      ],
+      "condition": {
+        "operator": "any",
+        "predicates": [
+          {
+            "kind": "account_kind_is",
+            "values": [
+              "workforce"
+            ]
+          },
+          {
+            "kind": "principal_kind_is",
+            "values": [
+              "agent"
+            ]
+          }
+        ]
+      },
+      "rule_id": "agent-reader-any-birthright"
+    },
+    {
+      "assignments": [
+        {
+          "access_atom_ids": [
+            "2d81a2bc-9538-5f22-b7b0-b6ec9eeb6539",
+            "371757e4-4bbd-5559-8c38-5ca171a5dfd6",
+            "4795d645-2633-59b1-8628-4d557fa016c6",
+            "47c4fd2c-a5d8-5024-8c77-938246afda27",
+            "b6a01789-04bb-5c9f-bf15-cc89de9f8721",
+            "b9e48cf3-4b98-589b-909a-e0dfeae2dea2",
+            "d01230d6-22ff-5c4c-97c3-8834d5562d09",
+            "f2e2d323-f41b-5e2e-ac43-03dae8397482"
+          ],
+          "assignment_id": "employee-reader-role",
+          "target_id": "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c",
+          "target_kind": "role"
+        }
+      ],
+      "condition": {
+        "operator": "all",
+        "predicates": [
+          {
+            "kind": "employment_type_is",
+            "values": [
+              "employee"
+            ]
+          },
+          {
+            "kind": "principal_kind_is",
+            "values": [
+              "employee"
+            ]
+          },
+          {
+            "kind": "tenant_is",
+            "tenant_ids": [
+              "701dfa93-9a42-5fd7-9e66-f93f0c004730"
+            ]
+          },
+          {
+            "kind": "unit_is",
+            "unit_ids": [
+              "0619b957-3d6c-5fe7-9a30-5752e25aff57"
+            ]
+          }
+        ]
+      },
+      "rule_id": "employee-reader-birthright"
+    },
+    {
+      "assignments": [
+        {
+          "access_atom_ids": [
+            "41afdadc-6607-5f5a-8ea0-425e8be36736"
+          ],
+          "assignment_id": "one-workforce-permission",
+          "target_id": "de7fe84a-ee71-5016-a04d-5ae0ba527940",
+          "target_kind": "permission"
+        }
+      ],
+      "condition": {
+        "operator": "all",
+        "predicates": [
+          {
+            "kind": "account_kind_is",
+            "values": [
+              "workforce"
+            ]
+          }
+        ]
+      },
+      "rule_id": "one-workforce-account-birthright"
+    }
+  ],
+  "dsd_constraints": [
+    {
+      "cardinality": 2,
+      "constraint_id": "admin-reader-dsd",
+      "role_ids": [
+        "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c",
+        "e793a152-ac32-51ac-a87e-b2333e8413c9"
+      ],
+      "subject_ids": [],
+      "tenant_id": "701dfa93-9a42-5fd7-9e66-f93f0c004730"
+    }
+  ],
+  "evaluation_corpus_digest": {
+    "algorithm": "sha256",
+    "synthetic": true,
+    "value": "1293dc2a22820f1e0b72f85c7c17028872c424b7483223f50b6f4dd822acf1d6"
+  },
+  "identity_access_universe_digest": {
+    "algorithm": "sha256",
+    "synthetic": true,
+    "value": "b4eae423689ede98d98858cae004f98d07fa5b0ac4774858500a4ba257946f4a"
+  },
+  "intended_group_nesting": [
+    {
+      "child_group_id": "9b4b0db9-8ad8-5b12-a4cb-3b5564b5dd98",
+      "parent_group_id": "9a644107-5296-5c9c-a49e-69471fb8fb70"
+    }
+  ],
+  "intended_group_role_assignments": [
+    {
+      "group_id": "9a644107-5296-5c9c-a49e-69471fb8fb70",
+      "role_id": "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c"
+    },
+    {
+      "group_id": "9b4b0db9-8ad8-5b12-a4cb-3b5564b5dd98",
+      "role_id": "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c"
+    }
+  ],
+  "intended_memberships": [
+    {
+      "group_id": "9b4b0db9-8ad8-5b12-a4cb-3b5564b5dd98",
+      "subject_id": "27bec596-b170-53f1-9d25-8031a404dbb9"
+    },
+    {
+      "group_id": "9b4b0db9-8ad8-5b12-a4cb-3b5564b5dd98",
+      "subject_id": "3708e7ef-67ee-5513-8d87-d9dc7da1816a"
+    },
+    {
+      "group_id": "9b4b0db9-8ad8-5b12-a4cb-3b5564b5dd98",
+      "subject_id": "a0e8ab48-05ec-55c8-93df-c88969a62653"
+    },
+    {
+      "group_id": "9b4b0db9-8ad8-5b12-a4cb-3b5564b5dd98",
+      "subject_id": "a6aa20bc-c654-5c9b-ae00-f4b91df767e6"
+    }
+  ],
+  "intended_role_grants": [
+    {
+      "permission_id": "1610fe52-a7f8-5f24-bcb2-b83d55405a0a",
+      "role_id": "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c"
+    },
+    {
+      "permission_id": "16662a3d-cbf4-59f6-ae75-bb72fcd119f9",
+      "role_id": "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c"
+    },
+    {
+      "permission_id": "7a584a28-641d-55bc-81a0-f61d7ab8f4ff",
+      "role_id": "e793a152-ac32-51ac-a87e-b2333e8413c9"
+    },
+    {
+      "permission_id": "de7fe84a-ee71-5016-a04d-5ae0ba527940",
+      "role_id": "e793a152-ac32-51ac-a87e-b2333e8413c9"
+    }
+  ],
+  "intended_role_hierarchy": [
+    {
+      "junior_role_id": "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c",
+      "senior_role_id": "e793a152-ac32-51ac-a87e-b2333e8413c9"
+    }
+  ],
+  "intended_subject_role_assignments": [
+    {
+      "role_id": "e793a152-ac32-51ac-a87e-b2333e8413c9",
+      "subject_id": "be929c31-a661-5a99-8a46-6476529b89dd"
+    },
+    {
+      "role_id": "e793a152-ac32-51ac-a87e-b2333e8413c9",
+      "subject_id": "c7ab81de-d3ae-5bd6-98be-ef844afe452f"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "ssd_constraints": [
+    {
+      "cardinality": 2,
+      "constraint_id": "admin-reader-ssd",
+      "role_ids": [
+        "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c",
+        "e793a152-ac32-51ac-a87e-b2333e8413c9"
+      ],
+      "subject_ids": [],
+      "tenant_id": "701dfa93-9a42-5fd7-9e66-f93f0c004730"
+    }
+  ]
+}

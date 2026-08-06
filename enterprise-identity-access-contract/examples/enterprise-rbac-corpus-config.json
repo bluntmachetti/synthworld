@@ -1,0 +1,473 @@
+{
+  "access_requests": [
+    {
+      "cell_key": "agent-session-cell",
+      "request_key": "agent-session-request"
+    },
+    {
+      "cell_key": "employee-session-cell",
+      "request_key": "employee-session-request"
+    },
+    {
+      "cell_key": "expired-account-cell",
+      "request_key": "expired-account-request"
+    },
+    {
+      "cell_key": "static-cell-001",
+      "request_key": "static-request-001"
+    },
+    {
+      "cell_key": "static-cell-002",
+      "request_key": "static-request-002"
+    },
+    {
+      "cell_key": "static-cell-003",
+      "request_key": "static-request-003"
+    },
+    {
+      "cell_key": "static-cell-004",
+      "request_key": "static-request-004"
+    },
+    {
+      "cell_key": "static-cell-005",
+      "request_key": "static-request-005"
+    },
+    {
+      "cell_key": "static-cell-006",
+      "request_key": "static-request-006"
+    },
+    {
+      "cell_key": "static-cell-007",
+      "request_key": "static-request-007"
+    },
+    {
+      "cell_key": "static-cell-008",
+      "request_key": "static-request-008"
+    },
+    {
+      "cell_key": "static-cell-009",
+      "request_key": "static-request-009"
+    },
+    {
+      "cell_key": "static-cell-010",
+      "request_key": "static-request-010"
+    },
+    {
+      "cell_key": "static-cell-011",
+      "request_key": "static-request-011"
+    },
+    {
+      "cell_key": "static-cell-012",
+      "request_key": "static-request-012"
+    },
+    {
+      "cell_key": "static-cell-013",
+      "request_key": "static-request-013"
+    },
+    {
+      "cell_key": "static-cell-014",
+      "request_key": "static-request-014"
+    },
+    {
+      "cell_key": "static-cell-015",
+      "request_key": "static-request-015"
+    },
+    {
+      "cell_key": "static-cell-016",
+      "request_key": "static-request-016"
+    }
+  ],
+  "compile_config": {
+    "budget": {
+      "max_access_atoms": 500000,
+      "max_access_requests": 1000000,
+      "max_accounts": 100000,
+      "max_attribute_facts": 1000000,
+      "max_authorization_targets": 50000,
+      "max_declared_actions": 100000,
+      "max_derivations_per_cell": 64,
+      "max_directory_rbac_relations": 50000,
+      "max_evaluation_cells": 1000000,
+      "max_evaluator_cases": 1000000,
+      "max_group_depth": 64,
+      "max_groups": 10000,
+      "max_native_contexts": 10000,
+      "max_principals": 100000,
+      "max_rebac_path_expansions": 100000,
+      "max_rebac_paths_per_cell": 64,
+      "max_rebac_rules": 10000,
+      "max_rebac_tuples": 500000,
+      "max_role_activation_requests": 100000,
+      "max_role_depth": 64,
+      "max_roles": 10000,
+      "max_scenario_deltas": 1000000,
+      "max_session_state_slots": 100000,
+      "max_sod_constraints": 10000,
+      "max_sod_evaluations": 1000000,
+      "max_sod_role_set_width": 32,
+      "max_temporal_events": 1000000,
+      "max_total_abac_predicates": 100000,
+      "max_total_abac_rules": 10000,
+      "max_total_derivations": 2000000
+    },
+    "outer_safety": {
+      "max_canonical_bytes": 10737418240,
+      "max_expanded_steps": 25000000,
+      "max_relations": 10000000,
+      "max_serialized_records": 10000000,
+      "max_work_units": 100000000
+    },
+    "schema_version": "1.0.0"
+  },
+  "contexts": [
+    {
+      "context_key": "static-context"
+    }
+  ],
+  "evaluation_cells": [
+    {
+      "access_atom_id": "9603b5fa-9e19-58bb-89b0-07917e59f752",
+      "cell_key": "agent-session-cell",
+      "context_key": "static-context",
+      "session_state_key": "agent-session-state",
+      "tick": 5
+    },
+    {
+      "access_atom_id": "47c4fd2c-a5d8-5024-8c77-938246afda27",
+      "cell_key": "employee-session-cell",
+      "context_key": "static-context",
+      "session_state_key": "employee-session-state",
+      "tick": 5
+    },
+    {
+      "access_atom_id": "c70a63fd-22bf-5915-a98d-b4a58559caac",
+      "cell_key": "expired-account-cell",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 20
+    },
+    {
+      "access_atom_id": "00c9285f-3fea-5fc0-9e26-c9c00a8c4f83",
+      "cell_key": "static-cell-001",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "2d81a2bc-9538-5f22-b7b0-b6ec9eeb6539",
+      "cell_key": "static-cell-002",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "371757e4-4bbd-5559-8c38-5ca171a5dfd6",
+      "cell_key": "static-cell-003",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "41afdadc-6607-5f5a-8ea0-425e8be36736",
+      "cell_key": "static-cell-004",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "4795d645-2633-59b1-8628-4d557fa016c6",
+      "cell_key": "static-cell-005",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "47c4fd2c-a5d8-5024-8c77-938246afda27",
+      "cell_key": "static-cell-006",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "572d0cac-3a92-58a1-bd29-efda2bcd1202",
+      "cell_key": "static-cell-007",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "639ffb2d-1611-573f-9de9-a72f01c451dd",
+      "cell_key": "static-cell-008",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "9603b5fa-9e19-58bb-89b0-07917e59f752",
+      "cell_key": "static-cell-009",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "b65d0482-636b-5e88-b25b-1e3988e8dfa1",
+      "cell_key": "static-cell-010",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "b6a01789-04bb-5c9f-bf15-cc89de9f8721",
+      "cell_key": "static-cell-011",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "b9e48cf3-4b98-589b-909a-e0dfeae2dea2",
+      "cell_key": "static-cell-012",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "c70a63fd-22bf-5915-a98d-b4a58559caac",
+      "cell_key": "static-cell-013",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "d01230d6-22ff-5c4c-97c3-8834d5562d09",
+      "cell_key": "static-cell-014",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "e4088f4c-7ba9-5525-9813-eb5559a4858e",
+      "cell_key": "static-cell-015",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    },
+    {
+      "access_atom_id": "f2e2d323-f41b-5e2e-ac43-03dae8397482",
+      "cell_key": "static-cell-016",
+      "context_key": "static-context",
+      "session_state_key": null,
+      "tick": 0
+    }
+  ],
+  "evaluator_cases": [
+    {
+      "case_key": "agent-activation-case",
+      "labels": [
+        "activation"
+      ],
+      "target_key": "agent-activation",
+      "target_kind": "activation_request"
+    },
+    {
+      "case_key": "agent-session-case",
+      "labels": [
+        "activated-role",
+        "directory-rbac"
+      ],
+      "target_key": "agent-session-cell",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "employee-activation-case",
+      "labels": [
+        "activation"
+      ],
+      "target_key": "employee-activation",
+      "target_kind": "activation_request"
+    },
+    {
+      "case_key": "employee-session-case",
+      "labels": [
+        "activated-role",
+        "directory-rbac"
+      ],
+      "target_key": "employee-session-cell",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "expired-account-case",
+      "labels": [
+        "half-open-expiry"
+      ],
+      "target_key": "expired-account-cell",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-001",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-001",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-002",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-002",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-003",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-003",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-004",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-004",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-005",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-005",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-006",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-006",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-007",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-007",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-008",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-008",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-009",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-009",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-010",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-010",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-011",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-011",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-012",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-012",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-013",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-013",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-014",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-014",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-015",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-015",
+      "target_kind": "access_cell"
+    },
+    {
+      "case_key": "static-case-016",
+      "labels": [
+        "directory-rbac"
+      ],
+      "target_key": "static-cell-016",
+      "target_kind": "access_cell"
+    }
+  ],
+  "identity_access_universe_digest": {
+    "algorithm": "sha256",
+    "synthetic": true,
+    "value": "b4eae423689ede98d98858cae004f98d07fa5b0ac4774858500a4ba257946f4a"
+  },
+  "role_activation_requests": [
+    {
+      "request_key": "agent-activation",
+      "requested_role_ids": [
+        "a32d7dae-4dc6-524e-8f18-fdd25cfaa81c",
+        "e793a152-ac32-51ac-a87e-b2333e8413c9"
+      ],
+      "session_state_key": "agent-session-state"
+    },
+    {
+      "request_key": "employee-activation",
+      "requested_role_ids": [
+        "e793a152-ac32-51ac-a87e-b2333e8413c9"
+      ],
+      "session_state_key": "employee-session-state"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "session_slots": [
+    {
+      "activation_tick": 5,
+      "session_key": "agent-session",
+      "session_state_key": "agent-session-state",
+      "subject_id": "be929c31-a661-5a99-8a46-6476529b89dd",
+      "valid_until_tick": 10
+    },
+    {
+      "activation_tick": 5,
+      "session_key": "employee-session",
+      "session_state_key": "employee-session-state",
+      "subject_id": "27bec596-b170-53f1-9d25-8031a404dbb9",
+      "valid_until_tick": 10
+    }
+  ]
+}

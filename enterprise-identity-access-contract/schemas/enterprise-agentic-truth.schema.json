@@ -1,0 +1,323 @@
+{
+  "$defs": {
+    "AgenticExpectedDecisionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_account_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "capability_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "credential_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "delegation_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "enterprise_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "failure_reasons": {
+          "items": {
+            "$ref": "#/$defs/AgenticFailureReason"
+          },
+          "title": "Failure Reasons",
+          "type": "array"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "runtime_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "subject_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        }
+      },
+      "required": [
+        "enterprise_decision",
+        "subject_gate",
+        "tenant_gate",
+        "agent_account_gate",
+        "runtime_gate",
+        "credential_gate",
+        "capability_gate",
+        "delegation_gate",
+        "final_decision",
+        "failure_reasons"
+      ],
+      "title": "AgenticExpectedDecisionV1",
+      "type": "object"
+    },
+    "AgenticFailureReason": {
+      "enum": [
+        "enterprise_denied",
+        "subject_mismatch",
+        "tenant_mismatch",
+        "agent_account_inactive",
+        "agent_account_binding_mismatch",
+        "wrong_runtime",
+        "credential_invalid",
+        "capability_exceeded",
+        "no_active_delegation",
+        "delegation_mismatch"
+      ],
+      "title": "AgenticFailureReason",
+      "type": "string"
+    },
+    "AgenticGateOutcome": {
+      "enum": [
+        "satisfied",
+        "unsatisfied",
+        "not_applicable"
+      ],
+      "title": "AgenticGateOutcome",
+      "type": "string"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "EnterpriseAgenticAttributionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_account_id": {
+          "title": "Agent Account Id",
+          "type": "string"
+        },
+        "agent_principal_id": {
+          "title": "Agent Principal Id",
+          "type": "string"
+        },
+        "human_principal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Human Principal Id"
+        },
+        "runtime_id": {
+          "title": "Runtime Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "human_principal_id",
+        "agent_principal_id",
+        "agent_account_id",
+        "runtime_id"
+      ],
+      "title": "EnterpriseAgenticAttributionTruthV1",
+      "type": "object"
+    },
+    "EnterpriseAgenticCaseKind": {
+      "enum": [
+        "valid_agent_principal",
+        "enterprise_denied_agent",
+        "human_authority_not_unioned",
+        "wrong_subject_agent",
+        "wrong_runtime_agent",
+        "invalid_credential_agent",
+        "shared_credential_agent",
+        "wrong_scope_agent",
+        "cross_tenant_agent",
+        "suspended_agent_account",
+        "valid_human_context",
+        "enterprise_denied_human",
+        "same_human_different_agent",
+        "same_agent_different_human",
+        "missing_delegation",
+        "revoked_delegation",
+        "wrong_runtime_human",
+        "wrong_scope_human",
+        "cross_tenant_human",
+        "evidence_discarded"
+      ],
+      "title": "EnterpriseAgenticCaseKind",
+      "type": "string"
+    },
+    "EnterpriseAgenticCaseLabelV1": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EnterpriseAgenticCaseKind"
+        },
+        "scenario_tags": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Scenario Tags",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "kind",
+        "scenario_tags"
+      ],
+      "title": "EnterpriseAgenticCaseLabelV1",
+      "type": "object"
+    },
+    "EnterpriseAgenticCaseTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action_event_id": {
+          "title": "Action Event Id",
+          "type": "string"
+        },
+        "attribution": {
+          "$ref": "#/$defs/EnterpriseAgenticAttributionTruthV1"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "expected_decision": {
+          "$ref": "#/$defs/AgenticExpectedDecisionV1"
+        },
+        "reconstructable_at_audit": {
+          "title": "Reconstructable At Audit",
+          "type": "boolean"
+        },
+        "required_evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Evidence Refs",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "action_event_id",
+        "expected_decision",
+        "attribution",
+        "required_evidence_refs",
+        "reconstructable_at_audit"
+      ],
+      "title": "EnterpriseAgenticCaseTruthV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_state_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "benchmark_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "case_labels": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAgenticCaseLabelV1"
+      },
+      "title": "Case Labels",
+      "type": "array"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAgenticCaseTruthV1"
+      },
+      "title": "Cases",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "public_input_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "public_input_digest",
+    "benchmark_digest",
+    "access_state_digest",
+    "cases",
+    "case_labels"
+  ],
+  "title": "EnterpriseAgenticTruthV1",
+  "type": "object"
+}

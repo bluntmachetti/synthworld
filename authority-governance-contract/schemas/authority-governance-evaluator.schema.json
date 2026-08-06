@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/authority-governance-contract/schemas/authority-governance-evaluator.schema.json",
+  "x-generated-from": "synthworld.authority_governance.models.AuthorityGovernanceEvaluatorV1",
+  "x-generated-by": "authority-governance-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python authority-governance-contract/tools/generate_contract.py",
+  "$defs": {
+    "AuthorityChangeType": {
+      "enum": [
+        "grant",
+        "amend",
+        "attenuate",
+        "suspend",
+        "revoke",
+        "expire",
+        "supersede"
+      ],
+      "title": "AuthorityChangeType",
+      "type": "string"
+    },
+    "AuthorityGovernanceCaseKind": {
+      "enum": [
+        "properly_approved_grant",
+        "wrong_approver",
+        "approved_scope_differs",
+        "denied_request_enacted",
+        "valid_emergency_exception",
+        "expired_approver_authority",
+        "policy_changed_after_decision",
+        "missing_retained_approval_evidence",
+        "unlinked_supersession",
+        "revocation_effective_time_drift",
+        "conflicting_decisions",
+        "unauthorised_well_formed_change"
+      ],
+      "title": "AuthorityGovernanceCaseKind",
+      "type": "string"
+    },
+    "AuthorityGovernanceTruthRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "authority_change_id": {
+          "minLength": 1,
+          "title": "Authority Change Id",
+          "type": "string"
+        },
+        "case_kind": {
+          "$ref": "#/$defs/AuthorityGovernanceCaseKind"
+        },
+        "change_type": {
+          "$ref": "#/$defs/AuthorityChangeType"
+        },
+        "canonical_before_state": {
+          "$ref": "#/$defs/AuthorityStateV1"
+        },
+        "canonical_after_state": {
+          "$ref": "#/$defs/AuthorityStateV1"
+        },
+        "governance_decision_authorised": {
+          "title": "Governance Decision Authorised",
+          "type": "boolean"
+        },
+        "approver_authorised_at_decision": {
+          "title": "Approver Authorised At Decision",
+          "type": "boolean"
+        },
+        "canonical_requester_principal_id": {
+          "minLength": 1,
+          "title": "Canonical Requester Principal Id",
+          "type": "string"
+        },
+        "canonical_approval_chain": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Canonical Approval Chain",
+          "type": "array"
+        },
+        "canonical_accountable_owner_chain": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Canonical Accountable Owner Chain",
+          "type": "array"
+        },
+        "applicable_policy_version_id": {
+          "minLength": 1,
+          "title": "Applicable Policy Version Id",
+          "type": "string"
+        },
+        "applicable_policy_rule_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Applicable Policy Rule Ids",
+          "type": "array"
+        },
+        "applicable_control_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Applicable Control Ids",
+          "type": "array"
+        },
+        "expected_rationale_code": {
+          "minLength": 1,
+          "title": "Expected Rationale Code",
+          "type": "string"
+        },
+        "expected_exception_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Exception Id"
+        },
+        "required_decision_evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Decision Evidence Refs",
+          "type": "array"
+        },
+        "controlling_decision_id": {
+          "minLength": 1,
+          "title": "Controlling Decision Id",
+          "type": "string"
+        },
+        "expected_decision_outcome": {
+          "$ref": "#/$defs/GovernanceDecisionOutcome"
+        },
+        "expected_effective_tick": {
+          "minimum": 0,
+          "title": "Expected Effective Tick",
+          "type": "integer"
+        },
+        "superseded_authority_change_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Superseded Authority Change Id"
+        },
+        "enactment_consistent": {
+          "title": "Enactment Consistent",
+          "type": "boolean"
+        },
+        "audit_reconstructable": {
+          "title": "Audit Reconstructable",
+          "type": "boolean"
+        },
+        "failure_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Failure Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "authority_change_id",
+        "case_kind",
+        "change_type",
+        "canonical_before_state",
+        "canonical_after_state",
+        "governance_decision_authorised",
+        "approver_authorised_at_decision",
+        "canonical_requester_principal_id",
+        "canonical_approval_chain",
+        "canonical_accountable_owner_chain",
+        "applicable_policy_version_id",
+        "applicable_policy_rule_ids",
+        "applicable_control_ids",
+        "expected_rationale_code",
+        "required_decision_evidence_refs",
+        "controlling_decision_id",
+        "expected_decision_outcome",
+        "expected_effective_tick",
+        "enactment_consistent",
+        "audit_reconstructable",
+        "failure_reasons"
+      ],
+      "title": "AuthorityGovernanceTruthRowV1",
+      "type": "object"
+    },
+    "AuthorityStateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "authorities": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GovernedAuthorityV1"
+          },
+          "title": "Authorities",
+          "type": "array"
+        }
+      },
+      "title": "AuthorityStateV1",
+      "type": "object"
+    },
+    "GovernanceDecisionOutcome": {
+      "enum": [
+        "approved",
+        "denied",
+        "partially_approved",
+        "withdrawn",
+        "expired"
+      ],
+      "title": "GovernanceDecisionOutcome",
+      "type": "string"
+    },
+    "GovernedAuthorityV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "authority_id": {
+          "minLength": 1,
+          "title": "Authority Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "capability_id": {
+          "minLength": 1,
+          "title": "Capability Id",
+          "type": "string"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "scopes": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Scopes",
+          "type": "array"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "authority_id",
+        "subject_id",
+        "capability_id",
+        "resource_id",
+        "actions",
+        "scopes",
+        "purpose",
+        "valid_from_tick"
+      ],
+      "title": "GovernedAuthorityV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "public_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "truth": {
+      "items": {
+        "$ref": "#/$defs/AuthorityGovernanceTruthRowV1"
+      },
+      "minItems": 1,
+      "title": "Truth",
+      "type": "array"
+    }
+  },
+  "required": [
+    "public_digest",
+    "truth"
+  ],
+  "title": "AuthorityGovernanceEvaluatorV1",
+  "type": "object"
+}

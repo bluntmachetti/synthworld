@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/authority-governance-contract/schemas/authority-governance-report.schema.json",
+  "x-generated-from": "synthworld.authority_governance.models.AuthorityGovernanceReportV1",
+  "x-generated-by": "authority-governance-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python authority-governance-contract/tools/generate_contract.py",
+  "$defs": {
+    "AuthorityGovernanceCaseFindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "authority_change_id": {
+          "minLength": 1,
+          "title": "Authority Change Id",
+          "type": "string"
+        },
+        "state_correct": {
+          "title": "State Correct",
+          "type": "boolean"
+        },
+        "governance_authority_correct": {
+          "title": "Governance Authority Correct",
+          "type": "boolean"
+        },
+        "policy_rationale_correct": {
+          "title": "Policy Rationale Correct",
+          "type": "boolean"
+        },
+        "evidence_observability_correct": {
+          "title": "Evidence Observability Correct",
+          "type": "boolean"
+        },
+        "enactment_correct": {
+          "title": "Enactment Correct",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "authority_change_id",
+        "state_correct",
+        "governance_authority_correct",
+        "policy_rationale_correct",
+        "evidence_observability_correct",
+        "enactment_correct"
+      ],
+      "title": "AuthorityGovernanceCaseFindingV1",
+      "type": "object"
+    },
+    "AuthorityGovernanceMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "family": {
+          "$ref": "#/$defs/GovernanceMetricFamily"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "name",
+        "value",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning"
+      ],
+      "title": "AuthorityGovernanceMetricV1",
+      "type": "object"
+    },
+    "GovernanceMetricFamily": {
+      "enum": [
+        "state",
+        "governance_authority",
+        "policy_rationale",
+        "evidence_observability",
+        "enactment"
+      ],
+      "title": "GovernanceMetricFamily",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "scoring_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Scoring Version",
+      "type": "string"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/AuthorityGovernanceCaseFindingV1"
+      },
+      "minItems": 1,
+      "title": "Findings",
+      "type": "array"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/AuthorityGovernanceMetricV1"
+      },
+      "minItems": 1,
+      "title": "Metrics",
+      "type": "array"
+    }
+  },
+  "required": [
+    "findings",
+    "metrics"
+  ],
+  "title": "AuthorityGovernanceReportV1",
+  "type": "object"
+}

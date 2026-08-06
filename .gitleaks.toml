@@ -34,3 +34,53 @@ paths = [
 regexes = [
   '''^\s*evt-\d{3}-[a-z-]+(?:,\s*evt-\d{3}-[a-z-]+)*(?:,)?(?:\s+and)?\s*$''',
 ]
+
+# The enterprise and contextual-access contracts are built on the noun "access"
+# (access_request_id, access_atom_id, identity_access_universe_digest), and
+# "access" is a generic-api-key trigger keyword. The published example fixtures
+# therefore report ~400 findings, all of them synthetic.
+#
+# These three allowlists target "secret" rather than "line" on purpose. The
+# example fixtures are single-line JSON documents, so a line-scoped regex would
+# exempt the entire document as soon as one identifier appeared anywhere on it,
+# hiding a real credential that shared the line. Matching the captured value
+# keeps each exemption to the individual finding.
+[[rules.allowlists]]
+description = "Deterministic UUIDv5 fixture identifiers in published contract examples"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''^(?:enterprise-identity-access|contextual-access)-contract/examples/.*\.json$''',
+]
+regexes = [
+  '''^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$''',
+]
+
+# Pydantic field declarations such as `config_digest: SyntheticDigestV1` capture
+# the annotation itself as the candidate secret. Anchored to the project's
+# Synthetic*V<n> type-naming convention so only type names are exempt; a real
+# credential does not match, and neither does a value assigned to one of these
+# fields.
+[[rules.allowlists]]
+description = "Synthetic value-object type annotations in library source"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''^src/synthworld/.*\.py$''',
+]
+regexes = [
+  '''^Synthetic[A-Za-z0-9]+V[0-9]+$''',
+]
+
+# A single reference-run coverage label whose "compat-1-measured" shape clears
+# the entropy threshold. Pinned to the exact literal and file.
+[[rules.allowlists]]
+description = "Reference-run coverage label in the agent-authority reference build"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''^src/synthworld/agent_authority/reference\.py$''',
+]
+regexes = [
+  '''^compat-1-measured$''',
+]

@@ -1,0 +1,1575 @@
+{
+  "$defs": {
+    "AbacEmploymentType": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner",
+        "not_applicable"
+      ],
+      "title": "AbacEmploymentType",
+      "type": "string"
+    },
+    "AbacRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Cell Ids",
+          "type": "array"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "operator": {
+          "$ref": "#/$defs/FlatRuleOperator"
+        },
+        "predicates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "action_class_is": "#/$defs/ActionClassIsV1",
+                "action_is": "#/$defs/ActionIsV1",
+                "assurance_at_least": "#/$defs/AssuranceAtLeastV1",
+                "classification_within_clearance": "#/$defs/ClassificationWithinClearanceV1",
+                "employment_type_is": "#/$defs/EmploymentTypeIsV1",
+                "network_zone_is": "#/$defs/NetworkZoneIsV1",
+                "same_tenant": "#/$defs/SameTenantV1",
+                "subject_kind_is": "#/$defs/SubjectKindIsV1",
+                "subject_unit_is": "#/$defs/SubjectUnitIsV1",
+                "subject_unit_owns_target": "#/$defs/SubjectUnitOwnsTargetV1",
+                "target_kind_is": "#/$defs/TargetKindIsV1"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SubjectKindIsV1"
+              },
+              {
+                "$ref": "#/$defs/EmploymentTypeIsV1"
+              },
+              {
+                "$ref": "#/$defs/SameTenantV1"
+              },
+              {
+                "$ref": "#/$defs/SubjectUnitIsV1"
+              },
+              {
+                "$ref": "#/$defs/SubjectUnitOwnsTargetV1"
+              },
+              {
+                "$ref": "#/$defs/TargetKindIsV1"
+              },
+              {
+                "$ref": "#/$defs/ClassificationWithinClearanceV1"
+              },
+              {
+                "$ref": "#/$defs/ActionIsV1"
+              },
+              {
+                "$ref": "#/$defs/ActionClassIsV1"
+              },
+              {
+                "$ref": "#/$defs/AssuranceAtLeastV1"
+              },
+              {
+                "$ref": "#/$defs/NetworkZoneIsV1"
+              }
+            ]
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Predicates",
+          "type": "array"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "rule_id",
+        "revision_id",
+        "effect",
+        "operator",
+        "cell_ids",
+        "predicates",
+        "valid_from_tick"
+      ],
+      "title": "AbacRuleV1",
+      "type": "object"
+    },
+    "ActionClass": {
+      "enum": [
+        "read",
+        "write",
+        "execute",
+        "admin"
+      ],
+      "title": "ActionClass",
+      "type": "string"
+    },
+    "ActionClassFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "action_class",
+          "default": "action_class",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "action",
+          "default": "action",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "action_class",
+          "default": "action_class",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ActionClass"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "ActionClassFactV1",
+      "type": "object"
+    },
+    "ActionClassIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "action_class_is",
+          "default": "action_class_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/ActionClass"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "ActionClassIsV1",
+      "type": "object"
+    },
+    "ActionIdFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "action_id",
+          "default": "action_id",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "action",
+          "default": "action",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "action_id",
+          "default": "action_id",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "ActionIdFactV1",
+      "type": "object"
+    },
+    "ActionIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Action Ids",
+          "type": "array"
+        },
+        "kind": {
+          "const": "action_is",
+          "default": "action_is",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action_ids"
+      ],
+      "title": "ActionIsV1",
+      "type": "object"
+    },
+    "AssuranceAtLeastV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "assurance_at_least",
+          "default": "assurance_at_least",
+          "title": "Kind",
+          "type": "string"
+        },
+        "minimum": {
+          "$ref": "#/$defs/AssuranceLevel"
+        }
+      },
+      "required": [
+        "minimum"
+      ],
+      "title": "AssuranceAtLeastV1",
+      "type": "object"
+    },
+    "AssuranceLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "title": "AssuranceLevel",
+      "type": "string"
+    },
+    "AttributeValueState": {
+      "enum": [
+        "known",
+        "unknown"
+      ],
+      "title": "AttributeValueState",
+      "type": "string"
+    },
+    "ClassificationWithinClearanceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "classification_within_clearance",
+          "default": "classification_within_clearance",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "ClassificationWithinClearanceV1",
+      "type": "object"
+    },
+    "EmploymentTypeIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "employment_type_is",
+          "default": "employment_type_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/AbacEmploymentType"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "EmploymentTypeIsV1",
+      "type": "object"
+    },
+    "EnvironmentAssuranceLevelFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "assurance_level",
+          "default": "assurance_level",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "environment",
+          "default": "environment",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "environment_assurance_level",
+          "default": "environment_assurance_level",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssuranceLevel"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "EnvironmentAssuranceLevelFactV1",
+      "type": "object"
+    },
+    "EnvironmentNetworkZoneFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "network_zone",
+          "default": "network_zone",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "environment",
+          "default": "environment",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "environment_network_zone",
+          "default": "environment_network_zone",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkZone"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "EnvironmentNetworkZoneFactV1",
+      "type": "object"
+    },
+    "FlatRuleOperator": {
+      "enum": [
+        "all",
+        "any"
+      ],
+      "title": "FlatRuleOperator",
+      "type": "string"
+    },
+    "InformationClassification": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "InformationClassification",
+      "type": "string"
+    },
+    "NetworkZone": {
+      "enum": [
+        "internal",
+        "partner",
+        "public"
+      ],
+      "title": "NetworkZone",
+      "type": "string"
+    },
+    "NetworkZoneIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "network_zone_is",
+          "default": "network_zone_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/NetworkZone"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "NetworkZoneIsV1",
+      "type": "object"
+    },
+    "PrincipalKind": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "ResourceClassificationFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "classification",
+          "default": "classification",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "resource",
+          "default": "resource",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "resource_classification",
+          "default": "resource_classification",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationClassification"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "ResourceClassificationFactV1",
+      "type": "object"
+    },
+    "ResourceOwnerUnitIdFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "owner_unit_id",
+          "default": "owner_unit_id",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "resource",
+          "default": "resource",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "resource_owner_unit_id",
+          "default": "resource_owner_unit_id",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "ResourceOwnerUnitIdFactV1",
+      "type": "object"
+    },
+    "ResourceTargetKindFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "target_kind",
+          "default": "target_kind",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "resource",
+          "default": "resource",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "resource_target_kind",
+          "default": "resource_target_kind",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TargetKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "ResourceTargetKindFactV1",
+      "type": "object"
+    },
+    "ResourceTenantIdFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "tenant_id",
+          "default": "tenant_id",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "resource",
+          "default": "resource",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "resource_tenant_id",
+          "default": "resource_tenant_id",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "ResourceTenantIdFactV1",
+      "type": "object"
+    },
+    "RuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "RuleEffect",
+      "type": "string"
+    },
+    "SameTenantV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "same_tenant",
+          "default": "same_tenant",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "SameTenantV1",
+      "type": "object"
+    },
+    "SubjectClearanceFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "clearance",
+          "default": "clearance",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "subject",
+          "default": "subject",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "subject_clearance",
+          "default": "subject_clearance",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/InformationClassification"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "SubjectClearanceFactV1",
+      "type": "object"
+    },
+    "SubjectEmploymentTypeFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "employment_type",
+          "default": "employment_type",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "subject",
+          "default": "subject",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "subject_employment_type",
+          "default": "subject_employment_type",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AbacEmploymentType"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "SubjectEmploymentTypeFactV1",
+      "type": "object"
+    },
+    "SubjectKindIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "subject_kind_is",
+          "default": "subject_kind_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/PrincipalKind"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "SubjectKindIsV1",
+      "type": "object"
+    },
+    "SubjectPrincipalKindFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "principal_kind",
+          "default": "principal_kind",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "subject",
+          "default": "subject",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "subject_principal_kind",
+          "default": "subject_principal_kind",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PrincipalKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "SubjectPrincipalKindFactV1",
+      "type": "object"
+    },
+    "SubjectTenantIdFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "tenant_id",
+          "default": "tenant_id",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "subject",
+          "default": "subject",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "subject_tenant_id",
+          "default": "subject_tenant_id",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "SubjectTenantIdFactV1",
+      "type": "object"
+    },
+    "SubjectUnitIdFactV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attribute_key": {
+          "const": "unit_id",
+          "default": "unit_id",
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "const": "subject",
+          "default": "subject",
+          "title": "Category",
+          "type": "string"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "subject_unit_id",
+          "default": "subject_unit_id",
+          "title": "Kind",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "cell_id",
+        "value_state",
+        "value",
+        "revision_id",
+        "valid_from_tick"
+      ],
+      "title": "SubjectUnitIdFactV1",
+      "type": "object"
+    },
+    "SubjectUnitIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "subject_unit_is",
+          "default": "subject_unit_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Unit Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "unit_ids"
+      ],
+      "title": "SubjectUnitIsV1",
+      "type": "object"
+    },
+    "SubjectUnitOwnsTargetV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "subject_unit_owns_target",
+          "default": "subject_unit_owns_target",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "SubjectUnitOwnsTargetV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    },
+    "TargetKind": {
+      "enum": [
+        "application",
+        "api",
+        "tool",
+        "data_store",
+        "environment"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    },
+    "TargetKindIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "target_kind_is",
+          "default": "target_kind_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/TargetKind"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "TargetKindIsV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attribute_facts": {
+      "default": [],
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "action_class": "#/$defs/ActionClassFactV1",
+            "action_id": "#/$defs/ActionIdFactV1",
+            "environment_assurance_level": "#/$defs/EnvironmentAssuranceLevelFactV1",
+            "environment_network_zone": "#/$defs/EnvironmentNetworkZoneFactV1",
+            "resource_classification": "#/$defs/ResourceClassificationFactV1",
+            "resource_owner_unit_id": "#/$defs/ResourceOwnerUnitIdFactV1",
+            "resource_target_kind": "#/$defs/ResourceTargetKindFactV1",
+            "resource_tenant_id": "#/$defs/ResourceTenantIdFactV1",
+            "subject_clearance": "#/$defs/SubjectClearanceFactV1",
+            "subject_employment_type": "#/$defs/SubjectEmploymentTypeFactV1",
+            "subject_principal_kind": "#/$defs/SubjectPrincipalKindFactV1",
+            "subject_tenant_id": "#/$defs/SubjectTenantIdFactV1",
+            "subject_unit_id": "#/$defs/SubjectUnitIdFactV1"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/SubjectPrincipalKindFactV1"
+          },
+          {
+            "$ref": "#/$defs/SubjectEmploymentTypeFactV1"
+          },
+          {
+            "$ref": "#/$defs/SubjectTenantIdFactV1"
+          },
+          {
+            "$ref": "#/$defs/SubjectUnitIdFactV1"
+          },
+          {
+            "$ref": "#/$defs/SubjectClearanceFactV1"
+          },
+          {
+            "$ref": "#/$defs/ResourceTargetKindFactV1"
+          },
+          {
+            "$ref": "#/$defs/ResourceTenantIdFactV1"
+          },
+          {
+            "$ref": "#/$defs/ResourceOwnerUnitIdFactV1"
+          },
+          {
+            "$ref": "#/$defs/ResourceClassificationFactV1"
+          },
+          {
+            "$ref": "#/$defs/ActionIdFactV1"
+          },
+          {
+            "$ref": "#/$defs/ActionClassFactV1"
+          },
+          {
+            "$ref": "#/$defs/EnvironmentAssuranceLevelFactV1"
+          },
+          {
+            "$ref": "#/$defs/EnvironmentNetworkZoneFactV1"
+          }
+        ]
+      },
+      "title": "Attribute Facts",
+      "type": "array"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "rules": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AbacRuleV1"
+      },
+      "title": "Rules",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest"
+  ],
+  "title": "EnterpriseAbacIntentOverlayV1",
+  "type": "object"
+}

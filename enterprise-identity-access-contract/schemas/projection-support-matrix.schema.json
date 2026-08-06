@@ -1,0 +1,178 @@
+{
+  "$defs": {
+    "ProjectionSupportClassification": {
+      "enum": [
+        "exact",
+        "approximated",
+        "unsupported"
+      ],
+      "title": "ProjectionSupportClassification",
+      "type": "string"
+    },
+    "ProjectionSupportRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/ProjectionSupportClassification"
+        },
+        "conformance_vector_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Conformance Vector Ids",
+          "type": "array"
+        },
+        "mapping_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "mapping_id": {
+          "title": "Mapping Id",
+          "type": "string"
+        },
+        "native_profile_version": {
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "native_source_feature": {
+          "title": "Native Source Feature",
+          "type": "string"
+        },
+        "semantic_delta": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Semantic Delta"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_construct": {
+          "title": "Target Construct",
+          "type": "string"
+        },
+        "target_profile_version": {
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mapping_id",
+        "native_source_feature",
+        "target_construct",
+        "classification",
+        "semantic_delta",
+        "native_profile_version",
+        "target_profile_version",
+        "mapping_digest",
+        "conformance_vector_ids"
+      ],
+      "title": "ProjectionSupportRowV1",
+      "type": "object"
+    },
+    "ProjectionTarget": {
+      "enum": [
+        "scim",
+        "authzen",
+        "openfga",
+        "shared_signals"
+      ],
+      "title": "ProjectionTarget",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "exercised_native_features": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Exercised Native Features",
+      "type": "array"
+    },
+    "mapping_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "native_profile_version": {
+      "title": "Native Profile Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ProjectionSupportRowV1"
+      },
+      "minItems": 1,
+      "title": "Rows",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "target": {
+      "$ref": "#/$defs/ProjectionTarget"
+    },
+    "target_profile_version": {
+      "title": "Target Profile Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "profile_id",
+    "target",
+    "native_profile_version",
+    "target_profile_version",
+    "mapping_digest",
+    "exercised_native_features",
+    "rows"
+  ],
+  "title": "ProjectionSupportMatrixV1",
+  "type": "object"
+}

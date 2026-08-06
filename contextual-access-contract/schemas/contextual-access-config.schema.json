@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-config.schema.json",
+  "x-generated-from": "synthworld.contextual_access.models.ContextualAccessConfigV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "ContextualAccessLimitsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "max_registry_objects": {
+          "default": 128,
+          "exclusiveMinimum": 0,
+          "maximum": 10000,
+          "title": "Max Registry Objects",
+          "type": "integer"
+        },
+        "max_initial_facts": {
+          "default": 128,
+          "exclusiveMinimum": 0,
+          "maximum": 20000,
+          "title": "Max Initial Facts",
+          "type": "integer"
+        },
+        "max_events": {
+          "default": 128,
+          "exclusiveMinimum": 0,
+          "maximum": 20000,
+          "title": "Max Events",
+          "type": "integer"
+        },
+        "max_delivery_attempts": {
+          "default": 256,
+          "exclusiveMinimum": 0,
+          "maximum": 40000,
+          "title": "Max Delivery Attempts",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 128,
+          "exclusiveMinimum": 0,
+          "maximum": 20000,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "max_policies": {
+          "default": 16,
+          "exclusiveMinimum": 0,
+          "maximum": 256,
+          "title": "Max Policies",
+          "type": "integer"
+        },
+        "max_rules_per_policy": {
+          "default": 64,
+          "exclusiveMinimum": 0,
+          "maximum": 256,
+          "title": "Max Rules Per Policy",
+          "type": "integer"
+        },
+        "max_predicates_per_rule": {
+          "default": 16,
+          "exclusiveMinimum": 0,
+          "maximum": 64,
+          "title": "Max Predicates Per Rule",
+          "type": "integer"
+        }
+      },
+      "title": "ContextualAccessLimitsV1",
+      "type": "object"
+    },
+    "ContextualCaseKind": {
+      "enum": [
+        "static_allow",
+        "static_deny",
+        "assignment_removed",
+        "on_call_expired",
+        "device_degraded",
+        "risk_elevated",
+        "justification_expired",
+        "delayed_delivery",
+        "duplicate_delivery",
+        "out_of_order_delivery"
+      ],
+      "title": "ContextualCaseKind",
+      "type": "string"
+    },
+    "ContextualFactKind": {
+      "enum": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "title": "ContextualFactKind",
+      "type": "string"
+    },
+    "ContextualObjectCountsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "work_items": {
+          "default": 3,
+          "exclusiveMinimum": 0,
+          "maximum": 64,
+          "title": "Work Items",
+          "type": "integer"
+        },
+        "duty_scopes": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "maximum": 64,
+          "title": "Duty Scopes",
+          "type": "integer"
+        },
+        "devices": {
+          "default": 6,
+          "exclusiveMinimum": 0,
+          "maximum": 64,
+          "title": "Devices",
+          "type": "integer"
+        },
+        "signal_sources": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "maximum": 64,
+          "title": "Signal Sources",
+          "type": "integer"
+        },
+        "approval_evidence": {
+          "default": 3,
+          "exclusiveMinimum": 0,
+          "maximum": 64,
+          "title": "Approval Evidence",
+          "type": "integer"
+        }
+      },
+      "title": "ContextualObjectCountsV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "tier": {
+      "const": "smoke",
+      "default": "smoke",
+      "title": "Tier",
+      "type": "string"
+    },
+    "enabled_fact_kinds": {
+      "default": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "items": {
+        "$ref": "#/$defs/ContextualFactKind"
+      },
+      "title": "Enabled Fact Kinds",
+      "type": "array"
+    },
+    "enabled_case_kinds": {
+      "default": [
+        "static_allow",
+        "static_deny",
+        "assignment_removed",
+        "on_call_expired",
+        "device_degraded",
+        "risk_elevated",
+        "justification_expired",
+        "delayed_delivery",
+        "duplicate_delivery",
+        "out_of_order_delivery"
+      ],
+      "items": {
+        "$ref": "#/$defs/ContextualCaseKind"
+      },
+      "title": "Enabled Case Kinds",
+      "type": "array"
+    },
+    "cases_per_kind": {
+      "default": 1,
+      "exclusiveMinimum": 0,
+      "maximum": 16,
+      "title": "Cases Per Kind",
+      "type": "integer"
+    },
+    "object_counts": {
+      "$ref": "#/$defs/ContextualObjectCountsV1"
+    },
+    "event_schedule_version": {
+      "const": "contextual-access-schedule-1.0.0",
+      "default": "contextual-access-schedule-1.0.0",
+      "title": "Event Schedule Version",
+      "type": "string"
+    },
+    "limits": {
+      "$ref": "#/$defs/ContextualAccessLimitsV1"
+    }
+  },
+  "required": [
+    "seed"
+  ],
+  "title": "ContextualAccessConfigV1",
+  "type": "object"
+}

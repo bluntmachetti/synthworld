@@ -1,0 +1,115 @@
+{
+  "$defs": {
+    "AuthorizationEvaluationProfileKind": {
+      "enum": [
+        "rbac",
+        "abac",
+        "rebac",
+        "rbac_with_abac_guard",
+        "rebac_with_abac_guard"
+      ],
+      "title": "AuthorizationEvaluationProfileKind",
+      "type": "string"
+    },
+    "AuthorizationKernelCellV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/AuthorizationEvaluationProfileKind"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cell_id",
+        "profile"
+      ],
+      "title": "AuthorizationKernelCellV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cells": {
+      "items": {
+        "$ref": "#/$defs/AuthorizationKernelCellV1"
+      },
+      "title": "Cells",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "composition_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_profile_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "composition_digest",
+    "evaluation_profile_digest",
+    "cells"
+  ],
+  "title": "EnterpriseAuthorizationKernelV1",
+  "type": "object"
+}

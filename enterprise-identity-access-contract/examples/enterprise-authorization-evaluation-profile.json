@@ -1,0 +1,86 @@
+{
+  "cells": [
+    {
+      "cell_id": "054f684d-3854-56f8-9de3-4fdca77de7a6",
+      "profile": "rbac"
+    },
+    {
+      "cell_id": "09ed02f7-68ac-5f5e-b62c-7087023fbf17",
+      "profile": "abac"
+    },
+    {
+      "cell_id": "2bee567a-0243-5011-b495-bd92eb6e46ff",
+      "profile": "rebac"
+    },
+    {
+      "cell_id": "64f39cbd-cfc8-5ddb-a290-f31e48f7e47c",
+      "profile": "rbac_with_abac_guard"
+    },
+    {
+      "cell_id": "69c5fbec-8fd6-520d-b8f2-8cacac0a6cd5",
+      "profile": "rebac_with_abac_guard"
+    },
+    {
+      "cell_id": "6ad9efa7-e9c3-56e0-8d6c-06a266149a19",
+      "profile": "rbac"
+    },
+    {
+      "cell_id": "6fef0184-69c0-5eaa-a2d6-1610d7a6d1a9",
+      "profile": "abac"
+    },
+    {
+      "cell_id": "89443068-d4c1-5346-bacb-78012271078c",
+      "profile": "rebac"
+    },
+    {
+      "cell_id": "9703a7c8-be58-5e5b-923c-65ea2649d5a0",
+      "profile": "rbac_with_abac_guard"
+    },
+    {
+      "cell_id": "aa3bdb89-31a6-5092-bd28-449251c547dd",
+      "profile": "rebac_with_abac_guard"
+    },
+    {
+      "cell_id": "b1f2b136-560a-5187-9eca-19a9e575046c",
+      "profile": "rbac"
+    },
+    {
+      "cell_id": "b4da6af1-251c-571c-bd53-2fe9f1b815bd",
+      "profile": "abac"
+    },
+    {
+      "cell_id": "b5afa2e1-05d8-598a-9c26-24503ad72b84",
+      "profile": "rebac"
+    },
+    {
+      "cell_id": "c79ada55-d9d2-5319-a869-8fdd8074718a",
+      "profile": "rbac_with_abac_guard"
+    },
+    {
+      "cell_id": "d2a602a9-fe29-5cae-a141-dee1e429e4d6",
+      "profile": "rebac_with_abac_guard"
+    },
+    {
+      "cell_id": "da9383fb-625d-509a-baab-a9cb8c43d321",
+      "profile": "rbac"
+    },
+    {
+      "cell_id": "dabd83e8-91c9-55e6-bdc2-098213a9ceac",
+      "profile": "abac"
+    },
+    {
+      "cell_id": "e799fa66-eb2e-50ee-9ec2-7cb36cec364c",
+      "profile": "rebac"
+    },
+    {
+      "cell_id": "f6b5c9fb-1e0c-5156-8985-0e9b93293ba3",
+      "profile": "rbac_with_abac_guard"
+    }
+  ],
+  "evaluation_corpus_digest": {
+    "algorithm": "sha256",
+    "synthetic": true,
+    "value": "1293dc2a22820f1e0b72f85c7c17028872c424b7483223f50b6f4dd822acf1d6"
+  },
+  "schema_version": "1.0.0"
+}

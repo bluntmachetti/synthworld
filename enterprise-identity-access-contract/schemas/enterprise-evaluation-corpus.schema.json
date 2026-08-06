@@ -1,0 +1,307 @@
+{
+  "$defs": {
+    "AccessEvaluationCellV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_atom_id": {
+          "title": "Access Atom Id",
+          "type": "string"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "context_id": {
+          "title": "Context Id",
+          "type": "string"
+        },
+        "session_state_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Session State Id"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cell_id",
+        "access_atom_id",
+        "context_id",
+        "session_state_id",
+        "tick"
+      ],
+      "title": "AccessEvaluationCellV1",
+      "type": "object"
+    },
+    "AuthorizationSessionSlotV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_tick": {
+          "minimum": 0,
+          "title": "Activation Tick",
+          "type": "integer"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "session_state_id": {
+          "title": "Session State Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "session_state_id",
+        "session_id",
+        "subject_id",
+        "activation_tick"
+      ],
+      "title": "AuthorizationSessionSlotV1",
+      "type": "object"
+    },
+    "EnterpriseAccessRequestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_request_id": {
+          "title": "Access Request Id",
+          "type": "string"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "access_request_id",
+        "cell_id"
+      ],
+      "title": "EnterpriseAccessRequestV1",
+      "type": "object"
+    },
+    "EnterpriseContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "context_id": {
+          "title": "Context Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "context_id"
+      ],
+      "title": "EnterpriseContextV1",
+      "type": "object"
+    },
+    "RoleActivationRequestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_request_id": {
+          "title": "Activation Request Id",
+          "type": "string"
+        },
+        "request_tick": {
+          "minimum": 0,
+          "title": "Request Tick",
+          "type": "integer"
+        },
+        "requested_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requested Role Ids",
+          "type": "array"
+        },
+        "session_id": {
+          "title": "Session Id",
+          "type": "string"
+        },
+        "session_state_id": {
+          "title": "Session State Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "activation_request_id",
+        "session_state_id",
+        "session_id",
+        "subject_id",
+        "request_tick",
+        "requested_role_ids"
+      ],
+      "title": "RoleActivationRequestV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_requests": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAccessRequestV1"
+      },
+      "minItems": 1,
+      "title": "Access Requests",
+      "type": "array"
+    },
+    "compile_config_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "contexts": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseContextV1"
+      },
+      "minItems": 1,
+      "title": "Contexts",
+      "type": "array"
+    },
+    "corpus_config_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_cell_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_cells": {
+      "items": {
+        "$ref": "#/$defs/AccessEvaluationCellV1"
+      },
+      "minItems": 1,
+      "title": "Evaluation Cells",
+      "type": "array"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "role_activation_requests": {
+      "items": {
+        "$ref": "#/$defs/RoleActivationRequestV1"
+      },
+      "title": "Role Activation Requests",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_slots": {
+      "items": {
+        "$ref": "#/$defs/AuthorizationSessionSlotV1"
+      },
+      "title": "Session Slots",
+      "type": "array"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "corpus_config_digest",
+    "compile_config_digest",
+    "evaluation_cell_digest",
+    "contexts",
+    "session_slots",
+    "role_activation_requests",
+    "evaluation_cells",
+    "access_requests"
+  ],
+  "title": "EnterpriseEvaluationCorpusV1",
+  "type": "object"
+}

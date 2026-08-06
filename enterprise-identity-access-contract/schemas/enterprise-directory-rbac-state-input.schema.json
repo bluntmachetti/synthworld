@@ -1,0 +1,430 @@
+{
+  "$defs": {
+    "AccountObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "minLength": 1,
+          "title": "Account Id",
+          "type": "string"
+        },
+        "administrative_state": {
+          "$ref": "#/$defs/AdministrativeState"
+        },
+        "observed_principal_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Principal Id"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "account_id",
+        "administrative_state",
+        "valid_from_tick",
+        "revision_id"
+      ],
+      "title": "AccountObservationV1",
+      "type": "object"
+    },
+    "AdministrativeState": {
+      "enum": [
+        "active",
+        "suspended",
+        "disabled"
+      ],
+      "title": "AdministrativeState",
+      "type": "string"
+    },
+    "AllSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "all",
+          "default": "all",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "AllSelectorV1",
+      "type": "object"
+    },
+    "CountSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "count",
+          "default": "count",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "CountSelectorV1",
+      "type": "object"
+    },
+    "DirectEntitlementV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "authorization_target_id": {
+          "minLength": 1,
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "subject_id",
+        "authorization_target_id",
+        "action",
+        "valid_from_tick",
+        "revision_id"
+      ],
+      "title": "DirectEntitlementV1",
+      "type": "object"
+    },
+    "FractionSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "fraction",
+          "default": "fraction",
+          "title": "Kind",
+          "type": "string"
+        },
+        "numerator": {
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "title": "FractionSelectorV1",
+      "type": "object"
+    },
+    "GroupNestingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "child_group_key": {
+          "title": "Child Group Key",
+          "type": "string"
+        },
+        "parent_group_key": {
+          "title": "Parent Group Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "child_group_key",
+        "parent_group_key"
+      ],
+      "title": "GroupNestingV1",
+      "type": "object"
+    },
+    "GroupRoleAssignmentV1": {
+      "additionalProperties": false,
+      "properties": {
+        "group_key": {
+          "title": "Group Key",
+          "type": "string"
+        },
+        "role_key": {
+          "title": "Role Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_key",
+        "role_key"
+      ],
+      "title": "GroupRoleAssignmentV1",
+      "type": "object"
+    },
+    "PopulationGroupMembershipRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "group_key": {
+          "title": "Group Key",
+          "type": "string"
+        },
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "rule_key",
+        "population_key",
+        "group_key",
+        "selector"
+      ],
+      "title": "PopulationGroupMembershipRuleV1",
+      "type": "object"
+    },
+    "PopulationRoleAssignmentRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "role_key": {
+          "title": "Role Key",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "rule_key",
+        "population_key",
+        "role_key",
+        "selector"
+      ],
+      "title": "PopulationRoleAssignmentRuleV1",
+      "type": "object"
+    },
+    "RoleGrantV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "resource_set_key": {
+          "title": "Resource Set Key",
+          "type": "string"
+        },
+        "role_key": {
+          "title": "Role Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_key",
+        "resource_set_key",
+        "action"
+      ],
+      "title": "RoleGrantV1",
+      "type": "object"
+    },
+    "RoleHierarchyV1": {
+      "additionalProperties": false,
+      "properties": {
+        "junior_role_key": {
+          "title": "Junior Role Key",
+          "type": "string"
+        },
+        "senior_role_key": {
+          "title": "Senior Role Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "senior_role_key",
+        "junior_role_key"
+      ],
+      "title": "RoleHierarchyV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "account_observations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AccountObservationV1"
+      },
+      "title": "Account Observations",
+      "type": "array"
+    },
+    "direct_entitlements": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DirectEntitlementV1"
+      },
+      "title": "Direct Entitlements",
+      "type": "array"
+    },
+    "group_nesting": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GroupNestingV1"
+      },
+      "title": "Group Nesting",
+      "type": "array"
+    },
+    "group_role_assignments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GroupRoleAssignmentV1"
+      },
+      "title": "Group Role Assignments",
+      "type": "array"
+    },
+    "memberships": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PopulationGroupMembershipRuleV1"
+      },
+      "title": "Memberships",
+      "type": "array"
+    },
+    "population_role_assignments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PopulationRoleAssignmentRuleV1"
+      },
+      "title": "Population Role Assignments",
+      "type": "array"
+    },
+    "role_grants": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RoleGrantV1"
+      },
+      "title": "Role Grants",
+      "type": "array"
+    },
+    "role_hierarchy": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RoleHierarchyV1"
+      },
+      "title": "Role Hierarchy",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "title": "EnterpriseDirectoryRbacStateInputV1",
+  "type": "object"
+}

@@ -1,0 +1,685 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-run-plan.schema.json",
+  "x-generated-from": "synthworld.contextual_access.protocol.ContextualAccessRunPlanV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "AccessDecisionProbeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "probe_type": {
+          "const": "access_decision",
+          "default": "access_decision",
+          "title": "Probe Type",
+          "type": "string"
+        },
+        "control_id": {
+          "const": "SW-CA-C02",
+          "default": "SW-CA-C02",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "trigger_event_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trigger Event Id"
+        }
+      },
+      "required": [
+        "probe_id",
+        "component_id",
+        "request_id"
+      ],
+      "title": "AccessDecisionProbeV1",
+      "type": "object"
+    },
+    "ContextualBenchmarkBindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_family": {
+          "const": "contextual_access",
+          "default": "contextual_access",
+          "title": "Benchmark Family",
+          "type": "string"
+        },
+        "benchmark_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Benchmark Version",
+          "type": "string"
+        },
+        "enterprise_public_root_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "contextual_public_root_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "access_atom_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "registry_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "public_case_inventory_digest": {
+          "$ref": "#/$defs/DigestV2"
+        }
+      },
+      "required": [
+        "enterprise_public_root_digest",
+        "contextual_public_root_digest",
+        "identity_access_universe_digest",
+        "access_atom_digest",
+        "registry_digest",
+        "request_digest",
+        "public_case_inventory_digest"
+      ],
+      "title": "ContextualBenchmarkBindingV1",
+      "type": "object"
+    },
+    "ContextualControlCoverageV1": {
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "disposition": {
+          "$ref": "#/$defs/ContextualCoverageDisposition"
+        },
+        "applicability_rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applicability Rationale"
+        }
+      },
+      "required": [
+        "control_id",
+        "disposition"
+      ],
+      "title": "ContextualControlCoverageV1",
+      "type": "object"
+    },
+    "ContextualControlId": {
+      "enum": [
+        "SW-CA-C01",
+        "SW-CA-C02",
+        "SW-CA-C03",
+        "SW-CA-C04",
+        "SW-CA-C05",
+        "SW-CA-C06"
+      ],
+      "title": "ContextualControlId",
+      "type": "string"
+    },
+    "ContextualCoverageDisposition": {
+      "enum": [
+        "selected",
+        "not_applicable"
+      ],
+      "title": "ContextualCoverageDisposition",
+      "type": "string"
+    },
+    "ContextualFactKind": {
+      "enum": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "title": "ContextualFactKind",
+      "type": "string"
+    },
+    "ContextualFaultKind": {
+      "enum": [
+        "delayed_delivery",
+        "duplicate_delivery",
+        "out_of_order_delivery",
+        "dropped_delivery"
+      ],
+      "title": "ContextualFaultKind",
+      "type": "string"
+    },
+    "ContextualFaultV1": {
+      "additionalProperties": false,
+      "properties": {
+        "fault_id": {
+          "minLength": 1,
+          "title": "Fault Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ContextualFaultKind"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "event_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Event Ids",
+          "type": "array"
+        },
+        "delivery_attempt_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Delivery Attempt Ids",
+          "type": "array"
+        },
+        "injection_tick": {
+          "minimum": 0,
+          "title": "Injection Tick",
+          "type": "integer"
+        },
+        "recovery_tick": {
+          "minimum": 0,
+          "title": "Recovery Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fault_id",
+        "kind",
+        "component_id",
+        "event_ids",
+        "delivery_attempt_ids",
+        "injection_tick",
+        "recovery_tick"
+      ],
+      "title": "ContextualFaultV1",
+      "type": "object"
+    },
+    "ContextualMappingKind": {
+      "enum": [
+        "subject_attribute",
+        "resource_attribute",
+        "action_attribute",
+        "environment_attribute",
+        "relationship_predicate"
+      ],
+      "title": "ContextualMappingKind",
+      "type": "string"
+    },
+    "ContextualRunBoundsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "feed_delay_bound_ticks": {
+          "exclusiveMinimum": 0,
+          "title": "Feed Delay Bound Ticks",
+          "type": "integer"
+        },
+        "feed_delay_unit": {
+          "const": "tick",
+          "default": "tick",
+          "title": "Feed Delay Unit",
+          "type": "string"
+        },
+        "sut_acceptance_bound_ns": {
+          "exclusiveMinimum": 0,
+          "title": "Sut Acceptance Bound Ns",
+          "type": "integer"
+        },
+        "sut_acceptance_unit": {
+          "const": "ns",
+          "default": "ns",
+          "title": "Sut Acceptance Unit",
+          "type": "string"
+        },
+        "post_acceptance_decision_bound_ns": {
+          "exclusiveMinimum": 0,
+          "title": "Post Acceptance Decision Bound Ns",
+          "type": "integer"
+        },
+        "post_acceptance_decision_unit": {
+          "const": "ns",
+          "default": "ns",
+          "title": "Post Acceptance Decision Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feed_delay_bound_ticks",
+        "sut_acceptance_bound_ns",
+        "post_acceptance_decision_bound_ns"
+      ],
+      "title": "ContextualRunBoundsV1",
+      "type": "object"
+    },
+    "DeliveryAcceptanceProbeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "probe_type": {
+          "const": "delivery_acceptance",
+          "default": "delivery_acceptance",
+          "title": "Probe Type",
+          "type": "string"
+        },
+        "control_id": {
+          "const": "SW-CA-C04",
+          "default": "SW-CA-C04",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "delivery_attempt_id": {
+          "minLength": 1,
+          "title": "Delivery Attempt Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "probe_id",
+        "component_id",
+        "event_id",
+        "delivery_attempt_id"
+      ],
+      "title": "DeliveryAcceptanceProbeV1",
+      "type": "object"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "EvidenceCorrelationProbeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "probe_type": {
+          "const": "evidence_correlation",
+          "default": "evidence_correlation",
+          "title": "Probe Type",
+          "type": "string"
+        },
+        "control_id": {
+          "const": "SW-CA-C06",
+          "default": "SW-CA-C06",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "required_evidence_kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        }
+      },
+      "required": [
+        "probe_id",
+        "component_id",
+        "request_id",
+        "required_evidence_kind"
+      ],
+      "title": "EvidenceCorrelationProbeV1",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "target",
+        "gateway",
+        "policy",
+        "credential_store",
+        "runtime",
+        "network",
+        "log",
+        "trace",
+        "memory"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "MappingIngestionProbeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "probe_type": {
+          "const": "mapping_ingestion",
+          "default": "mapping_ingestion",
+          "title": "Probe Type",
+          "type": "string"
+        },
+        "control_id": {
+          "const": "SW-CA-C01",
+          "default": "SW-CA-C01",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "fact_type": {
+          "$ref": "#/$defs/ContextualFactKind"
+        },
+        "mapping_kind": {
+          "$ref": "#/$defs/ContextualMappingKind"
+        }
+      },
+      "required": [
+        "probe_id",
+        "component_id",
+        "fact_type",
+        "mapping_kind"
+      ],
+      "title": "MappingIngestionProbeV1",
+      "type": "object"
+    },
+    "ProtectedEnforcementProbeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "probe_type": {
+          "const": "protected_enforcement",
+          "default": "protected_enforcement",
+          "title": "Probe Type",
+          "type": "string"
+        },
+        "control_id": {
+          "const": "SW-CA-C03",
+          "default": "SW-CA-C03",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "probe_id",
+        "component_id",
+        "request_id"
+      ],
+      "title": "ProtectedEnforcementProbeV1",
+      "type": "object"
+    },
+    "SynchronizationFaultProbeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "probe_type": {
+          "const": "synchronization_fault",
+          "default": "synchronization_fault",
+          "title": "Probe Type",
+          "type": "string"
+        },
+        "control_id": {
+          "const": "SW-CA-C05",
+          "default": "SW-CA-C05",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "fault_id": {
+          "minLength": 1,
+          "title": "Fault Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "probe_id",
+        "component_id",
+        "fault_id"
+      ],
+      "title": "SynchronizationFaultProbeV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "protocol_version": {
+      "const": "synthworld-contextual-access-1.0.0",
+      "default": "synthworld-contextual-access-1.0.0",
+      "title": "Protocol Version",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "benchmark": {
+      "$ref": "#/$defs/ContextualBenchmarkBindingV1"
+    },
+    "mapping_profile_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "event_schedule_version": {
+      "minLength": 1,
+      "title": "Event Schedule Version",
+      "type": "string"
+    },
+    "request_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Request Ids",
+      "type": "array"
+    },
+    "event_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Event Ids",
+      "type": "array"
+    },
+    "delivery_attempt_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Delivery Attempt Ids",
+      "type": "array"
+    },
+    "sut_component_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Sut Component Ids",
+      "type": "array"
+    },
+    "context_feed_component_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Context Feed Component Ids",
+      "type": "array"
+    },
+    "faults": {
+      "items": {
+        "$ref": "#/$defs/ContextualFaultV1"
+      },
+      "title": "Faults",
+      "type": "array"
+    },
+    "bounds": {
+      "$ref": "#/$defs/ContextualRunBoundsV1"
+    },
+    "required_evidence_kinds": {
+      "items": {
+        "$ref": "#/$defs/EvidenceKind"
+      },
+      "minItems": 1,
+      "title": "Required Evidence Kinds",
+      "type": "array"
+    },
+    "control_coverage": {
+      "items": {
+        "$ref": "#/$defs/ContextualControlCoverageV1"
+      },
+      "minItems": 1,
+      "title": "Control Coverage",
+      "type": "array"
+    },
+    "probes": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "access_decision": "#/$defs/AccessDecisionProbeV1",
+            "delivery_acceptance": "#/$defs/DeliveryAcceptanceProbeV1",
+            "evidence_correlation": "#/$defs/EvidenceCorrelationProbeV1",
+            "mapping_ingestion": "#/$defs/MappingIngestionProbeV1",
+            "protected_enforcement": "#/$defs/ProtectedEnforcementProbeV1",
+            "synchronization_fault": "#/$defs/SynchronizationFaultProbeV1"
+          },
+          "propertyName": "probe_type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/MappingIngestionProbeV1"
+          },
+          {
+            "$ref": "#/$defs/AccessDecisionProbeV1"
+          },
+          {
+            "$ref": "#/$defs/ProtectedEnforcementProbeV1"
+          },
+          {
+            "$ref": "#/$defs/DeliveryAcceptanceProbeV1"
+          },
+          {
+            "$ref": "#/$defs/SynchronizationFaultProbeV1"
+          },
+          {
+            "$ref": "#/$defs/EvidenceCorrelationProbeV1"
+          }
+        ]
+      },
+      "minItems": 1,
+      "title": "Probes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "benchmark",
+    "mapping_profile_digest",
+    "event_schedule_version",
+    "request_ids",
+    "event_ids",
+    "delivery_attempt_ids",
+    "sut_component_ids",
+    "context_feed_component_ids",
+    "faults",
+    "bounds",
+    "required_evidence_kinds",
+    "control_coverage",
+    "probes"
+  ],
+  "title": "ContextualAccessRunPlanV1",
+  "type": "object"
+}

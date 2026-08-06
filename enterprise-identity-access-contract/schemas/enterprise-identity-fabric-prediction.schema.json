@@ -1,0 +1,757 @@
+{
+  "$defs": {
+    "AbacCellPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "intended_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        }
+      },
+      "required": [
+        "cell_id",
+        "actual_outcome",
+        "intended_outcome"
+      ],
+      "title": "AbacCellPredictionV1",
+      "type": "object"
+    },
+    "AbacPredicatePredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/PredicateOutcome"
+        },
+        "truth_id": {
+          "title": "Truth Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truth_id",
+        "outcome"
+      ],
+      "title": "AbacPredicatePredictionV1",
+      "type": "object"
+    },
+    "ActivationOutcome": {
+      "enum": [
+        "accepted",
+        "rejected"
+      ],
+      "title": "ActivationOutcome",
+      "type": "string"
+    },
+    "ActivationPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_request_id": {
+          "minLength": 1,
+          "title": "Activation Request Id",
+          "type": "string"
+        },
+        "actual_activated_role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Activated Role Ids",
+          "type": "array"
+        },
+        "expected_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "observed_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "unauthorized_activated_role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unauthorized Activated Role Ids",
+          "type": "array"
+        },
+        "usable_activated_role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Usable Activated Role Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "activation_request_id",
+        "expected_outcome",
+        "observed_outcome"
+      ],
+      "title": "ActivationPredictionV1",
+      "type": "object"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "AuthorizedRoleSetPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Role Ids",
+          "type": "array"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id"
+      ],
+      "title": "AuthorizedRoleSetPredictionV1",
+      "type": "object"
+    },
+    "BindingStatus": {
+      "enum": [
+        "not_applicable",
+        "matches_canonical",
+        "missing",
+        "mismatch"
+      ],
+      "title": "BindingStatus",
+      "type": "string"
+    },
+    "BirthrightAssignmentPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "assignment_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Assignment Ids",
+          "type": "array"
+        },
+        "rule_id": {
+          "minLength": 1,
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "subject_id"
+      ],
+      "title": "BirthrightAssignmentPredictionV1",
+      "type": "object"
+    },
+    "DirectoryRbacCellPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "birthright_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effective_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "effective_path_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Effective Path Ids",
+          "type": "array"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        }
+      },
+      "required": [
+        "cell_id",
+        "birthright_decision",
+        "intended_decision",
+        "effective_decision",
+        "final_decision"
+      ],
+      "title": "DirectoryRbacCellPredictionV1",
+      "type": "object"
+    },
+    "DsdPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_request_id": {
+          "minLength": 1,
+          "title": "Activation Request Id",
+          "type": "string"
+        },
+        "constraint_id": {
+          "minLength": 1,
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "observed_session_violated": {
+          "title": "Observed Session Violated",
+          "type": "boolean"
+        },
+        "request_violated": {
+          "title": "Request Violated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "activation_request_id",
+        "request_violated",
+        "observed_session_violated"
+      ],
+      "title": "DsdPredictionV1",
+      "type": "object"
+    },
+    "EnterpriseAbacPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cells": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AbacCellPredictionV1"
+          },
+          "title": "Cells",
+          "type": "array"
+        },
+        "predicates": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AbacPredicatePredictionV1"
+          },
+          "title": "Predicates",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "title": "EnterpriseAbacPredictionV1",
+      "type": "object"
+    },
+    "EnterpriseDirectoryRbacPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ActivationPredictionV1"
+          },
+          "title": "Activations",
+          "type": "array"
+        },
+        "authorized_role_sets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AuthorizedRoleSetPredictionV1"
+          },
+          "title": "Authorized Role Sets",
+          "type": "array"
+        },
+        "birthright_assignments": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/BirthrightAssignmentPredictionV1"
+          },
+          "title": "Birthright Assignments",
+          "type": "array"
+        },
+        "cells": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DirectoryRbacCellPredictionV1"
+          },
+          "title": "Cells",
+          "type": "array"
+        },
+        "dsd_evaluations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DsdPredictionV1"
+          },
+          "title": "Dsd Evaluations",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "ssd_evaluations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SsdPredictionV1"
+          },
+          "title": "Ssd Evaluations",
+          "type": "array"
+        }
+      },
+      "title": "EnterpriseDirectoryRbacPredictionV1",
+      "type": "object"
+    },
+    "EnterpriseRebacPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cells": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RebacCellPredictionV1"
+          },
+          "title": "Cells",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "title": "EnterpriseRebacPredictionV1",
+      "type": "object"
+    },
+    "IdentityFabricAccessPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_exception": {
+          "title": "Approved Exception",
+          "type": "boolean"
+        },
+        "birthright_access": {
+          "title": "Birthright Access",
+          "type": "boolean"
+        },
+        "direct_entitlement": {
+          "title": "Direct Entitlement",
+          "type": "boolean"
+        },
+        "effective_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "outside_birthright": {
+          "title": "Outside Birthright",
+          "type": "boolean"
+        },
+        "outside_intent": {
+          "title": "Outside Intent",
+          "type": "boolean"
+        },
+        "policy_conflict": {
+          "title": "Policy Conflict",
+          "type": "boolean"
+        },
+        "query_id": {
+          "minLength": 1,
+          "title": "Query Id",
+          "type": "string"
+        },
+        "redundant_derivation": {
+          "title": "Redundant Derivation",
+          "type": "boolean"
+        },
+        "role_entitlement": {
+          "title": "Role Entitlement",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "direct_entitlement",
+        "role_entitlement",
+        "birthright_access",
+        "approved_exception",
+        "intended_decision",
+        "effective_decision",
+        "final_decision",
+        "policy_conflict",
+        "redundant_derivation",
+        "outside_birthright",
+        "outside_intent"
+      ],
+      "title": "IdentityFabricAccessPredictionV1",
+      "type": "object"
+    },
+    "IdentityFabricAccountPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_status": {
+          "$ref": "#/$defs/BindingStatus"
+        },
+        "canonical_principal_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Canonical Principal Id"
+        },
+        "inactive": {
+          "title": "Inactive",
+          "type": "boolean"
+        },
+        "lifecycle_status": {
+          "$ref": "#/$defs/LifecycleStatus"
+        },
+        "orphaned": {
+          "title": "Orphaned",
+          "type": "boolean"
+        },
+        "query_id": {
+          "minLength": 1,
+          "title": "Query Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query_id",
+        "binding_status",
+        "lifecycle_status",
+        "orphaned",
+        "inactive"
+      ],
+      "title": "IdentityFabricAccountPredictionV1",
+      "type": "object"
+    },
+    "IdentityFabricAccumulationPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulated_cell_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Accumulated Cell Ids",
+          "type": "array"
+        },
+        "query_id": {
+          "minLength": 1,
+          "title": "Query Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query_id"
+      ],
+      "title": "IdentityFabricAccumulationPredictionV1",
+      "type": "object"
+    },
+    "IdentityFabricCheckpointPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac": {
+          "$ref": "#/$defs/EnterpriseAbacPredictionV1"
+        },
+        "access": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentityFabricAccessPredictionV1"
+          },
+          "title": "Access",
+          "type": "array"
+        },
+        "accounts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentityFabricAccountPredictionV1"
+          },
+          "title": "Accounts",
+          "type": "array"
+        },
+        "checkpoint_id": {
+          "minLength": 1,
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "directory_rbac": {
+          "$ref": "#/$defs/EnterpriseDirectoryRbacPredictionV1"
+        },
+        "membership": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentityFabricMembershipPredictionV1"
+          },
+          "title": "Membership",
+          "type": "array"
+        },
+        "rebac": {
+          "$ref": "#/$defs/EnterpriseRebacPredictionV1"
+        },
+        "roles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentityFabricRolePredictionV1"
+          },
+          "title": "Roles",
+          "type": "array"
+        }
+      },
+      "required": [
+        "checkpoint_id"
+      ],
+      "title": "IdentityFabricCheckpointPredictionV1",
+      "type": "object"
+    },
+    "IdentityFabricMembershipPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "direct_member": {
+          "title": "Direct Member",
+          "type": "boolean"
+        },
+        "effective_member": {
+          "title": "Effective Member",
+          "type": "boolean"
+        },
+        "query_id": {
+          "minLength": 1,
+          "title": "Query Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query_id",
+        "direct_member",
+        "effective_member"
+      ],
+      "title": "IdentityFabricMembershipPredictionV1",
+      "type": "object"
+    },
+    "IdentityFabricRolePredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "direct_role_assignment": {
+          "title": "Direct Role Assignment",
+          "type": "boolean"
+        },
+        "effective_role": {
+          "title": "Effective Role",
+          "type": "boolean"
+        },
+        "group_derived_role": {
+          "title": "Group Derived Role",
+          "type": "boolean"
+        },
+        "hierarchy_inherited_role": {
+          "title": "Hierarchy Inherited Role",
+          "type": "boolean"
+        },
+        "query_id": {
+          "minLength": 1,
+          "title": "Query Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "query_id",
+        "direct_role_assignment",
+        "group_derived_role",
+        "hierarchy_inherited_role",
+        "effective_role"
+      ],
+      "title": "IdentityFabricRolePredictionV1",
+      "type": "object"
+    },
+    "LifecycleStatus": {
+      "enum": [
+        "not_applicable",
+        "active",
+        "inactive",
+        "not_yet_valid",
+        "expired"
+      ],
+      "title": "LifecycleStatus",
+      "type": "string"
+    },
+    "MechanismOutcome": {
+      "description": "Native outcome retained before benchmark default-deny normalization.",
+      "enum": [
+        "allow",
+        "deny",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "MechanismOutcome",
+      "type": "string"
+    },
+    "PredicateOutcome": {
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "PredicateOutcome",
+      "type": "string"
+    },
+    "RebacCellPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "actual_path_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Path Ids",
+          "type": "array"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "intended_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "intended_path_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Path Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cell_id",
+        "actual_outcome",
+        "intended_outcome"
+      ],
+      "title": "RebacCellPredictionV1",
+      "type": "object"
+    },
+    "SsdPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "constraint_id": {
+          "minLength": 1,
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "violated": {
+          "title": "Violated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "subject_id",
+        "violated"
+      ],
+      "title": "SsdPredictionV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "accumulation": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IdentityFabricAccumulationPredictionV1"
+      },
+      "title": "Accumulation",
+      "type": "array"
+    },
+    "benchmark_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "checkpoints": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IdentityFabricCheckpointPredictionV1"
+      },
+      "title": "Checkpoints",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "benchmark_digest"
+  ],
+  "title": "EnterpriseIdentityFabricPredictionV1",
+  "type": "object"
+}

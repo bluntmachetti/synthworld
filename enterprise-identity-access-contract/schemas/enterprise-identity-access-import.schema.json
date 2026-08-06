@@ -1,0 +1,993 @@
+{
+  "$defs": {
+    "AccountAllocationTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_kind": {
+          "$ref": "#/$defs/AccountKind"
+        },
+        "accounts_per_selected_subject": {
+          "exclusiveMinimum": 0,
+          "title": "Accounts Per Selected Subject",
+          "type": "integer"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "resource_set_key": {
+          "title": "Resource Set Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "key",
+        "population_key",
+        "resource_set_key",
+        "account_kind",
+        "selector",
+        "accounts_per_selected_subject"
+      ],
+      "title": "AccountAllocationTemplateV1",
+      "type": "object"
+    },
+    "AccountKind": {
+      "enum": [
+        "workforce",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "AccountKind",
+      "type": "string"
+    },
+    "AccountObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "minLength": 1,
+          "title": "Account Id",
+          "type": "string"
+        },
+        "administrative_state": {
+          "$ref": "#/$defs/AdministrativeState"
+        },
+        "observed_principal_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed Principal Id"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "account_id",
+        "administrative_state",
+        "valid_from_tick",
+        "revision_id"
+      ],
+      "title": "AccountObservationV1",
+      "type": "object"
+    },
+    "AccountSubjectAccessAtomRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_allocation_key": {
+          "title": "Account Allocation Key",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_key",
+        "account_allocation_key",
+        "action"
+      ],
+      "title": "AccountSubjectAccessAtomRuleV1",
+      "type": "object"
+    },
+    "AdministrativeState": {
+      "enum": [
+        "active",
+        "suspended",
+        "disabled"
+      ],
+      "title": "AdministrativeState",
+      "type": "string"
+    },
+    "AllSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "all",
+          "default": "all",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "AllSelectorV1",
+      "type": "object"
+    },
+    "CountSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "count",
+          "default": "count",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "CountSelectorV1",
+      "type": "object"
+    },
+    "DirectEntitlementV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "authorization_target_id": {
+          "minLength": 1,
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "subject_id",
+        "authorization_target_id",
+        "action",
+        "valid_from_tick",
+        "revision_id"
+      ],
+      "title": "DirectEntitlementV1",
+      "type": "object"
+    },
+    "EnterpriseDirectoryRbacStateInputV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_observations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AccountObservationV1"
+          },
+          "title": "Account Observations",
+          "type": "array"
+        },
+        "direct_entitlements": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DirectEntitlementV1"
+          },
+          "title": "Direct Entitlements",
+          "type": "array"
+        },
+        "group_nesting": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GroupNestingV1"
+          },
+          "title": "Group Nesting",
+          "type": "array"
+        },
+        "group_role_assignments": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GroupRoleAssignmentV1"
+          },
+          "title": "Group Role Assignments",
+          "type": "array"
+        },
+        "memberships": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PopulationGroupMembershipRuleV1"
+          },
+          "title": "Memberships",
+          "type": "array"
+        },
+        "population_role_assignments": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PopulationRoleAssignmentRuleV1"
+          },
+          "title": "Population Role Assignments",
+          "type": "array"
+        },
+        "role_grants": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RoleGrantV1"
+          },
+          "title": "Role Grants",
+          "type": "array"
+        },
+        "role_hierarchy": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RoleHierarchyV1"
+          },
+          "title": "Role Hierarchy",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "title": "EnterpriseDirectoryRbacStateInputV1",
+      "type": "object"
+    },
+    "EnterpriseIamUniverseExtensionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_access_atom_rules": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AccountSubjectAccessAtomRuleV1"
+          },
+          "title": "Account Access Atom Rules",
+          "type": "array"
+        },
+        "account_allocations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AccountAllocationTemplateV1"
+          },
+          "title": "Account Allocations",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "title": "EnterpriseIamUniverseExtensionV1",
+      "type": "object"
+    },
+    "EnterpriseIdentityAccessBlueprintV1": {
+      "additionalProperties": false,
+      "properties": {
+        "blueprint_key": {
+          "title": "Blueprint Key",
+          "type": "string"
+        },
+        "groups": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/GroupTemplateV1"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "id_namespace_salt": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Id Namespace Salt",
+          "type": "string"
+        },
+        "organisations": {
+          "items": {
+            "$ref": "#/$defs/OrganisationTemplateV1"
+          },
+          "minItems": 1,
+          "title": "Organisations",
+          "type": "array"
+        },
+        "populations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PopulationTemplateV1"
+          },
+          "title": "Populations",
+          "type": "array"
+        },
+        "principal_access_atom_rules": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PrincipalSubjectAccessAtomRuleV1"
+          },
+          "title": "Principal Access Atom Rules",
+          "type": "array"
+        },
+        "resource_sets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ResourceSetTemplateV1"
+          },
+          "title": "Resource Sets",
+          "type": "array"
+        },
+        "roles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RoleTemplateV1"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "tenants": {
+          "items": {
+            "$ref": "#/$defs/TenantTemplateV1"
+          },
+          "minItems": 1,
+          "title": "Tenants",
+          "type": "array"
+        },
+        "units": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UnitTemplateV1"
+          },
+          "title": "Units",
+          "type": "array"
+        }
+      },
+      "required": [
+        "blueprint_key",
+        "id_namespace_salt",
+        "tenants",
+        "organisations"
+      ],
+      "title": "EnterpriseIdentityAccessBlueprintV1",
+      "type": "object"
+    },
+    "FractionSelectorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "exclusiveMinimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "fraction",
+          "default": "fraction",
+          "title": "Kind",
+          "type": "string"
+        },
+        "numerator": {
+          "exclusiveMinimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "title": "FractionSelectorV1",
+      "type": "object"
+    },
+    "GroupNestingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "child_group_key": {
+          "title": "Child Group Key",
+          "type": "string"
+        },
+        "parent_group_key": {
+          "title": "Parent Group Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "child_group_key",
+        "parent_group_key"
+      ],
+      "title": "GroupNestingV1",
+      "type": "object"
+    },
+    "GroupRoleAssignmentV1": {
+      "additionalProperties": false,
+      "properties": {
+        "group_key": {
+          "title": "Group Key",
+          "type": "string"
+        },
+        "role_key": {
+          "title": "Role Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_key",
+        "role_key"
+      ],
+      "title": "GroupRoleAssignmentV1",
+      "type": "object"
+    },
+    "GroupTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "owner_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Unit Key"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key"
+      ],
+      "title": "GroupTemplateV1",
+      "type": "object"
+    },
+    "OrganisationTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key"
+      ],
+      "title": "OrganisationTemplateV1",
+      "type": "object"
+    },
+    "PopulationGroupMembershipRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "group_key": {
+          "title": "Group Key",
+          "type": "string"
+        },
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "rule_key",
+        "population_key",
+        "group_key",
+        "selector"
+      ],
+      "title": "PopulationGroupMembershipRuleV1",
+      "type": "object"
+    },
+    "PopulationRoleAssignmentRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "role_key": {
+          "title": "Role Key",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "rule_key",
+        "population_key",
+        "role_key",
+        "selector"
+      ],
+      "title": "PopulationRoleAssignmentRuleV1",
+      "type": "object"
+    },
+    "PopulationTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "exclusiveMinimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "population_kind": {
+          "$ref": "#/$defs/PrincipalKind"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        },
+        "unit_key": {
+          "title": "Unit Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key",
+        "unit_key",
+        "population_kind",
+        "count"
+      ],
+      "title": "PopulationTemplateV1",
+      "type": "object"
+    },
+    "PrincipalKind": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "PrincipalSubjectAccessAtomRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "population_key": {
+          "title": "Population Key",
+          "type": "string"
+        },
+        "resource_set_key": {
+          "title": "Resource Set Key",
+          "type": "string"
+        },
+        "rule_key": {
+          "title": "Rule Key",
+          "type": "string"
+        },
+        "selector": {
+          "discriminator": {
+            "mapping": {
+              "all": "#/$defs/AllSelectorV1",
+              "count": "#/$defs/CountSelectorV1",
+              "fraction": "#/$defs/FractionSelectorV1"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/AllSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/CountSelectorV1"
+            },
+            {
+              "$ref": "#/$defs/FractionSelectorV1"
+            }
+          ],
+          "title": "Selector"
+        }
+      },
+      "required": [
+        "rule_key",
+        "population_key",
+        "resource_set_key",
+        "action",
+        "selector"
+      ],
+      "title": "PrincipalSubjectAccessAtomRuleV1",
+      "type": "object"
+    },
+    "ResourceSetTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "instance_count": {
+          "exclusiveMinimum": 0,
+          "title": "Instance Count",
+          "type": "integer"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "owner_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Unit Key"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/TargetKind"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key",
+        "target_kind",
+        "instance_count",
+        "actions"
+      ],
+      "title": "ResourceSetTemplateV1",
+      "type": "object"
+    },
+    "RoleGrantV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "resource_set_key": {
+          "title": "Resource Set Key",
+          "type": "string"
+        },
+        "role_key": {
+          "title": "Role Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_key",
+        "resource_set_key",
+        "action"
+      ],
+      "title": "RoleGrantV1",
+      "type": "object"
+    },
+    "RoleHierarchyV1": {
+      "additionalProperties": false,
+      "properties": {
+        "junior_role_key": {
+          "title": "Junior Role Key",
+          "type": "string"
+        },
+        "senior_role_key": {
+          "title": "Senior Role Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "senior_role_key",
+        "junior_role_key"
+      ],
+      "title": "RoleHierarchyV1",
+      "type": "object"
+    },
+    "RoleTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "owner_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Unit Key"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key"
+      ],
+      "title": "RoleTemplateV1",
+      "type": "object"
+    },
+    "TargetKind": {
+      "enum": [
+        "application",
+        "api",
+        "tool",
+        "data_store",
+        "environment"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    },
+    "TenantTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "title": "TenantTemplateV1",
+      "type": "object"
+    },
+    "UnitKind": {
+      "enum": [
+        "division",
+        "department",
+        "team"
+      ],
+      "title": "UnitKind",
+      "type": "string"
+    },
+    "UnitTemplateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "organisation_key": {
+          "title": "Organisation Key",
+          "type": "string"
+        },
+        "parent_unit_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Unit Key"
+        },
+        "tenant_key": {
+          "title": "Tenant Key",
+          "type": "string"
+        },
+        "unit_kind": {
+          "$ref": "#/$defs/UnitKind"
+        }
+      },
+      "required": [
+        "key",
+        "tenant_key",
+        "organisation_key",
+        "unit_kind"
+      ],
+      "title": "UnitTemplateV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "blueprint": {
+      "$ref": "#/$defs/EnterpriseIdentityAccessBlueprintV1"
+    },
+    "directory_rbac_state": {
+      "$ref": "#/$defs/EnterpriseDirectoryRbacStateInputV1"
+    },
+    "iam_universe_extension": {
+      "$ref": "#/$defs/EnterpriseIamUniverseExtensionV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "blueprint",
+    "iam_universe_extension",
+    "directory_rbac_state"
+  ],
+  "title": "EnterpriseIdentityAccessImportV1",
+  "type": "object"
+}

@@ -1,0 +1,462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-run-truth.schema.json",
+  "x-generated-from": "synthworld.contextual_access.protocol.ContextualAccessRunTruthV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "AccessDecisionRunTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "truth_type": {
+          "const": "access_decision",
+          "default": "access_decision",
+          "title": "Truth Type",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "expected_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "trigger_event_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trigger Event Id"
+        },
+        "accepted_delivery_attempt_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Delivery Attempt Id"
+        },
+        "required_policy_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Policy Version Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "probe_id",
+        "control_id",
+        "request_id",
+        "expected_decision",
+        "required_policy_version_ids"
+      ],
+      "title": "AccessDecisionRunTruthV1",
+      "type": "object"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "ContextualControlId": {
+      "enum": [
+        "SW-CA-C01",
+        "SW-CA-C02",
+        "SW-CA-C03",
+        "SW-CA-C04",
+        "SW-CA-C05",
+        "SW-CA-C06"
+      ],
+      "title": "ContextualControlId",
+      "type": "string"
+    },
+    "ContextualFactKind": {
+      "enum": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "title": "ContextualFactKind",
+      "type": "string"
+    },
+    "ContextualMappingKind": {
+      "enum": [
+        "subject_attribute",
+        "resource_attribute",
+        "action_attribute",
+        "environment_attribute",
+        "relationship_predicate"
+      ],
+      "title": "ContextualMappingKind",
+      "type": "string"
+    },
+    "DeliveryAcceptanceTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "truth_type": {
+          "const": "delivery_acceptance",
+          "default": "delivery_acceptance",
+          "title": "Truth Type",
+          "type": "string"
+        },
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "delivery_attempt_id": {
+          "title": "Delivery Attempt Id",
+          "type": "string"
+        },
+        "effective_tick": {
+          "minimum": 0,
+          "title": "Effective Tick",
+          "type": "integer"
+        },
+        "delivery_tick": {
+          "minimum": 0,
+          "title": "Delivery Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "probe_id",
+        "control_id",
+        "event_id",
+        "delivery_attempt_id",
+        "effective_tick",
+        "delivery_tick"
+      ],
+      "title": "DeliveryAcceptanceTruthV1",
+      "type": "object"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "EvidenceCorrelationTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "truth_type": {
+          "const": "evidence_correlation",
+          "default": "evidence_correlation",
+          "title": "Truth Type",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "required_evidence_kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        }
+      },
+      "required": [
+        "probe_id",
+        "control_id",
+        "request_id",
+        "required_evidence_kind"
+      ],
+      "title": "EvidenceCorrelationTruthV1",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "target",
+        "gateway",
+        "policy",
+        "credential_store",
+        "runtime",
+        "network",
+        "log",
+        "trace",
+        "memory"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "MappingIngestionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "truth_type": {
+          "const": "mapping_ingestion",
+          "default": "mapping_ingestion",
+          "title": "Truth Type",
+          "type": "string"
+        },
+        "fact_type": {
+          "$ref": "#/$defs/ContextualFactKind"
+        },
+        "mapping_kind": {
+          "$ref": "#/$defs/ContextualMappingKind"
+        },
+        "expected_status": {
+          "const": "ingested",
+          "default": "ingested",
+          "title": "Expected Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "probe_id",
+        "control_id",
+        "fact_type",
+        "mapping_kind"
+      ],
+      "title": "MappingIngestionTruthV1",
+      "type": "object"
+    },
+    "ObservedSideEffect": {
+      "enum": [
+        "occurred",
+        "not_observed",
+        "unknown"
+      ],
+      "title": "ObservedSideEffect",
+      "type": "string"
+    },
+    "ProtectedEnforcementTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "truth_type": {
+          "const": "protected_enforcement",
+          "default": "protected_enforcement",
+          "title": "Truth Type",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "expected_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "expected_side_effect": {
+          "$ref": "#/$defs/ObservedSideEffect"
+        }
+      },
+      "required": [
+        "probe_id",
+        "control_id",
+        "request_id",
+        "expected_decision",
+        "expected_side_effect"
+      ],
+      "title": "ProtectedEnforcementTruthV1",
+      "type": "object"
+    },
+    "SynchronizationFaultTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "truth_type": {
+          "const": "synchronization_fault",
+          "default": "synchronization_fault",
+          "title": "Truth Type",
+          "type": "string"
+        },
+        "fault_id": {
+          "title": "Fault Id",
+          "type": "string"
+        },
+        "expected_status": {
+          "const": "recovered",
+          "default": "recovered",
+          "title": "Expected Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "probe_id",
+        "control_id",
+        "fault_id"
+      ],
+      "title": "SynchronizationFaultTruthV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "contextual_public_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "evaluator_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "rows": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "access_decision": "#/$defs/AccessDecisionRunTruthV1",
+            "delivery_acceptance": "#/$defs/DeliveryAcceptanceTruthV1",
+            "evidence_correlation": "#/$defs/EvidenceCorrelationTruthV1",
+            "mapping_ingestion": "#/$defs/MappingIngestionTruthV1",
+            "protected_enforcement": "#/$defs/ProtectedEnforcementTruthV1",
+            "synchronization_fault": "#/$defs/SynchronizationFaultTruthV1"
+          },
+          "propertyName": "truth_type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/MappingIngestionTruthV1"
+          },
+          {
+            "$ref": "#/$defs/AccessDecisionRunTruthV1"
+          },
+          {
+            "$ref": "#/$defs/ProtectedEnforcementTruthV1"
+          },
+          {
+            "$ref": "#/$defs/DeliveryAcceptanceTruthV1"
+          },
+          {
+            "$ref": "#/$defs/SynchronizationFaultTruthV1"
+          },
+          {
+            "$ref": "#/$defs/EvidenceCorrelationTruthV1"
+          }
+        ]
+      },
+      "title": "Rows",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "contextual_public_digest",
+    "evaluator_digest",
+    "rows"
+  ],
+  "title": "ContextualAccessRunTruthV1",
+  "type": "object"
+}

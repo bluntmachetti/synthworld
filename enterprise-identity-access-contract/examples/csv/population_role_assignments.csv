@@ -1,0 +1,2 @@
+rule_key,population_key,role_key,selector_kind,count,numerator,denominator
+assignment-agent-admin,population-agents,role-api-admin,all,,,

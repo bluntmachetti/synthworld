@@ -29,6 +29,44 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   New modules: `ambiguity_evidence`, `ambiguity_surfaces`, `ambiguity_channel`,
   `ambiguity_floor`, with v2 serialization/metrics/baselines support and
   `examples/compute_ambiguity_floor.py`.
+- Agent-authority and contextual-access receipt builders now seal honest
+  failed-run receipts: a failed product execution produces a manifest with
+  `execution_status=failed` and `evaluation_status=not_evaluated` that binds
+  only the product-stage artifacts and never loads evaluator truth, so an
+  assurance corpus can no longer be structurally biased toward successful runs.
+  Receipt validation enforces the paired statuses and the product-only artifact
+  inventory, and run manifests whose evidence claim is not supported by the
+  systems under test (live-lab claims with reference-only components) are
+  rejected. Managed-service provenance in `not_exposed` observability states
+  additionally forbids evidence references, and the contextual execution
+  receipt leaves `stimulus_digest` unset because that lineage executes the
+  public input directly.
+- Contextual-access receipts now expose the same explicit two-phase live-run
+  boundary as agent-authority receipts. External runners may finish and attribute
+  the product stage before constructing completion metadata; the finalizer then
+  replays the plan, public input, adapter, component inventory, provenance, and
+  artifact digests before evaluator truth is loaded. Existing deterministic
+  contextual receipt bytes remain unchanged.
+- An opt-in disposable agent-authority reference deployment now executes the
+  public enterprise-agentic smoke world across isolated Docker networks. It
+  produces live observation-v2 receipts covering L01-L06, the exact declared
+  L07 baseline/SUT inventory, and measured/unsupported L08 targets, while
+  keeping runtime credentials in a destroyed named volume and scanning canary
+  and token markers out of receipts, logs, and container metadata. A new
+  two-phase receipt finalizer lets live runners record completion metadata only
+  after external execution without exposing evaluator truth before product
+  output is durably staged.
+- Agent-authority observation schema `2.0.0` corrects L06 clock semantics without
+  changing the frozen observation-v1 schema. It records one explicit monotonic
+  revocation epoch, non-negative acknowledgement offsets, and signed send/completion
+  offsets so pre-revocation in-flight requests are representable. Receipt validation
+  dispatches v1/v2 observations and binds them to scoring formulas `1.0.0`/`2.0.0`;
+  migration guidance forbids guessing offsets from ambiguous v1 rows.
+- The 12-case authority-change governance conformance fixture from #73 is now an
+  additive frozen benchmark. Its public and evaluator payloads remain physically
+  separate; their visibility manifests and exact raw bytes are path-bound by a
+  packaged `SHA256SUMS`, verified by the packaged loader API, regeneration tests,
+  and isolated-wheel checks. No existing golden bytes changed.
 - The broker-removal pack is scored through the unified evaluator: `evaluate_broker_removal`
   projects each family's headline ratio into the standard `EvaluationReport`, the CLI gains
   `synthworld evaluate broker`, and `examples/evaluate_broker_adapter.py` is the worked

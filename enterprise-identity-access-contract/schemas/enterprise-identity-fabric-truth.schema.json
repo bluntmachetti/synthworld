@@ -1,0 +1,510 @@
+{
+  "$defs": {
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "BindingStatus": {
+      "enum": [
+        "not_applicable",
+        "matches_canonical",
+        "missing",
+        "mismatch"
+      ],
+      "title": "BindingStatus",
+      "type": "string"
+    },
+    "IdentityFabricAccessTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_exception": {
+          "title": "Approved Exception",
+          "type": "boolean"
+        },
+        "birthright_access": {
+          "title": "Birthright Access",
+          "type": "boolean"
+        },
+        "direct_entitlement": {
+          "title": "Direct Entitlement",
+          "type": "boolean"
+        },
+        "effective_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "mechanism_outcomes": {
+          "$ref": "#/$defs/MechanismOutcomeSetV1"
+        },
+        "outside_birthright": {
+          "title": "Outside Birthright",
+          "type": "boolean"
+        },
+        "outside_intent": {
+          "title": "Outside Intent",
+          "type": "boolean"
+        },
+        "policy_conflict": {
+          "title": "Policy Conflict",
+          "type": "boolean"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "redundant_derivation": {
+          "title": "Redundant Derivation",
+          "type": "boolean"
+        },
+        "role_entitlement": {
+          "title": "Role Entitlement",
+          "type": "boolean"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "direct_entitlement",
+        "role_entitlement",
+        "birthright_access",
+        "approved_exception",
+        "intended_decision",
+        "effective_decision",
+        "final_decision",
+        "mechanism_outcomes",
+        "policy_conflict",
+        "redundant_derivation",
+        "outside_birthright",
+        "outside_intent"
+      ],
+      "title": "IdentityFabricAccessTruthV1",
+      "type": "object"
+    },
+    "IdentityFabricAccountTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_status": {
+          "$ref": "#/$defs/BindingStatus"
+        },
+        "canonical_principal_id": {
+          "title": "Canonical Principal Id",
+          "type": "string"
+        },
+        "inactive": {
+          "title": "Inactive",
+          "type": "boolean"
+        },
+        "lifecycle_status": {
+          "$ref": "#/$defs/LifecycleStatus"
+        },
+        "observed_principal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Observed Principal Id"
+        },
+        "orphaned": {
+          "title": "Orphaned",
+          "type": "boolean"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "canonical_principal_id",
+        "observed_principal_id",
+        "binding_status",
+        "lifecycle_status",
+        "orphaned",
+        "inactive"
+      ],
+      "title": "IdentityFabricAccountTruthV1",
+      "type": "object"
+    },
+    "IdentityFabricAccumulationTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "accumulated_cell_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Accumulated Cell Ids",
+          "type": "array"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "accumulated_cell_ids"
+      ],
+      "title": "IdentityFabricAccumulationTruthV1",
+      "type": "object"
+    },
+    "IdentityFabricCaseLabelV1": {
+      "additionalProperties": false,
+      "properties": {
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Labels",
+          "type": "array"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "labels"
+      ],
+      "title": "IdentityFabricCaseLabelV1",
+      "type": "object"
+    },
+    "IdentityFabricCheckpointTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access": {
+          "items": {
+            "$ref": "#/$defs/IdentityFabricAccessTruthV1"
+          },
+          "title": "Access",
+          "type": "array"
+        },
+        "accounts": {
+          "items": {
+            "$ref": "#/$defs/IdentityFabricAccountTruthV1"
+          },
+          "title": "Accounts",
+          "type": "array"
+        },
+        "checkpoint_id": {
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "membership": {
+          "items": {
+            "$ref": "#/$defs/IdentityFabricMembershipTruthV1"
+          },
+          "title": "Membership",
+          "type": "array"
+        },
+        "roles": {
+          "items": {
+            "$ref": "#/$defs/IdentityFabricRoleTruthV1"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "checkpoint_id",
+        "sequence",
+        "membership",
+        "roles",
+        "accounts",
+        "access"
+      ],
+      "title": "IdentityFabricCheckpointTruthV1",
+      "type": "object"
+    },
+    "IdentityFabricMembershipTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "direct_member": {
+          "title": "Direct Member",
+          "type": "boolean"
+        },
+        "effective_member": {
+          "title": "Effective Member",
+          "type": "boolean"
+        },
+        "membership_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Membership Path Ids",
+          "type": "array"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "direct_member",
+        "effective_member",
+        "membership_path_ids"
+      ],
+      "title": "IdentityFabricMembershipTruthV1",
+      "type": "object"
+    },
+    "IdentityFabricRoleTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "authorized_role_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Authorized Role Path Ids",
+          "type": "array"
+        },
+        "direct_role_assignment": {
+          "title": "Direct Role Assignment",
+          "type": "boolean"
+        },
+        "effective_role": {
+          "title": "Effective Role",
+          "type": "boolean"
+        },
+        "group_derived_role": {
+          "title": "Group Derived Role",
+          "type": "boolean"
+        },
+        "hierarchy_inherited_role": {
+          "title": "Hierarchy Inherited Role",
+          "type": "boolean"
+        },
+        "query_id": {
+          "title": "Query Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query_id",
+        "direct_role_assignment",
+        "group_derived_role",
+        "hierarchy_inherited_role",
+        "effective_role",
+        "authorized_role_path_ids"
+      ],
+      "title": "IdentityFabricRoleTruthV1",
+      "type": "object"
+    },
+    "LifecycleStatus": {
+      "enum": [
+        "not_applicable",
+        "active",
+        "inactive",
+        "not_yet_valid",
+        "expired"
+      ],
+      "title": "LifecycleStatus",
+      "type": "string"
+    },
+    "MechanismOutcome": {
+      "description": "Native outcome retained before benchmark default-deny normalization.",
+      "enum": [
+        "allow",
+        "deny",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "MechanismOutcome",
+      "type": "string"
+    },
+    "MechanismOutcomeSetV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rbac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rebac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "title": "MechanismOutcomeSetV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "accumulation": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricAccumulationTruthV1"
+      },
+      "title": "Accumulation",
+      "type": "array"
+    },
+    "benchmark_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "canonical_binding_truth_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "case_labels": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricCaseLabelV1"
+      },
+      "title": "Case Labels",
+      "type": "array"
+    },
+    "checkpoints": {
+      "items": {
+        "$ref": "#/$defs/IdentityFabricCheckpointTruthV1"
+      },
+      "title": "Checkpoints",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "public_input_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "public_input_digest",
+    "benchmark_digest",
+    "canonical_binding_truth_digest",
+    "checkpoints",
+    "accumulation",
+    "case_labels"
+  ],
+  "title": "EnterpriseIdentityFabricTruthV1",
+  "type": "object"
+}

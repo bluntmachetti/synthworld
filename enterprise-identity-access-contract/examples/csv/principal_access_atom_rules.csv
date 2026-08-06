@@ -1,0 +1,3 @@
+rule_key,population_key,resource_set_key,action,selector_kind,count,numerator,denominator
+atom-agent-read,population-agents,resource-customer-api,read,all,,,
+atom-employee-read,population-employees,resource-customer-api,read,all,,,

@@ -1,0 +1,2 @@
+key,population_key,resource_set_key,account_kind,selector_kind,count,numerator,denominator,accounts_per_selected_subject
+allocation-workforce-api,population-employees,resource-customer-api,workforce,count,2,,,1

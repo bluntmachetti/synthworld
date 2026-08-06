@@ -1,0 +1,401 @@
+{
+  "$defs": {
+    "AuthorizationSourceLayer": {
+      "description": "Whether a component row came from observed or intended policy state.",
+      "enum": [
+        "actual",
+        "intended"
+      ],
+      "title": "AuthorizationSourceLayer",
+      "type": "string"
+    },
+    "OpenFgaAuthorizationModelV1": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.1",
+          "default": "1.1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "type_definitions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Type Definitions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type_definitions"
+      ],
+      "title": "OpenFgaAuthorizationModelV1",
+      "type": "object"
+    },
+    "OpenFgaRuleProjectionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/ProjectionSupportClassification"
+        },
+        "emitted": {
+          "title": "Emitted",
+          "type": "boolean"
+        },
+        "native_template": {
+          "$ref": "#/$defs/RebacTemplateKind"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_construct": {
+          "title": "Target Construct",
+          "type": "string"
+        }
+      },
+      "required": [
+        "native_template",
+        "target_construct",
+        "classification",
+        "emitted"
+      ],
+      "title": "OpenFgaRuleProjectionV1",
+      "type": "object"
+    },
+    "OpenFgaTupleProjectionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "native_relation": {
+          "$ref": "#/$defs/RebacRelation"
+        },
+        "native_revision_id": {
+          "title": "Native Revision Id",
+          "type": "string"
+        },
+        "native_snapshot_id": {
+          "title": "Native Snapshot Id",
+          "type": "string"
+        },
+        "native_valid_from_tick": {
+          "title": "Native Valid From Tick",
+          "type": "integer"
+        },
+        "native_valid_until_tick": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Native Valid Until Tick"
+        },
+        "object": {
+          "title": "Object",
+          "type": "string"
+        },
+        "relation": {
+          "title": "Relation",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tuple_id": {
+          "title": "Tuple Id",
+          "type": "string"
+        },
+        "user": {
+          "title": "User",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tuple_id",
+        "user",
+        "relation",
+        "object",
+        "native_relation",
+        "native_snapshot_id",
+        "native_revision_id",
+        "native_valid_from_tick",
+        "native_valid_until_tick"
+      ],
+      "title": "OpenFgaTupleProjectionV1",
+      "type": "object"
+    },
+    "ProjectionSupportClassification": {
+      "enum": [
+        "exact",
+        "approximated",
+        "unsupported"
+      ],
+      "title": "ProjectionSupportClassification",
+      "type": "string"
+    },
+    "ProjectionSupportMatrixV1": {
+      "additionalProperties": false,
+      "properties": {
+        "exercised_native_features": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Exercised Native Features",
+          "type": "array"
+        },
+        "mapping_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "native_profile_version": {
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "profile_id": {
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/ProjectionSupportRowV1"
+          },
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target": {
+          "$ref": "#/$defs/ProjectionTarget"
+        },
+        "target_profile_version": {
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_id",
+        "target",
+        "native_profile_version",
+        "target_profile_version",
+        "mapping_digest",
+        "exercised_native_features",
+        "rows"
+      ],
+      "title": "ProjectionSupportMatrixV1",
+      "type": "object"
+    },
+    "ProjectionSupportRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/ProjectionSupportClassification"
+        },
+        "conformance_vector_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Conformance Vector Ids",
+          "type": "array"
+        },
+        "mapping_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "mapping_id": {
+          "title": "Mapping Id",
+          "type": "string"
+        },
+        "native_profile_version": {
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "native_source_feature": {
+          "title": "Native Source Feature",
+          "type": "string"
+        },
+        "semantic_delta": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Semantic Delta"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_construct": {
+          "title": "Target Construct",
+          "type": "string"
+        },
+        "target_profile_version": {
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mapping_id",
+        "native_source_feature",
+        "target_construct",
+        "classification",
+        "semantic_delta",
+        "native_profile_version",
+        "target_profile_version",
+        "mapping_digest",
+        "conformance_vector_ids"
+      ],
+      "title": "ProjectionSupportRowV1",
+      "type": "object"
+    },
+    "ProjectionTarget": {
+      "enum": [
+        "scim",
+        "authzen",
+        "openfga",
+        "shared_signals"
+      ],
+      "title": "ProjectionTarget",
+      "type": "string"
+    },
+    "RebacRelation": {
+      "enum": [
+        "member_of",
+        "owns",
+        "manages",
+        "collaborates_on"
+      ],
+      "title": "RebacRelation",
+      "type": "string"
+    },
+    "RebacTemplateKind": {
+      "enum": [
+        "direct_subject_relation",
+        "group_collaboration",
+        "manager_of_owner"
+      ],
+      "title": "RebacTemplateKind",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "authorization_model": {
+      "$ref": "#/$defs/OpenFgaAuthorizationModelV1"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "mapping_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "rebac_truth_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "rules": {
+      "items": {
+        "$ref": "#/$defs/OpenFgaRuleProjectionV1"
+      },
+      "title": "Rules",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_layer": {
+      "$ref": "#/$defs/AuthorizationSourceLayer"
+    },
+    "support_matrix": {
+      "$ref": "#/$defs/ProjectionSupportMatrixV1"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "tuples": {
+      "items": {
+        "$ref": "#/$defs/OpenFgaTupleProjectionV1"
+      },
+      "title": "Tuples",
+      "type": "array"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "rebac_truth_digest",
+    "source_layer",
+    "mapping_digest",
+    "support_matrix",
+    "authorization_model",
+    "tuples",
+    "rules"
+  ],
+  "title": "OpenFgaProjectionV1",
+  "type": "object"
+}

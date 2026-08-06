@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "AgentAuthorizationMappingKind": {
+      "enum": [
+        "agent_as_principal",
+        "human_subject_agent_context"
+      ],
+      "title": "AgentAuthorizationMappingKind",
+      "type": "string"
+    },
+    "EnterpriseAgenticCaseReferenceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action_event_id": {
+          "title": "Action Event Id",
+          "type": "string"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "mapping_kind": {
+          "$ref": "#/$defs/AgentAuthorizationMappingKind"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "action_event_id",
+        "mapping_kind"
+      ],
+      "title": "EnterpriseAgenticCaseReferenceV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_input_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "aiim_profile_version": {
+      "const": "0.1.0-experimental",
+      "default": "0.1.0-experimental",
+      "title": "Aiim Profile Version",
+      "type": "string"
+    },
+    "aiim_source_id": {
+      "const": "openid-aiim-mcp-interop-2026-07-14",
+      "default": "openid-aiim-mcp-interop-2026-07-14",
+      "title": "Aiim Source Id",
+      "type": "string"
+    },
+    "audit_event_id": {
+      "title": "Audit Event Id",
+      "type": "string"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAgenticCaseReferenceV1"
+      },
+      "minItems": 1,
+      "title": "Cases",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "config_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "events_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "profile_version": {
+      "const": "enterprise-agentic-smoke-1.0.0",
+      "default": "enterprise-agentic-smoke-1.0.0",
+      "title": "Profile Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "snapshot_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "tier": {
+      "const": "smoke",
+      "default": "smoke",
+      "title": "Tier",
+      "type": "string"
+    }
+  },
+  "required": [
+    "seed",
+    "config_digest",
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "access_input_digest",
+    "snapshot_digest",
+    "events_digest",
+    "audit_event_id",
+    "cases"
+  ],
+  "title": "EnterpriseAgenticBenchmarkV1",
+  "type": "object"
+}

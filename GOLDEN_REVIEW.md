@@ -157,3 +157,51 @@ rather than a leak, but it means this pack measures whether a system handles the
 hard cases, not whether it can tell them apart from cases it has not seen. A held-out
 seed changes surface values, not labels. Treat it as a conformance fixture, in the
 sense Asteria Agentic v1 is one.
+
+## Authority-governance-v1 review record
+
+Reviewed: 2026-08-05. Authority-governance schema, benchmark, and scoring
+versions: `1.0.0`. Schedule version:
+`authority-governance-reference-1.0.0`.
+
+This is the explicit additive frozen-benchmark transition for issue #73. The
+hand-inspectable fixture contains 12 cases, 49 governance events and matching
+V2 schedule envelopes, two decision-time policy versions, three approver
+mandates, and 37 opaque evidence records. It covers the required valid grant,
+wrong and expired approvers, approved-versus-enacted scope drift, denied but
+enacted authority, valid emergency exception, later-policy non-retroactivity,
+missing retained approval evidence, unlinked supersession, revocation timing
+drift, conflicting decisions, and well-formed unauthorised change.
+
+The review checked that integer tick remains the only deterministic world clock;
+every envelope is canonically ordered by `(effective_tick,event_id)` with a
+derived contiguous index and a digest-bound `governance_1_0` payload; later
+policy, decision, and evidence records do not retroactively alter earlier truth;
+well-formed negative cases remain scoreable; and malformed event, schedule,
+policy, mandate, evidence, and cross-artifact references remain invalid.
+
+Public and evaluator payloads are physically separate and independently
+manifest-bound. The public payload contains no case kind, governance or
+approver verdict, canonical state, failure reason, expected enactment, or audit-
+reconstructability answer. All generated records remain recursively
+`synthetic: true`, contain only safely fictional opaque identifiers, and include
+no reusable credential material. The evaluator retains the structured answer
+key needed to score state, governance authority, policy/rationale,
+evidence/observability, and enactment independently.
+
+The exact SHA-256 values are
+`340df0ed2b33db6c05805891258dda789f445e300084a0e347ee318044d3191b`
+for the public payload,
+`60081ed11ff85b6909e57771f3aeffb8023136ae8b66e91bbaf4473ef7f27d92`
+for its manifest,
+`7822846e7d5613741857cceed33df849f04606548a4c0e1ce789646aaae8e5e5`
+for the evaluator payload, and
+`d9b5e3c19a74344ba9b28bfb58efde98ce8809e4157e8c0fa6b97639a7a36e18`
+for its manifest. The canonical path-bound `SHA256SUMS` bytes have digest
+`a856171b2a328614705340a0d8d8dcf1f6bc0794adf0853c377718f796eb585c`.
+Tests regenerate the four artifacts byte-for-byte, pin all five hashes, reject
+inventory/path/encoding/type/checksum tampering, and verify the packaged wheel.
+
+No existing golden artifact or checksum changed in this transition. Asteria v1,
+the post-#77 ambiguity baseline, and `src/synthworld/temporal.py` remain outside
+the new tree and byte-identical to their pre-transition versions.

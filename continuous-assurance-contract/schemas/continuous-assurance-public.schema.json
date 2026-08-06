@@ -1,0 +1,578 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/continuous-assurance-contract/schemas/continuous-assurance-public.schema.json",
+  "x-generated-from": "synthworld.continuous_assurance.models.ContinuousAssurancePublicV1",
+  "x-generated-by": "continuous-assurance-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python continuous-assurance-contract/tools/generate_contract.py",
+  "$defs": {
+    "AssuranceDriftKind": {
+      "enum": [
+        "credential",
+        "delegation",
+        "entitlement",
+        "evidence",
+        "owner",
+        "policy"
+      ],
+      "title": "AssuranceDriftKind",
+      "type": "string"
+    },
+    "AssuranceObservedState": {
+      "enum": [
+        "active",
+        "changed",
+        "healthy",
+        "inactive",
+        "missing",
+        "present",
+        "retained",
+        "withdrawn"
+      ],
+      "title": "AssuranceObservedState",
+      "type": "string"
+    },
+    "ContinuousAssuranceBenchmarkBindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "benchmark_family": {
+          "const": "continuous_assurance",
+          "default": "continuous_assurance",
+          "title": "Benchmark Family",
+          "type": "string"
+        },
+        "benchmark_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Benchmark Version",
+          "type": "string"
+        },
+        "generator_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Generator Version",
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/ContinuousAssuranceTier"
+        },
+        "source_public_bindings_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "case_inventory_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "policy_profile_id": {
+          "minLength": 1,
+          "title": "Policy Profile Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tier",
+        "source_public_bindings_digest",
+        "case_inventory_digest",
+        "policy_profile_id"
+      ],
+      "title": "ContinuousAssuranceBenchmarkBindingV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceCaseV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Signal Ids",
+          "type": "array"
+        },
+        "remediation_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Remediation Ids",
+          "type": "array"
+        },
+        "feed_window_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Feed Window Id"
+        }
+      },
+      "required": [
+        "case_id",
+        "signal_ids"
+      ],
+      "title": "ContinuousAssuranceCaseV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceCheckpointV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "checkpoint_id": {
+          "minLength": 1,
+          "title": "Checkpoint Id",
+          "type": "string"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        },
+        "observed_signal_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Observed Signal Ids",
+          "type": "array"
+        },
+        "observed_remediation_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Observed Remediation Ids",
+          "type": "array"
+        },
+        "available_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Available Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "checkpoint_id",
+        "tick"
+      ],
+      "title": "ContinuousAssuranceCheckpointV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceFeedWindowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "feed_window_id": {
+          "minLength": 1,
+          "title": "Feed Window Id",
+          "type": "string"
+        },
+        "source_family": {
+          "$ref": "#/$defs/ContinuousAssuranceSourceFamily"
+        },
+        "unavailable_from_tick": {
+          "minimum": 0,
+          "title": "Unavailable From Tick",
+          "type": "integer"
+        },
+        "restored_at_tick": {
+          "minimum": 0,
+          "title": "Restored At Tick",
+          "type": "integer"
+        },
+        "delayed_signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Delayed Signal Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "feed_window_id",
+        "source_family",
+        "unavailable_from_tick",
+        "restored_at_tick",
+        "delayed_signal_ids"
+      ],
+      "title": "ContinuousAssuranceFeedWindowV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceRemediationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "remediation_id": {
+          "minLength": 1,
+          "title": "Remediation Id",
+          "type": "string"
+        },
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "dimension": {
+          "$ref": "#/$defs/AssuranceDriftKind"
+        },
+        "observed_state": {
+          "$ref": "#/$defs/AssuranceObservedState"
+        },
+        "action_tick": {
+          "minimum": 0,
+          "title": "Action Tick",
+          "type": "integer"
+        },
+        "decision_tick": {
+          "minimum": 0,
+          "title": "Decision Tick",
+          "type": "integer"
+        },
+        "effective_tick": {
+          "minimum": 0,
+          "title": "Effective Tick",
+          "type": "integer"
+        },
+        "observation_tick": {
+          "minimum": 0,
+          "title": "Observation Tick",
+          "type": "integer"
+        },
+        "audit_tick": {
+          "minimum": 0,
+          "title": "Audit Tick",
+          "type": "integer"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "remediation_id",
+        "case_id",
+        "dimension",
+        "observed_state",
+        "action_tick",
+        "decision_tick",
+        "effective_tick",
+        "observation_tick",
+        "audit_tick",
+        "evidence_refs"
+      ],
+      "title": "ContinuousAssuranceRemediationV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceSignalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "signal_id": {
+          "minLength": 1,
+          "title": "Signal Id",
+          "type": "string"
+        },
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "dimension": {
+          "$ref": "#/$defs/AssuranceDriftKind"
+        },
+        "source": {
+          "$ref": "#/$defs/ContinuousAssuranceSourceReferenceV1"
+        },
+        "observed_state": {
+          "$ref": "#/$defs/AssuranceObservedState"
+        },
+        "action_tick": {
+          "minimum": 0,
+          "title": "Action Tick",
+          "type": "integer"
+        },
+        "decision_tick": {
+          "minimum": 0,
+          "title": "Decision Tick",
+          "type": "integer"
+        },
+        "effective_tick": {
+          "minimum": 0,
+          "title": "Effective Tick",
+          "type": "integer"
+        },
+        "observation_tick": {
+          "minimum": 0,
+          "title": "Observation Tick",
+          "type": "integer"
+        },
+        "audit_tick": {
+          "minimum": 0,
+          "title": "Audit Tick",
+          "type": "integer"
+        },
+        "policy_version_id": {
+          "minLength": 1,
+          "title": "Policy Version Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "signal_id",
+        "case_id",
+        "dimension",
+        "source",
+        "observed_state",
+        "action_tick",
+        "decision_tick",
+        "effective_tick",
+        "observation_tick",
+        "audit_tick",
+        "policy_version_id",
+        "evidence_refs"
+      ],
+      "title": "ContinuousAssuranceSignalV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceSourceBindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "family": {
+          "$ref": "#/$defs/ContinuousAssuranceSourceFamily"
+        },
+        "public_schema_version": {
+          "minLength": 1,
+          "title": "Public Schema Version",
+          "type": "string"
+        },
+        "public_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        }
+      },
+      "required": [
+        "family",
+        "public_schema_version",
+        "public_digest"
+      ],
+      "title": "ContinuousAssuranceSourceBindingV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceSourceFamily": {
+      "enum": [
+        "authority_governance_1_0",
+        "contextual_access_1_0",
+        "enterprise_agentic_1_0",
+        "identity_fabric_1_0"
+      ],
+      "title": "ContinuousAssuranceSourceFamily",
+      "type": "string"
+    },
+    "ContinuousAssuranceSourceReferenceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "family": {
+          "$ref": "#/$defs/ContinuousAssuranceSourceFamily"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "record_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        }
+      },
+      "required": [
+        "family",
+        "record_id",
+        "record_digest"
+      ],
+      "title": "ContinuousAssuranceSourceReferenceV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceTier": {
+      "enum": [
+        "smoke",
+        "standard",
+        "longitudinal",
+        "held_out"
+      ],
+      "title": "ContinuousAssuranceTier",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "benchmark": {
+      "$ref": "#/$defs/ContinuousAssuranceBenchmarkBindingV1"
+    },
+    "horizon_tick": {
+      "minimum": 0,
+      "title": "Horizon Tick",
+      "type": "integer"
+    },
+    "source_bindings": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceSourceBindingV1"
+      },
+      "minItems": 1,
+      "title": "Source Bindings",
+      "type": "array"
+    },
+    "signals": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceSignalV1"
+      },
+      "minItems": 1,
+      "title": "Signals",
+      "type": "array"
+    },
+    "remediations": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceRemediationV1"
+      },
+      "title": "Remediations",
+      "type": "array"
+    },
+    "feed_windows": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceFeedWindowV1"
+      },
+      "title": "Feed Windows",
+      "type": "array"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceCaseV1"
+      },
+      "minItems": 1,
+      "title": "Cases",
+      "type": "array"
+    },
+    "checkpoints": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceCheckpointV1"
+      },
+      "minItems": 1,
+      "title": "Checkpoints",
+      "type": "array"
+    }
+  },
+  "required": [
+    "benchmark",
+    "horizon_tick",
+    "source_bindings",
+    "signals",
+    "remediations",
+    "feed_windows",
+    "cases",
+    "checkpoints"
+  ],
+  "title": "ContinuousAssurancePublicV1",
+  "type": "object"
+}

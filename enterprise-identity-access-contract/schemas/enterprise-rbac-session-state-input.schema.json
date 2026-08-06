@@ -1,0 +1,115 @@
+{
+  "$defs": {
+    "ActivationOutcome": {
+      "enum": [
+        "accepted",
+        "rejected"
+      ],
+      "title": "ActivationOutcome",
+      "type": "string"
+    },
+    "ObservedRbacSessionStateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activated_role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Activated Role Ids",
+          "type": "array"
+        },
+        "observed_at_tick": {
+          "minimum": 0,
+          "title": "Observed At Tick",
+          "type": "integer"
+        },
+        "observed_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "session_state_id": {
+          "minLength": 1,
+          "title": "Session State Id",
+          "type": "string"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "session_state_id",
+        "observed_outcome",
+        "observed_at_tick",
+        "revision_id"
+      ],
+      "title": "ObservedRbacSessionStateV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sessions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ObservedRbacSessionStateV1"
+      },
+      "title": "Sessions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "evaluation_corpus_digest"
+  ],
+  "title": "EnterpriseRbacSessionStateInputV1",
+  "type": "object"
+}

@@ -1,0 +1,2335 @@
+{
+  "$defs": {
+    "AbacAttributeFactTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "active_at_cell_tick": {
+          "title": "Active At Cell Tick",
+          "type": "boolean"
+        },
+        "attribute_key": {
+          "enum": [
+            "principal_kind",
+            "employment_type",
+            "tenant_id",
+            "unit_id",
+            "clearance",
+            "target_kind",
+            "owner_unit_id",
+            "classification",
+            "action_id",
+            "action_class",
+            "assurance_level",
+            "network_zone"
+          ],
+          "title": "Attribute Key",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/AttributeCategory"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "value_state": {
+          "$ref": "#/$defs/AttributeValueState"
+        }
+      },
+      "required": [
+        "fact_id",
+        "revision_id",
+        "source_layer",
+        "cell_id",
+        "category",
+        "attribute_key",
+        "value_state",
+        "value",
+        "active_at_cell_tick"
+      ],
+      "title": "AbacAttributeFactTruthV1",
+      "type": "object"
+    },
+    "AbacCellTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_conflict": {
+          "title": "Actual Conflict",
+          "type": "boolean"
+        },
+        "actual_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "actual_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Rule Truth Ids",
+          "type": "array"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "intended_conflict": {
+          "title": "Intended Conflict",
+          "type": "boolean"
+        },
+        "intended_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "intended_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Rule Truth Ids",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cell_id",
+        "actual_outcome",
+        "intended_outcome",
+        "actual_conflict",
+        "intended_conflict",
+        "actual_rule_truth_ids",
+        "intended_rule_truth_ids"
+      ],
+      "title": "AbacCellTruthV1",
+      "type": "object"
+    },
+    "AbacPredicateTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/PredicateOutcome"
+        },
+        "predicate_index": {
+          "minimum": 0,
+          "title": "Predicate Index",
+          "type": "integer"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "supporting_fact_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supporting Fact Ids",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "truth_id": {
+          "title": "Truth Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truth_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "predicate_index",
+        "outcome",
+        "supporting_fact_ids"
+      ],
+      "title": "AbacPredicateTruthV1",
+      "type": "object"
+    },
+    "AbacRuleTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "predicate_outcome": {
+          "$ref": "#/$defs/PredicateOutcome"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "truth_id": {
+          "title": "Truth Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truth_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "effect",
+        "predicate_outcome",
+        "outcome"
+      ],
+      "title": "AbacRuleTruthV1",
+      "type": "object"
+    },
+    "AccessDerivationPathTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "mechanism": {
+          "$ref": "#/$defs/DerivationMechanism"
+        },
+        "membership_group_path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Membership Group Path",
+          "type": "array"
+        },
+        "path_id": {
+          "title": "Path Id",
+          "type": "string"
+        },
+        "permission_id": {
+          "title": "Permission Id",
+          "type": "string"
+        },
+        "role_path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Role Path",
+          "type": "array"
+        },
+        "source_record_id": {
+          "title": "Source Record Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path_id",
+        "cell_id",
+        "mechanism",
+        "subject_id",
+        "permission_id",
+        "membership_group_path",
+        "role_path",
+        "source_record_id"
+      ],
+      "title": "AccessDerivationPathTruthV1",
+      "type": "object"
+    },
+    "ActivationDecisionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_request_id": {
+          "title": "Activation Request Id",
+          "type": "string"
+        },
+        "authorized_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Authorized Role Ids",
+          "type": "array"
+        },
+        "dsd_cardinality_met": {
+          "title": "Dsd Cardinality Met",
+          "type": "boolean"
+        },
+        "expected_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "requested_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requested Role Ids",
+          "type": "array"
+        },
+        "session_state_id": {
+          "title": "Session State Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "unauthorized_role_requested": {
+          "title": "Unauthorized Role Requested",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "activation_request_id",
+        "session_state_id",
+        "subject_id",
+        "requested_role_ids",
+        "authorized_role_ids",
+        "expected_outcome",
+        "unauthorized_role_requested",
+        "dsd_cardinality_met"
+      ],
+      "title": "ActivationDecisionTruthV1",
+      "type": "object"
+    },
+    "ActivationOutcome": {
+      "enum": [
+        "accepted",
+        "rejected"
+      ],
+      "title": "ActivationOutcome",
+      "type": "string"
+    },
+    "AgenticExpectedDecisionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_account_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "capability_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "credential_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "delegation_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "enterprise_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "failure_reasons": {
+          "items": {
+            "$ref": "#/$defs/AgenticFailureReason"
+          },
+          "title": "Failure Reasons",
+          "type": "array"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "runtime_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "subject_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_gate": {
+          "$ref": "#/$defs/AgenticGateOutcome"
+        }
+      },
+      "required": [
+        "enterprise_decision",
+        "subject_gate",
+        "tenant_gate",
+        "agent_account_gate",
+        "runtime_gate",
+        "credential_gate",
+        "capability_gate",
+        "delegation_gate",
+        "final_decision",
+        "failure_reasons"
+      ],
+      "title": "AgenticExpectedDecisionV1",
+      "type": "object"
+    },
+    "AgenticFailureReason": {
+      "enum": [
+        "enterprise_denied",
+        "subject_mismatch",
+        "tenant_mismatch",
+        "agent_account_inactive",
+        "agent_account_binding_mismatch",
+        "wrong_runtime",
+        "credential_invalid",
+        "capability_exceeded",
+        "no_active_delegation",
+        "delegation_mismatch"
+      ],
+      "title": "AgenticFailureReason",
+      "type": "string"
+    },
+    "AgenticGateOutcome": {
+      "enum": [
+        "satisfied",
+        "unsatisfied",
+        "not_applicable"
+      ],
+      "title": "AgenticGateOutcome",
+      "type": "string"
+    },
+    "ApprovedExceptionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "exception_id": {
+          "title": "Exception Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "exception_id",
+        "cell_id",
+        "active"
+      ],
+      "title": "ApprovedExceptionTruthV1",
+      "type": "object"
+    },
+    "AttributeCategory": {
+      "enum": [
+        "subject",
+        "resource",
+        "action",
+        "environment"
+      ],
+      "title": "AttributeCategory",
+      "type": "string"
+    },
+    "AttributeValueState": {
+      "enum": [
+        "known",
+        "unknown"
+      ],
+      "title": "AttributeValueState",
+      "type": "string"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "AuthorizationEvaluationProfileKind": {
+      "enum": [
+        "rbac",
+        "abac",
+        "rebac",
+        "rbac_with_abac_guard",
+        "rebac_with_abac_guard"
+      ],
+      "title": "AuthorizationEvaluationProfileKind",
+      "type": "string"
+    },
+    "AuthorizationSourceLayer": {
+      "description": "Whether a component row came from observed or intended policy state.",
+      "enum": [
+        "actual",
+        "intended"
+      ],
+      "title": "AuthorizationSourceLayer",
+      "type": "string"
+    },
+    "AuthorizedRolePathTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "assignment_source_id": {
+          "title": "Assignment Source Id",
+          "type": "string"
+        },
+        "assignment_source_kind": {
+          "$ref": "#/$defs/RoleAssignmentSourceKind"
+        },
+        "group_path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Group Path",
+          "type": "array"
+        },
+        "path_id": {
+          "title": "Path Id",
+          "type": "string"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "role_path": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Role Path",
+          "type": "array"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path_id",
+        "subject_id",
+        "role_id",
+        "assignment_source_kind",
+        "assignment_source_id",
+        "group_path",
+        "role_path"
+      ],
+      "title": "AuthorizedRolePathTruthV1",
+      "type": "object"
+    },
+    "AuthorizedRoleSetTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Role Ids",
+          "type": "array"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "subject_id",
+        "role_ids"
+      ],
+      "title": "AuthorizedRoleSetTruthV1",
+      "type": "object"
+    },
+    "BindingStatus": {
+      "enum": [
+        "not_applicable",
+        "matches_canonical",
+        "missing",
+        "mismatch"
+      ],
+      "title": "BindingStatus",
+      "type": "string"
+    },
+    "BirthrightAssignmentTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_atom_id": {
+          "title": "Access Atom Id",
+          "type": "string"
+        },
+        "assignment_id": {
+          "title": "Assignment Id",
+          "type": "string"
+        },
+        "assignment_satisfied": {
+          "title": "Assignment Satisfied",
+          "type": "boolean"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "eligible": {
+          "title": "Eligible",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_id",
+        "assignment_id",
+        "cell_id",
+        "subject_id",
+        "access_atom_id",
+        "eligible",
+        "assignment_satisfied"
+      ],
+      "title": "BirthrightAssignmentTruthV1",
+      "type": "object"
+    },
+    "BirthrightEligibilityTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "eligible": {
+          "title": "Eligible",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_id",
+        "subject_id",
+        "eligible"
+      ],
+      "title": "BirthrightEligibilityTruthV1",
+      "type": "object"
+    },
+    "BirthrightPredicateTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "predicate_index": {
+          "minimum": 0,
+          "title": "Predicate Index",
+          "type": "integer"
+        },
+        "result": {
+          "title": "Result",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_id",
+        "subject_id",
+        "predicate_index",
+        "result"
+      ],
+      "title": "BirthrightPredicateTruthV1",
+      "type": "object"
+    },
+    "CompiledEnterpriseAbacTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac_intent_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "abac_state_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "attribute_facts": {
+          "items": {
+            "$ref": "#/$defs/AbacAttributeFactTruthV1"
+          },
+          "title": "Attribute Facts",
+          "type": "array"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/AbacCellTruthV1"
+          },
+          "title": "Cells",
+          "type": "array"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "evaluation_corpus_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "predicate_truth": {
+          "items": {
+            "$ref": "#/$defs/AbacPredicateTruthV1"
+          },
+          "title": "Predicate Truth",
+          "type": "array"
+        },
+        "rule_truth": {
+          "items": {
+            "$ref": "#/$defs/AbacRuleTruthV1"
+          },
+          "title": "Rule Truth",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "identity_access_universe_digest",
+        "evaluation_corpus_digest",
+        "abac_state_digest",
+        "abac_intent_digest",
+        "attribute_facts",
+        "predicate_truth",
+        "rule_truth",
+        "cells"
+      ],
+      "title": "CompiledEnterpriseAbacTruthV1",
+      "type": "object"
+    },
+    "CompiledEnterpriseAccessCellV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac_cell_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Abac Cell Id"
+        },
+        "actual_mechanism_outcomes": {
+          "$ref": "#/$defs/MechanismOutcomeSetV1"
+        },
+        "binding_status": {
+          "$ref": "#/$defs/BindingStatus"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "directory_rbac_cell_id": {
+          "title": "Directory Rbac Cell Id",
+          "type": "string"
+        },
+        "effective_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_mechanism_outcomes": {
+          "$ref": "#/$defs/MechanismOutcomeSetV1"
+        },
+        "lifecycle_status": {
+          "$ref": "#/$defs/LifecycleStatus"
+        },
+        "policy_conflict_id": {
+          "title": "Policy Conflict Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/AuthorizationEvaluationProfileKind"
+        },
+        "rebac_cell_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Rebac Cell Id"
+        },
+        "reconciliation": {
+          "$ref": "#/$defs/ReconciliationOutcome"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cell_id",
+        "profile",
+        "actual_mechanism_outcomes",
+        "intended_mechanism_outcomes",
+        "intended_decision",
+        "effective_decision",
+        "final_decision",
+        "reconciliation",
+        "binding_status",
+        "lifecycle_status",
+        "policy_conflict_id",
+        "directory_rbac_cell_id",
+        "abac_cell_id",
+        "rebac_cell_id"
+      ],
+      "title": "CompiledEnterpriseAccessCellV1",
+      "type": "object"
+    },
+    "CompiledEnterpriseAccessStateV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac_truth_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyntheticDigestV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "authorization_kernel_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "canonical_binding_truth_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/CompiledEnterpriseAccessCellV1"
+          },
+          "title": "Cells",
+          "type": "array"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "composition_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "directory_rbac_truth_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "evaluation_corpus_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "policy_conflicts": {
+          "items": {
+            "$ref": "#/$defs/PolicyConflictTruthV1"
+          },
+          "title": "Policy Conflicts",
+          "type": "array"
+        },
+        "rebac_truth_digest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SyntheticDigestV1"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "identity_access_universe_digest",
+        "canonical_binding_truth_digest",
+        "evaluation_corpus_digest",
+        "composition_digest",
+        "authorization_kernel_digest",
+        "directory_rbac_truth_digest",
+        "abac_truth_digest",
+        "rebac_truth_digest",
+        "policy_conflicts",
+        "cells"
+      ],
+      "title": "CompiledEnterpriseAccessStateV1",
+      "type": "object"
+    },
+    "CompiledEnterpriseDirectoryRbacTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_derivation_paths": {
+          "items": {
+            "$ref": "#/$defs/AccessDerivationPathTruthV1"
+          },
+          "title": "Access Derivation Paths",
+          "type": "array"
+        },
+        "activation_decisions": {
+          "items": {
+            "$ref": "#/$defs/ActivationDecisionTruthV1"
+          },
+          "title": "Activation Decisions",
+          "type": "array"
+        },
+        "approved_exceptions": {
+          "items": {
+            "$ref": "#/$defs/ApprovedExceptionTruthV1"
+          },
+          "title": "Approved Exceptions",
+          "type": "array"
+        },
+        "authorized_role_paths": {
+          "items": {
+            "$ref": "#/$defs/AuthorizedRolePathTruthV1"
+          },
+          "title": "Authorized Role Paths",
+          "type": "array"
+        },
+        "authorized_role_sets": {
+          "items": {
+            "$ref": "#/$defs/AuthorizedRoleSetTruthV1"
+          },
+          "title": "Authorized Role Sets",
+          "type": "array"
+        },
+        "birthright_assignments": {
+          "items": {
+            "$ref": "#/$defs/BirthrightAssignmentTruthV1"
+          },
+          "title": "Birthright Assignments",
+          "type": "array"
+        },
+        "birthright_eligibility": {
+          "items": {
+            "$ref": "#/$defs/BirthrightEligibilityTruthV1"
+          },
+          "title": "Birthright Eligibility",
+          "type": "array"
+        },
+        "birthright_predicates": {
+          "items": {
+            "$ref": "#/$defs/BirthrightPredicateTruthV1"
+          },
+          "title": "Birthright Predicates",
+          "type": "array"
+        },
+        "canonical_binding_truth_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/DirectoryRbacCellTruthV1"
+          },
+          "title": "Cells",
+          "type": "array"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "directory_rbac_intent_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "directory_rbac_kernel_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "dsd_evaluations": {
+          "items": {
+            "$ref": "#/$defs/DsdConstraintTruthV1"
+          },
+          "title": "Dsd Evaluations",
+          "type": "array"
+        },
+        "evaluation_corpus_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "intended_derivation_paths": {
+          "items": {
+            "$ref": "#/$defs/AccessDerivationPathTruthV1"
+          },
+          "title": "Intended Derivation Paths",
+          "type": "array"
+        },
+        "membership_paths": {
+          "items": {
+            "$ref": "#/$defs/MembershipPathTruthV1"
+          },
+          "title": "Membership Paths",
+          "type": "array"
+        },
+        "observed_sessions": {
+          "items": {
+            "$ref": "#/$defs/ObservedSessionTruthV1"
+          },
+          "title": "Observed Sessions",
+          "type": "array"
+        },
+        "rbac_session_state_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "ssd_evaluations": {
+          "items": {
+            "$ref": "#/$defs/SsdConstraintTruthV1"
+          },
+          "title": "Ssd Evaluations",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "identity_access_universe_digest",
+        "canonical_binding_truth_digest",
+        "evaluation_corpus_digest",
+        "directory_rbac_kernel_digest",
+        "directory_rbac_intent_digest",
+        "rbac_session_state_digest",
+        "membership_paths",
+        "authorized_role_paths",
+        "authorized_role_sets",
+        "access_derivation_paths",
+        "intended_derivation_paths",
+        "birthright_predicates",
+        "birthright_eligibility",
+        "birthright_assignments",
+        "approved_exceptions",
+        "ssd_evaluations",
+        "dsd_evaluations",
+        "activation_decisions",
+        "observed_sessions",
+        "cells"
+      ],
+      "title": "CompiledEnterpriseDirectoryRbacTruthV1",
+      "type": "object"
+    },
+    "CompiledEnterpriseRebacTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cells": {
+          "items": {
+            "$ref": "#/$defs/RebacCellTruthV1"
+          },
+          "title": "Cells",
+          "type": "array"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "evaluation_corpus_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "paths": {
+          "items": {
+            "$ref": "#/$defs/RebacPathTruthV1"
+          },
+          "title": "Paths",
+          "type": "array"
+        },
+        "rebac_intent_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "rebac_state_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "relation_tuples": {
+          "items": {
+            "$ref": "#/$defs/RebacTupleTruthV1"
+          },
+          "title": "Relation Tuples",
+          "type": "array"
+        },
+        "rule_truth": {
+          "items": {
+            "$ref": "#/$defs/RebacRuleTruthV1"
+          },
+          "title": "Rule Truth",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "identity_access_universe_digest",
+        "evaluation_corpus_digest",
+        "rebac_state_digest",
+        "rebac_intent_digest",
+        "relation_tuples",
+        "paths",
+        "rule_truth",
+        "cells"
+      ],
+      "title": "CompiledEnterpriseRebacTruthV1",
+      "type": "object"
+    },
+    "DerivationMechanism": {
+      "enum": [
+        "direct_entitlement",
+        "role"
+      ],
+      "title": "DerivationMechanism",
+      "type": "string"
+    },
+    "DirectoryRbacCellTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_exception_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Approved Exception Ids",
+          "type": "array"
+        },
+        "binding_status": {
+          "$ref": "#/$defs/BindingStatus"
+        },
+        "birthright_assignment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Birthright Assignment Ids",
+          "type": "array"
+        },
+        "birthright_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effective_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "effective_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Effective Path Ids",
+          "type": "array"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Path Ids",
+          "type": "array"
+        },
+        "lifecycle_status": {
+          "$ref": "#/$defs/LifecycleStatus"
+        },
+        "reconciliation": {
+          "$ref": "#/$defs/ReconciliationOutcome"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cell_id",
+        "subject_id",
+        "tick",
+        "birthright_decision",
+        "intended_decision",
+        "effective_decision",
+        "final_decision",
+        "reconciliation",
+        "binding_status",
+        "lifecycle_status",
+        "birthright_assignment_ids",
+        "approved_exception_ids",
+        "intended_path_ids",
+        "effective_path_ids"
+      ],
+      "title": "DirectoryRbacCellTruthV1",
+      "type": "object"
+    },
+    "DsdConstraintTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_request_id": {
+          "title": "Activation Request Id",
+          "type": "string"
+        },
+        "actual_intersection_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Intersection Role Ids",
+          "type": "array"
+        },
+        "cardinality": {
+          "minimum": 2,
+          "title": "Cardinality",
+          "type": "integer"
+        },
+        "constraint_id": {
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "observed_session_violated": {
+          "title": "Observed Session Violated",
+          "type": "boolean"
+        },
+        "request_violated": {
+          "title": "Request Violated",
+          "type": "boolean"
+        },
+        "requested_intersection_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Requested Intersection Role Ids",
+          "type": "array"
+        },
+        "session_state_id": {
+          "title": "Session State Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "activation_request_id",
+        "session_state_id",
+        "requested_intersection_role_ids",
+        "actual_intersection_role_ids",
+        "cardinality",
+        "request_violated",
+        "observed_session_violated"
+      ],
+      "title": "DsdConstraintTruthV1",
+      "type": "object"
+    },
+    "EnterpriseAgenticAttributionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "agent_account_id": {
+          "title": "Agent Account Id",
+          "type": "string"
+        },
+        "agent_principal_id": {
+          "title": "Agent Principal Id",
+          "type": "string"
+        },
+        "human_principal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Human Principal Id"
+        },
+        "runtime_id": {
+          "title": "Runtime Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "human_principal_id",
+        "agent_principal_id",
+        "agent_account_id",
+        "runtime_id"
+      ],
+      "title": "EnterpriseAgenticAttributionTruthV1",
+      "type": "object"
+    },
+    "EnterpriseAgenticCaseKind": {
+      "enum": [
+        "valid_agent_principal",
+        "enterprise_denied_agent",
+        "human_authority_not_unioned",
+        "wrong_subject_agent",
+        "wrong_runtime_agent",
+        "invalid_credential_agent",
+        "shared_credential_agent",
+        "wrong_scope_agent",
+        "cross_tenant_agent",
+        "suspended_agent_account",
+        "valid_human_context",
+        "enterprise_denied_human",
+        "same_human_different_agent",
+        "same_agent_different_human",
+        "missing_delegation",
+        "revoked_delegation",
+        "wrong_runtime_human",
+        "wrong_scope_human",
+        "cross_tenant_human",
+        "evidence_discarded"
+      ],
+      "title": "EnterpriseAgenticCaseKind",
+      "type": "string"
+    },
+    "EnterpriseAgenticCaseLabelV1": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EnterpriseAgenticCaseKind"
+        },
+        "scenario_tags": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Scenario Tags",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "kind",
+        "scenario_tags"
+      ],
+      "title": "EnterpriseAgenticCaseLabelV1",
+      "type": "object"
+    },
+    "EnterpriseAgenticCaseTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action_event_id": {
+          "title": "Action Event Id",
+          "type": "string"
+        },
+        "attribution": {
+          "$ref": "#/$defs/EnterpriseAgenticAttributionTruthV1"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "expected_decision": {
+          "$ref": "#/$defs/AgenticExpectedDecisionV1"
+        },
+        "reconstructable_at_audit": {
+          "title": "Reconstructable At Audit",
+          "type": "boolean"
+        },
+        "required_evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Evidence Refs",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "action_event_id",
+        "expected_decision",
+        "attribution",
+        "required_evidence_refs",
+        "reconstructable_at_audit"
+      ],
+      "title": "EnterpriseAgenticCaseTruthV1",
+      "type": "object"
+    },
+    "EnterpriseAgenticTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_state_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "benchmark_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "case_labels": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAgenticCaseLabelV1"
+          },
+          "title": "Case Labels",
+          "type": "array"
+        },
+        "cases": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAgenticCaseTruthV1"
+          },
+          "title": "Cases",
+          "type": "array"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "public_input_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "public_input_digest",
+        "benchmark_digest",
+        "access_state_digest",
+        "cases",
+        "case_labels"
+      ],
+      "title": "EnterpriseAgenticTruthV1",
+      "type": "object"
+    },
+    "EnterpriseCanonicalAccountBindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "principal_id": {
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account_id",
+        "principal_id"
+      ],
+      "title": "EnterpriseCanonicalAccountBindingV1",
+      "type": "object"
+    },
+    "EnterpriseCanonicalBindingTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "bindings": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseCanonicalAccountBindingV1"
+          },
+          "title": "Bindings",
+          "type": "array"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "identity_access_universe_digest",
+        "bindings"
+      ],
+      "title": "EnterpriseCanonicalBindingTruthV1",
+      "type": "object"
+    },
+    "LifecycleStatus": {
+      "enum": [
+        "not_applicable",
+        "active",
+        "inactive",
+        "not_yet_valid",
+        "expired"
+      ],
+      "title": "LifecycleStatus",
+      "type": "string"
+    },
+    "MechanismOutcome": {
+      "description": "Native outcome retained before benchmark default-deny normalization.",
+      "enum": [
+        "allow",
+        "deny",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "MechanismOutcome",
+      "type": "string"
+    },
+    "MechanismOutcomeSetV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rbac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rebac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "title": "MechanismOutcomeSetV1",
+      "type": "object"
+    },
+    "MembershipPathTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "group_id": {
+          "title": "Group Id",
+          "type": "string"
+        },
+        "group_path": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Group Path",
+          "type": "array"
+        },
+        "path_id": {
+          "title": "Path Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path_id",
+        "subject_id",
+        "group_id",
+        "group_path"
+      ],
+      "title": "MembershipPathTruthV1",
+      "type": "object"
+    },
+    "ObservedSessionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_activated_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Activated Role Ids",
+          "type": "array"
+        },
+        "dsd_compliant": {
+          "title": "Dsd Compliant",
+          "type": "boolean"
+        },
+        "expected_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "observed_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "observed_outcome_correct": {
+          "title": "Observed Outcome Correct",
+          "type": "boolean"
+        },
+        "session_state_id": {
+          "title": "Session State Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "unauthorized_activated_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unauthorized Activated Role Ids",
+          "type": "array"
+        },
+        "usable_activated_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Usable Activated Role Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "session_state_id",
+        "expected_outcome",
+        "observed_outcome",
+        "actual_activated_role_ids",
+        "unauthorized_activated_role_ids",
+        "usable_activated_role_ids",
+        "observed_outcome_correct",
+        "dsd_compliant"
+      ],
+      "title": "ObservedSessionTruthV1",
+      "type": "object"
+    },
+    "PolicyConflictTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_allowing_mechanisms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Allowing Mechanisms",
+          "type": "array"
+        },
+        "actual_conflict": {
+          "title": "Actual Conflict",
+          "type": "boolean"
+        },
+        "actual_denying_mechanisms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Denying Mechanisms",
+          "type": "array"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "conflict_id": {
+          "title": "Conflict Id",
+          "type": "string"
+        },
+        "intended_allowing_mechanisms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Allowing Mechanisms",
+          "type": "array"
+        },
+        "intended_conflict": {
+          "title": "Intended Conflict",
+          "type": "boolean"
+        },
+        "intended_denying_mechanisms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Denying Mechanisms",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "conflict_id",
+        "cell_id",
+        "actual_conflict",
+        "intended_conflict",
+        "actual_allowing_mechanisms",
+        "actual_denying_mechanisms",
+        "intended_allowing_mechanisms",
+        "intended_denying_mechanisms"
+      ],
+      "title": "PolicyConflictTruthV1",
+      "type": "object"
+    },
+    "PredicateOutcome": {
+      "enum": [
+        "true",
+        "false",
+        "unknown"
+      ],
+      "title": "PredicateOutcome",
+      "type": "string"
+    },
+    "RebacCellTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_conflict": {
+          "title": "Actual Conflict",
+          "type": "boolean"
+        },
+        "actual_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "actual_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Path Ids",
+          "type": "array"
+        },
+        "actual_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Rule Truth Ids",
+          "type": "array"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "intended_conflict": {
+          "title": "Intended Conflict",
+          "type": "boolean"
+        },
+        "intended_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "intended_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Path Ids",
+          "type": "array"
+        },
+        "intended_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Rule Truth Ids",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cell_id",
+        "actual_outcome",
+        "intended_outcome",
+        "actual_conflict",
+        "intended_conflict",
+        "actual_rule_truth_ids",
+        "intended_rule_truth_ids",
+        "actual_path_ids",
+        "intended_path_ids"
+      ],
+      "title": "RebacCellTruthV1",
+      "type": "object"
+    },
+    "RebacPathTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "path_id": {
+          "title": "Path Id",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "template": {
+          "$ref": "#/$defs/RebacTemplateKind"
+        },
+        "tuple_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Tuple Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "template",
+        "subject_id",
+        "authorization_target_id",
+        "tuple_ids"
+      ],
+      "title": "RebacPathTruthV1",
+      "type": "object"
+    },
+    "RebacRelation": {
+      "enum": [
+        "member_of",
+        "owns",
+        "manages",
+        "collaborates_on"
+      ],
+      "title": "RebacRelation",
+      "type": "string"
+    },
+    "RebacRuleTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path Ids",
+          "type": "array"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "template": {
+          "$ref": "#/$defs/RebacTemplateKind"
+        },
+        "truth_id": {
+          "title": "Truth Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truth_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "template",
+        "effect",
+        "outcome",
+        "path_ids"
+      ],
+      "title": "RebacRuleTruthV1",
+      "type": "object"
+    },
+    "RebacTemplateKind": {
+      "enum": [
+        "direct_subject_relation",
+        "group_collaboration",
+        "manager_of_owner"
+      ],
+      "title": "RebacTemplateKind",
+      "type": "string"
+    },
+    "RebacTupleTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "object_entity_id": {
+          "title": "Object Entity Id",
+          "type": "string"
+        },
+        "relation": {
+          "$ref": "#/$defs/RebacRelation"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "subject_entity_id": {
+          "title": "Subject Entity Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tuple_id": {
+          "title": "Tuple Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "tuple_id",
+        "revision_id",
+        "source_layer",
+        "tenant_id",
+        "subject_entity_id",
+        "relation",
+        "object_entity_id",
+        "snapshot_id",
+        "valid_from_tick"
+      ],
+      "title": "RebacTupleTruthV1",
+      "type": "object"
+    },
+    "ReconciliationOutcome": {
+      "enum": [
+        "aligned_allow",
+        "aligned_deny",
+        "excessive",
+        "missing"
+      ],
+      "title": "ReconciliationOutcome",
+      "type": "string"
+    },
+    "RoleAssignmentSourceKind": {
+      "enum": [
+        "subject",
+        "group"
+      ],
+      "title": "RoleAssignmentSourceKind",
+      "type": "string"
+    },
+    "RuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "RuleEffect",
+      "type": "string"
+    },
+    "SsdConstraintTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cardinality": {
+          "minimum": 2,
+          "title": "Cardinality",
+          "type": "integer"
+        },
+        "constraint_id": {
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "intersection_role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intersection Role Ids",
+          "type": "array"
+        },
+        "role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Role Ids",
+          "type": "array"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "violated": {
+          "title": "Violated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "subject_id",
+        "role_ids",
+        "intersection_role_ids",
+        "cardinality",
+        "violated"
+      ],
+      "title": "SsdConstraintTruthV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "abac_truth": {
+      "$ref": "#/$defs/CompiledEnterpriseAbacTruthV1"
+    },
+    "access_state": {
+      "$ref": "#/$defs/CompiledEnterpriseAccessStateV1"
+    },
+    "canonical_binding_truth": {
+      "$ref": "#/$defs/EnterpriseCanonicalBindingTruthV1"
+    },
+    "directory_rbac_truth": {
+      "$ref": "#/$defs/CompiledEnterpriseDirectoryRbacTruthV1"
+    },
+    "public_input_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "rebac_truth": {
+      "$ref": "#/$defs/CompiledEnterpriseRebacTruthV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "truth": {
+      "$ref": "#/$defs/EnterpriseAgenticTruthV1"
+    }
+  },
+  "required": [
+    "public_input_digest",
+    "canonical_binding_truth",
+    "directory_rbac_truth",
+    "abac_truth",
+    "rebac_truth",
+    "access_state",
+    "truth"
+  ],
+  "title": "EnterpriseAgenticEvaluatorArtifactsV1",
+  "type": "object"
+}

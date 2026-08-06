@@ -1,0 +1,2243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-product-input.schema.json",
+  "x-generated-from": "synthworld.assurance.contextual_access.ContextualAccessProductInputV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "AccessAtomV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "access_atom_id": {
+          "title": "Access Atom Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "access_atom_id",
+        "subject_id",
+        "authorization_target_id",
+        "action"
+      ],
+      "title": "AccessAtomV1",
+      "type": "object"
+    },
+    "AccessSubjectKind": {
+      "enum": [
+        "principal",
+        "account"
+      ],
+      "title": "AccessSubjectKind",
+      "type": "string"
+    },
+    "AccountKind": {
+      "enum": [
+        "workforce",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "AccountKind",
+      "type": "string"
+    },
+    "BusinessJustificationContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "business_justification",
+          "default": "business_justification",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "justification_kind": {
+          "$ref": "#/$defs/BusinessJustificationKind"
+        },
+        "approval_evidence_id": {
+          "title": "Approval Evidence Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "asset_id",
+        "action",
+        "justification_kind",
+        "approval_evidence_id",
+        "valid_from_tick"
+      ],
+      "title": "BusinessJustificationContextV1",
+      "type": "object"
+    },
+    "BusinessJustificationKind": {
+      "enum": [
+        "case_assignment",
+        "change_approval",
+        "emergency_access"
+      ],
+      "title": "BusinessJustificationKind",
+      "type": "string"
+    },
+    "CaseAssignmentContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "case_assignment",
+          "default": "case_assignment",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "work_item_id": {
+          "title": "Work Item Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "assignment_state": {
+          "$ref": "#/$defs/CaseAssignmentState"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "work_item_id",
+        "asset_id",
+        "assignment_state",
+        "valid_from_tick"
+      ],
+      "title": "CaseAssignmentContextV1",
+      "type": "object"
+    },
+    "CaseAssignmentState": {
+      "enum": [
+        "assigned",
+        "unassigned"
+      ],
+      "title": "CaseAssignmentState",
+      "type": "string"
+    },
+    "ContextDeliveryAttemptV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "attempt_id": {
+          "minLength": 1,
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "attempt_index": {
+          "minimum": 0,
+          "title": "Attempt Index",
+          "type": "integer"
+        },
+        "delivery_tick": {
+          "minimum": 0,
+          "title": "Delivery Tick",
+          "type": "integer"
+        },
+        "delivery_order": {
+          "minimum": 0,
+          "title": "Delivery Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "event_id",
+        "attempt_index",
+        "delivery_tick",
+        "delivery_order"
+      ],
+      "title": "ContextDeliveryAttemptV1",
+      "type": "object"
+    },
+    "ContextualAccessBenchmarkV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "profile_version": {
+          "const": "contextual-access-smoke-1.0.0",
+          "default": "contextual-access-smoke-1.0.0",
+          "title": "Profile Version",
+          "type": "string"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "tier": {
+          "const": "smoke",
+          "default": "smoke",
+          "title": "Tier",
+          "type": "string"
+        },
+        "event_schedule_version": {
+          "const": "contextual-access-schedule-1.0.0",
+          "default": "contextual-access-schedule-1.0.0",
+          "title": "Event Schedule Version",
+          "type": "string"
+        },
+        "config_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "access_atom_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "registry_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "mapping_profile_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "policy_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "initial_fact_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "event_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "schedule_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "delivery_attempt_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        }
+      },
+      "required": [
+        "seed",
+        "config_digest",
+        "identity_access_universe_digest",
+        "access_atom_digest",
+        "registry_digest",
+        "mapping_profile_digest",
+        "policy_digest",
+        "initial_fact_digest",
+        "event_digest",
+        "schedule_digest",
+        "delivery_attempt_digest",
+        "request_digest"
+      ],
+      "title": "ContextualAccessBenchmarkV1",
+      "type": "object"
+    },
+    "ContextualAccessEventV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "effective_tick": {
+          "minimum": 0,
+          "title": "Effective Tick",
+          "type": "integer"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "fact_removed": "#/$defs/ContextualFactRemovedV1",
+              "fact_upserted": "#/$defs/ContextualFactUpsertedV1"
+            },
+            "propertyName": "event_type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ContextualFactUpsertedV1"
+            },
+            {
+              "$ref": "#/$defs/ContextualFactRemovedV1"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "id",
+        "effective_tick",
+        "payload"
+      ],
+      "title": "ContextualAccessEventV1",
+      "type": "object"
+    },
+    "ContextualAccessPublicV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "universe": {
+          "$ref": "#/$defs/EnterpriseIdentityAccessUniverseV1"
+        },
+        "registry": {
+          "$ref": "#/$defs/ContextualObjectRegistryV1"
+        },
+        "mapping_profile": {
+          "$ref": "#/$defs/ContextualFactMappingProfileV1"
+        },
+        "policies": {
+          "items": {
+            "$ref": "#/$defs/ContextualPolicyV1"
+          },
+          "minItems": 1,
+          "title": "Policies",
+          "type": "array"
+        },
+        "initial_facts": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "business_justification": "#/$defs/BusinessJustificationContextV1",
+                "case_assignment": "#/$defs/CaseAssignmentContextV1",
+                "device_posture": "#/$defs/DevicePostureContextV1",
+                "on_call": "#/$defs/OnCallContextV1",
+                "risk_signal": "#/$defs/RiskSignalContextV1"
+              },
+              "propertyName": "fact_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/CaseAssignmentContextV1"
+              },
+              {
+                "$ref": "#/$defs/OnCallContextV1"
+              },
+              {
+                "$ref": "#/$defs/DevicePostureContextV1"
+              },
+              {
+                "$ref": "#/$defs/RiskSignalContextV1"
+              },
+              {
+                "$ref": "#/$defs/BusinessJustificationContextV1"
+              }
+            ]
+          },
+          "title": "Initial Facts",
+          "type": "array"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/ContextualAccessEventV1"
+          },
+          "title": "Events",
+          "type": "array"
+        },
+        "schedule": {
+          "items": {
+            "$ref": "#/$defs/TemporalEventEnvelopeV1"
+          },
+          "title": "Schedule",
+          "type": "array"
+        },
+        "delivery_attempts": {
+          "items": {
+            "$ref": "#/$defs/ContextDeliveryAttemptV1"
+          },
+          "title": "Delivery Attempts",
+          "type": "array"
+        },
+        "requests": {
+          "items": {
+            "$ref": "#/$defs/ContextualAccessRequestV1"
+          },
+          "minItems": 1,
+          "title": "Requests",
+          "type": "array"
+        },
+        "benchmark": {
+          "$ref": "#/$defs/ContextualAccessBenchmarkV1"
+        }
+      },
+      "required": [
+        "universe",
+        "registry",
+        "mapping_profile",
+        "policies",
+        "initial_facts",
+        "events",
+        "schedule",
+        "delivery_attempts",
+        "requests",
+        "benchmark"
+      ],
+      "title": "ContextualAccessPublicV1",
+      "type": "object"
+    },
+    "ContextualAccessRequestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "request_index": {
+          "minimum": 0,
+          "title": "Request Index",
+          "type": "integer"
+        },
+        "request_tick": {
+          "minimum": 0,
+          "title": "Request Tick",
+          "type": "integer"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "asset_id": {
+          "minLength": 1,
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "access_atom_id": {
+          "minLength": 1,
+          "title": "Access Atom Id",
+          "type": "string"
+        },
+        "device_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Id"
+        }
+      },
+      "required": [
+        "request_id",
+        "request_index",
+        "request_tick",
+        "subject_id",
+        "asset_id",
+        "action",
+        "access_atom_id"
+      ],
+      "title": "ContextualAccessRequestV1",
+      "type": "object"
+    },
+    "ContextualFactKind": {
+      "enum": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "title": "ContextualFactKind",
+      "type": "string"
+    },
+    "ContextualFactMappingProfileV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "profile_id": {
+          "minLength": 1,
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "profile_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Profile Version",
+          "type": "string"
+        },
+        "mappings": {
+          "items": {
+            "$ref": "#/$defs/ContextualFactMappingV1"
+          },
+          "title": "Mappings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "profile_id",
+        "mappings"
+      ],
+      "title": "ContextualFactMappingProfileV1",
+      "type": "object"
+    },
+    "ContextualFactMappingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "$ref": "#/$defs/ContextualFactKind"
+        },
+        "mapping_kind": {
+          "$ref": "#/$defs/ContextualMappingKind"
+        },
+        "nist_category": {
+          "anyOf": [
+            {
+              "enum": [
+                "subject",
+                "resource",
+                "action",
+                "environment"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Nist Category"
+        },
+        "relationship_predicate": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Relationship Predicate"
+        }
+      },
+      "required": [
+        "fact_type",
+        "mapping_kind",
+        "nist_category"
+      ],
+      "title": "ContextualFactMappingV1",
+      "type": "object"
+    },
+    "ContextualFactRemovedV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "event_type": {
+          "const": "fact_removed",
+          "default": "fact_removed",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "fact": {
+          "discriminator": {
+            "mapping": {
+              "business_justification": "#/$defs/BusinessJustificationContextV1",
+              "case_assignment": "#/$defs/CaseAssignmentContextV1",
+              "device_posture": "#/$defs/DevicePostureContextV1",
+              "on_call": "#/$defs/OnCallContextV1",
+              "risk_signal": "#/$defs/RiskSignalContextV1"
+            },
+            "propertyName": "fact_type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CaseAssignmentContextV1"
+            },
+            {
+              "$ref": "#/$defs/OnCallContextV1"
+            },
+            {
+              "$ref": "#/$defs/DevicePostureContextV1"
+            },
+            {
+              "$ref": "#/$defs/RiskSignalContextV1"
+            },
+            {
+              "$ref": "#/$defs/BusinessJustificationContextV1"
+            }
+          ],
+          "title": "Fact"
+        }
+      },
+      "required": [
+        "fact"
+      ],
+      "title": "ContextualFactRemovedV1",
+      "type": "object"
+    },
+    "ContextualFactUpsertedV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "event_type": {
+          "const": "fact_upserted",
+          "default": "fact_upserted",
+          "title": "Event Type",
+          "type": "string"
+        },
+        "fact": {
+          "discriminator": {
+            "mapping": {
+              "business_justification": "#/$defs/BusinessJustificationContextV1",
+              "case_assignment": "#/$defs/CaseAssignmentContextV1",
+              "device_posture": "#/$defs/DevicePostureContextV1",
+              "on_call": "#/$defs/OnCallContextV1",
+              "risk_signal": "#/$defs/RiskSignalContextV1"
+            },
+            "propertyName": "fact_type"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/CaseAssignmentContextV1"
+            },
+            {
+              "$ref": "#/$defs/OnCallContextV1"
+            },
+            {
+              "$ref": "#/$defs/DevicePostureContextV1"
+            },
+            {
+              "$ref": "#/$defs/RiskSignalContextV1"
+            },
+            {
+              "$ref": "#/$defs/BusinessJustificationContextV1"
+            }
+          ],
+          "title": "Fact"
+        }
+      },
+      "required": [
+        "fact"
+      ],
+      "title": "ContextualFactUpsertedV1",
+      "type": "object"
+    },
+    "ContextualMappingKind": {
+      "enum": [
+        "subject_attribute",
+        "resource_attribute",
+        "action_attribute",
+        "environment_attribute",
+        "relationship_predicate"
+      ],
+      "title": "ContextualMappingKind",
+      "type": "string"
+    },
+    "ContextualObjectKind": {
+      "enum": [
+        "work_item",
+        "duty_scope",
+        "device",
+        "signal_source",
+        "approval_evidence"
+      ],
+      "title": "ContextualObjectKind",
+      "type": "string"
+    },
+    "ContextualObjectRegistryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "objects": {
+          "items": {
+            "$ref": "#/$defs/ContextualObjectV1"
+          },
+          "minItems": 1,
+          "title": "Objects",
+          "type": "array"
+        }
+      },
+      "required": [
+        "objects"
+      ],
+      "title": "ContextualObjectRegistryV1",
+      "type": "object"
+    },
+    "ContextualObjectV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ContextualObjectKind"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "minLength": 1,
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "display_label": {
+          "minLength": 1,
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "tenant_id",
+        "organisation_id",
+        "display_label"
+      ],
+      "title": "ContextualObjectV1",
+      "type": "object"
+    },
+    "ContextualPolicyV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "policy_id": {
+          "minLength": 1,
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "policy_version_id": {
+          "minLength": 1,
+          "title": "Policy Version Id",
+          "type": "string"
+        },
+        "target_handles": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Target Handles",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "rules": {
+          "items": {
+            "$ref": "#/$defs/ContextualRuleV1"
+          },
+          "maxItems": 256,
+          "minItems": 1,
+          "title": "Rules",
+          "type": "array"
+        },
+        "default_decision": {
+          "const": "deny",
+          "default": "deny",
+          "title": "Default Decision",
+          "type": "string"
+        },
+        "combining_algorithm": {
+          "const": "deny_overrides",
+          "default": "deny_overrides",
+          "title": "Combining Algorithm",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy_id",
+        "policy_version_id",
+        "target_handles",
+        "actions",
+        "rules"
+      ],
+      "title": "ContextualPolicyV1",
+      "type": "object"
+    },
+    "ContextualRuleComposition": {
+      "enum": [
+        "all",
+        "any"
+      ],
+      "title": "ContextualRuleComposition",
+      "type": "string"
+    },
+    "ContextualRuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "ContextualRuleEffect",
+      "type": "string"
+    },
+    "ContextualRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "minLength": 1,
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "effect": {
+          "$ref": "#/$defs/ContextualRuleEffect"
+        },
+        "composition": {
+          "$ref": "#/$defs/ContextualRuleComposition"
+        },
+        "predicates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "device_posture_is": "#/$defs/DevicePostureIsV1",
+                "has_active_case_assignment": "#/$defs/HasActiveCaseAssignmentV1",
+                "has_valid_business_justification": "#/$defs/HasValidBusinessJustificationV1",
+                "is_on_call": "#/$defs/IsOnCallV1",
+                "risk_at_most": "#/$defs/RiskAtMostV1"
+              },
+              "propertyName": "predicate_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/HasActiveCaseAssignmentV1"
+              },
+              {
+                "$ref": "#/$defs/IsOnCallV1"
+              },
+              {
+                "$ref": "#/$defs/DevicePostureIsV1"
+              },
+              {
+                "$ref": "#/$defs/RiskAtMostV1"
+              },
+              {
+                "$ref": "#/$defs/HasValidBusinessJustificationV1"
+              }
+            ]
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Predicates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule_id",
+        "effect",
+        "composition",
+        "predicates"
+      ],
+      "title": "ContextualRuleV1",
+      "type": "object"
+    },
+    "DevicePosture": {
+      "enum": [
+        "trusted",
+        "noncompliant",
+        "unknown"
+      ],
+      "title": "DevicePosture",
+      "type": "string"
+    },
+    "DevicePostureContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "device_posture",
+          "default": "device_posture",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "device_id": {
+          "title": "Device Id",
+          "type": "string"
+        },
+        "posture": {
+          "$ref": "#/$defs/DevicePosture"
+        },
+        "observed_at_tick": {
+          "minimum": 0,
+          "title": "Observed At Tick",
+          "type": "integer"
+        },
+        "expires_at_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "device_id",
+        "posture",
+        "observed_at_tick"
+      ],
+      "title": "DevicePostureContextV1",
+      "type": "object"
+    },
+    "DevicePostureIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "predicate_type": {
+          "const": "device_posture_is",
+          "default": "device_posture_is",
+          "title": "Predicate Type",
+          "type": "string"
+        },
+        "predicate_id": {
+          "minLength": 1,
+          "title": "Predicate Id",
+          "type": "string"
+        },
+        "required_posture": {
+          "enum": [
+            "trusted",
+            "noncompliant"
+          ],
+          "title": "Required Posture",
+          "type": "string"
+        }
+      },
+      "required": [
+        "predicate_id",
+        "required_posture"
+      ],
+      "title": "DevicePostureIsV1",
+      "type": "object"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "EnterpriseAccessSubjectV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "subject_kind": {
+          "$ref": "#/$defs/AccessSubjectKind"
+        }
+      },
+      "required": [
+        "subject_id",
+        "tenant_id",
+        "subject_kind"
+      ],
+      "title": "EnterpriseAccessSubjectV1",
+      "type": "object"
+    },
+    "EnterpriseAccountV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "account_kind": {
+          "$ref": "#/$defs/AccountKind"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "account_id",
+        "tenant_id",
+        "authorization_target_id",
+        "account_kind",
+        "display_label"
+      ],
+      "title": "EnterpriseAccountV1",
+      "type": "object"
+    },
+    "EnterpriseAuthorizationTargetV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/TargetKind"
+        },
+        "owner_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner Unit Id"
+        },
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actions",
+          "type": "array"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authorization_target_id",
+        "tenant_id",
+        "organisation_id",
+        "target_kind",
+        "owner_unit_id",
+        "actions",
+        "display_label"
+      ],
+      "title": "EnterpriseAuthorizationTargetV1",
+      "type": "object"
+    },
+    "EnterpriseGroupV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "group_id": {
+          "title": "Group Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "owner_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner Unit Id"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_id",
+        "tenant_id",
+        "organisation_id",
+        "owner_unit_id",
+        "display_label"
+      ],
+      "title": "EnterpriseGroupV1",
+      "type": "object"
+    },
+    "EnterpriseIdentityAccessUniverseV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "compiler_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Compiler Version",
+          "type": "string"
+        },
+        "selector_algorithm_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Selector Algorithm Version",
+          "type": "string"
+        },
+        "seed": {
+          "title": "Seed",
+          "type": "integer"
+        },
+        "tenants": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseTenantV1"
+          },
+          "title": "Tenants",
+          "type": "array"
+        },
+        "organisations": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseOrganisationV1"
+          },
+          "title": "Organisations",
+          "type": "array"
+        },
+        "units": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseUnitV1"
+          },
+          "title": "Units",
+          "type": "array"
+        },
+        "principals": {
+          "items": {
+            "$ref": "#/$defs/EnterprisePrincipalV1"
+          },
+          "title": "Principals",
+          "type": "array"
+        },
+        "accounts": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAccountV1"
+          },
+          "title": "Accounts",
+          "type": "array"
+        },
+        "access_subjects": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAccessSubjectV1"
+          },
+          "title": "Access Subjects",
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseGroupV1"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "roles": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseRoleV1"
+          },
+          "title": "Roles",
+          "type": "array"
+        },
+        "authorization_targets": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseAuthorizationTargetV1"
+          },
+          "title": "Authorization Targets",
+          "type": "array"
+        },
+        "permissions": {
+          "items": {
+            "$ref": "#/$defs/EnterprisePermissionV1"
+          },
+          "title": "Permissions",
+          "type": "array"
+        },
+        "relationship_anchors": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseRelationshipAnchorV1"
+          },
+          "title": "Relationship Anchors",
+          "type": "array"
+        },
+        "access_atoms": {
+          "items": {
+            "$ref": "#/$defs/AccessAtomV1"
+          },
+          "title": "Access Atoms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "seed",
+        "tenants",
+        "organisations",
+        "units",
+        "principals",
+        "accounts",
+        "access_subjects",
+        "groups",
+        "roles",
+        "authorization_targets",
+        "permissions",
+        "relationship_anchors",
+        "access_atoms"
+      ],
+      "title": "EnterpriseIdentityAccessUniverseV1",
+      "type": "object"
+    },
+    "EnterpriseOrganisationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "organisation_id",
+        "tenant_id",
+        "display_label"
+      ],
+      "title": "EnterpriseOrganisationV1",
+      "type": "object"
+    },
+    "EnterprisePermissionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "permission_id": {
+          "title": "Permission Id",
+          "type": "string"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "permission_id",
+        "authorization_target_id",
+        "action"
+      ],
+      "title": "EnterprisePermissionV1",
+      "type": "object"
+    },
+    "EnterprisePrincipalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "principal_id": {
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "unit_id": {
+          "title": "Unit Id",
+          "type": "string"
+        },
+        "principal_kind": {
+          "$ref": "#/$defs/PrincipalKind"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "principal_id",
+        "tenant_id",
+        "organisation_id",
+        "unit_id",
+        "principal_kind",
+        "display_label"
+      ],
+      "title": "EnterprisePrincipalV1",
+      "type": "object"
+    },
+    "EnterpriseRelationshipAnchorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "anchor_id": {
+          "title": "Anchor Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "entity_kind": {
+          "$ref": "#/$defs/RelationshipAnchorKind"
+        },
+        "entity_id": {
+          "title": "Entity Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "anchor_id",
+        "tenant_id",
+        "entity_kind",
+        "entity_id"
+      ],
+      "title": "EnterpriseRelationshipAnchorV1",
+      "type": "object"
+    },
+    "EnterpriseRoleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "owner_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner Unit Id"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "tenant_id",
+        "organisation_id",
+        "owner_unit_id",
+        "display_label"
+      ],
+      "title": "EnterpriseRoleV1",
+      "type": "object"
+    },
+    "EnterpriseTenantV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "display_label"
+      ],
+      "title": "EnterpriseTenantV1",
+      "type": "object"
+    },
+    "EnterpriseUnitV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "unit_id": {
+          "title": "Unit Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "unit_kind": {
+          "$ref": "#/$defs/UnitKind"
+        },
+        "parent_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Unit Id"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit_id",
+        "tenant_id",
+        "organisation_id",
+        "unit_kind",
+        "parent_unit_id",
+        "display_label"
+      ],
+      "title": "EnterpriseUnitV1",
+      "type": "object"
+    },
+    "HasActiveCaseAssignmentV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "predicate_type": {
+          "const": "has_active_case_assignment",
+          "default": "has_active_case_assignment",
+          "title": "Predicate Type",
+          "type": "string"
+        },
+        "predicate_id": {
+          "minLength": 1,
+          "title": "Predicate Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "predicate_id"
+      ],
+      "title": "HasActiveCaseAssignmentV1",
+      "type": "object"
+    },
+    "HasValidBusinessJustificationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "predicate_type": {
+          "const": "has_valid_business_justification",
+          "default": "has_valid_business_justification",
+          "title": "Predicate Type",
+          "type": "string"
+        },
+        "predicate_id": {
+          "minLength": 1,
+          "title": "Predicate Id",
+          "type": "string"
+        },
+        "justification_kind": {
+          "$ref": "#/$defs/BusinessJustificationKind"
+        }
+      },
+      "required": [
+        "predicate_id",
+        "justification_kind"
+      ],
+      "title": "HasValidBusinessJustificationV1",
+      "type": "object"
+    },
+    "IsOnCallV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "predicate_type": {
+          "const": "is_on_call",
+          "default": "is_on_call",
+          "title": "Predicate Type",
+          "type": "string"
+        },
+        "predicate_id": {
+          "minLength": 1,
+          "title": "Predicate Id",
+          "type": "string"
+        },
+        "duty_scope_id": {
+          "minLength": 1,
+          "title": "Duty Scope Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "predicate_id",
+        "duty_scope_id"
+      ],
+      "title": "IsOnCallV1",
+      "type": "object"
+    },
+    "OnCallContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "on_call",
+          "default": "on_call",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "duty_scope_id": {
+          "title": "Duty Scope Id",
+          "type": "string"
+        },
+        "duty_state": {
+          "$ref": "#/$defs/OnCallState"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "duty_scope_id",
+        "duty_state",
+        "valid_from_tick"
+      ],
+      "title": "OnCallContextV1",
+      "type": "object"
+    },
+    "OnCallState": {
+      "enum": [
+        "on_call",
+        "off_call"
+      ],
+      "title": "OnCallState",
+      "type": "string"
+    },
+    "PrincipalKind": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "RelationshipAnchorKind": {
+      "enum": [
+        "principal",
+        "account",
+        "group",
+        "unit",
+        "authorization_target"
+      ],
+      "title": "RelationshipAnchorKind",
+      "type": "string"
+    },
+    "RiskAtMostV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "predicate_type": {
+          "const": "risk_at_most",
+          "default": "risk_at_most",
+          "title": "Predicate Type",
+          "type": "string"
+        },
+        "predicate_id": {
+          "minLength": 1,
+          "title": "Predicate Id",
+          "type": "string"
+        },
+        "signal_source_id": {
+          "minLength": 1,
+          "title": "Signal Source Id",
+          "type": "string"
+        },
+        "maximum_level": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Maximum Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "predicate_id",
+        "signal_source_id",
+        "maximum_level"
+      ],
+      "title": "RiskAtMostV1",
+      "type": "object"
+    },
+    "RiskLevel": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "unknown"
+      ],
+      "title": "RiskLevel",
+      "type": "string"
+    },
+    "RiskSignalContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_id": {
+          "minLength": 1,
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "fact_key": {
+          "minLength": 1,
+          "title": "Fact Key",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "tombstone": {
+          "default": false,
+          "title": "Tombstone",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "const": "risk_signal",
+          "default": "risk_signal",
+          "title": "Fact Type",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "signal_source_id": {
+          "title": "Signal Source Id",
+          "type": "string"
+        },
+        "risk_level": {
+          "$ref": "#/$defs/RiskLevel"
+        },
+        "effective_from_tick": {
+          "minimum": 0,
+          "title": "Effective From Tick",
+          "type": "integer"
+        },
+        "expires_at_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expires At Tick"
+        }
+      },
+      "required": [
+        "fact_id",
+        "fact_key",
+        "revision",
+        "subject_id",
+        "signal_source_id",
+        "risk_level",
+        "effective_from_tick"
+      ],
+      "title": "RiskSignalContextV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    },
+    "TargetKind": {
+      "enum": [
+        "application",
+        "api",
+        "tool",
+        "data_store",
+        "environment"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    },
+    "TemporalEventEnvelopeV1": {
+      "additionalProperties": false,
+      "description": "One payload digest positioned on the sole integer-tick schedule.",
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "effective_tick": {
+          "minimum": 0,
+          "title": "Effective Tick",
+          "type": "integer"
+        },
+        "event_index": {
+          "minimum": 0,
+          "title": "Event Index",
+          "type": "integer"
+        },
+        "event_schedule_version": {
+          "minLength": 1,
+          "title": "Event Schedule Version",
+          "type": "string"
+        },
+        "payload_family": {
+          "$ref": "#/$defs/TemporalPayloadFamilyV1"
+        },
+        "payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Payload Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "effective_tick",
+        "event_index",
+        "event_schedule_version",
+        "payload_family",
+        "payload_sha256"
+      ],
+      "title": "TemporalEventEnvelopeV1",
+      "type": "object"
+    },
+    "TemporalPayloadFamilyV1": {
+      "description": "The two concrete payload families that justify schedule view v1.",
+      "enum": [
+        "privacy_1_2",
+        "contextual_access_1_0"
+      ],
+      "title": "TemporalPayloadFamilyV1",
+      "type": "string"
+    },
+    "UnitKind": {
+      "enum": [
+        "division",
+        "department",
+        "team"
+      ],
+      "title": "UnitKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Product-input envelope the testbed stages before execution.\n\nThe testbed synthesizes this envelope from the preflight artifacts; the\nadapter never produces it.  Adapter output is replayed separately and must\nequal ``public`` before this envelope is written.",
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_plan_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "contextual_public_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "public": {
+      "$ref": "#/$defs/ContextualAccessPublicV1"
+    }
+  },
+  "required": [
+    "run_plan_digest",
+    "contextual_public_digest",
+    "public"
+  ],
+  "title": "ContextualAccessProductInputV1",
+  "type": "object"
+}

@@ -1,0 +1,404 @@
+{
+  "$defs": {
+    "AccessSubjectKind": {
+      "enum": [
+        "principal",
+        "account"
+      ],
+      "title": "AccessSubjectKind",
+      "type": "string"
+    },
+    "AuthZenActionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "AuthZenActionV1",
+      "type": "object"
+    },
+    "AuthZenContextV1": {
+      "additionalProperties": false,
+      "properties": {
+        "context_id": {
+          "title": "Context Id",
+          "type": "string"
+        },
+        "logical_tick": {
+          "title": "Logical Tick",
+          "type": "integer"
+        },
+        "session_state_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Session State Id"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "context_id",
+        "logical_tick",
+        "session_state_id"
+      ],
+      "title": "AuthZenContextV1",
+      "type": "object"
+    },
+    "AuthZenFieldProvenanceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "native_source": {
+          "title": "Native Source",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_field": {
+          "title": "Target Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_field",
+        "native_source"
+      ],
+      "title": "AuthZenFieldProvenanceV1",
+      "type": "object"
+    },
+    "AuthZenResourceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "type": {
+          "$ref": "#/$defs/TargetKind"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "title": "AuthZenResourceV1",
+      "type": "object"
+    },
+    "AuthZenSubjectV1": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "type": {
+          "$ref": "#/$defs/AccessSubjectKind"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "title": "AuthZenSubjectV1",
+      "type": "object"
+    },
+    "ProjectionSupportClassification": {
+      "enum": [
+        "exact",
+        "approximated",
+        "unsupported"
+      ],
+      "title": "ProjectionSupportClassification",
+      "type": "string"
+    },
+    "ProjectionSupportMatrixV1": {
+      "additionalProperties": false,
+      "properties": {
+        "exercised_native_features": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Exercised Native Features",
+          "type": "array"
+        },
+        "mapping_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "native_profile_version": {
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "profile_id": {
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/ProjectionSupportRowV1"
+          },
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target": {
+          "$ref": "#/$defs/ProjectionTarget"
+        },
+        "target_profile_version": {
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile_id",
+        "target",
+        "native_profile_version",
+        "target_profile_version",
+        "mapping_digest",
+        "exercised_native_features",
+        "rows"
+      ],
+      "title": "ProjectionSupportMatrixV1",
+      "type": "object"
+    },
+    "ProjectionSupportRowV1": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/ProjectionSupportClassification"
+        },
+        "conformance_vector_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Conformance Vector Ids",
+          "type": "array"
+        },
+        "mapping_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "mapping_id": {
+          "title": "Mapping Id",
+          "type": "string"
+        },
+        "native_profile_version": {
+          "title": "Native Profile Version",
+          "type": "string"
+        },
+        "native_source_feature": {
+          "title": "Native Source Feature",
+          "type": "string"
+        },
+        "semantic_delta": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Semantic Delta"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_construct": {
+          "title": "Target Construct",
+          "type": "string"
+        },
+        "target_profile_version": {
+          "title": "Target Profile Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mapping_id",
+        "native_source_feature",
+        "target_construct",
+        "classification",
+        "semantic_delta",
+        "native_profile_version",
+        "target_profile_version",
+        "mapping_digest",
+        "conformance_vector_ids"
+      ],
+      "title": "ProjectionSupportRowV1",
+      "type": "object"
+    },
+    "ProjectionTarget": {
+      "enum": [
+        "scim",
+        "authzen",
+        "openfga",
+        "shared_signals"
+      ],
+      "title": "ProjectionTarget",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    },
+    "TargetKind": {
+      "enum": [
+        "application",
+        "api",
+        "tool",
+        "data_store",
+        "environment"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_request_id": {
+      "title": "Access Request Id",
+      "type": "string"
+    },
+    "action": {
+      "$ref": "#/$defs/AuthZenActionV1"
+    },
+    "cell_id": {
+      "title": "Cell Id",
+      "type": "string"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "context": {
+      "$ref": "#/$defs/AuthZenContextV1"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "field_provenance": {
+      "items": {
+        "$ref": "#/$defs/AuthZenFieldProvenanceV1"
+      },
+      "title": "Field Provenance",
+      "type": "array"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "mapping_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "resource": {
+      "$ref": "#/$defs/AuthZenResourceV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "subject": {
+      "$ref": "#/$defs/AuthZenSubjectV1"
+    },
+    "support_matrix": {
+      "$ref": "#/$defs/ProjectionSupportMatrixV1"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "access_request_id",
+    "cell_id",
+    "subject",
+    "action",
+    "resource",
+    "context",
+    "field_provenance",
+    "mapping_digest",
+    "support_matrix"
+  ],
+  "title": "AuthZenRequestProjectionV1",
+  "type": "object"
+}

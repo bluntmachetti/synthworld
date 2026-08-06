@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "AuthZenRawOutcome": {
+      "enum": [
+        "allow",
+        "deny",
+        "indeterminate",
+        "transport_error",
+        "timeout",
+        "unavailable"
+      ],
+      "title": "AuthZenRawOutcome",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_request_id": {
+      "title": "Access Request Id",
+      "type": "string"
+    },
+    "boolean_decision": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Boolean Decision"
+    },
+    "raw_outcome": {
+      "$ref": "#/$defs/AuthZenRawOutcome"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "transport_evidence_digest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "access_request_id",
+    "raw_outcome",
+    "boolean_decision"
+  ],
+  "title": "AuthZenDecisionObservationV1",
+  "type": "object"
+}

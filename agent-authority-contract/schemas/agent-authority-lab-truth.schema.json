@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/agent-authority-lab-truth.schema.json",
+  "x-generated-from": "synthworld.agent_authority.models.AgentAuthorityLabTruthV1",
+  "x-generated-by": "agent-authority-contract/tools/generate_protocol_schemas.py",
+  "x-regenerate-with": "uv run python agent-authority-contract/tools/generate_protocol_schemas.py",
+  "$defs": {
+    "AgentAuthorityControlId": {
+      "enum": [
+        "SW-AA-C01",
+        "SW-AA-C02",
+        "SW-AA-C03",
+        "SW-AA-C04",
+        "SW-AA-C05",
+        "SW-AA-C06",
+        "SW-AA-C07",
+        "SW-AA-C08",
+        "SW-AA-C09",
+        "SW-AA-C10",
+        "SW-AA-C11",
+        "SW-AA-C12",
+        "SW-AA-C13",
+        "SW-AA-C14",
+        "SW-AA-C15",
+        "SW-AA-C16",
+        "SW-AA-L01",
+        "SW-AA-L02",
+        "SW-AA-L03",
+        "SW-AA-L04",
+        "SW-AA-L05",
+        "SW-AA-L06",
+        "SW-AA-L07",
+        "SW-AA-L08"
+      ],
+      "title": "AgentAuthorityControlId",
+      "type": "string"
+    },
+    "AgentAuthorityStimulusTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "stimulus_id": {
+          "minLength": 1,
+          "title": "Stimulus Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/AgentAuthorityControlId"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "l01_secret_exposure": "#/$defs/L01SecretExposureTruthV1",
+              "l02_credential_replay": "#/$defs/L02CredentialReplayTruthV1",
+              "l03_direct_path_bypass": "#/$defs/L03DirectPathBypassTruthV1",
+              "l04_network_policy": "#/$defs/L04NetworkPolicyTruthV1",
+              "l05_critical_dependency_failure": "#/$defs/L05CriticalDependencyFailureTruthV1",
+              "l06_revocation_propagation": "#/$defs/L06RevocationPropagationTruthV1"
+            },
+            "propertyName": "variant"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/L01SecretExposureTruthV1"
+            },
+            {
+              "$ref": "#/$defs/L02CredentialReplayTruthV1"
+            },
+            {
+              "$ref": "#/$defs/L03DirectPathBypassTruthV1"
+            },
+            {
+              "$ref": "#/$defs/L04NetworkPolicyTruthV1"
+            },
+            {
+              "$ref": "#/$defs/L05CriticalDependencyFailureTruthV1"
+            },
+            {
+              "$ref": "#/$defs/L06RevocationPropagationTruthV1"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "stimulus_id",
+        "control_id",
+        "payload"
+      ],
+      "title": "AgentAuthorityStimulusTruthV1",
+      "type": "object"
+    },
+    "EvidenceChannel": {
+      "enum": [
+        "context",
+        "log",
+        "trace",
+        "memory"
+      ],
+      "title": "EvidenceChannel",
+      "type": "string"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "target",
+        "gateway",
+        "policy",
+        "credential_store",
+        "runtime",
+        "network",
+        "log",
+        "trace",
+        "memory"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "L01SecretExposureTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/EvidenceKind"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "variant": {
+          "const": "l01_secret_exposure",
+          "default": "l01_secret_exposure",
+          "title": "Variant",
+          "type": "string"
+        },
+        "required_channels": {
+          "items": {
+            "$ref": "#/$defs/EvidenceChannel"
+          },
+          "minItems": 1,
+          "title": "Required Channels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "required_evidence_kinds",
+        "required_channels"
+      ],
+      "title": "L01SecretExposureTruthV1",
+      "type": "object"
+    },
+    "L02CredentialReplayTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/EvidenceKind"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "variant": {
+          "const": "l02_credential_replay",
+          "default": "l02_credential_replay",
+          "title": "Variant",
+          "type": "string"
+        },
+        "expected_decisions": {
+          "default": [
+            "deny",
+            "error"
+          ],
+          "items": {
+            "enum": [
+              "deny",
+              "error"
+            ],
+            "type": "string"
+          },
+          "title": "Expected Decisions",
+          "type": "array"
+        },
+        "expected_no_side_effect": {
+          "const": true,
+          "default": true,
+          "title": "Expected No Side Effect",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required_evidence_kinds"
+      ],
+      "title": "L02CredentialReplayTruthV1",
+      "type": "object"
+    },
+    "L03DirectPathBypassTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/EvidenceKind"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "variant": {
+          "const": "l03_direct_path_bypass",
+          "default": "l03_direct_path_bypass",
+          "title": "Variant",
+          "type": "string"
+        },
+        "safe_reachability_or_denial": {
+          "const": true,
+          "default": true,
+          "title": "Safe Reachability Or Denial",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required_evidence_kinds"
+      ],
+      "title": "L03DirectPathBypassTruthV1",
+      "type": "object"
+    },
+    "L04NetworkPolicyTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/EvidenceKind"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "variant": {
+          "const": "l04_network_policy",
+          "default": "l04_network_policy",
+          "title": "Variant",
+          "type": "string"
+        },
+        "safe_connectivity_or_denial": {
+          "const": true,
+          "default": true,
+          "title": "Safe Connectivity Or Denial",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required_evidence_kinds"
+      ],
+      "title": "L04NetworkPolicyTruthV1",
+      "type": "object"
+    },
+    "L05CriticalDependencyFailureTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/EvidenceKind"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "variant": {
+          "const": "l05_critical_dependency_failure",
+          "default": "l05_critical_dependency_failure",
+          "title": "Variant",
+          "type": "string"
+        },
+        "enforcement_point_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Enforcement Point Ids",
+          "type": "array"
+        },
+        "expected_fail_closed": {
+          "const": true,
+          "default": true,
+          "title": "Expected Fail Closed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "required_evidence_kinds",
+        "enforcement_point_ids"
+      ],
+      "title": "L05CriticalDependencyFailureTruthV1",
+      "type": "object"
+    },
+    "L06RevocationPropagationTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/EvidenceKind"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "variant": {
+          "const": "l06_revocation_propagation",
+          "default": "l06_revocation_propagation",
+          "title": "Variant",
+          "type": "string"
+        },
+        "enforcement_point_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Enforcement Point Ids",
+          "type": "array"
+        },
+        "credential_or_child_handles": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Credential Or Child Handles",
+          "type": "array"
+        },
+        "bound_ns": {
+          "exclusiveMinimum": 0,
+          "title": "Bound Ns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "required_evidence_kinds",
+        "enforcement_point_ids",
+        "credential_or_child_handles",
+        "bound_ns"
+      ],
+      "title": "L06RevocationPropagationTruthV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "stimuli": {
+      "items": {
+        "$ref": "#/$defs/AgentAuthorityStimulusTruthV1"
+      },
+      "minItems": 1,
+      "title": "Stimuli",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "stimuli"
+  ],
+  "title": "AgentAuthorityLabTruthV1",
+  "type": "object"
+}

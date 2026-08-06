@@ -1,0 +1,274 @@
+{
+  "$defs": {
+    "ActivationOutcome": {
+      "enum": [
+        "accepted",
+        "rejected"
+      ],
+      "title": "ActivationOutcome",
+      "type": "string"
+    },
+    "ActivationPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_request_id": {
+          "minLength": 1,
+          "title": "Activation Request Id",
+          "type": "string"
+        },
+        "actual_activated_role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Activated Role Ids",
+          "type": "array"
+        },
+        "expected_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "observed_outcome": {
+          "$ref": "#/$defs/ActivationOutcome"
+        },
+        "unauthorized_activated_role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unauthorized Activated Role Ids",
+          "type": "array"
+        },
+        "usable_activated_role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Usable Activated Role Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "activation_request_id",
+        "expected_outcome",
+        "observed_outcome"
+      ],
+      "title": "ActivationPredictionV1",
+      "type": "object"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "AuthorizedRoleSetPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "role_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Role Ids",
+          "type": "array"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id"
+      ],
+      "title": "AuthorizedRoleSetPredictionV1",
+      "type": "object"
+    },
+    "BirthrightAssignmentPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "assignment_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Assignment Ids",
+          "type": "array"
+        },
+        "rule_id": {
+          "minLength": 1,
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "subject_id"
+      ],
+      "title": "BirthrightAssignmentPredictionV1",
+      "type": "object"
+    },
+    "DirectoryRbacCellPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "birthright_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effective_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "effective_path_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Effective Path Ids",
+          "type": "array"
+        },
+        "final_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "intended_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        }
+      },
+      "required": [
+        "cell_id",
+        "birthright_decision",
+        "intended_decision",
+        "effective_decision",
+        "final_decision"
+      ],
+      "title": "DirectoryRbacCellPredictionV1",
+      "type": "object"
+    },
+    "DsdPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "activation_request_id": {
+          "minLength": 1,
+          "title": "Activation Request Id",
+          "type": "string"
+        },
+        "constraint_id": {
+          "minLength": 1,
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "observed_session_violated": {
+          "title": "Observed Session Violated",
+          "type": "boolean"
+        },
+        "request_violated": {
+          "title": "Request Violated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "activation_request_id",
+        "request_violated",
+        "observed_session_violated"
+      ],
+      "title": "DsdPredictionV1",
+      "type": "object"
+    },
+    "SsdPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "constraint_id": {
+          "minLength": 1,
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "violated": {
+          "title": "Violated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "subject_id",
+        "violated"
+      ],
+      "title": "SsdPredictionV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "activations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ActivationPredictionV1"
+      },
+      "title": "Activations",
+      "type": "array"
+    },
+    "authorized_role_sets": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AuthorizedRoleSetPredictionV1"
+      },
+      "title": "Authorized Role Sets",
+      "type": "array"
+    },
+    "birthright_assignments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/BirthrightAssignmentPredictionV1"
+      },
+      "title": "Birthright Assignments",
+      "type": "array"
+    },
+    "cells": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DirectoryRbacCellPredictionV1"
+      },
+      "title": "Cells",
+      "type": "array"
+    },
+    "dsd_evaluations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DsdPredictionV1"
+      },
+      "title": "Dsd Evaluations",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "ssd_evaluations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/SsdPredictionV1"
+      },
+      "title": "Ssd Evaluations",
+      "type": "array"
+    }
+  },
+  "title": "EnterpriseDirectoryRbacPredictionV1",
+  "type": "object"
+}

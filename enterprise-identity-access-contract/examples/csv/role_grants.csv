@@ -1,0 +1,3 @@
+role_key,resource_set_key,action
+role-api-admin,resource-customer-api,write
+role-api-reader,resource-customer-api,read

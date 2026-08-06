@@ -1,0 +1,1152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/agent-authority-observations-v2.schema.json",
+  "x-generated-from": "synthworld.agent_authority.models_v2.AgentAuthorityRunObservationsV2",
+  "x-generated-by": "agent-authority-contract/tools/generate_protocol_schemas.py",
+  "x-regenerate-with": "uv run python agent-authority-contract/tools/generate_protocol_schemas.py",
+  "$defs": {
+    "AgentAuthorityControlId": {
+      "enum": [
+        "SW-AA-C01",
+        "SW-AA-C02",
+        "SW-AA-C03",
+        "SW-AA-C04",
+        "SW-AA-C05",
+        "SW-AA-C06",
+        "SW-AA-C07",
+        "SW-AA-C08",
+        "SW-AA-C09",
+        "SW-AA-C10",
+        "SW-AA-C11",
+        "SW-AA-C12",
+        "SW-AA-C13",
+        "SW-AA-C14",
+        "SW-AA-C15",
+        "SW-AA-C16",
+        "SW-AA-L01",
+        "SW-AA-L02",
+        "SW-AA-L03",
+        "SW-AA-L04",
+        "SW-AA-L05",
+        "SW-AA-L06",
+        "SW-AA-L07",
+        "SW-AA-L08"
+      ],
+      "title": "AgentAuthorityControlId",
+      "type": "string"
+    },
+    "AgentAuthorityObservationV2": {
+      "additionalProperties": false,
+      "description": "Observation envelope retaining V1 fields with an L06-v2 payload.",
+      "properties": {
+        "stimulus_id": {
+          "minLength": 1,
+          "title": "Stimulus Id",
+          "type": "string"
+        },
+        "attribution": {
+          "$ref": "#/$defs/ObservationAttributionV1"
+        },
+        "elapsed_ns": {
+          "minimum": 0,
+          "title": "Elapsed Ns",
+          "type": "integer"
+        },
+        "evidence_handle_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Handle Refs",
+          "type": "array"
+        },
+        "observed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string",
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d+)?(Z|[+-]00:00)$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observed At"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "l01_secret_exposure": "#/$defs/L01SecretExposureObservationV1",
+              "l02_credential_replay": "#/$defs/L02CredentialReplayObservationV1",
+              "l03_direct_path_bypass": "#/$defs/L03DirectPathBypassObservationV1",
+              "l04_network_policy": "#/$defs/L04NetworkPolicyObservationV1",
+              "l05_critical_dependency_failure": "#/$defs/L05CriticalDependencyFailureObservationV1",
+              "l06_revocation_propagation": "#/$defs/L06RevocationPropagationObservationV2"
+            },
+            "propertyName": "variant"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/L01SecretExposureObservationV1"
+            },
+            {
+              "$ref": "#/$defs/L02CredentialReplayObservationV1"
+            },
+            {
+              "$ref": "#/$defs/L03DirectPathBypassObservationV1"
+            },
+            {
+              "$ref": "#/$defs/L04NetworkPolicyObservationV1"
+            },
+            {
+              "$ref": "#/$defs/L05CriticalDependencyFailureObservationV1"
+            },
+            {
+              "$ref": "#/$defs/L06RevocationPropagationObservationV2"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "stimulus_id",
+        "attribution",
+        "elapsed_ns",
+        "payload"
+      ],
+      "title": "AgentAuthorityObservationV2",
+      "type": "object"
+    },
+    "AttributionKind": {
+      "enum": [
+        "specific",
+        "multiple",
+        "ambiguous",
+        "unobserved"
+      ],
+      "title": "AttributionKind",
+      "type": "string"
+    },
+    "CandidateProbeOutcome": {
+      "enum": [
+        "obtained",
+        "rejected",
+        "failed",
+        "unobserved"
+      ],
+      "title": "CandidateProbeOutcome",
+      "type": "string"
+    },
+    "CapabilityProbeResultV1": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/CandidateProbeOutcome"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "outcome"
+      ],
+      "title": "CapabilityProbeResultV1",
+      "type": "object"
+    },
+    "ChannelScanV1": {
+      "additionalProperties": false,
+      "properties": {
+        "channel": {
+          "$ref": "#/$defs/EvidenceChannel"
+        },
+        "collection_status": {
+          "$ref": "#/$defs/CollectionStatus"
+        },
+        "canary_match": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Canary Match"
+        },
+        "evidence_handle_ref": {
+          "minLength": 1,
+          "title": "Evidence Handle Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "channel",
+        "collection_status",
+        "canary_match",
+        "evidence_handle_ref"
+      ],
+      "title": "ChannelScanV1",
+      "type": "object"
+    },
+    "CollectionStatus": {
+      "enum": [
+        "collected",
+        "unavailable",
+        "failed"
+      ],
+      "title": "CollectionStatus",
+      "type": "string"
+    },
+    "CompatibilityStatus": {
+      "enum": [
+        "measured",
+        "unsupported",
+        "incomplete",
+        "not_attempted"
+      ],
+      "title": "CompatibilityStatus",
+      "type": "string"
+    },
+    "ConnectivityObservation": {
+      "enum": [
+        "blocked",
+        "connected",
+        "unknown"
+      ],
+      "title": "ConnectivityObservation",
+      "type": "string"
+    },
+    "ConstraintCheckStatus": {
+      "enum": [
+        "satisfied",
+        "violated",
+        "unobserved"
+      ],
+      "title": "ConstraintCheckStatus",
+      "type": "string"
+    },
+    "CoverageLimitationKind": {
+      "enum": [
+        "skipped",
+        "capped"
+      ],
+      "title": "CoverageLimitationKind",
+      "type": "string"
+    },
+    "CoverageLimitationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "$ref": "#/$defs/AgentAuthorityControlId"
+        },
+        "kind": {
+          "$ref": "#/$defs/CoverageLimitationKind"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "control_id",
+        "kind",
+        "reason"
+      ],
+      "title": "CoverageLimitationV1",
+      "type": "object"
+    },
+    "DependencyFaultResultV1": {
+      "additionalProperties": false,
+      "properties": {
+        "stimulus_id": {
+          "minLength": 1,
+          "title": "Stimulus Id",
+          "type": "string"
+        },
+        "dependency_component_id": {
+          "minLength": 1,
+          "title": "Dependency Component Id",
+          "type": "string"
+        },
+        "fault_confirmation": {
+          "$ref": "#/$defs/FaultConfirmation"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "stimulus_id",
+        "dependency_component_id",
+        "fault_confirmation"
+      ],
+      "title": "DependencyFaultResultV1",
+      "type": "object"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "EnforcementOutcomeV1": {
+      "additionalProperties": false,
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/$defs/ObservedDecision"
+        },
+        "side_effect": {
+          "$ref": "#/$defs/ObservedSideEffect"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component_id",
+        "decision",
+        "side_effect"
+      ],
+      "title": "EnforcementOutcomeV1",
+      "type": "object"
+    },
+    "EvidenceChannel": {
+      "enum": [
+        "context",
+        "log",
+        "trace",
+        "memory"
+      ],
+      "title": "EvidenceChannel",
+      "type": "string"
+    },
+    "EvidenceHandleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "handle": {
+          "minLength": 1,
+          "title": "Handle",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "collection_status": {
+          "$ref": "#/$defs/CollectionStatus"
+        },
+        "redaction_status": {
+          "$ref": "#/$defs/RedactionStatus"
+        }
+      },
+      "required": [
+        "handle",
+        "kind",
+        "digest",
+        "collection_status",
+        "redaction_status"
+      ],
+      "title": "EvidenceHandleV1",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "target",
+        "gateway",
+        "policy",
+        "credential_store",
+        "runtime",
+        "network",
+        "log",
+        "trace",
+        "memory"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "FailureRateMeasurementV1": {
+      "additionalProperties": false,
+      "properties": {
+        "measurement_kind": {
+          "const": "failure_rate",
+          "default": "failure_rate",
+          "title": "Measurement Kind",
+          "type": "string"
+        },
+        "failed_count": {
+          "minimum": 0,
+          "title": "Failed Count",
+          "type": "integer"
+        },
+        "total_count": {
+          "exclusiveMinimum": 0,
+          "title": "Total Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "failed_count",
+        "total_count"
+      ],
+      "title": "FailureRateMeasurementV1",
+      "type": "object"
+    },
+    "FaultConfirmation": {
+      "enum": [
+        "confirmed",
+        "unconfirmed"
+      ],
+      "title": "FaultConfirmation",
+      "type": "string"
+    },
+    "L01SecretExposureObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "const": "l01_secret_exposure",
+          "default": "l01_secret_exposure",
+          "title": "Variant",
+          "type": "string"
+        },
+        "channel_scans": {
+          "items": {
+            "$ref": "#/$defs/ChannelScanV1"
+          },
+          "minItems": 1,
+          "title": "Channel Scans",
+          "type": "array"
+        }
+      },
+      "required": [
+        "channel_scans"
+      ],
+      "title": "L01SecretExposureObservationV1",
+      "type": "object"
+    },
+    "L02CredentialReplayObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "const": "l02_credential_replay",
+          "default": "l02_credential_replay",
+          "title": "Variant",
+          "type": "string"
+        },
+        "target_decision": {
+          "$ref": "#/$defs/ObservedDecision"
+        },
+        "side_effect": {
+          "$ref": "#/$defs/ObservedSideEffect"
+        },
+        "sender_constraint_status": {
+          "$ref": "#/$defs/ConstraintCheckStatus"
+        },
+        "audience_check_status": {
+          "$ref": "#/$defs/ConstraintCheckStatus"
+        },
+        "target_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "target_decision",
+        "side_effect",
+        "sender_constraint_status",
+        "audience_check_status"
+      ],
+      "title": "L02CredentialReplayObservationV1",
+      "type": "object"
+    },
+    "L03DirectPathBypassObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "const": "l03_direct_path_bypass",
+          "default": "l03_direct_path_bypass",
+          "title": "Variant",
+          "type": "string"
+        },
+        "reachability": {
+          "$ref": "#/$defs/ReachabilityObservation"
+        },
+        "target_decision": {
+          "$ref": "#/$defs/ObservedDecision"
+        },
+        "side_effect": {
+          "$ref": "#/$defs/ObservedSideEffect"
+        },
+        "traversed_component_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Traversed Component Ids",
+          "type": "array"
+        },
+        "network_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Network Evidence Refs",
+          "type": "array"
+        },
+        "target_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reachability",
+        "target_decision",
+        "side_effect"
+      ],
+      "title": "L03DirectPathBypassObservationV1",
+      "type": "object"
+    },
+    "L04NetworkPolicyObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "const": "l04_network_policy",
+          "default": "l04_network_policy",
+          "title": "Variant",
+          "type": "string"
+        },
+        "connectivity": {
+          "$ref": "#/$defs/ConnectivityObservation"
+        },
+        "target_decision": {
+          "$ref": "#/$defs/ObservedDecision"
+        },
+        "side_effect": {
+          "$ref": "#/$defs/ObservedSideEffect"
+        },
+        "network_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Network Evidence Refs",
+          "type": "array"
+        },
+        "target_evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "connectivity",
+        "target_decision",
+        "side_effect"
+      ],
+      "title": "L04NetworkPolicyObservationV1",
+      "type": "object"
+    },
+    "L05CriticalDependencyFailureObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "const": "l05_critical_dependency_failure",
+          "default": "l05_critical_dependency_failure",
+          "title": "Variant",
+          "type": "string"
+        },
+        "fault_confirmation": {
+          "$ref": "#/$defs/FaultConfirmation"
+        },
+        "enforcement_outcomes": {
+          "items": {
+            "$ref": "#/$defs/EnforcementOutcomeV1"
+          },
+          "minItems": 1,
+          "title": "Enforcement Outcomes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "fault_confirmation",
+        "enforcement_outcomes"
+      ],
+      "title": "L05CriticalDependencyFailureObservationV1",
+      "type": "object"
+    },
+    "L06RevocationPropagationObservationV2": {
+      "additionalProperties": false,
+      "description": "L06 timing tied to one explicit monotonic revocation epoch.",
+      "properties": {
+        "variant": {
+          "const": "l06_revocation_propagation",
+          "default": "l06_revocation_propagation",
+          "title": "Variant",
+          "type": "string"
+        },
+        "revocation_epoch_monotonic_ns": {
+          "minimum": 0,
+          "title": "Revocation Epoch Monotonic Ns",
+          "type": "integer"
+        },
+        "point_results": {
+          "items": {
+            "$ref": "#/$defs/RevocationPointResultV2"
+          },
+          "minItems": 1,
+          "title": "Point Results",
+          "type": "array"
+        },
+        "timed_attempts": {
+          "items": {
+            "$ref": "#/$defs/TimedAttemptV2"
+          },
+          "minItems": 1,
+          "title": "Timed Attempts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "revocation_epoch_monotonic_ns",
+        "point_results",
+        "timed_attempts"
+      ],
+      "title": "L06RevocationPropagationObservationV2",
+      "type": "object"
+    },
+    "LatencyMeasurementV1": {
+      "additionalProperties": false,
+      "properties": {
+        "measurement_kind": {
+          "const": "latency",
+          "default": "latency",
+          "title": "Measurement Kind",
+          "type": "string"
+        },
+        "statistic": {
+          "$ref": "#/$defs/LatencyStatistic"
+        },
+        "value_ns": {
+          "minimum": 0,
+          "title": "Value Ns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "statistic",
+        "value_ns"
+      ],
+      "title": "LatencyMeasurementV1",
+      "type": "object"
+    },
+    "LatencyStatistic": {
+      "enum": [
+        "p50",
+        "p95",
+        "p99"
+      ],
+      "title": "LatencyStatistic",
+      "type": "string"
+    },
+    "ObservationAttributionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/AttributionKind"
+        },
+        "component_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Component Ids",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "ObservationAttributionV1",
+      "type": "object"
+    },
+    "ObservedDecision": {
+      "enum": [
+        "allow",
+        "deny",
+        "error",
+        "timeout",
+        "unobserved"
+      ],
+      "title": "ObservedDecision",
+      "type": "string"
+    },
+    "ObservedSideEffect": {
+      "enum": [
+        "occurred",
+        "not_observed",
+        "unknown"
+      ],
+      "title": "ObservedSideEffect",
+      "type": "string"
+    },
+    "OperationalCoverageGapV1": {
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "const": "SW-AA-L07",
+          "default": "SW-AA-L07",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "stage_id": {
+          "minLength": 1,
+          "title": "Stage Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "stage_id",
+        "reason"
+      ],
+      "title": "OperationalCoverageGapV1",
+      "type": "object"
+    },
+    "OperationalMeasurementV1": {
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "const": "SW-AA-L07",
+          "default": "SW-AA-L07",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "stage_id": {
+          "minLength": 1,
+          "title": "Stage Id",
+          "type": "string"
+        },
+        "sample_count": {
+          "exclusiveMinimum": 0,
+          "title": "Sample Count",
+          "type": "integer"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "payload": {
+          "discriminator": {
+            "mapping": {
+              "failure_rate": "#/$defs/FailureRateMeasurementV1",
+              "latency": "#/$defs/LatencyMeasurementV1",
+              "throughput": "#/$defs/ThroughputMeasurementV1"
+            },
+            "propertyName": "measurement_kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/LatencyMeasurementV1"
+            },
+            {
+              "$ref": "#/$defs/FailureRateMeasurementV1"
+            },
+            {
+              "$ref": "#/$defs/ThroughputMeasurementV1"
+            }
+          ],
+          "title": "Payload"
+        }
+      },
+      "required": [
+        "stage_id",
+        "sample_count",
+        "evidence_refs",
+        "payload"
+      ],
+      "title": "OperationalMeasurementV1",
+      "type": "object"
+    },
+    "ReachabilityObservation": {
+      "enum": [
+        "blocked",
+        "reachable",
+        "unknown"
+      ],
+      "title": "ReachabilityObservation",
+      "type": "string"
+    },
+    "RedactionStatus": {
+      "enum": [
+        "not_required",
+        "redacted"
+      ],
+      "title": "RedactionStatus",
+      "type": "string"
+    },
+    "RevocationPointResultV2": {
+      "additionalProperties": false,
+      "description": "First observed rejection relative to the revocation issue epoch.",
+      "properties": {
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "ack_offset_ns": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ack Offset Ns"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component_id"
+      ],
+      "title": "RevocationPointResultV2",
+      "type": "object"
+    },
+    "TargetCompatibilityV1": {
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "const": "SW-AA-L08",
+          "default": "SW-AA-L08",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "coverage_key": {
+          "minLength": 1,
+          "title": "Coverage Key",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "target_handle": {
+          "minLength": 1,
+          "title": "Target Handle",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CompatibilityStatus"
+        },
+        "candidate_results": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CapabilityProbeResultV1"
+          },
+          "title": "Candidate Results",
+          "type": "array"
+        },
+        "nondominated_minima": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Nondominated Minima",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "limitation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limitation"
+        }
+      },
+      "required": [
+        "coverage_key",
+        "component_id",
+        "target_handle",
+        "status"
+      ],
+      "title": "TargetCompatibilityV1",
+      "type": "object"
+    },
+    "ThroughputMeasurementV1": {
+      "additionalProperties": false,
+      "properties": {
+        "measurement_kind": {
+          "const": "throughput",
+          "default": "throughput",
+          "title": "Measurement Kind",
+          "type": "string"
+        },
+        "completed_count": {
+          "minimum": 0,
+          "title": "Completed Count",
+          "type": "integer"
+        },
+        "duration_ns": {
+          "exclusiveMinimum": 0,
+          "title": "Duration Ns",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "completed_count",
+        "duration_ns"
+      ],
+      "title": "ThroughputMeasurementV1",
+      "type": "object"
+    },
+    "TimedAttemptV2": {
+      "additionalProperties": false,
+      "description": "Attempt timing signed relative to the revocation issue epoch.",
+      "properties": {
+        "enforcement_point_id": {
+          "minLength": 1,
+          "title": "Enforcement Point Id",
+          "type": "string"
+        },
+        "credential_or_child_handle": {
+          "minLength": 1,
+          "title": "Credential Or Child Handle",
+          "type": "string"
+        },
+        "sent_offset_ns": {
+          "title": "Sent Offset Ns",
+          "type": "integer"
+        },
+        "completed_offset_ns": {
+          "title": "Completed Offset Ns",
+          "type": "integer"
+        },
+        "decision": {
+          "$ref": "#/$defs/ObservedDecision"
+        },
+        "side_effect": {
+          "$ref": "#/$defs/ObservedSideEffect"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "enforcement_point_id",
+        "credential_or_child_handle",
+        "sent_offset_ns",
+        "completed_offset_ns",
+        "decision",
+        "side_effect"
+      ],
+      "title": "TimedAttemptV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Observation document whose L06 offsets are revocation-relative.",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "observations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AgentAuthorityObservationV2"
+      },
+      "title": "Observations",
+      "type": "array"
+    },
+    "dependency_fault_results": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DependencyFaultResultV1"
+      },
+      "title": "Dependency Fault Results",
+      "type": "array"
+    },
+    "operational_measurements": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OperationalMeasurementV1"
+      },
+      "title": "Operational Measurements",
+      "type": "array"
+    },
+    "operational_coverage_gaps": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/OperationalCoverageGapV1"
+      },
+      "title": "Operational Coverage Gaps",
+      "type": "array"
+    },
+    "target_compatibility": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TargetCompatibilityV1"
+      },
+      "title": "Target Compatibility",
+      "type": "array"
+    },
+    "evidence_handles": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EvidenceHandleV1"
+      },
+      "title": "Evidence Handles",
+      "type": "array"
+    },
+    "coverage_limitations": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/CoverageLimitationV1"
+      },
+      "title": "Coverage Limitations",
+      "type": "array"
+    },
+    "limitations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id"
+  ],
+  "title": "AgentAuthorityRunObservationsV2",
+  "type": "object"
+}

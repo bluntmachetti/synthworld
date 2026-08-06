@@ -1,0 +1,415 @@
+{
+  "$defs": {
+    "AuthorizationSourceLayer": {
+      "description": "Whether a component row came from observed or intended policy state.",
+      "enum": [
+        "actual",
+        "intended"
+      ],
+      "title": "AuthorizationSourceLayer",
+      "type": "string"
+    },
+    "MechanismOutcome": {
+      "description": "Native outcome retained before benchmark default-deny normalization.",
+      "enum": [
+        "allow",
+        "deny",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "MechanismOutcome",
+      "type": "string"
+    },
+    "RebacCellTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actual_conflict": {
+          "title": "Actual Conflict",
+          "type": "boolean"
+        },
+        "actual_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "actual_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Path Ids",
+          "type": "array"
+        },
+        "actual_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actual Rule Truth Ids",
+          "type": "array"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "intended_conflict": {
+          "title": "Intended Conflict",
+          "type": "boolean"
+        },
+        "intended_outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "intended_path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Path Ids",
+          "type": "array"
+        },
+        "intended_rule_truth_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Intended Rule Truth Ids",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cell_id",
+        "actual_outcome",
+        "intended_outcome",
+        "actual_conflict",
+        "intended_conflict",
+        "actual_rule_truth_ids",
+        "intended_rule_truth_ids",
+        "actual_path_ids",
+        "intended_path_ids"
+      ],
+      "title": "RebacCellTruthV1",
+      "type": "object"
+    },
+    "RebacPathTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "path_id": {
+          "title": "Path Id",
+          "type": "string"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "template": {
+          "$ref": "#/$defs/RebacTemplateKind"
+        },
+        "tuple_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "title": "Tuple Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "template",
+        "subject_id",
+        "authorization_target_id",
+        "tuple_ids"
+      ],
+      "title": "RebacPathTruthV1",
+      "type": "object"
+    },
+    "RebacRelation": {
+      "enum": [
+        "member_of",
+        "owns",
+        "manages",
+        "collaborates_on"
+      ],
+      "title": "RebacRelation",
+      "type": "string"
+    },
+    "RebacRuleTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "outcome": {
+          "$ref": "#/$defs/MechanismOutcome"
+        },
+        "path_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path Ids",
+          "type": "array"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "template": {
+          "$ref": "#/$defs/RebacTemplateKind"
+        },
+        "truth_id": {
+          "title": "Truth Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "truth_id",
+        "source_layer",
+        "rule_id",
+        "revision_id",
+        "cell_id",
+        "template",
+        "effect",
+        "outcome",
+        "path_ids"
+      ],
+      "title": "RebacRuleTruthV1",
+      "type": "object"
+    },
+    "RebacTemplateKind": {
+      "enum": [
+        "direct_subject_relation",
+        "group_collaboration",
+        "manager_of_owner"
+      ],
+      "title": "RebacTemplateKind",
+      "type": "string"
+    },
+    "RebacTupleTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "object_entity_id": {
+          "title": "Object Entity Id",
+          "type": "string"
+        },
+        "relation": {
+          "$ref": "#/$defs/RebacRelation"
+        },
+        "revision_id": {
+          "title": "Revision Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "source_layer": {
+          "$ref": "#/$defs/AuthorizationSourceLayer"
+        },
+        "subject_entity_id": {
+          "title": "Subject Entity Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tuple_id": {
+          "title": "Tuple Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "tuple_id",
+        "revision_id",
+        "source_layer",
+        "tenant_id",
+        "subject_entity_id",
+        "relation",
+        "object_entity_id",
+        "snapshot_id",
+        "valid_from_tick"
+      ],
+      "title": "RebacTupleTruthV1",
+      "type": "object"
+    },
+    "RuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "RuleEffect",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "cells": {
+      "items": {
+        "$ref": "#/$defs/RebacCellTruthV1"
+      },
+      "title": "Cells",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "paths": {
+      "items": {
+        "$ref": "#/$defs/RebacPathTruthV1"
+      },
+      "title": "Paths",
+      "type": "array"
+    },
+    "rebac_intent_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "rebac_state_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "relation_tuples": {
+      "items": {
+        "$ref": "#/$defs/RebacTupleTruthV1"
+      },
+      "title": "Relation Tuples",
+      "type": "array"
+    },
+    "rule_truth": {
+      "items": {
+        "$ref": "#/$defs/RebacRuleTruthV1"
+      },
+      "title": "Rule Truth",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "rebac_state_digest",
+    "rebac_intent_digest",
+    "relation_tuples",
+    "paths",
+    "rule_truth",
+    "cells"
+  ],
+  "title": "CompiledEnterpriseRebacTruthV1",
+  "type": "object"
+}

@@ -1,0 +1,137 @@
+{
+  "$defs": {
+    "EnterpriseAuthorizationMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "empty_behaviour": {
+          "$ref": "#/$defs/MetricEmptyBehaviour"
+        },
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "family",
+        "name",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning",
+        "empty_behaviour",
+        "value"
+      ],
+      "title": "EnterpriseAuthorizationMetricV1",
+      "type": "object"
+    },
+    "MetricEmptyBehaviour": {
+      "enum": [
+        "nonempty",
+        "null_if_empty"
+      ],
+      "title": "MetricEmptyBehaviour",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+      },
+      "title": "Metrics",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "support_matrix_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "support_matrix_digest",
+    "metrics"
+  ],
+  "title": "ProjectionFidelityMetricsV1",
+  "type": "object"
+}

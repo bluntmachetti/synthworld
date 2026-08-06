@@ -1,0 +1,101 @@
+x-service: &service
+  image: python@sha256:d764629ce0ddd8c71fd371e9901efb324a95789d2315a47db7e4d27e78f1b0e9
+  read_only: true
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp:size=16m,mode=1777
+  volumes:
+    - ./service.py:/lab/service.py:ro,z
+  restart: "no"
+
+services:
+  agent:
+    <<: *service
+    command: ["python", "/lab/service.py", "idle"]
+    networks: [agent]
+    secrets: [runtime_canary]
+
+  controller:
+    <<: *service
+    command: ["python", "/lab/service.py", "idle"]
+    networks: [agent, authority]
+    volumes:
+      - ./service.py:/lab/service.py:ro,z
+      - lab-state:/lab-state
+
+  credential:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "credential"]
+    networks: [authority]
+    volumes:
+      - ./service.py:/lab/service.py:ro,z
+      - runtime-secrets:/runtime-secrets
+
+  policy:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "policy"]
+    networks: [authority]
+
+  audit:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "audit"]
+    networks: [authority]
+
+  gateway-a:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "gateway"]
+    environment:
+      COMPONENT_ID: component-gateway-a
+    networks: [agent, authority, protected]
+    volumes:
+      - ./service.py:/lab/service.py:ro,z
+      - runtime-secrets:/runtime-secrets:ro
+
+  gateway-b:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "gateway"]
+    environment:
+      COMPONENT_ID: component-gateway-b
+    networks: [agent, authority, protected]
+    volumes:
+      - ./service.py:/lab/service.py:ro,z
+      - runtime-secrets:/runtime-secrets:ro
+
+  baseline:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "baseline"]
+    networks: [agent, protected]
+
+  target:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "target"]
+    networks: [protected]
+    volumes:
+      - ./service.py:/lab/service.py:ro,z
+      - lab-state:/lab-state
+
+  forbidden-target:
+    <<: *service
+    command: ["python", "/lab/service.py", "serve", "forbidden"]
+    networks: [forbidden]
+
+networks:
+  agent:
+    internal: true
+  authority:
+    internal: true
+  protected:
+    internal: true
+  forbidden:
+    internal: true
+
+volumes:
+  runtime-secrets:
+  lab-state:
+
+secrets:
+  runtime_canary:
+    file: ${SW_LAB_CANARY_FILE:?set SW_LAB_CANARY_FILE to a per-run secret file}

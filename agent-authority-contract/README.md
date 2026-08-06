@@ -4,9 +4,10 @@ The external contract for evaluating agent-authority systems against SynthWorld
 worlds: what can be tested, what a system under test must emit, and what a result
 must record to be reproducible.
 
-This directory is **documentation and data only**. Nothing here is imported by
-the `synthworld` package, and no runtime dependency is added by it — the YAML is
-read by people and by external tooling, not by the library.
+This directory is the external contract and its opt-in tooling. Nothing here is
+imported by the `synthworld` package and no runtime dependency is added to the
+library. The disposable reference deployment is an external Docker harness,
+while the YAML and schemas remain human- and tool-readable contract artifacts.
 
 ## Status
 
@@ -18,11 +19,19 @@ remaining docs are the two narrative files listed below.
 | `control-catalogue.yaml` | Draft `0.2.0-draft` — revised after adversarial review; statuses re-graded, two controls added, mappings downgraded |
 | `schemas/observed-action-trace.schema.json` | Generated from the model |
 | `schemas/agentic-trace-submission.schema.json` | Generated from the model |
-| `schemas/run-manifest.schema.json` | Draft `0.1.0-draft` — hand-authored proposal |
+| `schemas/agent-authority-run-plan.schema.json` | Generated executable preflight contract v1 |
+| `schemas/agent-authority-observations.schema.json` | Frozen generated post-execution evidence contract v1 |
+| `schemas/agent-authority-observations-v2.schema.json` | Generated observation v2 with signed, revocation-relative L06 timing |
+| `schemas/run-receipt-manifest-v2.schema.json` | Generated generic receipt v2 contract |
+| `schemas/run-manifest.schema.json` | Superseded `0.1.0-draft`, retained only for migration identification |
 | `tools/generate_trace_schema.py` | Working; `--check` drift gate runs in `make ci` |
+| `tools/generate_protocol_schemas.py` | Working; `--check` drift gate runs in `make ci` |
 | `synthworld validate agentic-trace` | Shipped — validates a submission with no answer-key access |
+| `synthworld validate agent-authority-run-plan` | Shipped — validates immutable pre-execution input |
+| `synthworld validate agent-authority-receipt` | Shipped — validates the complete digest-bound receipt |
 | `examples/` (design-intent traces) | Generated for three pattern classes |
 | `adapter-template/` | Working; runs and produces a valid trace as shipped |
+| `reference-deployment/` | Working opt-in live Compose lab; observation v2, full L01-L06, exact L07, measured/unsupported L08 |
 | `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
@@ -38,6 +47,8 @@ definition — where the two disagree the model is right and the schema is stale
 ```bash
 uv run python agent-authority-contract/tools/generate_trace_schema.py
 uv run python agent-authority-contract/tools/generate_trace_schema.py --check   # CI gate
+uv run python agent-authority-contract/tools/generate_protocol_schemas.py
+uv run python agent-authority-contract/tools/generate_protocol_schemas.py --check
 ```
 
 `--check` exits non-zero when a committed schema no longer matches the model. It runs
@@ -45,27 +56,85 @@ as the `schemas` target in `make ci`, so a model change that is not reflected he
 fails the build — drift between a published contract and the scorer that enforces it
 is worth a CI job.
 
-**The run manifest is hand-authored** because no model defines it yet. It is the
-component of this package that makes *findings* reproducible rather than merely
-making *fixtures* reproducible — a distinction worth being explicit about, since a
-seeded world and a checksum already give you the latter. A claim like "revocation did
-not propagate" is a claim about a named system at a version under a configuration on
-a topology, and none of that is recoverable from the benchmark artifacts.
+**The hand-authored run-manifest draft is superseded.** It remains at its original
+filename and meaning; it was not silently turned into a different schema. Current
+runs use one generic receipt lineage: frozen receipt v1 for existing ambiguity runs,
+and explicit receipt v2 for composed/self-hosted/managed systems. Agent-authority
+fields live in separate generated pre-execution run-plan and post-execution
+observation schemas.
 
-Three design choices in it are deliberate:
+Observation v2 is a narrow L06 correction. Run plan, stimulus, truth, report, and
+generic receipt schemas remain unchanged. V2 renames the L06 epoch to
+`revocation_epoch_monotonic_ns`; acknowledgement, send, and completion fields are
+offsets from that one epoch. Attempt offsets are signed, acknowledgements are
+non-negative, and completion cannot precede send. The receipt binds observation v1
+to scoring formula `1.0.0` and observation v2 to scoring formula `2.0.0`.
 
-- **`systems_under_test` is an array.** Every component in the authority path is
-  recorded separately, so a finding can be attributed to one of them — or explicitly
-  marked ambiguous. Attributing to a gateway something that originated in its
-  authorization server is the most common way a report becomes unfair.
-- **Lab runs must declare topology.** JSON Schema conditionals enforce it: a manifest
-  with `run_layer: lab` and no `topology` or `authority_critical_dependencies` fails
-  validation. A bypass or fail-closed finding is uninterpretable without reachability
-  declared, so this is a schema rule rather than a convention.
-- **Bounds and conflicts are declared up front.** `declared_bounds` exists so a
-  latency threshold is fixed before measurement, and
-  `authored_by_benchmark_maintainer` plus `conflicts_declared` record the things a
-  reader would otherwise have to discover.
+Do not mechanically relabel an observation-v1 document as v2. V1 records a
+`revocation_epoch_ns`, but its non-negative attempt values were compared directly
+with the bound without subtracting that epoch. Stored rows therefore do not prove
+whether their elapsed values were run-relative or revocation-relative. New live L06
+runs must use v2; existing v1 receipts remain loadable and replay under their frozen
+semantics. See `docs/observation-v2-migration.md`.
+
+The executable builder writes and validates `context/run-plan.json` before calling
+an adapter or product. It then binds the plan, stimulus set, exact product input,
+raw product output, observations, evaluator truth, and independent report metrics.
+Every authority-path component, enforcement point, critical dependency, fault
+target, performance baseline, and compatibility target must resolve before
+execution. Bounds and coverage denominators therefore cannot be invented after a
+result is visible.
+
+Live runners may split this into two explicit phases: execute the preflight-bound
+product stage first, then construct completion metadata and call the receipt
+finalizer. The finalizer replays every public artifact and execution binding before
+it loads evaluator truth. This prevents a live run from declaring a completion
+timestamp before the external deployment has actually finished.
+
+Receipt v2 distinguishes self-hosted, reference, and managed-service provenance.
+Managed services explicitly say whether configuration and version data is observed,
+partial, or not exposed; missing SaaS internals are never represented by fabricated
+digests. Real plans, provenance, and observations deliberately omit
+`synthetic: true`. Generated stimuli, fictional secret handles, truth, and reports
+retain the recursive marker.
+
+Receipt v1 remains byte-compatible. Its recursive `synthetic: true` on adapter/SUT
+provenance is a frozen semantic defect: consumers must not interpret that v1 marker
+as claiming the observed product or execution was fictional. Receipt v2 corrects
+the boundary without changing v1. The v2-only `live_lab_conformance` claim is
+invalid under v1.
+
+Frozen Asteria JSON is pretty-printed and its event streams are JSON Lines. When
+those bytes are inventoried they are `RAW_BYTES`, never mislabeled as canonical JSON.
+
+The old draft maps without overloading fields: artifact checksums and run/build
+metadata move to receipt v2; systems move to the discriminated provenance tuple;
+deployment declarations, bounds, coverage, review, and conflicts move to the run
+plan; measured evidence, gaps, and limitations move to observations. See
+`schemas/README.md` for the deprecation rule.
+
+PR1 declares only typed L06 revocation-propagation bounds. Decision-latency and
+recovery-time thresholds are deferred until a later contract can bind each one to a
+named stage or fault consumer; orphan thresholds are not accepted. For L08, a
+conclusive obtained/rejected candidate mix is a measured probe, while any failed or
+unobserved candidate makes the record incomplete. L07 gap reasons remain non-empty
+free text because they describe environment-specific evidence limitations; the gap
+status and denominator are closed and validated separately.
+
+An emitted L06 observation is structurally required to contain post-bound traffic,
+so its false-allow denominator cannot be empty. If the complete L06 observation is
+absent, the finding is `not_executed` and that metric alone uses the explicit
+`null_if_empty` state rather than treating missing evidence as a zero false-allow
+rate. Under observation v2, an attempt is post-bound exactly when
+`sent_offset_ns > bound_ns`; negative offsets preserve attempts that were already in
+flight when revocation was issued without misclassifying them as post-bound sends.
+
+The SynthWorld package supplies contracts and deterministic fake protocol fixtures;
+it performs no vendor API calls. The opt-in `reference-deployment/` harness remains
+outside package core and proves only its own live protocol execution. Vendor adapters
+still own credentials, tenant configuration, fault injection, and evidence collection.
+The deterministic fake fixture exercises every L01–L08 record shape but makes no
+live-control or vendor-performance claim.
 
 ### `format` is decorative — read this before trusting a validator
 

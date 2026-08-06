@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-report.schema.json",
+  "x-generated-from": "synthworld.contextual_access.protocol.ContextualAccessReportV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "ContextualControlId": {
+      "enum": [
+        "SW-CA-C01",
+        "SW-CA-C02",
+        "SW-CA-C03",
+        "SW-CA-C04",
+        "SW-CA-C05",
+        "SW-CA-C06"
+      ],
+      "title": "ContextualControlId",
+      "type": "string"
+    },
+    "ContextualProtocolFindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "probe_id": {
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "control_id": {
+          "$ref": "#/$defs/ContextualControlId"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "right_censored": {
+          "default": false,
+          "title": "Right Censored",
+          "type": "boolean"
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure Code"
+        }
+      },
+      "required": [
+        "probe_id",
+        "control_id",
+        "passed"
+      ],
+      "title": "ContextualProtocolFindingV1",
+      "type": "object"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "EnterpriseAuthorizationMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "empty_behaviour": {
+          "$ref": "#/$defs/MetricEmptyBehaviour"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "family",
+        "name",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning",
+        "empty_behaviour",
+        "value"
+      ],
+      "title": "EnterpriseAuthorizationMetricV1",
+      "type": "object"
+    },
+    "MetricEmptyBehaviour": {
+      "enum": [
+        "nonempty",
+        "null_if_empty"
+      ],
+      "title": "MetricEmptyBehaviour",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "truth_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/ContextualProtocolFindingV1"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+      },
+      "title": "Metrics",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "truth_digest",
+    "findings",
+    "metrics"
+  ],
+  "title": "ContextualAccessReportV1",
+  "type": "object"
+}

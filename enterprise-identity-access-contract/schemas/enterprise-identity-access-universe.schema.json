@@ -1,0 +1,668 @@
+{
+  "$defs": {
+    "AccessAtomV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_atom_id": {
+          "title": "Access Atom Id",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "access_atom_id",
+        "subject_id",
+        "authorization_target_id",
+        "action"
+      ],
+      "title": "AccessAtomV1",
+      "type": "object"
+    },
+    "AccessSubjectKind": {
+      "enum": [
+        "principal",
+        "account"
+      ],
+      "title": "AccessSubjectKind",
+      "type": "string"
+    },
+    "AccountKind": {
+      "enum": [
+        "workforce",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "AccountKind",
+      "type": "string"
+    },
+    "EnterpriseAccessSubjectV1": {
+      "additionalProperties": false,
+      "properties": {
+        "subject_id": {
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "subject_kind": {
+          "$ref": "#/$defs/AccessSubjectKind"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id",
+        "tenant_id",
+        "subject_kind"
+      ],
+      "title": "EnterpriseAccessSubjectV1",
+      "type": "object"
+    },
+    "EnterpriseAccountV1": {
+      "additionalProperties": false,
+      "properties": {
+        "account_id": {
+          "title": "Account Id",
+          "type": "string"
+        },
+        "account_kind": {
+          "$ref": "#/$defs/AccountKind"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "account_id",
+        "tenant_id",
+        "authorization_target_id",
+        "account_kind",
+        "display_label"
+      ],
+      "title": "EnterpriseAccountV1",
+      "type": "object"
+    },
+    "EnterpriseAuthorizationTargetV1": {
+      "additionalProperties": false,
+      "properties": {
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Actions",
+          "type": "array"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "owner_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner Unit Id"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/TargetKind"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authorization_target_id",
+        "tenant_id",
+        "organisation_id",
+        "target_kind",
+        "owner_unit_id",
+        "actions",
+        "display_label"
+      ],
+      "title": "EnterpriseAuthorizationTargetV1",
+      "type": "object"
+    },
+    "EnterpriseGroupV1": {
+      "additionalProperties": false,
+      "properties": {
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "group_id": {
+          "title": "Group Id",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "owner_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner Unit Id"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_id",
+        "tenant_id",
+        "organisation_id",
+        "owner_unit_id",
+        "display_label"
+      ],
+      "title": "EnterpriseGroupV1",
+      "type": "object"
+    },
+    "EnterpriseOrganisationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "organisation_id",
+        "tenant_id",
+        "display_label"
+      ],
+      "title": "EnterpriseOrganisationV1",
+      "type": "object"
+    },
+    "EnterprisePermissionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "authorization_target_id": {
+          "title": "Authorization Target Id",
+          "type": "string"
+        },
+        "permission_id": {
+          "title": "Permission Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "permission_id",
+        "authorization_target_id",
+        "action"
+      ],
+      "title": "EnterprisePermissionV1",
+      "type": "object"
+    },
+    "EnterprisePrincipalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "principal_id": {
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "principal_kind": {
+          "$ref": "#/$defs/PrincipalKind"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "unit_id": {
+          "title": "Unit Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "principal_id",
+        "tenant_id",
+        "organisation_id",
+        "unit_id",
+        "principal_kind",
+        "display_label"
+      ],
+      "title": "EnterprisePrincipalV1",
+      "type": "object"
+    },
+    "EnterpriseRelationshipAnchorV1": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor_id": {
+          "title": "Anchor Id",
+          "type": "string"
+        },
+        "entity_id": {
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "entity_kind": {
+          "$ref": "#/$defs/RelationshipAnchorKind"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "anchor_id",
+        "tenant_id",
+        "entity_kind",
+        "entity_id"
+      ],
+      "title": "EnterpriseRelationshipAnchorV1",
+      "type": "object"
+    },
+    "EnterpriseRoleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "owner_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Owner Unit Id"
+        },
+        "role_id": {
+          "title": "Role Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "tenant_id",
+        "organisation_id",
+        "owner_unit_id",
+        "display_label"
+      ],
+      "title": "EnterpriseRoleV1",
+      "type": "object"
+    },
+    "EnterpriseTenantV1": {
+      "additionalProperties": false,
+      "properties": {
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "display_label"
+      ],
+      "title": "EnterpriseTenantV1",
+      "type": "object"
+    },
+    "EnterpriseUnitV1": {
+      "additionalProperties": false,
+      "properties": {
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "organisation_id": {
+          "title": "Organisation Id",
+          "type": "string"
+        },
+        "parent_unit_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Parent Unit Id"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "unit_id": {
+          "title": "Unit Id",
+          "type": "string"
+        },
+        "unit_kind": {
+          "$ref": "#/$defs/UnitKind"
+        }
+      },
+      "required": [
+        "unit_id",
+        "tenant_id",
+        "organisation_id",
+        "unit_kind",
+        "parent_unit_id",
+        "display_label"
+      ],
+      "title": "EnterpriseUnitV1",
+      "type": "object"
+    },
+    "PrincipalKind": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "RelationshipAnchorKind": {
+      "enum": [
+        "principal",
+        "account",
+        "group",
+        "unit",
+        "authorization_target"
+      ],
+      "title": "RelationshipAnchorKind",
+      "type": "string"
+    },
+    "TargetKind": {
+      "enum": [
+        "application",
+        "api",
+        "tool",
+        "data_store",
+        "environment"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    },
+    "UnitKind": {
+      "enum": [
+        "division",
+        "department",
+        "team"
+      ],
+      "title": "UnitKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "access_atoms": {
+      "items": {
+        "$ref": "#/$defs/AccessAtomV1"
+      },
+      "title": "Access Atoms",
+      "type": "array"
+    },
+    "access_subjects": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAccessSubjectV1"
+      },
+      "title": "Access Subjects",
+      "type": "array"
+    },
+    "accounts": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAccountV1"
+      },
+      "title": "Accounts",
+      "type": "array"
+    },
+    "authorization_targets": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationTargetV1"
+      },
+      "title": "Authorization Targets",
+      "type": "array"
+    },
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "groups": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseGroupV1"
+      },
+      "title": "Groups",
+      "type": "array"
+    },
+    "organisations": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseOrganisationV1"
+      },
+      "title": "Organisations",
+      "type": "array"
+    },
+    "permissions": {
+      "items": {
+        "$ref": "#/$defs/EnterprisePermissionV1"
+      },
+      "title": "Permissions",
+      "type": "array"
+    },
+    "principals": {
+      "items": {
+        "$ref": "#/$defs/EnterprisePrincipalV1"
+      },
+      "title": "Principals",
+      "type": "array"
+    },
+    "relationship_anchors": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseRelationshipAnchorV1"
+      },
+      "title": "Relationship Anchors",
+      "type": "array"
+    },
+    "roles": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseRoleV1"
+      },
+      "title": "Roles",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "selector_algorithm_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Selector Algorithm Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "tenants": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseTenantV1"
+      },
+      "title": "Tenants",
+      "type": "array"
+    },
+    "units": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseUnitV1"
+      },
+      "title": "Units",
+      "type": "array"
+    }
+  },
+  "required": [
+    "seed",
+    "tenants",
+    "organisations",
+    "units",
+    "principals",
+    "accounts",
+    "access_subjects",
+    "groups",
+    "roles",
+    "authorization_targets",
+    "permissions",
+    "relationship_anchors",
+    "access_atoms"
+  ],
+  "title": "EnterpriseIdentityAccessUniverseV1",
+  "type": "object"
+}

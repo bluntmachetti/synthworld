@@ -1,0 +1,690 @@
+{
+  "$defs": {
+    "AccountKind": {
+      "enum": [
+        "workforce",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "AccountKind",
+      "type": "string"
+    },
+    "AccountKindIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "account_kind_is",
+          "default": "account_kind_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/AccountKind"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "AccountKindIsV1",
+      "type": "object"
+    },
+    "ApprovedAccessExceptionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_atom_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Access Atom Ids",
+          "type": "array"
+        },
+        "exception_id": {
+          "title": "Exception Id",
+          "type": "string"
+        },
+        "owner_principal_id": {
+          "minLength": 1,
+          "title": "Owner Principal Id",
+          "type": "string"
+        },
+        "reason": {
+          "$ref": "#/$defs/ApprovedExceptionReason"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid Until Tick"
+        }
+      },
+      "required": [
+        "exception_id",
+        "subject_id",
+        "access_atom_ids",
+        "owner_principal_id",
+        "reason",
+        "valid_from_tick"
+      ],
+      "title": "ApprovedAccessExceptionV1",
+      "type": "object"
+    },
+    "ApprovedExceptionReason": {
+      "enum": [
+        "business_need",
+        "emergency",
+        "migration",
+        "remediation_pending"
+      ],
+      "title": "ApprovedExceptionReason",
+      "type": "string"
+    },
+    "AssignmentTargetKind": {
+      "enum": [
+        "group",
+        "role",
+        "permission"
+      ],
+      "title": "AssignmentTargetKind",
+      "type": "string"
+    },
+    "BirthrightAssignmentV1": {
+      "additionalProperties": false,
+      "properties": {
+        "access_atom_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Access Atom Ids",
+          "type": "array"
+        },
+        "assignment_id": {
+          "title": "Assignment Id",
+          "type": "string"
+        },
+        "target_id": {
+          "minLength": 1,
+          "title": "Target Id",
+          "type": "string"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/AssignmentTargetKind"
+        }
+      },
+      "required": [
+        "assignment_id",
+        "target_kind",
+        "target_id",
+        "access_atom_ids"
+      ],
+      "title": "BirthrightAssignmentV1",
+      "type": "object"
+    },
+    "BirthrightConditionOperator": {
+      "enum": [
+        "all",
+        "any"
+      ],
+      "title": "BirthrightConditionOperator",
+      "type": "string"
+    },
+    "BirthrightConditionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "operator": {
+          "$ref": "#/$defs/BirthrightConditionOperator"
+        },
+        "predicates": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "account_kind_is": "#/$defs/AccountKindIsV1",
+                "employment_type_is": "#/$defs/EmploymentTypeIsV1",
+                "principal_kind_is": "#/$defs/PrincipalKindIsV1",
+                "tenant_is": "#/$defs/TenantIsV1",
+                "unit_is": "#/$defs/UnitIsV1"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/PrincipalKindIsV1"
+              },
+              {
+                "$ref": "#/$defs/EmploymentTypeIsV1"
+              },
+              {
+                "$ref": "#/$defs/TenantIsV1"
+              },
+              {
+                "$ref": "#/$defs/UnitIsV1"
+              },
+              {
+                "$ref": "#/$defs/AccountKindIsV1"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Predicates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "operator",
+        "predicates"
+      ],
+      "title": "BirthrightConditionV1",
+      "type": "object"
+    },
+    "BirthrightRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "assignments": {
+          "items": {
+            "$ref": "#/$defs/BirthrightAssignmentV1"
+          },
+          "minItems": 1,
+          "title": "Assignments",
+          "type": "array"
+        },
+        "condition": {
+          "$ref": "#/$defs/BirthrightConditionV1"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "condition",
+        "assignments"
+      ],
+      "title": "BirthrightRuleV1",
+      "type": "object"
+    },
+    "DynamicSodConstraintV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cardinality": {
+          "minimum": 2,
+          "title": "Cardinality",
+          "type": "integer"
+        },
+        "constraint_id": {
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Role Ids",
+          "type": "array"
+        },
+        "subject_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Subject Ids",
+          "type": "array"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "tenant_id",
+        "role_ids",
+        "cardinality"
+      ],
+      "title": "DynamicSodConstraintV1",
+      "type": "object"
+    },
+    "EmploymentType": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner"
+      ],
+      "title": "EmploymentType",
+      "type": "string"
+    },
+    "EmploymentTypeIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "employment_type_is",
+          "default": "employment_type_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/EmploymentType"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "EmploymentTypeIsV1",
+      "type": "object"
+    },
+    "IntendedGroupNestingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "child_group_id": {
+          "minLength": 1,
+          "title": "Child Group Id",
+          "type": "string"
+        },
+        "parent_group_id": {
+          "minLength": 1,
+          "title": "Parent Group Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "child_group_id",
+        "parent_group_id"
+      ],
+      "title": "IntendedGroupNestingV1",
+      "type": "object"
+    },
+    "IntendedGroupRoleAssignmentV1": {
+      "additionalProperties": false,
+      "properties": {
+        "group_id": {
+          "minLength": 1,
+          "title": "Group Id",
+          "type": "string"
+        },
+        "role_id": {
+          "minLength": 1,
+          "title": "Role Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "group_id",
+        "role_id"
+      ],
+      "title": "IntendedGroupRoleAssignmentV1",
+      "type": "object"
+    },
+    "IntendedRoleGrantV1": {
+      "additionalProperties": false,
+      "properties": {
+        "permission_id": {
+          "minLength": 1,
+          "title": "Permission Id",
+          "type": "string"
+        },
+        "role_id": {
+          "minLength": 1,
+          "title": "Role Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role_id",
+        "permission_id"
+      ],
+      "title": "IntendedRoleGrantV1",
+      "type": "object"
+    },
+    "IntendedRoleHierarchyV1": {
+      "additionalProperties": false,
+      "properties": {
+        "junior_role_id": {
+          "minLength": 1,
+          "title": "Junior Role Id",
+          "type": "string"
+        },
+        "senior_role_id": {
+          "minLength": 1,
+          "title": "Senior Role Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "senior_role_id",
+        "junior_role_id"
+      ],
+      "title": "IntendedRoleHierarchyV1",
+      "type": "object"
+    },
+    "IntendedSubjectGroupMembershipV1": {
+      "additionalProperties": false,
+      "properties": {
+        "group_id": {
+          "minLength": 1,
+          "title": "Group Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id",
+        "group_id"
+      ],
+      "title": "IntendedSubjectGroupMembershipV1",
+      "type": "object"
+    },
+    "IntendedSubjectRoleAssignmentV1": {
+      "additionalProperties": false,
+      "properties": {
+        "role_id": {
+          "minLength": 1,
+          "title": "Role Id",
+          "type": "string"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id",
+        "role_id"
+      ],
+      "title": "IntendedSubjectRoleAssignmentV1",
+      "type": "object"
+    },
+    "PrincipalKind": {
+      "enum": [
+        "employee",
+        "contractor",
+        "supplier",
+        "partner",
+        "service",
+        "workload",
+        "agent"
+      ],
+      "title": "PrincipalKind",
+      "type": "string"
+    },
+    "PrincipalKindIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "principal_kind_is",
+          "default": "principal_kind_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/PrincipalKind"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "title": "PrincipalKindIsV1",
+      "type": "object"
+    },
+    "StaticSodConstraintV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cardinality": {
+          "minimum": 2,
+          "title": "Cardinality",
+          "type": "integer"
+        },
+        "constraint_id": {
+          "title": "Constraint Id",
+          "type": "string"
+        },
+        "role_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Role Ids",
+          "type": "array"
+        },
+        "subject_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Subject Ids",
+          "type": "array"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "constraint_id",
+        "tenant_id",
+        "role_ids",
+        "cardinality"
+      ],
+      "title": "StaticSodConstraintV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    },
+    "TenantIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "tenant_is",
+          "default": "tenant_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "tenant_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Tenant Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "tenant_ids"
+      ],
+      "title": "TenantIsV1",
+      "type": "object"
+    },
+    "UnitIsV1": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "unit_is",
+          "default": "unit_is",
+          "title": "Kind",
+          "type": "string"
+        },
+        "unit_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Unit Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "unit_ids"
+      ],
+      "title": "UnitIsV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "approved_exceptions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ApprovedAccessExceptionV1"
+      },
+      "title": "Approved Exceptions",
+      "type": "array"
+    },
+    "birthright_rules": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/BirthrightRuleV1"
+      },
+      "title": "Birthright Rules",
+      "type": "array"
+    },
+    "dsd_constraints": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DynamicSodConstraintV1"
+      },
+      "title": "Dsd Constraints",
+      "type": "array"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "intended_group_nesting": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IntendedGroupNestingV1"
+      },
+      "title": "Intended Group Nesting",
+      "type": "array"
+    },
+    "intended_group_role_assignments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IntendedGroupRoleAssignmentV1"
+      },
+      "title": "Intended Group Role Assignments",
+      "type": "array"
+    },
+    "intended_memberships": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IntendedSubjectGroupMembershipV1"
+      },
+      "title": "Intended Memberships",
+      "type": "array"
+    },
+    "intended_role_grants": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IntendedRoleGrantV1"
+      },
+      "title": "Intended Role Grants",
+      "type": "array"
+    },
+    "intended_role_hierarchy": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IntendedRoleHierarchyV1"
+      },
+      "title": "Intended Role Hierarchy",
+      "type": "array"
+    },
+    "intended_subject_role_assignments": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/IntendedSubjectRoleAssignmentV1"
+      },
+      "title": "Intended Subject Role Assignments",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "ssd_constraints": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/StaticSodConstraintV1"
+      },
+      "title": "Ssd Constraints",
+      "type": "array"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest"
+  ],
+  "title": "EnterpriseDirectoryRbacIntentOverlayV1",
+  "type": "object"
+}

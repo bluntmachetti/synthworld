@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-shared-signals-projection.schema.json",
+  "x-generated-from": "synthworld.contextual_access.shared_signals.ContextualSharedSignalsProjectionV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "ContextualFactKind": {
+      "enum": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "title": "ContextualFactKind",
+      "type": "string"
+    },
+    "ContextualSharedSignalsEventV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "default": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "profile_version": {
+          "const": "synthworld-contextual-shared-signals-1.0.0",
+          "default": "synthworld-contextual-shared-signals-1.0.0",
+          "title": "Profile Version",
+          "type": "string"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_index": {
+          "minimum": 0,
+          "title": "Event Index",
+          "type": "integer"
+        },
+        "payload_family": {
+          "const": "contextual_access_1_0",
+          "default": "contextual_access_1_0",
+          "title": "Payload Family",
+          "type": "string"
+        },
+        "native_fact_type": {
+          "$ref": "#/$defs/ContextualFactKind"
+        },
+        "subject_id": {
+          "minLength": 1,
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "custom_event_type": {
+          "minLength": 1,
+          "title": "Custom Event Type",
+          "type": "string"
+        },
+        "standardized_caep_event_type": {
+          "default": null,
+          "title": "Standardized Caep Event Type",
+          "type": "null"
+        },
+        "effective_tick": {
+          "minimum": 0,
+          "title": "Effective Tick",
+          "type": "integer"
+        },
+        "projected_event_tick": {
+          "minimum": 0,
+          "title": "Projected Event Tick",
+          "type": "integer"
+        },
+        "payload_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Payload Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_id",
+        "event_index",
+        "native_fact_type",
+        "subject_id",
+        "custom_event_type",
+        "effective_tick",
+        "projected_event_tick",
+        "payload_sha256"
+      ],
+      "title": "ContextualSharedSignalsEventV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_version": {
+      "const": "synthworld-contextual-shared-signals-1.0.0",
+      "default": "synthworld-contextual-shared-signals-1.0.0",
+      "title": "Profile Version",
+      "type": "string"
+    },
+    "selected_temporal_base": {
+      "const": "synthworld-temporal-1.2.0",
+      "default": "synthworld-temporal-1.2.0",
+      "title": "Selected Temporal Base",
+      "type": "string"
+    },
+    "source_public_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "mapping_profile_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "event_schedule_version": {
+      "minLength": 1,
+      "title": "Event Schedule Version",
+      "type": "string"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/ContextualSharedSignalsEventV1"
+      },
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "source_public_digest",
+    "mapping_profile_digest",
+    "event_schedule_version",
+    "events"
+  ],
+  "title": "ContextualSharedSignalsProjectionV1",
+  "type": "object"
+}

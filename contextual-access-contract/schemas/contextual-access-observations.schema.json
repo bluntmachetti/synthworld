@@ -1,0 +1,665 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-access-observations.schema.json",
+  "x-generated-from": "synthworld.contextual_access.protocol.ContextualAccessObservationsV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "AccessDecisionObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "observation_type": {
+          "const": "access_decision",
+          "default": "access_decision",
+          "title": "Observation Type",
+          "type": "string"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "trigger_event_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trigger Event Id"
+        },
+        "accepted_delivery_attempt_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Delivery Attempt Id"
+        },
+        "policy_version_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Policy Version Ids",
+          "type": "array"
+        },
+        "attempts": {
+          "items": {
+            "$ref": "#/$defs/ContextualDecisionAttemptV1"
+          },
+          "minItems": 1,
+          "title": "Attempts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "observation_id",
+        "probe_id",
+        "component_id",
+        "evidence_refs",
+        "request_id",
+        "policy_version_ids",
+        "attempts"
+      ],
+      "title": "AccessDecisionObservationV1",
+      "type": "object"
+    },
+    "CollectionStatus": {
+      "enum": [
+        "collected",
+        "unavailable",
+        "failed"
+      ],
+      "title": "CollectionStatus",
+      "type": "string"
+    },
+    "ContextDeliveryAcceptanceObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "observation_type": {
+          "const": "delivery_acceptance",
+          "default": "delivery_acceptance",
+          "title": "Observation Type",
+          "type": "string"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "delivery_attempt_id": {
+          "minLength": 1,
+          "title": "Delivery Attempt Id",
+          "type": "string"
+        },
+        "projected_event_tick": {
+          "minimum": 0,
+          "title": "Projected Event Tick",
+          "type": "integer"
+        },
+        "set_issue_tick": {
+          "minimum": 0,
+          "title": "Set Issue Tick",
+          "type": "integer"
+        },
+        "observed_delivery_tick": {
+          "minimum": 0,
+          "title": "Observed Delivery Tick",
+          "type": "integer"
+        },
+        "accepted": {
+          "title": "Accepted",
+          "type": "boolean"
+        },
+        "acceptance_elapsed_ns": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Acceptance Elapsed Ns"
+        }
+      },
+      "required": [
+        "observation_id",
+        "probe_id",
+        "component_id",
+        "evidence_refs",
+        "event_id",
+        "delivery_attempt_id",
+        "projected_event_tick",
+        "set_issue_tick",
+        "observed_delivery_tick",
+        "accepted"
+      ],
+      "title": "ContextDeliveryAcceptanceObservationV1",
+      "type": "object"
+    },
+    "ContextualDecisionAttemptV1": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_tick": {
+          "minimum": 0,
+          "title": "Decision Tick",
+          "type": "integer"
+        },
+        "decision": {
+          "$ref": "#/$defs/ObservedDecision"
+        },
+        "elapsed_ns_from_acceptance": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Elapsed Ns From Acceptance"
+        }
+      },
+      "required": [
+        "decision_tick",
+        "decision"
+      ],
+      "title": "ContextualDecisionAttemptV1",
+      "type": "object"
+    },
+    "ContextualFactKind": {
+      "enum": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "title": "ContextualFactKind",
+      "type": "string"
+    },
+    "ContextualMappingKind": {
+      "enum": [
+        "subject_attribute",
+        "resource_attribute",
+        "action_attribute",
+        "environment_attribute",
+        "relationship_predicate"
+      ],
+      "title": "ContextualMappingKind",
+      "type": "string"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "EvidenceCorrelationObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "observation_type": {
+          "const": "evidence_correlation",
+          "default": "evidence_correlation",
+          "title": "Observation Type",
+          "type": "string"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "evidence_kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "correlated": {
+          "title": "Correlated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "observation_id",
+        "probe_id",
+        "component_id",
+        "evidence_refs",
+        "request_id",
+        "evidence_kind",
+        "correlated"
+      ],
+      "title": "EvidenceCorrelationObservationV1",
+      "type": "object"
+    },
+    "EvidenceHandleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "handle": {
+          "minLength": 1,
+          "title": "Handle",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/EvidenceKind"
+        },
+        "digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "collection_status": {
+          "$ref": "#/$defs/CollectionStatus"
+        },
+        "redaction_status": {
+          "$ref": "#/$defs/RedactionStatus"
+        }
+      },
+      "required": [
+        "handle",
+        "kind",
+        "digest",
+        "collection_status",
+        "redaction_status"
+      ],
+      "title": "EvidenceHandleV1",
+      "type": "object"
+    },
+    "EvidenceKind": {
+      "enum": [
+        "target",
+        "gateway",
+        "policy",
+        "credential_store",
+        "runtime",
+        "network",
+        "log",
+        "trace",
+        "memory"
+      ],
+      "title": "EvidenceKind",
+      "type": "string"
+    },
+    "MappingIngestionObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "observation_type": {
+          "const": "mapping_ingestion",
+          "default": "mapping_ingestion",
+          "title": "Observation Type",
+          "type": "string"
+        },
+        "fact_type": {
+          "$ref": "#/$defs/ContextualFactKind"
+        },
+        "mapping_kind": {
+          "$ref": "#/$defs/ContextualMappingKind"
+        },
+        "status": {
+          "$ref": "#/$defs/MappingIngestionStatus"
+        }
+      },
+      "required": [
+        "observation_id",
+        "probe_id",
+        "component_id",
+        "evidence_refs",
+        "fact_type",
+        "mapping_kind",
+        "status"
+      ],
+      "title": "MappingIngestionObservationV1",
+      "type": "object"
+    },
+    "MappingIngestionStatus": {
+      "enum": [
+        "ingested",
+        "unsupported",
+        "error"
+      ],
+      "title": "MappingIngestionStatus",
+      "type": "string"
+    },
+    "ObservedDecision": {
+      "enum": [
+        "allow",
+        "deny",
+        "error",
+        "timeout",
+        "unobserved"
+      ],
+      "title": "ObservedDecision",
+      "type": "string"
+    },
+    "ObservedSideEffect": {
+      "enum": [
+        "occurred",
+        "not_observed",
+        "unknown"
+      ],
+      "title": "ObservedSideEffect",
+      "type": "string"
+    },
+    "ProtectedEnforcementObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "observation_type": {
+          "const": "protected_enforcement",
+          "default": "protected_enforcement",
+          "title": "Observation Type",
+          "type": "string"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/$defs/ObservedDecision"
+        },
+        "side_effect": {
+          "$ref": "#/$defs/ObservedSideEffect"
+        }
+      },
+      "required": [
+        "observation_id",
+        "probe_id",
+        "component_id",
+        "evidence_refs",
+        "request_id",
+        "decision",
+        "side_effect"
+      ],
+      "title": "ProtectedEnforcementObservationV1",
+      "type": "object"
+    },
+    "RedactionStatus": {
+      "enum": [
+        "not_required",
+        "redacted"
+      ],
+      "title": "RedactionStatus",
+      "type": "string"
+    },
+    "SynchronizationFaultObservationV1": {
+      "additionalProperties": false,
+      "properties": {
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "probe_id": {
+          "minLength": 1,
+          "title": "Probe Id",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "observation_type": {
+          "const": "synchronization_fault",
+          "default": "synchronization_fault",
+          "title": "Observation Type",
+          "type": "string"
+        },
+        "fault_id": {
+          "minLength": 1,
+          "title": "Fault Id",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/SynchronizationFaultStatus"
+        },
+        "recovery_elapsed_ns": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recovery Elapsed Ns"
+        }
+      },
+      "required": [
+        "observation_id",
+        "probe_id",
+        "component_id",
+        "evidence_refs",
+        "fault_id",
+        "status"
+      ],
+      "title": "SynchronizationFaultObservationV1",
+      "type": "object"
+    },
+    "SynchronizationFaultStatus": {
+      "enum": [
+        "recovered",
+        "failed",
+        "inconclusive"
+      ],
+      "title": "SynchronizationFaultStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "observations": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "access_decision": "#/$defs/AccessDecisionObservationV1",
+            "delivery_acceptance": "#/$defs/ContextDeliveryAcceptanceObservationV1",
+            "evidence_correlation": "#/$defs/EvidenceCorrelationObservationV1",
+            "mapping_ingestion": "#/$defs/MappingIngestionObservationV1",
+            "protected_enforcement": "#/$defs/ProtectedEnforcementObservationV1",
+            "synchronization_fault": "#/$defs/SynchronizationFaultObservationV1"
+          },
+          "propertyName": "observation_type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/MappingIngestionObservationV1"
+          },
+          {
+            "$ref": "#/$defs/AccessDecisionObservationV1"
+          },
+          {
+            "$ref": "#/$defs/ProtectedEnforcementObservationV1"
+          },
+          {
+            "$ref": "#/$defs/ContextDeliveryAcceptanceObservationV1"
+          },
+          {
+            "$ref": "#/$defs/SynchronizationFaultObservationV1"
+          },
+          {
+            "$ref": "#/$defs/EvidenceCorrelationObservationV1"
+          }
+        ]
+      },
+      "title": "Observations",
+      "type": "array"
+    },
+    "evidence_handles": {
+      "items": {
+        "$ref": "#/$defs/EvidenceHandleV1"
+      },
+      "title": "Evidence Handles",
+      "type": "array"
+    },
+    "limitations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "run_id",
+    "observations",
+    "evidence_handles"
+  ],
+  "title": "ContextualAccessObservationsV1",
+  "type": "object"
+}

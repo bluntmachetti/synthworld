@@ -1,0 +1,790 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/agent-authority-contract/schemas/agent-authority-run-plan.schema.json",
+  "x-generated-from": "synthworld.agent_authority.models.AgentAuthorityRunPlanV1",
+  "x-generated-by": "agent-authority-contract/tools/generate_protocol_schemas.py",
+  "x-regenerate-with": "uv run python agent-authority-contract/tools/generate_protocol_schemas.py",
+  "$defs": {
+    "AdapterAuthor": {
+      "enum": [
+        "operator",
+        "vendor",
+        "synthworld",
+        "joint"
+      ],
+      "title": "AdapterAuthor",
+      "type": "string"
+    },
+    "AdapterAuthorshipDisclosureV1": {
+      "additionalProperties": false,
+      "properties": {
+        "author": {
+          "$ref": "#/$defs/AdapterAuthor"
+        },
+        "disclosure": {
+          "minLength": 1,
+          "title": "Disclosure",
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "disclosure"
+      ],
+      "title": "AdapterAuthorshipDisclosureV1",
+      "type": "object"
+    },
+    "AgentAuthorityBenchmarkBindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_family": {
+          "minLength": 1,
+          "title": "Benchmark Family",
+          "type": "string"
+        },
+        "benchmark_version": {
+          "minLength": 1,
+          "title": "Benchmark Version",
+          "type": "string"
+        },
+        "public_root_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "evaluator_root_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "identity_access_universe_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "policy_digest": {
+          "$ref": "#/$defs/DigestV2"
+        },
+        "cell_digest": {
+          "$ref": "#/$defs/DigestV2"
+        }
+      },
+      "required": [
+        "benchmark_family",
+        "benchmark_version",
+        "public_root_digest",
+        "evaluator_root_digest",
+        "identity_access_universe_digest",
+        "policy_digest",
+        "cell_digest"
+      ],
+      "title": "AgentAuthorityBenchmarkBindingV1",
+      "type": "object"
+    },
+    "AgentAuthorityControlId": {
+      "enum": [
+        "SW-AA-C01",
+        "SW-AA-C02",
+        "SW-AA-C03",
+        "SW-AA-C04",
+        "SW-AA-C05",
+        "SW-AA-C06",
+        "SW-AA-C07",
+        "SW-AA-C08",
+        "SW-AA-C09",
+        "SW-AA-C10",
+        "SW-AA-C11",
+        "SW-AA-C12",
+        "SW-AA-C13",
+        "SW-AA-C14",
+        "SW-AA-C15",
+        "SW-AA-C16",
+        "SW-AA-L01",
+        "SW-AA-L02",
+        "SW-AA-L03",
+        "SW-AA-L04",
+        "SW-AA-L05",
+        "SW-AA-L06",
+        "SW-AA-L07",
+        "SW-AA-L08"
+      ],
+      "title": "AgentAuthorityControlId",
+      "type": "string"
+    },
+    "ArrivalModel": {
+      "enum": [
+        "fixed_rate",
+        "closed_loop"
+      ],
+      "title": "ArrivalModel",
+      "type": "string"
+    },
+    "AuthorityCapabilityV1": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_id": {
+          "minLength": 1,
+          "title": "Candidate Id",
+          "type": "string"
+        },
+        "credential_kind": {
+          "$ref": "#/$defs/CredentialKind"
+        },
+        "actions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        },
+        "scopes": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Scopes",
+          "type": "array"
+        },
+        "audiences": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Audiences",
+          "type": "array"
+        },
+        "sender_constraint": {
+          "$ref": "#/$defs/SenderConstraint"
+        },
+        "maximum_lifetime_ns": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Lifetime Ns"
+        }
+      },
+      "required": [
+        "candidate_id",
+        "credential_kind",
+        "actions",
+        "scopes",
+        "audiences",
+        "sender_constraint"
+      ],
+      "title": "AuthorityCapabilityV1",
+      "type": "object"
+    },
+    "BoundUnit": {
+      "enum": [
+        "ns",
+        "us",
+        "ms",
+        "s"
+      ],
+      "title": "BoundUnit",
+      "type": "string"
+    },
+    "CompatibilityTargetV1": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage_key": {
+          "minLength": 1,
+          "title": "Coverage Key",
+          "type": "string"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "target_handle": {
+          "minLength": 1,
+          "title": "Target Handle",
+          "type": "string"
+        },
+        "applicable_patterns": {
+          "items": {
+            "$ref": "#/$defs/DeploymentPattern"
+          },
+          "minItems": 1,
+          "title": "Applicable Patterns",
+          "type": "array"
+        },
+        "action_universe": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Action Universe",
+          "type": "array"
+        },
+        "scope_universe": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Scope Universe",
+          "type": "array"
+        },
+        "audience_universe": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Audience Universe",
+          "type": "array"
+        },
+        "probe_candidates": {
+          "items": {
+            "$ref": "#/$defs/AuthorityCapabilityV1"
+          },
+          "minItems": 1,
+          "title": "Probe Candidates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "coverage_key",
+        "component_id",
+        "target_handle",
+        "applicable_patterns",
+        "action_universe",
+        "scope_universe",
+        "audience_universe",
+        "probe_candidates"
+      ],
+      "title": "CompatibilityTargetV1",
+      "type": "object"
+    },
+    "ConfigurationReviewStatus": {
+      "enum": [
+        "reviewed",
+        "not_reviewed",
+        "not_applicable"
+      ],
+      "title": "ConfigurationReviewStatus",
+      "type": "string"
+    },
+    "ControlCoverageEntryV1": {
+      "additionalProperties": false,
+      "properties": {
+        "control_id": {
+          "$ref": "#/$defs/AgentAuthorityControlId"
+        },
+        "catalogue_layer": {
+          "$ref": "#/$defs/ControlLayer"
+        },
+        "disposition": {
+          "$ref": "#/$defs/CoverageDisposition"
+        },
+        "applicability_rationale": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Applicability Rationale"
+        }
+      },
+      "required": [
+        "control_id",
+        "catalogue_layer",
+        "disposition"
+      ],
+      "title": "ControlCoverageEntryV1",
+      "type": "object"
+    },
+    "ControlLayer": {
+      "enum": [
+        "core",
+        "lab",
+        "operational"
+      ],
+      "title": "ControlLayer",
+      "type": "string"
+    },
+    "CoverageDisposition": {
+      "enum": [
+        "selected",
+        "not_applicable"
+      ],
+      "title": "CoverageDisposition",
+      "type": "string"
+    },
+    "CredentialKind": {
+      "enum": [
+        "bearer",
+        "dpop",
+        "mtls",
+        "workload_identity",
+        "proprietary"
+      ],
+      "title": "CredentialKind",
+      "type": "string"
+    },
+    "DeclaredBoundV1": {
+      "additionalProperties": false,
+      "properties": {
+        "bound_id": {
+          "minLength": 1,
+          "title": "Bound Id",
+          "type": "string"
+        },
+        "control_id": {
+          "const": "SW-AA-L06",
+          "default": "SW-AA-L06",
+          "title": "Control Id",
+          "type": "string"
+        },
+        "metric": {
+          "const": "revocation_propagation",
+          "default": "revocation_propagation",
+          "title": "Metric",
+          "type": "string"
+        },
+        "value": {
+          "exclusiveMinimum": 0,
+          "title": "Value",
+          "type": "integer"
+        },
+        "unit": {
+          "$ref": "#/$defs/BoundUnit"
+        }
+      },
+      "required": [
+        "bound_id",
+        "value",
+        "unit"
+      ],
+      "title": "DeclaredBoundV1",
+      "type": "object"
+    },
+    "DeploymentPattern": {
+      "enum": [
+        "proxy_injection",
+        "short_lived_minting",
+        "static_bearer"
+      ],
+      "title": "DeploymentPattern",
+      "type": "string"
+    },
+    "DigestV2": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "DigestV2",
+      "type": "object"
+    },
+    "DirectPathReachability": {
+      "enum": [
+        "blocked",
+        "reachable",
+        "unknown"
+      ],
+      "title": "DirectPathReachability",
+      "type": "string"
+    },
+    "LatencyStatistic": {
+      "enum": [
+        "p50",
+        "p95",
+        "p99"
+      ],
+      "title": "LatencyStatistic",
+      "type": "string"
+    },
+    "LoadProfileV1": {
+      "additionalProperties": false,
+      "properties": {
+        "request_count": {
+          "exclusiveMinimum": 0,
+          "title": "Request Count",
+          "type": "integer"
+        },
+        "max_concurrency": {
+          "exclusiveMinimum": 0,
+          "title": "Max Concurrency",
+          "type": "integer"
+        },
+        "arrival_model": {
+          "$ref": "#/$defs/ArrivalModel"
+        },
+        "rate_numerator": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate Numerator"
+        },
+        "rate_denominator": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rate Denominator"
+        }
+      },
+      "required": [
+        "request_count",
+        "max_concurrency",
+        "arrival_model"
+      ],
+      "title": "LoadProfileV1",
+      "type": "object"
+    },
+    "OperationalCoveragePlanV1": {
+      "additionalProperties": false,
+      "properties": {
+        "performance_stages": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PerformanceStageV1"
+          },
+          "title": "Performance Stages",
+          "type": "array"
+        },
+        "compatibility_targets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CompatibilityTargetV1"
+          },
+          "title": "Compatibility Targets",
+          "type": "array"
+        }
+      },
+      "title": "OperationalCoveragePlanV1",
+      "type": "object"
+    },
+    "PerformanceStageRole": {
+      "enum": [
+        "baseline",
+        "sut"
+      ],
+      "title": "PerformanceStageRole",
+      "type": "string"
+    },
+    "PerformanceStageV1": {
+      "additionalProperties": false,
+      "properties": {
+        "stage_id": {
+          "minLength": 1,
+          "title": "Stage Id",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/PerformanceStageRole"
+        },
+        "component_id": {
+          "minLength": 1,
+          "title": "Component Id",
+          "type": "string"
+        },
+        "target_handle": {
+          "minLength": 1,
+          "title": "Target Handle",
+          "type": "string"
+        },
+        "action_handle": {
+          "minLength": 1,
+          "title": "Action Handle",
+          "type": "string"
+        },
+        "load_profile": {
+          "$ref": "#/$defs/LoadProfileV1"
+        },
+        "measurement_window_ns": {
+          "exclusiveMinimum": 0,
+          "title": "Measurement Window Ns",
+          "type": "integer"
+        },
+        "statistics": {
+          "items": {
+            "$ref": "#/$defs/LatencyStatistic"
+          },
+          "minItems": 1,
+          "title": "Statistics",
+          "type": "array"
+        },
+        "baseline_stage_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baseline Stage Id"
+        }
+      },
+      "required": [
+        "stage_id",
+        "role",
+        "component_id",
+        "target_handle",
+        "action_handle",
+        "load_profile",
+        "measurement_window_ns",
+        "statistics"
+      ],
+      "title": "PerformanceStageV1",
+      "type": "object"
+    },
+    "ProtocolConflictV1": {
+      "additionalProperties": false,
+      "properties": {
+        "topic": {
+          "minLength": 1,
+          "title": "Topic",
+          "type": "string"
+        },
+        "disposition": {
+          "minLength": 1,
+          "title": "Disposition",
+          "type": "string"
+        }
+      },
+      "required": [
+        "topic",
+        "disposition"
+      ],
+      "title": "ProtocolConflictV1",
+      "type": "object"
+    },
+    "RepresentativeConfigurationReviewV1": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/ConfigurationReviewStatus"
+        },
+        "reviewer_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer Id"
+        },
+        "evidence_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "limitation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Limitation"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "RepresentativeConfigurationReviewV1",
+      "type": "object"
+    },
+    "RunLayer": {
+      "enum": [
+        "core",
+        "lab",
+        "combined"
+      ],
+      "title": "RunLayer",
+      "type": "string"
+    },
+    "SenderConstraint": {
+      "enum": [
+        "bound",
+        "unbound"
+      ],
+      "title": "SenderConstraint",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "protocol_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Protocol Version",
+      "type": "string"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "run_layer": {
+      "$ref": "#/$defs/RunLayer"
+    },
+    "control_coverage": {
+      "items": {
+        "$ref": "#/$defs/ControlCoverageEntryV1"
+      },
+      "minItems": 1,
+      "title": "Control Coverage",
+      "type": "array"
+    },
+    "benchmark": {
+      "$ref": "#/$defs/AgentAuthorityBenchmarkBindingV1"
+    },
+    "event_schedule_version": {
+      "minLength": 1,
+      "title": "Event Schedule Version",
+      "type": "string"
+    },
+    "deployment_patterns": {
+      "items": {
+        "$ref": "#/$defs/DeploymentPattern"
+      },
+      "minItems": 1,
+      "title": "Deployment Patterns",
+      "type": "array"
+    },
+    "authority_path_component_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Authority Path Component Ids",
+      "type": "array"
+    },
+    "enforcement_point_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Enforcement Point Ids",
+      "type": "array"
+    },
+    "direct_path_reachability": {
+      "$ref": "#/$defs/DirectPathReachability"
+    },
+    "isolation_mechanism": {
+      "minLength": 1,
+      "title": "Isolation Mechanism",
+      "type": "string"
+    },
+    "authority_critical_dependency_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Authority Critical Dependency Ids",
+      "type": "array"
+    },
+    "declared_bounds": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/DeclaredBoundV1"
+      },
+      "title": "Declared Bounds",
+      "type": "array"
+    },
+    "operational_coverage": {
+      "$ref": "#/$defs/OperationalCoveragePlanV1"
+    },
+    "stimulus_set_digest": {
+      "$ref": "#/$defs/DigestV2"
+    },
+    "adapter_authorship": {
+      "$ref": "#/$defs/AdapterAuthorshipDisclosureV1"
+    },
+    "representative_configuration_review": {
+      "$ref": "#/$defs/RepresentativeConfigurationReviewV1"
+    },
+    "conflicts": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ProtocolConflictV1"
+      },
+      "title": "Conflicts",
+      "type": "array"
+    },
+    "planned_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string",
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(\\.\\d+)?(Z|[+-]00:00)$"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Planned At"
+    }
+  },
+  "required": [
+    "run_id",
+    "run_layer",
+    "control_coverage",
+    "benchmark",
+    "event_schedule_version",
+    "deployment_patterns",
+    "authority_path_component_ids",
+    "enforcement_point_ids",
+    "direct_path_reachability",
+    "isolation_mechanism",
+    "authority_critical_dependency_ids",
+    "operational_coverage",
+    "stimulus_set_digest",
+    "adapter_authorship",
+    "representative_configuration_review"
+  ],
+  "title": "AgentAuthorityRunPlanV1",
+  "type": "object"
+}

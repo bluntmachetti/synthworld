@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/contextual-access-contract/schemas/contextual-shared-signals-mapping-profile.schema.json",
+  "x-generated-from": "synthworld.contextual_access.shared_signals.ContextualSharedSignalsMappingProfileV1",
+  "x-generated-by": "contextual-access-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python contextual-access-contract/tools/generate_contract.py",
+  "$defs": {
+    "ContextualFactKind": {
+      "enum": [
+        "case_assignment",
+        "on_call",
+        "device_posture",
+        "risk_signal",
+        "business_justification"
+      ],
+      "title": "ContextualFactKind",
+      "type": "string"
+    },
+    "ContextualSharedSignalsMappingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "fact_type": {
+          "$ref": "#/$defs/ContextualFactKind"
+        },
+        "custom_event_type": {
+          "minLength": 1,
+          "title": "Custom Event Type",
+          "type": "string"
+        },
+        "standardized_caep_event_type": {
+          "default": null,
+          "title": "Standardized Caep Event Type",
+          "type": "null"
+        },
+        "classification": {
+          "const": "custom_profile",
+          "default": "custom_profile",
+          "title": "Classification",
+          "type": "string"
+        },
+        "semantic_delta": {
+          "minLength": 1,
+          "title": "Semantic Delta",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fact_type",
+        "custom_event_type",
+        "semantic_delta"
+      ],
+      "title": "ContextualSharedSignalsMappingV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_version": {
+      "const": "synthworld-contextual-shared-signals-1.0.0",
+      "default": "synthworld-contextual-shared-signals-1.0.0",
+      "title": "Profile Version",
+      "type": "string"
+    },
+    "selected_temporal_base": {
+      "const": "synthworld-temporal-1.2.0",
+      "default": "synthworld-temporal-1.2.0",
+      "title": "Selected Temporal Base",
+      "type": "string"
+    },
+    "schedule_view_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schedule View Version",
+      "type": "string"
+    },
+    "mappings": {
+      "items": {
+        "$ref": "#/$defs/ContextualSharedSignalsMappingV1"
+      },
+      "title": "Mappings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "mappings"
+  ],
+  "title": "ContextualSharedSignalsMappingProfileV1",
+  "type": "object"
+}

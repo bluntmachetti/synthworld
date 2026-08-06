@@ -1,0 +1,331 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bluntmachetti/synthworld/continuous-assurance-contract/schemas/continuous-assurance-evaluator.schema.json",
+  "x-generated-from": "synthworld.continuous_assurance.models.ContinuousAssuranceEvaluatorV1",
+  "x-generated-by": "continuous-assurance-contract/tools/generate_contract.py",
+  "x-regenerate-with": "uv run python continuous-assurance-contract/tools/generate_contract.py",
+  "$defs": {
+    "AssuranceDriftKind": {
+      "enum": [
+        "credential",
+        "delegation",
+        "entitlement",
+        "evidence",
+        "owner",
+        "policy"
+      ],
+      "title": "AssuranceDriftKind",
+      "type": "string"
+    },
+    "ContinuousAssuranceCaseKind": {
+      "enum": [
+        "credential_drift",
+        "delegation_recurrence",
+        "entitlement_transient_drift",
+        "evidence_late_arrival",
+        "feed_outage_delay",
+        "owner_drift",
+        "policy_later_version",
+        "stable_control"
+      ],
+      "title": "ContinuousAssuranceCaseKind",
+      "type": "string"
+    },
+    "ContinuousAssuranceCaseTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "case_id": {
+          "minLength": 1,
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_kind": {
+          "$ref": "#/$defs/ContinuousAssuranceCaseKind"
+        },
+        "drift_kind": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssuranceDriftKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "finding_required": {
+          "title": "Finding Required",
+          "type": "boolean"
+        },
+        "drift_effective_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Drift Effective Tick"
+        },
+        "first_observable_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "First Observable Tick"
+        },
+        "expected_finding_opened_tick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Finding Opened Tick"
+        },
+        "expected_finding_cleared_ticks": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Expected Finding Cleared Ticks",
+          "type": "array"
+        },
+        "expected_remediation_complete": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Remediation Complete"
+        },
+        "expected_recurrence_opened_ticks": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Expected Recurrence Opened Ticks",
+          "type": "array"
+        },
+        "expected_evidence_continuous": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Evidence Continuous"
+        },
+        "canonical_policy_version_id": {
+          "minLength": 1,
+          "title": "Canonical Policy Version Id",
+          "type": "string"
+        },
+        "lifecycle": {
+          "items": {
+            "$ref": "#/$defs/ContinuousAssuranceFindingTransitionTruthV1"
+          },
+          "title": "Lifecycle",
+          "type": "array"
+        },
+        "failure_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Failure Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_kind",
+        "finding_required",
+        "canonical_policy_version_id",
+        "lifecycle",
+        "failure_reasons"
+      ],
+      "title": "ContinuousAssuranceCaseTruthV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceEvaluatorSourceBindingV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "family": {
+          "$ref": "#/$defs/ContinuousAssuranceSourceFamily"
+        },
+        "public_schema_version": {
+          "minLength": 1,
+          "title": "Public Schema Version",
+          "type": "string"
+        },
+        "public_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        },
+        "evaluator_schema_version": {
+          "minLength": 1,
+          "title": "Evaluator Schema Version",
+          "type": "string"
+        },
+        "evaluator_digest": {
+          "$ref": "#/$defs/SyntheticDigestV1"
+        }
+      },
+      "required": [
+        "family",
+        "public_schema_version",
+        "public_digest",
+        "evaluator_schema_version",
+        "evaluator_digest"
+      ],
+      "title": "ContinuousAssuranceEvaluatorSourceBindingV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceFindingTransitionTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        },
+        "state": {
+          "$ref": "#/$defs/FindingLifecycleState"
+        }
+      },
+      "required": [
+        "tick",
+        "state"
+      ],
+      "title": "ContinuousAssuranceFindingTransitionTruthV1",
+      "type": "object"
+    },
+    "ContinuousAssuranceSourceFamily": {
+      "enum": [
+        "authority_governance_1_0",
+        "contextual_access_1_0",
+        "enterprise_agentic_1_0",
+        "identity_fabric_1_0"
+      ],
+      "title": "ContinuousAssuranceSourceFamily",
+      "type": "string"
+    },
+    "FindingLifecycleState": {
+      "enum": [
+        "clear",
+        "open"
+      ],
+      "title": "FindingLifecycleState",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "public_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "private_config_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "source_bindings": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceEvaluatorSourceBindingV1"
+      },
+      "minItems": 1,
+      "title": "Source Bindings",
+      "type": "array"
+    },
+    "truth": {
+      "items": {
+        "$ref": "#/$defs/ContinuousAssuranceCaseTruthV1"
+      },
+      "minItems": 1,
+      "title": "Truth",
+      "type": "array"
+    }
+  },
+  "required": [
+    "public_digest",
+    "private_config_digest",
+    "source_bindings",
+    "truth"
+  ],
+  "title": "ContinuousAssuranceEvaluatorV1",
+  "type": "object"
+}
