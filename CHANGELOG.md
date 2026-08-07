@@ -9,8 +9,44 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-08-06
+
 ### Added
 
+- **A deterministic enterprise identity and access surface, with authorization
+  evaluated against standards-shaped projections (#7, #27).** SynthWorld now
+  generates a fixed enterprise identity/access universe — organisations, units,
+  populations, principals, accounts, groups, roles, permissions, entitlements,
+  and opaque authorization targets — and evaluates access against it through
+  three bounded oracles: a directory **RBAC** oracle with role and group closure,
+  a bounded **ABAC** oracle over declared attributes, and a bounded **ReBAC**
+  oracle over relationship tuples. Access derivation is an implementation detail
+  of the oracle rather than a published topology, so no artifact describes the
+  model as an identity topology.
+  New modules: `enterprise`, `enterprise/rbac`, `enterprise/abac`,
+  `enterprise/rebac`, `enterprise/authorization`, `enterprise/conformance`,
+  `enterprise/identity_fabric`, `agentic/enterprise`.
+- **Vendor-neutral projections so a real authorization engine can consume the
+  world without a bespoke adapter.** `enterprise/projections/` emits an RFC
+  7643-style **SCIM** user/group projection, an **OpenFGA** authorization model
+  and relationship tuples for the bounded ReBAC subset, and an **AuthZEN 1.0**
+  request projection with per-field provenance. Each projection carries an
+  explicit mapping profile recording what it can and cannot represent, so a
+  projection gap is declared rather than silently lossy. A **Shared Signals/CAEP**
+  mapping profile is declared, but temporal event emission is deliberately
+  deferred and no SET envelope is constructed yet.
+- **Two smoke benchmarks and a graded assurance ladder.** An enterprise identity
+  fabric smoke benchmark and an enterprise agentic smoke benchmark publish public
+  inputs and evaluator truth under `enterprise-identity-access-contract/`; a
+  contextual access benchmark profile publishes under
+  `contextual-access-contract/`. `continuous_assurance` adds `smoke`,
+  `standard`, `longitudinal`, and `held_out` tiers governing assurance cadence.
+  Note these are assurance tiers, not generated-world scale tiers — the
+  `enterprise_agentic` scale ladder #27 asks for remains open at `smoke` only.
+- **An executable agent-authority run protocol.** `agent_authority` and
+  `assurance` add a staged run protocol with signed execution receipts, component
+  provenance, and evidence claims, so an evaluation run is reconstructible from
+  its receipt rather than trusted on assertion.
 - **The ambiguity v2 pack gets its difficulty from a computed error floor, not a
   codebook (#80).** The v1-style surfaces encoded each identity index in cleartext, so a
   ~30-line normaliser recovered every relation and scored 1.0000; two successor designs
@@ -443,7 +479,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/bluntmachetti/synthworld/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bluntmachetti/synthworld/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/bluntmachetti/synthworld/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/bluntmachetti/synthworld/compare/v0.9.0...v0.10.0

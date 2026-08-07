@@ -598,6 +598,513 @@ matching fails the transliterated spelling of the same person — which is why b
 spellings are generated. Normalising and declining without corroboration trades
 coverage for precision, which is the choice the projection exists to make visible.
 
+## Use case 11: enterprise identity and access structure
+
+Use this when you need a bounded, safely fictional enterprise identity/access universe —
+tenants, organisational units, principals, unbound account slots, groups, roles,
+authorization targets, permissions, and a frozen access-atom inventory — to test an IAM,
+IGA, or authorization system against.
+
+You author the *structure*; SynthWorld compiles the *universe*. It is not a directory
+service, IGA workflow system, PDP, policy engine, or runtime enforcement component, and it
+makes no network call at any point. The runtime dependencies are `pydantic`, `Faker`, and
+`pyyaml`; there is no HTTP client in the package.
+
+### Author, validate, compile
+
+Three commands, in order:
+
+```bash
+synthworld scaffold-enterprise-access \
+  --format yaml \
+  --output private-enterprise.yaml
+
+synthworld validate-enterprise-access --input private-enterprise.yaml
+
+synthworld compile-enterprise-access \
+  --input private-enterprise.yaml \
+  --seed 20260804 \
+  --output compiled-enterprise
+```
+
+The scaffold writes a working reference blueprint you edit in place. When you do not pass
+`--id-namespace-salt`, it generates a fresh 256-bit salt with `secrets.token_hex(32)` and
+writes it into the template. It also prints:
+
+```text
+Importing structure is not anonymisation; protect the source and namespace salt.
+```
+
+Take that literally. Logical keys, headcounts, group structure, role structure, and access
+breadth can stay commercially sensitive even when the file contains no person rows.
+
+Every compiled identifier is `uuid5(kind_namespace, blueprint_namespace ‖ logical-key
+components)`, where `blueprint_namespace = uuid5(BLUEPRINT_NS, schema_version ‖ salt)`. The
+salt and your logical keys are *both* load-bearing: neither alone determines an identifier,
+and both are inputs to every identifier the compiler emits, account identifiers included.
+Treat the blueprint as an operator-private document, not a shareable one.
+
+`--format json` writes a single JSON envelope instead. `--format csv` writes a directory
+holding a 20-file CSV bundle; `compile-enterprise-access` accepts that directory path, or a
+`.zip` of it, as `--input`. On the scaffolded reference blueprint all formats compile to
+identical bytes — but that equivalence is not a general guarantee, because the CSV reader
+hardcodes `account_observations` and `direct_entitlements` to empty lists (see the limits
+below). A YAML or JSON blueprint that uses either cannot be round-tripped through CSV.
+
+### Validation reports every error in a stage, not the first one
+
+`validate-enterprise-access` exits `0` on a valid import and `1` otherwise, printing one
+diagnostic per line to stderr in the form `<code> <file:row:column>: <message>`. Add
+`--json` for the full `EnterpriseIdentityAccessValidationReportV1`. Within a stage it does
+not stop at the first problem. A blueprint whose only content is a `blueprint_key` set to an
+email address produces all six of these at once:
+
+```text
+model_validation blueprint.blueprint_key: Value error, person_level_email_forbidden
+model_validation blueprint.id_namespace_salt: Field required
+model_validation blueprint.organisations: Field required
+model_validation blueprint.tenants: Field required
+model_validation directory_rbac_state: Field required
+model_validation iam_universe_extension: Field required
+```
+
+`person_level_email_forbidden` is worth calling out: any logical key that looks like an
+email address is rejected outright, because a logical key is the one field where a real
+person's identifier tends to leak in from a directory export.
+
+One caveat on staging. The CLI reconstructs its report from the import loader, so it stops
+at whichever stage fails first — a parse error and a structural-reference error will not
+appear in the same run. Call `validate_enterprise_identity_access()` directly if you want
+the structural pass in isolation.
+
+### What compilation writes
+
+Compilation is deterministic from the saved import, the explicit seed, the schema versions,
+and the compiler version. It prints a count and writes four files into two disjoint trees:
+
+```text
+Enterprise identity/access universe ready: 6 principals, 4 account slots, 16 access atoms
+  -> compiled-enterprise
+
+compiled-enterprise/
+  public/
+    identity-access-universe.json     # EnterpriseIdentityAccessUniverseV1
+    manifest.json                     # visibility: "public"
+  evaluator/
+    canonical-binding-truth.json      # account_id -> principal_id
+    manifest.json                     # visibility: "evaluator"
+```
+
+The public universe holds entity inventories and the frozen access-atom inventory. Every
+identifier is an opaque UUIDv5 string, every label is a generated placeholder
+(`Example Account 000001`), and every record carries `synthetic: true`. It contains neither
+`id_namespace_salt` nor `blueprint_key` nor any logical key you authored.
+
+`EnterpriseAccountV1` has no `principal_id`. Which principal owns an account is exactly the
+linkage the public tree withholds, and it lives only in
+`evaluator/canonical-binding-truth.json`. That file is a whole
+`EnterpriseCanonicalBindingTruthV1` object — a `bindings` array plus the universe digest it
+is bound to — not a bare list of pairs:
+
+```json
+{
+  "bindings": [
+    {"account_id": "…", "principal_id": "…", "synthetic": true}
+  ],
+  "identity_access_universe_digest": {
+    "algorithm": "sha256", "synthetic": true, "value": "…"
+  },
+  "schema_version": "1.0.0",
+  "synthetic": true
+}
+```
+
+Write your loader against that shape. The split is physical, not a flag: there is no API
+that loads both trees at once; each loader requires its directory to hold exactly its two
+expected files, requires the manifest's declared visibility to match, and re-verifies path,
+schema version, byte size and SHA-256 digest against the bytes on disk. Bytes that differ
+from their own canonical JSON form are rejected.
+
+### What the seed moves, and what it does not
+
+At a fixed salt, tenant, organisation, unit, principal, group, role, authorization-target
+and permission identifiers do not depend on the seed.
+
+Account allocation *is* seed-driven — the seed ranks principal slots — and that choice
+cascades into `accounts`, `access_subjects`, `access_atoms`, and `relationship_anchors`.
+Every changed record is one whose subject or entity is an account, so an access-atom
+identifier is seed-stable only when its subject is a principal.
+
+How many records move depends on your salt and on which two seeds you compare, so do not
+treat any particular count as a property of the format. On the reference import, seeds 111
+and 222 move all 4 accounts and the 4 subjects, atoms, and anchors that hang off them, while
+seeds 20260804 and 999 move only 2 of the 4. Principals do not move in either case.
+
+Adding an unrelated template does not remap existing identifiers. But generated
+`display_label` values are positional over the canonical key order, so a template that sorts
+ahead of existing ones renumbers their labels. Pin downstream tests to identifiers, never to
+labels.
+
+### Limits worth knowing before you author
+
+- **Export is write-once.** `compile-enterprise-access` and `scaffold-enterprise-access`
+  both refuse an existing output path. There is no `--force`.
+- **Selectors are a closed three-member vocabulary** — `all`, `count`, `fraction`. A
+  fraction must be pre-reduced, so `2/4` fails with `selector_fraction_not_reduced`.
+- **Multiple tenants and organisations are supported; references between them are not.**
+  Each requires at least one entry and has no upper bound, and a two-tenant blueprint
+  compiles cleanly. What is rejected is any *reference* that leaves its silo — access
+  declarations, memberships, group nesting, role assignments, group-role assignments, role
+  hierarchy, and role grants each get their own `cross_tenant_*` diagnostic. You can model
+  several independent silos in one blueprint; you cannot model federated access across them.
+- **Access atoms must be globally unique.** Two rules declaring the same
+  (subject, target, action) abort compilation with `duplicate_access_atom_declaration`.
+- **CSV and ZIP cannot express everything.** `account_observations` and
+  `direct_entitlements` have no CSV files and are hardcoded empty by the CSV reader.
+- **The compiled universe carries no edges.** No memberships, group nesting, role
+  assignments, role hierarchy, role grants, entitlements, or account bindings. The
+  `directory_rbac_state` you author is validated for referential integrity and cross-tenant
+  safety here, and is consumed downstream by the **`enterprise.rbac`** package only —
+  nothing under `enterprise.abac` or `enterprise.rebac` reads it.
+  `EnterpriseRelationshipAnchorV1` is an addressability stub whose fields are `anchor_id`,
+  `entity_id`, `entity_kind`, `tenant_id`, and `synthetic`. It records that an entity is
+  addressable, and carries no relation type and no edges.
+- **Nothing enterprise-related is exported from the top-level `synthworld` package.**
+  Import `synthworld.enterprise...` explicitly.
+
+## Use case 12: projecting a compiled world to SCIM, OpenFGA, and AuthZEN
+
+Use this when you need SynthWorld's enterprise data in the *shape* another standard uses —
+to exercise an adapter, a mapping layer, or a fixture loader — and you want a written record
+of what the conversion could not carry.
+
+**These are pure, offline data conversions.** The package holds no SCIM client, no AuthZEN
+HTTP client, no Shared Signals transmitter, and no OpenFGA writer or evaluator. Nothing here
+contacts a service, exchanges a credential, or makes a policy decision.
+
+They are also **shape-level projections, not wire-format documents**. The SCIM output has no
+`schemas` URN array, no `meta`, no `externalId`; its fields are `user_id` / `user_name` /
+`active`. The OpenFGA authorization model is a constant `OpenFgaAuthorizationModelV1` —
+`schema_version: "1.1"` plus five fixed `type_definitions` strings — not a DSL document. You
+will need an adapter before a real endpoint accepts any of it.
+
+There is no CLI for this. Import from `synthworld.enterprise.projections`.
+
+### SCIM
+
+```python
+from synthworld.enterprise.projections import project_scim, scim_projection_profile_v1
+
+projection = project_scim(
+    universe=universe,                        # EnterpriseIdentityAccessUniverseV1
+    directory_rbac_kernel=kernel,             # EnterpriseDirectoryRbacKernelV1
+    profile=scim_projection_profile_v1(snapshot_tick=0),
+)
+```
+
+Both inputs are public artifacts. The kernel must bind the exact universe you pass, or the
+call raises `scim_kernel_universe_digest_mismatch` — projections fail closed rather than
+silently mixing worlds.
+
+Four things to expect from the output:
+
+- `roles` and `entitlements` are **always empty**, and `authorization_semantics` is the
+  frozen literal `"none"`. The projection deliberately imports no authorization meaning.
+- `user_name` is fabricated as `<account_id>@accounts.example.invalid`, using the reserved
+  `.invalid` TLD.
+- An account with no directory observation projects `active: false`. Missing observation
+  fails closed to inactive.
+- Only **accounts** become group members. A membership edge whose subject is a principal is
+  skipped, and nested groups never appear as members of their parent. On the shipped
+  reference pack every membership subject is a principal, so both projected groups come back
+  with no members — correct behaviour, and why that fixture is a poor smoke test for a
+  membership adapter.
+
+### OpenFGA
+
+```python
+from synthworld.enterprise.authorization_common import AuthorizationSourceLayer
+from synthworld.enterprise.projections import openfga_mapping_profile_v1, project_openfga
+
+actual = project_openfga(
+    universe=universe,
+    rebac_truth=rebac_truth,                  # CompiledEnterpriseRebacTruthV1
+    mapping_profile=openfga_mapping_profile_v1(
+        source_layer=AuthorizationSourceLayer.ACTUAL,
+    ),
+)
+```
+
+One projection covers exactly one source layer, so seeing both takes two calls.
+
+Two cautions. First, **the input is compiled truth**, not a public artifact —
+`CompiledEnterpriseRebacTruthV1` is evaluator-side. Because the tuples are derived from it,
+treat the projection's *output* as evaluator-side too unless you have checked what your
+chosen source layer exposes: an `actual` projection describes the access that really holds,
+which is part of what a system under test is meant to work out. Second, each emitted tuple
+carries `native_snapshot_id`, `native_revision_id`, `native_valid_from_tick`, and
+`native_valid_until_tick` as inert metadata that no OpenFGA runtime enforces.
+
+### AuthZEN
+
+```python
+from synthworld.enterprise.projections import authzen_mapping_profile_v1, project_authzen
+
+projection = project_authzen(
+    universe=universe,
+    corpus=corpus,                            # EnterpriseEvaluationCorpusV1
+    request=corpus.access_requests[0],
+    mapping_profile=authzen_mapping_profile_v1(),
+)
+```
+
+One request per call — there is no batch or evaluations-endpoint shape.
+
+The projection **embeds no expected decision**, which is what lets you hand it to a system
+under test while the corpus's expected decision stays evaluator-side. That statement is
+about the decision field specifically; if you extend the projection or add context of your
+own, re-check what you are carrying across.
+
+If your system under test returns a decision, record it as a separate observation.
+Normalisation is deliberately lossy: only `allow` and `deny` normalise to a decision, while
+`indeterminate`, `transport_error`, `timeout`, and `unavailable` normalise to `None` — and
+the model *forces* `boolean_decision` to be `None` for those four. Supplying `False`
+alongside a timeout raises `authzen_raw_outcome_boolean_mismatch`. A transport failure is not
+a deny, and the schema refuses to let you record it as one.
+
+### Every projection reports what it lost
+
+Each call also compiles a support matrix: one row per exercised native feature, classified
+`exact`, `approximated`, or `unsupported`, with a mandatory prose `semantic_delta` on every
+non-exact row and a canonical mapping digest binding the set together.
+
+```python
+from synthworld.enterprise.projections import evaluate_projection_fidelity
+
+for metric in evaluate_projection_fidelity(projection.support_matrix).metrics:
+    print(metric.family, metric.name, metric.numerator, metric.denominator, metric.value)
+```
+
+There is no combined fidelity score, by design — the three rates are reported independently.
+A single "fidelity" number would let a target that drops authorization semantics entirely
+read as mostly fine.
+
+### Shared Signals / CAEP is a declaration, not an emitter
+
+`synthworld.enterprise.projections.shared_signals` publishes a mapping profile and a support
+matrix, and nothing else. **There is no `project_*` function, no event model, and no SET
+envelope is ever constructed.** The deferral is encoded in the schema itself:
+`schedule_view_status` is the frozen literal `"deferred_to_pr7"` and
+`emitted_event_projection` is `"deferred"` — no other value validates.
+
+Two of its six declared mappings reach a real CAEP event type — `credential_change` exactly,
+and `account_disabled` only approximately, with the recorded delta "Account disablement is
+not necessarily a CAEP session revocation". Two more map onto SynthWorld-private URNs that no
+CAEP receiver knows. The profile records which edition was reviewed; it is not evidence of a
+working event emitter.
+
+## Use case 13: enterprise authorization benchmarks
+
+Use these when you want to score a system rather than fixture it — specifically, whether it
+reaches the right authorization decision *and* can say why.
+
+Three enterprise benchmarks have a command line — `generate-enterprise-agentic`,
+`generate-contextual-access`, and `generate-continuous-assurance`. The directory/RBAC, ABAC,
+ReBAC, identity-fabric, and authority-governance packs are Python API only.
+
+### Run the enterprise-agentic smoke pack
+
+This pack replays an agent overlay — agent accounts, runtimes, opaque credential handles,
+capabilities, and human-to-agent delegations — over a fixed compiled access state, and
+scores the immutable enterprise decision separately from seven downstream authority gates,
+attribution, and audit evidence.
+
+```bash
+synthworld generate-enterprise-agentic \
+  --tier smoke \
+  --seed 20260804 \
+  --output enterprise-agentic-world
+```
+
+```text
+Enterprise-agentic smoke pack ready: 20 cases -> enterprise-agentic-world
+
+enterprise-agentic-world/
+  public/enterprise-agentic-input.json
+  public/manifest.json
+  evaluator/enterprise-agentic-evaluator.json
+  evaluator/manifest.json
+```
+
+Give only `enterprise-agentic-world/public/` to the system under test — that keeps an
+adapter from reading truth by accident. (It does *not* keep the answers secret; see "The
+reference packs are not blind" below.) That tree does not contain `expected_decision`,
+`failure_reasons`, `case_labels`, `canonical_binding_truth`, `reconstructable_at_audit`, or
+the compiled access state. Credential records appear as `opaque_handle` identifiers; no
+`secret` or `token` field exists in either tree.
+
+`--tier` accepts `smoke` and nothing else. `EnterpriseAgenticTier` has exactly one member,
+so no other tier is representable without a schema change.
+
+### Check the shape before you score
+
+```bash
+synthworld validate enterprise-agentic-trace \
+  --predictions predictions/enterprise-agentic.jsonl \
+  --benchmark-root enterprise-agentic-world
+```
+
+This reads only the public tree — public case ids and the public benchmark digest, never
+truth — so you can iterate on an adapter without the evaluator bundle at hand. It reports
+every bad row at once with line numbers. The codes it emits are `invalid_row`,
+`duplicate_case_id`, `benchmark_digest_mismatch`, `unexpected_case_id`, and `missing_case_id`.
+
+Each JSONL line is one `EnterpriseAgenticTraceRowV1`, carrying `enterprise_decision`, the
+seven `gates`, `final_decision`, `failure_reasons`, the four attribution ids, `evidence_refs`,
+and `reconstructable_at_audit`.
+
+Scoring is strict-inventory: every declared case must appear exactly once. Partial
+submissions are rejected rather than partially scored.
+
+### Evaluate a prediction
+
+```bash
+synthworld evaluate enterprise-agentic \
+  --predictions predictions/enterprise-agentic.jsonl \
+  --benchmark-root enterprise-agentic-world \
+  --summary
+```
+
+`--benchmark-root` is required for this task; omit `--summary` for the complete JSON report.
+
+For the shipped `Enterprise decision only` baseline — a system that reads the enterprise
+decision correctly and then treats every downstream agent gate as satisfied —
+`enterprise_decision_accuracy` is 1.0000 while `final_decision_accuracy` and
+`failure_reason_exact_match` are both 0.3000.
+
+That gap is the whole point. The authority model is deliberately non-unioning: the final
+decision allows only when the enterprise cell allows **and** every applicable subject,
+tenant, agent-account, runtime, credential, capability, and delegation gate passes. There is
+no path by which a human owner's authority rescues an agent denial, so a product cannot hide
+an enterprise denial behind a runtime failure or the reverse.
+
+Note the differing denominators. `delegation_gate_accuracy` has `n=10` because delegation is
+`not_applicable` for the ten `agent_as_principal` cases, while the other six gates have
+`n=20`. Every metric states its own denominator and denominator meaning, and there is **no
+aggregate agentic score**.
+
+### Scoring the directory/RBAC oracle from Python
+
+The bounded authorization oracles — directory/RBAC, ABAC, ReBAC, and the composed access
+state — have **no CLI at all**. Compile truth and score a prediction in process:
+
+```python
+from synthworld.enterprise import (
+    compile_enterprise_directory_rbac_truth,
+    evaluate_enterprise_directory_rbac,
+)
+from synthworld.enterprise.rbac import perfect_enterprise_directory_rbac_prediction
+from synthworld.enterprise.rbac.reference import reference_enterprise_rbac_inputs
+
+reference = reference_enterprise_rbac_inputs()
+truth = compile_enterprise_directory_rbac_truth(
+    universe=reference.universe_result.public_universe,
+    canonical_binding_truth=reference.universe_result.evaluator_canonical_binding_truth,
+    corpus=reference.corpus_result.public_corpus,
+    directory_rbac_kernel=reference.kernel,
+    session_state=reference.session_state,
+    directory_rbac_intent=reference.intent,
+)
+
+report = evaluate_enterprise_directory_rbac(
+    truth=truth,
+    predictions=perfect_enterprise_directory_rbac_prediction(truth),
+)
+```
+
+Substitute your own system's output for `perfect_…` — that function exists to prove the
+scorer is satisfiable and to give you the exact prediction shape to fill in. Unknown
+prediction ids are rejected; *missing* predictions score as incorrect rather than erroring.
+
+**Read the metric families before reading the numbers.** Five of the metrics do not score
+your prediction at all — `sprawl/effective_outside_intent_rate`,
+`sprawl/missing_intended_access_rate`,
+`birthright_breadth/effective_outside_birthright_rate`,
+`redundancy/redundant_derivation_cell_rate`, and
+`accumulation/privilege_accumulation_subject_rate` are computed from the compiled truth
+alone. They describe how much excess access the *world* contains, not how well a system
+found it.
+
+There is deliberately no aggregate. The scorer's own docstring says so: *score independent
+semantic families; deliberately emit no aggregate.*
+
+### The identity-fabric pack is Python-only
+
+The identity-fabric benchmark scores membership, role resolution, account
+binding/lifecycle, entitlement, birthright, exception, intended-vs-effective-vs-final
+access, redundancy, sprawl, and cross-checkpoint privilege accumulation over at least two
+ordered immutable checkpoints.
+
+```python
+from synthworld.enterprise import evaluate_enterprise_identity_fabric
+from synthworld.enterprise.identity_fabric.metrics import (
+    perfect_enterprise_identity_fabric_prediction,
+)
+from synthworld.enterprise.identity_fabric.reference import (
+    reference_enterprise_identity_fabric,
+)
+
+reference = reference_enterprise_identity_fabric()
+report = evaluate_enterprise_identity_fabric(
+    artifacts=reference.evaluator,
+    predictions=perfect_enterprise_identity_fabric_prediction(reference.evaluator),
+)
+```
+
+Two gaps to plan around. There is **no CLI subcommand** for this pack, and there is **no
+JSONL trace format and no shape validator** — predictions must be constructed as
+`EnterpriseIdentityFabricPredictionV1` in Python. The agentic pack has both; this one does
+not.
+
+### Limits, stated plainly
+
+**The reference packs are conformance fixtures, not statistical benchmarks.** The
+identity-fabric pack has 19 evaluation cells *per checkpoint* over two checkpoints; the
+agentic pack is exactly 20 cases, one per case kind, so every gate metric has `n <= 20`. A
+1-of-1 or 3-of-3 slice is not a rate.
+
+**The reference packs are not blind, and re-seeding does not make them blind.** Three facts
+to plan around:
+
+1. `synthworld generate-enterprise-agentic --tier smoke --seed 20260804` reproduces the
+   checked-in `enterprise-identity-access-contract/examples/` files byte-for-byte. Your
+   "fresh" pack *is* the shipped fixture.
+2. Changing the seed does not re-sample the world or the answers. The compiled `access`
+   block — universe, corpus, both kernels, intents, states, evaluation profile, and
+   composition — is byte-identical across seeds. The overlay is not byte-identical, but its
+   counts are unchanged (6 agent accounts, 6 runtimes, 10 credentials, 8 capabilities, 11
+   delegations, 24 events, 20 cases) and every case kind keeps the same
+   `expected_decision`. What moves is case ids, a subset of overlay and event identifiers,
+   and the digests. The seed selects which principal plays the primary agent and rotates
+   part of the identifier namespace — it is not a re-randomisation knob.
+3. The identity-fabric pack takes no seed at all, and its reference builder output is
+   byte-identical to the checked-in public and evaluator files.
+
+So for these two packs the answer key is in the repository regardless of what you pass on
+the command line. The public/evaluator split is still worth honouring — it stops an adapter
+reading truth by accident, and for a universe you compile from your *own* blueprint the
+account-to-principal binding really is withheld — but it is not secrecy here. Treat a
+perfect score on the reference packs as evidence that an adapter conforms, never as
+evidence that a system generalises.
+
+**Nothing here decides or enforces anything.** These packs perform no network call,
+credential exchange, model execution, PDP decision, runtime enforcement, containment, or
+vendor configuration.
+
+For the contract-level description of these families — schemas, examples, and the pinned
+standards ledger — see
+[`enterprise-identity-access-contract/README.md`](enterprise-identity-access-contract/README.md).
+
 ## Reading evaluation results
 
 Use `--summary` for the headline metrics and omit it for the complete JSON
@@ -622,6 +1129,27 @@ answers. Keep them on the evaluator side.
 
 SynthWorld creates fictional test data. It is not an anonymisation tool and
 must not be used to impersonate, investigate, enrich, or target real people.
+
+### Enterprise trees
+
+The enterprise commands follow the same rule with two additions.
+
+`compile-enterprise-access`, `generate-enterprise-agentic`, and the identity-fabric exporter
+each write a `public/` tree and an `evaluator/` tree. Ship the `public/` tree; keep
+`evaluator/` on the evaluator side. `evaluator/canonical-binding-truth.json` is the
+account-to-principal linkage the public universe deliberately withholds, and the agentic and
+identity-fabric evaluator bundles hold expected decisions, failure reasons, and case labels.
+For the two shipped reference packs this separation is hygiene rather than secrecy — their
+evaluator bundles are checked into `enterprise-identity-access-contract/examples/`.
+
+Separately, the blueprint you author is neither public nor evaluator — it is
+operator-private. It carries your logical keys and the 256-bit `id_namespace_salt`, and
+every compiled identifier is derived from both. Neither the salt nor any logical key appears
+in the compiled artifacts. Do not distribute the blueprint alongside them.
+
+One projection is the exception to the "public in, public out" reading: `project_openfga`
+consumes `CompiledEnterpriseRebacTruthV1`, which is evaluator-side. An OpenFGA projection is
+derived from truth and is not automatically a public artifact.
 
 For exact field definitions, consult the
 [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md). For frozen reference scores, see

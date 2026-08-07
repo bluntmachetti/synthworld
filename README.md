@@ -26,6 +26,7 @@ tool and does not transform sensitive real-world data into a safe dataset.
 |---|---|---|
 | Inspect the data without installing anything | [Browse the frozen benchmarks on Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks) | Available |
 | Test agent identity and delegated authority | Use [Asteria Agentic v1](AGENTIC_BENCHMARK.md) | Available |
+| Model an enterprise identity/access world and test RBAC, ABAC, or ReBAC authorization | See [the enterprise surface](#enterprise-identity-and-access) | Partial: contracts published, unreleased |
 | Create safe connected identities for tests or demos | Run `synthworld generate` | Available |
 | Evaluate PII extraction, entity matching, relationship inference, or risk scoring | Follow the [user guide](USER_GUIDE.md) | Available |
 | Explore breach, search, broker, and social exposure scenarios | Generate an exposure corpus | Partial: generation and integrity metrics |
@@ -197,6 +198,177 @@ public observations  ---------->  system predictions
 Only corpus types and CLI commands explicitly described as public should be
 passed to product adapters. Do not pass the annotated extraction corpus into a
 product or model without first projecting only its page fields.
+
+## Enterprise identity and access
+
+**Identity tells you who holds an entitlement. The enterprise surface asks harder
+questions: did a system reach the correct authorization decision, can it still
+show which rule, role, relationship, or delegation produced it, can it explain why
+an authority changed, and does it notice when access drifts over time.**
+
+The surface is two things, and it matters which one you are using.
+
+**A compiler.** `compile-enterprise-access` turns an operator-authored blueprint
+of enterprise identity/access *structure* into a fixed, safely fictional
+universe: tenants, organisations, units, principals, unbound account slots,
+access subjects, groups, roles, permissions, opaque authorization targets,
+relationship anchors, and a frozen access-atom inventory. Canonical
+account-to-principal bindings are written to a separate `evaluator/` file; the
+public universe carries no `principal_id` on an account.
+
+**Reference benchmark packs.** The enterprise `generate-*` commands build
+built-in reference packs. **No CLI command takes a universe you compiled.**
+`generate-enterprise-agentic` and `generate-contextual-access` re-derive the
+pinned reference universe and abort if its digest has moved;
+`generate-continuous-assurance` builds from the shipped reference sources. The
+identity-fabric and authority-change governance packs have no command line at all
+and are reached only through the Python API. So the three-command quickstart below
+gives you a universe and its binding truth — it does not, on its own, give you the
+oracles.
+
+The Python API is the bridge, partially. The RBAC, ABAC, and ReBAC truth
+compilers, the evaluation-corpus compiler, the SCIM/OpenFGA/AuthZEN projections,
+and `generate_contextual_access_smoke` all take a `universe=` argument and will
+accept one you compiled. But they also require inputs that nothing derives from
+your blueprint: a corpus config, and state and intent overlays. A corpus config
+pins the digest of the universe it was built against, so it is not portable to
+any other universe — re-pointing the shipped reference corpus config at a
+universe compiled from the same blueprint at a different seed fails with
+`corpus_universe_digest_mismatch`.
+
+It is for teams building or auditing an IAM, authorization, access-review, or
+agent-gateway stack who need a deterministic world plus an answer key. It is not
+a directory service, IGA workflow system, policy decision point, identity-fabric
+product, vendor client, or runtime enforcement component. Nothing in it performs
+a network call, credential exchange, or enforcement action — and the package
+ships no HTTP client at all. The AuthZEN surface projects requests and
+normalizes decision observations, but you supply the entire transport: calling a
+live PDP, and producing the `transport_evidence_digest` that
+`normalize_authzen_observation` expects, are yours to implement.
+
+```bash
+synthworld scaffold-enterprise-access --format yaml --output private-enterprise.yaml
+synthworld validate-enterprise-access --input private-enterprise.yaml
+synthworld compile-enterprise-access \
+  --input private-enterprise.yaml \
+  --seed 20260804 \
+  --output compiled-enterprise
+```
+
+Compilation is deterministic: the same import at the same seed, compiler
+version, and selector algorithm version reproduces the universe and the binding
+truth byte for byte.
+
+The seed changes the world's content, not merely its labels. Structural
+identifiers — tenant, organisation, unit, principal, group, role, authorization
+target, and permission — derive from the namespace salt and your logical keys, and
+do not depend on the seed at all; across two seeds those records stay
+byte-identical. What the seed does decide is *which* principals are allocated
+accounts. Account identifiers embed the selected principal slot, so they move with
+the seed, and any access atom whose subject is an account inherits that. How many
+records move depends on your salt and on which two seeds you compare — on the
+reference import, seeds 111 and 222 move every account while 20260804 and 999 move
+half of them — so treat the mechanism as the invariant, not any particular count.
+What holds in every case is that principal-subject records do not move.
+
+That allocation is the account-to-principal binding the evaluator tree holds, and
+it is protected by the **salt**, not by withholding. Slot selection hashes the
+blueprint namespace — derived from your 64-hex salt — together with a logical
+population key, and the public universe carries neither. The `seed` field in the
+public universe is therefore harmless on its own. Leak the salt and the blueprint,
+however, and the binding becomes recomputable from public data.
+
+The `--seed` flag on `generate-enterprise-agentic` and
+`generate-contextual-access` is a different knob again. Those packs are pinned to
+one universe, whose digest is identical across seeds. The seed varies which
+agents, accounts, capabilities, and access atoms the cases are drawn over. What
+does not move is the universe, the case count — twenty and ten respectively —
+and the mix of case kinds.
+
+| Family | What it measures | Runs over | How you reach it |
+|---|---|---|---|
+| Identity/access universe | Compiles the fixed world and its evaluator-only account-to-principal binding truth | your blueprint | `scaffold-`, `validate-`, and `compile-enterprise-access` |
+| Directory/RBAC, ABAC, and ReBAC oracles | Birthright, intended, effective, and binding/lifecycle-gated final decision per cell, plus the derivation that produced each one | any universe, given a corpus config and overlays you author | Python: `synthworld.enterprise` |
+| Identity fabric | Membership and role resolution, account binding and lifecycle, redundant grants, access outside birthright and intent, and privilege accumulation across ordered checkpoints | built-in reference pack | Python: `synthworld.enterprise.identity_fabric` |
+| Enterprise agentic | Whether an agent action was within delegated authority, gate by gate, and whether retained evidence still reconstructs it at audit | the pinned reference universe only (digest-enforced) | `generate-enterprise-agentic`, `validate enterprise-agentic-trace`, `evaluate enterprise-agentic` |
+| Contextual access | Whether the decision follows when the facts that justify access change and arrive late, twice, or out of order | pinned reference universe via the CLI; any universe via `generate_contextual_access_smoke` | `generate-contextual-access`, `validate contextual-access-trace`, `evaluate contextual-access` |
+| Authority-change governance | Whether you can reconstruct why an authority change happened, under the policy in force at decision time | its own self-contained world — not the enterprise universe | Python: `synthworld.authority_governance` |
+| Continuous assurance | Whether identity and authority drift is detected, classified, cleared, and not silently reopened over time | shipped reference sources | `generate-continuous-assurance`, `evaluate continuous-assurance` |
+| Standards projections | SCIM, AuthZEN, and OpenFGA shapes; Shared Signals/CAEP is a mapping declaration that emits no enterprise events. Each ships a support matrix classifying every mapping `exact`, `approximated`, or `unsupported` | any universe, plus the kernel or truth each projection needs | Python: `synthworld.enterprise.projections` |
+
+Two support taxonomies appear below and they are not the same vocabulary. The
+enterprise projections above classify each mapping `exact`, `approximated`, or
+`unsupported`. The separate contextual-access Shared Signals projection uses its
+own single-valued `classification` field, whose only member is `custom_profile`.
+
+The contract packages are the normative documentation for this surface and
+describe each family's schemas, budgets, and boundaries in full:
+[enterprise identity/access](enterprise-identity-access-contract/README.md),
+[contextual access](contextual-access-contract/README.md),
+[authority governance](authority-governance-contract/README.md), and
+[continuous assurance](continuous-assurance-contract/README.md). Each ships
+generated JSON Schemas and examples, regenerated and checked by
+`uv run python <package>/tools/generate_contract.py --check`.
+
+### What the enterprise surface does not claim
+
+- **Importing structure is not anonymisation.** Logical keys, counts, group and
+  role structure, and access breadth can stay commercially sensitive even with no
+  person rows present. Keep the source import and the 64-hex namespace salt
+  private; `scaffold-enterprise-access` prints that warning after a successful
+  write.
+- **The public/evaluator split is a directory convention, not a custody
+  boundary.** `compile-enterprise-access` takes one `--output`, and `public/` and
+  `evaluator/` are sibling subdirectories beneath it, written with default file
+  permissions. Nothing chmods the evaluator tree or offers it a separate
+  destination. Keeping answer keys away from a model is your operational job.
+- **The reference packs are conformance fixtures, not blind tests.** All four
+  contract packages ship their evaluator answer key in `examples/` —
+  `enterprise-identity-fabric-evaluator.json` and
+  `enterprise-agentic-evaluator.json` under
+  `enterprise-identity-access-contract/`, plus
+  `contextual-access-evaluator.json`, `continuous-assurance-evaluator.json`, and
+  `authority-governance-evaluator.json`. Treat every shipped reference pack's
+  truth as public.
+- **No tier grows the world.** Enterprise agentic and contextual access expose
+  `smoke` only, and identity fabric has no tier at all, so for three of the five
+  families the question does not arise. Continuous assurance is the one family
+  with a tier ladder, and it governs assurance cadence rather than world scale:
+  its `smoke`, `standard`, `longitudinal`, and `held_out`
+  profiles repeat a fixed eight-template cycle — 8, 24, 48, and 24 cases — over
+  the shipped source records. `held_out` additionally permutes template order,
+  and the source record each case binds to is indexed by seed, `--risk-threshold`,
+  cycle, and position, so case identities differ between seeds and risk
+  thresholds while staying reproducible for any given configuration. `held_out`
+  is a generation-profile name, not keyed concealment — see
+  [EVALUATION_KEY_CUSTODY.md](EVALUATION_KEY_CUSTODY.md).
+- **Not every family has a command line.** Identity fabric and authority-change
+  governance are reachable only through the Python API; no terminal command
+  generates or scores either, and identity fabric has no JSONL trace format.
+- **Shared Signals/CAEP is a mapping declaration.** The enterprise projection
+  declares its mappings and support matrix but emits no events and constructs no
+  SET envelope; temporal emission is deferred. The additive contextual projection
+  under `contextual-access-contract/` does emit event projections and selects the
+  shipped temporal `1.2` tick contract — but every mapping it declares is
+  classified `custom_profile` with a null `standardized_caep_event_type`, so
+  these are versioned SynthWorld events, not standardized CAEP event types. SET
+  construction, signing, transmission, and vendor ingestion remain external.
+- **There is no aggregate score in any of these families.** Each metric carries
+  its own numerator, denominator, support, and denominator meaning, so a weak
+  dimension cannot be averaged away. Four of the five families also publish an
+  explicit empty behaviour; authority-change governance does not — its metric
+  model has no empty-behaviour field and requires `denominator > 0`, so an empty
+  governance metric is unrepresentable rather than null-reported.
+- **Standards are pinned, never "latest".** `standards-profile-ledger.json`
+  records eleven external editions reviewed on 2026-08-04 and the versioned
+  SynthWorld profile selected from each. Entries are classified across six
+  categories — normative standard, government reference, test method,
+  implementation model, community work, and research — so a final standard is
+  never conflated with a draft or a research paper. The dated AIIM MCP interop
+  snapshot is `community_work`/`draft` and supplies experimental scenario
+  vocabulary only.
+- **This surface is unreleased.** It sits under `[Unreleased]` in
+  [CHANGELOG.md](CHANGELOG.md) and is not yet covered by a tagged release.
 
 ## Install
 
