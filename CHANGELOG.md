@@ -329,6 +329,20 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
+- A Claude LLM adapter example (`examples/claude_adapter.py`) that integrates
+  a real model system against the Asteria agentic and exact-span extraction
+  tasks. The agentic public package is verified against its oracle-free
+  manifest (path-safe artifact names, symlink and traversal rejection,
+  per-file SHA-256, artifact-set digest, unlisted-file rejection) before
+  anything reaches the model. Responses are cached under hash-derived
+  filenames in validated, fingerprinted envelopes recording requested/served
+  model, generation configuration, stop reason, fallback occurrence,
+  response ID, and SDK version; cached and fresh outputs are validated
+  against the task contract, mismatched caches are rejected, and each run
+  writes a
+  `run-manifest.json` that binds per-unit fingerprints, a response
+  artifact-set digest, and the output SHA-256. Offline logic is covered by
+  `tests/test_claude_adapter.py`.
 - An AGENTIC_BENCHMARK.md "Trace conventions" section (issue #34) documenting
   the deterministic delegation-chain, evidence-reference, and side-effect
   rules the agentic evaluator grades against for the frozen Asteria Agentic
