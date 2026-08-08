@@ -11,7 +11,7 @@
   "scripts": {
     "docs:prepare": "node tools/prepare_docs_content.mjs",
     "docs:build": "npm run docs:prepare && blume build",
-    "docs:check": "npm run docs:prepare && blume check --strict && blume validate && blume build && blume audit && node tools/audit_docs_dist.mjs",
+    "docs:check": "npm run docs:prepare && blume check --strict && blume validate && blume build && blume audit --verbose && node tools/audit_docs_dist.mjs",
     "docs:preview": "npm run docs:prepare && blume preview"
   },
   "dependencies": {
