@@ -1,0 +1,19 @@
+{
+  "name": "synthworld-docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Hermetic documentation build for SynthWorld.",
+  "engines": {
+    "node": "22.12.0",
+    "npm": "10.9.0"
+  },
+  "packageManager": "npm@10.9.0",
+  "scripts": {
+    "docs:build": "blume build",
+    "docs:check": "blume check --strict && blume validate && blume build && blume audit && node tools/audit_docs_dist.mjs",
+    "docs:preview": "blume preview"
+  },
+  "dependencies": {
+    "blume": "1.4.0"
+  }
+}

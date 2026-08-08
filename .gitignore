@@ -1,5 +1,9 @@
 /.coverage
+/.blume/
+/.blume-verify/
 /.mypy_cache/
+/.npm/
+/node_modules/
 /.pytest_cache/
 /.ruff_cache/
 /.venv/
