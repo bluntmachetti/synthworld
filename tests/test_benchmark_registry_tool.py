@@ -1160,7 +1160,7 @@ def _successful_reproduction_process(
         stderr = b""
 
     def execute(command: list[str], **kwargs: object) -> Process:
-        calls.append((command, kwargs, Path(command[6]).read_bytes()))
+        calls.append((command, kwargs, Path(command[5]).read_bytes()))
         output = Path(command[-1])
         output.mkdir()
         (output / "sample.json").write_bytes(
