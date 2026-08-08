@@ -1,4 +1,4 @@
-.PHONY: baselines ci examples install lint metrics package reference-lab schemas test typecheck
+.PHONY: baselines ci examples install lint metrics package publication-boundary reference-lab schemas test typecheck
 
 UV := uv
 SEED := 20260719
@@ -19,6 +19,7 @@ lint:
 
 typecheck:
 	$(UV) run mypy
+	$(UV) run mypy tools/audit_publication_boundary.py
 
 package:
 	$(UV) build --clear
@@ -34,6 +35,9 @@ package:
 
 test:
 	$(UV) run pytest
+
+publication-boundary:
+	$(UV) run pytest --no-cov tests/test_public_repository_boundary.py tests/test_docs_publication_boundary.py
 
 metrics:
 	$(UV) run synthworld metrics --seed $(SEED) --persona-count $(PERSONAS)

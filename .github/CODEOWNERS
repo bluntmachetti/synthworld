@@ -5,6 +5,9 @@
 /.gitignore @bluntmachetti
 /CONTRIBUTING.md @bluntmachetti
 /Makefile @bluntmachetti
+/docs/publication-boundary.json @bluntmachetti
 /pyproject.toml @bluntmachetti
 /src/synthworld/**/*adapter*.py @bluntmachetti
+/tools/audit_publication_boundary.py @bluntmachetti
+/tests/test_docs_publication_boundary.py @bluntmachetti
 /tests/test_public_repository_boundary.py @bluntmachetti

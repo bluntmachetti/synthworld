@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0.0",
+  "sources": [
+    {
+      "path": "README.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "USER_GUIDE.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "DATA_DICTIONARY.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "AGENTIC_BENCHMARK.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "BENCHMARKS.md",
+      "source_type": "generated_benchmark_catalog",
+      "generator": "examples/generate_benchmarks_doc.py",
+      "requires_sensitivity": true,
+      "permitted_sensitivities": [
+        "public_reference_truth"
+      ]
+    },
+    {
+      "path": "ROADMAP.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "CHANGELOG.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "SECURITY.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "GOLDEN_REVIEW.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "EVALUATION_KEY_CUSTODY.md",
+      "source_type": "project_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "examples/README.md",
+      "source_type": "example_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "agent-authority-contract/README.md",
+      "source_type": "contract_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "authority-governance-contract/README.md",
+      "source_type": "contract_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "contextual-access-contract/README.md",
+      "source_type": "contract_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "continuous-assurance-contract/README.md",
+      "source_type": "contract_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    },
+    {
+      "path": "enterprise-identity-access-contract/README.md",
+      "source_type": "contract_documentation",
+      "generator": null,
+      "requires_sensitivity": false,
+      "permitted_sensitivities": []
+    }
+  ],
+  "allowed_sensitivities": [
+    "public_input",
+    "public_reference_truth"
+  ],
+  "forbidden_sensitivities": [
+    "private_held_out_truth",
+    "operator_private",
+    "internal_build_only"
+  ],
+  "allowed_machine_readable_outputs": [],
+  "forbidden_output_names": [
+    "llms.txt",
+    "llms-full.txt",
+    "sitemap.xml",
+    "feed.xml",
+    "rss.xml",
+    "atom.xml",
+    ".env",
+    ".env.local",
+    ".env.production"
+  ],
+  "forbidden_path_parts": [
+    ".omc",
+    ".qwen",
+    ".local-assurance",
+    "node_modules",
+    "__pycache__",
+    "caches",
+    ".git",
+    ".ssh",
+    "private",
+    "internal",
+    "secret",
+    "credentials"
+  ],
+  "forbidden_suffixes": [
+    ".map",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".tgz",
+    ".bz2",
+    ".xz",
+    ".7z",
+    ".sqlite",
+    ".db",
+    ".csv",
+    ".parquet"
+  ]
+}
