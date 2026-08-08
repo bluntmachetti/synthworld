@@ -6,15 +6,7 @@ export default defineConfig({
     "Deterministic synthetic identity data and ground-truth benchmarks.",
   banner: "Documentation preview: interfaces and publication status may change.",
   content: {
-    sources: [
-      { type: "filesystem", root: "docs" },
-      {
-        type: "filesystem",
-        root: ".",
-        include: ["CHANGELOG.md"],
-        prefix: "changelog",
-      },
-    ],
+    sources: [{ type: "filesystem", root: ".blume-content" }],
   },
   github: {
     owner: "bluntmachetti",

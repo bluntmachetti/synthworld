@@ -46,6 +46,7 @@ jobs:
           if git diff --quiet "$base" HEAD -- \
             docs CHANGELOG.md blume.config.ts package.json package-lock.json \
             tsconfig.json .nvmrc tools/audit_docs_dist.mjs \
+            tools/prepare_docs_content.mjs \
             .github/workflows/docs-impact.yml; then
             echo "impacted=false" >> "$GITHUB_OUTPUT"
           else

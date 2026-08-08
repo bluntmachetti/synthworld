@@ -94,8 +94,9 @@ function auditRootReference(target, renderedPath) {
 try {
   await stat(join(outputRoot, "index.html"));
   await stat(join(outputRoot, "blume-search.json"));
+  await stat(join(outputRoot, "changelog", "CHANGELOG", "index.html"));
 } catch {
-  fail("production HTML or the local search index is missing");
+  fail("production HTML, changelog route, or the local search index is missing");
 }
 
 let outputFiles = [];

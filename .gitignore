@@ -1,5 +1,6 @@
 /.coverage
 /.blume/
+/.blume-content/
 /.blume-verify/
 /.mypy_cache/
 /.npm/
