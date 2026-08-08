@@ -48,6 +48,10 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         # for receipt provenance; it imports no consumer code or private symbols.
         # Reviewed with the live reference-deployment slice on 2026-08-05.
         Path("agent-authority-contract/reference-deployment/run.py"),
+        # The mechanical capability inventory copies the public distribution
+        # name from pyproject.toml; it contains no consumer integration material.
+        # Reviewed with the capability-governance work package on 2026-08-08.
+        Path("docs/_data/capabilities.generated.json"),
         Path("Makefile"),
         Path("README.md"),
         Path("ROADMAP.md"),
