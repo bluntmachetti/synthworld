@@ -1,6 +1,7 @@
 # Publication and consumer-boundary changes require maintainer review.
 /.github/CODEOWNERS @bluntmachetti
 /.github/pull_request_template.md @bluntmachetti
+/docs/decisions/** @bluntmachetti
 /.github/workflows/** @bluntmachetti
 /.gitignore @bluntmachetti
 /CONTRIBUTING.md @bluntmachetti
