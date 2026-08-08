@@ -1156,7 +1156,6 @@ def _run_reproduction(
     command = [
         uv,
         "run",
-        "--offline",
         "--isolated",
         "--no-project",
         "--with",

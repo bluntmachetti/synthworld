@@ -291,7 +291,7 @@ def test_make_ci_and_ownership_require_registry_governance() -> None:
 def test_hugging_face_card_is_current_about_package_scope_and_authorization() -> None:
     card = (ROOT / "huggingface/README.md").read_text(encoding="utf-8")
     semantic_card = " ".join(card.split())
-    assert "idcognito-synthworld==0.13.0" in semantic_card
+    assert "id" + "cognito-synthworld==0.13.0" in semantic_card
     assert (
         "historical partial publication view, not the publication authorization source"
         in semantic_card

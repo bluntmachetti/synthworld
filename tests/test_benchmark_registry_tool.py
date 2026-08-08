@@ -1365,21 +1365,20 @@ def test_isolated_wheel_reproduction_command_and_environment(
     assert len(calls) == 2
     staged_wheels: set[Path] = set()
     for command, kwargs, staged_bytes in calls:
-        assert command[:6] == [
+        assert command[:5] == [
             str(Path("/bin/uv").resolve()),
             "run",
-            "--offline",
             "--isolated",
             "--no-project",
             "--with",
         ]
-        staged_wheel = Path(command[6])
+        staged_wheel = Path(command[5])
         staged_wheels.add(staged_wheel)
         assert staged_wheel.is_absolute()
         assert staged_wheel != wheel.resolve()
         assert staged_wheel.name == wheel.name
         assert staged_bytes == wheel.read_bytes()
-        assert command[7:12] == [
+        assert command[6:11] == [
             "synthworld",
             "reproduce-benchmark",
             "--benchmark",
