@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -138,8 +139,48 @@ def test_code_owner_gate_is_limited_to_boundary_defining_files() -> None:
         "/Makefile",
         "/pyproject.toml",
         "/src/synthworld/**/*adapter*.py",
+        "/docs/publication-boundary.json",
+        "/tools/audit_publication_boundary.py",
+        "/tests/test_docs_publication_boundary.py",
         "/tests/test_public_repository_boundary.py",
     } <= patterns
+
+
+def test_publication_policy_sources_are_tracked_and_classified() -> None:
+    policy = json.loads(
+        (_ROOT / "docs/publication-boundary.json").read_text(encoding="utf-8")
+    )
+    sources = cast(list[dict[str, object]], policy["sources"])
+    source_paths = [Path(cast(str, entry["path"])) for entry in sources]
+    tracked = set(_tracked_paths())
+    canonical_sensitivities = {
+        "public_input",
+        "public_reference_truth",
+    }
+    expected_source_keys = {
+        "path",
+        "source_type",
+        "generator",
+        "requires_sensitivity",
+        "permitted_sensitivities",
+    }
+
+    assert len(source_paths) == len(set(source_paths))
+    for entry, source_path in zip(sources, source_paths, strict=True):
+        assert set(entry) == expected_source_keys
+        assert (_ROOT / source_path).is_file(), source_path
+        assert source_path in tracked, source_path
+        permitted_sensitivities = cast(list[str], entry["permitted_sensitivities"])
+        assert set(permitted_sensitivities) <= canonical_sensitivities
+        if entry["requires_sensitivity"]:
+            assert permitted_sensitivities
+        else:
+            assert not permitted_sensitivities
+
+    assert set(policy["allowed_sensitivities"]) == {
+        "public_input",
+        "public_reference_truth",
+    }
 
 
 def test_consumer_references_stay_in_reviewed_public_metadata() -> None:

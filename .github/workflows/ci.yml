@@ -22,8 +22,8 @@ jobs:
           python-version: "3.12"
       - name: Install locked dependencies
         run: uv sync --locked --all-groups
-      - name: Enforce public consumer boundary
-        run: uv run pytest --no-cov tests/test_public_repository_boundary.py
+      - name: Enforce consumer boundary and verify documentation publication harness
+        run: make publication-boundary
 
   quality:
     name: Python ${{ matrix.python-version }} full gates
