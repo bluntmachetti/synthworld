@@ -61,7 +61,12 @@ def _write_json(path: Path, value: object) -> None:
 
 def _validate(manifest_path: Path) -> dict[str, object]:
     return publication.validate_publication(
-        manifest_path, SCHEMA, REGISTRY, REGISTRY_SCHEMA, CARD, ROOT
+        manifest_path,
+        SCHEMA,
+        REGISTRY,
+        REGISTRY_SCHEMA,
+        CARD,
+        ROOT,
     )
 
 
@@ -82,7 +87,8 @@ def test_repository_manifest_derives_no_upload_operations() -> None:
 
 @pytest.mark.parametrize("content", ["[]\n", "not-json\n"])
 def test_load_json_object_rejects_non_objects_and_invalid_json(
-    tmp_path: Path, content: str
+    tmp_path: Path,
+    content: str,
 ) -> None:
     path = tmp_path / "input.json"
     path.write_text(content, encoding="utf-8")
@@ -130,7 +136,8 @@ def test_validate_schema_rejects_invalid_schema() -> None:
     ],
 )
 def test_card_config_parser_rejects_invalid_frontmatter(
-    tmp_path: Path, content: str
+    tmp_path: Path,
+    content: str,
 ) -> None:
     path = tmp_path / "README.md"
     path.write_text(content, encoding="utf-8")
@@ -171,9 +178,7 @@ def test_registry_target_intersection_requires_gate_and_artifact_approval(
                 "benchmark_version": "1.0.0",
                 "id": "sample",
                 "lifecycle": "published",
-                "publication_gate": _approved_hf_gate(
-                    "sample", "hugging_face_raw"
-                ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
             },
             {
                 "artifacts": [],
@@ -186,7 +191,8 @@ def test_registry_target_intersection_requires_gate_and_artifact_approval(
     }
 
     operations, benchmarks, summary = publication.derive_registry_state(
-        _complete_registry(registry), tmp_path
+        _complete_registry(registry),
+        tmp_path,
     )
 
     assert operations == [
@@ -304,7 +310,8 @@ def test_registry_rejects_invalid_benchmark_inventory() -> None:
     ],
 )
 def test_registry_rejects_incomplete_authorized_artifact(
-    tmp_path: Path, artifact: dict[str, object]
+    tmp_path: Path,
+    artifact: dict[str, object],
 ) -> None:
     registry = {
         "benchmarks": [
@@ -313,15 +320,16 @@ def test_registry_rejects_incomplete_authorized_artifact(
                 "benchmark_version": "1.0.0",
                 "id": "sample",
                 "lifecycle": "published",
-                "publication_gate": _approved_hf_gate(
-                    "sample", "hugging_face_raw"
-                ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
             }
         ]
     }
 
     with pytest.raises(publication.PublicationError, match="require a path and digest"):
-        publication.derive_registry_state(_complete_registry(registry), tmp_path)
+        publication.derive_registry_state(
+            _complete_registry(registry),
+            tmp_path,
+        )
 
 
 def test_registry_normalizes_malformed_entries() -> None:
@@ -330,9 +338,7 @@ def test_registry_normalizes_malformed_entries() -> None:
 
 
 def test_registry_rejects_non_dict_benchmark() -> None:
-    with pytest.raises(
-        publication.PublicationError, match="malformed benchmark entry"
-    ):
+    with pytest.raises(publication.PublicationError, match="malformed benchmark entry"):
         publication.derive_registry_state({"benchmarks": [None]}, ROOT)
 
 
@@ -349,7 +355,8 @@ def test_registry_rejects_non_dict_benchmark() -> None:
     ],
 )
 def test_registry_rejects_invalid_benchmark_field_types(
-    field: str, value: object
+    field: str,
+    value: object,
 ) -> None:
     benchmark: dict[str, object] = {
         "artifact_ids": [],
@@ -362,9 +369,7 @@ def test_registry_rejects_invalid_benchmark_field_types(
     }
     benchmark[field] = value
 
-    with pytest.raises(
-        publication.PublicationError, match="malformed benchmark entry"
-    ):
+    with pytest.raises(publication.PublicationError, match="malformed benchmark entry"):
         publication.derive_registry_state({"benchmarks": [benchmark]}, ROOT)
 
 
@@ -404,9 +409,7 @@ def test_registry_rejects_missing_gate_id() -> None:
         ]
     }
 
-    with pytest.raises(
-        publication.PublicationError, match="gate ID is missing"
-    ):
+    with pytest.raises(publication.PublicationError, match="gate ID is missing"):
         publication.derive_registry_state(registry, ROOT)
 
 
@@ -425,9 +428,7 @@ def test_registry_rejects_non_dict_artifact() -> None:
         ]
     }
 
-    with pytest.raises(
-        publication.PublicationError, match="malformed artifact entry"
-    ):
+    with pytest.raises(publication.PublicationError, match="malformed artifact entry"):
         publication.derive_registry_state(registry, ROOT)
 
 
@@ -442,7 +443,8 @@ def test_registry_rejects_non_dict_artifact() -> None:
     ],
 )
 def test_registry_rejects_invalid_artifact_field_types(
-    field: str, value: object
+    field: str,
+    value: object,
 ) -> None:
     artifact: dict[str, object] = {
         "answer_key_label": None,
@@ -467,9 +469,7 @@ def test_registry_rejects_invalid_artifact_field_types(
         ]
     }
 
-    with pytest.raises(
-        publication.PublicationError, match="malformed artifact entry"
-    ):
+    with pytest.raises(publication.PublicationError, match="malformed artifact entry"):
         publication.derive_registry_state(registry, ROOT)
 
 
@@ -521,17 +521,16 @@ def test_registry_rejects_viewer_evaluator_artifact(tmp_path: Path) -> None:
                 "benchmark_version": "1.0.0",
                 "id": "sample",
                 "lifecycle": "published",
-                "publication_gate": _approved_hf_gate(
-                    "sample", "hugging_face_viewer"
-                ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_viewer"),
             }
         ]
     }
 
-    with pytest.raises(
-        publication.PublicationError, match="public-only artifact"
-    ):
-        publication.derive_registry_state(_complete_registry(registry), tmp_path)
+    with pytest.raises(publication.PublicationError, match="public-only artifact"):
+        publication.derive_registry_state(
+            _complete_registry(registry),
+            tmp_path,
+        )
 
 
 def test_registry_rejects_viewer_evaluator_marker_for_public_input(
@@ -559,17 +558,16 @@ def test_registry_rejects_viewer_evaluator_marker_for_public_input(
                 "benchmark_version": "1.0.0",
                 "id": "sample",
                 "lifecycle": "published",
-                "publication_gate": _approved_hf_gate(
-                    "sample", "hugging_face_viewer"
-                ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_viewer"),
             }
         ]
     }
 
-    with pytest.raises(
-        publication.PublicationError, match="public-only artifact"
-    ):
-        publication.derive_registry_state(_complete_registry(registry), tmp_path)
+    with pytest.raises(publication.PublicationError, match="public-only artifact"):
+        publication.derive_registry_state(
+            _complete_registry(registry),
+            tmp_path,
+        )
 
 
 def test_registry_allows_explicitly_labeled_raw_evaluator_artifact(
@@ -597,15 +595,14 @@ def test_registry_allows_explicitly_labeled_raw_evaluator_artifact(
                 "benchmark_version": "1.0.0",
                 "id": "sample",
                 "lifecycle": "published",
-                "publication_gate": _approved_hf_gate(
-                    "sample", "hugging_face_raw"
-                ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
             }
         ]
     }
 
     operations, _, _ = publication.derive_registry_state(
-        _complete_registry(registry), tmp_path
+        _complete_registry(registry),
+        tmp_path,
     )
 
     assert operations[0]["artifact_kind"] == "evaluator_truth"
@@ -621,7 +618,10 @@ def test_registry_allows_explicitly_labeled_raw_evaluator_artifact(
     ],
 )
 def test_registry_rejects_incorrectly_labeled_raw_artifact(
-    tmp_path: Path, kind: str, sensitivity: str, label: str | None
+    tmp_path: Path,
+    kind: str,
+    sensitivity: str,
+    label: str | None,
 ) -> None:
     source = tmp_path / "sample.json"
     source.write_bytes(b"{}\n")
@@ -644,16 +644,15 @@ def test_registry_rejects_incorrectly_labeled_raw_artifact(
                 "benchmark_version": "1.0.0",
                 "id": "sample",
                 "lifecycle": "published",
-                "publication_gate": _approved_hf_gate(
-                    "sample", "hugging_face_raw"
-                ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
             }
         ]
     }
 
     with pytest.raises(publication.PublicationError):
         publication.derive_registry_state(
-            _complete_registry(registry), tmp_path
+            _complete_registry(registry),
+            tmp_path,
         )
 
 
@@ -742,9 +741,7 @@ def test_registry_binds_artifact_identity(tmp_path: Path, field: str) -> None:
                     "benchmark_version": "1.0.0",
                     "id": "sample",
                     "lifecycle": "published",
-                    "publication_gate": _approved_hf_gate(
-                        "sample", "hugging_face_raw"
-                    ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
                 }
             ]
         }
@@ -788,9 +785,7 @@ def test_registry_rejects_source_digest_drift(tmp_path: Path) -> None:
                 "benchmark_version": "1.0.0",
                 "id": "sample",
                 "lifecycle": "published",
-                "publication_gate": _approved_hf_gate(
-                    "sample", "hugging_face_raw"
-                ),
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
             }
         ]
     }
