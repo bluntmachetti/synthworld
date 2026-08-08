@@ -36,6 +36,10 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
         Path(".github/workflows/release.yml"),
         Path("CHANGELOG.md"),
+        # Public package installation and PyPI links only. Reviewed as part of the
+        # additive plain-Markdown documentation migration on 2026-08-08.
+        Path("docs/getting-started.md"),
+        Path("docs/index.md"),
         # The worked broker adapter names the consumer once, in its module docstring,
         # to say whose integration pattern it demonstrates - reviewed 2026-08-04 with
         # PR #95, which is the review this allowlist exists to force.
