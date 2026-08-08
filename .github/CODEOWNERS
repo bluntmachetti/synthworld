@@ -8,3 +8,7 @@
 /pyproject.toml @bluntmachetti
 /src/synthworld/**/*adapter*.py @bluntmachetti
 /tests/test_public_repository_boundary.py @bluntmachetti
+/docs/_data/capabilities*.json @bluntmachetti
+/docs/_schemas/capabilities*.json @bluntmachetti
+/tools/** @bluntmachetti
+/tests/test_capability_governance*.py @bluntmachetti
