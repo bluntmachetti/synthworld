@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "package": {
+      "additionalProperties": false,
+      "properties": {
+        "distribution": {"type": "string"},
+        "scripts": {"items": {"$ref": "#/$defs/script"}, "type": "array"},
+        "version": {"type": "string"}
+      },
+      "required": ["distribution", "scripts", "version"],
+      "type": "object"
+    },
+    "releases": {"items": {"$ref": "#/$defs/release"}, "type": "array"},
+    "routes": {"items": {"$ref": "#/$defs/route"}, "type": "array"},
+    "schema_version": {"const": "1.0.0"},
+    "surfaces": {"items": {"$ref": "#/$defs/surface"}, "type": "array"}
+  },
+  "required": ["package", "releases", "routes", "schema_version", "surfaces"],
+  "type": "object",
+  "$defs": {
+    "release": {
+      "additionalProperties": false,
+      "properties": {
+        "heading": {"type": "string"},
+        "id": {"type": "string"},
+        "version": {"type": "string"}
+      },
+      "required": ["heading", "id", "version"],
+      "type": "object"
+    },
+    "route": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {"type": "string"},
+        "heading": {"type": "string"},
+        "id": {"type": "string"},
+        "path": {"type": "string"}
+      },
+      "required": ["anchor", "heading", "id", "path"],
+      "type": "object"
+    },
+    "script": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string"},
+        "target": {"type": "string"}
+      },
+      "required": ["name", "target"],
+      "type": "object"
+    },
+    "surface": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "python_export"}}, "required": ["kind"]},
+          "then": {"required": ["implementation_module"]}
+        }
+      ],
+      "properties": {
+        "assignment_required": {"type": "boolean"},
+        "id": {"type": "string"},
+        "implementation_module": {"type": "string"},
+        "kind": {"enum": ["cli_command", "python_export", "contract", "schema", "benchmark"]},
+        "name": {"type": "string"},
+        "source": {"type": "string"},
+        "visibility": {"enum": ["public", "subpackage", "structural"]}
+      },
+      "required": ["assignment_required", "id", "kind", "name", "source", "visibility"],
+      "type": "object"
+    }
+  }
+}
