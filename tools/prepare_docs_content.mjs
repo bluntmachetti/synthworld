@@ -17,9 +17,6 @@ const rootDocuments = [
   "DATA_DICTIONARY.md",
   "EVALUATION_KEY_CUSTODY.md",
   "GOLDEN_REVIEW.md",
-  "README.md",
-  "ROADMAP.md",
-  "USER_GUIDE.md",
 ];
 const nestedDocuments = [
   "agent-authority-contract/README.md",
@@ -65,11 +62,32 @@ async function writeDocument(destination, content) {
   await writeFile(destinationPath, content, { encoding: "utf8", flag: "wx" });
 }
 
+async function adaptDocument(source, replacements) {
+  let content = await readFile(source, "utf8");
+  for (const [match, replacement] of replacements) {
+    content = content.replaceAll(match, replacement);
+  }
+  await writeDocument(source, content);
+}
+
 await rm(stagingRoot, { force: true, recursive: true });
 await copyTree(sourceRoot, stagingRoot);
 for (const document of [...rootDocuments, ...nestedDocuments]) {
   await copyDocument(document);
 }
+await adaptDocument("README.md", [
+  ["(LICENSE)", "(https://github.com/bluntmachetti/synthworld/blob/main/LICENSE)"],
+  ["(Makefile)", "(https://github.com/bluntmachetti/synthworld/blob/main/Makefile)"],
+  ["(docs/index.md)", "(index.md)"],
+  [
+    "(examples/)",
+    "(https://github.com/bluntmachetti/synthworld/tree/main/examples)",
+  ],
+]);
+await adaptDocument("ROADMAP.md", [
+  ["(docs/roadmap/index.md)", "(roadmap/index.md)"],
+]);
+await adaptDocument("USER_GUIDE.md", [["(docs/index.md)", "(index.md)"]]);
 await writeDocument(
   "CHANGELOG.md",
   `---
