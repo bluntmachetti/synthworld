@@ -44,7 +44,16 @@ jobs:
           fi
 
           if git diff --quiet "$base" HEAD -- \
-            docs CHANGELOG.md blume.config.ts package.json package-lock.json \
+            docs AGENTIC_BENCHMARK.md BENCHMARKS.md CHANGELOG.md \
+            DATA_DICTIONARY.md EVALUATION_KEY_CUSTODY.md GOLDEN_REVIEW.md \
+            README.md ROADMAP.md USER_GUIDE.md \
+            agent-authority-contract/README.md \
+            authority-governance-contract/README.md \
+            contextual-access-contract/README.md \
+            continuous-assurance-contract/README.md \
+            enterprise-identity-access-contract/README.md \
+            huggingface/README.md \
+            blume.config.ts package.json package-lock.json \
             tsconfig.json .nvmrc tools/audit_docs_dist.mjs \
             tools/prepare_docs_content.mjs \
             .github/workflows/docs-impact.yml; then
