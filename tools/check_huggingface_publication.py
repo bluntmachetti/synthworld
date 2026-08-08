@@ -175,7 +175,9 @@ def _approved_hf_gate(
         or gate.get("benchmark_id") != benchmark_id
         or gate.get("benchmark_version") != benchmark_version
     ):
-        raise PublicationError(f"{benchmark_id}: HF publication gate identity is invalid")
+        raise PublicationError(
+            f"{benchmark_id}: HF publication gate identity is invalid"
+        )
     checks = gate.get("checks")
     if not isinstance(checks, list):
         raise PublicationError(f"{benchmark_id}: HF publication checks are missing")
@@ -221,7 +223,9 @@ def derive_registry_state(
             artifacts = benchmark["artifacts"]
             publication_gate_id = benchmark["publication_gate_id"]
         except KeyError as error:
-            raise PublicationError("resolved registry: malformed benchmark entry") from error
+            raise PublicationError(
+                "resolved registry: malformed benchmark entry"
+            ) from error
         if (
             not isinstance(benchmark_id, str)
             or not isinstance(benchmark_version, str)
@@ -286,7 +290,8 @@ def derive_registry_state(
                     approved_sha256, str
                 ):
                     raise PublicationError(
-                        f"{artifact_id}: HF-authorized artifacts require a path and digest"
+                        f"{artifact_id}: HF-authorized artifacts require "
+                        "a path and digest"
                     )
                 if artifact_kind == "public_input" and (
                     sensitivity != "public_input" or answer_key_label is not None
@@ -303,7 +308,8 @@ def derive_registry_state(
                         or evaluator_marker.search(source_path.casefold())
                     ):
                         raise PublicationError(
-                            f"{artifact_id}: Viewer publication requires a public-only artifact"
+                            f"{artifact_id}: Viewer publication requires "
+                            "a public-only artifact"
                         )
                 elif artifact_kind != "public_input" and (
                     artifact_kind != "evaluator_truth"
@@ -311,7 +317,8 @@ def derive_registry_state(
                     or not answer_key_label
                 ):
                     raise PublicationError(
-                        f"{artifact_id}: raw reference truth requires explicit evaluator labeling"
+                        f"{artifact_id}: raw reference truth requires "
+                        "explicit evaluator labeling"
                     )
                 source_file = _source_file(repository_root, source_path)
                 if file_sha256(source_file) != approved_sha256:
@@ -401,7 +408,9 @@ def validate_publication(
     try:
         manifest_bytes = manifest_path.read_bytes()
     except (OSError, ValueError) as error:
-        raise PublicationError("publication manifest: cannot read canonical bytes") from error
+        raise PublicationError(
+            "publication manifest: cannot read canonical bytes"
+        ) from error
     if manifest_bytes != canonical_json(manifest).encode("utf-8"):
         raise PublicationError("publication manifest: JSON is not canonical")
     for label, path, expected in (
@@ -413,7 +422,9 @@ def validate_publication(
 
     card_configs = read_card_configs(card_path)
     if card_configs != manifest["historical_card"]["configs"]:
-        raise PublicationError("dataset card: config inventory does not match the manifest")
+        raise PublicationError(
+            "dataset card: config inventory does not match the manifest"
+        )
 
     operations, authorized_benchmarks, summary = derive_registry_state(
         registry, repository_root

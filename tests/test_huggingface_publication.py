@@ -72,7 +72,9 @@ def test_repository_manifest_derives_no_upload_operations() -> None:
         "dataset_repository": "Bluntmachetti7/synthworld-benchmarks",
         "network_access": False,
         "operations": [],
-        "registry_sha256": "16160bbf11c73285319374133aa9d5caf3d8699393029fc9d3dd58e89d848818",
+        "registry_sha256": (
+            "16160bbf11c73285319374133aa9d5caf3d8699393029fc9d3dd58e89d848818"
+        ),
         "status": "blocked_no_authorized_targets",
         "upload_enabled": False,
     }
@@ -112,9 +114,18 @@ def test_validate_schema_rejects_invalid_schema() -> None:
         "---\nconfigs: invalid\n---\nbody\n",
         "---\nnull\n---\nbody\n",
         "---\nconfigs:\n- invalid\n---\nbody\n",
-        "---\nconfigs:\n- config_name: sample\n  data_files: []\n  extra: true\n---\nbody\n",
-        "---\nconfigs:\n- config_name: sample\n  data_files: []\n  default: 'false'\n---\nbody\n",
-        "---\nconfigs:\n- config_name: sample\n  data_files:\n  - path: sample.json\n---\nbody\n",
+        (
+            "---\nconfigs:\n- config_name: sample\n"
+            "  data_files: []\n  extra: true\n---\nbody\n"
+        ),
+        (
+            "---\nconfigs:\n- config_name: sample\n"
+            "  data_files: []\n  default: 'false'\n---\nbody\n"
+        ),
+        (
+            "---\nconfigs:\n- config_name: sample\n  data_files:\n"
+            "  - path: sample.json\n---\nbody\n"
+        ),
         "---\nconfigs:\n- config_name: sample\n  data_files:\n  - invalid\n---\nbody\n",
     ],
 )
@@ -263,7 +274,9 @@ def test_registry_rejects_duplicate_benchmark_identity() -> None:
 
 
 def test_registry_rejects_invalid_benchmark_inventory() -> None:
-    with pytest.raises(publication.PublicationError, match="benchmarks must be an array"):
+    with pytest.raises(
+        publication.PublicationError, match="benchmarks must be an array"
+    ):
         publication.derive_registry_state({"benchmarks": "invalid"}, ROOT)
 
 
@@ -479,7 +492,9 @@ def test_registry_rejects_invalid_target_vocabularies(
         ]
     }
 
-    with pytest.raises(publication.PublicationError, match="invalid publication targets"):
+    with pytest.raises(
+        publication.PublicationError, match="invalid publication targets"
+    ):
         publication.derive_registry_state(_complete_registry(registry), ROOT)
 
 
@@ -743,10 +758,12 @@ def test_registry_binds_artifact_identity(tmp_path: Path, field: str) -> None:
         publication.derive_registry_state(registry, tmp_path)
 
 
-@pytest.mark.parametrize("source_path", [".", "../escape.json", "/tmp/escape.json"])
+@pytest.mark.parametrize("source_path", [".", "../escape.json", "absolute"])
 def test_registry_rejects_source_path_escape(
     tmp_path: Path, source_path: str
 ) -> None:
+    if source_path == "absolute":
+        source_path = str(tmp_path.parent / "escape.json")
     with pytest.raises(publication.PublicationError, match="escapes repository"):
         publication._source_file(tmp_path, source_path)
 
@@ -912,7 +929,7 @@ def test_protected_workflow_has_no_hf_credential_or_upload_command() -> None:
         encoding="utf-8"
     )
 
-    parsed = yaml.load(workflow, Loader=yaml.BaseLoader)
+    parsed = yaml.safe_load(workflow.replace("\non:", '\n"on":', 1))
 
     assert set(parsed["on"]) == {"pull_request", "push", "workflow_dispatch"}
     assert set(parsed["on"]["push"]["paths"]) >= {"pyproject.toml", "uv.lock"}
