@@ -6,5 +6,7 @@
 /CONTRIBUTING.md @bluntmachetti
 /Makefile @bluntmachetti
 /pyproject.toml @bluntmachetti
+/examples/eads_adapter/** @bluntmachetti
 /src/synthworld/**/*adapter*.py @bluntmachetti
+/tests/test_eads_adapter.py @bluntmachetti
 /tests/test_public_repository_boundary.py @bluntmachetti

@@ -1,0 +1,21 @@
+{
+  "organisations": [
+    {
+      "organisation_id": "boundary-input-only",
+      "name": "Contoso Global",
+      "industry": "technology",
+      "scale": "medium",
+      "regions": [{"region_id": "boundary-west", "name": "West Europe"}],
+      "domains": [{"domain_id": "identity", "name": "Identity", "children": []}],
+      "teams": [
+        {"team_id": "identity-team", "name": "Okta Administrators", "team_type": "platform", "domain_id": "identity", "region_ids": ["boundary-west"], "size": 250}
+      ],
+      "services": [
+        {"service_id": "entra-production", "name": "Microsoft Entra ID Production for Salesforce", "service_type": "application", "classification": "confidential", "owning_team_id": "identity-team"}
+      ],
+      "ownerships": [
+        {"team_id": "identity-team", "service_id": "entra-production", "relationship": "owner"}
+      ]
+    }
+  ]
+}
