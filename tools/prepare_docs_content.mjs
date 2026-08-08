@@ -1,12 +1,4 @@
-import { constants } from "node:fs";
-import {
-  copyFile,
-  mkdir,
-  readFile,
-  readdir,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
 
 const sourceRoot = "docs";
@@ -36,9 +28,6 @@ const publicDocumentSources = new Set([
   "CHANGELOG.md",
   "huggingface/README.md",
 ]);
-const markdownLink =
-  /(?<!!)(\[[^\]\n]*\]\()(<[^>\n]+>|[^)\s\n]+)([^)\n]*\))/gu;
-
 function compareNames(left, right) {
   if (left.name < right.name) return -1;
   if (left.name > right.name) return 1;
@@ -52,16 +41,27 @@ function destinationForSource(source) {
   return null;
 }
 
-function routeForDestination(destination) {
+function routePathForDestination(destination) {
   let route = destination.replace(/\.(?:md|mdx)$/u, "");
   if (route === "index") route = "";
   if (route.endsWith("/index")) route = route.slice(0, -"/index".length);
-  return route ? `${deploymentBase}/${route}` : `${deploymentBase}/`;
+  return route;
 }
 
 function githubTarget(source, isDirectory) {
   const view = isDirectory ? "tree" : "blob";
   return `${githubSource}/${view}/main/${source}`;
+}
+
+function relativeRoute(source, target, suffix) {
+  const sourceDestination = destinationForSource(source);
+  if (sourceDestination === null) {
+    throw new Error(`missing source route for staged document: ${source}`);
+  }
+  const sourceRoute = routePathForDestination(sourceDestination);
+  const relative = posix.relative(sourceRoute, target);
+  if (relative === "") return suffix || ".";
+  return `${relative}${suffix}`;
 }
 
 function rewriteTarget(source, rawTarget) {
@@ -75,12 +75,16 @@ function rewriteTarget(source, rawTarget) {
   ) {
     return rawTarget;
   }
-  if (target.startsWith(deploymentBase)) return target;
-  if (target.startsWith("/")) return `${deploymentBase}${target}`;
-
   const suffixAt = target.search(/[?#]/u);
   const path = suffixAt === -1 ? target : target.slice(0, suffixAt);
   const suffix = suffixAt === -1 ? "" : target.slice(suffixAt);
+  if (path === deploymentBase || path.startsWith(`${deploymentBase}/`)) {
+    const route = path.slice(deploymentBase.length).replace(/^\//u, "");
+    return relativeRoute(source, route, suffix);
+  }
+  if (path.startsWith("/")) {
+    return relativeRoute(source, path.replace(/^\//u, ""), suffix);
+  }
   const isDirectory = path.endsWith("/");
   const resolvedSource = posix.normalize(posix.join(posix.dirname(source), path));
   if (resolvedSource === ".." || resolvedSource.startsWith("../")) {
@@ -89,31 +93,145 @@ function rewriteTarget(source, rawTarget) {
 
   const destination = destinationForSource(resolvedSource);
   if (destination !== null) {
-    return `${routeForDestination(destination)}${suffix}`;
+    return relativeRoute(
+      source,
+      routePathForDestination(destination),
+      suffix,
+    );
   }
   return `${githubTarget(resolvedSource, isDirectory)}${suffix}`;
 }
 
+function isEscaped(content, index) {
+  let backslashes = 0;
+  for (let cursor = index - 1; cursor >= 0 && content[cursor] === "\\"; cursor--) {
+    backslashes += 1;
+  }
+  return backslashes % 2 === 1;
+}
+
+function runLength(content, index, character) {
+  let length = 0;
+  while (content[index + length] === character) length += 1;
+  return length;
+}
+
+function labelStart(line, closing) {
+  let depth = 1;
+  for (let cursor = closing - 1; cursor >= 0; cursor--) {
+    if (isEscaped(line, cursor)) continue;
+    if (line[cursor] === "]") depth += 1;
+    if (line[cursor] === "[") {
+      depth -= 1;
+      if (depth === 0) return cursor;
+    }
+  }
+  return -1;
+}
+
+function destinationEnd(line, start) {
+  if (line[start] === "<") {
+    for (let cursor = start + 1; cursor < line.length; cursor++) {
+      if (line[cursor] === ">" && !isEscaped(line, cursor)) return cursor + 1;
+    }
+    return -1;
+  }
+
+  let depth = 0;
+  for (let cursor = start; cursor < line.length; cursor++) {
+    if (isEscaped(line, cursor)) continue;
+    if (line[cursor] === "(") {
+      depth += 1;
+    } else if (line[cursor] === ")") {
+      if (depth === 0) return cursor;
+      depth -= 1;
+    } else if (/\s/u.test(line[cursor]) && depth === 0) {
+      return cursor;
+    }
+  }
+  return -1;
+}
+
+function rewriteMarkdownLine(line, source, state) {
+  const replacements = [];
+  for (let cursor = 0; cursor < line.length; cursor++) {
+    if (state.comment) {
+      const end = line.indexOf("-->", cursor);
+      if (end === -1) return line;
+      state.comment = false;
+      cursor = end + "-->".length - 1;
+      continue;
+    }
+    if (line.startsWith("<!--", cursor)) {
+      state.comment = true;
+      cursor += "<!--".length - 1;
+      continue;
+    }
+    if (line[cursor] === "`") {
+      const length = runLength(line, cursor, "`");
+      if (state.inlineCode === 0) {
+        state.inlineCode = length;
+      } else if (length === state.inlineCode) {
+        state.inlineCode = 0;
+      }
+      cursor += length - 1;
+      continue;
+    }
+    if (
+      state.inlineCode !== 0 ||
+      line[cursor] !== "]" ||
+      line[cursor + 1] !== "(" ||
+      isEscaped(line, cursor)
+    ) {
+      continue;
+    }
+
+    const opening = labelStart(line, cursor);
+    if (opening === -1 || line[opening - 1] === "!") continue;
+    const start = cursor + 2;
+    const end = destinationEnd(line, start);
+    if (end === -1 || end === start) continue;
+    replacements.push({
+      end,
+      replacement: rewriteTarget(source, line.slice(start, end)),
+      start,
+    });
+    cursor = end - 1;
+  }
+
+  let rewritten = line;
+  for (const replacement of replacements.reverse()) {
+    rewritten =
+      rewritten.slice(0, replacement.start) +
+      replacement.replacement +
+      rewritten.slice(replacement.end);
+  }
+  return rewritten;
+}
+
 function rewriteMarkdownLinks(content, source) {
-  let fence = null;
+  const state = { comment: false, fence: null, inlineCode: 0 };
   return content
     .split(/(?<=\n)/u)
     .map((line) => {
-      const marker = /^\s*(`{3,}|~{3,})/u.exec(line)?.[1];
-      if (marker) {
-        if (fence === null) {
-          fence = marker[0];
-        } else if (marker[0] === fence) {
-          fence = null;
+      const marker = /^ {0,3}(`{3,}|~{3,})(.*)$/u.exec(line);
+      if (state.fence !== null) {
+        if (
+          marker &&
+          marker[1][0] === state.fence.character &&
+          marker[1].length >= state.fence.length &&
+          marker[2].trim() === ""
+        ) {
+          state.fence = null;
         }
         return line;
       }
-      if (fence !== null) return line;
-      return line.replace(
-        markdownLink,
-        (_match, opening, target, closing) =>
-          `${opening}${rewriteTarget(source, target)}${closing}`,
-      );
+      if (marker) {
+        state.fence = { character: marker[1][0], length: marker[1].length };
+        state.inlineCode = 0;
+        return line;
+      }
+      return rewriteMarkdownLine(line, source, state);
     })
     .join("");
 }
@@ -146,16 +264,10 @@ async function copyTree(sourcePath, destinationPath, source, destination) {
         childSource,
         childDestination,
       );
+    } else if (entry.isFile() && /\.(?:md|mdx)$/u.test(entry.name)) {
+      await stageMarkdown(childSourcePath, childSource, childDestination);
     } else if (entry.isFile()) {
-      if (/\.(?:md|mdx)$/u.test(entry.name)) {
-        await stageMarkdown(childSourcePath, childSource, childDestination);
-      } else {
-        await copyFile(
-          childSourcePath,
-          childDestinationPath,
-          constants.COPYFILE_EXCL,
-        );
-      }
+      continue;
     } else {
       throw new Error(`unsupported documentation entry: ${childSource}`);
     }
