@@ -1,0 +1,163 @@
+{
+  "authorized_benchmarks": [],
+  "dataset_repository": "Bluntmachetti7/synthworld-benchmarks",
+  "external_gates": [
+    {
+      "evidence_required": "Configure required reviewers on the hugging-face-publication GitHub environment.",
+      "id": "github_environment_protection",
+      "status": "pending"
+    },
+    {
+      "evidence_required": "Verify repository ownership, access control, and intended file layout on Hugging Face.",
+      "id": "hf_repository_control",
+      "status": "pending"
+    },
+    {
+      "evidence_required": "Verify uploaded bytes and remote SHA-256 values after an explicitly authorized publication.",
+      "id": "post_upload_integrity",
+      "status": "pending"
+    },
+    {
+      "evidence_required": "Verify Viewer schemas, splits, row counts, and public/evaluator labels against the approved manifest.",
+      "id": "viewer_remote_validation",
+      "status": "pending"
+    }
+  ],
+  "historical_card": {
+    "configs": [
+      {
+        "config_name": "personas",
+        "data_files": [
+          {
+            "path": "viewer/personas.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": true,
+        "default_explicit": true
+      },
+      {
+        "config_name": "relationships",
+        "data_files": [
+          {
+            "path": "viewer/relationships.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "public_extraction_pages",
+        "data_files": [
+          {
+            "path": "viewer/public_extraction_pages.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "extraction_answers",
+        "data_files": [
+          {
+            "path": "viewer/extraction_answers.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "public_identity_records",
+        "data_files": [
+          {
+            "path": "viewer/public_identity_records.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "asteria_principals",
+        "data_files": [
+          {
+            "path": "frozen/asteria-agentic-v1/public/principals.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "asteria_resources",
+        "data_files": [
+          {
+            "path": "frozen/asteria-agentic-v1/public/resources.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "asteria_delegations",
+        "data_files": [
+          {
+            "path": "frozen/asteria-agentic-v1/public/public_delegations.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "asteria_authority_truth",
+        "data_files": [
+          {
+            "path": "frozen/asteria-agentic-v1/evaluator/authority_truth.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      },
+      {
+        "config_name": "asteria_cases",
+        "data_files": [
+          {
+            "path": "frozen/asteria-agentic-v1/evaluator/cases.jsonl",
+            "split": "golden"
+          }
+        ],
+        "default": false,
+        "default_explicit": false
+      }
+    ],
+    "path": "huggingface/README.md",
+    "sha256": "5bc5f87922fb98b77e0162dd330dbba4eaaa2f0f1f2c10204abafcb7f3861f7e",
+    "status": "historical_partial_publication_view"
+  },
+  "operations": [],
+  "policy": {
+    "network_access": false,
+    "required_gate_targets": [
+      "hugging_face_raw",
+      "hugging_face_viewer"
+    ],
+    "upload_enabled": false
+  },
+  "registry": {
+    "path": "docs/_data/benchmarks.resolved.json",
+    "sha256": "16160bbf11c73285319374133aa9d5caf3d8699393029fc9d3dd58e89d848818"
+  },
+  "registry_summary": {
+    "candidate": 8,
+    "hf_authorized_artifacts": 0,
+    "published": 7,
+    "total": 15
+  },
+  "schema_version": "1.0.0"
+}
