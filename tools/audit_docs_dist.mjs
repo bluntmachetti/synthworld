@@ -20,10 +20,7 @@ const forbiddenSurfacePatterns = [
     /\/(?:agent-readability\.json|llms(?:-full)?\.txt|\.well-known\/(?:api-catalog|mcp(?:\.json|\/server-card\.json)))(?:["'/?#]|$)/,
   ],
   ["WebMCP registration", /(?:navigator|document)\.modelContext|provideContext|registerTool\s*\(/],
-  [
-    "WebMCP client bundle",
-    /(?:href|src)=["'][^"']*WebMcp[^"']*\.js(?:[?#][^"']*)?["']/i,
-  ],
+  ["WebMCP activation marker", /<blume-webmcp(?:\s|>)/i],
 ];
 const forbiddenLeakPatterns = [
   ["absolute home path", /\/home\/[A-Za-z0-9._-]+\//],
