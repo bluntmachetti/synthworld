@@ -54,6 +54,9 @@ function githubTarget(source, isDirectory) {
 }
 
 function relativeRoute(source, target, suffix) {
+  if (target.startsWith("/") || target.split("/").includes("..")) {
+    throw new Error(`invalid staged route target: ${source} -> ${target}`);
+  }
   const sourceDestination = destinationForSource(source);
   if (sourceDestination === null) {
     throw new Error(`missing source route for staged document: ${source}`);
@@ -214,7 +217,8 @@ function rewriteMarkdownLinks(content, source) {
   return content
     .split(/(?<=\n)/u)
     .map((line) => {
-      const marker = /^ {0,3}(`{3,}|~{3,})(.*)$/u.exec(line);
+      const unquoted = line.replace(/^(?: {0,3}>[ \t]?)+/u, "");
+      const marker = /^ {0,3}(`{3,}|~{3,})(.*)$/u.exec(unquoted);
       if (state.fence !== null) {
         if (
           marker &&
@@ -231,6 +235,7 @@ function rewriteMarkdownLinks(content, source) {
         state.inlineCode = 0;
         return line;
       }
+      if (/^(?: {4}|\t)/u.test(line)) return line;
       return rewriteMarkdownLine(line, source, state);
     })
     .join("");

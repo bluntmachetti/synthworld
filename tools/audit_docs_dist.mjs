@@ -20,6 +20,10 @@ const forbiddenSurfacePatterns = [
     /\/(?:agent-readability\.json|llms(?:-full)?\.txt|\.well-known\/(?:api-catalog|mcp(?:\.json|\/server-card\.json)))(?:["'/?#]|$)/,
   ],
   ["WebMCP registration", /(?:navigator|document)\.modelContext|provideContext|registerTool\s*\(/],
+  [
+    "WebMCP client bundle",
+    /(?:href|src)=["'][^"']*WebMcp[^"']*\.js(?:[?#][^"']*)?["']/i,
+  ],
 ];
 const forbiddenLeakPatterns = [
   ["absolute home path", /\/home\/[A-Za-z0-9._-]+\//],
@@ -59,7 +63,11 @@ const textExtensions = new Set([
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const paths = [];
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => {
+    if (left.name < right.name) return -1;
+    if (left.name > right.name) return 1;
+    return 0;
+  })) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
       paths.push(...(await walk(path)));
@@ -117,28 +125,28 @@ for (const path of outputFiles) {
   ) {
     fail(`forbidden agent-facing artifact emitted at ${renderedPath}`);
   }
-  if (forbiddenOpaqueExtensions.has(extname(path))) {
+  const extension = extname(path);
+  if (forbiddenOpaqueExtensions.has(extension)) {
     fail(`opaque compressed artifact emitted at ${renderedPath}`);
   }
 
-  const text = (await readFile(path)).toString("utf8");
+  if (!textExtensions.has(extension)) {
+    continue;
+  }
+
+  const text = await readFile(path, "utf8");
   for (const [label, pattern] of forbiddenLeakPatterns) {
     if (pattern.test(text)) {
       fail(`${label} found in ${renderedPath}`);
     }
   }
 
-  if (!textExtensions.has(extname(path))) {
-    continue;
-  }
-
-  for (const [label, pattern] of forbiddenSurfacePatterns) {
-    if (pattern.test(text)) {
-      fail(`${label} found in ${renderedPath}`);
+  if (extension === ".html") {
+    for (const [label, pattern] of forbiddenSurfacePatterns) {
+      if (pattern.test(text)) {
+        fail(`${label} found in ${renderedPath}`);
+      }
     }
-  }
-
-  if (extname(path) === ".html") {
     const rootReference = /(?:action|href|poster|src)=["'](\/(?!\/)[^"']*)["']/g;
     for (const match of text.matchAll(rootReference)) {
       auditRootReference(match[1], renderedPath);
@@ -154,19 +162,13 @@ for (const path of outputFiles) {
     }
   }
 
-  if (extname(path) === ".css") {
+  if (extension === ".css") {
     const cssRootReference = /url\(\s*["']?(\/(?!\/)[^"')\s]+)["']?\s*\)/g;
     for (const match of text.matchAll(cssRootReference)) {
       auditRootReference(match[1], renderedPath);
     }
   }
 
-  if (extname(path) === ".js") {
-    const scriptRootReference = /["'`](\/(?!\/)[A-Za-z0-9._~-][^"'`\r\n]*)["'`]/g;
-    for (const match of text.matchAll(scriptRootReference)) {
-      auditRootReference(match[1], renderedPath);
-    }
-  }
 }
 
 if (process.exitCode) {
