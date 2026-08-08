@@ -9,6 +9,12 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Added
+
+- A curated benchmark registry now records independent lifecycle, benchmark-kind,
+  evaluation-mode, artifact-sensitivity, integrity, and publication-gate evidence
+  for every current benchmark family.
+
 ## [0.13.0] - 2026-08-06
 
 ### Added

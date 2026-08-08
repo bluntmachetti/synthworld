@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -125,10 +126,33 @@ from synthworld.risk_serialization import (
 )
 from synthworld.serialization import world_to_json
 
+REPRODUCIBLE_BENCHMARK_IDS = (
+    "ambiguity-v1",
+    "asteria-agentic-v1",
+    "authority-governance-v1",
+    "connection-v1",
+    "core-world-v1",
+    "extraction-v1",
+    "risk-v1",
+)
+
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
+
+    if args.command == "reproduce-benchmark":
+        reproduction = importlib.import_module("synthworld.benchmark_reproduction")
+        try:
+            reproduction.reproduce_benchmark(
+                benchmark_id=args.benchmark,
+                output_directory=args.output,
+            )
+        except (OSError, ValueError) as error:
+            print(f"reproduce-benchmark: {error}", file=sys.stderr)
+            return 1
+        print(f"Benchmark reproduced: {args.benchmark} -> {args.output}")
+        return 0
 
     if args.command == "scaffold-enterprise-access":
         try:
@@ -784,6 +808,17 @@ def _parser() -> argparse.ArgumentParser:
     households.add_argument("--person-count", type=int, default=100)
     households.add_argument("--community-count", type=int, default=4)
     households.add_argument("--output", type=Path, required=True)
+
+    reproduce_benchmark = subparsers.add_parser(
+        "reproduce-benchmark",
+        help="recreate one published benchmark's complete artifact inventory",
+    )
+    reproduce_benchmark.add_argument(
+        "--benchmark",
+        choices=REPRODUCIBLE_BENCHMARK_IDS,
+        required=True,
+    )
+    reproduce_benchmark.add_argument("--output", type=Path, required=True)
 
     generate = subparsers.add_parser("generate", help="write a world as JSON")
     _add_world_arguments(generate)

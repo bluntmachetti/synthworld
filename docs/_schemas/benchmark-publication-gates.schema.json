@@ -1,0 +1,37 @@
+{
+  "$defs": {
+    "check": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {"enum": ["independent_versions", "public_input", "evaluator_truth", "boundary_validation", "checksums", "submission_contract", "scorer_version", "baseline", "metric_denominators", "limitations", "adversarial_review", "safety_review", "clean_install_reproduction", "deterministic_ci_recreation", "catalogue_hf_metadata"]},
+        "rationale": {"type": ["string", "null"]},
+        "status": {"enum": ["pass", "pending", "not_applicable"]}
+      },
+      "required": ["name", "status", "rationale"],
+      "type": "object"
+    },
+    "gate": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_targets": {"items": {"enum": ["repository", "python_package", "docs_catalog", "hugging_face_raw", "hugging_face_viewer"]}, "type": "array"},
+        "benchmark_id": {"type": "string"},
+        "benchmark_version": {"type": "string"},
+        "checks": {"items": {"$ref": "#/$defs/check"}, "type": "array"},
+        "decision": {"enum": ["approved", "blocked"]},
+        "id": {"type": "string"},
+        "release_tag": {"pattern": "^v", "type": "string"},
+        "review_route_id": {"type": "string"}
+      },
+      "required": ["id", "benchmark_id", "benchmark_version", "decision", "approved_targets", "review_route_id", "release_tag", "checks"],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "gates": {"items": {"$ref": "#/$defs/gate"}, "type": "array"},
+    "schema_version": {"const": "1.0.0"}
+  },
+  "required": ["schema_version", "gates"],
+  "type": "object"
+}

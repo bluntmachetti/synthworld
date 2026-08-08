@@ -1,4 +1,4 @@
-.PHONY: baselines ci examples install lint metrics package reference-lab schemas test typecheck
+.PHONY: baselines benchmark-registry benchmark-registry-check ci examples install lint metrics package reference-lab schemas test typecheck
 
 UV := uv
 SEED := 20260719
@@ -23,7 +23,9 @@ typecheck:
 package:
 	$(UV) build --clear
 	$(UV) run python -c "from pathlib import Path; from tarfile import open as open_tar; archives=list(Path('dist').glob('*.tar.gz')); assert len(archives) == 1; archive=open_tar(archives[0], 'r:gz'); names={item.name for item in archive.getmembers()}; archive.close(); assert not any('/.local-assurance/' in name or name.endswith('/.local-assurance') for name in names)"
-	$(UV) run python -c "from zipfile import ZipFile; names=set(ZipFile('$(WHEEL)').namelist()); assert any(name.endswith('dist-info/licenses/LICENSE') for name in names); required={'synthworld/py.typed','synthworld/benchmarks/golden-v1.json','synthworld/benchmarks/SHA256SUMS','synthworld/benchmarks/extraction-golden-v1.json','synthworld/benchmarks/EXTRACTION_SHA256SUMS','synthworld/benchmarks/extraction-public-golden-v1.json','synthworld/benchmarks/EXTRACTION_PUBLIC_SHA256SUMS','synthworld/benchmarks/extraction-answer-golden-v1.json','synthworld/benchmarks/EXTRACTION_ANSWER_SHA256SUMS','synthworld/benchmarks/connection-golden-v1.json','synthworld/benchmarks/CONNECTION_SHA256SUMS','synthworld/benchmarks/connection-public-golden-v1.json','synthworld/benchmarks/CONNECTION_PUBLIC_SHA256SUMS','synthworld/benchmarks/risk-public-golden-v1.json','synthworld/benchmarks/RISK_PUBLIC_SHA256SUMS','synthworld/benchmarks/risk-answer-golden-v1.json','synthworld/benchmarks/RISK_ANSWER_SHA256SUMS','synthworld/benchmarks/asteria-agentic-v1/public/manifest.json','synthworld/benchmarks/asteria-agentic-v1/public/public_events.jsonl','synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json','synthworld/benchmarks/asteria-agentic-v1/evaluator/authority_truth.jsonl','synthworld/benchmarks/authority-governance-v1/SHA256SUMS','synthworld/benchmarks/authority-governance-v1/public/authority-governance-input.json','synthworld/benchmarks/authority-governance-v1/public/manifest.json','synthworld/benchmarks/authority-governance-v1/evaluator/authority-governance-evaluator.json','synthworld/benchmarks/authority-governance-v1/evaluator/manifest.json','synthworld/benchmarks/households-smoke-v1.json','synthworld/benchmarks/HOUSEHOLDS_SMOKE_SHA256SUMS','synthworld/benchmarks/ambiguity-public-v1.json','synthworld/benchmarks/ambiguity-memberships-v1.json','synthworld/benchmarks/ambiguity-dispositions-v1.json','synthworld/benchmarks/AMBIGUITY_SHA256SUMS'}; assert required <= names"
+	$(UV) run python -c "from zipfile import ZipFile; names=set(ZipFile('$(WHEEL)').namelist()); assert any(name.endswith('dist-info/licenses/LICENSE') for name in names); assert 'synthworld/py.typed' in names"
+	$(UV) run python tools/generate_benchmark_registry.py --check-wheel $(WHEEL)
+	$(UV) run python tools/generate_benchmark_registry.py --check-reproduction $(WHEEL)
 	$(UV) run --isolated --no-project --with ./$(WHEEL) synthworld connection-metrics
 	$(UV) run --isolated --no-project --with ./$(WHEEL) synthworld risk-metrics
 	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python -c "import tempfile; from pathlib import Path; from synthworld.agentic import generate_asteria_agentic_v1, reference_agentic_trace, trace_submission_to_jsonl; from synthworld.cli import main; benchmark=generate_asteria_agentic_v1(); path=Path(tempfile.mkdtemp())/'trace.jsonl'; path.write_text(trace_submission_to_jsonl(reference_agentic_trace(benchmark)), encoding='utf-8'); assert main(['validate','agentic-trace','--predictions',str(path)]) == 0; assert main(['validate','agentic-trace','--predictions','/dev/null']) == 1"
@@ -73,4 +75,10 @@ schemas:
 	$(UV) run python agent-authority-contract/tools/render_coverage_table.py --check
 	$(UV) run python -c "import subprocess,sys,tempfile; from pathlib import Path; d=Path(tempfile.mkdtemp()); subprocess.run([sys.executable,'-m','synthworld.cli' if False else 'synthworld'],capture_output=True); from synthworld.cli import main; assert main(['generate-agentic','--output',str(d/'a')])==0; subprocess.run([sys.executable,'agent-authority-contract/adapter-template/adapter.py','--public-dir',str(d/'a/public'),'--output',str(d/'t.jsonl')],check=True,capture_output=True); assert main(['validate','agentic-trace','--predictions',str(d/'t.jsonl')])==0, 'the shipped adapter template must produce a valid trace'"
 
-ci: lint typecheck package test metrics examples baselines schemas
+benchmark-registry:
+	$(UV) run python tools/generate_benchmark_registry.py
+
+benchmark-registry-check:
+	$(UV) run python tools/generate_benchmark_registry.py --check
+
+ci: lint typecheck benchmark-registry-check package test metrics examples baselines schemas
