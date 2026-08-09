@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from types import ModuleType
 
 import pytest
 from pydantic import ValidationError
@@ -25,8 +24,8 @@ from synthworld.agentic.enterprise.c08_v2 import (
     C08SourceWorldV2,
     C08SubmissionV2,
     DEFAULT_C08_REFERENCE_SEED,
-    compile_c08_truth,
     c08_public_observation_id,
+    compile_c08_truth,
     evaluate_c08,
     export_c08_artifacts,
     generate_c08_reference,

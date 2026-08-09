@@ -369,7 +369,9 @@ def load_c08_v2_frozen_tree(root: FrozenNode) -> C08FrozenBundle:
         public_model != generated.public
         or evaluator_model != generated.evaluator
     ):
-        raise C08FrozenArtifactError("frozen payload does not match the fixed reference")
+        raise C08FrozenArtifactError(
+            "frozen payload does not match the fixed reference"
+        )
     return C08FrozenBundle(
         public=public_model,
         evaluator=evaluator_model,
