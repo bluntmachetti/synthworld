@@ -409,6 +409,218 @@ def _verify_asteria(
     )
 
 
+def _verify_path_bound_manifest(
+    artifacts: Mapping[str, bytes],
+    memberships: dict[str, list[str]],
+    records: list[JsonObject],
+    *,
+    owner: str,
+    record_prefix: str,
+    expected_members: Iterable[str],
+) -> JsonObject:
+    if owner not in artifacts:
+        raise RegistryError(f"{owner}: missing manifest")
+    manifest = _json_manifest(artifacts[owner], owner)
+    descriptors = manifest.get("artifacts")
+    if not isinstance(descriptors, list) or not descriptors:
+        raise RegistryError(f"{owner}: invalid artifact descriptors")
+    resolved_payloads: dict[str, bytes] = {}
+    resolved_members: list[str] = []
+    seen: set[str] = set()
+    for descriptor in descriptors:
+        if not isinstance(descriptor, dict):
+            raise RegistryError(f"{owner}: invalid artifact descriptor")
+        member = descriptor.get("path")
+        digest = descriptor.get("sha256")
+        byte_size = descriptor.get("byte_size")
+        if (
+            not isinstance(member, str)
+            or member in seen
+            or not isinstance(digest, str)
+            or SHA256_RE(digest) is None
+            or not isinstance(byte_size, int)
+        ):
+            raise RegistryError(f"{owner}: invalid artifact descriptor")
+        seen.add(member)
+        resolved = _member_path(owner, member)
+        if resolved not in artifacts:
+            raise RegistryError(f"{owner}: unknown manifest member {member}")
+        payload = artifacts[resolved]
+        if len(payload) != byte_size or _sha256(payload) != digest:
+            raise RegistryError(f"{owner}: manifest binding differs for {member}")
+        resolved_payloads[member] = payload
+        resolved_members.append(resolved)
+    if sorted(resolved_members) != sorted(expected_members):
+        raise RegistryError(f"{owner}: artifact inventory differs")
+    if manifest.get("artifact_set_digest") != artifact_set_digest(resolved_payloads):
+        raise RegistryError(f"{owner}: artifact set digest differs")
+    _record_integrity(
+        memberships,
+        records,
+        record_id=f"{record_prefix}:{owner}",
+        path=owner,
+        scheme="sha256-path-bound-v1",
+        members=resolved_members,
+    )
+    return manifest
+
+
+def _path_bound_descriptor(path: str, payload: bytes) -> JsonObject:
+    return {
+        "byte_size": len(payload),
+        "path": path,
+        "sha256": _sha256(payload),
+        "synthetic": True,
+    }
+
+
+def _verify_asteria_v2(
+    artifacts: Mapping[str, bytes],
+    memberships: dict[str, list[str]],
+    records: list[JsonObject],
+) -> None:
+    root = f"{BENCHMARK_PREFIX}asteria-agentic-c08-v2"
+    root_owner = f"{root}/manifest.json"
+    public_owner = f"{root}/public/manifest.json"
+    public_payload_path = f"{root}/public/c08-asteria-public.json"
+    evaluator_owner = f"{root}/evaluator/manifest.json"
+    evaluator_payload_path = f"{root}/evaluator/c08-asteria-evaluator.json"
+    expected_tree = {
+        root_owner,
+        public_owner,
+        public_payload_path,
+        evaluator_owner,
+        evaluator_payload_path,
+    }
+    actual_tree = {path for path in artifacts if path.startswith(f"{root}/")}
+    if not actual_tree:
+        return
+    if actual_tree != expected_tree:
+        raise RegistryError(f"{root}: Asteria C08 v2 inventory differs")
+    root_manifest = _verify_path_bound_manifest(
+        artifacts,
+        memberships,
+        records,
+        owner=root_owner,
+        record_prefix="c08-asteria-root",
+        expected_members=expected_tree - {root_owner},
+    )
+    public_manifest = _verify_path_bound_manifest(
+        artifacts,
+        memberships,
+        records,
+        owner=public_owner,
+        record_prefix="c08-asteria-public",
+        expected_members=(public_payload_path,),
+    )
+    evaluator_manifest = _verify_path_bound_manifest(
+        artifacts,
+        memberships,
+        records,
+        owner=evaluator_owner,
+        record_prefix="c08-asteria-evaluator",
+        expected_members=(evaluator_payload_path,),
+    )
+    public_payload = artifacts[public_payload_path]
+    evaluator_payload = artifacts[evaluator_payload_path]
+    public_digest = _sha256(public_payload)
+    public_files = {"c08-asteria-public.json": public_payload}
+    evaluator_files = {"c08-asteria-evaluator.json": evaluator_payload}
+    expected_public_manifest = {
+        "artifact_set_digest": artifact_set_digest(public_files),
+        "artifacts": [
+            _path_bound_descriptor("c08-asteria-public.json", public_payload)
+        ],
+        "benchmark_id": "asteria-agentic-c08-v2",
+        "schema_version": "2.0.0",
+        "seed": 20260809,
+        "synthetic": True,
+        "visibility": "public",
+    }
+    expected_evaluator_manifest = {
+        "artifact_set_digest": artifact_set_digest(evaluator_files),
+        "artifacts": [
+            _path_bound_descriptor("c08-asteria-evaluator.json", evaluator_payload)
+        ],
+        "benchmark_id": "asteria-agentic-c08-v2",
+        "public_input_digest": public_digest,
+        "schema_version": "2.0.0",
+        "seed": 20260809,
+        "synthetic": True,
+        "visibility": "evaluator",
+    }
+    root_files = {
+        "evaluator/c08-asteria-evaluator.json": evaluator_payload,
+        "evaluator/manifest.json": artifacts[evaluator_owner],
+        "public/c08-asteria-public.json": public_payload,
+        "public/manifest.json": artifacts[public_owner],
+    }
+    expected_root_manifest = {
+        "artifact_set_digest": artifact_set_digest(root_files),
+        "artifacts": [
+            _path_bound_descriptor(path, payload)
+            for path, payload in sorted(root_files.items())
+        ],
+        "benchmark_id": "asteria-agentic-c08-v2",
+        "evaluator_artifact_set_digest": artifact_set_digest(evaluator_files),
+        "evaluator_public_input_digest": public_digest,
+        "public_artifact_set_digest": artifact_set_digest(public_files),
+        "public_input_digest": public_digest,
+        "schema_version": "2.0.0",
+        "seed": 20260809,
+        "synthetic": True,
+        "visibility": "root",
+    }
+    if public_manifest != expected_public_manifest:
+        raise RegistryError(f"{public_owner}: manifest contract differs")
+    if evaluator_manifest != expected_evaluator_manifest:
+        raise RegistryError(f"{evaluator_owner}: manifest contract differs")
+    if root_manifest != expected_root_manifest:
+        raise RegistryError(f"{root_owner}: manifest contract differs")
+
+
+def _verify_enterprise_c08_v2(artifacts: Mapping[str, bytes]) -> None:
+    root = f"{BENCHMARK_PREFIX}enterprise-agentic-c08-v2"
+    owner = f"{root}/SHA256SUMS"
+    manifest_path = f"{root}/manifest.json"
+    evaluator_path = f"{root}/evaluator/truth.json"
+    public_path = f"{root}/public/public-input.json"
+    expected_tree = {owner, manifest_path, evaluator_path, public_path}
+    actual_tree = {path for path in artifacts if path.startswith(f"{root}/")}
+    if not actual_tree:
+        return
+    if actual_tree != expected_tree:
+        raise RegistryError(f"{owner}: enterprise C08 v2 inventory differs")
+    evaluator_payload = artifacts[evaluator_path]
+    public_payload = artifacts[public_path]
+    manifest_payload = artifacts[manifest_path]
+    expected_rows = (
+        ("evaluator/truth.json", _sha256(evaluator_payload)),
+        ("manifest.json", _sha256(manifest_payload)),
+        ("public/public-input.json", _sha256(public_payload)),
+    )
+    if _parse_sha256sum(artifacts[owner], owner) != expected_rows:
+        raise RegistryError(f"{owner}: enterprise C08 v2 checksum rows differ")
+    expected_manifest = {
+        "benchmark_id": "enterprise-agentic-c08-v2",
+        "checksum_algorithm": "sha256",
+        "checksum_excludes": ["SHA256SUMS"],
+        "checksum_file": "SHA256SUMS",
+        "evaluator_inventory": [
+            _path_bound_descriptor("evaluator/truth.json", evaluator_payload)
+        ],
+        "public_input_digest": _sha256(public_payload),
+        "public_inventory": [
+            _path_bound_descriptor("public/public-input.json", public_payload)
+        ],
+        "schema_version": "2.0.0",
+        "seed": 20260809,
+        "synthetic": True,
+    }
+    if _json_manifest(manifest_payload, manifest_path) != expected_manifest:
+        raise RegistryError(f"{manifest_path}: enterprise C08 v2 manifest differs")
+
+
 def _verify_authority_manifests(
     artifacts: Mapping[str, bytes],
     memberships: dict[str, list[str]],
@@ -488,8 +700,10 @@ def discover_generated(root: Path) -> JsonObject:
     artifacts = _read_artifact_bytes(root, benchmark_paths)
     memberships: dict[str, list[str]] = {path: [] for path in benchmark_paths}
     records: list[JsonObject] = []
+    _verify_enterprise_c08_v2(artifacts)
     _verify_sha256_manifests(artifacts, memberships, records)
     _verify_asteria(artifacts, memberships, records)
+    _verify_asteria_v2(artifacts, memberships, records)
     _verify_authority_manifests(artifacts, memberships, records)
     facts = []
     for path in benchmark_paths:

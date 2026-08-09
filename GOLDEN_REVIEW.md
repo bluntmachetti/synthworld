@@ -362,7 +362,11 @@ Reports measure offline artifact submissions only. They do not prove live
 evidence retention, durable logging, enforcement behavior, deployment, real
 Asteria/EADS compatibility, or a real EADS export. D8 excludes C13, C15/C16,
 Face A, EADS compatibility, deployment, and generated-world demonstrations.
-There is no registry entry, external publication, or publication claim.
+Repository-local candidate registry entries exist for `asteria-agentic-c08-v2`
+and `enterprise-agentic-c08-v2`, but all publication gates remain pending. The
+entries support candidate discovery only; they do not represent external
+publication, publication approval, or verification of any external host,
+viewer, download, or re-download path.
 
 ## C08 v2 corrective audit closure
 

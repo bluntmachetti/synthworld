@@ -11,6 +11,12 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
+- **C08 v2 candidate registry metadata.** Repository-local metadata records the
+  Asteria and enterprise C08 v2 benchmark identities as candidates with pending
+  publication gates. These entries do not publish either benchmark externally
+  or claim external hosting, viewer support, download availability, or
+  re-download verification.
+
 - **Independent C08 v2 frozen-artifact candidates.** Asteria now commits an exact
   five-file root/public/evaluator manifest tree; enterprise commits an exact
   four-file root-manifest/`SHA256SUMS` tree with a packaged fail-closed loader and

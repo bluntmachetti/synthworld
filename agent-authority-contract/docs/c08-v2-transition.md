@@ -252,15 +252,16 @@ may imply that an excluded item has shipped or been validated.
 ## Pending verification and publication evidence
 
 The candidate trees, loaders, governed schemas, adversarial hardening, baseline
-records, and expanded v1 assertions are implemented. None of the following has
-run for the current committed bytes: CI, Ruff lint, Ruff format checking, schema
-`--check`, package build, isolated-wheel execution, clean-install loading, or
-byte-for-byte regeneration verification. The enterprise publication test also
-committed `a0b012...`; that gate must be reconciled before it can pass.
+records, and expanded v1 assertions are implemented. GitHub Actions runs
+`31329844103` and `31330774589` verified the frozen bytes, repository gates,
+generated documents, schemas, and package paths recorded in `GOLDEN_REVIEW.md`.
 
-There is no benchmark-registry entry, external publication, or publication claim
-for these candidates. Until the pending evidence is produced, they remain
-committed frozen-artifact candidates, not published benchmarks.
+Repository-local candidate registry entries now exist for both C08 v2 benchmark
+identities. Verification of the current registry metadata remains pending until
+its branch CI passes. The entries do not represent external publication,
+publication approval, or verification of an external host, viewer, download, or
+re-download path; the artifacts remain frozen candidates, not published
+benchmarks.
 
 ## Corrective audit reconciliation
 

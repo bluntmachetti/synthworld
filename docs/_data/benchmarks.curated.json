@@ -83,6 +83,111 @@
       "sensitivity": "public_input"
     },
     {
+      "answer_key_label": "Candidate integrity metadata for evaluator reference truth; never product input.",
+      "approved_sha256": "bc701080cf88c8a446e31d5d379c360b29939bf51a7e3e017ce41f417bfce45c",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-c08-v2",
+      "frozen": true,
+      "id": "asteria-agentic-c08-v2:evaluator-manifest",
+      "integrity_record_ids": [
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "kind": "manifest",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Candidate evaluator reference truth; never product input.",
+      "approved_sha256": "b94fc5791e36e43e2b2586cdab0c7aaec9c249700e060a784ccc582b13b777f4",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-c08-v2",
+      "frozen": true,
+      "id": "asteria-agentic-c08-v2:evaluator-truth",
+      "integrity_record_ids": [
+        "c08-asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "b9ed17cac90721a276b28570bd91b5c6f41b106dad5be15fa1257a7e9a16ade3",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-c08-v2",
+      "frozen": true,
+      "id": "asteria-agentic-c08-v2:public-input",
+      "integrity_record_ids": [
+        "c08-asteria-public:src/synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json",
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/c08-asteria-public.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "5313551de8dbf5f6cdf97447fe9ade9c0fa73500dfd8fd387aa8aa4954de69c3",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-c08-v2",
+      "frozen": true,
+      "id": "asteria-agentic-c08-v2:public-manifest",
+      "integrity_record_ids": [
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "kind": "manifest",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": "Candidate root integrity metadata binds public input and evaluator reference truth; never product input.",
+      "approved_sha256": "cb8deb43ab6216c4d913e294a7a88d882aabb75a6ecbc87f66011eb8099ad50b",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-c08-v2",
+      "frozen": true,
+      "id": "asteria-agentic-c08-v2:root-manifest",
+      "integrity_record_ids": [],
+      "kind": "manifest",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
       "answer_key_label": null,
       "approved_sha256": "3e4884bdcde3ec9e2fbdc958c5fcc587c54e733273afeb4df00e64fac4e20279",
       "approved_targets": [
@@ -703,6 +808,88 @@
       "sensitivity": "public_reference_truth"
     },
     {
+      "answer_key_label": "Candidate checksums bind public input and evaluator reference truth; never product input.",
+      "approved_sha256": "a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "enterprise-agentic-c08-v2",
+      "frozen": true,
+      "id": "enterprise-agentic-c08-v2:checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Candidate evaluator reference truth; never product input.",
+      "approved_sha256": "7fb510dfad3ef71b7aa895c51c1810b2a9fb354509220ae65fa92e27e254736b",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "enterprise-agentic-c08-v2",
+      "frozen": true,
+      "id": "enterprise-agentic-c08-v2:evaluator-truth",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/evaluator/truth.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "d7a525cfeb53fcbd62adef9ee9c11dbb5b222ffa47874a8c5a0226d43deb61f0",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "enterprise-agentic-c08-v2",
+      "frozen": true,
+      "id": "enterprise-agentic-c08-v2:public-input",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/public/public-input.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": "Candidate root integrity metadata binds public input and evaluator reference truth; never product input.",
+      "approved_sha256": "af0697c8af4715786d4af1c4b6c9c228bdc2f0b795c69d195355be42b14af3c3",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "enterprise-agentic-c08-v2",
+      "frozen": true,
+      "id": "enterprise-agentic-c08-v2:root-manifest",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS"
+      ],
+      "kind": "manifest",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/manifest.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
       "answer_key_label": "Published extraction answer key; never product input.",
       "approved_sha256": "ffc6503df8cbb9d8f99161ee29324e8d0a0187901118e8eeaa590b49e7598f78",
       "approved_targets": [
@@ -997,6 +1184,30 @@
     },
     {
       "artifact_ids": [
+        "asteria-agentic-c08-v2:evaluator-manifest",
+        "asteria-agentic-c08-v2:evaluator-truth",
+        "asteria-agentic-c08-v2:public-input",
+        "asteria-agentic-c08-v2:public-manifest",
+        "asteria-agentic-c08-v2:root-manifest"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "2.0.0",
+      "docs_route_ids": [
+        "route:agent-authority-contract/docs/c08-v2-transition.md#asteria-frozen-inventory-and-digests"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "asteria-agentic-c08-v2",
+      "introduced_in": "unreleased",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:agent-authority-contract/docs/c08-v2-transition.md#evaluation-boundary-and-v1-preservation",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Asteria C08 evidence-binding v2"
+    },
+    {
+      "artifact_ids": [
         "asteria-agentic-v1:agents",
         "asteria-agentic-v1:authority-truth",
         "asteria-agentic-v1:canonical-bindings",
@@ -1119,24 +1330,6 @@
         "route:README.md#current-benchmark-families"
       ],
       "evaluation_mode": "generated_evaluation",
-      "example_command": "synthworld generate-continuous-assurance --output continuous-assurance.json",
-      "id": "continuous-assurance",
-      "introduced_in": "0.13.0",
-      "lifecycle": "candidate",
-      "limitations_route_id": "route:USER_GUIDE.md#limits-stated-plainly",
-      "publication_gate_id": null,
-      "replacement_id": null,
-      "reproduction": null,
-      "title": "Continuous assurance benchmark"
-    },
-    {
-      "artifact_ids": [],
-      "benchmark_kind": "generated_benchmark",
-      "benchmark_version": "1.0.0",
-      "docs_route_ids": [
-        "route:README.md#current-benchmark-families"
-      ],
-      "evaluation_mode": "generated_evaluation",
       "example_command": "synthworld generate-contextual-access --output contextual-access.json",
       "id": "contextual-access",
       "introduced_in": "0.13.0",
@@ -1146,6 +1339,24 @@
       "replacement_id": null,
       "reproduction": null,
       "title": "Contextual access benchmark"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "generated_benchmark",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:README.md#current-benchmark-families"
+      ],
+      "evaluation_mode": "generated_evaluation",
+      "example_command": "synthworld generate-continuous-assurance --output continuous-assurance.json",
+      "id": "continuous-assurance",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:USER_GUIDE.md#limits-stated-plainly",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Continuous assurance benchmark"
     },
     {
       "artifact_ids": [
@@ -1195,6 +1406,29 @@
       "replacement_id": null,
       "reproduction": null,
       "title": "Enterprise agentic benchmark"
+    },
+    {
+      "artifact_ids": [
+        "enterprise-agentic-c08-v2:checksum",
+        "enterprise-agentic-c08-v2:evaluator-truth",
+        "enterprise-agentic-c08-v2:public-input",
+        "enterprise-agentic-c08-v2:root-manifest"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "2.0.0",
+      "docs_route_ids": [
+        "route:agent-authority-contract/docs/c08-v2-transition.md#enterprise-frozen-inventory-and-digests"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "enterprise-agentic-c08-v2",
+      "introduced_in": "unreleased",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:agent-authority-contract/docs/c08-v2-transition.md#evaluation-boundary-and-v1-preservation",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Enterprise C08 evidence-binding v2"
     },
     {
       "artifact_ids": [],
