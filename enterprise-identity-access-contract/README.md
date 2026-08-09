@@ -333,3 +333,14 @@ uv run python enterprise-identity-access-contract/tools/generate_contract.py --c
 
 The enterprise work is independent of ambiguity issue #80. It does not modify
 ambiguity schemas, fixtures, checksums, or `GOLDEN_REVIEW.md`.
+
+### C08 v2 corrective boundary
+
+Enterprise C08 v2 exposes candidate observation/evidence IDs and binding handles
+in public inputs while retaining evaluator-selected bindings, required-ID sets,
+expected outcomes, and scenario truth in evaluator truth. Every requirement
+must have a same-action/same-kind different-handle distractor, and reports must
+carry schema-required measurement_scope after 4de6df8. The publication gate
+pins committed SHA256SUMS bytes to
+a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123;
+execution gates remain pending until CI.

@@ -453,3 +453,17 @@ world-authoring UI. Adding generated organisations, scale tiers, and custom
 scenario authoring belongs to the follow-on temporal/profile work. Those worlds
 can reuse this event and evaluation boundary without changing the frozen
 Asteria bytes.
+
+## C08 v2 public identifier and report correction
+
+Candidate observation/evidence IDs and binding handles are public benchmark
+inputs. They provide the literal identifiers needed to submit a selection.
+Evaluator-selected binding rows, required-ID sets, expected outcomes, and
+scenario truth remain confined to evaluator artifacts.
+
+For enterprise C08 v2, each requirement must have a same-action/same-kind
+candidate with a different binding handle. This runtime invariant makes the
+handle discriminating and prevents kind-only matching. Since 4de6df8,
+measurement_scope is required by the report schema; it must describe the
+offline measurement boundary and must not imply live retention, durable
+logging, enforcement, deployment, or EADS compatibility.

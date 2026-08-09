@@ -348,3 +348,12 @@ nothing.
 - **Control IDs are permanent.** Never renumber, never reuse a retired ID.
 - **Do not add a control without an observable invariant.** If it cannot be stated
   without naming a product or a draft, it is not a control yet.
+
+### C08 v2 corrective boundary
+
+C08 v2 public inputs include literal candidate observation/evidence IDs and
+binding handles so selections are constructible without evaluator bytes.
+Evaluator-selected bindings, required-ID sets, expected outcomes, and scenario
+truth remain evaluator-only. The Asteria publication gate pins root digest
+5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a;
+execution gates remain pending until CI.

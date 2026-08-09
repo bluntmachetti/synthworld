@@ -350,7 +350,6 @@ The assertions exist, but this documentation reconciliation did not run them.
 CI, Ruff lint, Ruff format checking, schema `--check`, package build,
 isolated-wheel execution, clean-install loading, and byte-for-byte regeneration
 verification remain pending. The current publication test also pins an earlier
-enterprise checksum-record digest (`3ad3c6...`) rather than committed-byte digest
 `a0b012...`; no passing checksum-root gate is claimed.
 
 Reports measure offline artifact submissions only. They do not prove live
@@ -358,3 +357,27 @@ evidence retention, durable logging, enforcement behavior, deployment, real
 Asteria/EADS compatibility, or a real EADS export. D8 excludes C13, C15/C16,
 Face A, EADS compatibility, deployment, and generated-world demonstrations.
 There is no registry entry, external publication, or publication claim.
+
+## C08 v2 corrective audit closure
+
+Fresh-audit finding 4 is resolved in the documented boundary: literal candidate
+observation/evidence IDs and public binding handles are public and necessary for
+solvability. Only evaluator-selected binding rows, required-ID sets, expected
+outcomes, and scenario truth are evaluator-only.
+
+Fresh-audit finding 6 is resolved by the implemented lineage evidence: after
+dd40fd9, preservation covers all 19 frozen Asteria v1 files, not only the
+previous public/evaluator root subsets. No v1 byte is authorized to change.
+
+The publication-gate pins are enterprise SHA256SUMS
+a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123
+and Asteria root artifact-set digest
+5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a.
+Enterprise additionally requires a same-action/same-kind different-handle
+distractor for every requirement, and measurement_scope is schema-required on
+reports after 4de6df8.
+
+This records implemented contract corrections and completed native adversarial
+resolutions only. CI, Ruff lint and format, schema --check, package builds,
+isolated-wheel execution, clean-install checks, and regeneration verification
+remain pending; no registry or publication completion is asserted.

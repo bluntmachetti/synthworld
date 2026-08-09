@@ -185,3 +185,19 @@ Exact candidate inventories and committed digests are in
 [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md). CI, package, isolated-wheel, clean-install,
 schema-check, and regeneration evidence remains pending; there is no registry or
 publication claim.
+
+## C08 v2 corrective freeze evidence
+
+Current publication-gate expectations pin:
+
+- Asteria root artifact set:
+  5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a
+- Enterprise SHA256SUMS committed bytes:
+  a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123
+
+After dd40fd9, Asteria v1 byte-preservation evidence covers its complete
+19-file frozen inventory. Candidate observation/evidence IDs and binding
+handles are public for C08 v2 solvability; evaluator selections and truth are
+not. These recorded expectations do not mark CI, lint, format, schema checks,
+package builds, wheel/clean-install execution, or regeneration verification as
+complete.

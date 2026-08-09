@@ -1316,3 +1316,15 @@ All prediction schemas are Pydantic models supporting `.model_validate_json(text
 ### Error handling
 - `EvaluationInputError`: Raised (inheriting from `ValueError`) if the submission is malformed or invalid for the benchmark (e.g. partitioning incorrect records, or missing case IDs), rather than merely scoring poorly.
 - Pydantic's `ValidationError` is raised if predictions violate the schema.
+
+## C08 v2 corrective field boundary
+
+- Candidate observation_id and evidence_id values are public identifiers for
+  selectable records.
+- binding_handle is public and is required to correlate a requirement with the
+  intended candidate among same-action/same-kind distractors.
+- Evaluator-selected binding rows, required-ID sets, expected outcomes, and
+  scenario truth are evaluator-only.
+- Enterprise measurement_scope is a schema-required report field after
+  4de6df8; it records offline measurement limitations rather than operational
+  proof.

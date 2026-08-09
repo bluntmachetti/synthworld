@@ -256,9 +256,35 @@ records, and expanded v1 assertions are implemented. None of the following has
 run for the current committed bytes: CI, Ruff lint, Ruff format checking, schema
 `--check`, package build, isolated-wheel execution, clean-install loading, or
 byte-for-byte regeneration verification. The enterprise publication test also
-still pins an earlier `SHA256SUMS`-bytes digest (`3ad3c6...`) rather than the
 committed `a0b012...`; that gate must be reconciled before it can pass.
 
 There is no benchmark-registry entry, external publication, or publication claim
 for these candidates. Until the pending evidence is produced, they remain
 committed frozen-artifact candidates, not published benchmarks.
+
+## Corrective audit reconciliation
+
+The frozen C08 v2 public boundary exposes the literal candidate observation and
+evidence IDs, together with each public binding handle, so a submission can be
+constructed from public bytes alone. Candidate IDs identify selectable public
+records; they are not evaluator answers. Evaluator-selected binding rows,
+required-ID sets, expected outcomes, and scenario truth remain evaluator-only.
+
+Enterprise generation and packaged loading require every requirement to have at
+least one distractor with the same action and candidate kind but a different
+binding handle. A kind-only match is therefore insufficient. After 4de6df8,
+measurement_scope is required by the enterprise report schema rather than
+being optional report prose.
+
+The publication gates pin the committed enterprise SHA256SUMS bytes to
+a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123
+and the Asteria root artifact set to
+5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a.
+These are gate expectations, not a claim that publication or any execution gate
+has passed.
+
+After dd40fd9, Asteria v1 preservation evidence covers the complete frozen
+19-file inventory. It extends the earlier public/evaluator root evidence without
+changing any v1 byte. CI, Ruff lint and format, schema --check, package builds,
+isolated-wheel execution, clean-install checks, and regeneration verification
+remain pending.
