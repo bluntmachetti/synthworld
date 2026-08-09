@@ -35,6 +35,7 @@ remaining docs are the two narrative files listed below.
 | `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
 | `docs/c15-c16-v2-design.md` | Accepted `0.1.0-design` input for future credential-authority and exact-payload v2 transitions; no v1 implementation or coverage claim |
+| `docs/face-b-compiled-universe-design.md` | Proposed `0.1.0-design` contract for future compiled-universe intake, tiers, C10 semantics, planted cases, and v2 publication gates; no runtime or real-export compatibility claim |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
