@@ -34,10 +34,13 @@ from synthworld.agentic.enterprise.c08_v2 import (
     project_c08_public,
     reference_submission_from_public,
     serialize_c08_public,
+    validate_c08_truth_against_public,
 )
 from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluationReportV2,
     C08EvidenceRequirementV2,
+    C08MeasurementScopeV2,
+    C08PublicActionV2,
     C08PublicInputV2,
 )
 from synthworld.agentic.enterprise.c08_v2.projection import c08_public_input_digest
@@ -598,7 +601,10 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             )
         }
     )
-    with pytest.raises(ValidationError, match="resolve exactly one observation"):
+    with pytest.raises(
+        ValidationError,
+        match="C08 public requirement must resolve to exactly one observation",
+    ):
         C08PublicInputV2(
             actions=(missing_kind, public.actions[1]),
             evidence_events=public.evidence_events,
@@ -659,6 +665,214 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
                         ),
                     }
                 ),
+            ),
+        )
+
+
+def test_source_action_requirement_validators_reject_noncanonical_values() -> None:
+    action = _source().actions[0]
+    blank_ids = action.model_dump(mode="json")
+    blank_ids["required_evidence_ids"] = [" ", "evidence-a-2"]
+    with pytest.raises(ValidationError, match="nonblank identifiers"):
+        C08SourceActionV2.model_validate(blank_ids)
+
+    duplicate_requirements = action.model_dump(mode="json")
+    duplicate_requirements["required_evidence"][1] = duplicate_requirements[
+        "required_evidence"
+    ][0]
+    with pytest.raises(ValidationError, match="must not contain duplicates"):
+        C08SourceActionV2.model_validate(duplicate_requirements)
+
+    unsorted_requirements = action.model_dump(mode="json")
+    unsorted_requirements["required_evidence"] = list(
+        reversed(unsorted_requirements["required_evidence"])
+    )
+    with pytest.raises(ValidationError, match="requirements must be sorted"):
+        C08SourceActionV2.model_validate(unsorted_requirements)
+
+
+def test_source_world_rejects_remaining_event_and_binding_failures() -> None:
+    source = _source()
+    with pytest.raises(ValidationError, match="contiguous sequence order"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(
+                source.evidence_events[0].model_copy(update={"sequence": 1}),
+                *source.evidence_events[1:],
+            ),
+        )
+
+    duplicate_binding = source.evidence_events[0].model_copy(
+        update={
+            "sequence": len(source.evidence_events),
+            "evidence_id": "evidence-duplicate-binding",
+        }
+    )
+    with pytest.raises(ValidationError, match="action/kind/handle bindings"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(*source.evidence_events, duplicate_binding),
+        )
+
+    unknown_action = source.evidence_events[0].model_copy(
+        update={"action_id": "action-unknown"}
+    )
+    with pytest.raises(ValidationError, match="references an unknown action"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(unknown_action, *source.evidence_events[1:]),
+        )
+
+    wrong_semantics = source.evidence_events[0].model_copy(
+        update={"resource_id": "resource-wrong"}
+    )
+    with pytest.raises(ValidationError, match="semantics differ from its action"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(wrong_semantics, *source.evidence_events[1:]),
+        )
+
+    mismatched_required = source.actions[0].model_copy(
+        update={
+            "required_evidence_ids": (
+                "evidence-a-1",
+                "evidence-a-identity-extra",
+            )
+        }
+    )
+    with pytest.raises(ValidationError, match="semantics differ from required IDs"):
+        C08SourceWorldV2(
+            actions=(mismatched_required, source.actions[1]),
+            evidence_events=source.evidence_events,
+        )
+
+
+def test_public_and_evaluator_models_reject_remaining_canonicality_failures() -> None:
+    public, evaluator = _bundle()
+    action = public.actions[0]
+    duplicate_requirements = action.model_dump(mode="json")
+    duplicate_requirements["required_evidence"][1] = duplicate_requirements[
+        "required_evidence"
+    ][0]
+    with pytest.raises(ValidationError, match="must not contain duplicates"):
+        C08PublicActionV2.model_validate(duplicate_requirements)
+
+    unsorted_requirements = action.model_dump(mode="json")
+    unsorted_requirements["required_evidence"] = list(
+        reversed(unsorted_requirements["required_evidence"])
+    )
+    with pytest.raises(ValidationError, match="requirements must be sorted"):
+        C08PublicActionV2.model_validate(unsorted_requirements)
+
+    duplicate_evidence_id = public.evidence_events[1].model_copy(
+        update={"evidence_id": public.evidence_events[0].evidence_id}
+    )
+    with pytest.raises(ValidationError, match="evidence identifiers must be unique"):
+        C08PublicInputV2(
+            actions=public.actions,
+            evidence_events=(
+                public.evidence_events[0],
+                duplicate_evidence_id,
+                *public.evidence_events[2:],
+            ),
+        )
+
+    unknown_action = public.evidence_events[0].model_copy(
+        update={"action_id": "action-unknown"}
+    )
+    with pytest.raises(ValidationError, match="references unknown action"):
+        C08PublicInputV2(
+            actions=public.actions,
+            evidence_events=(unknown_action, *public.evidence_events[1:]),
+        )
+
+    binding = evaluator.bindings[0]
+    duplicate_binding_requirements = binding.model_dump(mode="json")
+    duplicate_binding_requirements["required_evidence"][1] = (
+        duplicate_binding_requirements["required_evidence"][0]
+    )
+    with pytest.raises(ValidationError, match="must not contain duplicates"):
+        C08EvidenceBindingV2.model_validate(duplicate_binding_requirements)
+
+    unsorted_binding_requirements = binding.model_dump(mode="json")
+    unsorted_binding_requirements["required_evidence"] = list(
+        reversed(unsorted_binding_requirements["required_evidence"])
+    )
+    with pytest.raises(ValidationError, match="requirements must be sorted"):
+        C08EvidenceBindingV2.model_validate(unsorted_binding_requirements)
+
+    with pytest.raises(ValidationError, match="bindings must be sorted"):
+        C08EvaluatorTruthV2(
+            public_input_digest=evaluator.public_input_digest,
+            bindings=tuple(reversed(evaluator.bindings)),
+        )
+
+    with pytest.raises(ValidationError, match="report limitations are fixed"):
+        C08MeasurementScopeV2(limitations=("unsupported live claim",))
+
+
+def test_truth_validation_rejects_each_public_binding_mismatch() -> None:
+    public, evaluator = _bundle()
+    with pytest.raises(C08ProjectionError, match="do not cover public actions"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(update={"bindings": evaluator.bindings[:1]}),
+        )
+
+    first = evaluator.bindings[0]
+    wrong_tenant = first.model_copy(update={"tenant_id": "tenant-wrong"})
+    with pytest.raises(C08ProjectionError, match="tenant binding differs"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(
+                update={"bindings": (wrong_tenant, *evaluator.bindings[1:])}
+            ),
+        )
+
+    changed_requirement = first.required_evidence[0].model_copy(
+        update={"binding_handle": "binding-changed-authority"}
+    )
+    wrong_requirements = first.model_copy(
+        update={
+            "required_evidence": (
+                changed_requirement,
+                *first.required_evidence[1:],
+            )
+        }
+    )
+    with pytest.raises(C08ProjectionError, match="evidence kinds differ"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(
+                update={"bindings": (wrong_requirements, *evaluator.bindings[1:])}
+            ),
+        )
+
+    action = public.actions[0]
+    required_handles = {
+        requirement.binding_handle for requirement in action.required_evidence
+    }
+    distractor_ids = tuple(
+        sorted(
+            event.evidence_id
+            for event in public.evidence_events
+            if event.action_id == action.action_id
+            and event.binding_handle not in required_handles
+        )
+    )
+    wrong_bound_requirements = first.model_copy(
+        update={"required_observation_ids": distractor_ids}
+    )
+    with pytest.raises(C08ProjectionError, match="bound public evidence"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(
+                update={
+                    "bindings": (
+                        wrong_bound_requirements,
+                        *evaluator.bindings[1:],
+                    )
+                }
             ),
         )
 
@@ -742,6 +956,60 @@ def test_report_order_and_serialization_are_canonical_and_separate(
     with pytest.raises(C08SerializationError, match=r"not canonical"):
         load_c08_public(path)
     assert serialize_c08_public(public).endswith(b"\n")
+
+
+def test_serialization_rejects_invalid_models_and_canonical_default_omission(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    malformed = tmp_path / "malformed.json"
+    malformed.write_bytes(b"{\n")
+    with pytest.raises(C08SerializationError, match="invalid C08 public artifact"):
+        load_c08_public(malformed)
+
+    invalid_model = tmp_path / "invalid-model.json"
+    invalid_model.write_bytes(b"{}\n")
+    with pytest.raises(C08SerializationError, match="invalid C08 public artifact"):
+        load_c08_public(invalid_model)
+
+    public, evaluator = _bundle()
+    omitted_default = public.model_dump(mode="json")
+    del omitted_default["schema_version"]
+    omitted_payload = (
+        json.dumps(
+            omitted_default,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+        + b"\n"
+    )
+    omitted_path = tmp_path / "omitted-default.json"
+    omitted_path.write_bytes(omitted_payload)
+    with pytest.raises(C08SerializationError, match="not canonical"):
+        load_c08_public(omitted_path)
+
+    submission = _reference_submission(public)
+    without_report = tmp_path / "without-report"
+    export_c08_artifacts(
+        without_report,
+        public=public,
+        evaluator=evaluator,
+        submission=submission,
+    )
+    assert not (without_report / "evaluator" / "report.json").exists()
+
+    def fail_write(_path: Path, _payload: bytes) -> int:
+        raise OSError("synthetic write failure")
+
+    monkeypatch.setattr(Path, "write_bytes", fail_write)
+    with pytest.raises(C08SerializationError, match="artifact export failed"):
+        export_c08_artifacts(
+            tmp_path / "write-failure",
+            public=public,
+            evaluator=evaluator,
+            submission=submission,
+        )
 
 
 def test_report_models_require_canonical_order() -> None:
