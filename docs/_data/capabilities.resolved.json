@@ -6964,6 +6964,14 @@
             },
             {
               "assignment_required": true,
+              "id": "cli:synthworld reproduce-benchmark",
+              "kind": "cli_command",
+              "name": "synthworld reproduce-benchmark",
+              "source": "src/synthworld/cli.py",
+              "visibility": "public"
+            },
+            {
+              "assignment_required": true,
               "id": "cli:synthworld validate",
               "kind": "cli_command",
               "name": "synthworld validate",
@@ -7033,22 +7041,22 @@
           ]
         }
       },
-      "journey_route": "route:USER_GUIDE.md#run-the-five-evaluation-examples",
+      "journey_route": "route:USER_GUIDE.md#run-five-foundational-evaluation-examples",
       "maturity": "stable",
-      "notes": "The two command groups route to the task-specific surfaces catalogued elsewhere; this record owns only the shared command-group interfaces and shared Python types.",
+      "notes": "The command groups route to task-specific surfaces catalogued elsewhere; this record owns only shared command dispatch, benchmark reproduction, and shared Python types.",
       "related_surfaces": [],
       "roadmap_routes": [
         "route:ROADMAP.md#phase-1--benchmark-adoption"
       ],
       "since": "0.8.0",
       "summary": "Provide common evaluation reports, metrics, and command dispatch for scoreable tasks.",
-      "support": "Supported shared evaluation report and command-dispatch interfaces.",
+      "support": "Supported shared evaluation report, benchmark reproduction, and command-dispatch interfaces.",
       "title": "Shared evaluation framework"
     }
   ],
   "input_digests": {
-    "curated_sha256": "318b0a7af4610e7ce48190089a2b3ce9827e297bea1b4d0a1700efc7d3b8a79d",
-    "generated_sha256": "de830ab5d19d9b400b97d3db7a4d2b690cad999f91af9a371d5075fd6509dd46"
+    "curated_sha256": "6808018d087118dbe474f947971b3249c026a27e595214147e56164c8e4526a4",
+    "generated_sha256": "7c417f673ec020a3f0a5789b9d2c4db2e977ab17ef0de96d2c1bd5377d23dbc5"
   },
   "schema_version": "1.0.0"
 }

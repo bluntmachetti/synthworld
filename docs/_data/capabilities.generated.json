@@ -323,6 +323,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "added-8",
+      "heading": "Added",
+      "id": "route:CHANGELOG.md#added-8",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "changed",
       "heading": "Changed",
       "id": "route:CHANGELOG.md#changed",
@@ -464,6 +470,12 @@
       "anchor": "development",
       "heading": "Development",
       "id": "route:CONTRIBUTING.md#development",
+      "path": "CONTRIBUTING.md"
+    },
+    {
+      "anchor": "documentation",
+      "heading": "Documentation",
+      "id": "route:CONTRIBUTING.md#documentation",
       "path": "CONTRIBUTING.md"
     },
     {
@@ -800,6 +812,12 @@
       "anchor": "golden-v1-review-record",
       "heading": "Golden-v1 review record",
       "id": "route:GOLDEN_REVIEW.md#golden-v1-review-record",
+      "path": "GOLDEN_REVIEW.md"
+    },
+    {
+      "anchor": "risk-v1-review-record",
+      "heading": "Risk-v1 review record",
+      "id": "route:GOLDEN_REVIEW.md#risk-v1-review-record",
       "path": "GOLDEN_REVIEW.md"
     },
     {
@@ -1151,15 +1169,15 @@
       "path": "USER_GUIDE.md"
     },
     {
-      "anchor": "run-the-enterprise-agentic-smoke-pack",
-      "heading": "Run the enterprise-agentic smoke pack",
-      "id": "route:USER_GUIDE.md#run-the-enterprise-agentic-smoke-pack",
+      "anchor": "run-five-foundational-evaluation-examples",
+      "heading": "Run five foundational evaluation examples",
+      "id": "route:USER_GUIDE.md#run-five-foundational-evaluation-examples",
       "path": "USER_GUIDE.md"
     },
     {
-      "anchor": "run-the-five-evaluation-examples",
-      "heading": "Run the five evaluation examples",
-      "id": "route:USER_GUIDE.md#run-the-five-evaluation-examples",
+      "anchor": "run-the-enterprise-agentic-smoke-pack",
+      "heading": "Run the enterprise-agentic smoke pack",
+      "id": "route:USER_GUIDE.md#run-the-enterprise-agentic-smoke-pack",
       "path": "USER_GUIDE.md"
     },
     {
@@ -1735,6 +1753,468 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/benchmarks/index.md",
+      "path": "docs/benchmarks/index.md"
+    },
+    {
+      "anchor": "benchmarks",
+      "heading": "Benchmarks",
+      "id": "route:docs/benchmarks/index.md#benchmarks",
+      "path": "docs/benchmarks/index.md"
+    },
+    {
+      "anchor": "start-here",
+      "heading": "Start here",
+      "id": "route:docs/benchmarks/index.md#start-here",
+      "path": "docs/benchmarks/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/concepts/benchmark-model.md",
+      "path": "docs/concepts/benchmark-model.md"
+    },
+    {
+      "anchor": "benchmark-model",
+      "heading": "Benchmark model",
+      "id": "route:docs/concepts/benchmark-model.md#benchmark-model",
+      "path": "docs/concepts/benchmark-model.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/concepts/benchmark-publication.md",
+      "path": "docs/concepts/benchmark-publication.md"
+    },
+    {
+      "anchor": "benchmark-publication",
+      "heading": "Benchmark publication",
+      "id": "route:docs/concepts/benchmark-publication.md#benchmark-publication",
+      "path": "docs/concepts/benchmark-publication.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/concepts/conformance-vs-generalisation.md",
+      "path": "docs/concepts/conformance-vs-generalisation.md"
+    },
+    {
+      "anchor": "conformance-and-generalisation",
+      "heading": "Conformance and generalisation",
+      "id": "route:docs/concepts/conformance-vs-generalisation.md#conformance-and-generalisation",
+      "path": "docs/concepts/conformance-vs-generalisation.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/concepts/determinism-seeds-and-keys.md",
+      "path": "docs/concepts/determinism-seeds-and-keys.md"
+    },
+    {
+      "anchor": "determinism-seeds-and-keys",
+      "heading": "Determinism, seeds, and keys",
+      "id": "route:docs/concepts/determinism-seeds-and-keys.md#determinism-seeds-and-keys",
+      "path": "docs/concepts/determinism-seeds-and-keys.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/concepts/index.md",
+      "path": "docs/concepts/index.md"
+    },
+    {
+      "anchor": "concepts",
+      "heading": "Concepts",
+      "id": "route:docs/concepts/index.md#concepts",
+      "path": "docs/concepts/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/concepts/public-vs-evaluator.md",
+      "path": "docs/concepts/public-vs-evaluator.md"
+    },
+    {
+      "anchor": "public-input-and-evaluator-truth",
+      "heading": "Public input and evaluator truth",
+      "id": "route:docs/concepts/public-vs-evaluator.md#public-input-and-evaluator-truth",
+      "path": "docs/concepts/public-vs-evaluator.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/concepts/safety-boundary.md",
+      "path": "docs/concepts/safety-boundary.md"
+    },
+    {
+      "anchor": "safety-boundary",
+      "heading": "Safety boundary",
+      "id": "route:docs/concepts/safety-boundary.md#safety-boundary",
+      "path": "docs/concepts/safety-boundary.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/experiments/index.md",
+      "path": "docs/experiments/index.md"
+    },
+    {
+      "anchor": "experiments",
+      "heading": "Experiments",
+      "id": "route:docs/experiments/index.md#experiments",
+      "path": "docs/experiments/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/getting-started.md",
+      "path": "docs/getting-started.md"
+    },
+    {
+      "anchor": "choose-the-next-guide",
+      "heading": "Choose the next guide",
+      "id": "route:docs/getting-started.md#choose-the-next-guide",
+      "path": "docs/getting-started.md"
+    },
+    {
+      "anchor": "create-a-deterministic-world",
+      "heading": "Create a deterministic world",
+      "id": "route:docs/getting-started.md#create-a-deterministic-world",
+      "path": "docs/getting-started.md"
+    },
+    {
+      "anchor": "getting-started",
+      "heading": "Getting Started",
+      "id": "route:docs/getting-started.md#getting-started",
+      "path": "docs/getting-started.md"
+    },
+    {
+      "anchor": "install",
+      "heading": "Install",
+      "id": "route:docs/getting-started.md#install",
+      "path": "docs/getting-started.md"
+    },
+    {
+      "anchor": "run-the-foundational-walkthrough",
+      "heading": "Run the foundational walkthrough",
+      "id": "route:docs/getting-started.md#run-the-foundational-walkthrough",
+      "path": "docs/getting-started.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/agent-authority.md",
+      "path": "docs/guides/agent-authority.md"
+    },
+    {
+      "anchor": "agent-authority",
+      "heading": "Agent authority",
+      "id": "route:docs/guides/agent-authority.md#agent-authority",
+      "path": "docs/guides/agent-authority.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/enterprise-access.md",
+      "path": "docs/guides/enterprise-access.md"
+    },
+    {
+      "anchor": "enterprise-identity-and-access",
+      "heading": "Enterprise identity and access",
+      "id": "route:docs/guides/enterprise-access.md#enterprise-identity-and-access",
+      "path": "docs/guides/enterprise-access.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/evaluating-a-system.md",
+      "path": "docs/guides/evaluating-a-system.md"
+    },
+    {
+      "anchor": "evaluating-a-system",
+      "heading": "Evaluating a system",
+      "id": "route:docs/guides/evaluating-a-system.md#evaluating-a-system",
+      "path": "docs/guides/evaluating-a-system.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/identity-resolution.md",
+      "path": "docs/guides/identity-resolution.md"
+    },
+    {
+      "anchor": "identity-resolution",
+      "heading": "Identity resolution",
+      "id": "route:docs/guides/identity-resolution.md#identity-resolution",
+      "path": "docs/guides/identity-resolution.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/identity-worlds.md",
+      "path": "docs/guides/identity-worlds.md"
+    },
+    {
+      "anchor": "identity-worlds",
+      "heading": "Identity worlds",
+      "id": "route:docs/guides/identity-worlds.md#identity-worlds",
+      "path": "docs/guides/identity-worlds.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/index.md",
+      "path": "docs/guides/index.md"
+    },
+    {
+      "anchor": "guides",
+      "heading": "Guides",
+      "id": "route:docs/guides/index.md#guides",
+      "path": "docs/guides/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/privacy-exposure.md",
+      "path": "docs/guides/privacy-exposure.md"
+    },
+    {
+      "anchor": "privacy-and-exposure",
+      "heading": "Privacy and exposure",
+      "id": "route:docs/guides/privacy-exposure.md#privacy-and-exposure",
+      "path": "docs/guides/privacy-exposure.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/index.md",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "capability-and-benchmark-status",
+      "heading": "Capability and benchmark status",
+      "id": "route:docs/index.md#capability-and-benchmark-status",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "choose-your-goal",
+      "heading": "Choose your goal",
+      "id": "route:docs/index.md#choose-your-goal",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "current-focus",
+      "heading": "Current focus",
+      "id": "route:docs/index.md#current-focus",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "featured-benchmarks",
+      "heading": "Featured benchmarks",
+      "id": "route:docs/index.md#featured-benchmarks",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "five-minute-quickstart",
+      "heading": "Five-minute quickstart",
+      "id": "route:docs/index.md#five-minute-quickstart",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "mental-model",
+      "heading": "Mental model",
+      "id": "route:docs/index.md#mental-model",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "navigate",
+      "heading": "Navigate",
+      "id": "route:docs/index.md#navigate",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "project-links",
+      "heading": "Project links",
+      "id": "route:docs/index.md#project-links",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "synthworld-documentation",
+      "heading": "SynthWorld documentation",
+      "id": "route:docs/index.md#synthworld-documentation",
+      "path": "docs/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/migration-index.md",
+      "path": "docs/migration-index.md"
+    },
+    {
+      "anchor": "documentation-migration-index",
+      "heading": "Documentation migration index",
+      "id": "route:docs/migration-index.md#documentation-migration-index",
+      "path": "docs/migration-index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/reference/benchmarks.md",
+      "path": "docs/reference/benchmarks.md"
+    },
+    {
+      "anchor": "benchmarks",
+      "heading": "Benchmarks",
+      "id": "route:docs/reference/benchmarks.md#benchmarks",
+      "path": "docs/reference/benchmarks.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/reference/capabilities.md",
+      "path": "docs/reference/capabilities.md"
+    },
+    {
+      "anchor": "capabilities",
+      "heading": "Capabilities",
+      "id": "route:docs/reference/capabilities.md#capabilities",
+      "path": "docs/reference/capabilities.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/reference/cli.md",
+      "path": "docs/reference/cli.md"
+    },
+    {
+      "anchor": "cli-reference",
+      "heading": "CLI reference",
+      "id": "route:docs/reference/cli.md#cli-reference",
+      "path": "docs/reference/cli.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/reference/index.md",
+      "path": "docs/reference/index.md"
+    },
+    {
+      "anchor": "reference",
+      "heading": "Reference",
+      "id": "route:docs/reference/index.md#reference",
+      "path": "docs/reference/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/reference/metrics.md",
+      "path": "docs/reference/metrics.md"
+    },
+    {
+      "anchor": "metrics",
+      "heading": "Metrics",
+      "id": "route:docs/reference/metrics.md#metrics",
+      "path": "docs/reference/metrics.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/reference/schemas.md",
+      "path": "docs/reference/schemas.md"
+    },
+    {
+      "anchor": "schemas",
+      "heading": "Schemas",
+      "id": "route:docs/reference/schemas.md#schemas",
+      "path": "docs/reference/schemas.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/reference/standards-profiles.md",
+      "path": "docs/reference/standards-profiles.md"
+    },
+    {
+      "anchor": "standards-profiles",
+      "heading": "Standards profiles",
+      "id": "route:docs/reference/standards-profiles.md#standards-profiles",
+      "path": "docs/reference/standards-profiles.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/roadmap/index.md",
+      "path": "docs/roadmap/index.md"
+    },
+    {
+      "anchor": "later",
+      "heading": "Later",
+      "id": "route:docs/roadmap/index.md#later",
+      "path": "docs/roadmap/index.md"
+    },
+    {
+      "anchor": "next",
+      "heading": "Next",
+      "id": "route:docs/roadmap/index.md#next",
+      "path": "docs/roadmap/index.md"
+    },
+    {
+      "anchor": "now",
+      "heading": "Now",
+      "id": "route:docs/roadmap/index.md#now",
+      "path": "docs/roadmap/index.md"
+    },
+    {
+      "anchor": "roadmap",
+      "heading": "Roadmap",
+      "id": "route:docs/roadmap/index.md#roadmap",
+      "path": "docs/roadmap/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/support/contributing-documentation.md",
+      "path": "docs/support/contributing-documentation.md"
+    },
+    {
+      "anchor": "contributing-documentation",
+      "heading": "Contributing documentation",
+      "id": "route:docs/support/contributing-documentation.md#contributing-documentation",
+      "path": "docs/support/contributing-documentation.md"
+    },
+    {
+      "anchor": "safety-and-review",
+      "heading": "Safety and review",
+      "id": "route:docs/support/contributing-documentation.md#safety-and-review",
+      "path": "docs/support/contributing-documentation.md"
+    },
+    {
+      "anchor": "source-hierarchy",
+      "heading": "Source hierarchy",
+      "id": "route:docs/support/contributing-documentation.md#source-hierarchy",
+      "path": "docs/support/contributing-documentation.md"
+    },
+    {
+      "anchor": "version-language",
+      "heading": "Version language",
+      "id": "route:docs/support/contributing-documentation.md#version-language",
+      "path": "docs/support/contributing-documentation.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/support/index.md",
+      "path": "docs/support/index.md"
+    },
+    {
+      "anchor": "support",
+      "heading": "Support",
+      "id": "route:docs/support/index.md#support",
+      "path": "docs/support/index.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:enterprise-identity-access-contract/README.md",
       "path": "enterprise-identity-access-contract/README.md"
     },
@@ -1873,6 +2353,14 @@
   ],
   "schema_version": "1.0.0",
   "surfaces": [
+    {
+      "assignment_required": false,
+      "id": "benchmark:docs/benchmarks/index.md",
+      "kind": "benchmark",
+      "name": "index.md",
+      "source": "docs/benchmarks/index.md",
+      "visibility": "structural"
+    },
     {
       "assignment_required": true,
       "id": "cli:synthworld compile-enterprise-access",
@@ -2094,6 +2582,14 @@
       "id": "cli:synthworld metrics",
       "kind": "cli_command",
       "name": "synthworld metrics",
+      "source": "src/synthworld/cli.py",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "cli:synthworld reproduce-benchmark",
+      "kind": "cli_command",
+      "name": "synthworld reproduce-benchmark",
       "source": "src/synthworld/cli.py",
       "visibility": "public"
     },
