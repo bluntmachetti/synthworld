@@ -33,7 +33,10 @@ from synthworld.agentic.c08_v2 import (
     reference_c08_submission,
     semantic_c08_submission,
 )
-from synthworld.enterprise.canonical import canonical_json_bytes, canonical_json_value_bytes
+from synthworld.enterprise.canonical import (
+    canonical_json_bytes,
+    canonical_json_value_bytes,
+)
 
 
 def _benchmark() -> C08AsteriaBenchmarkV2:
