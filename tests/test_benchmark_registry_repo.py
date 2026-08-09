@@ -197,7 +197,8 @@ def test_c08_v2_candidates_have_exact_registry_semantics() -> None:
     artifacts = {
         item["id"]: item
         for item in registry["artifacts"]
-        if item["benchmark_id"] in {
+        if item["benchmark_id"]
+        in {
             "asteria-agentic-c08-v2",
             "enterprise-agentic-c08-v2",
         }
@@ -222,7 +223,8 @@ def test_c08_v2_candidates_have_exact_registry_semantics() -> None:
     assert len(artifacts) == 9
     assert all(item["frozen"] for item in artifacts.values())
     assert all(
-        item["present_in"] == item["approved_targets"]
+        item["present_in"]
+        == item["approved_targets"]
         == ["repository", "python_package"]
         for item in artifacts.values()
     )

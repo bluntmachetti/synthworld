@@ -468,9 +468,7 @@ def _asteria_v2_mapping() -> dict[str, bytes]:
             "evaluator_artifact_set_digest": registry.artifact_set_digest(
                 evaluator_files
             ),
-            "evaluator_public_input_digest": hashlib.sha256(
-                public_payload
-            ).hexdigest(),
+            "evaluator_public_input_digest": hashlib.sha256(public_payload).hexdigest(),
             "public_artifact_set_digest": registry.artifact_set_digest(public_files),
             "public_input_digest": hashlib.sha256(public_payload).hexdigest(),
             "schema_version": "2.0.0",
@@ -576,8 +574,9 @@ def _verify_path_bound_fixture(
     )
 
 
-def test_path_bound_manifest_rejects_missing_invalid_and_duplicate_descriptors(
-) -> None:
+def test_path_bound_manifest_rejects_missing_invalid_and_duplicate_descriptors() -> (
+    None
+):
     payload = b"payload\n"
     valid = _path_bound_descriptor("input.json", payload)
     digest = registry.artifact_set_digest({"input.json": payload})
