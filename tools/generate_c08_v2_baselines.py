@@ -75,7 +75,7 @@ def _replace_asteria_row(
         if row.action_event_id != action_event_id
         else C08SubmissionRowV2(
             action_event_id=action_event_id,
-            retained_observation_ids=retained_observation_ids,
+            retained_observation_ids=tuple(sorted(retained_observation_ids)),
         )
         for row in submission.rows
     )

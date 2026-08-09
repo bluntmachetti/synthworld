@@ -10,8 +10,10 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
+import synthworld.agentic.c08_v2.metrics as c08_metrics
 from synthworld.agentic.c08_v2 import (
     C08ArtifactError,
+    C08ArtifactManifestV2,
     C08AsteriaBenchmarkV2,
     C08AsteriaEvaluatorV2,
     C08AsteriaPublicInputV2,
@@ -33,7 +35,7 @@ from synthworld.agentic.c08_v2 import (
     semantic_c08_submission,
 )
 from synthworld.agentic.c08_v2.models import C08ScenarioKind
-from synthworld.enterprise.canonical import canonical_json_bytes
+from synthworld.enterprise.canonical import canonical_json_bytes, canonical_json_value_bytes
 
 
 def _benchmark() -> C08AsteriaBenchmarkV2:
@@ -699,3 +701,259 @@ def test_schema_tool_is_deterministic_and_check_detects_drift_and_missing(
     report.unlink()
     with pytest.raises(RuntimeError, match="missing"):
         tool.check_schema_directory(tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("values", "message"),
+    (
+        (("",), "nonblank"),
+        (("duplicate", "duplicate"), "unique"),
+        (("z-last", "a-first"), "canonical order"),
+    ),
+)
+def test_measurement_scope_strings_are_nonblank_unique_and_canonical(
+    values: tuple[str, ...], message: str
+) -> None:
+    scope = _benchmark().public.measurement_scope
+    with pytest.raises(ValidationError, match=message):
+        type(scope).model_validate(
+            {**scope.model_dump(mode="json"), "proves": values}
+        )
+
+
+def test_public_action_and_stream_canonical_contracts_fail_closed() -> None:
+    benchmark = _benchmark()
+    action = next(
+        item for item in benchmark.public.actions if len(item.required_evidence) > 1
+    )
+    action_document = action.model_dump(mode="json")
+    requirements = action_document["required_evidence"]
+    with pytest.raises(ValidationError, match="unique"):
+        type(action).model_validate(
+            {**action_document, "required_evidence": (requirements[0], requirements[0])}
+        )
+    with pytest.raises(ValidationError, match="canonical order"):
+        type(action).model_validate(
+            {**action_document, "required_evidence": tuple(reversed(requirements))}
+        )
+
+    public_document = benchmark.public.model_dump(mode="json")
+    duplicate_actions = [dict(item) for item in public_document["actions"]]
+    duplicate_actions[1] = dict(duplicate_actions[0])
+    with pytest.raises(ValidationError, match="action ids"):
+        C08AsteriaPublicInputV2.model_validate(
+            {**public_document, "actions": duplicate_actions}
+        )
+
+    noncontiguous_actions = [dict(item) for item in public_document["actions"]]
+    noncontiguous_actions[0]["event_order"] = len(noncontiguous_actions) + 1
+    with pytest.raises(ValidationError, match="contiguous event order"):
+        C08AsteriaPublicInputV2.model_validate(
+            {**public_document, "actions": noncontiguous_actions}
+        )
+
+    unordered_observations = [
+        dict(item) for item in public_document["evidence_observations"]
+    ]
+    unordered_observations[0]["observation_order"] = len(unordered_observations) + 1
+    with pytest.raises(ValidationError, match="preserve order"):
+        C08AsteriaPublicInputV2.model_validate(
+            {**public_document, "evidence_observations": unordered_observations}
+        )
+
+    unsolvable_actions = [dict(item) for item in public_document["actions"]]
+    unsolvable_requirements = [
+        dict(item) for item in unsolvable_actions[0]["required_evidence"]
+    ]
+    unsolvable_requirements[0]["binding_handle"] = (
+        "00000000-0000-0000-0000-000000000000"
+    )
+    unsolvable_requirements.sort(
+        key=lambda item: (item["evidence_kind"], item["binding_handle"])
+    )
+    unsolvable_actions[0]["required_evidence"] = unsolvable_requirements
+    with pytest.raises(ValidationError, match="exactly one binding handle"):
+        C08AsteriaPublicInputV2.model_validate(
+            {**public_document, "actions": unsolvable_actions}
+        )
+
+
+def test_evaluator_submission_and_benchmark_identities_fail_closed() -> None:
+    benchmark = _benchmark()
+    evaluator_document = benchmark.evaluator.model_dump(mode="json")
+    bindings = evaluator_document["bindings"]
+    with pytest.raises(ValidationError, match="binding action ids"):
+        C08AsteriaEvaluatorV2.model_validate(
+            {**evaluator_document, "bindings": (bindings[0], *bindings)}
+        )
+
+    with pytest.raises(ValidationError, match="nonblank"):
+        C08SubmissionRowV2(action_event_id="action", retained_observation_ids=("",))
+
+    reference = reference_c08_submission(benchmark)
+    reference_document = reference.model_dump(mode="json")
+    rows = reference_document["rows"]
+    with pytest.raises(ValidationError, match="submission action ids"):
+        C08AsteriaSubmissionV2.model_validate(
+            {**reference_document, "rows": (rows[0], rows[0], *rows[1:])}
+        )
+
+    incomplete_evaluator = C08AsteriaEvaluatorV2.model_validate(
+        {**evaluator_document, "bindings": bindings[:-1]}
+    )
+    with pytest.raises(ValidationError, match="actions and evaluator bindings"):
+        C08AsteriaBenchmarkV2(
+            public=benchmark.public,
+            evaluator=incomplete_evaluator,
+        )
+
+    binding = benchmark.evaluator.bindings[0]
+    unknown_binding = binding.model_copy(
+        update={"required_observation_ids": ("unknown-observation",)}
+    )
+    unknown_evaluator = benchmark.evaluator.model_copy(
+        update={
+            "bindings": tuple(
+                unknown_binding if item == binding else item
+                for item in benchmark.evaluator.bindings
+            )
+        }
+    )
+    with pytest.raises(ValidationError, match="unknown observation"):
+        C08AsteriaBenchmarkV2(
+            public=benchmark.public,
+            evaluator=unknown_evaluator,
+        )
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    (
+        ({"numerator": 2, "denominator": 1, "value": 2.0}, "cannot exceed"),
+        (
+            {"denominator": 1, "value": None, "undefined_reason": "unsupported"},
+            "zero support",
+        ),
+        (
+            {"denominator": 0, "value": None, "undefined_reason": None},
+            "zero support",
+        ),
+        ({"denominator": 0, "value": 0.0}, "must have support"),
+        (
+            {"denominator": 1, "value": 1.0, "undefined_reason": "unexpected"},
+            "must have support",
+        ),
+        ({"numerator": 1, "denominator": 2, "value": 0.75}, "must equal"),
+        ({"numerator": 1, "denominator": 1, "value": float("inf")}, "must equal"),
+    ),
+)
+def test_metric_value_contract_rejects_incoherent_states(
+    updates: dict[str, object], message: str
+) -> None:
+    document: dict[str, object] = {
+        "name": "exact_evidence_match",
+        "numerator": 0,
+        "denominator": 1,
+        "value": 0.0,
+        "denominator_meaning": "test actions",
+        "undefined_reason": None,
+    }
+    with pytest.raises(ValidationError, match=message):
+        C08MetricV2.model_validate({**document, **updates})
+
+
+def test_report_and_manifest_collections_require_fixed_canonical_order() -> None:
+    benchmark = _benchmark()
+    report = evaluate_c08_submission(benchmark, reference_c08_submission(benchmark))
+    with pytest.raises(ValidationError, match="fixed independent order"):
+        C08MetricsReportV2.model_validate(
+            {
+                **report.model_dump(mode="json"),
+                "metrics": tuple(
+                    item.model_dump(mode="json") for item in reversed(report.metrics)
+                ),
+            }
+        )
+
+    manifest_document = json.loads(
+        build_c08_public_artifacts(benchmark.public)["manifest.json"]
+    )
+    descriptor = manifest_document["artifacts"][0]
+    with pytest.raises(ValidationError, match="paths must be unique"):
+        C08ArtifactManifestV2.model_validate(
+            {**manifest_document, "artifacts": (descriptor, descriptor)}
+        )
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08ArtifactManifestV2.model_validate(
+            {
+                **manifest_document,
+                "artifacts": (
+                    {**descriptor, "path": "z-last.json"},
+                    {**descriptor, "path": "a-first.json"},
+                ),
+            }
+        )
+
+
+def test_serialization_rejects_invalid_payload_and_manifest_bindings() -> None:
+    benchmark = _benchmark()
+    public_artifacts = build_c08_public_artifacts(benchmark.public)
+    invalid_payload = dict(public_artifacts)
+    invalid_payload["c08-asteria-public.json"] = b"not-json\n"
+    with pytest.raises(C08ArtifactError, match="invalid"):
+        load_c08_public_artifacts(invalid_payload)
+
+    mismatched_manifest = dict(public_artifacts)
+    manifest_document = json.loads(mismatched_manifest["manifest.json"])
+    manifest_document["visibility"] = "evaluator"
+    mismatched_manifest["manifest.json"] = canonical_json_value_bytes(
+        manifest_document
+    )
+    with pytest.raises(C08ArtifactError, match="manifest binding"):
+        load_c08_public_artifacts(mismatched_manifest)
+
+    reference = reference_c08_submission(benchmark)
+    submission_artifacts = build_c08_submission_artifacts(reference)
+    assert load_c08_submission_artifacts(submission_artifacts) == reference
+    assert (
+        load_c08_bundle(
+            public_artifacts,
+            build_c08_evaluator_artifacts(benchmark.evaluator),
+        )
+        == benchmark
+    )
+
+
+def test_solver_and_evaluator_defensive_invariants(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    benchmark = _benchmark()
+    action = benchmark.public.actions[0]
+    requirement = action.required_evidence[0].model_copy(
+        update={"binding_handle": "00000000-0000-0000-0000-000000000000"}
+    )
+    corrupted_action = action.model_copy(
+        update={
+            "required_evidence": (requirement, *action.required_evidence[1:]),
+        }
+    )
+    corrupted_public = benchmark.public.model_copy(
+        update={"actions": (corrupted_action, *benchmark.public.actions[1:])}
+    )
+    with pytest.raises(ValueError, match="not uniquely solvable"):
+        semantic_c08_submission(corrupted_public)
+
+    reference = reference_c08_submission(benchmark)
+    with pytest.raises(C08EvaluationError, match="benchmark id"):
+        evaluate_c08_submission(
+            benchmark,
+            reference.model_copy(update={"benchmark_id": "wrong-benchmark"}),
+        )
+
+    monkeypatch.setattr(
+        c08_metrics,
+        "C08_METRIC_NAMES",
+        tuple(reversed(c08_metrics.C08_METRIC_NAMES)),
+    )
+    with pytest.raises(AssertionError, match="construction order"):
+        evaluate_c08_submission(benchmark, reference)

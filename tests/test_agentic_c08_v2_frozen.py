@@ -4,8 +4,10 @@ import hashlib
 import json
 import os
 import shutil
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from importlib.resources.abc import Traversable
 from pathlib import Path
+from typing import cast
 
 import pytest
 from pydantic import ValidationError
@@ -23,6 +25,7 @@ from synthworld.agentic.c08_v2 import (
     C08FrozenRootManifestV2,
     c08_frozen_artifact_set_digest,
     freeze_c08_v2_benchmark,
+    generate_c08_asteria_v2,
     load_c08_v2_frozen_tree,
     load_packaged_c08_v2_benchmark,
 )
@@ -201,6 +204,80 @@ def _refresh_evaluator_and_root_manifests(root: Path) -> None:
         descriptor["sha256"] = hashlib.sha256(payload).hexdigest()
     root_manifest["artifact_set_digest"] = c08_frozen_artifact_set_digest(files)
     root_manifest_path.write_bytes(canonical_json_value_bytes(root_manifest))
+
+
+def _refresh_all_manifests(root: Path) -> None:
+    public_payload_path = root / C08_FROZEN_PUBLIC_PAYLOAD
+    public_payload = public_payload_path.read_bytes()
+    public_digest = hashlib.sha256(public_payload).hexdigest()
+    public_manifest_path = root / C08_FROZEN_PUBLIC_MANIFEST
+    public_manifest = json.loads(public_manifest_path.read_bytes())
+    public_descriptor = public_manifest["artifacts"][0]
+    public_descriptor["byte_size"] = len(public_payload)
+    public_descriptor["sha256"] = public_digest
+    public_set_digest = c08_frozen_artifact_set_digest(
+        {public_payload_path.name: public_payload}
+    )
+    public_manifest["artifact_set_digest"] = public_set_digest
+    public_manifest_path.write_bytes(canonical_json_value_bytes(public_manifest))
+
+    evaluator_payload_path = root / C08_FROZEN_EVALUATOR_PAYLOAD
+    evaluator_payload = evaluator_payload_path.read_bytes()
+    evaluator_manifest_path = root / C08_FROZEN_EVALUATOR_MANIFEST
+    evaluator_manifest = json.loads(evaluator_manifest_path.read_bytes())
+    evaluator_descriptor = evaluator_manifest["artifacts"][0]
+    evaluator_descriptor["byte_size"] = len(evaluator_payload)
+    evaluator_descriptor["sha256"] = hashlib.sha256(evaluator_payload).hexdigest()
+    evaluator_set_digest = c08_frozen_artifact_set_digest(
+        {evaluator_payload_path.name: evaluator_payload}
+    )
+    evaluator_manifest["public_input_digest"] = public_digest
+    evaluator_manifest["artifact_set_digest"] = evaluator_set_digest
+    evaluator_manifest_path.write_bytes(canonical_json_value_bytes(evaluator_manifest))
+
+    root_manifest_path = root / C08_FROZEN_MANIFEST
+    root_manifest = json.loads(root_manifest_path.read_bytes())
+    root_manifest["public_input_digest"] = public_digest
+    root_manifest["evaluator_public_input_digest"] = public_digest
+    root_manifest["public_artifact_set_digest"] = public_set_digest
+    root_manifest["evaluator_artifact_set_digest"] = evaluator_set_digest
+    files = {
+        relative: (root / relative).read_bytes()
+        for relative in EXPECTED_FILES
+        if relative != C08_FROZEN_MANIFEST
+    }
+    for relative, payload in files.items():
+        descriptor = next(
+            item for item in root_manifest["artifacts"] if item["path"] == relative
+        )
+        descriptor["byte_size"] = len(payload)
+        descriptor["sha256"] = hashlib.sha256(payload).hexdigest()
+    root_manifest["artifact_set_digest"] = c08_frozen_artifact_set_digest(files)
+    root_manifest_path.write_bytes(canonical_json_value_bytes(root_manifest))
+
+
+class _PackagedTreeNode:
+    def __init__(self, path: Path) -> None:
+        self._path = path
+
+    @property
+    def name(self) -> str:
+        return self._path.name
+
+    def iterdir(self) -> Iterator[_PackagedTreeNode]:
+        return (_PackagedTreeNode(path) for path in self._path.iterdir())
+
+    def is_dir(self) -> bool:
+        return self._path.is_dir()
+
+    def is_file(self) -> bool:
+        return self._path.is_file()
+
+    def joinpath(self, *descendants: str) -> _PackagedTreeNode:
+        return _PackagedTreeNode(self._path.joinpath(*descendants))
+
+    def read_bytes(self) -> bytes:
+        return self._path.read_bytes()
 
 
 def test_filesystem_and_packaged_loads_have_exact_verified_inventory() -> None:
@@ -418,4 +495,129 @@ def test_typed_manifest_contracts_reject_wrong_shapes(
         document[field] = document[field][:-1]
     path.write_bytes(canonical_json_value_bytes(document))
     with pytest.raises(C08FrozenArtifactError):
+        load_c08_v2_frozen_tree(root)
+
+
+def test_traversable_tree_uses_packaged_child_resolution() -> None:
+    packaged_tree = cast(Traversable, _PackagedTreeNode(FROZEN_TREE))
+    assert load_c08_v2_frozen_tree(packaged_tree) == load_c08_v2_frozen_tree(
+        FROZEN_TREE
+    )
+
+
+def test_unreadable_frozen_file_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = _copy_tree(tmp_path)
+    payload_path = root / C08_FROZEN_PUBLIC_PAYLOAD
+    read_bytes = Path.read_bytes
+
+    def read_or_fail(path: Path) -> bytes:
+        if path == payload_path:
+            raise OSError("synthetic unreadable file")
+        return read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", read_or_fail)
+    with pytest.raises(C08FrozenArtifactError, match="cannot read"):
+        load_c08_v2_frozen_tree(root)
+
+
+def test_frozen_tree_digest_validation_stages_are_discriminating(
+    tmp_path: Path,
+) -> None:
+    root = _copy_tree(tmp_path / "tree-descriptor")
+    manifest_path = root / C08_FROZEN_PUBLIC_MANIFEST
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["artifacts"][0]["byte_size"] += 1
+    manifest_path.write_bytes(canonical_json_value_bytes(manifest))
+    with pytest.raises(C08FrozenArtifactError, match="tree descriptor"):
+        load_c08_v2_frozen_tree(root)
+
+    root = _copy_tree(tmp_path / "tree-set")
+    manifest_path = root / C08_FROZEN_PUBLIC_MANIFEST
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["artifact_set_digest"] = "0" * 64
+    manifest_path.write_bytes(canonical_json_value_bytes(manifest))
+    with pytest.raises(C08FrozenArtifactError, match="tree artifact-set"):
+        load_c08_v2_frozen_tree(root)
+
+    root = _copy_tree(tmp_path / "root-descriptor")
+    manifest_path = root / C08_FROZEN_MANIFEST
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["artifacts"][0]["byte_size"] += 1
+    manifest_path.write_bytes(canonical_json_value_bytes(manifest))
+    with pytest.raises(C08FrozenArtifactError, match="root descriptor"):
+        load_c08_v2_frozen_tree(root)
+
+    root = _copy_tree(tmp_path / "root-set")
+    manifest_path = root / C08_FROZEN_MANIFEST
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["artifact_set_digest"] = "0" * 64
+    manifest_path.write_bytes(canonical_json_value_bytes(manifest))
+    with pytest.raises(C08FrozenArtifactError, match="root artifact-set"):
+        load_c08_v2_frozen_tree(root)
+
+    root = _copy_tree(tmp_path / "root-cross-binding")
+    manifest_path = root / C08_FROZEN_MANIFEST
+    manifest = json.loads(manifest_path.read_bytes())
+    manifest["public_artifact_set_digest"] = "0" * 64
+    manifest_path.write_bytes(canonical_json_value_bytes(manifest))
+    with pytest.raises(C08FrozenArtifactError, match="cross-artifact binding"):
+        load_c08_v2_frozen_tree(root)
+
+
+def test_frozen_manifest_inventory_models_reject_each_invalid_shape() -> None:
+    root_document = json.loads((FROZEN_TREE / C08_FROZEN_MANIFEST).read_bytes())
+    root_artifacts = root_document["artifacts"]
+    duplicate_artifacts = [dict(item) for item in root_artifacts]
+    duplicate_artifacts[-1] = dict(duplicate_artifacts[0])
+    with pytest.raises(ValidationError, match="paths must be unique"):
+        C08FrozenRootManifestV2.model_validate(
+            {**root_document, "artifacts": duplicate_artifacts}
+        )
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08FrozenRootManifestV2.model_validate(
+            {**root_document, "artifacts": tuple(reversed(root_artifacts))}
+        )
+
+    public_document = json.loads(
+        (FROZEN_TREE / C08_FROZEN_PUBLIC_MANIFEST).read_bytes()
+    )
+    public_descriptor = dict(public_document["artifacts"][0])
+    public_descriptor["path"] = "unexpected-public.json"
+    with pytest.raises(ValidationError, match="public manifest inventory"):
+        C08FrozenPublicManifestV2.model_validate(
+            {**public_document, "artifacts": (public_descriptor,)}
+        )
+
+    evaluator_document = json.loads(
+        (FROZEN_TREE / C08_FROZEN_EVALUATOR_MANIFEST).read_bytes()
+    )
+    evaluator_descriptor = dict(evaluator_document["artifacts"][0])
+    evaluator_descriptor["path"] = "unexpected-evaluator.json"
+    with pytest.raises(ValidationError, match="evaluator manifest inventory"):
+        C08FrozenEvaluatorManifestV2.model_validate(
+            {**evaluator_document, "artifacts": (evaluator_descriptor,)}
+        )
+
+    wrong_root_artifacts = [dict(item) for item in root_artifacts]
+    wrong_root_artifacts[0]["path"] = "a-unexpected.json"
+    wrong_root_artifacts.sort(key=lambda item: item["path"])
+    with pytest.raises(ValidationError, match="root manifest inventory"):
+        C08FrozenRootManifestV2.model_validate(
+            {**root_document, "artifacts": wrong_root_artifacts}
+        )
+
+
+def test_valid_but_nonreference_frozen_payloads_are_rejected(tmp_path: Path) -> None:
+    root = _copy_tree(tmp_path)
+    alternate = generate_c08_asteria_v2(8)
+    (root / C08_FROZEN_PUBLIC_PAYLOAD).write_bytes(
+        canonical_json_bytes(alternate.public)
+    )
+    (root / C08_FROZEN_EVALUATOR_PAYLOAD).write_bytes(
+        canonical_json_bytes(alternate.evaluator)
+    )
+    _refresh_all_manifests(root)
+    with pytest.raises(C08FrozenArtifactError, match="fixed reference"):
         load_c08_v2_frozen_tree(root)
