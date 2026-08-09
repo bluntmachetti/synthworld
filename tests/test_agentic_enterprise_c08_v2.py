@@ -42,7 +42,6 @@ from synthworld.agentic.enterprise.c08_v2.models import (
 from synthworld.agentic.enterprise.c08_v2.projection import c08_public_input_digest
 from synthworld.agentic.enterprise.c08_v2.reference import c08_public_observation_id
 
-
 _SOURCE_EVIDENCE_IDS = {
     "evidence-a-1",
     "evidence-a-2",
