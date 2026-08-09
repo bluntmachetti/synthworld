@@ -13,6 +13,7 @@ from synthworld.agentic.enterprise.c08_v2 import (
     C08CaseOutcomeV2,
     C08FrozenArtifactV2,
     C08FrozenManifestV2,
+    C08SubmissionV2,
     evaluate_c08,
     generate_c08_reference,
     reference_submission_from_public,
@@ -205,15 +206,18 @@ def test_frozen_evaluation_rejects_cross_tenant_and_wrong_action() -> None:
     assert "offline scoring does not prove durable logging" in report_payload
     assert "offline scoring does not prove enforcement behavior" in report_payload
 
-    wrong_action_id = tree.public.actions[1].action_id
-    wrong_action = reference.model_copy(
-        update={
-            "observations": (
-                first.model_copy(update={"action_id": wrong_action_id}),
-                *reference.observations[1:],
-            )
-        }
+    foreign_evidence = next(
+        event
+        for event in tree.public.evidence_events
+        if event.action_id != first.action_id
     )
+    wrong_action_payload = reference.model_dump(mode="json")
+    wrong_action_payload["observations"][0]["evidence_id"] = (
+        foreign_evidence.evidence_id
+    )
+    wrong_action = C08SubmissionV2.model_validate(wrong_action_payload)
+    assert wrong_action.observations[0].action_id == first.action_id
+    assert foreign_evidence.action_id != first.action_id
     report = evaluate_c08(
         public=tree.public,
         evaluator=tree.evaluator,

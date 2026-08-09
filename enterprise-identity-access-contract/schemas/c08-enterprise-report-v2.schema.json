@@ -149,16 +149,7 @@
   "additionalProperties": false,
   "properties": {
     "measurement_scope": {
-      "$ref": "#/$defs/C08MeasurementScopeV2",
-      "default": {
-        "limitations": [
-          "offline scoring does not prove live evidence retention",
-          "offline scoring does not prove durable logging",
-          "offline scoring does not prove enforcement behavior"
-        ],
-        "offline_artifacts_only": true,
-        "synthetic": true
-      }
+      "$ref": "#/$defs/C08MeasurementScopeV2"
     },
     "metrics": {
       "items": {
@@ -196,6 +187,7 @@
   },
   "required": [
     "public_input_digest",
+    "measurement_scope",
     "outcomes",
     "metrics"
   ],

@@ -241,6 +241,14 @@ class C08PublicInputV2(SyntheticModel):
                     "C08 public evidence event semantics differ from action"
                 )
         for action in self.actions:
+            required_handles_by_kind = {
+                requirement.kind: {
+                    item.binding_handle
+                    for item in action.required_evidence
+                    if item.kind is requirement.kind
+                }
+                for requirement in action.required_evidence
+            }
             for requirement in action.required_evidence:
                 matches = sum(
                     event.action_id == action.action_id
@@ -251,6 +259,19 @@ class C08PublicInputV2(SyntheticModel):
                 if matches != 1:
                     raise ValueError(
                         "C08 public requirement must resolve to exactly one observation"
+                    )
+                has_distractor = any(
+                    event.action_id == action.action_id
+                    and event.kind is requirement.kind
+                    and event.binding_handle
+                    not in required_handles_by_kind[requirement.kind]
+                    for event in self.evidence_events
+                )
+                if not has_distractor:
+                    raise ValueError(
+                        "C08 public requirement must have at least one "
+                        "same-action/same-kind distractor with a different "
+                        "binding handle"
                     )
         return self
 
@@ -397,7 +418,7 @@ class C08MeasurementScopeV2(SyntheticModel):
 class C08EvaluationReportV2(SyntheticModel):
     schema_version: Literal["2.0.0"] = C08_V2_SCHEMA_VERSION
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
-    measurement_scope: C08MeasurementScopeV2 = C08MeasurementScopeV2()
+    measurement_scope: C08MeasurementScopeV2
     outcomes: tuple[C08CaseResultV2, ...] = Field(min_length=1)
     metrics: tuple[C08EvaluationMetricV2, ...] = Field(min_length=1)
 

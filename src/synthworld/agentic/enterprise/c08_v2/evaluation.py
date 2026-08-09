@@ -15,6 +15,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluationReportV2,
     C08EvaluatorTruthV2,
     C08EvidenceObservationV2,
+    C08MeasurementScopeV2,
     C08PublicInputV2,
     C08SubmissionV2,
 )
@@ -177,6 +178,7 @@ def evaluate_c08(
     )
     return C08EvaluationReportV2(
         public_input_digest=expected_digest,
+        measurement_scope=C08MeasurementScopeV2(),
         outcomes=tuple(sorted(outcomes, key=lambda item: item.action_id)),
         metrics=tuple(sorted(metrics, key=lambda item: item.name)),
     )

@@ -47,7 +47,9 @@ _SOURCE_EVIDENCE_IDS = {
     "evidence-a-1",
     "evidence-a-2",
     "evidence-a-extra",
+    "evidence-a-identity-extra",
     "evidence-b-1",
+    "evidence-b-extra",
 }
 
 
@@ -133,6 +135,18 @@ def _source() -> C08SourceWorldV2:
             ),
             C08EvidenceEventV2(
                 sequence=3,
+                evidence_id="evidence-a-identity-extra",
+                action_id="action-a",
+                tenant_id="tenant-a",
+                resource_id="resource-a",
+                action="read",
+                tick=1,
+                kind=C08EvidenceKindV2.IDENTITY,
+                binding_handle="binding-a-identity-distractor",
+                payload_digest="d" * 64,
+            ),
+            C08EvidenceEventV2(
+                sequence=4,
                 evidence_id="evidence-b-1",
                 action_id="action-b",
                 tenant_id="tenant-b",
@@ -141,7 +155,19 @@ def _source() -> C08SourceWorldV2:
                 tick=2,
                 kind=C08EvidenceKindV2.POLICY,
                 binding_handle="binding-b-policy",
-                payload_digest="d" * 64,
+                payload_digest="e" * 64,
+            ),
+            C08EvidenceEventV2(
+                sequence=5,
+                evidence_id="evidence-b-extra",
+                action_id="action-b",
+                tenant_id="tenant-b",
+                resource_id="resource-b",
+                action="write",
+                tick=2,
+                kind=C08EvidenceKindV2.POLICY,
+                binding_handle="binding-b-policy-distractor",
+                payload_digest="f" * 64,
             ),
         ),
     )
@@ -207,7 +233,9 @@ def test_projection_hides_bindings_and_exact_case_scores() -> None:
         _public_evidence_id("evidence-a-1"),
         _public_evidence_id("evidence-a-2"),
         _public_evidence_id("evidence-a-extra"),
+        _public_evidence_id("evidence-a-identity-extra"),
         _public_evidence_id("evidence-b-1"),
+        _public_evidence_id("evidence-b-extra"),
     }
     assert evaluator.bindings[0].required_observation_ids == tuple(
         sorted(
@@ -394,10 +422,37 @@ def test_same_kind_distractors_are_allowed_but_duplicate_handles_are_rejected() 
     invalid_public = public.model_copy(
         update={"evidence_events": (*public.evidence_events, duplicate)}
     )
-    with pytest.raises(ValidationError, match="unique per action, kind, and handle"):
+    with pytest.raises(
+        ValidationError,
+        match="action/kind/handle bindings must be unique",
+    ):
         C08PublicInputV2.model_validate(invalid_public.model_dump())
     with pytest.raises(ValueError, match="ambiguous"):
         reference_submission_from_public(invalid_public)
+
+
+def test_public_requirement_without_nonrequired_same_kind_distractor_is_rejected(
+) -> None:
+    public, _ = _bundle()
+    evidence_events = tuple(
+        event
+        for event in public.evidence_events
+        if not (
+            event.action_id == "action-a"
+            and event.kind is C08EvidenceKindV2.IDENTITY
+            and event.binding_handle == "binding-a-identity-distractor"
+        )
+    )
+    payload = public.model_dump(mode="json")
+    payload["evidence_events"] = [
+        event.model_copy(update={"sequence": sequence}).model_dump(mode="json")
+        for sequence, event in enumerate(evidence_events)
+    ]
+    with pytest.raises(
+        ValidationError,
+        match="same-action/same-kind distractor with a different binding handle",
+    ):
+        C08PublicInputV2.model_validate(payload)
 
 
 def test_evaluation_rejects_digest_and_reference_mismatches() -> None:
@@ -522,7 +577,7 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             ),
         )
     public, evaluator = _bundle()
-    with pytest.raises(ValidationError, match="contiguous and ordered"):
+    with pytest.raises(ValidationError, match="contiguous sequence order"):
         C08PublicInputV2(
             actions=public.actions,
             evidence_events=tuple(reversed(public.evidence_events)),
@@ -568,21 +623,17 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             ),
         )
     with pytest.raises(ValidationError, match="contiguous sequence"):
-        _submission(
-            c08_public_input_digest(public),
-            (("action-a", "tenant-a", "evidence-a-1"),),
-        ).model_copy(
-            update={
-                "observations": (
-                    C08EvidenceObservationV2(
-                        observation_id="observation-0",
-                        sequence=1,
-                        action_id="action-a",
-                        tenant_id="tenant-a",
-                        evidence_id="evidence-a-1",
-                    ),
-                )
-            }
+        C08SubmissionV2(
+            public_input_digest=c08_public_input_digest(public),
+            observations=(
+                C08EvidenceObservationV2(
+                    observation_id="observation-0",
+                    sequence=1,
+                    action_id="action-a",
+                    tenant_id="tenant-a",
+                    evidence_id=_public_evidence_id("evidence-a-1"),
+                ),
+            ),
         )
     with pytest.raises(ValidationError, match="binding action identifiers"):
         C08EvaluatorTruthV2(
@@ -698,15 +749,21 @@ def test_report_models_require_canonical_order() -> None:
         (("action-a", "tenant-a", "evidence-a-1"),),
     )
     report = evaluate_c08(public=public, evaluator=evaluator, submission=submission)
+    report_without_scope = report.model_dump(mode="json")
+    del report_without_scope["measurement_scope"]
+    with pytest.raises(ValidationError, match="measurement_scope"):
+        C08EvaluationReportV2.model_validate(report_without_scope)
     with pytest.raises(ValidationError, match="outcomes must be sorted"):
         C08EvaluationReportV2(
             public_input_digest=report.public_input_digest,
+            measurement_scope=report.measurement_scope,
             outcomes=tuple(reversed(report.outcomes)),
             metrics=report.metrics,
         )
     with pytest.raises(ValidationError, match="metrics must be sorted"):
         C08EvaluationReportV2(
             public_input_digest=report.public_input_digest,
+            measurement_scope=report.measurement_scope,
             outcomes=report.outcomes,
             metrics=tuple(reversed(report.metrics)),
         )
@@ -734,7 +791,7 @@ def test_report_models_require_canonical_order() -> None:
             ),
             required_observation_ids=("x-required", "x-extra"),
         )
-    with pytest.raises(ValidationError, match="binding evidence identifiers"):
+    with pytest.raises(ValidationError, match="binding observation identifiers"):
         C08EvidenceBindingV2(
             action_id="action-x",
             tenant_id="tenant-x",
@@ -834,6 +891,13 @@ def test_generated_c08_schemas_are_model_authoritative_and_checkable(
         "c08-enterprise-submission-v2.schema.json",
         "c08-enterprise-report-v2.schema.json",
     }
+    report_path = next(
+        path
+        for path in expected
+        if path.name == "c08-enterprise-report-v2.schema.json"
+    )
+    report_schema = json.loads(expected[report_path])
+    assert "measurement_scope" in report_schema["required"]
     tool.write_schema_files(tmp_path)
     assert tool.main(["--check"]) == 0
     tool.check_schema_files(tmp_path)
