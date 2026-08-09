@@ -11,12 +11,16 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
-- **C08 v2 frozen-artifact candidate documentation.** The independent Asteria
-  and enterprise C08 evidence-completeness candidates pin seed `20260809` and
-  schema version `2.0.0`, with separate public/evaluator artifact inventories,
-  checksum records, baseline discrimination fixtures, and explicit offline-only
-  limits. Package, clean-install, deterministic regeneration, and CI gates are
-  deliberately recorded as pending rather than claimed complete.
+- **Independent C08 v2 frozen-artifact candidates.** Asteria now commits an exact
+  five-file root/public/evaluator manifest tree; enterprise commits an exact
+  four-file root-manifest/`SHA256SUMS` tree with a packaged fail-closed loader and
+  fixed-seed identity comparison. Both public contracts use opaque binding
+  handles plus same-kind distractors instead of exposing a unique kind-to-ID
+  answer. Independent manifest schemas, expanded v1 hash locks, explicit offline
+  report scope, and exactly two metric-only discrimination records accompany the
+  candidate bytes. Native adversarial findings are recorded as resolved, while
+  CI, Ruff/format, schema check, package, isolated-wheel, clean-install, and
+  regeneration evidence remain pending. Nothing is registered or published.
 
 ## [0.13.0] - 2026-08-06
 

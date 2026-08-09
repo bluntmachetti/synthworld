@@ -314,19 +314,35 @@ four files and refuses to run if the output root already exists:
 
 | Artifact | Schema version | Visibility | Meaning |
 |---|---|---|---|
-| `asteria-agentic-c08-v2/public/c08-asteria-public.json` | `2.0.0` | public | Actions, public observations, and evidence kinds for offline C08 scoring. |
-| `asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json` | `2.0.0` | evaluator | Exact required-observation bindings and scenario labels, bound to the public-input digest. |
-| `enterprise-agentic-c08-v2/public/public-input.json` | `2.0.0` | public | Enterprise actions and ordered evidence events for offline C08 scoring. |
-| `enterprise-agentic-c08-v2/evaluator/truth.json` | `2.0.0` | evaluator | Exact required evidence-ID and tenant bindings, bound to the public-input digest. |
+| `asteria-agentic-c08-v2/manifest.json` | `2.0.0` | root | Four-child exact inventory and public/evaluator/root digest cross-bindings. |
+| `asteria-agentic-c08-v2/public/c08-asteria-public.json` | `2.0.0` | public | Actions, `(kind, binding_handle)` requirements, and opaque observations with same-kind distractors. |
+| `asteria-agentic-c08-v2/public/manifest.json` | `2.0.0` | public | One-payload public inventory and artifact-set digest. |
+| `asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json` | `2.0.0` | evaluator | Exact observation bindings and scenario labels, bound to public bytes. |
+| `asteria-agentic-c08-v2/evaluator/manifest.json` | `2.0.0` | evaluator | One-payload evaluator inventory, artifact-set digest, and public-input digest. |
+| `enterprise-agentic-c08-v2/manifest.json` | `2.0.0` | root | Independent public/evaluator payload inventories and public-input binding. |
+| `enterprise-agentic-c08-v2/SHA256SUMS` | n/a | root | Sorted path-bearing hashes for manifest and both payloads; excludes itself. |
+| `enterprise-agentic-c08-v2/public/public-input.json` | `2.0.0` | public | Actions, binding-handle requirements, separately derived opaque observation IDs, and same-kind distractors. |
+| `enterprise-agentic-c08-v2/evaluator/truth.json` | `2.0.0` | evaluator | Exact observation-ID, handle, tenant, and action bindings. |
 
-The two lineages are independently typed and serialised. Asteria records
-per-visibility manifests plus a root manifest; the visibility manifest excludes
-itself from its own artifact-set digest, while the root includes the visibility
-manifests and excludes itself. Enterprise records the public/evaluator inventory
-in `manifest.json` and path-bearing hashes in `SHA256SUMS`, which excludes
-itself; it has no separately published aggregate root digest. These artifacts
-are offline scoring inputs and evaluator truth, not claims about live evidence
-retention, durable logging, enforcement, deployment, or EADS compatibility.
+Asteria uses independent frozen root/public/evaluator manifest schemas. Its
+visibility artifact sets contain only their payload; its root artifact set includes
+both payloads and both visibility manifests and excludes only root manifest.
+Enterprise uses one independent frozen manifest schema and has no visibility
+manifests or aggregate artifact-set digest. Its `SHA256SUMS` excludes itself.
+
+`C08EvidenceRequirementV2` carries kind plus binding handle. The corresponding
+public observation model carries action semantics, an opaque observation ID, and
+the handle. Same-kind distractors make kind-only matching insufficient while one
+handle match keeps the public task deterministically solvable. The evaluator keeps
+the exact required IDs. Packaged loaders reject integrity-valid alternate seeds by
+comparing parsed models and bytes with fixed seed `20260809` generation.
+
+Exactly two aggregate baseline files live under `tests/fixtures/c08_v2/`, one per
+lineage. They contain public/submission digests and denominator-bearing metrics,
+but no submission rows, observations, IDs, outcomes, or evaluator truth. Reports
+carry an offline measurement scope and do not prove live retention, durable
+logging, enforcement, deployment, or EADS compatibility. Verification and
+publication evidence remains pending; see `GOLDEN_REVIEW.md`.
 
 The withheld fact is precise: `EnterpriseAccountV1` publishes `account_id`, `tenant_id`,
 `authorization_target_id`, and `account_kind` but **no `principal_id`**. Recovering the

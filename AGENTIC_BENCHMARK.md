@@ -141,18 +141,33 @@ line rather than stopping at the first failure.
 ## C08 v2 offline evidence-completeness candidates
 
 The independently versioned `asteria-agentic-c08-v2` and
-`enterprise-agentic-c08-v2` candidates pin seed `20260809` and schema version
-`2.0.0`. Each has separate public and evaluator artifacts and its own submission
-and scoring contract. They assess offline evidence-binding completeness, not the
-Asteria Agentic v1 authority, attribution, temporal, provenance, or side-effect
-dimensions.
+`enterprise-agentic-c08-v2` committed candidates pin seed `20260809` and schema
+version `2.0.0`. Each has separate public and evaluator artifacts, an independent
+frozen manifest contract, a packaged loader with fixed-reference comparison, and
+its own submission and scoring contract.
 
-The public/evaluator split prevents accidental answer-key use by product inputs;
-it is not a secrecy claim. The evaluator artifacts are package data. C08 v2 does
-not establish live evidence retention, durable logging, policy enforcement,
-deployment behaviour, real-export compatibility, or EADS compatibility. The
-authoritative candidate inventory, digests, self-exclusion rules, baseline
-records, and pending package/CI gates are in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
+Public actions declare `(evidence kind, binding handle)` requirements. Each
+requirement has a same-action, same-kind distractor with a different handle, and
+exactly one observation matches the required handle. Products therefore correlate
+public action semantics and handles rather than echoing a unique kind or a public
+expected ID. Exact required observation IDs and case truth remain evaluator-only.
+Enterprise additionally derives opaque public observation IDs separately from its
+source evidence IDs.
+
+Asteria has exactly five candidate files: root manifest, public payload/manifest,
+and evaluator payload/manifest. Its public, evaluator, and root artifact-set
+digests are respectively `fe59c2...`, `68cefa...`, and `5fc98e...`. Enterprise
+has exactly four: root manifest, `SHA256SUMS`, public payload, and evaluator truth;
+its checksum-record bytes hash to `a0b012...`, and that lineage defines no separate
+aggregate artifact-set digest. Exactly two metric-only baseline files record
+dedicated discrimination without submission rows or evaluator truth.
+
+Reports explicitly mark `offline_artifacts_only`. They do not establish live
+evidence retention, durable logging, enforcement, deployment behaviour,
+real-export compatibility, or EADS compatibility. CI, Ruff/format, schema check,
+package, isolated-wheel, clean-install, and regeneration evidence remain pending;
+there is no registry or publication claim. Exact committed hashes and D8 exclusions
+are in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
 
 | code | severity | meaning |
 |---|---|---|
