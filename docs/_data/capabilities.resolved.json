@@ -1627,6 +1627,717 @@
       "title": "Asteria agentic authority benchmark"
     },
     {
+      "id": "asteria-agentic-c08-v2",
+      "interfaces": {
+        "cli": {
+          "coverage": "none",
+          "subset_note": null,
+          "surfaces": []
+        },
+        "python": {
+          "coverage": "full",
+          "subset_note": null,
+          "surfaces": [
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08ArtifactManifestV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08ArtifactManifestV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08AsteriaBenchmarkV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaBenchmarkV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08AsteriaEvaluatorV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaEvaluatorV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08AsteriaPublicInputV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaPublicInputV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08AsteriaSubmissionV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaSubmissionV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08EvidenceBindingV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceBindingV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08EvidenceObservationV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceObservationV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08MetricV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08MetricV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08MetricsReportV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08MetricsReportV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08PublicActionV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08PublicActionV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.C08SubmissionRowV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08SubmissionRowV2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.build_c08_evaluator_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "build_c08_evaluator_artifacts",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.build_c08_public_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "build_c08_public_artifacts",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.build_c08_submission_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "build_c08_submission_artifacts",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08ArtifactError",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "C08ArtifactError",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08ArtifactManifestV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08ArtifactManifestV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08AsteriaBenchmarkV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaBenchmarkV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08AsteriaEvaluatorV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaEvaluatorV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08AsteriaPublicInputV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaPublicInputV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08AsteriaSubmissionV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08AsteriaSubmissionV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08EvaluationError",
+              "implementation_module": "synthworld.agentic.c08_v2.metrics",
+              "kind": "python_export",
+              "name": "C08EvaluationError",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08EvidenceBindingV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceBindingV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08EvidenceObservationV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceObservationV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08EvidenceRequirementV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceRequirementV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08FrozenArtifactError",
+              "implementation_module": "synthworld.agentic.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "C08FrozenArtifactError",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08FrozenBundle",
+              "implementation_module": "synthworld.agentic.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "C08FrozenBundle",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08FrozenEvaluatorManifestV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08FrozenEvaluatorManifestV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08FrozenPublicManifestV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08FrozenPublicManifestV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08FrozenRootManifestV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08FrozenRootManifestV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08MetricV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08MetricV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08MetricsReportV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08MetricsReportV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08PublicActionV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08PublicActionV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08SubmissionRowV2",
+              "implementation_module": "synthworld.agentic.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08SubmissionRowV2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_BENCHMARK_PATH",
+              "implementation_module": "pathlib",
+              "kind": "python_export",
+              "name": "C08_FROZEN_BENCHMARK_PATH",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_DIGEST_ALGORITHM",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_DIGEST_ALGORITHM",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_EVALUATOR_DIR",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_EVALUATOR_DIR",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_EVALUATOR_INVENTORY",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_EVALUATOR_INVENTORY",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_EVALUATOR_MANIFEST",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_EVALUATOR_MANIFEST",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_EVALUATOR_PAYLOAD",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_EVALUATOR_PAYLOAD",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_MANIFEST",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_MANIFEST",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_PUBLIC_DIR",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_PUBLIC_DIR",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_PUBLIC_INVENTORY",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_PUBLIC_INVENTORY",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_PUBLIC_MANIFEST",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_PUBLIC_MANIFEST",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_PUBLIC_PAYLOAD",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_PUBLIC_PAYLOAD",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_ROOT_INVENTORY",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_ROOT_INVENTORY",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_SEED",
+              "implementation_module": "synthworld.agentic.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_SEED",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.build_c08_evaluator_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "build_c08_evaluator_artifacts",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.build_c08_public_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "build_c08_public_artifacts",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.build_c08_submission_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "build_c08_submission_artifacts",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.c08_frozen_artifact_set_digest",
+              "implementation_module": "synthworld.agentic.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "c08_frozen_artifact_set_digest",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.evaluate_c08_submission",
+              "implementation_module": "synthworld.agentic.c08_v2.metrics",
+              "kind": "python_export",
+              "name": "evaluate_c08_submission",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.freeze_c08_v2_benchmark",
+              "implementation_module": "synthworld.agentic.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "freeze_c08_v2_benchmark",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.generate_c08_asteria_v2",
+              "implementation_module": "synthworld.agentic.c08_v2.generator",
+              "kind": "python_export",
+              "name": "generate_c08_asteria_v2",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.load_c08_bundle",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_bundle",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.load_c08_evaluator_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_evaluator_artifacts",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.load_c08_public_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_public_artifacts",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.load_c08_submission_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_submission_artifacts",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.load_c08_v2_frozen_tree",
+              "implementation_module": "synthworld.agentic.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "load_c08_v2_frozen_tree",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.load_packaged_c08_v2_benchmark",
+              "implementation_module": "synthworld.agentic.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "load_packaged_c08_v2_benchmark",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.reference_c08_submission",
+              "implementation_module": "synthworld.agentic.c08_v2.generator",
+              "kind": "python_export",
+              "name": "reference_c08_submission",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.c08_v2.semantic_c08_submission",
+              "implementation_module": "synthworld.agentic.c08_v2.generator",
+              "kind": "python_export",
+              "name": "semantic_c08_submission",
+              "source": "src/synthworld/agentic/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.evaluate_c08_submission",
+              "implementation_module": "synthworld.agentic.c08_v2.metrics",
+              "kind": "python_export",
+              "name": "evaluate_c08_submission",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.generate_c08_asteria_v2",
+              "implementation_module": "synthworld.agentic.c08_v2.generator",
+              "kind": "python_export",
+              "name": "generate_c08_asteria_v2",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.load_c08_bundle",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_bundle",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.load_c08_evaluator_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_evaluator_artifacts",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.load_c08_public_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_public_artifacts",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.load_c08_submission_artifacts",
+              "implementation_module": "synthworld.agentic.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_submission_artifacts",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.reference_c08_submission",
+              "implementation_module": "synthworld.agentic.c08_v2.generator",
+              "kind": "python_export",
+              "name": "reference_c08_submission",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.semantic_c08_submission",
+              "implementation_module": "synthworld.agentic.c08_v2.generator",
+              "kind": "python_export",
+              "name": "semantic_c08_submission",
+              "source": "src/synthworld/agentic/__init__.py",
+              "visibility": "subpackage"
+            }
+          ]
+        }
+      },
+      "journey_route": "route:agent-authority-contract/docs/c08-v2-transition.md#asteria-frozen-inventory-and-digests",
+      "maturity": "preview",
+      "notes": "Repository-local candidate API; publication, deployment, and external-host verification remain outside this capability claim.",
+      "related_surfaces": [
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-evaluator-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-evaluator-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-evaluator-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-frozen-evaluator-manifest-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-frozen-evaluator-manifest-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-frozen-evaluator-manifest-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-frozen-public-manifest-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-frozen-public-manifest-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-frozen-public-manifest-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-frozen-root-manifest-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-frozen-root-manifest-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-frozen-root-manifest-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-manifest-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-manifest-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-manifest-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-public-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-public-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-public-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-report-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-report-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-report-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:agent-authority-contract/schemas/c08-asteria-submission-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-asteria-submission-v2.schema.json",
+          "source": "agent-authority-contract/schemas/c08-asteria-submission-v2.schema.json",
+          "visibility": "public"
+        }
+      ],
+      "roadmap_routes": [],
+      "since": "unreleased",
+      "summary": "Generate, freeze, load, and evaluate the deterministic Asteria C08 v2 public/evaluator benchmark split.",
+      "support": "Supported for repository-local candidate generation and offline evaluation while publication gates remain pending.",
+      "title": "Asteria C08 evidence-binding v2"
+    },
+    {
       "id": "broker-evaluation",
       "interfaces": {
         "cli": {
@@ -3874,6 +4585,648 @@
       "summary": "Generate, validate, and evaluate enterprise agentic benchmark traces.",
       "support": "Supported for the enterprise identity and access contract workflow.",
       "title": "Enterprise agentic assurance"
+    },
+    {
+      "id": "enterprise-agentic-c08-v2",
+      "interfaces": {
+        "cli": {
+          "coverage": "none",
+          "subset_note": null,
+          "surfaces": []
+        },
+        "python": {
+          "coverage": "full",
+          "subset_note": null,
+          "surfaces": [
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08CaseOutcomeV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08CaseOutcomeV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08EvaluationReportV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvaluationReportV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08EvaluatorTruthV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvaluatorTruthV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08EvidenceEventV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceEventV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08EvidenceKindV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceKindV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08PublicInputV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08PublicInputV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08ReferenceBundleV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
+              "kind": "python_export",
+              "name": "C08ReferenceBundleV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.C08SubmissionV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08SubmissionV2",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08CaseOutcomeV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08CaseOutcomeV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08CaseResultV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08CaseResultV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvaluationError",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.errors",
+              "kind": "python_export",
+              "name": "C08EvaluationError",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvaluationMetricV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvaluationMetricV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvaluationReportV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvaluationReportV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvaluatorTruthV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvaluatorTruthV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvidenceBindingV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceBindingV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvidenceEventV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceEventV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvidenceKindV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceKindV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvidenceObservationV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceObservationV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08EvidenceRequirementV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08EvidenceRequirementV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08FrozenArtifactV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08FrozenArtifactV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08FrozenManifestV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08FrozenManifestV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08MeasurementScopeV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08MeasurementScopeV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08ProjectionError",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.errors",
+              "kind": "python_export",
+              "name": "C08ProjectionError",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08PublicActionV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08PublicActionV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08PublicInputV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08PublicInputV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08ReferenceBundleV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
+              "kind": "python_export",
+              "name": "C08ReferenceBundleV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08SerializationError",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.errors",
+              "kind": "python_export",
+              "name": "C08SerializationError",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08SourceActionV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08SourceActionV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08SourceWorldV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08SourceWorldV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08SubmissionV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.models",
+              "kind": "python_export",
+              "name": "C08SubmissionV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08_FROZEN_BENCHMARK_ID",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_BENCHMARK_ID",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08_FROZEN_SEED",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2",
+              "kind": "python_export",
+              "name": "C08_FROZEN_SEED",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.C08_REFERENCE_NAMESPACE",
+              "implementation_module": "uuid",
+              "kind": "python_export",
+              "name": "C08_REFERENCE_NAMESPACE",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.DEFAULT_C08_REFERENCE_SEED",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2",
+              "kind": "python_export",
+              "name": "DEFAULT_C08_REFERENCE_SEED",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.FrozenC08BenchmarkError",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "FrozenC08BenchmarkError",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.FrozenC08BenchmarkV2",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "FrozenC08BenchmarkV2",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.c08_public_observation_id",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.projection",
+              "kind": "python_export",
+              "name": "c08_public_observation_id",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.compile_c08_truth",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.projection",
+              "kind": "python_export",
+              "name": "compile_c08_truth",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.evaluate_c08",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.evaluation",
+              "kind": "python_export",
+              "name": "evaluate_c08",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.export_c08_artifacts",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "export_c08_artifacts",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.frozen_files",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "frozen_files",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.generate_c08_reference",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
+              "kind": "python_export",
+              "name": "generate_c08_reference",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.load_c08_evaluator",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_evaluator",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.load_c08_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_public",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.load_c08_submission",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_submission",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.load_frozen_benchmark",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "load_frozen_benchmark",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.load_packaged_frozen_benchmark",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "load_packaged_frozen_benchmark",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.project_c08_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.projection",
+              "kind": "python_export",
+              "name": "project_c08_public",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.reference_submission_from_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
+              "kind": "python_export",
+              "name": "reference_submission_from_public",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.serialize_c08_evaluator",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "serialize_c08_evaluator",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.serialize_c08_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "serialize_c08_public",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.serialize_c08_submission",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "serialize_c08_submission",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.validate_c08_truth_against_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.projection",
+              "kind": "python_export",
+              "name": "validate_c08_truth_against_public",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.c08_v2.write_frozen_benchmark",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.frozen",
+              "kind": "python_export",
+              "name": "write_frozen_benchmark",
+              "source": "src/synthworld/agentic/enterprise/c08_v2/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.compile_c08_truth",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.projection",
+              "kind": "python_export",
+              "name": "compile_c08_truth",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.evaluate_c08",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.evaluation",
+              "kind": "python_export",
+              "name": "evaluate_c08",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.export_c08_artifacts",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "export_c08_artifacts",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.generate_c08_reference",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
+              "kind": "python_export",
+              "name": "generate_c08_reference",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.load_c08_evaluator",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_evaluator",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.load_c08_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_public",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.load_c08_submission",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
+              "kind": "python_export",
+              "name": "load_c08_submission",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.project_c08_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.projection",
+              "kind": "python_export",
+              "name": "project_c08_public",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.reference_submission_from_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
+              "kind": "python_export",
+              "name": "reference_submission_from_public",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.agentic.enterprise.validate_c08_truth_against_public",
+              "implementation_module": "synthworld.agentic.enterprise.c08_v2.projection",
+              "kind": "python_export",
+              "name": "validate_c08_truth_against_public",
+              "source": "src/synthworld/agentic/enterprise/__init__.py",
+              "visibility": "subpackage"
+            }
+          ]
+        }
+      },
+      "journey_route": "route:agent-authority-contract/docs/c08-v2-transition.md#enterprise-frozen-inventory-and-digests",
+      "maturity": "preview",
+      "notes": "Repository-local candidate API; publication, deployment, real-EADS compatibility, and external-host verification remain outside this capability claim.",
+      "related_surfaces": [
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/c08-enterprise-evaluator-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-enterprise-evaluator-v2.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/c08-enterprise-evaluator-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/c08-enterprise-manifest-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-enterprise-manifest-v2.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/c08-enterprise-manifest-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/c08-enterprise-public-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-enterprise-public-v2.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/c08-enterprise-public-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/c08-enterprise-report-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-enterprise-report-v2.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/c08-enterprise-report-v2.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/c08-enterprise-submission-v2.schema.json",
+          "kind": "schema",
+          "name": "c08-enterprise-submission-v2.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/c08-enterprise-submission-v2.schema.json",
+          "visibility": "public"
+        }
+      ],
+      "roadmap_routes": [],
+      "since": "unreleased",
+      "summary": "Generate, freeze, load, and evaluate the deterministic enterprise C08 v2 public/evaluator benchmark split.",
+      "support": "Supported for repository-local candidate generation and offline evaluation while publication gates remain pending.",
+      "title": "Enterprise C08 evidence-binding v2"
     },
     {
       "id": "enterprise-authoring",
@@ -7055,8 +8408,8 @@
     }
   ],
   "input_digests": {
-    "curated_sha256": "6808018d087118dbe474f947971b3249c026a27e595214147e56164c8e4526a4",
-    "generated_sha256": "7c417f673ec020a3f0a5789b9d2c4db2e977ab17ef0de96d2c1bd5377d23dbc5"
+    "curated_sha256": "0fd38170c7820e3668e256f44cc4d79479a300465ea5004271a0ee94be1f048c",
+    "generated_sha256": "68825704919d02b345d592a88f3cca4f80c67541d0177a1078f41f79671625b0"
   },
   "schema_version": "1.0.0"
 }
