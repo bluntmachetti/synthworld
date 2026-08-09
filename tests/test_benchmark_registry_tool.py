@@ -576,7 +576,8 @@ def _verify_path_bound_fixture(
     )
 
 
-def test_path_bound_manifest_rejects_missing_invalid_and_duplicate_descriptors() -> None:
+def test_path_bound_manifest_rejects_missing_invalid_and_duplicate_descriptors(
+) -> None:
     payload = b"payload\n"
     valid = _path_bound_descriptor("input.json", payload)
     digest = registry.artifact_set_digest({"input.json": payload})
