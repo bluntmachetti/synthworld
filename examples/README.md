@@ -51,6 +51,55 @@ See [`AGENTIC_BENCHMARK.md`](../AGENTIC_BENCHMARK.md) for the public package
 layout and the independent identity, authority, temporal, attribution,
 ownership, provenance, and side-effect metrics.
 
+## EADS adapter: humans-only Phase 1
+
+[`eads_adapter/README.md`](eads_adapter/README.md) defines the documentation
+contract for a deterministic Phase 1 EADS-to-enterprise adapter. It maps each
+source organisation independently to one tenant and one organisation, treats
+the tenant as the isolation boundary, and retains region and regulatory concepts
+as gap metadata rather than inventing enterprise unit semantics.
+
+The caller explicitly selects the strict `sdk-size-v1` or
+`topology-headcount-v1` reference profile. These profiles were inferred from
+planning inputs and synthetic fixtures; compatibility with the 31 real exports
+requires a representative sanitized export or pinned schema. Source `size` and
+`headcount` are validated but never drive generated population. Source-export
+`scale`, `team_type`, and `industry` fields are interpreted by the exact
+published [`eads-human-population-policy-v1`](eads_adapter/README.md#population-policy-eads-human-population-policy-v1),
+not supplied as independent SynthWorld inputs. It specifies the scale bases,
+rational factors, aliases, unknown-value gaps, half-up rounding, and
+`largest-remainder-proportional-v1` downscaling. Phase 1 is humans-only, defers
+BIAN and other non-human identities, preserves frozen Asteria v1, and forbids
+real vendor or product labels in compiled and public output.
+
+The documented command interface is:
+
+```bash
+uv run python -m examples.eads_adapter \
+  --source PATH \
+  --vintage sdk-size-v1 \
+  --output OUTPUT_DIR \
+  --seed 42 \
+  --namespace-salt-file PRIVATE_SALT_FILE \
+  --max-principals-per-organisation 10000
+```
+
+The salt file contains a private 256-bit salt as 64 lowercase hexadecimal
+characters and must never be published; opaque references use keyed HMAC under
+it. The principal cap defaults to `10000`, is limited to `1000000`, and triggers
+the published downscaling policy. The output root may be absent or existing and
+empty; non-empty roots and non-directories are rejected, and staging is
+atomically promoted. A partial failure exits nonzero but retains manifest-bound
+artifacts for successful organisations beside the failure report; all-excluded
+emits no artifacts and exits nonzero. Private imports and reports remain
+separate from public and evaluator trees. The reader reads at most 50 MiB plus
+one detection byte from a no-follow regular-file descriptor, applies a depth-
+and node-bounded JSON-compatible restricted parser, and sanitizes recursion or
+memory errors. The example does not bundle, test, or claim validation of raw
+EADS exports. See the
+[sanitized aggregate gap requirements](../enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md)
+for the publication boundary and later issue #27 needs.
+
 ## Sample output
 
 Full, frozen sample outputs ship inside the package as the golden benchmarks

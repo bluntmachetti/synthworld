@@ -56,10 +56,18 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
 _ALLOWED_PUBLIC_ADAPTER_EXAMPLES = frozenset(
     {
         Path("agent-authority-contract/adapter-template/adapter.py"),
+        # Bounded EADS reference profiles only: private inputs stay physically
+        # separate and the 31-export compatibility claim remains deferred.
+        # Reviewed 2026-08-08 with the humans-only Phase 1 adapter.
+        Path("examples/eads_adapter/__init__.py"),
+        Path("examples/eads_adapter/__main__.py"),
+        Path("examples/eads_adapter/adapter.py"),
+        Path("examples/eads_adapter/models.py"),
         # Public-timeline-only by construction; asserts nothing truth-side is
         # reachable from it. Reviewed 2026-08-04 with PR #95.
         Path("examples/evaluate_broker_adapter.py"),
         Path("src/synthworld/search_adapter.py"),
+        Path("tests/test_eads_adapter.py"),
     }
 )
 
@@ -137,7 +145,9 @@ def test_code_owner_gate_is_limited_to_boundary_defining_files() -> None:
         "/.gitignore",
         "/Makefile",
         "/pyproject.toml",
+        "/examples/eads_adapter/**",
         "/src/synthworld/**/*adapter*.py",
+        "/tests/test_eads_adapter.py",
         "/tests/test_public_repository_boundary.py",
     } <= patterns
 

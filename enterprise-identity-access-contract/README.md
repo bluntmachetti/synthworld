@@ -63,6 +63,92 @@ explicit seed, schema versions, and compiler version. Compilation writes only th
 fixed universe beneath `public/` and canonical account-binding truth beneath
 `evaluator/`; the public loader never traverses the evaluator tree.
 
+## EADS adapter Phase 1 boundary
+
+The documented [EADS adapter example](../examples/eads_adapter/README.md) is a
+humans-only conversion into this existing enterprise v1 authoring contract. It
+maps each EADS organisation independently to one tenant and one organisation.
+Tenant is the security isolation boundary; regions and regulatory or
+geopolitical groupings remain sanitized gap metadata rather than tenants or
+invented unit kinds.
+
+Source parsing requires an explicit `sdk-size-v1` or
+`topology-headcount-v1` strict reference profile. The profiles were inferred
+from planning inputs and synthetic fixtures, not validated against the 31 real
+exports; a representative sanitized export or exact schema is required before
+claiming that compatibility. The corresponding `size` or `headcount` field is
+validated but never controls generated population. Counts come from a
+versioned, published deterministic mix policy over source-export `scale`,
+`team_type`, and `industry` fields, not independent SynthWorld inputs.
+Phase 1 defers BIAN and all agent, workload, service, and other non-human
+identities.
+
+`eads-human-population-policy-v1` uses scale bases `micro=4`, `small=8`,
+`medium=16`, `large=32`, and `enterprise=64`; team factors `product=3/2`,
+`operations=5/4`, `control=1`, and `platform=3/2`; and aliases
+`controls -> control`, `ops -> operations`, `product-team -> product`, and
+`platform-team -> platform`. Industry factors are `banking=5/4`,
+`financial-services=5/4`, `healthcare=5/4`, `logistics=1`,
+`public-services=1`, `research=1`, and `technology=3/2`. Unknown team or
+industry values use factor `1` and emit a gap. Raw count is
+`max(1, nearest(scale_base * team_factor * industry_factor))`; exact halves
+round up by `(numerator + denominator // 2) // denominator`. Source `size` and
+`headcount` are ignored.
+
+When `--max-principals-per-organisation` is exceeded,
+`largest-remainder-proportional-v1` floors one person per team, distributes the
+remaining cap proportionally to `raw_count - 1`, then assigns residues by
+largest fractional remainder and canonical team key. A cap below team count
+fails. The cap defaults to `10000` and cannot exceed `1000000`.
+
+The reader reads at most 50 MiB plus one detection byte from a no-follow
+regular-file descriptor. Its JSON-compatible restricted parser requires finite
+scalars and string keys, enforces fixed depth and node limits, rejects YAML
+duplicate keys, aliases, merges, custom tags, and non-JSON scalars, and
+sanitizes recursion and memory failures. Source classification is
+not mapped into enterprise v1; null and present values are recorded as distinct
+unexpressed gaps. Supported `owner` and `approver` relationships widen to the
+whole mapped employee team through `AllSelector` and record that fidelity loss,
+including any divergence from `owning_team_id`; unsupported ownership is
+skipped.
+
+The command interface is:
+
+```bash
+uv run python -m examples.eads_adapter \
+  --source PATH \
+  --vintage sdk-size-v1 \
+  --output OUTPUT_DIR \
+  --seed 42 \
+  --namespace-salt-file PRIVATE_SALT_FILE \
+  --max-principals-per-organisation 10000
+```
+
+The salt file contains a private 256-bit salt encoded as 64 lowercase
+hexadecimal characters. It is an explicit deterministic input and must never be
+published. Opaque references are keyed HMAC derivations under that salt. The
+output root may be absent or existing and empty; non-empty roots and
+non-directories are rejected. The run is staged and atomically promoted.
+Private imports are written under `private/imports/<opaque-ref>/`, the machine
+report under `private/reports/`, and manifested reference artifacts under
+physically separate `artifacts/<opaque-ref>/public/` and `evaluator/` trees.
+Private imports and reports must not be published. Partial multi-organisation
+failure exits nonzero while retaining correctly manifest-bound artifacts for
+successful organisations beside the failure report. All-excluded emits no
+artifacts and exits nonzero; every other zero-success run also exits nonzero.
+
+The machine report's canonical source payload digest covers normalized
+JSON-compatible content, not exact source bytes or a source path. Raw EADS
+exports remain private and are not bundled, tested, or validated by this
+documentation. Source
+organisation, vendor, and product labels must be replaced by safely fictional
+labels or opaque stable identifiers before compiled or public output. Asteria v1
+remains frozen and is not changed by this adapter. The
+[sanitized aggregate gap record](EADS_ADAPTER_GAPS.md) captures hierarchy,
+classification, ownership, region/regulatory, ignored source-scale, and future
+issue #27 generated-world requirements; it is requirements evidence, not a
+frozen benchmark.
+
 `directory_rbac_state` in this version is a structurally validated input contract.
 The independently versioned PR3 corpus declares exact context, subject-bound
 session, activation-request, access-request, and access-cell slots. Its compiler

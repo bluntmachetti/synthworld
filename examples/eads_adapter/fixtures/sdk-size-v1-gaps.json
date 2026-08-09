@@ -1,0 +1,27 @@
+{
+  "organisations": [
+    {
+      "organisation_id": "example-gap-laboratory",
+      "name": "Gap Laboratory Example Ltd",
+      "industry": "research",
+      "scale": "large",
+      "regions": [{"region_id": "example-offshore", "name": "Example Offshore"}],
+      "domains": [
+        {"domain_id": "platform", "name": "Platform", "children": [
+          {"domain_id": "platform-data", "name": "Data", "children": [
+            {"domain_id": "platform-data-archive", "name": "Archive", "children": []}
+          ]}
+        ]}
+      ],
+      "teams": [
+        {"team_id": "archive-operators", "name": "Archive Operators", "team_type": "guild-like", "domain_id": "platform-data-archive", "region_ids": ["example-offshore"], "size": 999}
+      ],
+      "services": [
+        {"service_id": "example-archive", "name": "Example Archive", "service_type": "Tier 1", "classification": null, "owning_team_id": "archive-operators"}
+      ],
+      "ownerships": [
+        {"team_id": "archive-operators", "service_id": "example-archive", "relationship": "informal-custodian"}
+      ]
+    }
+  ]
+}
