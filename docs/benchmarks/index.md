@@ -12,6 +12,8 @@ published.
 
 ## Start here
 
+- [Registry catalogue](/benchmarks/catalogue) is the generated public projection
+  of capability and benchmark status from the resolved governance registries.
 - [Benchmark reference](/reference/benchmarks) lists the stable catalog surface
   and explains how publication status is represented.
 - [Benchmark model](/concepts/benchmark-model) defines the package's benchmark

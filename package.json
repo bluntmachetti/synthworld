@@ -9,7 +9,7 @@
   },
   "packageManager": "npm@10.9.0",
   "scripts": {
-    "docs:prepare": "node tools/prepare_docs_content.mjs",
+    "docs:prepare": "node tools/prepare_docs_content.mjs && node tools/generate_registry_catalogue.mjs",
     "docs:build": "npm run docs:prepare && blume build",
     "docs:check": "npm run docs:prepare && blume check --strict && blume validate && blume build && blume audit --verbose && node tools/audit_docs_dist.mjs",
     "docs:preview": "npm run docs:prepare && blume preview"
