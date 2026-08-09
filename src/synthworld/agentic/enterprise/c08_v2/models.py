@@ -442,6 +442,13 @@ class C08FrozenArtifactV2(SyntheticModel):
     byte_size: int = Field(ge=0)
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
+    @field_validator("path")
+    @classmethod
+    def path_names_a_file(cls, value: str) -> str:
+        if value.rsplit("/", maxsplit=1)[-1] in {".", ".."}:
+            raise ValueError("C08 frozen artifact path must name a file")
+        return value
+
 
 class C08FrozenManifestV2(SyntheticModel):
     """Separate immutable contract for the enterprise frozen benchmark tree."""
@@ -469,10 +476,6 @@ class C08FrozenManifestV2(SyntheticModel):
                 raise ValueError("C08 frozen inventories must be unique and sorted")
             if any(not path.startswith(prefix) for path in paths):
                 raise ValueError("C08 frozen inventory path escapes its tree")
-        if set(item.path for item in self.public_inventory) & set(
-            item.path for item in self.evaluator_inventory
-        ):
-            raise ValueError("C08 frozen inventories must be disjoint")
         return self
 
 
