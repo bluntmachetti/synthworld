@@ -301,6 +301,52 @@ def test_projection_rejects_changed_public_action() -> None:
         compile_c08_truth(source, changed)
 
 
+def test_compile_orders_evaluator_bindings_by_action_id() -> None:
+    source = _source()
+    renamed_actions = (
+        source.actions[0].model_copy(update={"action_id": "z-action"}),
+        source.actions[1].model_copy(update={"action_id": "a-action"}),
+    )
+    renamed_events = tuple(
+        event.model_copy(
+            update={
+                "action_id": (
+                    "z-action" if event.action_id == "action-a" else "a-action"
+                )
+            }
+        )
+        for event in source.evidence_events
+    )
+    renamed_source = C08SourceWorldV2(
+        actions=renamed_actions,
+        evidence_events=renamed_events,
+    )
+    public = project_c08_public(renamed_source)
+    evaluator = compile_c08_truth(renamed_source, public)
+    assert tuple(item.action_id for item in public.actions) == (
+        "z-action",
+        "a-action",
+    )
+    assert tuple(item.action_id for item in evaluator.bindings) == (
+        "a-action",
+        "z-action",
+    )
+
+
+def test_duplicate_same_kind_public_evidence_is_rejected() -> None:
+    public, _ = _bundle()
+    duplicate = public.evidence_events[2].model_copy(
+        update={"kind": C08EvidenceKindV2.AUTHORITY}
+    )
+    invalid_public = public.model_copy(
+        update={"evidence_events": (*public.evidence_events, duplicate)}
+    )
+    with pytest.raises(ValidationError, match="unique per action"):
+        C08PublicInputV2.model_validate(invalid_public.model_dump())
+    with pytest.raises(ValueError, match="ambiguous"):
+        reference_submission_from_public(invalid_public)
+
+
 def test_evaluation_rejects_digest_and_reference_mismatches() -> None:
     public, evaluator = _bundle()
     submission = _submission("0" * 64, ())
@@ -690,6 +736,12 @@ def test_generated_c08_schemas_are_model_authoritative_and_checkable(
     tool.check_schema_files(tmp_path)
     assert all(path.read_bytes() == payload for path, payload in expected.items())
     assert all(path.read_bytes().endswith(b"\n") for path in expected)
+
+    unexpected = tmp_path / "schemas" / "c08-enterprise-unexpected-v2.schema.json"
+    unexpected.write_bytes(b"{}\n")
+    with pytest.raises(tool.C08SchemaDriftError, match="unexpected"):
+        tool.check_schema_files(tmp_path)
+    unexpected.unlink()
 
     drifted = next(iter(expected))
     drifted.write_bytes(drifted.read_bytes() + b"\n")

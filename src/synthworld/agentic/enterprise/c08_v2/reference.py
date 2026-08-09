@@ -7,6 +7,7 @@ from uuid import UUID, uuid5
 
 from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluatorTruthV2,
+    C08EvidenceEventV2,
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
     C08PublicInputV2,
@@ -114,9 +115,16 @@ def _build_source(seed: int) -> C08SourceWorldV2:
 def reference_submission_from_public(public: C08PublicInputV2) -> C08SubmissionV2:
     """Construct the exact reference submission using only public evidence semantics."""
 
-    events_by_semantics = {
-        (event.action_id, event.kind): event for event in public.evidence_events
-    }
+    events_by_semantics: dict[
+        tuple[str, C08EvidenceKindV2], C08EvidenceEventV2
+    ] = {}
+    for event in public.evidence_events:
+        key = (event.action_id, event.kind)
+        if key in events_by_semantics:
+            raise ValueError(
+                "C08 public evidence is ambiguous for an action and evidence kind"
+            )
+        events_by_semantics[key] = event
     rows = tuple(
         (
             action.action_id,

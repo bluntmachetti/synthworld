@@ -77,7 +77,7 @@ def compile_c08_truth(
                 required_evidence_kinds=action.required_evidence_kinds,
                 required_evidence_ids=action.required_evidence_ids,
             )
-            for action in source.actions
+            for action in sorted(source.actions, key=lambda item: item.action_id)
         ),
     )
     validate_c08_truth_against_public(public, truth)

@@ -111,8 +111,15 @@ class C08SourceWorldV2(SyntheticModel):
             range(len(self.evidence_events))
         ):
             raise ValueError("C08 evidence events must have contiguous sequence order")
+        observed_action_kinds: set[tuple[str, C08EvidenceKindV2]] = set()
         actions = {item.action_id: item for item in self.actions}
         for event in self.evidence_events:
+            action_kind = (event.action_id, event.kind)
+            if action_kind in observed_action_kinds:
+                raise ValueError(
+                    "C08 evidence kinds must be unique per action"
+                )
+            observed_action_kinds.add(action_kind)
             action = actions.get(event.action_id)
             if action is None:
                 raise ValueError("C08 evidence event references an unknown action")
@@ -185,8 +192,15 @@ class C08PublicInputV2(SyntheticModel):
             raise ValueError(
                 "C08 public evidence events must have contiguous sequence order"
             )
+        observed_action_kinds: set[tuple[str, C08EvidenceKindV2]] = set()
         actions_by_id = {item.action_id: item for item in self.actions}
         for event in self.evidence_events:
+            action_kind = (event.action_id, event.kind)
+            if action_kind in observed_action_kinds:
+                raise ValueError(
+                    "C08 public evidence kinds must be unique per action"
+                )
+            observed_action_kinds.add(action_kind)
             action = actions_by_id.get(event.action_id)
             if action is None:
                 raise ValueError("C08 public evidence event references unknown action")

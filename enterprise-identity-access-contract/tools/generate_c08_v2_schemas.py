@@ -59,7 +59,15 @@ def check_schema_files(root: Path = ROOT) -> None:
     """Fail without writing when any expected C08 v2 schema is missing or stale."""
 
     problems: list[str] = []
-    for path, expected in expected_schema_files(root).items():
+    expected_files = expected_schema_files(root)
+    expected_names = {path.name for path in expected_files}
+    schema_dir = root / "schemas"
+    problems.extend(
+        f"unexpected {path}"
+        for path in sorted(schema_dir.glob("c08-enterprise-*-v2.schema.json"))
+        if path.is_file() and path.name not in expected_names
+    )
+    for path, expected in expected_files.items():
         if not path.is_file():
             problems.append(f"missing {path}")
         elif path.read_bytes() != expected:
