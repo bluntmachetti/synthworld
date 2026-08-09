@@ -11,8 +11,11 @@
 /src/synthworld/**/*adapter*.py @bluntmachetti
 /src/synthworld/benchmark_reproduction.py @bluntmachetti
 /src/synthworld/benchmarks/** @bluntmachetti
+/docs/_data/capabilities*.json @bluntmachetti
 /docs/_data/** @bluntmachetti
+/docs/_schemas/capabilities*.json @bluntmachetti
 /docs/_schemas/** @bluntmachetti
 /tools/** @bluntmachetti
+/tests/test_capability_governance*.py @bluntmachetti
 /tests/test_public_repository_boundary.py @bluntmachetti
 /tests/** @bluntmachetti
