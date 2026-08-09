@@ -62,6 +62,20 @@ def _metric(report: C08MetricsReportV2, name: str) -> C08MetricV2:
     return next(item for item in report.metrics if item.name == name)
 
 
+def _recursive_keys(value: object) -> set[str]:
+    if isinstance(value, dict):
+        keys = set(value)
+        for item in value.values():
+            keys.update(_recursive_keys(item))
+        return keys
+    if isinstance(value, list):
+        keys: set[str] = set()
+        for item in value:
+            keys.update(_recursive_keys(item))
+        return keys
+    return set()
+
+
 def _changed_submission(
     benchmark: C08AsteriaBenchmarkV2,
     action_index: int,
@@ -103,12 +117,19 @@ def test_generation_is_deterministic_and_scope_is_honest() -> None:
     assert first == second
     assert first.public.measurement_scope.offline_artifacts_only is True
     assert (
-        "production logging behavior" in first.public.measurement_scope.does_not_prove
+        "live enforcement or production logging behavior"
+        in first.public.measurement_scope.does_not_prove
     )
-    public_json = first.public.model_dump_json()
-    assert "required_observation_ids" not in public_json
-    assert "scenario_kind" not in public_json
-    assert "availability" not in public_json
+    public_keys = _recursive_keys(first.public.model_dump(mode="json"))
+    assert {
+        "availability",
+        "bindings",
+        "evaluator",
+        "expected_verdict",
+        "outcome",
+        "required_observation_ids",
+        "scenario_kind",
+    }.isdisjoint(public_keys)
     assert first.evaluator.bindings
 
 
@@ -154,9 +175,18 @@ def test_public_evaluator_submission_artifacts_are_separate_and_bound() -> None:
         "c08-asteria-submission.json",
         "manifest.json",
     }
-    assert (
-        b"required_observation_ids" not in public_artifacts["c08-asteria-public.json"]
+    public_keys = _recursive_keys(
+        json.loads(public_artifacts["c08-asteria-public.json"])
     )
+    assert {
+        "availability",
+        "bindings",
+        "evaluator",
+        "expected_verdict",
+        "outcome",
+        "required_observation_ids",
+        "scenario_kind",
+    }.isdisjoint(public_keys)
     assert all(payload.endswith(b"\n") for payload in public_artifacts.values())
     assert (
         load_c08_bundle(public_artifacts, evaluator_artifacts, submission_artifacts)
@@ -290,18 +320,16 @@ def test_public_candidate_identities_and_evaluator_order_are_canonical() -> None
                 ],
             }
         )
-    evaluator = C08AsteriaEvaluatorV2.model_validate(
-        {
-            **benchmark.evaluator.model_dump(mode="json"),
-            "bindings": [
-                item.model_dump(mode="json")
-                for item in reversed(benchmark.evaluator.bindings)
-            ],
-        }
-    )
-    assert tuple(item.action_event_id for item in evaluator.bindings) == tuple(
-        sorted(item.action_event_id for item in evaluator.bindings)
-    )
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08AsteriaEvaluatorV2.model_validate(
+            {
+                **benchmark.evaluator.model_dump(mode="json"),
+                "bindings": [
+                    item.model_dump(mode="json")
+                    for item in reversed(benchmark.evaluator.bindings)
+                ],
+            }
+        )
 
 
 def test_public_ordinals_and_opaque_ids_do_not_recover_scenario_labels() -> None:
@@ -547,7 +575,10 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
                 action_event_id=action.action_event_id,
                 retained_observation_ids=(),
             )
-            for action in benchmark.public.actions
+            for action in sorted(
+                benchmark.public.actions,
+                key=lambda item: item.action_event_id,
+            )
         ),
     )
     report = evaluate_c08_submission(benchmark, empty)
@@ -566,12 +597,16 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
 def test_submission_alignment_and_model_ordering_are_fail_closed() -> None:
     benchmark = _benchmark()
     reference = reference_c08_submission(benchmark)
-    reversed_rows = reference.model_copy(
-        update={"rows": tuple(reversed(reference.rows))}
-    )
-    assert reversed_rows.rows == tuple(
-        sorted(reference.rows, key=lambda item: item.action_event_id)
-    )
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08AsteriaSubmissionV2.model_validate(
+            {
+                **reference.model_dump(mode="json"),
+                "rows": [
+                    row.model_dump(mode="json")
+                    for row in reversed(reference.rows)
+                ],
+            }
+        )
     with pytest.raises(C08EvaluationError, match="missing"):
         evaluate_c08_submission(
             benchmark, reference.model_copy(update={"rows": reference.rows[:-1]})

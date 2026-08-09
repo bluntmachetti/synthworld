@@ -176,6 +176,20 @@ def _resource_files(root: Traversable) -> dict[str, bytes]:
     return payloads
 
 
+def _recursive_keys(value: object) -> set[str]:
+    if isinstance(value, dict):
+        keys = set(value)
+        for item in value.values():
+            keys.update(_recursive_keys(item))
+        return keys
+    if isinstance(value, list):
+        keys: set[str] = set()
+        for item in value:
+            keys.update(_recursive_keys(item))
+        return keys
+    return set()
+
+
 def _assert_canonical_files(payloads: dict[str, bytes]) -> None:
     for path, payload in payloads.items():
         assert payload.decode("utf-8")
@@ -240,14 +254,24 @@ def test_public_and_evaluator_package_resources_remain_physically_separate() -> 
     assert {path for path in enterprise if path.startswith("public/")}.isdisjoint(
         path for path in enterprise if path.startswith("evaluator/")
     )
-    asteria_public = b"".join(
-        payload for path, payload in asteria.items() if path.startswith("public/")
-    )
+    asteria_public_keys: set[str] = set()
+    for path, payload in asteria.items():
+        if path.startswith("public/"):
+            asteria_public_keys.update(_recursive_keys(json.loads(payload)))
     enterprise_public = b"".join(
         payload for path, payload in enterprise.items() if path.startswith("public/")
     )
-    assert b"required_observation_ids" not in asteria_public
-    assert b"scenario_kind" not in asteria_public
+    assert {
+        "availability",
+        "bindings",
+        "evaluator",
+        "evaluator_public_input_digest",
+        "expected_verdict",
+        "outcome",
+        "public_input_digest",
+        "required_observation_ids",
+        "scenario_kind",
+    }.isdisjoint(asteria_public_keys)
     assert b"required_evidence_ids" not in enterprise_public
     assert b'"outcome"' not in enterprise_public
     assert not any(

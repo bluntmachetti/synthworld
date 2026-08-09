@@ -47,7 +47,10 @@ def _payload_digest(*parts: str) -> str:
 
 
 def _scope() -> C08MeasurementScopeV2:
-    return C08MeasurementScopeV2(proves=_PROVES, does_not_prove=_DOES_NOT_PROVE)
+    return C08MeasurementScopeV2(
+        proves=tuple(sorted(_PROVES)),
+        does_not_prove=tuple(sorted(_DOES_NOT_PROVE)),
+    )
 
 
 def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
@@ -169,14 +172,22 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
                 event_order=action_index,
                 action=action,
                 resource_id=resource_id,
-                requested_scope=scope,
-                required_evidence=tuple(requirements),
+                requested_scope=tuple(sorted(scope)),
+                required_evidence=tuple(
+                    sorted(
+                        requirements,
+                        key=lambda item: (
+                            item.evidence_kind.value,
+                            item.binding_handle,
+                        ),
+                    )
+                ),
             )
         )
         bindings.append(
             C08EvidenceBindingV2(
                 action_event_id=action_id,
-                required_observation_ids=tuple(action_observation_ids),
+                required_observation_ids=tuple(sorted(action_observation_ids)),
                 scenario_kind=evaluator_scenarios[stable_key],
             )
         )
@@ -219,7 +230,7 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
         benchmark_id=benchmark_id,
         public_input_digest=public_digest,
         measurement_scope=_scope(),
-        bindings=tuple(bindings),
+        bindings=tuple(sorted(bindings, key=lambda item: item.action_event_id)),
     )
     return C08AsteriaBenchmarkV2(
         schema_version=C08_SCHEMA_VERSION,
@@ -243,9 +254,14 @@ def reference_c08_submission(
         rows=tuple(
             C08SubmissionRowV2(
                 action_event_id=binding.action_event_id,
-                retained_observation_ids=binding.required_observation_ids,
+                retained_observation_ids=tuple(
+                    sorted(binding.required_observation_ids)
+                ),
             )
-            for binding in benchmark.evaluator.bindings
+            for binding in sorted(
+                benchmark.evaluator.bindings,
+                key=lambda item: item.action_event_id,
+            )
         ),
     )
 
@@ -282,12 +298,12 @@ def semantic_c08_submission(
         rows.append(
             C08SubmissionRowV2(
                 action_event_id=action.action_event_id,
-                retained_observation_ids=tuple(selected),
+                retained_observation_ids=tuple(sorted(selected)),
             )
         )
     return C08AsteriaSubmissionV2(
         public_input_digest=hashlib.sha256(canonical_json_bytes(public)).hexdigest(),
-        rows=tuple(rows),
+        rows=tuple(sorted(rows, key=lambda item: item.action_event_id)),
     )
 
 

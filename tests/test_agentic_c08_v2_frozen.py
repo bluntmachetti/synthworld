@@ -156,6 +156,20 @@ def _tree_bytes(root: Path) -> dict[str, bytes]:
     }
 
 
+def _recursive_keys(value: object) -> set[str]:
+    if isinstance(value, dict):
+        keys = set(value)
+        for item in value.values():
+            keys.update(_recursive_keys(item))
+        return keys
+    if isinstance(value, list):
+        keys: set[str] = set()
+        for item in value:
+            keys.update(_recursive_keys(item))
+        return keys
+    return set()
+
+
 def _v1_metadata_bytes(document: Mapping[str, object]) -> bytes:
     return (json.dumps(document, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
@@ -223,18 +237,21 @@ def test_frozen_format_and_public_tree_have_no_evaluator_leakage() -> None:
             assert not payload.endswith(b"\n\n")
             assert payload.decode("utf-8")
             json.loads(payload)
-    public_text = "\n".join(
-        path.read_text(encoding="utf-8")
-        for path in (FROZEN_TREE / "public").rglob("*")
-        if path.is_file()
-    )
-    for marker in (
+    public_keys: set[str] = set()
+    for path in (FROZEN_TREE / "public").rglob("*"):
+        if path.is_file():
+            public_keys.update(_recursive_keys(json.loads(path.read_bytes())))
+    assert {
+        "availability",
+        "bindings",
+        "evaluator",
+        "evaluator_public_input_digest",
+        "expected_verdict",
+        "outcome",
+        "public_input_digest",
         "required_observation_ids",
         "scenario_kind",
-        "public_input_digest",
-        "evaluator",
-    ):
-        assert marker not in public_text
+    }.isdisjoint(public_keys)
     assert not any(
         "submission" in path.name or "report" in path.name
         for path in FROZEN_TREE.rglob("*")

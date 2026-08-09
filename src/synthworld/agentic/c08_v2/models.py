@@ -41,7 +41,9 @@ def _canonical_strings(values: tuple[str, ...], label: str) -> tuple[str, ...]:
         raise ValueError(f"{label} must contain nonblank values")
     if len(set(values)) != len(values):
         raise ValueError(f"{label} must be unique")
-    return tuple(sorted(values))
+    if values != tuple(sorted(values)):
+        raise ValueError(f"{label} must use canonical order")
+    return values
 
 
 class C08EvidenceKind(StrEnum):
@@ -102,12 +104,15 @@ class C08PublicActionV2(SyntheticModel):
         identities = tuple((item.evidence_kind, item.binding_handle) for item in value)
         if len(set(identities)) != len(identities):
             raise ValueError("required evidence kind/handle pairs must be unique")
-        return tuple(
+        ordered = tuple(
             sorted(
                 value,
                 key=lambda item: (item.evidence_kind.value, item.binding_handle),
             )
         )
+        if ordered != value:
+            raise ValueError("required evidence must use canonical order")
+        return value
 
 
 class C08EvidenceObservationV2(SyntheticModel):
@@ -223,7 +228,9 @@ class C08AsteriaEvaluatorV2(SyntheticModel):
         ids = tuple(item.action_event_id for item in value)
         if len(set(ids)) != len(ids):
             raise ValueError("evaluator binding action ids must be unique")
-        return tuple(sorted(value, key=lambda item: item.action_event_id))
+        if value != tuple(sorted(value, key=lambda item: item.action_event_id)):
+            raise ValueError("evaluator bindings must use canonical order")
+        return value
 
 
 class C08SubmissionRowV2(SyntheticModel):
@@ -237,7 +244,9 @@ class C08SubmissionRowV2(SyntheticModel):
             raise ValueError("retained observation ids must be unique")
         if any(not item.strip() for item in value):
             raise ValueError("retained observation ids must be nonblank")
-        return tuple(sorted(value))
+        if value != tuple(sorted(value)):
+            raise ValueError("retained observation ids must use canonical order")
+        return value
 
 
 class C08AsteriaSubmissionV2(SyntheticModel):
@@ -253,7 +262,7 @@ class C08AsteriaSubmissionV2(SyntheticModel):
             raise ValueError("submission action ids must be unique")
         ordered = tuple(sorted(self.rows, key=lambda item: item.action_event_id))
         if ordered != self.rows:
-            return self.model_copy(update={"rows": ordered})
+            raise ValueError("submission rows must use canonical order")
         return self
 
 
@@ -369,7 +378,7 @@ class C08ArtifactManifestV2(SyntheticModel):
             raise ValueError("manifest artifact paths must be unique")
         ordered = tuple(sorted(self.artifacts, key=lambda item: item.path))
         if ordered != self.artifacts:
-            return self.model_copy(update={"artifacts": ordered})
+            raise ValueError("manifest artifacts must use canonical order")
         return self
 
 
@@ -379,7 +388,9 @@ def _canonical_frozen_artifacts(
     paths = tuple(item.path for item in artifacts)
     if len(set(paths)) != len(paths):
         raise ValueError("frozen manifest artifact paths must be unique")
-    return tuple(sorted(artifacts, key=lambda item: item.path))
+    if artifacts != tuple(sorted(artifacts, key=lambda item: item.path)):
+        raise ValueError("frozen manifest artifacts must use canonical order")
+    return artifacts
 
 
 class C08FrozenPublicManifestV2(SyntheticModel):
@@ -395,8 +406,6 @@ class C08FrozenPublicManifestV2(SyntheticModel):
         ordered = _canonical_frozen_artifacts(self.artifacts)
         if tuple(item.path for item in ordered) != (C08_PUBLIC_ARTIFACT,):
             raise ValueError("frozen public manifest inventory differs")
-        if ordered != self.artifacts:
-            return self.model_copy(update={"artifacts": ordered})
         return self
 
 
@@ -414,8 +423,6 @@ class C08FrozenEvaluatorManifestV2(SyntheticModel):
         ordered = _canonical_frozen_artifacts(self.artifacts)
         if tuple(item.path for item in ordered) != (C08_EVALUATOR_ARTIFACT,):
             raise ValueError("frozen evaluator manifest inventory differs")
-        if ordered != self.artifacts:
-            return self.model_copy(update={"artifacts": ordered})
         return self
 
 
@@ -442,8 +449,6 @@ class C08FrozenRootManifestV2(SyntheticModel):
         )
         if tuple(item.path for item in ordered) != expected:
             raise ValueError("frozen root manifest inventory differs")
-        if ordered != self.artifacts:
-            return self.model_copy(update={"artifacts": ordered})
         return self
 
 
