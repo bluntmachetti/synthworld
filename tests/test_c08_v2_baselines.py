@@ -175,9 +175,7 @@ def test_asteria_aggregate_shape_reproduction_and_directions() -> None:
     )
 
 
-def test_asteria_baseline_digest_projection_does_not_weaken_submission_order() -> (
-    None
-):
+def test_asteria_baseline_digest_projection_does_not_weaken_submission_order() -> None:
     tool = _load_tool()
     benchmark = tool.generate_c08_asteria_v2(SEED)
     submission = tool._asteria_submission(benchmark, "exact")
@@ -188,17 +186,16 @@ def test_asteria_baseline_digest_projection_does_not_weaken_submission_order() -
         for row in submission.rows
     )
 
-    compatibility_bytes = tool._asteria_baseline_submission_bytes(
-        benchmark, submission
-    )
+    compatibility_bytes = tool._asteria_baseline_submission_bytes(benchmark, submission)
     compatibility_document = json.loads(compatibility_bytes)
     assert tuple(
         row["action_event_id"] for row in compatibility_document["rows"]
     ) == tuple(action.action_event_id for action in benchmark.public.actions)
     exact_record = tool.build_asteria_baseline_records(SEED)["records"][0]
-    assert exact_record["submission_digest"] == hashlib.sha256(
-        compatibility_bytes
-    ).hexdigest()
+    assert (
+        exact_record["submission_digest"]
+        == hashlib.sha256(compatibility_bytes).hexdigest()
+    )
 
 
 def test_enterprise_aggregate_shape_reproduction_and_directions() -> None:
