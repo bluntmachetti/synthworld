@@ -52,6 +52,27 @@ _ASTERIA_V1_DIGESTS = {
         "9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594"
     ),
 }
+_ASTERIA_V1_PUBLIC_FILES = (
+    "organisation.json",
+    "principals.jsonl",
+    "agents.jsonl",
+    "runtimes.jsonl",
+    "resources.jsonl",
+    "public_credentials.jsonl",
+    "public_delegations.jsonl",
+    "public_events.jsonl",
+    "tool_schemas/procurement-tools.json",
+    "scenarios/procurement-delegation.json",
+)
+_ASTERIA_V1_EVALUATOR_FILES = (
+    "canonical_bindings.json",
+    "authority_truth.jsonl",
+    "cases.jsonl",
+    "expected_decisions.jsonl",
+    "expected_side_effects.jsonl",
+    "expected_provenance.jsonl",
+    "evidence_epochs.jsonl",
+)
 _ENTERPRISE_V1_EXAMPLE_DIGESTS = {
     "enterprise-agentic-evaluator.json": (
         "9fbf331d8a037e444d3b756007ce1ab2426b3cd39ab46461cb1343bbccbfb723"
@@ -67,7 +88,7 @@ _ENTERPRISE_V1_EXAMPLE_DIGESTS = {
     ),
 }
 _ASTERIA_ROOT_DIGEST = (
-    "a1c72b05a391416ccfacf6eb4bc18ecca342f834b007ee9b1bb0c26a795d21e8"
+    "5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a"
 )
 _ENTERPRISE_CHECKSUM_ROOT = (
     "3ad3c6a1dd226d6a62c273a291032b9309bd5fa627540beac8507347fe1e0dcb"
@@ -201,13 +222,21 @@ def test_public_and_evaluator_package_resources_remain_physically_separate() -> 
 
 def test_v1_artifact_identities_are_preserved() -> None:
     benchmarks = files("synthworld.benchmarks")
-    asteria_checksums = json.loads(
-        benchmarks.joinpath(
-            "asteria-agentic-v1/evaluator/checksums.json"
-        ).read_bytes()
+    asteria = benchmarks.joinpath("asteria-agentic-v1")
+    public_payloads = {
+        path: asteria.joinpath("public", path).read_bytes()
+        for path in _ASTERIA_V1_PUBLIC_FILES
+    }
+    evaluator_payloads = {
+        path: asteria.joinpath("evaluator", path).read_bytes()
+        for path in _ASTERIA_V1_EVALUATOR_FILES
+    }
+    assert c08_frozen_artifact_set_digest(public_payloads) == (
+        _ASTERIA_V1_DIGESTS["public_artifact_set_digest"]
     )
-    for field, digest in _ASTERIA_V1_DIGESTS.items():
-        assert asteria_checksums[field] == digest
+    assert c08_frozen_artifact_set_digest(evaluator_payloads) == (
+        _ASTERIA_V1_DIGESTS["evaluator_artifact_set_digest"]
+    )
 
     examples = Path("enterprise-identity-access-contract/examples")
     for filename, digest in _ENTERPRISE_V1_EXAMPLE_DIGESTS.items():
