@@ -23,6 +23,7 @@ from synthworld.agentic.enterprise.c08_v2.reference import generate_c08_referenc
 from synthworld.agentic.enterprise.c08_v2.serialization import (
     load_c08_evaluator,
     load_c08_public,
+    require_c08_canonical_json_bytes,
     serialize_c08_evaluator,
     serialize_c08_public,
 )
@@ -183,6 +184,11 @@ def load_frozen_benchmark(root: Path) -> FrozenC08BenchmarkV2:
         raise FrozenC08BenchmarkError("frozen benchmark inventory differs")
     manifest = _parse_manifest(payloads[MANIFEST_PATH])
     _check_checksums(payloads)
+    try:
+        require_c08_canonical_json_bytes(payloads[PUBLIC_PATH], "public")
+        require_c08_canonical_json_bytes(payloads[EVALUATOR_PATH], "evaluator")
+    except ValueError as error:
+        raise FrozenC08BenchmarkError(str(error)) from error
     try:
         public = load_c08_public(root / PUBLIC_PATH)
         evaluator = load_c08_evaluator(root / EVALUATOR_PATH)

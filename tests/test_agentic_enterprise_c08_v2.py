@@ -584,7 +584,7 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             evidence_events=tuple(reversed(public.evidence_events)),
         )
     tenant_tampered = public.evidence_events[0].model_copy(
-        update={"tenant_id": "tenant-b"}
+        update={"tenant_id": "tenant-tampered"}
     )
     with pytest.raises(ValidationError, match="semantics differ"):
         C08PublicInputV2(
@@ -791,7 +791,7 @@ def test_report_models_require_canonical_order() -> None:
             required_evidence=(
                 _requirement(C08EvidenceKindV2.AUTHORITY, "binding-x-authority"),
             ),
-            required_observation_ids=("x-required", "x-extra"),
+            required_observation_ids=("x-extra", "x-required"),
         )
     with pytest.raises(ValidationError, match="binding observation identifiers"):
         C08EvidenceBindingV2(
