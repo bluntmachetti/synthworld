@@ -86,13 +86,13 @@ def evaluate_c08(
     wrong_action_count = 0
     extra_count = 0
     required_count = sum(
-        len(binding.required_evidence_ids) for binding in evaluator.bindings
+        len(binding.required_observation_ids) for binding in evaluator.bindings
     )
 
     for action in public.actions:
         binding = bindings[action.action_id]
         observations = by_action[action.action_id]
-        required = set(binding.required_evidence_ids)
+        required = set(binding.required_observation_ids)
         seen_required: set[str] = set()
         action_fabricated = False
         action_wrong = False

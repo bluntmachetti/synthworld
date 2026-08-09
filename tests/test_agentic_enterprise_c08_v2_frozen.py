@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import hashlib
-import importlib.util
 import json
 import shutil
 from pathlib import Path
-from types import ModuleType
 
 import pytest
 
@@ -16,7 +14,22 @@ from synthworld.agentic.enterprise.c08_v2 import (
     C08FrozenArtifactV2,
     C08FrozenManifestV2,
     evaluate_c08,
+    generate_c08_reference,
     reference_submission_from_public,
+)
+from synthworld.agentic.enterprise.c08_v2.frozen import (
+    FrozenC08BenchmarkError,
+    frozen_files,
+    load_frozen_benchmark,
+    load_packaged_frozen_benchmark,
+    write_frozen_benchmark,
+)
+from synthworld.agentic.enterprise.c08_v2.projection import (
+    c08_public_input_digest,
+)
+from synthworld.agentic.enterprise.c08_v2.serialization import (
+    serialize_c08_evaluator,
+    serialize_c08_public,
 )
 
 _EXPECTED_FILES = {
@@ -25,29 +38,39 @@ _EXPECTED_FILES = {
     "public/public-input.json",
     "evaluator/truth.json",
 }
-_V1_EXAMPLE_DIGESTS = {
-    "enterprise-agentic-evaluator.json": (
+_PACKAGED_ROOT = Path("src/synthworld/benchmarks/enterprise-agentic-c08-v2")
+_V1_DIGESTS = {
+    "examples/enterprise-agentic-evaluator.json": (
         "9fbf331d8a037e444d3b756007ce1ab2426b3cd39ab46461cb1343bbccbfb723"
     ),
-    "enterprise-agentic-metrics.json": (
+    "examples/enterprise-agentic-metrics.json": (
         "983f5abb9ee17b91dbfec39fd029c8ebce3ed1de738f500a32dc01f4b61864c7"
     ),
-    "enterprise-agentic-prediction.json": (
+    "examples/enterprise-agentic-prediction.json": (
         "c8af6e28c4d7e47f86969cff9a669081414414c498abc9ae1cd46ccb5252a2bd"
     ),
-    "enterprise-agentic-public-input.json": (
+    "examples/enterprise-agentic-public-input.json": (
         "ca581923b57927c9595a6e3f44e783bcdc02bd329f6bd9b79eee11ea034f28a3"
     ),
+    "schemas/enterprise-agentic-benchmark.schema.json": (
+        "7ca6c5fa4de53ff527b535871663606750c2dce1ddb143e1971cbaad89531f10"
+    ),
+    "schemas/enterprise-agentic-evaluator.schema.json": (
+        "b1d5ee7109c4cf0e151c30ec414976bc7fbd210607bdf2bd50ae07e930c6dbfc"
+    ),
+    "schemas/enterprise-agentic-metrics.schema.json": (
+        "979d31dc1c55e1dd034eb2840e06c3730558e17872d14fd798f520c7f6948862"
+    ),
+    "schemas/enterprise-agentic-prediction.schema.json": (
+        "f3cd117cd476176e79a2fb5264e04fb7f671815a335db6f6976578c4890bccb6"
+    ),
+    "schemas/enterprise-agentic-public-input.schema.json": (
+        "97418f7200ffdbc9665562e0560ce55cdf3ab65f3ee4baa4843a114f8aae9b1b"
+    ),
+    "schemas/enterprise-agentic-truth.schema.json": (
+        "5a3352b538fcac485e3d9d0449760586201207cb91897d113371e2ff4b377a1a"
+    ),
 }
-
-
-def _tool() -> ModuleType:
-    path = Path("enterprise-identity-access-contract/tools/freeze_c08_v2_benchmark.py")
-    spec = importlib.util.spec_from_file_location("freeze_c08_v2_benchmark", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def _files(root: Path) -> dict[str, bytes]:
@@ -79,18 +102,53 @@ def _rewrite_checksum(root: Path, path: str, payload: bytes) -> None:
     )
 
 
+def _canonical_json_bytes(value: object) -> bytes:
+    return (
+        json.dumps(
+            value,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+        + b"\n"
+    )
+
+
+def _write_self_consistent_alternate(root: Path) -> None:
+    alternate = generate_c08_reference(20260810)
+    payloads = frozen_files()
+    payloads["public/public-input.json"] = serialize_c08_public(alternate.public)
+    payloads["evaluator/truth.json"] = serialize_c08_evaluator(alternate.evaluator)
+    manifest = json.loads(payloads["manifest.json"])
+    manifest["public_input_digest"] = c08_public_input_digest(alternate.public)
+    for inventory_name in ("public_inventory", "evaluator_inventory"):
+        for artifact in manifest[inventory_name]:
+            payload = payloads[artifact["path"]]
+            artifact["byte_size"] = len(payload)
+            artifact["sha256"] = hashlib.sha256(payload).hexdigest()
+    payloads["manifest.json"] = _canonical_json_bytes(manifest)
+    payloads["SHA256SUMS"] = "".join(
+        f"{hashlib.sha256(payloads[path]).hexdigest()}  {path}\n"
+        for path in sorted(payloads)
+        if path != "SHA256SUMS"
+    ).encode("ascii")
+    for path, payload in payloads.items():
+        destination = root / path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(payload)
+
+
 def test_frozen_tree_has_fixed_seed_exact_inventory_and_canonical_bytes() -> None:
-    tool = _tool()
-    tree = tool.load_frozen_benchmark()
+    tree = load_packaged_frozen_benchmark()
     assert tree.manifest.benchmark_id == "enterprise-agentic-c08-v2"
     assert tree.manifest.seed == 20260809
     assert tree.manifest.checksum_excludes == ("SHA256SUMS",)
-    assert set(_files(tool.DEFAULT_ROOT)) == _EXPECTED_FILES
-    for path, payload in _files(tool.DEFAULT_ROOT).items():
+    assert set(_files(_PACKAGED_ROOT)) == _EXPECTED_FILES
+    for path, payload in _files(_PACKAGED_ROOT).items():
         assert payload.endswith(b"\n"), path
         assert not payload.endswith(b"\n\n"), path
         assert b"\r" not in payload, path
-    checksum_payload = (tool.DEFAULT_ROOT / "SHA256SUMS").read_bytes()
+    checksum_payload = (_PACKAGED_ROOT / "SHA256SUMS").read_bytes()
     assert b"SHA256SUMS" not in checksum_payload
     assert b"submission" not in checksum_payload
     assert b"report" not in checksum_payload
@@ -98,23 +156,22 @@ def test_frozen_tree_has_fixed_seed_exact_inventory_and_canonical_bytes() -> Non
 
 
 def test_frozen_generation_is_byte_identical(tmp_path: Path) -> None:
-    tool = _tool()
     first = tmp_path / "first"
     second = tmp_path / "second"
-    tool.write_frozen_benchmark(first)
-    tool.write_frozen_benchmark(second)
-    assert _files(first) == _files(second) == tool.frozen_files()
+    write_frozen_benchmark(first)
+    write_frozen_benchmark(second)
+    assert _files(first) == _files(second) == frozen_files()
 
 
 def test_public_tree_has_no_evaluator_fields_or_case_truth() -> None:
-    tool = _tool()
-    tree = tool.load_frozen_benchmark()
+    tree = load_packaged_frozen_benchmark()
     public_bytes = b"".join(
         payload
-        for path, payload in _files(tool.DEFAULT_ROOT).items()
+        for path, payload in _files(_PACKAGED_ROOT).items()
         if path.startswith("public/")
     )
     assert b"required_evidence_ids" not in public_bytes
+    assert b"required_observation_ids" not in public_bytes
     assert b"C08CaseOutcomeV2" not in public_bytes
     assert b'"outcome"' not in public_bytes
     assert b"evaluator/truth.json" not in public_bytes
@@ -123,8 +180,7 @@ def test_public_tree_has_no_evaluator_fields_or_case_truth() -> None:
 
 
 def test_frozen_evaluation_rejects_cross_tenant_and_wrong_action() -> None:
-    tool = _tool()
-    tree = tool.load_frozen_benchmark()
+    tree = load_packaged_frozen_benchmark()
     reference = reference_submission_from_public(tree.public)
     first = reference.observations[0]
     cross_tenant = reference.model_copy(
@@ -145,6 +201,10 @@ def test_frozen_evaluation_rejects_cross_tenant_and_wrong_action() -> None:
         for item in report.outcomes
         if item.action_id == first.action_id
     ) is C08CaseOutcomeV2.WRONG_ACTION
+    report_payload = json.dumps(report.model_dump(mode="json"))
+    assert "offline scoring does not prove live evidence retention" in report_payload
+    assert "offline scoring does not prove durable logging" in report_payload
+    assert "offline scoring does not prove enforcement behavior" in report_payload
 
     wrong_action_id = tree.public.actions[1].action_id
     wrong_action = reference.model_copy(
@@ -170,34 +230,33 @@ def test_frozen_evaluation_rejects_cross_tenant_and_wrong_action() -> None:
 def test_frozen_loader_rejects_missing_extra_directory_symlink_and_digest(
     tmp_path: Path,
 ) -> None:
-    tool = _tool()
-    source = tool.DEFAULT_ROOT
+    source = _PACKAGED_ROOT
 
     missing = tmp_path / "missing"
     _copy_frozen(source, missing)
     (missing / "public/public-input.json").unlink()
-    with pytest.raises(tool.FrozenC08BenchmarkError, match="inventory"):
-        tool.load_frozen_benchmark(missing)
+    with pytest.raises(FrozenC08BenchmarkError, match="inventory"):
+        load_frozen_benchmark(missing)
 
     extra = tmp_path / "extra"
     _copy_frozen(source, extra)
     (extra / "extra.json").write_bytes(b"{}\n")
-    with pytest.raises(tool.FrozenC08BenchmarkError, match="inventory"):
-        tool.load_frozen_benchmark(extra)
+    with pytest.raises(FrozenC08BenchmarkError, match="inventory"):
+        load_frozen_benchmark(extra)
 
     directory = tmp_path / "directory"
     _copy_frozen(source, directory)
     (directory / "public/public-input.json").unlink()
     (directory / "public/public-input.json").mkdir()
-    with pytest.raises(tool.FrozenC08BenchmarkError, match="inventory"):
-        tool.load_frozen_benchmark(directory)
+    with pytest.raises(FrozenC08BenchmarkError, match="inventory"):
+        load_frozen_benchmark(directory)
 
     symlink = tmp_path / "symlink"
     _copy_frozen(source, symlink)
     (symlink / "evaluator/truth.json").unlink()
     (symlink / "evaluator/truth.json").symlink_to("../public/public-input.json")
-    with pytest.raises(tool.FrozenC08BenchmarkError, match="symlink"):
-        tool.load_frozen_benchmark(symlink)
+    with pytest.raises(FrozenC08BenchmarkError, match="symlink"):
+        load_frozen_benchmark(symlink)
 
     digest = tmp_path / "digest"
     _copy_frozen(source, digest)
@@ -211,33 +270,45 @@ def test_frozen_loader_rejects_missing_extra_directory_symlink_and_digest(
         + "\n",
         encoding="ascii",
     )
-    with pytest.raises(tool.FrozenC08BenchmarkError, match="digest"):
-        tool.load_frozen_benchmark(digest)
+    with pytest.raises(FrozenC08BenchmarkError, match="digest"):
+        load_frozen_benchmark(digest)
 
 
 def test_frozen_loader_rejects_noncanonical_json(tmp_path: Path) -> None:
-    tool = _tool()
     root = tmp_path / "noncanonical"
-    _copy_frozen(tool.DEFAULT_ROOT, root)
+    _copy_frozen(_PACKAGED_ROOT, root)
     path = root / "public/public-input.json"
     payload = path.read_bytes()
     noncanonical = json.dumps(json.loads(payload), indent=2).encode("utf-8") + b"\n"
     path.write_bytes(noncanonical)
     _rewrite_checksum(root, "public/public-input.json", noncanonical)
-    with pytest.raises(tool.FrozenC08BenchmarkError, match="canonical"):
-        tool.load_frozen_benchmark(root)
+    with pytest.raises(FrozenC08BenchmarkError, match="canonical"):
+        load_frozen_benchmark(root)
 
 
-def test_enterprise_v1_examples_remain_byte_identical() -> None:
-    root = Path("enterprise-identity-access-contract/examples")
-    for filename, expected in _V1_EXAMPLE_DIGESTS.items():
-        payload = (root / filename).read_bytes()
+def test_frozen_loader_rejects_self_consistent_replacement(tmp_path: Path) -> None:
+    root = tmp_path / "alternate"
+    _write_self_consistent_alternate(root)
+    with pytest.raises(FrozenC08BenchmarkError, match="root identity"):
+        load_frozen_benchmark(root)
+
+
+def test_complete_enterprise_v1_inventory_remains_byte_identical() -> None:
+    root = Path("enterprise-identity-access-contract")
+    actual = {
+        path.relative_to(root).as_posix()
+        for directory in (root / "examples", root / "schemas")
+        for path in directory.glob("enterprise-agentic-*")
+        if path.is_file()
+    }
+    assert actual == set(_V1_DIGESTS)
+    for path, expected in _V1_DIGESTS.items():
+        payload = (root / path).read_bytes()
         assert hashlib.sha256(payload).hexdigest() == expected
 
 
 def test_manifest_model_rejects_non_enterprise_or_unsorted_inventory() -> None:
-    tool = _tool()
-    manifest = tool.load_frozen_benchmark().manifest
+    manifest = load_packaged_frozen_benchmark().manifest
     with pytest.raises(ValueError, match="enterprise-agentic-c08-v2"):
         C08FrozenManifestV2.model_validate(
             {**manifest.model_dump(mode="json"), "benchmark_id": "asteria"}

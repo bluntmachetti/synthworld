@@ -6,6 +6,14 @@ from synthworld.agentic.enterprise.c08_v2.errors import (
     C08SerializationError,
 )
 from synthworld.agentic.enterprise.c08_v2.evaluation import evaluate_c08
+from synthworld.agentic.enterprise.c08_v2.frozen import (
+    FrozenC08BenchmarkError,
+    FrozenC08BenchmarkV2,
+    frozen_files,
+    load_frozen_benchmark,
+    load_packaged_frozen_benchmark,
+    write_frozen_benchmark,
+)
 from synthworld.agentic.enterprise.c08_v2.models import (
     C08_FROZEN_BENCHMARK_ID,
     C08_FROZEN_SEED,
@@ -18,8 +26,10 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvidenceEventV2,
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
+    C08EvidenceRequirementV2,
     C08FrozenArtifactV2,
     C08FrozenManifestV2,
+    C08MeasurementScopeV2,
     C08PublicActionV2,
     C08PublicInputV2,
     C08SourceActionV2,
@@ -27,6 +37,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08SubmissionV2,
 )
 from synthworld.agentic.enterprise.c08_v2.projection import (
+    c08_public_observation_id,
     compile_c08_truth,
     project_c08_public,
     validate_c08_truth_against_public,
@@ -63,8 +74,10 @@ __all__ = [
     "C08EvidenceEventV2",
     "C08EvidenceKindV2",
     "C08EvidenceObservationV2",
+    "C08EvidenceRequirementV2",
     "C08FrozenArtifactV2",
     "C08FrozenManifestV2",
+    "C08MeasurementScopeV2",
     "C08ProjectionError",
     "C08PublicActionV2",
     "C08PublicInputV2",
@@ -73,11 +86,17 @@ __all__ = [
     "C08SourceActionV2",
     "C08SourceWorldV2",
     "C08SubmissionV2",
+    "FrozenC08BenchmarkError",
+    "FrozenC08BenchmarkV2",
+    "c08_public_observation_id",
     "compile_c08_truth",
     "evaluate_c08",
     "export_c08_artifacts",
+    "frozen_files",
     "generate_c08_reference",
     "load_c08_evaluator",
+    "load_frozen_benchmark",
+    "load_packaged_frozen_benchmark",
     "load_c08_public",
     "load_c08_submission",
     "project_c08_public",
@@ -86,4 +105,5 @@ __all__ = [
     "serialize_c08_public",
     "serialize_c08_submission",
     "validate_c08_truth_against_public",
+    "write_frozen_benchmark",
 ]
