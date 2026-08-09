@@ -1,7 +1,8 @@
 # C08 evidence-binding v2 transition
 
 Status: implemented frozen-artifact candidate, 2026-08-09. Candidate bytes are
-committed; verification and publication gates remain pending.
+committed; repository verification passed and external publication gates remain
+pending.
 
 This transition gives `SW-AA-C08` independently versioned Asteria and enterprise
 surfaces for evidence completeness. Existing v1 models, metric names, schemas,
@@ -69,9 +70,9 @@ families for drift.
 
 ## Locked C08-only freeze contract
 
-The following decisions describe the committed candidate bytes. They do not assert
-that CI, schema drift, packaging, clean-install, regeneration, or publication gates
-have passed.
+The following decisions describe the committed candidate bytes. Repository CI,
+schema drift, packaging, clean-install, and regeneration verification has passed;
+external publication gates remain pending.
 
 ### Identity and deterministic inputs
 
@@ -257,11 +258,11 @@ records, and expanded v1 assertions are implemented. GitHub Actions runs
 generated documents, schemas, and package paths recorded in `GOLDEN_REVIEW.md`.
 
 Repository-local candidate registry entries now exist for both C08 v2 benchmark
-identities. Verification of the current registry metadata remains pending until
-its branch CI passes. The entries do not represent external publication,
-publication approval, or verification of an external host, viewer, download, or
-re-download path; the artifacts remain frozen candidates, not published
-benchmarks.
+identities. Registry and capability metadata verification passed for PR #114 at
+`b2fffc179cfae4cb86e41f398407ea3520cad7d6` in CI run `31340599669`. The entries
+do not represent external publication, publication approval, or verification of
+an external host, viewer, download, or re-download path; the artifacts remain
+frozen candidates, not published benchmarks.
 
 ## Corrective audit reconciliation
 

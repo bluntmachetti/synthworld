@@ -362,6 +362,13 @@ Reports measure offline artifact submissions only. They do not prove live
 evidence retention, durable logging, enforcement behavior, deployment, real
 Asteria/EADS compatibility, or a real EADS export. D8 excludes C13, C15/C16,
 Face A, EADS compatibility, deployment, and generated-world demonstrations.
+PR #114 head `b2fffc179cfae4cb86e41f398407ea3520cad7d6` passed repository-local
+candidate registry and capability verification in CI run `31340599669` on
+2026-08-09. The Python 3.12 leg ran 2,432 tests with 100% statement and branch
+coverage, including 100% coverage for `tools/generate_c08_v2_baselines.py`.
+Docs dark preview passed in run `31340599662`. The verified registry integration
+did not change the frozen C08 v2 benchmark bytes.
+
 Repository-local candidate registry entries exist for `asteria-agentic-c08-v2`
 and `enterprise-agentic-c08-v2`, but all publication gates remain pending. The
 entries support candidate discovery only; they do not represent external
