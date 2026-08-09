@@ -18,7 +18,6 @@ from synthworld.agentic.enterprise.c08_v2 import (
     C08EvidenceEventV2,
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
-    C08EvidenceRequirementV2,
     C08ProjectionError,
     C08SerializationError,
     C08SourceActionV2,
@@ -37,6 +36,7 @@ from synthworld.agentic.enterprise.c08_v2 import (
 )
 from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluationReportV2,
+    C08EvidenceRequirementV2,
     C08PublicInputV2,
 )
 from synthworld.agentic.enterprise.c08_v2.projection import c08_public_input_digest
