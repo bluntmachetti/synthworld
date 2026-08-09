@@ -99,9 +99,7 @@ def _public_manifest_bytes(payload: bytes) -> bytes:
     return canonical_json_bytes(manifest)
 
 
-def _evaluator_manifest_bytes(
-    payload: bytes, public_input_digest: str
-) -> bytes:
+def _evaluator_manifest_bytes(payload: bytes, public_input_digest: str) -> bytes:
     manifest = C08FrozenEvaluatorManifestV2(
         public_input_digest=public_input_digest,
         artifact_set_digest=c08_frozen_artifact_set_digest(
@@ -244,9 +242,8 @@ def _validate_root_manifest(
     descriptors = {item.path: item for item in manifest.artifacts}
     for path, payload in files_by_path.items():
         descriptor = descriptors[path]
-        if (
-            descriptor.byte_size != len(payload)
-            or descriptor.sha256 != _sha256(payload)
+        if descriptor.byte_size != len(payload) or descriptor.sha256 != _sha256(
+            payload
         ):
             raise C08FrozenArtifactError(f"root descriptor mismatch: {path}")
     expected_digest = c08_frozen_artifact_set_digest(
@@ -365,10 +362,7 @@ def load_c08_v2_frozen_tree(root: FrozenNode) -> C08FrozenBundle:
     ):
         raise C08FrozenArtifactError("root cross-artifact binding mismatch")
     generated = generate_c08_asteria_v2(C08_FROZEN_SEED)
-    if (
-        public_model != generated.public
-        or evaluator_model != generated.evaluator
-    ):
+    if public_model != generated.public or evaluator_model != generated.evaluator:
         raise C08FrozenArtifactError(
             "frozen payload does not match the fixed reference"
         )

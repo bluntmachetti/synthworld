@@ -74,9 +74,7 @@ def _build_artifacts(
 def build_c08_public_artifacts(
     public: C08AsteriaPublicInputV2,
 ) -> dict[str, bytes]:
-    return _build_artifacts(
-        visibility="public", path=C08_PUBLIC_ARTIFACT, model=public
-    )
+    return _build_artifacts(visibility="public", path=C08_PUBLIC_ARTIFACT, model=public)
 
 
 def build_c08_evaluator_artifacts(
@@ -118,9 +116,7 @@ def _load_artifacts[ModelT: BaseModel](
     if set(artifacts) != {path, C08_MANIFEST_ARTIFACT}:
         raise C08ArtifactError("C08 artifact inventory differs")
     parsed = _read_canonical(artifacts, path, model)
-    manifest = _read_canonical(
-        artifacts, C08_MANIFEST_ARTIFACT, C08ArtifactManifestV2
-    )
+    manifest = _read_canonical(artifacts, C08_MANIFEST_ARTIFACT, C08ArtifactManifestV2)
     payload = artifacts[path]
     if (
         manifest.visibility != visibility

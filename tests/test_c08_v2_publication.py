@@ -130,20 +130,12 @@ _ASTERIA_V1_EVALUATOR_CHECKSUMS = {
             "d5b4aeac96bface4331622c6eba307fad8b2cc5044fcdc2cfef8622c3ff61079"
         ),
     },
-    "public_artifact_set_digest": _ASTERIA_V1_DIGESTS[
-        "public_artifact_set_digest"
-    ],
+    "public_artifact_set_digest": _ASTERIA_V1_DIGESTS["public_artifact_set_digest"],
     "schema_version": "1.0.0",
 }
 _ASTERIA_V1_FILES = frozenset(
-    {
-        f"public/{path}"
-        for path in (*_ASTERIA_V1_PUBLIC_FILES, "manifest.json")
-    }
-    | {
-        f"evaluator/{path}"
-        for path in (*_ASTERIA_V1_EVALUATOR_FILES, "checksums.json")
-    }
+    {f"public/{path}" for path in (*_ASTERIA_V1_PUBLIC_FILES, "manifest.json")}
+    | {f"evaluator/{path}" for path in (*_ASTERIA_V1_EVALUATOR_FILES, "checksums.json")}
 )
 _ENTERPRISE_V1_EXAMPLE_DIGESTS = {
     "enterprise-agentic-evaluator.json": (
@@ -219,9 +211,10 @@ def test_asteria_package_loader_validates_all_digest_roots() -> None:
         payloads,
         excluded_paths=("manifest.json",),
     )
-    assert loaded.public_input_digest == hashlib.sha256(
-        payloads["public/c08-asteria-public.json"]
-    ).hexdigest()
+    assert (
+        loaded.public_input_digest
+        == hashlib.sha256(payloads["public/c08-asteria-public.json"]).hexdigest()
+    )
 
 
 def test_enterprise_package_resources_validate_checksum_root_and_bindings() -> None:
@@ -268,18 +261,18 @@ def test_v1_artifact_identities_are_preserved() -> None:
     tree = _resource_files(asteria)
     assert set(tree) == _ASTERIA_V1_FILES
     public_payloads = {
-        path: tree[f"public/{path}"]
-        for path in _ASTERIA_V1_PUBLIC_FILES
+        path: tree[f"public/{path}"] for path in _ASTERIA_V1_PUBLIC_FILES
     }
     evaluator_payloads = {
-        path: tree[f"evaluator/{path}"]
-        for path in _ASTERIA_V1_EVALUATOR_FILES
+        path: tree[f"evaluator/{path}"] for path in _ASTERIA_V1_EVALUATOR_FILES
     }
-    assert c08_frozen_artifact_set_digest(public_payloads) == (
-        _ASTERIA_V1_DIGESTS["public_artifact_set_digest"]
+    assert (
+        c08_frozen_artifact_set_digest(public_payloads)
+        == (_ASTERIA_V1_DIGESTS["public_artifact_set_digest"])
     )
-    assert c08_frozen_artifact_set_digest(evaluator_payloads) == (
-        _ASTERIA_V1_DIGESTS["evaluator_artifact_set_digest"]
+    assert (
+        c08_frozen_artifact_set_digest(evaluator_payloads)
+        == (_ASTERIA_V1_DIGESTS["evaluator_artifact_set_digest"])
     )
     assert _ASTERIA_V1_PUBLIC_MANIFEST["artifacts"] == {
         path: hashlib.sha256(payload).hexdigest()
@@ -294,9 +287,7 @@ def test_v1_artifact_identities_are_preserved() -> None:
     assert json.loads(public_manifest) == _ASTERIA_V1_PUBLIC_MANIFEST
     assert json.loads(evaluator_checksums) == _ASTERIA_V1_EVALUATOR_CHECKSUMS
     assert public_manifest == _v1_metadata_bytes(_ASTERIA_V1_PUBLIC_MANIFEST)
-    assert evaluator_checksums == _v1_metadata_bytes(
-        _ASTERIA_V1_EVALUATOR_CHECKSUMS
-    )
+    assert evaluator_checksums == _v1_metadata_bytes(_ASTERIA_V1_EVALUATOR_CHECKSUMS)
 
     examples = Path("enterprise-identity-access-contract/examples")
     for filename, digest in _ENTERPRISE_V1_EXAMPLE_DIGESTS.items():

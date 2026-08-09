@@ -178,9 +178,7 @@ def _bundle() -> tuple[C08PublicInputV2, C08EvaluatorTruthV2]:
     return public, compile_c08_truth(source, public)
 
 
-def _submission(
-    digest: str, rows: tuple[tuple[str, str, str], ...]
-) -> C08SubmissionV2:
+def _submission(digest: str, rows: tuple[tuple[str, str, str], ...]) -> C08SubmissionV2:
     return C08SubmissionV2(
         public_input_digest=digest,
         observations=tuple(
@@ -255,11 +253,14 @@ def test_projection_hides_bindings_and_exact_case_scores() -> None:
         "evidence_fabrication_rate",
         "evidence_wrong_action_rate",
     }
-    assert next(
-        item.value
-        for item in report.metrics
-        if item.name == "evidence_exact_match_accuracy"
-    ) == 1.0
+    assert (
+        next(
+            item.value
+            for item in report.metrics
+            if item.name == "evidence_exact_match_accuracy"
+        )
+        == 1.0
+    )
 
 
 @pytest.mark.parametrize(
@@ -323,8 +324,9 @@ def test_discriminating_c08_outcomes(
     assert _outcome(report, action_id) is expected
 
 
-def test_metrics_have_independent_denominators_and_zero_submission_is_undefined(
-) -> None:
+def test_metrics_have_independent_denominators_and_zero_submission_is_undefined() -> (
+    None
+):
     public, evaluator = _bundle()
     report = evaluate_c08(
         public=public,
@@ -407,8 +409,7 @@ def test_same_kind_distractors_are_allowed_but_duplicate_handles_are_rejected() 
     authority_candidates = tuple(
         event
         for event in public.evidence_events
-        if event.action_id == "action-a"
-        and event.kind is C08EvidenceKindV2.AUTHORITY
+        if event.action_id == "action-a" and event.kind is C08EvidenceKindV2.AUTHORITY
     )
     assert len(authority_candidates) == 2
     assert len({event.binding_handle for event in authority_candidates}) == 2
@@ -430,8 +431,9 @@ def test_same_kind_distractors_are_allowed_but_duplicate_handles_are_rejected() 
         reference_submission_from_public(invalid_public)
 
 
-def test_public_requirement_without_nonrequired_same_kind_distractor_is_rejected(
-) -> None:
+def test_public_requirement_without_nonrequired_same_kind_distractor_is_rejected() -> (
+    None
+):
     public, _ = _bundle()
     evidence_events = tuple(
         event
@@ -724,9 +726,10 @@ def test_report_order_and_serialization_are_canonical_and_separate(
     assert load_c08_public(root / "public" / "public-input.json") == public
     assert load_c08_evaluator(root / "evaluator" / "truth.json") == evaluator
     assert load_c08_submission(root / "submission" / "submission.json") == submission
-    assert "required_observation_ids" not in (
-        root / "public" / "public-input.json"
-    ).read_text()
+    assert (
+        "required_observation_ids"
+        not in (root / "public" / "public-input.json").read_text()
+    )
     with pytest.raises(C08SerializationError, match="already exists"):
         export_c08_artifacts(
             root, public=public, evaluator=evaluator, submission=submission
@@ -828,9 +831,7 @@ def test_reference_generator_is_deterministic_and_publicly_constructible() -> No
         bound_events = tuple(
             event_by_id[item] for item in binding.required_observation_ids
         )
-        assert {
-            (item.kind, item.binding_handle) for item in bound_events
-        } == {
+        assert {(item.kind, item.binding_handle) for item in bound_events} == {
             (item.kind, item.binding_handle) for item in binding.required_evidence
         }
         assert all(
@@ -845,10 +846,13 @@ def test_reference_generator_is_deterministic_and_publicly_constructible() -> No
                 and event.kind is requirement.kind
             )
             assert len(same_kind) == 2
-            assert sum(
-                event.binding_handle == requirement.binding_handle
-                for event in same_kind
-            ) == 1
+            assert (
+                sum(
+                    event.binding_handle == requirement.binding_handle
+                    for event in same_kind
+                )
+                == 1
+            )
     assert len(first.public.actions) == 3
     assert all(
         sum(
@@ -891,9 +895,7 @@ def test_generated_c08_schemas_are_model_authoritative_and_checkable(
         "c08-enterprise-report-v2.schema.json",
     }
     report_path = next(
-        path
-        for path in expected
-        if path.name == "c08-enterprise-report-v2.schema.json"
+        path for path in expected if path.name == "c08-enterprise-report-v2.schema.json"
     )
     report_schema = json.loads(expected[report_path])
     assert "measurement_scope" in report_schema["required"]

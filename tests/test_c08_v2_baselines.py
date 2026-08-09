@@ -129,9 +129,7 @@ def _records(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 def _metric(record: dict[str, Any], name: str) -> float:
     value = next(
-        metric["value"]
-        for metric in record["metrics"]
-        if metric["name"] == name
+        metric["value"] for metric in record["metrics"] if metric["name"] == name
     )
     assert isinstance(value, float)
     return value
@@ -139,9 +137,7 @@ def _metric(record: dict[str, Any], name: str) -> float:
 
 def test_fixture_inventory_is_exact() -> None:
     actual = {
-        path.relative_to(ROOT).as_posix()
-        for path in ROOT.rglob("*")
-        if path.is_file()
+        path.relative_to(ROOT).as_posix() for path in ROOT.rglob("*") if path.is_file()
     }
     assert actual == {
         "asteria/baseline-records.json",
@@ -170,9 +166,9 @@ def test_asteria_aggregate_shape_reproduction_and_directions() -> None:
     assert _metric(records["fabricated"], "fabricated_evidence_free") < _metric(
         exact, "fabricated_evidence_free"
     )
-    assert _metric(
-        records["wrong_action"], "wrong_action_evidence_free"
-    ) < _metric(exact, "wrong_action_evidence_free")
+    assert _metric(records["wrong_action"], "wrong_action_evidence_free") < _metric(
+        exact, "wrong_action_evidence_free"
+    )
     assert _metric(records["extra"], "extra_evidence_free") < _metric(
         exact, "extra_evidence_free"
     )
@@ -195,9 +191,9 @@ def test_enterprise_aggregate_shape_reproduction_and_directions() -> None:
     assert _metric(records["fabricated"], "evidence_fabrication_rate") > _metric(
         exact, "evidence_fabrication_rate"
     )
-    assert _metric(
-        records["wrong_action"], "evidence_wrong_action_rate"
-    ) > _metric(exact, "evidence_wrong_action_rate")
+    assert _metric(records["wrong_action"], "evidence_wrong_action_rate") > _metric(
+        exact, "evidence_wrong_action_rate"
+    )
     assert _metric(records["extra"], "evidence_extra_rate") > _metric(
         exact, "evidence_extra_rate"
     )

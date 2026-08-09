@@ -196,11 +196,14 @@ def test_frozen_evaluation_rejects_cross_tenant_and_wrong_action() -> None:
         evaluator=tree.evaluator,
         submission=cross_tenant,
     )
-    assert next(
-        item.outcome
-        for item in report.outcomes
-        if item.action_id == first.action_id
-    ) is C08CaseOutcomeV2.WRONG_ACTION
+    assert (
+        next(
+            item.outcome
+            for item in report.outcomes
+            if item.action_id == first.action_id
+        )
+        is C08CaseOutcomeV2.WRONG_ACTION
+    )
     report_payload = json.dumps(report.model_dump(mode="json"))
     assert "offline scoring does not prove live evidence retention" in report_payload
     assert "offline scoring does not prove durable logging" in report_payload
@@ -223,11 +226,14 @@ def test_frozen_evaluation_rejects_cross_tenant_and_wrong_action() -> None:
         evaluator=tree.evaluator,
         submission=wrong_action,
     )
-    assert next(
-        item.outcome
-        for item in report.outcomes
-        if item.action_id == first.action_id
-    ) is C08CaseOutcomeV2.WRONG_ACTION
+    assert (
+        next(
+            item.outcome
+            for item in report.outcomes
+            if item.action_id == first.action_id
+        )
+        is C08CaseOutcomeV2.WRONG_ACTION
+    )
 
 
 def test_frozen_loader_rejects_missing_extra_directory_symlink_and_digest(

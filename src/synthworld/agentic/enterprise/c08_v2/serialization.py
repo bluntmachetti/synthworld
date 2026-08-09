@@ -23,6 +23,7 @@ EVALUATOR_FILE = "truth.json"
 SUBMISSION_FILE = "submission.json"
 REPORT_FILE = "report.json"
 
+
 def serialize_c08_public(model: C08PublicInputV2) -> bytes:
     return canonical_json_bytes(model)
 

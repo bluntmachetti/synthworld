@@ -134,9 +134,7 @@ def _asteria_submission(
             binding.action_event_id,
             (*row.retained_observation_ids, extra_observation_id),
         )
-    raise ValueError(
-        f"unsupported Asteria C08 baseline failure mode: {failure_mode}"
-    )
+    raise ValueError(f"unsupported Asteria C08 baseline failure mode: {failure_mode}")
 
 
 def _renumber_enterprise(
@@ -169,8 +167,7 @@ def _enterprise_submission(
     }.get(failure_mode)
     if target_name is None:
         raise ValueError(
-            "unsupported enterprise C08 baseline failure mode: "
-            f"{failure_mode}"
+            f"unsupported enterprise C08 baseline failure mode: {failure_mode}"
         )
     target = actions_by_name[target_name]
     observations = list(reference.observations)
@@ -263,9 +260,7 @@ def build_asteria_baseline_records(seed: int = DEFAULT_SEED) -> dict[str, object
     for failure_mode in ASTERIA_FAILURE_MODES:
         submission = _asteria_submission(benchmark, failure_mode)
         report = evaluate_c08_submission(benchmark, submission)
-        records.append(
-            _baseline_record(failure_mode, submission, report.metrics)
-        )
+        records.append(_baseline_record(failure_mode, submission, report.metrics))
     return {
         "benchmark_id": benchmark.benchmark_id,
         "schema_version": benchmark.schema_version,
@@ -286,9 +281,7 @@ def build_enterprise_baseline_records(
             evaluator=bundle.evaluator,
             submission=submission,
         )
-        records.append(
-            _baseline_record(failure_mode, submission, report.metrics)
-        )
+        records.append(_baseline_record(failure_mode, submission, report.metrics))
     return {
         "benchmark_id": C08_FROZEN_BENCHMARK_ID,
         "schema_version": bundle.public.schema_version,
@@ -320,8 +313,7 @@ def _assert_inventory(root: Path) -> None:
             unexpected.append(relative)
     if unexpected:
         raise RuntimeError(
-            "unexpected C08 baseline fixture entries: "
-            + ", ".join(sorted(unexpected))
+            "unexpected C08 baseline fixture entries: " + ", ".join(sorted(unexpected))
         )
 
 

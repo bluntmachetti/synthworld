@@ -74,8 +74,7 @@ def _binding_handle(
 ) -> str:
     value = uuid5(
         C08_REFERENCE_NAMESPACE,
-        "binding-handle:"
-        f"{seed}:{action_index}:{kind_index}:{candidate_index}",
+        f"binding-handle:{seed}:{action_index}:{kind_index}:{candidate_index}",
     )
     return f"c08h_{value.hex}"
 

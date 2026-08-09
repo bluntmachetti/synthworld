@@ -115,9 +115,7 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
         )
     )
     public_actions: list[C08PublicActionV2] = []
-    observation_specs: list[
-        tuple[str, str, C08EvidenceKind, str, str]
-    ] = []
+    observation_specs: list[tuple[str, str, C08EvidenceKind, str, str]] = []
     bindings: list[C08EvidenceBindingV2] = []
 
     for action_index, (
@@ -125,18 +123,14 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
         action,
         scope,
         required_kinds,
-    ) in enumerate(
-        ordered_action_specs, start=1
-    ):
+    ) in enumerate(ordered_action_specs, start=1):
         action_id = _stable_named_id(seed, "action", stable_key)
         resource_id = _stable_named_id(seed, "resource", stable_key)
         requirements: list[C08EvidenceRequirementV2] = []
         action_observation_ids: list[str] = []
         for local_index, kind in enumerate(required_kinds, start=1):
             requirement_key = f"{stable_key}:{kind.value}:{local_index}"
-            binding_handle = _stable_named_id(
-                seed, "binding-handle", requirement_key
-            )
+            binding_handle = _stable_named_id(seed, "binding-handle", requirement_key)
             distractor_handle = _stable_named_id(
                 seed, "distractor-binding-handle", requirement_key
             )

@@ -33,9 +33,7 @@ MANIFEST_PATH = "manifest.json"
 CHECKSUMS_PATH = "SHA256SUMS"
 PUBLIC_PATH = "public/public-input.json"
 EVALUATOR_PATH = "evaluator/truth.json"
-EXPECTED_FILES = frozenset(
-    {MANIFEST_PATH, CHECKSUMS_PATH, PUBLIC_PATH, EVALUATOR_PATH}
-)
+EXPECTED_FILES = frozenset({MANIFEST_PATH, CHECKSUMS_PATH, PUBLIC_PATH, EVALUATOR_PATH})
 EXPECTED_DIRECTORIES = frozenset({"public", "evaluator"})
 _CHECKSUM_ROW = re.compile(r"^([0-9a-f]{64})  ([^\n]+)$")
 

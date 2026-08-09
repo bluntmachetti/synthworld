@@ -137,10 +137,7 @@ V1_EVALUATOR_CHECKSUMS = {
 }
 V1_TREE_FILES = frozenset(
     {f"public/{path}" for path in (*V1_PUBLIC_FILES, "manifest.json")}
-    | {
-        f"evaluator/{path}"
-        for path in (*V1_EVALUATOR_FILES, "checksums.json")
-    }
+    | {f"evaluator/{path}" for path in (*V1_EVALUATOR_FILES, "checksums.json")}
 )
 
 
@@ -196,9 +193,12 @@ def test_filesystem_and_packaged_loads_have_exact_verified_inventory() -> None:
     packaged = load_packaged_c08_v2_benchmark()
     assert filesystem == packaged
     assert set(_tree_bytes(FROZEN_TREE)) == EXPECTED_FILES
-    assert filesystem.public_input_digest == hashlib.sha256(
-        (FROZEN_TREE / C08_FROZEN_PUBLIC_PAYLOAD).read_bytes()
-    ).hexdigest()
+    assert (
+        filesystem.public_input_digest
+        == hashlib.sha256(
+            (FROZEN_TREE / C08_FROZEN_PUBLIC_PAYLOAD).read_bytes()
+        ).hexdigest()
+    )
 
 
 def test_regeneration_is_byte_for_byte_identical(tmp_path: Path) -> None:
@@ -272,16 +272,13 @@ def test_v1_complete_source_tree_bytes_are_preserved() -> None:
     root = REPOSITORY_ROOT / "src/synthworld/benchmarks/asteria-agentic-v1"
     tree = _tree_bytes(root)
     assert set(tree) == V1_TREE_FILES
-    public_payloads = {
-        path: tree[f"public/{path}"] for path in V1_PUBLIC_FILES
-    }
+    public_payloads = {path: tree[f"public/{path}"] for path in V1_PUBLIC_FILES}
     evaluator_payloads = {
         path: tree[f"evaluator/{path}"] for path in V1_EVALUATOR_FILES
     }
     assert c08_frozen_artifact_set_digest(public_payloads) == V1_PUBLIC_ROOT_DIGEST
     assert (
-        c08_frozen_artifact_set_digest(evaluator_payloads)
-        == V1_EVALUATOR_ROOT_DIGEST
+        c08_frozen_artifact_set_digest(evaluator_payloads) == V1_EVALUATOR_ROOT_DIGEST
     )
     assert V1_PUBLIC_MANIFEST["artifacts"] == {
         path: hashlib.sha256(payload).hexdigest()

@@ -88,9 +88,7 @@ class C08PublicActionV2(SyntheticModel):
     def canonical_requirements(
         cls, value: tuple[C08EvidenceRequirementV2, ...]
     ) -> tuple[C08EvidenceRequirementV2, ...]:
-        identities = tuple(
-            (item.evidence_kind, item.binding_handle) for item in value
-        )
+        identities = tuple((item.evidence_kind, item.binding_handle) for item in value)
         if len(set(identities)) != len(identities):
             raise ValueError("required evidence kind/handle pairs must be unique")
         return tuple(
@@ -136,9 +134,7 @@ class C08AsteriaPublicInputV2(SyntheticModel):
         observation_orders = tuple(
             item.observation_order for item in self.evidence_observations
         )
-        if observation_orders != tuple(
-            range(1, len(self.evidence_observations) + 1)
-        ):
+        if observation_orders != tuple(range(1, len(self.evidence_observations) + 1)):
             raise ValueError("public observations must preserve order")
         if any(
             item.action_event_id not in set(action_ids)
@@ -258,9 +254,7 @@ class C08AsteriaBenchmarkV2(SyntheticModel):
 
     @model_validator(mode="after")
     def bind_public_and_evaluator(self) -> Self:
-        public_actions = {
-            item.action_event_id: item for item in self.public.actions
-        }
+        public_actions = {item.action_event_id: item for item in self.public.actions}
         binding_ids = {item.action_event_id for item in self.evaluator.bindings}
         observations = {
             item.observation_id: item for item in self.public.evidence_observations
@@ -389,9 +383,7 @@ class C08FrozenPublicManifestV2(SyntheticModel):
     seed: Literal[20260809] = 20260809
     visibility: Literal["public"] = "public"
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
-    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(
-        min_length=1, max_length=1
-    )
+    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=1, max_length=1)
 
     @model_validator(mode="after")
     def validate_inventory(self) -> Self:
@@ -410,9 +402,7 @@ class C08FrozenEvaluatorManifestV2(SyntheticModel):
     visibility: Literal["evaluator"] = "evaluator"
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
-    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(
-        min_length=1, max_length=1
-    )
+    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=1, max_length=1)
 
     @model_validator(mode="after")
     def validate_inventory(self) -> Self:
@@ -434,9 +424,7 @@ class C08FrozenRootManifestV2(SyntheticModel):
     public_artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     evaluator_artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
-    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(
-        min_length=4, max_length=4
-    )
+    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=4, max_length=4)
 
     @model_validator(mode="after")
     def validate_inventory(self) -> Self:
