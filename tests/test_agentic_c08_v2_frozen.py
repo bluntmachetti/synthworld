@@ -163,10 +163,10 @@ def _recursive_keys(value: object) -> set[str]:
             keys.update(_recursive_keys(item))
         return keys
     if isinstance(value, list):
-        keys: set[str] = set()
+        list_keys: set[str] = set()
         for item in value:
-            keys.update(_recursive_keys(item))
-        return keys
+            list_keys.update(_recursive_keys(item))
+        return list_keys
     return set()
 
 
