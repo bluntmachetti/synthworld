@@ -4,17 +4,15 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Mapping
-from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
-
-from synthworld.enterprise.canonical import canonical_json_bytes
 
 from synthworld.agentic.c08_v2.models import (
     C08_EVALUATOR_ARTIFACT,
     C08_MANIFEST_ARTIFACT,
     C08_PUBLIC_ARTIFACT,
     C08_SUBMISSION_ARTIFACT,
+    C08AsteriaBenchmarkV2,
     C08AsteriaEvaluatorV2,
     C08AsteriaPublicInputV2,
     C08AsteriaSubmissionV2,
@@ -22,8 +20,7 @@ from synthworld.agentic.c08_v2.models import (
     C08ArtifactManifestV2,
     C08_SCHEMA_VERSION,
 )
-
-ModelT = TypeVar("ModelT", bound=BaseModel)
+from synthworld.enterprise.canonical import canonical_json_bytes
 
 
 class C08ArtifactError(ValueError):
@@ -98,7 +95,7 @@ def build_c08_submission_artifacts(
     )
 
 
-def _read_canonical(
+def _read_canonical[ModelT: BaseModel](
     artifacts: Mapping[str, bytes], path: str, model: type[ModelT]
 ) -> ModelT:
     try:
@@ -111,7 +108,7 @@ def _read_canonical(
     return parsed
 
 
-def _load_artifacts(
+def _load_artifacts[ModelT: BaseModel](
     artifacts: Mapping[str, bytes],
     *,
     visibility: str,
@@ -182,7 +179,7 @@ def load_c08_bundle(
     public_artifacts: Mapping[str, bytes],
     evaluator_artifacts: Mapping[str, bytes],
     submission_artifacts: Mapping[str, bytes] | None = None,
-):
+) -> C08AsteriaBenchmarkV2:
     """Load both trees and cross-bind evaluator truth to public bytes."""
 
     public = load_c08_public_artifacts(public_artifacts)
@@ -192,8 +189,6 @@ def load_c08_bundle(
         raise C08ArtifactError("C08 evaluator/public digest binding differs")
     if submission_artifacts is not None:
         load_c08_submission_artifacts(submission_artifacts, public=public)
-    from synthworld.agentic.c08_v2.models import C08AsteriaBenchmarkV2
-
     return C08AsteriaBenchmarkV2(public=public, evaluator=evaluator)
 
 

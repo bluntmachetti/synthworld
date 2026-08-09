@@ -113,7 +113,10 @@ class C08AsteriaPublicInputV2(SyntheticModel):
         )
         if len(set(observation_ids)) != len(observation_ids):
             raise ValueError("public observation ids must be unique")
-        if tuple(item.observation_order for item in self.evidence_observations) != tuple(
+        observation_orders = tuple(
+            item.observation_order for item in self.evidence_observations
+        )
+        if observation_orders != tuple(
             range(1, len(self.evidence_observations) + 1)
         ):
             raise ValueError("public observations must preserve order")
@@ -253,7 +256,9 @@ class C08MetricsReportV2(SyntheticModel):
     def require_metric_set(self) -> Self:
         names = tuple(item.name for item in self.metrics)
         if names != C08_METRIC_NAMES:
-            raise ValueError("C08 metrics must be emitted in the fixed independent order")
+            raise ValueError(
+                "C08 metrics must be emitted in the fixed independent order"
+            )
         return self
 
 
@@ -282,19 +287,19 @@ class C08ArtifactManifestV2(SyntheticModel):
 
 
 __all__ = [
-    "C08_MANIFEST_ARTIFACT",
     "C08_BENCHMARK_ID",
     "C08_EVALUATOR_ARTIFACT",
+    "C08_MANIFEST_ARTIFACT",
     "C08_METRIC_NAMES",
     "C08_PUBLIC_ARTIFACT",
     "C08_SCHEMA_VERSION",
     "C08_SUBMISSION_ARTIFACT",
+    "C08ArtifactDescriptorV2",
+    "C08ArtifactManifestV2",
     "C08AsteriaBenchmarkV2",
     "C08AsteriaEvaluatorV2",
     "C08AsteriaPublicInputV2",
     "C08AsteriaSubmissionV2",
-    "C08ArtifactDescriptorV2",
-    "C08ArtifactManifestV2",
     "C08EvidenceBindingV2",
     "C08EvidenceKind",
     "C08EvidenceObservationV2",

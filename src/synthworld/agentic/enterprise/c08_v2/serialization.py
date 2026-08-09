@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TypeVar
 
 from pydantic import BaseModel
 
@@ -24,9 +23,6 @@ EVALUATOR_FILE = "truth.json"
 SUBMISSION_FILE = "submission.json"
 REPORT_FILE = "report.json"
 
-ModelT = TypeVar("ModelT", bound=BaseModel)
-
-
 def serialize_c08_public(model: C08PublicInputV2) -> bytes:
     return canonical_json_bytes(model)
 
@@ -43,7 +39,9 @@ def serialize_c08_report(model: C08EvaluationReportV2) -> bytes:
     return canonical_json_bytes(model)
 
 
-def _parse(payload: bytes, model: type[ModelT], label: str) -> ModelT:
+def _parse[ModelT: BaseModel](
+    payload: bytes, model: type[ModelT], label: str
+) -> ModelT:
     try:
         parsed = model.model_validate_json(payload)
     except (TypeError, ValueError) as error:
@@ -53,7 +51,7 @@ def _parse(payload: bytes, model: type[ModelT], label: str) -> ModelT:
     return parsed
 
 
-def _read(path: Path, model: type[ModelT], label: str) -> ModelT:
+def _read[ModelT: BaseModel](path: Path, model: type[ModelT], label: str) -> ModelT:
     try:
         payload = path.read_bytes()
     except OSError as error:
@@ -97,7 +95,9 @@ def export_c08_artifacts(
             serialize_c08_submission(submission)
         )
         if report is not None:
-            (root / EVALUATOR_DIR / REPORT_FILE).write_bytes(serialize_c08_report(report))
+            (root / EVALUATOR_DIR / REPORT_FILE).write_bytes(
+                serialize_c08_report(report)
+            )
     except OSError as error:
         raise C08SerializationError("C08 artifact export failed") from error
 

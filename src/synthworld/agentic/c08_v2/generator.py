@@ -5,8 +5,6 @@ from __future__ import annotations
 import hashlib
 from uuid import UUID, uuid5
 
-from synthworld.enterprise.canonical import canonical_json_bytes
-
 from synthworld.agentic.c08_v2.models import (
     C08_BENCHMARK_ID,
     C08_SCHEMA_VERSION,
@@ -22,6 +20,7 @@ from synthworld.agentic.c08_v2.models import (
     C08ScenarioKind,
     C08SubmissionRowV2,
 )
+from synthworld.enterprise.canonical import canonical_json_bytes
 
 _NAMESPACE = UUID("4d0df8e1-9f0d-5d21-9a10-4c5d10afc816")
 _PROVES = (
@@ -33,7 +32,8 @@ _DOES_NOT_PROVE = (
     "live enforcement or production logging behavior",
     "compatibility with a real Asteria or EADS export",
     "secrecy against a reader who receives the evaluator artifact",
-    "whether an omitted required observation was missing or discarded from the submission alone",
+    "whether an omitted required observation was missing or "
+    "discarded from the submission alone",
 )
 
 
@@ -59,12 +59,48 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
 
     benchmark_id = C08_BENCHMARK_ID
     action_specs = (
-        ("read", "resource-001", ("read",), C08ScenarioKind.EXACT, (C08EvidenceKind.AUTHORITY_RECORD, C08EvidenceKind.POLICY_RECORD)),
-        ("read", "resource-002", ("read",), C08ScenarioKind.MISSING, (C08EvidenceKind.AUTHORITY_RECORD, C08EvidenceKind.POLICY_RECORD)),
-        ("write", "resource-003", ("write",), C08ScenarioKind.FABRICATED, (C08EvidenceKind.AUTHORITY_RECORD,)),
-        ("delete", "resource-004", ("delete",), C08ScenarioKind.WRONG_ACTION, (C08EvidenceKind.AUTHORITY_RECORD,)),
-        ("export", "resource-005", ("export",), C08ScenarioKind.EXTRA, (C08EvidenceKind.AUTHORITY_RECORD,)),
-        ("read", "resource-006", ("read",), C08ScenarioKind.DISCARDED, (C08EvidenceKind.AUTHORITY_RECORD,)),
+        (
+            "read",
+            "resource-001",
+            ("read",),
+            C08ScenarioKind.EXACT,
+            (C08EvidenceKind.AUTHORITY_RECORD, C08EvidenceKind.POLICY_RECORD),
+        ),
+        (
+            "read",
+            "resource-002",
+            ("read",),
+            C08ScenarioKind.MISSING,
+            (C08EvidenceKind.AUTHORITY_RECORD, C08EvidenceKind.POLICY_RECORD),
+        ),
+        (
+            "write",
+            "resource-003",
+            ("write",),
+            C08ScenarioKind.FABRICATED,
+            (C08EvidenceKind.AUTHORITY_RECORD,),
+        ),
+        (
+            "delete",
+            "resource-004",
+            ("delete",),
+            C08ScenarioKind.WRONG_ACTION,
+            (C08EvidenceKind.AUTHORITY_RECORD,),
+        ),
+        (
+            "export",
+            "resource-005",
+            ("export",),
+            C08ScenarioKind.EXTRA,
+            (C08EvidenceKind.AUTHORITY_RECORD,),
+        ),
+        (
+            "read",
+            "resource-006",
+            ("read",),
+            C08ScenarioKind.DISCARDED,
+            (C08EvidenceKind.AUTHORITY_RECORD,),
+        ),
     )
     public_actions: list[C08PublicActionV2] = []
     observations: list[C08EvidenceObservationV2] = []
@@ -91,9 +127,13 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
                 required_evidence_kinds=required_kinds,
             )
         )
-        observation_count = 3 if scenario in {C08ScenarioKind.EXTRA, C08ScenarioKind.DISCARDED} else 2
+        observation_count = (
+            3 if scenario in {C08ScenarioKind.EXTRA, C08ScenarioKind.DISCARDED} else 2
+        )
         action_observation_ids: list[str] = []
-        required_count = 2 if scenario in {C08ScenarioKind.EXACT, C08ScenarioKind.MISSING} else 1
+        required_count = (
+            2 if scenario in {C08ScenarioKind.EXACT, C08ScenarioKind.MISSING} else 1
+        )
         for local_index in range(1, observation_count + 1):
             observation_order += 1
             observation_id = _stable_id(

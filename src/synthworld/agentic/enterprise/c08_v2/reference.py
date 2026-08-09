@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from uuid import UUID, uuid5
 
 from synthworld.agentic.enterprise.c08_v2.models import (
+    C08EvaluatorTruthV2,
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
-    C08EvaluatorTruthV2,
     C08PublicInputV2,
     C08SourceWorldV2,
     C08SubmissionV2,
@@ -48,6 +48,18 @@ def _reference_id(seed: int, category: str, index: int) -> str:
     return f"{category}-{value.hex[:16]}"
 
 
+def _evidence_id(
+    seed: int,
+    action_index: int,
+    kind_index: int,
+    kind: C08EvidenceKindV2,
+) -> str:
+    suffix = _reference_id(
+        seed, "evidence", action_index * 10 + kind_index
+    ).split("-", 1)[1]
+    return f"evidence-{kind.value}-{suffix}"
+
+
 def _build_source(seed: int) -> C08SourceWorldV2:
     actions = []
     events = []
@@ -58,8 +70,7 @@ def _build_source(seed: int) -> C08SourceWorldV2:
         resource_id = _reference_id(seed, "resource", index)
         tick = index + 1
         required_ids = tuple(
-            f"evidence-{kind.value}-"
-            f"{_reference_id(seed, 'evidence', index * 10 + kind_index).split('-', 1)[1]}"
+            _evidence_id(seed, index, kind_index, kind)
             for kind_index, kind in enumerate(required_kinds)
         )
         actions.append(
@@ -130,7 +141,9 @@ def reference_submission_from_public(public: C08PublicInputV2) -> C08SubmissionV
     )
 
 
-def generate_c08_reference(seed: int = DEFAULT_C08_REFERENCE_SEED) -> C08ReferenceBundleV2:
+def generate_c08_reference(
+    seed: int = DEFAULT_C08_REFERENCE_SEED,
+) -> C08ReferenceBundleV2:
     """Generate a bounded, deterministic C08 v2 reference bundle."""
 
     if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0:

@@ -68,7 +68,9 @@ class C08SourceActionV2(SyntheticModel):
     @model_validator(mode="after")
     def required_evidence_shapes_match(self) -> Self:
         if len(self.required_evidence_ids) != len(self.required_evidence_kinds):
-            raise ValueError("C08 required evidence IDs and kinds must have equal length")
+            raise ValueError(
+                "C08 required evidence IDs and kinds must have equal length"
+            )
         return self
 
 
@@ -97,7 +99,9 @@ class C08SourceWorldV2(SyntheticModel):
         action_ids = tuple(item.action_id for item in self.actions)
         if len(set(action_ids)) != len(action_ids):
             raise ValueError("C08 action identifiers must be unique")
-        expected = tuple(sorted(self.actions, key=lambda item: (item.tick, item.action_id)))
+        expected = tuple(
+            sorted(self.actions, key=lambda item: (item.tick, item.action_id))
+        )
         if self.actions != expected:
             raise ValueError("C08 actions must be ordered by tick and action ID")
         evidence_ids = tuple(item.evidence_id for item in self.evidence_events)
@@ -167,7 +171,9 @@ class C08PublicInputV2(SyntheticModel):
         action_ids = tuple(item.action_id for item in self.actions)
         if len(set(action_ids)) != len(action_ids):
             raise ValueError("C08 public action identifiers must be unique")
-        expected = tuple(sorted(self.actions, key=lambda item: (item.tick, item.action_id)))
+        expected = tuple(
+            sorted(self.actions, key=lambda item: (item.tick, item.action_id))
+        )
         if self.actions != expected:
             raise ValueError("C08 public actions must be ordered by tick and action ID")
         evidence_ids = tuple(item.evidence_id for item in self.evidence_events)
@@ -176,7 +182,9 @@ class C08PublicInputV2(SyntheticModel):
         if tuple(item.sequence for item in self.evidence_events) != tuple(
             range(len(self.evidence_events))
         ):
-            raise ValueError("C08 public evidence events must have contiguous sequence order")
+            raise ValueError(
+                "C08 public evidence events must have contiguous sequence order"
+            )
         actions_by_id = {item.action_id: item for item in self.actions}
         for event in self.evidence_events:
             action = actions_by_id.get(event.action_id)
@@ -188,7 +196,9 @@ class C08PublicInputV2(SyntheticModel):
                 event.action,
                 event.tick,
             ) != (action.tenant_id, action.resource_id, action.action, action.tick):
-                raise ValueError("C08 public evidence event semantics differ from action")
+                raise ValueError(
+                    "C08 public evidence event semantics differ from action"
+                )
         for action in self.actions:
             observed_kinds = {
                 event.kind
@@ -196,7 +206,9 @@ class C08PublicInputV2(SyntheticModel):
                 if event.action_id == action.action_id
             }
             if not set(action.required_evidence_kinds) <= observed_kinds:
-                raise ValueError("C08 public evidence kinds are not observable for an action")
+                raise ValueError(
+                    "C08 public evidence kinds are not observable for an action"
+                )
         return self
 
 
@@ -227,7 +239,9 @@ class C08EvidenceBindingV2(SyntheticModel):
     @model_validator(mode="after")
     def required_evidence_shapes_match(self) -> Self:
         if len(self.required_evidence_ids) != len(self.required_evidence_kinds):
-            raise ValueError("C08 binding evidence IDs and kinds must have equal length")
+            raise ValueError(
+                "C08 binding evidence IDs and kinds must have equal length"
+            )
         return self
 
 
@@ -241,7 +255,9 @@ class C08EvaluatorTruthV2(SyntheticModel):
         action_ids = tuple(item.action_id for item in self.bindings)
         if len(set(action_ids)) != len(action_ids):
             raise ValueError("C08 binding action identifiers must be unique")
-        if self.bindings != tuple(sorted(self.bindings, key=lambda item: item.action_id)):
+        if self.bindings != tuple(
+            sorted(self.bindings, key=lambda item: item.action_id)
+        ):
             raise ValueError("C08 bindings must be sorted by action ID")
         required_ids = tuple(
             evidence_id
@@ -249,7 +265,9 @@ class C08EvaluatorTruthV2(SyntheticModel):
             for evidence_id in binding.required_evidence_ids
         )
         if len(set(required_ids)) != len(required_ids):
-            raise ValueError("C08 binding required evidence identifiers must be globally unique")
+            raise ValueError(
+                "C08 binding required evidence identifiers must be globally unique"
+            )
         return self
 
 
@@ -326,7 +344,9 @@ class C08EvaluationReportV2(SyntheticModel):
 
     @model_validator(mode="after")
     def canonical_report_order(self) -> Self:
-        if self.outcomes != tuple(sorted(self.outcomes, key=lambda item: item.action_id)):
+        if self.outcomes != tuple(
+            sorted(self.outcomes, key=lambda item: item.action_id)
+        ):
             raise ValueError("C08 outcomes must be sorted by action ID")
         if self.metrics != tuple(sorted(self.metrics, key=lambda item: item.name)):
             raise ValueError("C08 metrics must be sorted by name")
@@ -336,13 +356,13 @@ class C08EvaluationReportV2(SyntheticModel):
 __all__ = [
     "C08CaseOutcomeV2",
     "C08CaseResultV2",
+    "C08EvaluationMetricV2",
+    "C08EvaluationReportV2",
+    "C08EvaluatorTruthV2",
     "C08EvidenceBindingV2",
     "C08EvidenceEventV2",
     "C08EvidenceKindV2",
     "C08EvidenceObservationV2",
-    "C08EvaluationMetricV2",
-    "C08EvaluationReportV2",
-    "C08EvaluatorTruthV2",
     "C08PublicActionV2",
     "C08PublicInputV2",
     "C08SourceActionV2",

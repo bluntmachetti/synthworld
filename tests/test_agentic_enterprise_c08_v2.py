@@ -11,12 +11,12 @@ from pydantic import ValidationError
 from synthworld.agentic.enterprise.c08_v2 import (
     C08CaseOutcomeV2,
     C08EvaluationError,
+    C08EvaluationMetricV2,
+    C08EvaluatorTruthV2,
     C08EvidenceBindingV2,
     C08EvidenceEventV2,
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
-    C08EvaluationMetricV2,
-    C08EvaluatorTruthV2,
     C08ProjectionError,
     C08SerializationError,
     C08SourceActionV2,
@@ -29,13 +29,12 @@ from synthworld.agentic.enterprise.c08_v2 import (
     load_c08_evaluator,
     load_c08_public,
     load_c08_submission,
-    project_c08_public,
     generate_c08_reference,
+    project_c08_public,
     reference_submission_from_public,
     serialize_c08_public,
 )
 from synthworld.agentic.enterprise.c08_v2.models import (
-    C08CaseResultV2,
     C08EvaluationReportV2,
     C08PublicInputV2,
 )
@@ -255,7 +254,8 @@ def test_discriminating_c08_outcomes(
     assert _outcome(report, action_id) is expected
 
 
-def test_metrics_have_independent_denominators_and_zero_submission_is_undefined() -> None:
+def test_metrics_have_independent_denominators_and_zero_submission_is_undefined(
+) -> None:
     public, evaluator = _bundle()
     report = evaluate_c08(
         public=public,
@@ -494,7 +494,7 @@ def test_metric_model_rejects_inconsistent_values() -> None:
             denominator=1,
             denominator_meaning="items",
         )
-    with pytest.raises(ValidationError, match="undefined.*value"):
+    with pytest.raises(ValidationError, match=r"undefined.*value"):
         C08EvaluationMetricV2(
             name="bad",
             value=0.0,
@@ -535,7 +535,9 @@ def test_metric_model_rejects_inconsistent_values() -> None:
         )
 
 
-def test_report_order_and_serialization_are_canonical_and_separate(tmp_path: Path) -> None:
+def test_report_order_and_serialization_are_canonical_and_separate(
+    tmp_path: Path,
+) -> None:
     public, evaluator = _bundle()
     submission = _reference_submission(public)
     report = evaluate_c08(public=public, evaluator=evaluator, submission=submission)
@@ -546,7 +548,9 @@ def test_report_order_and_serialization_are_canonical_and_separate(tmp_path: Pat
     assert load_c08_public(root / "public" / "public-input.json") == public
     assert load_c08_evaluator(root / "evaluator" / "truth.json") == evaluator
     assert load_c08_submission(root / "submission" / "submission.json") == submission
-    assert "required_evidence_ids" not in (root / "public" / "public-input.json").read_text()
+    assert "required_evidence_ids" not in (
+        root / "public" / "public-input.json"
+    ).read_text()
     with pytest.raises(C08SerializationError, match="already exists"):
         export_c08_artifacts(
             root, public=public, evaluator=evaluator, submission=submission
@@ -556,7 +560,7 @@ def test_report_order_and_serialization_are_canonical_and_separate(tmp_path: Pat
     noncanonical = json.dumps(public.model_dump(mode="json"), indent=2).encode()
     path = tmp_path / "noncanonical.json"
     path.write_bytes(noncanonical)
-    with pytest.raises(C08SerializationError, match="not canonical"):
+        with pytest.raises(C08SerializationError, match=r"not canonical"):
         load_c08_public(path)
     assert serialize_c08_public(public).endswith(b"\n")
 
@@ -634,8 +638,12 @@ def test_reference_generator_is_deterministic_and_publicly_constructible() -> No
         action = public_by_id[binding.action_id]
         assert binding.tenant_id == action.tenant_id
         assert binding.required_evidence_kinds == action.required_evidence_kinds
-        bound_events = tuple(event_by_id[item] for item in binding.required_evidence_ids)
-        assert tuple(item.kind for item in bound_events) == binding.required_evidence_kinds
+        bound_events = tuple(
+            event_by_id[item] for item in binding.required_evidence_ids
+        )
+        assert tuple(item.kind for item in bound_events) == (
+            binding.required_evidence_kinds
+        )
         assert all(
             (item.action_id, item.tenant_id) == (action.action_id, action.tenant_id)
             for item in bound_events

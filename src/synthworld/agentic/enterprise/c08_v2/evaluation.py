@@ -13,8 +13,8 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08CaseResultV2,
     C08EvaluationMetricV2,
     C08EvaluationReportV2,
-    C08EvidenceObservationV2,
     C08EvaluatorTruthV2,
+    C08EvidenceObservationV2,
     C08PublicInputV2,
     C08SubmissionV2,
 )
@@ -107,10 +107,10 @@ def evaluate_c08(
             ):
                 wrong_action_count += 1
                 action_wrong = True
-            elif observation.evidence_id not in required:
-                extra_count += 1
-                action_extra = True
-            elif observation.evidence_id in seen_required:
+            elif (
+                observation.evidence_id not in required
+                or observation.evidence_id in seen_required
+            ):
                 extra_count += 1
                 action_extra = True
             else:

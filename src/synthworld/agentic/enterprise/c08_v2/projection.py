@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from synthworld.agentic.enterprise.c08_v2.errors import C08ProjectionError
 from synthworld.agentic.enterprise.c08_v2.models import (
+    C08EvaluatorTruthV2,
     C08EvidenceBindingV2,
     C08EvidenceEventV2,
-    C08EvaluatorTruthV2,
     C08PublicActionV2,
     C08PublicInputV2,
     C08SourceActionV2,
@@ -27,7 +27,9 @@ def _public_action(source: C08SourceActionV2) -> C08PublicActionV2:
 
 
 def project_c08_public(source: C08SourceWorldV2) -> C08PublicInputV2:
-    """Construct public actions and non-oracle evidence observations field by field."""
+    """Construct public actions and non-oracle evidence observations field by
+    field.
+    """
 
     return C08PublicInputV2(
         actions=tuple(_public_action(item) for item in source.actions),
@@ -57,11 +59,15 @@ def c08_public_input_digest(public: C08PublicInputV2) -> str:
 def compile_c08_truth(
     source: C08SourceWorldV2, public: C08PublicInputV2
 ) -> C08EvaluatorTruthV2:
-    """Bind source-only required evidence to the independently projected public input."""
+    """Bind source-only required evidence to the independently projected public
+    input.
+    """
 
     expected_public = project_c08_public(source)
     if public != expected_public:
-        raise C08ProjectionError("C08 public projection differs from source actions and evidence")
+        raise C08ProjectionError(
+            "C08 public projection differs from source actions and evidence"
+        )
     truth = C08EvaluatorTruthV2(
         public_input_digest=c08_public_input_digest(public),
         bindings=tuple(
@@ -92,9 +98,13 @@ def validate_c08_truth_against_public(
     for action_id, action in actions_by_id.items():
         binding = bindings_by_id[action_id]
         if binding.tenant_id != action.tenant_id:
-            raise C08ProjectionError("C08 evaluator tenant binding differs from public action")
+            raise C08ProjectionError(
+                "C08 evaluator tenant binding differs from public action"
+            )
         if binding.required_evidence_kinds != action.required_evidence_kinds:
-            raise C08ProjectionError("C08 evaluator evidence kinds differ from public action")
+            raise C08ProjectionError(
+                "C08 evaluator evidence kinds differ from public action"
+            )
         bound_events: list[C08EvidenceEventV2] = []
         for evidence_id in binding.required_evidence_ids:
             event = events_by_id.get(evidence_id)
@@ -109,7 +119,9 @@ def validate_c08_truth_against_public(
                 or event.action != action.action
                 or event.tick != action.tick
             ):
-                raise C08ProjectionError("C08 evaluator evidence does not match its public action")
+                raise C08ProjectionError(
+                    "C08 evaluator evidence does not match its public action"
+                )
             bound_events.append(event)
         if tuple(event.kind for event in bound_events) != binding.required_evidence_kinds:
             raise C08ProjectionError(

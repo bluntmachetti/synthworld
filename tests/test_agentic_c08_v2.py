@@ -9,12 +9,13 @@ from typing import Protocol, cast
 import pytest
 from pydantic import ValidationError
 
-from synthworld.enterprise.canonical import canonical_json_bytes
-
 from synthworld.agentic.c08_v2 import (
     C08ArtifactError,
-    C08EvaluationError,
+    C08AsteriaBenchmarkV2,
     C08AsteriaSubmissionV2,
+    C08EvaluationError,
+    C08MetricV2,
+    C08MetricsReportV2,
     C08SubmissionRowV2,
     build_c08_evaluator_artifacts,
     build_c08_public_artifacts,
@@ -28,9 +29,10 @@ from synthworld.agentic.c08_v2 import (
     reference_c08_submission,
     semantic_c08_submission,
 )
+from synthworld.enterprise.canonical import canonical_json_bytes
 
 
-def _benchmark():
+def _benchmark() -> C08AsteriaBenchmarkV2:
     return generate_c08_asteria_v2(7)
 
 
@@ -52,11 +54,15 @@ def _schema_tool() -> _SchemaTool:
     return cast(_SchemaTool, module)
 
 
-def _metric(report, name: str):
+def _metric(report: C08MetricsReportV2, name: str) -> C08MetricV2:
     return next(item for item in report.metrics if item.name == name)
 
 
-def _changed_submission(benchmark, action_index: int, additions: tuple[str, ...]):
+def _changed_submission(
+    benchmark: C08AsteriaBenchmarkV2,
+    action_index: int,
+    additions: tuple[str, ...],
+) -> C08AsteriaSubmissionV2:
     reference = reference_c08_submission(benchmark)
     rows = list(reference.rows)
     row = rows[action_index]
@@ -76,7 +82,10 @@ def test_generation_is_deterministic_and_scope_is_honest() -> None:
     second = _benchmark()
     assert first == second
     assert first.public.measurement_scope.offline_artifacts_only is True
-    assert "production logging behavior" in first.public.measurement_scope.does_not_prove
+    assert (
+        "production logging behavior"
+        in first.public.measurement_scope.does_not_prove
+    )
     public_json = first.public.model_dump_json()
     assert "required_observation_ids" not in public_json
     assert "scenario_kind" not in public_json
@@ -126,7 +135,9 @@ def test_public_evaluator_submission_artifacts_are_separate_and_bound() -> None:
         "c08-asteria-submission.json",
         "manifest.json",
     }
-    assert b"required_observation_ids" not in public_artifacts["c08-asteria-public.json"]
+    assert b"required_observation_ids" not in public_artifacts[
+        "c08-asteria-public.json"
+    ]
     assert all(payload.endswith(b"\n") for payload in public_artifacts.values())
     assert load_c08_bundle(
         public_artifacts, evaluator_artifacts, submission_artifacts
@@ -138,7 +149,8 @@ def test_public_evaluator_submission_artifacts_are_separate_and_bound() -> None:
     ) == reference_c08_submission(benchmark)
 
 
-def test_public_requirement_semantics_construct_a_reference_without_exact_truth() -> None:
+def test_public_requirement_semantics_construct_a_reference_without_exact_truth(
+) -> None:
     benchmark = _benchmark()
     semantic_submission = semantic_c08_submission(benchmark.public)
     assert semantic_submission == reference_c08_submission(benchmark)
@@ -153,10 +165,9 @@ def test_public_requirement_semantics_construct_a_reference_without_exact_truth(
 def test_manifest_and_cross_tree_digest_fail_closed() -> None:
     benchmark = _benchmark()
     public = build_c08_public_artifacts(benchmark.public)
-    evaluator = build_c08_evaluator_artifacts(benchmark.evaluator)
     tampered_public = dict(public)
     tampered_public["c08-asteria-public.json"] += b" "
-    with pytest.raises(C08ArtifactError, match="noncanonical|manifest"):
+    with pytest.raises(C08ArtifactError, match=r"noncanonical|manifest"):
         load_c08_public_artifacts(tampered_public)
     changed_digest = "0" * 64
     if changed_digest == benchmark.evaluator.public_input_digest:
@@ -202,7 +213,9 @@ def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
                     *reference.rows[:action_index],
                     row.model_copy(
                         update={
-                            "retained_observation_ids": row.retained_observation_ids[:-1]
+                            "retained_observation_ids": (
+                                row.retained_observation_ids[:-1]
+                            )
                         }
                     ),
                     *reference.rows[action_index + 1 :],
@@ -218,7 +231,9 @@ def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
             for item in benchmark.public.evidence_observations
             if item.action_event_id == reference.rows[action_index].action_event_id
         ]
-        changed = _changed_submission(benchmark, action_index, (observations[-1].observation_id,))
+        changed = _changed_submission(
+            benchmark, action_index, (observations[-1].observation_id,)
+        )
     else:
         changed = _changed_submission(benchmark, action_index, addition)
     report = evaluate_c08_submission(benchmark, changed)
@@ -253,7 +268,10 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
             canonical_json_bytes(benchmark.public)
         ).hexdigest(),
         rows=tuple(
-            C08SubmissionRowV2(action_event_id=action.action_event_id, retained_observation_ids=())
+            C08SubmissionRowV2(
+                action_event_id=action.action_event_id,
+                retained_observation_ids=(),
+            )
             for action in benchmark.public.actions
         )
     )
@@ -273,21 +291,34 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
 def test_submission_alignment_and_model_ordering_are_fail_closed() -> None:
     benchmark = _benchmark()
     reference = reference_c08_submission(benchmark)
-    reversed_rows = reference.model_copy(update={"rows": tuple(reversed(reference.rows))})
-    assert reversed_rows.rows == tuple(sorted(reference.rows, key=lambda item: item.action_event_id))
+    reversed_rows = reference.model_copy(
+        update={"rows": tuple(reversed(reference.rows))}
+    )
+    assert reversed_rows.rows == tuple(
+        sorted(reference.rows, key=lambda item: item.action_event_id)
+    )
     with pytest.raises(C08EvaluationError, match="missing"):
-        evaluate_c08_submission(benchmark, reference.model_copy(update={"rows": reference.rows[:-1]}))
+        evaluate_c08_submission(
+            benchmark, reference.model_copy(update={"rows": reference.rows[:-1]})
+        )
     unknown = C08SubmissionRowV2(action_event_id="unknown", retained_observation_ids=())
     with pytest.raises(C08EvaluationError, match="unknown"):
-        evaluate_c08_submission(benchmark, reference.model_copy(update={"rows": (*reference.rows[:-1], unknown)}))
+        evaluate_c08_submission(
+            benchmark,
+            reference.model_copy(update={"rows": (*reference.rows[:-1], unknown)}),
+        )
     with pytest.raises(ValidationError, match="unique"):
         C08SubmissionRowV2(retained_observation_ids=("a", "a"), action_event_id="x")
 
 
 def test_deterministic_digest_and_input_validation() -> None:
     benchmark = _benchmark()
-    public_bytes = build_c08_public_artifacts(benchmark.public)["c08-asteria-public.json"]
-    assert hashlib.sha256(public_bytes).hexdigest() == benchmark.evaluator.public_input_digest
+    public_bytes = build_c08_public_artifacts(benchmark.public)[
+        "c08-asteria-public.json"
+    ]
+    assert hashlib.sha256(public_bytes).hexdigest() == (
+        benchmark.evaluator.public_input_digest
+    )
     assert generate_c08_asteria_v2(8) != benchmark
     with pytest.raises(TypeError, match="integer"):
         generate_c08_asteria_v2(True)
@@ -295,7 +326,8 @@ def test_deterministic_digest_and_input_validation() -> None:
         generate_c08_asteria_v2(-1)
 
 
-def test_submission_digest_rejects_cross_public_replay_in_evaluation_and_loading() -> None:
+def test_submission_digest_rejects_cross_public_replay_in_evaluation_and_loading(
+) -> None:
     source = _benchmark()
     target = generate_c08_asteria_v2(8)
     submission = reference_c08_submission(source)

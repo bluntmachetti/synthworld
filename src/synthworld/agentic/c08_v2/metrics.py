@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import hashlib
 
-from synthworld.enterprise.canonical import canonical_json_bytes
-
 from synthworld.agentic.c08_v2.models import (
     C08_METRIC_NAMES,
     C08AsteriaBenchmarkV2,
@@ -13,6 +11,7 @@ from synthworld.agentic.c08_v2.models import (
     C08MetricV2,
     C08MetricsReportV2,
 )
+from synthworld.enterprise.canonical import canonical_json_bytes
 
 
 class C08EvaluationError(ValueError):
@@ -55,7 +54,8 @@ def evaluate_c08_submission(
     actual = set(rows)
     if actual != expected:
         raise C08EvaluationError(
-            f"C08 submission must cover each public action once; missing={sorted(expected - actual)}, "
+            "C08 submission must cover each public action once; "
+            f"missing={sorted(expected - actual)}, "
             f"unknown={sorted(actual - expected)}"
         )
     bindings = {item.action_event_id: item for item in benchmark.evaluator.bindings}
@@ -76,7 +76,11 @@ def evaluate_c08_submission(
         rows[action_id] <= observations.keys() for action_id in active_ids
     )
     wrong_action_free = tuple(
-        all(observations[item].action_event_id == action_id for item in rows[action_id] if item in observations)
+        all(
+            observations[item].action_event_id == action_id
+            for item in rows[action_id]
+            if item in observations
+        )
         for action_id in active_ids
     )
     extra_free = tuple(

@@ -10,10 +10,10 @@ from typing import Any
 from pydantic import BaseModel
 
 from synthworld.agentic.c08_v2.models import (
+    C08ArtifactManifestV2,
     C08AsteriaEvaluatorV2,
     C08AsteriaPublicInputV2,
     C08AsteriaSubmissionV2,
-    C08ArtifactManifestV2,
     C08MetricsReportV2,
 )
 
