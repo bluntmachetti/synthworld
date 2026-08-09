@@ -297,7 +297,6 @@ def test_v1_complete_source_tree_bytes_are_preserved() -> None:
     assert json.loads(evaluator_checksums) == V1_EVALUATOR_CHECKSUMS
     assert public_manifest == _v1_metadata_bytes(V1_PUBLIC_MANIFEST)
     assert evaluator_checksums == _v1_metadata_bytes(V1_EVALUATOR_CHECKSUMS)
-    )
 
 
 @pytest.mark.parametrize(
