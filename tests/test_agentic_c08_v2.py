@@ -790,6 +790,11 @@ def test_evaluator_submission_and_benchmark_identities_fail_closed() -> None:
 
     with pytest.raises(ValidationError, match="nonblank"):
         C08SubmissionRowV2(action_event_id="action", retained_observation_ids=("",))
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08SubmissionRowV2(
+            action_event_id="action",
+            retained_observation_ids=("z-observation", "a-observation"),
+        )
 
     reference = reference_c08_submission(benchmark)
     reference_document = reference.model_dump(mode="json")

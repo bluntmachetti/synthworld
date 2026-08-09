@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import re
@@ -172,6 +173,32 @@ def test_asteria_aggregate_shape_reproduction_and_directions() -> None:
     assert _metric(records["extra"], "extra_evidence_free") < _metric(
         exact, "extra_evidence_free"
     )
+
+
+def test_asteria_baseline_digest_projection_does_not_weaken_submission_order() -> (
+    None
+):
+    tool = _load_tool()
+    benchmark = tool.generate_c08_asteria_v2(SEED)
+    submission = tool._asteria_submission(benchmark, "exact")
+    action_ids = tuple(row.action_event_id for row in submission.rows)
+    assert action_ids == tuple(sorted(action_ids))
+    assert all(
+        row.retained_observation_ids == tuple(sorted(row.retained_observation_ids))
+        for row in submission.rows
+    )
+
+    compatibility_bytes = tool._asteria_baseline_submission_bytes(
+        benchmark, submission
+    )
+    compatibility_document = json.loads(compatibility_bytes)
+    assert tuple(
+        row["action_event_id"] for row in compatibility_document["rows"]
+    ) == tuple(action.action_event_id for action in benchmark.public.actions)
+    exact_record = tool.build_asteria_baseline_records(SEED)["records"][0]
+    assert exact_record["submission_digest"] == hashlib.sha256(
+        compatibility_bytes
+    ).hexdigest()
 
 
 def test_enterprise_aggregate_shape_reproduction_and_directions() -> None:

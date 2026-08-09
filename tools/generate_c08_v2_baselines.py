@@ -8,8 +8,6 @@ import json
 from collections.abc import Sequence
 from pathlib import Path
 
-from pydantic import BaseModel
-
 from synthworld.agentic.c08_v2 import (
     C08AsteriaBenchmarkV2,
     C08AsteriaSubmissionV2,
@@ -79,7 +77,12 @@ def _replace_asteria_row(
         )
         for row in submission.rows
     )
-    return submission.model_copy(update={"rows": rows})
+    return C08AsteriaSubmissionV2(
+        schema_version=submission.schema_version,
+        benchmark_id=submission.benchmark_id,
+        public_input_digest=submission.public_input_digest,
+        rows=tuple(sorted(rows, key=lambda item: item.action_event_id)),
+    )
 
 
 def _asteria_submission(
@@ -135,6 +138,21 @@ def _asteria_submission(
             (*row.retained_observation_ids, extra_observation_id),
         )
     raise ValueError(f"unsupported Asteria C08 baseline failure mode: {failure_mode}")
+
+
+def _asteria_baseline_submission_bytes(
+    benchmark: C08AsteriaBenchmarkV2,
+    submission: C08AsteriaSubmissionV2,
+) -> bytes:
+    """Preserve the frozen baseline's deterministic public-event row order."""
+
+    rows_by_action = {row.action_event_id: row for row in submission.rows}
+    document = submission.model_dump(mode="json")
+    document["rows"] = [
+        rows_by_action[action.action_event_id].model_dump(mode="json")
+        for action in benchmark.public.actions
+    ]
+    return _canonical_json_bytes(document)
 
 
 def _renumber_enterprise(
@@ -242,14 +260,12 @@ def _metric_records(metrics: Sequence[Metric]) -> list[dict[str, object]]:
 
 def _baseline_record(
     failure_mode: str,
-    submission: BaseModel,
+    submission_bytes: bytes,
     metrics: Sequence[Metric],
 ) -> dict[str, object]:
     return {
         "failure_mode": failure_mode,
-        "submission_digest": hashlib.sha256(
-            canonical_json_bytes(submission)
-        ).hexdigest(),
+        "submission_digest": hashlib.sha256(submission_bytes).hexdigest(),
         "metrics": _metric_records(metrics),
     }
 
@@ -260,7 +276,13 @@ def build_asteria_baseline_records(seed: int = DEFAULT_SEED) -> dict[str, object
     for failure_mode in ASTERIA_FAILURE_MODES:
         submission = _asteria_submission(benchmark, failure_mode)
         report = evaluate_c08_submission(benchmark, submission)
-        records.append(_baseline_record(failure_mode, submission, report.metrics))
+        records.append(
+            _baseline_record(
+                failure_mode,
+                _asteria_baseline_submission_bytes(benchmark, submission),
+                report.metrics,
+            )
+        )
     return {
         "benchmark_id": benchmark.benchmark_id,
         "schema_version": benchmark.schema_version,
@@ -281,7 +303,13 @@ def build_enterprise_baseline_records(
             evaluator=bundle.evaluator,
             submission=submission,
         )
-        records.append(_baseline_record(failure_mode, submission, report.metrics))
+        records.append(
+            _baseline_record(
+                failure_mode,
+                canonical_json_bytes(submission),
+                report.metrics,
+            )
+        )
     return {
         "benchmark_id": C08_FROZEN_BENCHMARK_ID,
         "schema_version": bundle.public.schema_version,
