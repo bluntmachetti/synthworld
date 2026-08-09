@@ -25,7 +25,6 @@ from synthworld.agentic.enterprise.c08_v2 import (
     C08SourceWorldV2,
     C08SubmissionV2,
     compile_c08_truth,
-    c08_public_observation_id,
     evaluate_c08,
     export_c08_artifacts,
     generate_c08_reference,
@@ -41,6 +40,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08PublicInputV2,
 )
 from synthworld.agentic.enterprise.c08_v2.projection import c08_public_input_digest
+from synthworld.agentic.enterprise.c08_v2.reference import c08_public_observation_id
 
 
 _SOURCE_EVIDENCE_IDS = {
