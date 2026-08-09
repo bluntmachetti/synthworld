@@ -198,6 +198,13 @@ def test_asteria_baseline_digest_projection_does_not_weaken_submission_order() -
     )
 
 
+def test_asteria_generator_rejects_unknown_failure_mode() -> None:
+    tool = _load_tool()
+    benchmark = tool.generate_c08_asteria_v2(SEED)
+    with pytest.raises(ValueError, match="unsupported Asteria"):
+        tool._asteria_submission(benchmark, "unknown")
+
+
 def test_enterprise_aggregate_shape_reproduction_and_directions() -> None:
     tool = _load_tool()
     payload = _fixture(ENTERPRISE_FILE)
@@ -223,6 +230,13 @@ def test_enterprise_aggregate_shape_reproduction_and_directions() -> None:
     )
 
 
+def test_enterprise_generator_rejects_unknown_failure_mode() -> None:
+    tool = _load_tool()
+    bundle = tool.generate_c08_reference(SEED)
+    with pytest.raises(ValueError, match="unsupported enterprise"):
+        tool._enterprise_submission(bundle, "unknown")
+
+
 def test_generator_rejects_unexpected_fixture_entries(tmp_path: Path) -> None:
     tool = _load_tool()
     tmp_path.joinpath("unexpected.json").write_bytes(b"{}\n")
@@ -238,6 +252,37 @@ def test_generator_rejects_symlinked_output_root(tmp_path: Path) -> None:
     linked_root.symlink_to(real_root, target_is_directory=True)
     with pytest.raises(RuntimeError, match="symlink"):
         tool.write_baselines(linked_root)
+
+
+def test_generator_rejects_file_output_root(tmp_path: Path) -> None:
+    tool = _load_tool()
+    output = tmp_path / "output"
+    output.write_bytes(b"")
+    with pytest.raises(RuntimeError, match="not a directory"):
+        tool.write_baselines(output)
+
+
+def test_generator_rejects_symlinked_inventory_entry(tmp_path: Path) -> None:
+    tool = _load_tool()
+    target = tmp_path / "target"
+    target.write_bytes(b"{}\n")
+    (tmp_path / "linked.json").symlink_to(target)
+    with pytest.raises(RuntimeError, match="linked.json"):
+        tool.write_baselines(tmp_path)
+
+
+def test_generator_creates_missing_output_root(tmp_path: Path) -> None:
+    tool = _load_tool()
+    output = tmp_path / "nested" / "baselines"
+    tool.write_baselines(output, seed=SEED)
+    assert output.is_dir()
+
+
+def test_generator_main_writes_requested_output(tmp_path: Path) -> None:
+    tool = _load_tool()
+    output = tmp_path / "generated"
+    assert tool.main(["--output", str(output), "--seed", str(SEED)]) == 0
+    assert output.is_dir()
 
 
 def test_generator_is_deterministic(tmp_path: Path) -> None:
