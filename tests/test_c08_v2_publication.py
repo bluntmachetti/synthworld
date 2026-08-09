@@ -13,19 +13,8 @@ from synthworld.agentic.c08_v2 import (
     load_c08_v2_frozen_tree,
     load_packaged_c08_v2_benchmark,
 )
-from synthworld.agentic.enterprise.c08_v2 import (
-    C08EvaluatorTruthV2,
-    C08FrozenManifestV2,
-    C08PublicInputV2,
-)
-from synthworld.agentic.enterprise.c08_v2.projection import (
-    c08_public_input_digest,
-    validate_c08_truth_against_public,
-)
-from synthworld.enterprise.canonical import (
-    canonical_json_bytes,
-    canonical_json_value_bytes,
-)
+from synthworld.agentic.enterprise.c08_v2 import load_packaged_frozen_benchmark
+from synthworld.enterprise.canonical import canonical_json_value_bytes
 
 _ASTERIA_FILES = frozenset(
     {
@@ -91,7 +80,7 @@ _ASTERIA_ROOT_DIGEST = (
     "5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a"
 )
 _ENTERPRISE_CHECKSUM_ROOT = (
-    "3ad3c6a1dd226d6a62c273a291032b9309bd5fa627540beac8507347fe1e0dcb"
+    "a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123"
 )
 
 
@@ -119,14 +108,6 @@ def _assert_canonical_files(payloads: dict[str, bytes]) -> None:
         assert not payload.endswith(b"\n\n"), path
         if path.endswith(".json"):
             assert canonical_json_value_bytes(json.loads(payload)) == payload
-
-
-def _checksum_rows(payload: bytes) -> dict[str, str]:
-    rows = tuple(row.split("  ", 1) for row in payload.decode("ascii").splitlines())
-    assert tuple(path for _, path in rows) == tuple(sorted(path for _, path in rows))
-    assert len({path for _, path in rows}) == len(rows)
-    assert all(len(digest) == 64 for digest, _ in rows)
-    return {path: digest for digest, path in rows}
 
 
 def test_packaged_resource_trees_have_exact_canonical_inventories() -> None:
@@ -159,38 +140,12 @@ def test_asteria_package_loader_validates_all_digest_roots() -> None:
 def test_enterprise_package_resources_validate_checksum_root_and_bindings() -> None:
     root = files("synthworld.benchmarks").joinpath("enterprise-agentic-c08-v2")
     payloads = _resource_files(root)
-    manifest_payload = payloads["manifest.json"]
-    public_payload = payloads["public/public-input.json"]
-    evaluator_payload = payloads["evaluator/truth.json"]
-    manifest = C08FrozenManifestV2.model_validate_json(manifest_payload)
-    public = C08PublicInputV2.model_validate_json(public_payload)
-    evaluator = C08EvaluatorTruthV2.model_validate_json(evaluator_payload)
+    loaded = load_packaged_frozen_benchmark()
 
-    checksums = _checksum_rows(payloads["SHA256SUMS"])
-    checksummed_payloads = {
-        path: payload for path, payload in payloads.items() if path != "SHA256SUMS"
-    }
-    assert checksums == {
-        path: hashlib.sha256(payload).hexdigest()
-        for path, payload in checksummed_payloads.items()
-    }
     assert hashlib.sha256(payloads["SHA256SUMS"]).hexdigest() == (
         _ENTERPRISE_CHECKSUM_ROOT
     )
-    assert canonical_json_bytes(manifest) == manifest_payload
-    assert canonical_json_bytes(public) == public_payload
-    assert canonical_json_bytes(evaluator) == evaluator_payload
-    assert manifest.public_input_digest == evaluator.public_input_digest
-    assert manifest.public_input_digest == c08_public_input_digest(public)
-    assert {
-        artifact.path: (artifact.byte_size, artifact.sha256)
-        for artifact in manifest.public_inventory + manifest.evaluator_inventory
-    } == {
-        path: (len(payload), hashlib.sha256(payload).hexdigest())
-        for path, payload in checksummed_payloads.items()
-        if path != "manifest.json"
-    }
-    validate_c08_truth_against_public(public, evaluator)
+    assert loaded.manifest.public_input_digest == loaded.evaluator.public_input_digest
 
 
 def test_public_and_evaluator_package_resources_remain_physically_separate() -> None:
