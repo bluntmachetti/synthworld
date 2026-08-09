@@ -4,6 +4,7 @@ import hashlib
 import json
 import runpy
 import sys
+import types
 from pathlib import Path
 from uuid import UUID
 
@@ -44,6 +45,98 @@ from synthworld.models import SyntheticModel, SynthWorld, WorldMetrics
 from synthworld.risk import PublicRiskCorpus, RiskAnswerKey, RiskBand
 from synthworld.risk_generator import generate_risk_benchmark
 from synthworld.risk_metrics import RiskBenchmarkMetrics
+
+REPRODUCIBLE_BENCHMARK_IDS = (
+    "ambiguity-v1",
+    "asteria-agentic-v1",
+    "authority-governance-v1",
+    "connection-v1",
+    "core-world-v1",
+    "extraction-v1",
+    "risk-v1",
+)
+
+
+@pytest.mark.parametrize("benchmark_id", REPRODUCIBLE_BENCHMARK_IDS)
+def test_reproduce_benchmark_delegates_each_published_recipe(
+    benchmark_id: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, Path]] = []
+    module = types.ModuleType("synthworld.benchmark_reproduction")
+
+    def reproduce_benchmark(*, benchmark_id: str, output_directory: Path) -> None:
+        calls.append((benchmark_id, output_directory))
+
+    module.__dict__["reproduce_benchmark"] = reproduce_benchmark
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    output = tmp_path / benchmark_id
+
+    exit_code = main(
+        [
+            "reproduce-benchmark",
+            "--benchmark",
+            benchmark_id,
+            "--output",
+            str(output),
+        ]
+    )
+
+    assert exit_code == 0
+    assert calls == [(benchmark_id, output)]
+    assert capsys.readouterr().out == (
+        f"Benchmark reproduced: {benchmark_id} -> {output}\n"
+    )
+
+
+def test_reproduce_benchmark_reports_a_recipe_failure(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = types.ModuleType("synthworld.benchmark_reproduction")
+
+    def reproduce_benchmark(*, benchmark_id: str, output_directory: Path) -> None:
+        raise ValueError(f"{benchmark_id}: output already exists")
+
+    module.__dict__["reproduce_benchmark"] = reproduce_benchmark
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+
+    exit_code = main(
+        [
+            "reproduce-benchmark",
+            "--benchmark",
+            "core-world-v1",
+            "--output",
+            str(tmp_path / "existing"),
+        ]
+    )
+
+    assert exit_code == 1
+    assert capsys.readouterr().err == (
+        "reproduce-benchmark: core-world-v1: output already exists\n"
+    )
+
+
+def test_reproduce_benchmark_rejects_an_unpublished_benchmark(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit) as raised:
+        main(
+            [
+                "reproduce-benchmark",
+                "--benchmark",
+                "enterprise-agentic",
+                "--output",
+                str(tmp_path / "output"),
+            ]
+        )
+
+    assert raised.value.code == 2
+    assert "invalid choice" in capsys.readouterr().err
 
 
 def test_generate_command_writes_a_populated_world(

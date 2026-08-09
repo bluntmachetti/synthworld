@@ -1,0 +1,1344 @@
+{
+  "artifacts": [
+    {
+      "answer_key_label": "Checksums bind the public input and published reference truth.",
+      "approved_sha256": "6cfc0483ccd43256010a88ef25df4869a5cfc1cd6e7b0f105b5a4b9cfca26986",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "ambiguity-v1",
+      "frozen": true,
+      "id": "ambiguity-v1:checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published reference disposition truth; never product input.",
+      "approved_sha256": "334808680b46f58f78ac820c887548692b057eab97bb6cf41571d1e77dd87e11",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "ambiguity-v1",
+      "frozen": true,
+      "id": "ambiguity-v1:dispositions",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/ambiguity-dispositions-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published reference membership truth; never product input.",
+      "approved_sha256": "42d7f52a4c4a058d2616630dce719fb8c659fd56d4789d91d0cfdee96a264a8e",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "ambiguity-v1",
+      "frozen": true,
+      "id": "ambiguity-v1:memberships",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/ambiguity-memberships-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "ambiguity-v1",
+      "frozen": true,
+      "id": "ambiguity-v1:public",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/ambiguity-public-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "3e4884bdcde3ec9e2fbdc958c5fcc587c54e733273afeb4df00e64fac4e20279",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:agents",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/agents.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": "Published reference authority truth; give it to the evaluator only after prediction.",
+      "approved_sha256": "093efedf08d1db33e04335bd846a50b58bb8222bb2395dca8358d8e2820536b0",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:authority-truth",
+      "integrity_record_ids": [
+        "asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/authority_truth.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published canonical-binding reference truth; never product input.",
+      "approved_sha256": "9ed29aa54a1c05d9ae2b62797059a85fb96c6710b762568465f98222fc844cdf",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:canonical-bindings",
+      "integrity_record_ids": [
+        "asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/canonical_bindings.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published evaluation cases and reference truth; never product input.",
+      "approved_sha256": "a44d28143128da2051c665e8ae421e1b2d3af0cb2e364d42af099f0ecc8b35a5",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:cases",
+      "integrity_record_ids": [
+        "asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/cases.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Checksum record for published evaluator reference truth.",
+      "approved_sha256": "0b16503d3d481cad163f5ab70ed3c60d6ed0f028eabf14351734a08beae4d387",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:evaluator-checksums",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published evaluator evidence epochs; never product input.",
+      "approved_sha256": "e685ee9b0334eb5c2ae5905e930d6302160e525634eb92f0c4334a8a5c9d15a8",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:evidence-epochs",
+      "integrity_record_ids": [
+        "asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/evidence_epochs.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published expected-decision reference truth; never product input.",
+      "approved_sha256": "49e68d770b3a68666d193d1304d0eaebc67eb689c66ff4697ba59db6be41be49",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:expected-decisions",
+      "integrity_record_ids": [
+        "asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/expected_decisions.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published expected-provenance reference truth; never product input.",
+      "approved_sha256": "05fedec838d2569ebc4ebbe7d9af8ab5757faf6bcfe1858ecae9d06423553fa1",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:expected-provenance",
+      "integrity_record_ids": [
+        "asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/expected_provenance.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published expected-side-effects reference truth; never product input.",
+      "approved_sha256": "d5b4aeac96bface4331622c6eba307fad8b2cc5044fcdc2cfef8622c3ff61079",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:expected-side-effects",
+      "integrity_record_ids": [
+        "asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/expected_side_effects.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "bc29c6aa8e342e72c76e9ae58ca5e101beeb2e69f7956bf878890f714af29c08",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:organisation",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/organisation.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "58163ce487ec8a0e986cac5380706ecac352819a1706d265518fbb515955874c",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:principals",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/principals.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "59e116652a078eb46b5e3ea1946d3b78a00b3945d2809a4af25c8875a5f42a93",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:public-credentials",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/public_credentials.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "476df49d66e774c0303370739e9e5bc8011e66985652d14664c581535c743957",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:public-delegations",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/public_delegations.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "ab920f3866aaa86deeadbbe4c5882170205c12d8d2c1a0fa638c0415aa0ec6eb",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:public-events",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/public_events.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "a92bd0b4398fe59724d848978b673c85884adab99d1672ce9e4bfd34e320efbe",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:public-manifest",
+      "integrity_record_ids": [],
+      "kind": "manifest",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "866a24fdf59e2bbd957717af9c0402a629b341046205d953724a15bddef19266",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:resources",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/resources.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "d1d08d2b060e6b900029bc180a266e41cc3e4da7938fd27fb8c2577f27298704",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:runtimes",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/runtimes.jsonl",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "37f09e82146a249cc5a7f02ad3ec5abf95724d2eaf4dbc40da3b969f9ea88ec9",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:scenario",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/scenarios/procurement-delegation.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "11d22e49cb95b52d294d832d5df145e86c492fd16c3781f21c5e664b4ef6c6c8",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "frozen": true,
+      "id": "asteria-agentic-v1:tool-schema",
+      "integrity_record_ids": [
+        "asteria-public:src/synthworld/benchmarks/asteria-agentic-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/asteria-agentic-v1/public/tool_schemas/procurement-tools.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": "Checksums bind public input and published evaluator reference truth.",
+      "approved_sha256": "a856171b2a328614705340a0d8d8dcf1f6bc0794adf0853c377718f796eb585c",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "authority-governance-v1",
+      "frozen": true,
+      "id": "authority-governance-v1:checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published evaluator reference truth; never product input.",
+      "approved_sha256": "7822846e7d5613741857cceed33df849f04606548a4c0e1ce789646aaae8e5e5",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "authority-governance-v1",
+      "frozen": true,
+      "id": "authority-governance-v1:evaluator",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
+        "authority-manifest:src/synthworld/benchmarks/authority-governance-v1/evaluator/manifest.json"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/authority-governance-v1/evaluator/authority-governance-evaluator.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Manifest for published evaluator reference truth.",
+      "approved_sha256": "d9b5e3c19a74344ba9b28bfb58efde98ce8809e4157e8c0fa6b97639a7a36e18",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "authority-governance-v1",
+      "frozen": true,
+      "id": "authority-governance-v1:evaluator-manifest",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS"
+      ],
+      "kind": "manifest",
+      "path": "src/synthworld/benchmarks/authority-governance-v1/evaluator/manifest.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "340df0ed2b33db6c05805891258dda789f445e300084a0e347ee318044d3191b",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "authority-governance-v1",
+      "frozen": true,
+      "id": "authority-governance-v1:public-input",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
+        "authority-manifest:src/synthworld/benchmarks/authority-governance-v1/public/manifest.json"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/authority-governance-v1/public/authority-governance-input.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "60081ed11ff85b6909e57771f3aeffb8023136ae8b66e91bbaf4473ef7f27d92",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "authority-governance-v1",
+      "frozen": true,
+      "id": "authority-governance-v1:public-manifest",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS"
+      ],
+      "kind": "manifest",
+      "path": "src/synthworld/benchmarks/authority-governance-v1/public/manifest.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": "Checksum for joined published reference fixture.",
+      "approved_sha256": "c2a9612df25d37bea9a2dfeb0e968763f8bb3659b6a4aa8e47d4ea93058b4377",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "connection-v1",
+      "frozen": true,
+      "id": "connection-v1:checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/CONNECTION_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Joined published reference fixture; never product input.",
+      "approved_sha256": "044b52650039059b5841e0af9c512e2bbc7dbb089d43e465d43fda06889a8fe4",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "connection-v1",
+      "frozen": true,
+      "id": "connection-v1:golden",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/CONNECTION_SHA256SUMS"
+      ],
+      "kind": "joined_reference_fixture",
+      "path": "src/synthworld/benchmarks/connection-golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "fa896ae417f75d6fc4ac650ec26683a39b3994bc004c743fc1fcc71f605ff17e",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "connection-v1",
+      "frozen": true,
+      "id": "connection-v1:public",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/CONNECTION_PUBLIC_SHA256SUMS"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/connection-public-golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "bd30a434b0f0cbd912f9e6fcd862c1f7f332deabd9f8bf2a9d83c49bcf39e204",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "connection-v1",
+      "frozen": true,
+      "id": "connection-v1:public-checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/CONNECTION_PUBLIC_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": "Checksum for joined published reference fixture.",
+      "approved_sha256": "bebeecf02c0cefdb580194731c5854b5665f11983b0bb8c5ed9cfc7609fbba4f",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "core-world-v1",
+      "frozen": true,
+      "id": "core-world-v1:checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Joined published reference fixture; never product input.",
+      "approved_sha256": "8b75fcd932dbbe2d0ea94d034f8c546c6c3857d3c99669180222f807cf48755d",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "core-world-v1",
+      "frozen": true,
+      "id": "core-world-v1:golden",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/SHA256SUMS"
+      ],
+      "kind": "joined_reference_fixture",
+      "path": "src/synthworld/benchmarks/golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Published extraction answer key; never product input.",
+      "approved_sha256": "ffc6503df8cbb9d8f99161ee29324e8d0a0187901118e8eeaa590b49e7598f78",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "extraction-v1",
+      "frozen": true,
+      "id": "extraction-v1:answer",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/EXTRACTION_ANSWER_SHA256SUMS"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/extraction-answer-golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Checksum for published extraction answer key.",
+      "approved_sha256": "62d59fb12c2b2fe5103bab1f554b4a3db439c5770d958e1d8a846adfd91459bf",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "extraction-v1",
+      "frozen": true,
+      "id": "extraction-v1:answer-checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/EXTRACTION_ANSWER_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Joined published extraction reference fixture; never product input.",
+      "approved_sha256": "69bf567bf122ed7831f0963883b0524c3b9d991b5ef0f7a5b6b7ce69ee234e57",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "extraction-v1",
+      "frozen": true,
+      "id": "extraction-v1:golden",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/EXTRACTION_SHA256SUMS"
+      ],
+      "kind": "joined_reference_fixture",
+      "path": "src/synthworld/benchmarks/extraction-golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Checksum for joined published extraction reference fixture.",
+      "approved_sha256": "7670a205b7dcc27622ce92648292489bf7517dc6cc359973554aa0d821b4e172",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "extraction-v1",
+      "frozen": true,
+      "id": "extraction-v1:golden-checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/EXTRACTION_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "10632f000f8aeb8ccd8557476b18b940cfd35b91f7cb38dcf209269de987160e",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "extraction-v1",
+      "frozen": true,
+      "id": "extraction-v1:public",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/EXTRACTION_PUBLIC_SHA256SUMS"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/extraction-public-golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "f520af026f4d886b8903f79e7eae8ab95bd956bd177ac8c526d6e041bc387746",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "extraction-v1",
+      "frozen": true,
+      "id": "extraction-v1:public-checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/EXTRACTION_PUBLIC_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "946fb4de22c16d9e47d9a31a5d6e6623d39d1676aacfc30b13529ca81fe17f4d",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "households-smoke-v1",
+      "frozen": true,
+      "id": "households-smoke-v1:checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/HOUSEHOLDS_SMOKE_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "dba52a49dbed6dadef9cace8b4a512121ae83abbea31ca77f5c12d15a6771bc4",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "households-smoke-v1",
+      "frozen": true,
+      "id": "households-smoke-v1:smoke",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/HOUSEHOLDS_SMOKE_SHA256SUMS"
+      ],
+      "kind": "smoke_sample",
+      "path": "src/synthworld/benchmarks/households-smoke-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": "Published risk answer key; never product input.",
+      "approved_sha256": "32479aa077887a63d31a4de3dfbc822f01f6622f09ea6dd6d2a87e3af3cb319e",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "risk-v1",
+      "frozen": true,
+      "id": "risk-v1:answer",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/RISK_ANSWER_SHA256SUMS"
+      ],
+      "kind": "evaluator_truth",
+      "path": "src/synthworld/benchmarks/risk-answer-golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": "Checksum for published risk answer key.",
+      "approved_sha256": "07e300c8eee695c0eef60af9a4701cd5df03457215f5c310b1a9d7e05ff087cd",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "risk-v1",
+      "frozen": true,
+      "id": "risk-v1:answer-checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/RISK_ANSWER_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_reference_truth"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "690c2fb081826f72970af1e729651819c3563d9aa590190d566af24424238b33",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "risk-v1",
+      "frozen": true,
+      "id": "risk-v1:public",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/RISK_PUBLIC_SHA256SUMS"
+      ],
+      "kind": "public_input",
+      "path": "src/synthworld/benchmarks/risk-public-golden-v1.json",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    },
+    {
+      "answer_key_label": null,
+      "approved_sha256": "16f95e9d9e9f7539e8f14fab4688cf5c0ed995bb539ad415456ec77c08688a73",
+      "approved_targets": [
+        "repository",
+        "python_package"
+      ],
+      "benchmark_id": "risk-v1",
+      "frozen": true,
+      "id": "risk-v1:public-checksum",
+      "integrity_record_ids": [],
+      "kind": "checksum_manifest",
+      "path": "src/synthworld/benchmarks/RISK_PUBLIC_SHA256SUMS",
+      "present_in": [
+        "repository",
+        "python_package"
+      ],
+      "sensitivity": "public_input"
+    }
+  ],
+  "benchmarks": [
+    {
+      "artifact_ids": [
+        "ambiguity-v1:checksum",
+        "ambiguity-v1:dispositions",
+        "ambiguity-v1:memberships",
+        "ambiguity-v1:public"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-9-identity-resolution-ambiguity"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "ambiguity-v1",
+      "introduced_in": "0.11.0",
+      "lifecycle": "published",
+      "limitations_route_id": "route:USER_GUIDE.md#two-truths-kept-apart",
+      "publication_gate_id": "ambiguity-v1-1.0.0",
+      "replacement_id": null,
+      "reproduction": {
+        "argv": [
+          "synthworld",
+          "reproduce-benchmark",
+          "--benchmark",
+          "ambiguity-v1",
+          "--output",
+          "{output_dir}"
+        ],
+        "mode": "regenerate_and_compare"
+      },
+      "title": "Identity-resolution ambiguity v1"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "generated_benchmark",
+      "benchmark_version": "2.0.0",
+      "docs_route_ids": [
+        "route:BENCHMARKS.md#ambiguity-v2-error-floor"
+      ],
+      "evaluation_mode": "generated_evaluation",
+      "example_command": "uv run python examples/compute_ambiguity_floor.py",
+      "id": "ambiguity-v2",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:README.md#what-the-ambiguity-pack-does-and-does-not-measure",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Identity-resolution ambiguity v2"
+    },
+    {
+      "artifact_ids": [
+        "asteria-agentic-v1:agents",
+        "asteria-agentic-v1:authority-truth",
+        "asteria-agentic-v1:canonical-bindings",
+        "asteria-agentic-v1:cases",
+        "asteria-agentic-v1:evaluator-checksums",
+        "asteria-agentic-v1:evidence-epochs",
+        "asteria-agentic-v1:expected-decisions",
+        "asteria-agentic-v1:expected-provenance",
+        "asteria-agentic-v1:expected-side-effects",
+        "asteria-agentic-v1:organisation",
+        "asteria-agentic-v1:principals",
+        "asteria-agentic-v1:public-credentials",
+        "asteria-agentic-v1:public-delegations",
+        "asteria-agentic-v1:public-events",
+        "asteria-agentic-v1:public-manifest",
+        "asteria-agentic-v1:resources",
+        "asteria-agentic-v1:runtimes",
+        "asteria-agentic-v1:scenario",
+        "asteria-agentic-v1:tool-schema"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:AGENTIC_BENCHMARK.md#asteria-agentic-v1"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "asteria-agentic-v1",
+      "introduced_in": "0.9.0",
+      "lifecycle": "published",
+      "limitations_route_id": "route:AGENTIC_BENCHMARK.md#creating-other-worlds-later",
+      "publication_gate_id": "asteria-agentic-v1-1.0.0",
+      "replacement_id": null,
+      "reproduction": {
+        "argv": [
+          "synthworld",
+          "reproduce-benchmark",
+          "--benchmark",
+          "asteria-agentic-v1",
+          "--output",
+          "{output_dir}"
+        ],
+        "mode": "regenerate_and_compare"
+      },
+      "title": "Asteria Agentic v1"
+    },
+    {
+      "artifact_ids": [
+        "authority-governance-v1:checksum",
+        "authority-governance-v1:evaluator",
+        "authority-governance-v1:evaluator-manifest",
+        "authority-governance-v1:public-input",
+        "authority-governance-v1:public-manifest"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-13-enterprise-authorization-benchmarks"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "authority-governance-v1",
+      "introduced_in": "0.13.0",
+      "lifecycle": "published",
+      "limitations_route_id": "route:USER_GUIDE.md#limits-stated-plainly",
+      "publication_gate_id": "authority-governance-v1-1.0.0",
+      "replacement_id": null,
+      "reproduction": {
+        "argv": [
+          "synthworld",
+          "reproduce-benchmark",
+          "--benchmark",
+          "authority-governance-v1",
+          "--output",
+          "{output_dir}"
+        ],
+        "mode": "regenerate_and_compare"
+      },
+      "title": "Authority governance v1"
+    },
+    {
+      "artifact_ids": [
+        "connection-v1:checksum",
+        "connection-v1:golden",
+        "connection-v1:public",
+        "connection-v1:public-checksum"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-3-entity-resolution",
+        "route:USER_GUIDE.md#use-case-4-relationship-inference"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "connection-v1",
+      "introduced_in": "0.6.0",
+      "lifecycle": "published",
+      "limitations_route_id": "route:BENCHMARKS.md#size-and-limits",
+      "publication_gate_id": "connection-v1-1.0.0",
+      "replacement_id": null,
+      "reproduction": {
+        "argv": [
+          "synthworld",
+          "reproduce-benchmark",
+          "--benchmark",
+          "connection-v1",
+          "--output",
+          "{output_dir}"
+        ],
+        "mode": "regenerate_and_compare"
+      },
+      "title": "Connection and relationship inference v1"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "generated_benchmark",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:README.md#current-benchmark-families"
+      ],
+      "evaluation_mode": "generated_evaluation",
+      "example_command": "synthworld generate-continuous-assurance --output continuous-assurance.json",
+      "id": "continuous-assurance",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:USER_GUIDE.md#limits-stated-plainly",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Continuous assurance benchmark"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "generated_benchmark",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:README.md#current-benchmark-families"
+      ],
+      "evaluation_mode": "generated_evaluation",
+      "example_command": "synthworld generate-contextual-access --output contextual-access.json",
+      "id": "contextual-access",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:USER_GUIDE.md#limits-stated-plainly",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Contextual access benchmark"
+    },
+    {
+      "artifact_ids": [
+        "core-world-v1:checksum",
+        "core-world-v1:golden"
+      ],
+      "benchmark_kind": "frozen_fixture",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-1-safe-connected-identity-fixtures"
+      ],
+      "evaluation_mode": "public_reference",
+      "example_command": null,
+      "id": "core-world-v1",
+      "introduced_in": "0.6.0",
+      "lifecycle": "published",
+      "limitations_route_id": "route:BENCHMARKS.md#size-and-limits",
+      "publication_gate_id": "core-world-v1-1.0.0",
+      "replacement_id": null,
+      "reproduction": {
+        "argv": [
+          "synthworld",
+          "reproduce-benchmark",
+          "--benchmark",
+          "core-world-v1",
+          "--output",
+          "{output_dir}"
+        ],
+        "mode": "regenerate_and_compare"
+      },
+      "title": "Core identity world v1"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "generated_benchmark",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-13-enterprise-authorization-benchmarks"
+      ],
+      "evaluation_mode": "generated_evaluation",
+      "example_command": "synthworld generate-enterprise-agentic --output enterprise-agentic.json",
+      "id": "enterprise-agentic",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:USER_GUIDE.md#limits-stated-plainly",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Enterprise agentic benchmark"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "generated_profile",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-13-enterprise-authorization-benchmarks"
+      ],
+      "evaluation_mode": "profile_smoke",
+      "example_command": "synthworld scaffold-enterprise-access --output enterprise-access.yaml",
+      "id": "enterprise-identity-fabric",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:USER_GUIDE.md#limits-stated-plainly",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Enterprise identity fabric profile"
+    },
+    {
+      "artifact_ids": [
+        "extraction-v1:answer",
+        "extraction-v1:answer-checksum",
+        "extraction-v1:golden",
+        "extraction-v1:golden-checksum",
+        "extraction-v1:public",
+        "extraction-v1:public-checksum"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-2-pii-extraction"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "extraction-v1",
+      "introduced_in": "0.6.0",
+      "lifecycle": "published",
+      "limitations_route_id": "route:BENCHMARKS.md#size-and-limits",
+      "publication_gate_id": "extraction-v1-1.0.0",
+      "replacement_id": null,
+      "reproduction": {
+        "argv": [
+          "synthworld",
+          "reproduce-benchmark",
+          "--benchmark",
+          "extraction-v1",
+          "--output",
+          "{output_dir}"
+        ],
+        "mode": "regenerate_and_compare"
+      },
+      "title": "PII extraction v1"
+    },
+    {
+      "artifact_ids": [
+        "households-smoke-v1:checksum",
+        "households-smoke-v1:smoke"
+      ],
+      "benchmark_kind": "generated_profile",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-8-households-and-workplaces"
+      ],
+      "evaluation_mode": "profile_smoke",
+      "example_command": "synthworld generate-households --seed 20260719 --output households",
+      "id": "households-smoke-v1",
+      "introduced_in": "0.11.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:USER_GUIDE.md#generation-cost",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Households and workplaces smoke profile v1"
+    },
+    {
+      "artifact_ids": [
+        "risk-v1:answer",
+        "risk-v1:answer-checksum",
+        "risk-v1:public",
+        "risk-v1:public-checksum"
+      ],
+      "benchmark_kind": "conformance_fixture",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-5-breach-risk-calibration"
+      ],
+      "evaluation_mode": "public_conformance",
+      "example_command": null,
+      "id": "risk-v1",
+      "introduced_in": "0.6.0",
+      "lifecycle": "published",
+      "limitations_route_id": "route:BENCHMARKS.md#size-and-limits",
+      "publication_gate_id": "risk-v1-1.0.0",
+      "replacement_id": null,
+      "reproduction": {
+        "argv": [
+          "synthworld",
+          "reproduce-benchmark",
+          "--benchmark",
+          "risk-v1",
+          "--output",
+          "{output_dir}"
+        ],
+        "mode": "regenerate_and_compare"
+      },
+      "title": "Risk calibration v1"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "projection",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:USER_GUIDE.md#use-case-10-search-provider-input-without-the-answer-key"
+      ],
+      "evaluation_mode": "public_reference",
+      "example_command": "uv run python examples/evaluate_all.py --seed 20260719",
+      "id": "search-projection",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:USER_GUIDE.md#use-case-10-search-provider-input-without-the-answer-key",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Search-provider projection"
+    },
+    {
+      "artifact_ids": [],
+      "benchmark_kind": "generated_benchmark",
+      "benchmark_version": "1.0.0",
+      "docs_route_ids": [
+        "route:BENCHMARKS.md#b-broker-removal-and-reappearance-timeline"
+      ],
+      "evaluation_mode": "generated_evaluation",
+      "example_command": "uv run python examples/evaluate_broker_adapter.py --seed 20260719",
+      "id": "temporal-broker-removal",
+      "introduced_in": "0.13.0",
+      "lifecycle": "candidate",
+      "limitations_route_id": "route:BENCHMARKS.md#size-and-limits",
+      "publication_gate_id": null,
+      "replacement_id": null,
+      "reproduction": null,
+      "title": "Temporal broker removal benchmark"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

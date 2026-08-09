@@ -1,0 +1,635 @@
+{
+  "gates": [
+    {
+      "approved_targets": [
+        "repository",
+        "python_package",
+        "docs_catalog"
+      ],
+      "benchmark_id": "core-world-v1",
+      "benchmark_version": "1.0.0",
+      "checks": [
+        {
+          "name": "independent_versions",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "public_input",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "evaluator_truth",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "boundary_validation",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "checksums",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "submission_contract",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "scorer_version",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "baseline",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "metric_denominators",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "limitations",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "adversarial_review",
+          "rationale": "This published reference fixture makes no blind or held-out evaluation claim; its joined truth is explicitly labelled public reference material.",
+          "status": "not_applicable"
+        },
+        {
+          "name": "safety_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "clean_install_reproduction",
+          "rationale": "The pinned wheel is installed offline in an isolated environment and its reproduction command must recreate the exact approved artifact inventory and SHA-256 values.",
+          "status": "pass"
+        },
+        {
+          "name": "deterministic_ci_recreation",
+          "rationale": "CI executes the isolated-wheel recipe twice in distinct empty directories and requires byte-identical complete inventories matching all approved digests.",
+          "status": "pass"
+        },
+        {
+          "name": "catalogue_hf_metadata",
+          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
+          "status": "not_applicable"
+        }
+      ],
+      "decision": "approved",
+      "id": "core-world-v1-1.0.0",
+      "release_tag": "v0.6.0",
+      "review_route_id": "route:GOLDEN_REVIEW.md#golden-v1-review-record"
+    },
+    {
+      "approved_targets": [
+        "repository",
+        "python_package",
+        "docs_catalog"
+      ],
+      "benchmark_id": "extraction-v1",
+      "benchmark_version": "1.0.0",
+      "checks": [
+        {
+          "name": "independent_versions",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "public_input",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "evaluator_truth",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "boundary_validation",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "checksums",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "submission_contract",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "scorer_version",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "baseline",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "metric_denominators",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "limitations",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "adversarial_review",
+          "rationale": "This public conformance fixture does not claim a blind or held-out threat model; the answer key is explicitly public reference truth.",
+          "status": "not_applicable"
+        },
+        {
+          "name": "safety_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "clean_install_reproduction",
+          "rationale": "The pinned wheel is installed offline in an isolated environment and its reproduction command must recreate the exact approved artifact inventory and SHA-256 values.",
+          "status": "pass"
+        },
+        {
+          "name": "deterministic_ci_recreation",
+          "rationale": "CI executes the isolated-wheel recipe twice in distinct empty directories and requires byte-identical complete inventories matching all approved digests.",
+          "status": "pass"
+        },
+        {
+          "name": "catalogue_hf_metadata",
+          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
+          "status": "not_applicable"
+        }
+      ],
+      "decision": "approved",
+      "id": "extraction-v1-1.0.0",
+      "release_tag": "v0.6.0",
+      "review_route_id": "route:GOLDEN_REVIEW.md#extraction-public-and-answer-review-record"
+    },
+    {
+      "approved_targets": [
+        "repository",
+        "python_package",
+        "docs_catalog"
+      ],
+      "benchmark_id": "connection-v1",
+      "benchmark_version": "1.0.0",
+      "checks": [
+        {
+          "name": "independent_versions",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "public_input",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "evaluator_truth",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "boundary_validation",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "checksums",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "submission_contract",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "scorer_version",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "baseline",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "metric_denominators",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "limitations",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "adversarial_review",
+          "rationale": "This public conformance fixture does not claim a blind or held-out threat model; the joined truth is explicitly public reference material.",
+          "status": "not_applicable"
+        },
+        {
+          "name": "safety_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "clean_install_reproduction",
+          "rationale": "The pinned wheel is installed offline in an isolated environment and its reproduction command must recreate the exact approved artifact inventory and SHA-256 values.",
+          "status": "pass"
+        },
+        {
+          "name": "deterministic_ci_recreation",
+          "rationale": "CI executes the isolated-wheel recipe twice in distinct empty directories and requires byte-identical complete inventories matching all approved digests.",
+          "status": "pass"
+        },
+        {
+          "name": "catalogue_hf_metadata",
+          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
+          "status": "not_applicable"
+        }
+      ],
+      "decision": "approved",
+      "id": "connection-v1-1.0.0",
+      "release_tag": "v0.6.0",
+      "review_route_id": "route:GOLDEN_REVIEW.md#connection-golden-v1-review-record"
+    },
+    {
+      "approved_targets": [
+        "repository",
+        "python_package",
+        "docs_catalog"
+      ],
+      "benchmark_id": "risk-v1",
+      "benchmark_version": "1.0.0",
+      "checks": [
+        {
+          "name": "independent_versions",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "public_input",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "evaluator_truth",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "boundary_validation",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "checksums",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "submission_contract",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "scorer_version",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "baseline",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "metric_denominators",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "limitations",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "adversarial_review",
+          "rationale": "This public conformance fixture does not claim a blind or held-out threat model; the answer key is explicitly public reference truth.",
+          "status": "not_applicable"
+        },
+        {
+          "name": "safety_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "clean_install_reproduction",
+          "rationale": "The pinned wheel is installed offline in an isolated environment and its reproduction command must recreate the exact approved artifact inventory and SHA-256 values.",
+          "status": "pass"
+        },
+        {
+          "name": "deterministic_ci_recreation",
+          "rationale": "CI executes the isolated-wheel recipe twice in distinct empty directories and requires byte-identical complete inventories matching all approved digests.",
+          "status": "pass"
+        },
+        {
+          "name": "catalogue_hf_metadata",
+          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
+          "status": "not_applicable"
+        }
+      ],
+      "decision": "approved",
+      "id": "risk-v1-1.0.0",
+      "release_tag": "v0.6.0",
+      "review_route_id": "route:GOLDEN_REVIEW.md#risk-v1-review-record"
+    },
+    {
+      "approved_targets": [
+        "repository",
+        "python_package",
+        "docs_catalog"
+      ],
+      "benchmark_id": "ambiguity-v1",
+      "benchmark_version": "1.0.0",
+      "checks": [
+        {
+          "name": "independent_versions",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "public_input",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "evaluator_truth",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "boundary_validation",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "checksums",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "submission_contract",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "scorer_version",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "baseline",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "metric_denominators",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "limitations",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "adversarial_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "safety_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "clean_install_reproduction",
+          "rationale": "The pinned wheel is installed offline in an isolated environment and its reproduction command must recreate the exact approved artifact inventory and SHA-256 values.",
+          "status": "pass"
+        },
+        {
+          "name": "deterministic_ci_recreation",
+          "rationale": "CI executes the isolated-wheel recipe twice in distinct empty directories and requires byte-identical complete inventories matching all approved digests.",
+          "status": "pass"
+        },
+        {
+          "name": "catalogue_hf_metadata",
+          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
+          "status": "not_applicable"
+        }
+      ],
+      "decision": "approved",
+      "id": "ambiguity-v1-1.0.0",
+      "release_tag": "v0.11.0",
+      "review_route_id": "route:GOLDEN_REVIEW.md#ambiguity-v1-review-record"
+    },
+    {
+      "approved_targets": [
+        "repository",
+        "python_package",
+        "docs_catalog"
+      ],
+      "benchmark_id": "asteria-agentic-v1",
+      "benchmark_version": "1.0.0",
+      "checks": [
+        {
+          "name": "independent_versions",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "public_input",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "evaluator_truth",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "boundary_validation",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "checksums",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "submission_contract",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "scorer_version",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "baseline",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "metric_denominators",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "limitations",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "adversarial_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "safety_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "clean_install_reproduction",
+          "rationale": "The pinned wheel is installed offline in an isolated environment and its reproduction command must recreate the exact approved artifact inventory and SHA-256 values.",
+          "status": "pass"
+        },
+        {
+          "name": "deterministic_ci_recreation",
+          "rationale": "CI executes the isolated-wheel recipe twice in distinct empty directories and requires byte-identical complete inventories matching all approved digests.",
+          "status": "pass"
+        },
+        {
+          "name": "catalogue_hf_metadata",
+          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
+          "status": "not_applicable"
+        }
+      ],
+      "decision": "approved",
+      "id": "asteria-agentic-v1-1.0.0",
+      "release_tag": "v0.9.0",
+      "review_route_id": "route:GOLDEN_REVIEW.md#asteria-agentic-v1-review-record"
+    },
+    {
+      "approved_targets": [
+        "repository",
+        "python_package",
+        "docs_catalog"
+      ],
+      "benchmark_id": "authority-governance-v1",
+      "benchmark_version": "1.0.0",
+      "checks": [
+        {
+          "name": "independent_versions",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "public_input",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "evaluator_truth",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "boundary_validation",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "checksums",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "submission_contract",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "scorer_version",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "baseline",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "metric_denominators",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "limitations",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "adversarial_review",
+          "rationale": "This public conformance fixture does not claim a blind or held-out threat model; evaluator truth is explicitly published reference material.",
+          "status": "not_applicable"
+        },
+        {
+          "name": "safety_review",
+          "rationale": null,
+          "status": "pass"
+        },
+        {
+          "name": "clean_install_reproduction",
+          "rationale": "The pinned wheel is installed offline in an isolated environment and its reproduction command must recreate the exact approved artifact inventory and SHA-256 values.",
+          "status": "pass"
+        },
+        {
+          "name": "deterministic_ci_recreation",
+          "rationale": "CI executes the isolated-wheel recipe twice in distinct empty directories and requires byte-identical complete inventories matching all approved digests.",
+          "status": "pass"
+        },
+        {
+          "name": "catalogue_hf_metadata",
+          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
+          "status": "not_applicable"
+        }
+      ],
+      "decision": "approved",
+      "id": "authority-governance-v1-1.0.0",
+      "release_tag": "v0.13.0",
+      "review_route_id": "route:GOLDEN_REVIEW.md#authority-governance-v1-review-record"
+    }
+  ],
+  "schema_version": "1.0.0"
+}

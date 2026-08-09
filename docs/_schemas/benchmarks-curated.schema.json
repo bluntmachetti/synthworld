@@ -1,0 +1,96 @@
+{
+  "$defs": {
+    "artifact": {
+      "additionalProperties": false,
+      "properties": {
+        "answer_key_label": {"type": ["string", "null"]},
+        "approved_sha256": {"anyOf": [{"pattern": "^[0-9a-f]{64}$", "type": "string"}, {"type": "null"}]},
+        "approved_targets": {"items": {"$ref": "#/$defs/target"}, "type": "array"},
+        "benchmark_id": {"type": "string"},
+        "frozen": {"type": "boolean"},
+        "id": {"type": "string"},
+        "integrity_record_ids": {"items": {"type": "string"}, "type": "array"},
+        "kind": {"enum": ["public_input", "evaluator_truth", "joined_reference_fixture", "smoke_sample", "manifest", "checksum_manifest", "viewer_projection", "reproduction_metadata"]},
+        "path": {"type": ["string", "null"]},
+        "present_in": {"items": {"enum": ["repository", "python_package"]}, "type": "array"},
+        "sensitivity": {"enum": ["public_input", "public_reference_truth", "private_held_out_truth", "operator_private", "internal_build_only"]}
+      },
+      "required": ["id", "benchmark_id", "path", "kind", "sensitivity", "frozen", "approved_sha256", "integrity_record_ids", "present_in", "approved_targets", "answer_key_label"],
+      "type": "object"
+    },
+    "benchmark": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "oneOf": [
+            {"properties": {"benchmark_kind": {"const": "frozen_fixture"}, "evaluation_mode": {"const": "public_reference"}}, "required": ["benchmark_kind", "evaluation_mode"]},
+            {"properties": {"benchmark_kind": {"const": "conformance_fixture"}, "evaluation_mode": {"enum": ["public_conformance", "public_reference"]}}, "required": ["benchmark_kind", "evaluation_mode"]},
+            {"properties": {"benchmark_kind": {"const": "generated_profile"}, "evaluation_mode": {"const": "profile_smoke"}}, "required": ["benchmark_kind", "evaluation_mode"]},
+            {"properties": {"benchmark_kind": {"const": "generated_benchmark"}, "evaluation_mode": {"const": "generated_evaluation"}}, "required": ["benchmark_kind", "evaluation_mode"]},
+            {"properties": {"benchmark_kind": {"const": "projection"}, "evaluation_mode": {"const": "public_reference"}}, "required": ["benchmark_kind", "evaluation_mode"]}
+          ]
+        },
+        {
+          "if": {"properties": {"lifecycle": {"enum": ["published", "superseded"]}}, "required": ["lifecycle"]},
+          "then": {
+            "properties": {
+              "example_command": {"type": "null"},
+              "reproduction": {"$ref": "#/$defs/reproduction"}
+            }
+          },
+          "else": {"properties": {"reproduction": {"type": "null"}}}
+        }
+      ],
+      "properties": {
+        "artifact_ids": {"items": {"type": "string"}, "type": "array"},
+        "benchmark_kind": {"enum": ["frozen_fixture", "conformance_fixture", "generated_profile", "generated_benchmark", "projection"]},
+        "benchmark_version": {"type": "string"},
+        "docs_route_ids": {"items": {"type": "string"}, "type": "array"},
+        "evaluation_mode": {"enum": ["public_conformance", "public_reference", "generated_evaluation", "profile_smoke"]},
+        "example_command": {"type": ["string", "null"]},
+        "id": {"type": "string"},
+        "introduced_in": {"type": "string"},
+        "lifecycle": {"enum": ["experimental", "candidate", "published", "superseded"]},
+        "limitations_route_id": {"type": ["string", "null"]},
+        "publication_gate_id": {"type": ["string", "null"]},
+        "replacement_id": {"type": ["string", "null"]},
+        "reproduction": {"anyOf": [{"$ref": "#/$defs/reproduction"}, {"type": "null"}]},
+        "title": {"type": "string"}
+      },
+      "required": ["id", "title", "lifecycle", "benchmark_kind", "benchmark_version", "evaluation_mode", "introduced_in", "artifact_ids", "reproduction", "example_command", "docs_route_ids", "limitations_route_id", "publication_gate_id", "replacement_id"],
+      "type": "object"
+    },
+    "reproduction": {
+      "additionalProperties": false,
+      "properties": {
+        "argv": {
+          "items": false,
+          "maxItems": 6,
+          "minItems": 6,
+          "prefixItems": [
+            {"const": "synthworld"},
+            {"const": "reproduce-benchmark"},
+            {"const": "--benchmark"},
+            {"minLength": 1, "type": "string"},
+            {"const": "--output"},
+            {"const": "{output_dir}"}
+          ],
+          "type": "array"
+        },
+        "mode": {"const": "regenerate_and_compare"}
+      },
+      "required": ["mode", "argv"],
+      "type": "object"
+    },
+    "target": {"enum": ["repository", "python_package", "docs_catalog", "hugging_face_raw", "hugging_face_viewer"]}
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifacts": {"items": {"$ref": "#/$defs/artifact"}, "type": "array"},
+    "benchmarks": {"items": {"$ref": "#/$defs/benchmark"}, "type": "array"},
+    "schema_version": {"const": "1.0.0"}
+  },
+  "required": ["schema_version", "benchmarks", "artifacts"],
+  "type": "object"
+}
