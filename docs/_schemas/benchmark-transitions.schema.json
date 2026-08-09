@@ -1,0 +1,47 @@
+{
+  "$defs": {
+    "transition": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_id": {"type": "string"},
+        "benchmark_id": {"type": "string"},
+        "decision": {"enum": ["refreeze", "version_transition", "supersede"]},
+        "from_version": {"type": "string"},
+        "id": {"type": "string"},
+        "new_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "old_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "rationale": {"minLength": 1, "pattern": "\\S", "type": "string"},
+        "replacement_id": {"type": "string"},
+        "review_route_id": {"pattern": "^route:[^#]+#[^#]+$", "type": "string"},
+        "to_version": {"type": "string"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"decision": {"const": "supersede"}}, "required": ["decision"]},
+          "then": {
+            "properties": {
+              "artifact_id": false,
+              "new_sha256": false,
+              "old_sha256": false
+            },
+            "required": ["replacement_id"]
+          },
+          "else": {
+            "properties": {"replacement_id": false},
+            "required": ["artifact_id", "old_sha256", "new_sha256"]
+          }
+        }
+      ],
+      "required": ["id", "benchmark_id", "decision", "from_version", "to_version", "review_route_id", "rationale"],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "transitions": {"items": {"$ref": "#/$defs/transition"}, "type": "array"}
+  },
+  "required": ["schema_version", "transitions"],
+  "type": "object"
+}

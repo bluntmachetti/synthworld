@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "capabilities": {"items": {"$ref": "#/$defs/capability"}, "type": "array"},
+    "input_digests": {
+      "additionalProperties": false,
+      "properties": {
+        "curated_sha256": {"pattern": "^[a-f0-9]{64}$", "type": "string"},
+        "generated_sha256": {"pattern": "^[a-f0-9]{64}$", "type": "string"}
+      },
+      "required": ["curated_sha256", "generated_sha256"],
+      "type": "object"
+    },
+    "schema_version": {"const": "1.0.0"}
+  },
+  "required": ["capabilities", "input_digests", "schema_version"],
+  "type": "object",
+  "$defs": {
+    "capability": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string"},
+        "interfaces": {"$ref": "#/$defs/interfaces"},
+        "journey_route": {"type": "string"},
+        "maturity": {"enum": ["experimental", "preview", "stable", "planned"]},
+        "notes": {"type": "string"},
+        "related_surfaces": {"items": {"$ref": "#/$defs/surface"}, "type": "array"},
+        "roadmap_routes": {"items": {"type": "string"}, "type": "array"},
+        "since": {"type": "string"},
+        "summary": {"type": "string"},
+        "support": {"type": "string"},
+        "title": {"type": "string"}
+      },
+      "required": ["id", "interfaces", "journey_route", "maturity", "notes", "related_surfaces", "roadmap_routes", "since", "summary", "support", "title"],
+      "type": "object"
+    },
+    "interface": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage": {"enum": ["none", "partial", "full"]},
+        "subset_note": {"type": ["string", "null"]},
+        "surfaces": {"items": {"$ref": "#/$defs/surface"}, "type": "array"}
+      },
+      "required": ["coverage", "subset_note", "surfaces"],
+      "type": "object"
+    },
+    "interfaces": {
+      "additionalProperties": false,
+      "properties": {
+        "cli": {"$ref": "#/$defs/interface"},
+        "python": {"$ref": "#/$defs/interface"}
+      },
+      "required": ["cli", "python"],
+      "type": "object"
+    },
+    "surface": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "python_export"}}, "required": ["kind"]},
+          "then": {"required": ["implementation_module"]}
+        }
+      ],
+      "properties": {
+        "assignment_required": {"type": "boolean"},
+        "id": {"type": "string"},
+        "implementation_module": {"type": "string"},
+        "kind": {"enum": ["cli_command", "python_export", "contract", "schema", "benchmark"]},
+        "name": {"type": "string"},
+        "source": {"type": "string"},
+        "visibility": {"enum": ["public", "subpackage", "structural"]}
+      },
+      "required": ["assignment_required", "id", "kind", "name", "source", "visibility"],
+      "type": "object"
+    }
+  }
+}

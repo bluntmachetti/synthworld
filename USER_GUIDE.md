@@ -1,5 +1,9 @@
 # SynthWorld user guide
 
+The additive [documentation hub](docs/index.md) now provides journey-led
+navigation. This guide remains the detailed compatibility source while each
+section is migrated and validated; no runnable material has been removed.
+
 SynthWorld is a testing ground for identity and privacy systems. It creates
 safely fictional test cases, lets your system process the public observations,
 and then scores its answers against known truth.
@@ -9,7 +13,7 @@ Start with the outcome you want below.
 
 ## Choose your use case
 
-| I want to... | What SynthWorld provides | Available in 0.9 |
+| I want to... | What SynthWorld provides | Current status |
 |---|---|---|
 | Create safe identities for a test, demo, or fixture | Connected fictional people, attributes, and planted relationships | Yes |
 | Test a PII extractor or document model | Synthetic pages and exact character-span scoring | Yes |
@@ -17,8 +21,9 @@ Start with the outcome you want below.
 | Test relationship inference | Public association evidence, positive relationships, and negative controls | Yes |
 | Test breach-risk scoring | Provider-neutral breach observations and expected score bands | Yes |
 | Test agent identity and delegated authority | Ordered Asteria actions with separate temporal, authority, attribution, and provenance truth | Yes |
-| Explore privacy exposure or broker reappearance | Breach, broker, search, and social scenarios | Partial: generation and integrity metrics only |
-| Test broader IAM, RAG privacy, wallets, or disaster identity | Future benchmark packs | Planned |
+| Explore privacy exposure or broker reappearance | Breach, broker, search, and social scenarios plus broker-removal evaluation | Partial: released broker evaluator; broader longitudinal behavior planned |
+| Model enterprise IAM and governance | Released universe and independently scored contract packs | Partial: released in `0.13.0` with broader depth planned |
+| Test broader generated agents, RAG privacy, wallets, or disaster identity | Future benchmark packs | Planned |
 
 ## The three-part workflow
 
@@ -69,7 +74,7 @@ supporting evidence. Use it when you need stable identity fixtures for a test,
 demo, graph import, or product prototype. Changing the seed creates a different
 repeatable world.
 
-## Run the five evaluation examples
+## Run five foundational evaluation examples
 
 From a clone of this repository:
 
@@ -79,7 +84,7 @@ uv run python examples/evaluate_all.py --predictions-dir predictions
 ```
 
 The walkthrough uses deliberately simple rules over public data only. It prints
-a score for every supported evaluation task and writes:
+a score for five foundational evaluation tasks and writes:
 
 ```text
 predictions/
@@ -352,9 +357,10 @@ synthworld generate-corpus \
   --output exposures.json
 ```
 
-This is currently a scenario-generation path. SynthWorld can report corpus
-integrity metrics, but version 0.9 does not yet provide a unified evaluator for
-broker-removal actions or longitudinal product behaviour.
+The exposure corpus remains the scenario-generation path and reports corpus
+integrity metrics. Package `0.13.0` added `synthworld evaluate broker` for the
+broker-removal lifecycle; broader longitudinal product behavior remains roadmap
+work rather than an implied capability of this corpus command.
 
 ## Use case 8: households and workplaces
 

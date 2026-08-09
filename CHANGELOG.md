@@ -18,9 +18,11 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   handles plus same-kind distractors instead of exposing a unique kind-to-ID
   answer. Independent manifest schemas, expanded v1 hash locks, explicit offline
   report scope, and exactly two metric-only discrimination records accompany the
-  candidate bytes. Native adversarial findings are recorded as resolved, while
-  CI, Ruff/format, schema check, package, isolated-wheel, clean-install, and
-  regeneration evidence remain pending. Nothing is registered or published.
+  candidate bytes. Native adversarial findings and repository verification gates
+  are recorded as resolved. Nothing is externally published or deployed.
+- A curated benchmark registry now records independent lifecycle, benchmark-kind,
+  evaluation-mode, artifact-sensitivity, integrity, and publication-gate evidence
+  for every current benchmark family.
 
 ## [0.13.0] - 2026-08-06
 

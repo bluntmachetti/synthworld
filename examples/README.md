@@ -21,10 +21,11 @@ runs this script and is part of `make ci`, so the example cannot rot.
 ## Worked evaluation: public-only baseline walkthrough
 
 [`evaluate_all.py`](evaluate_all.py) creates deliberately simple predictions
-from public observations only, then scores all five supported tasks: PII
+from public observations only, then scores five foundational tasks: PII
 extraction, entity resolution, relationship inference, risk calibration, and
 Asteria agent identity/delegated authority. No prediction rule reads an answer
-key.
+key. Other contract-specific evaluators are documented separately and are not
+claimed by this walkthrough.
 
 ```bash
 uv run python examples/evaluate_all.py --seed 20260719 --persona-count 10
