@@ -1,22 +1,27 @@
-"""Generate deterministic, submission-only C08 v2 baseline records."""
+"""Generate disclosure-safe, deterministic C08 v2 baseline records."""
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+
+from pydantic import BaseModel
 
 from synthworld.agentic.c08_v2 import (
     C08AsteriaBenchmarkV2,
     C08AsteriaSubmissionV2,
+    C08MetricV2,
     C08SubmissionRowV2,
     evaluate_c08_submission,
     generate_c08_asteria_v2,
-    reference_c08_submission,
+    semantic_c08_submission,
 )
 from synthworld.agentic.enterprise.c08_v2 import (
+    C08_FROZEN_BENCHMARK_ID,
+    C08EvaluationMetricV2,
     C08EvidenceObservationV2,
     C08ReferenceBundleV2,
     C08SubmissionV2,
@@ -24,10 +29,10 @@ from synthworld.agentic.enterprise.c08_v2 import (
     generate_c08_reference,
     reference_submission_from_public,
 )
+from synthworld.enterprise.canonical import canonical_json_bytes
 
 DEFAULT_SEED = 20260809
-SCHEMA_VERSION = "2.0.0"
-ASTERIA_CASES = (
+ASTERIA_FAILURE_MODES = (
     "exact",
     "missing",
     "fabricated",
@@ -35,7 +40,17 @@ ASTERIA_CASES = (
     "extra",
     "discarded",
 )
-ENTERPRISE_CASES = ("exact", "missing", "fabricated", "wrong_action", "extra")
+ENTERPRISE_FAILURE_MODES = (
+    "exact",
+    "missing",
+    "fabricated",
+    "wrong_action",
+    "extra",
+)
+ASTERIA_FILE = "asteria/baseline-records.json"
+ENTERPRISE_FILE = "enterprise/baseline-records.json"
+
+Metric = C08MetricV2 | C08EvaluationMetricV2
 
 
 def _canonical_json_bytes(value: object) -> bytes:
@@ -68,39 +83,44 @@ def _replace_asteria_row(
 
 
 def _asteria_submission(
-    benchmark: C08AsteriaBenchmarkV2, case: str
+    benchmark: C08AsteriaBenchmarkV2,
+    failure_mode: str,
 ) -> C08AsteriaSubmissionV2:
-    reference = reference_c08_submission(benchmark)
-    if case == "exact":
+    reference = semantic_c08_submission(benchmark.public)
+    if failure_mode == "exact":
         return reference
     binding = next(
-        item for item in benchmark.evaluator.bindings if item.scenario_kind.value == case
+        item
+        for item in benchmark.evaluator.bindings
+        if item.scenario_kind.value == failure_mode
     )
     row = next(
         item for item in reference.rows if item.action_event_id == binding.action_event_id
     )
-    if case in {"missing", "discarded"}:
+    if failure_mode in {"missing", "discarded"}:
         return _replace_asteria_row(
             reference,
             binding.action_event_id,
             row.retained_observation_ids[:-1],
         )
-    if case == "fabricated":
+    if failure_mode == "fabricated":
         return _replace_asteria_row(
             reference,
             binding.action_event_id,
             (*row.retained_observation_ids, "fabricated-observation"),
         )
-    if case == "wrong_action":
+    if failure_mode == "wrong_action":
         other_observation_id = next(
             item.observation_id
             for item in benchmark.public.evidence_observations
             if item.action_event_id != binding.action_event_id
         )
         return _replace_asteria_row(
-            reference, binding.action_event_id, (other_observation_id,)
+            reference,
+            binding.action_event_id,
+            (other_observation_id,),
         )
-    if case == "extra":
+    if failure_mode == "extra":
         extra_observation_id = next(
             item.observation_id
             for item in benchmark.public.evidence_observations
@@ -112,7 +132,9 @@ def _asteria_submission(
             binding.action_event_id,
             (*row.retained_observation_ids, extra_observation_id),
         )
-    raise ValueError(f"unsupported Asteria C08 baseline case: {case}")
+    raise ValueError(
+        f"unsupported Asteria C08 baseline failure mode: {failure_mode}"
+    )
 
 
 def _renumber_enterprise(
@@ -129,9 +151,12 @@ def _renumber_enterprise(
     )
 
 
-def _enterprise_submission(bundle: C08ReferenceBundleV2, case: str) -> C08SubmissionV2:
+def _enterprise_submission(
+    bundle: C08ReferenceBundleV2,
+    failure_mode: str,
+) -> C08SubmissionV2:
     reference = reference_submission_from_public(bundle.public)
-    if case == "exact":
+    if failure_mode == "exact":
         return reference
     actions_by_name = {action.action: action for action in bundle.public.actions}
     target_name = {
@@ -139,9 +164,12 @@ def _enterprise_submission(bundle: C08ReferenceBundleV2, case: str) -> C08Submis
         "fabricated": "delete",
         "wrong_action": "write",
         "extra": "delete",
-    }.get(case)
+    }.get(failure_mode)
     if target_name is None:
-        raise ValueError(f"unsupported enterprise C08 baseline case: {case}")
+        raise ValueError(
+            "unsupported enterprise C08 baseline failure mode: "
+            f"{failure_mode}"
+        )
     target = actions_by_name[target_name]
     observations = list(reference.observations)
     target_indexes = [
@@ -149,9 +177,9 @@ def _enterprise_submission(bundle: C08ReferenceBundleV2, case: str) -> C08Submis
         for index, observation in enumerate(observations)
         if observation.action_id == target.action_id
     ]
-    if case == "missing":
+    if failure_mode == "missing":
         observations.pop(target_indexes[-1])
-    elif case == "fabricated":
+    elif failure_mode == "fabricated":
         observations.append(
             C08EvidenceObservationV2(
                 observation_id="baseline-fabricated-observation",
@@ -161,7 +189,7 @@ def _enterprise_submission(bundle: C08ReferenceBundleV2, case: str) -> C08Submis
                 evidence_id="baseline-fabricated-evidence",
             )
         )
-    elif case == "wrong_action":
+    elif failure_mode == "wrong_action":
         other_evidence_id = next(
             event.evidence_id
             for event in bundle.public.evidence_events
@@ -177,16 +205,16 @@ def _enterprise_submission(bundle: C08ReferenceBundleV2, case: str) -> C08Submis
             )
         )
     else:
+        selected_ids = {
+            observation.evidence_id
+            for observation in reference.observations
+            if observation.action_id == target.action_id
+        }
         extra_evidence_id = next(
             event.evidence_id
             for event in bundle.public.evidence_events
             if event.action_id == target.action_id
-            and event.evidence_id
-            not in {
-                observation.evidence_id
-                for observation in reference.observations
-                if observation.action_id == target.action_id
-            }
+            and event.evidence_id not in selected_ids
         )
         observations.append(
             C08EvidenceObservationV2(
@@ -200,39 +228,80 @@ def _enterprise_submission(bundle: C08ReferenceBundleV2, case: str) -> C08Submis
     return _renumber_enterprise(reference, observations)
 
 
-def _envelope(
-    *,
-    lineage: str,
-    case: str,
-    seed: int,
-    submission: Any,
-    result: Any,
-) -> bytes:
-    return _canonical_json_bytes(
+def _metric_records(metrics: Sequence[Metric]) -> list[dict[str, object]]:
+    return [
         {
-            "baseline_id": f"{lineage}-c08-v2-{case}",
-            "case": case,
-            "lineage": lineage,
-            "schema_version": SCHEMA_VERSION,
-            "seed": seed,
-            "submission": submission.model_dump(mode="json"),
-            "result": result.model_dump(mode="json"),
+            "name": metric.name,
+            "numerator": metric.numerator,
+            "denominator": metric.denominator,
+            "value": metric.value,
+            "denominator_meaning": metric.denominator_meaning,
         }
-    )
+        for metric in metrics
+    ]
 
 
-def _expected_files() -> set[str]:
+def _baseline_record(
+    failure_mode: str,
+    submission: BaseModel,
+    metrics: Sequence[Metric],
+) -> dict[str, object]:
     return {
-        *(f"asteria/{case}.json" for case in ASTERIA_CASES),
-        *(f"enterprise/{case}.json" for case in ENTERPRISE_CASES),
+        "failure_mode": failure_mode,
+        "submission_digest": hashlib.sha256(
+            canonical_json_bytes(submission)
+        ).hexdigest(),
+        "metrics": _metric_records(metrics),
+    }
+
+
+def build_asteria_baseline_records(seed: int = DEFAULT_SEED) -> dict[str, object]:
+    benchmark = generate_c08_asteria_v2(seed)
+    records: list[dict[str, object]] = []
+    for failure_mode in ASTERIA_FAILURE_MODES:
+        submission = _asteria_submission(benchmark, failure_mode)
+        report = evaluate_c08_submission(benchmark, submission)
+        records.append(
+            _baseline_record(failure_mode, submission, report.metrics)
+        )
+    return {
+        "benchmark_id": benchmark.benchmark_id,
+        "schema_version": benchmark.schema_version,
+        "public_input_digest": benchmark.evaluator.public_input_digest,
+        "records": records,
+    }
+
+
+def build_enterprise_baseline_records(
+    seed: int = DEFAULT_SEED,
+) -> dict[str, object]:
+    bundle = generate_c08_reference(seed)
+    records: list[dict[str, object]] = []
+    for failure_mode in ENTERPRISE_FAILURE_MODES:
+        submission = _enterprise_submission(bundle, failure_mode)
+        report = evaluate_c08(
+            public=bundle.public,
+            evaluator=bundle.evaluator,
+            submission=submission,
+        )
+        records.append(
+            _baseline_record(failure_mode, submission, report.metrics)
+        )
+    return {
+        "benchmark_id": C08_FROZEN_BENCHMARK_ID,
+        "schema_version": bundle.public.schema_version,
+        "public_input_digest": bundle.evaluator.public_input_digest,
+        "records": records,
     }
 
 
 def _assert_inventory(root: Path) -> None:
-    expected = _expected_files()
+    expected_files = {ASTERIA_FILE, ENTERPRISE_FILE}
     allowed_directories = {"asteria", "enterprise"}
+    if root.is_symlink():
+        raise RuntimeError(f"C08 baseline output root must not be a symlink: {root}")
     if root.exists() and not root.is_dir():
-        raise RuntimeError(f"C08 baseline root is not a directory: {root}")
+        raise RuntimeError(f"C08 baseline output root is not a directory: {root}")
     if not root.exists():
         root.mkdir(parents=True)
         return
@@ -243,54 +312,29 @@ def _assert_inventory(root: Path) -> None:
             unexpected.append(relative)
         elif path.is_dir() and relative in allowed_directories:
             continue
-        elif path.is_file() and relative in expected:
+        elif path.is_file() and relative in expected_files:
             continue
         else:
             unexpected.append(relative)
     if unexpected:
         raise RuntimeError(
-            "unexpected C08 baseline fixture entries: " + ", ".join(sorted(unexpected))
+            "unexpected C08 baseline fixture entries: "
+            + ", ".join(sorted(unexpected))
         )
 
 
 def write_baselines(root: Path, seed: int = DEFAULT_SEED) -> None:
-    """Write all expected baseline files without accepting unknown entries."""
+    """Write the two aggregate baseline files with an exact inventory."""
 
     _assert_inventory(root)
     (root / "asteria").mkdir(exist_ok=True)
     (root / "enterprise").mkdir(exist_ok=True)
-
-    asteria = generate_c08_asteria_v2(seed)
-    for case in ASTERIA_CASES:
-        submission = _asteria_submission(asteria, case)
-        result = evaluate_c08_submission(asteria, submission)
-        (root / "asteria" / f"{case}.json").write_bytes(
-            _envelope(
-                lineage="asteria",
-                case=case,
-                seed=seed,
-                submission=submission,
-                result=result,
-            )
-        )
-
-    enterprise = generate_c08_reference(seed)
-    for case in ENTERPRISE_CASES:
-        submission = _enterprise_submission(enterprise, case)
-        result = evaluate_c08(
-            public=enterprise.public,
-            evaluator=enterprise.evaluator,
-            submission=submission,
-        )
-        (root / "enterprise" / f"{case}.json").write_bytes(
-            _envelope(
-                lineage="enterprise",
-                case=case,
-                seed=seed,
-                submission=submission,
-                result=result,
-            )
-        )
+    (root / ASTERIA_FILE).write_bytes(
+        _canonical_json_bytes(build_asteria_baseline_records(seed))
+    )
+    (root / ENTERPRISE_FILE).write_bytes(
+        _canonical_json_bytes(build_enterprise_baseline_records(seed))
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
