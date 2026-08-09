@@ -13,6 +13,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvidenceObservationV2,
     C08EvidenceRequirementV2,
     C08PublicInputV2,
+    C08SourceActionV2,
     C08SourceWorldV2,
     C08SubmissionV2,
 )
@@ -80,8 +81,8 @@ def _binding_handle(
 
 
 def _build_source(seed: int) -> C08SourceWorldV2:
-    actions = []
-    events = []
+    actions: list[C08SourceActionV2] = []
+    events: list[C08EvidenceEventV2] = []
     for index, (action_name, required_kinds) in enumerate(_REFERENCE_ACTIONS):
         action_id = _reference_id(seed, "action", index)
         tenant_id = _reference_id(seed, "tenant", index)
@@ -101,15 +102,15 @@ def _build_source(seed: int) -> C08SourceWorldV2:
             )
         )
         actions.append(
-            {
-                "action_id": action_id,
-                "tenant_id": tenant_id,
-                "resource_id": resource_id,
-                "action": action_name,
-                "tick": tick,
-                "required_evidence": requirements,
-                "required_evidence_ids": required_ids,
-            }
+            C08SourceActionV2(
+                action_id=action_id,
+                tenant_id=tenant_id,
+                resource_id=resource_id,
+                action=action_name,
+                tick=tick,
+                required_evidence=requirements,
+                required_evidence_ids=required_ids,
+            )
         )
         for kind_index, kind in enumerate(required_kinds):
             for candidate_index in (0, 1):
@@ -121,35 +122,36 @@ def _build_source(seed: int) -> C08SourceWorldV2:
                     kind,
                 )
                 events.append(
-                    {
-                        "sequence": 0,
-                        "evidence_id": evidence_id,
-                        "action_id": action_id,
-                        "tenant_id": tenant_id,
-                        "resource_id": resource_id,
-                        "action": action_name,
-                        "tick": tick,
-                        "kind": kind,
-                        "binding_handle": _binding_handle(
+                    C08EvidenceEventV2(
+                        sequence=0,
+                        evidence_id=evidence_id,
+                        action_id=action_id,
+                        tenant_id=tenant_id,
+                        resource_id=resource_id,
+                        action=action_name,
+                        tick=tick,
+                        kind=kind,
+                        binding_handle=_binding_handle(
                             seed,
                             index,
                             kind_index,
                             candidate_index,
                         ),
-                        "payload_digest": hashlib.sha256(
+                        payload_digest=hashlib.sha256(
                             f"{seed}:{evidence_id}:payload".encode()
                         ).hexdigest(),
-                    }
+                    )
                 )
     ordered_events = sorted(
         events,
-        key=lambda item: c08_public_observation_id(str(item["evidence_id"])),
+        key=lambda item: c08_public_observation_id(item.evidence_id),
     )
-    for sequence, event in enumerate(ordered_events):
-        event["sequence"] = sequence
     return C08SourceWorldV2(
         actions=tuple(actions),
-        evidence_events=tuple(ordered_events),
+        evidence_events=tuple(
+            event.model_copy(update={"sequence": sequence})
+            for sequence, event in enumerate(ordered_events)
+        ),
     )
 
 
