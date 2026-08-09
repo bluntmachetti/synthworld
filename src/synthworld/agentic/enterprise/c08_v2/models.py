@@ -11,6 +11,8 @@ from pydantic import Field, field_validator, model_validator
 from synthworld.models import SyntheticModel
 
 C08_V2_SCHEMA_VERSION = "2.0.0"
+C08_FROZEN_BENCHMARK_ID = "enterprise-agentic-c08-v2"
+C08_FROZEN_SEED = 20260809
 
 
 def _ordered_ids(value: tuple[str, ...], label: str) -> tuple[str, ...]:
@@ -367,7 +369,50 @@ class C08EvaluationReportV2(SyntheticModel):
         return self
 
 
+class C08FrozenArtifactV2(SyntheticModel):
+    """Manifest entry for one payload in the frozen public/evaluator tree."""
+
+    path: str = Field(pattern=r"^(public|evaluator)/[A-Za-z0-9._-]+$")
+    byte_size: int = Field(ge=0)
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class C08FrozenManifestV2(SyntheticModel):
+    """Separate immutable contract for the enterprise frozen benchmark tree."""
+
+    schema_version: Literal["2.0.0"] = C08_V2_SCHEMA_VERSION
+    benchmark_id: Literal["enterprise-agentic-c08-v2"] = C08_FROZEN_BENCHMARK_ID
+    seed: Literal[20260809] = C08_FROZEN_SEED
+    public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    checksum_algorithm: Literal["sha256"] = "sha256"
+    checksum_file: Literal["SHA256SUMS"] = "SHA256SUMS"
+    checksum_excludes: tuple[Literal["SHA256SUMS"], ...] = ("SHA256SUMS",)
+    public_inventory: tuple[C08FrozenArtifactV2, ...] = Field(min_length=1)
+    evaluator_inventory: tuple[C08FrozenArtifactV2, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_inventory(self) -> Self:
+        if self.checksum_excludes != ("SHA256SUMS",):
+            raise ValueError("C08 frozen checksum self-exclusion is fixed")
+        for inventory, prefix in (
+            (self.public_inventory, "public/"),
+            (self.evaluator_inventory, "evaluator/"),
+        ):
+            paths = tuple(item.path for item in inventory)
+            if paths != tuple(sorted(paths)) or len(set(paths)) != len(paths):
+                raise ValueError("C08 frozen inventories must be unique and sorted")
+            if any(not path.startswith(prefix) for path in paths):
+                raise ValueError("C08 frozen inventory path escapes its tree")
+        if set(item.path for item in self.public_inventory) & set(
+            item.path for item in self.evaluator_inventory
+        ):
+            raise ValueError("C08 frozen inventories must be disjoint")
+        return self
+
+
 __all__ = [
+    "C08_FROZEN_BENCHMARK_ID",
+    "C08_FROZEN_SEED",
     "C08CaseOutcomeV2",
     "C08CaseResultV2",
     "C08EvaluationMetricV2",
@@ -377,6 +422,8 @@ __all__ = [
     "C08EvidenceEventV2",
     "C08EvidenceKindV2",
     "C08EvidenceObservationV2",
+    "C08FrozenArtifactV2",
+    "C08FrozenManifestV2",
     "C08PublicActionV2",
     "C08PublicInputV2",
     "C08SourceActionV2",

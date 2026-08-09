@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "C08FrozenArtifactV2": {
+      "additionalProperties": false,
+      "description": "Manifest entry for one payload in the frozen public/evaluator tree.",
+      "properties": {
+        "byte_size": {
+          "minimum": 0,
+          "title": "Byte Size",
+          "type": "integer"
+        },
+        "path": {
+          "pattern": "^(public|evaluator)/[A-Za-z0-9._-]+$",
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "byte_size",
+        "sha256"
+      ],
+      "title": "C08FrozenArtifactV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Separate immutable contract for the enterprise frozen benchmark tree.",
+  "properties": {
+    "benchmark_id": {
+      "const": "enterprise-agentic-c08-v2",
+      "default": "enterprise-agentic-c08-v2",
+      "title": "Benchmark Id",
+      "type": "string"
+    },
+    "checksum_algorithm": {
+      "const": "sha256",
+      "default": "sha256",
+      "title": "Checksum Algorithm",
+      "type": "string"
+    },
+    "checksum_excludes": {
+      "default": [
+        "SHA256SUMS"
+      ],
+      "items": {
+        "const": "SHA256SUMS",
+        "type": "string"
+      },
+      "title": "Checksum Excludes",
+      "type": "array"
+    },
+    "checksum_file": {
+      "const": "SHA256SUMS",
+      "default": "SHA256SUMS",
+      "title": "Checksum File",
+      "type": "string"
+    },
+    "evaluator_inventory": {
+      "items": {
+        "$ref": "#/$defs/C08FrozenArtifactV2"
+      },
+      "minItems": 1,
+      "title": "Evaluator Inventory",
+      "type": "array"
+    },
+    "public_input_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Public Input Digest",
+      "type": "string"
+    },
+    "public_inventory": {
+      "items": {
+        "$ref": "#/$defs/C08FrozenArtifactV2"
+      },
+      "minItems": 1,
+      "title": "Public Inventory",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "const": 20260809,
+      "default": 20260809,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "public_input_digest",
+    "public_inventory",
+    "evaluator_inventory"
+  ],
+  "title": "C08FrozenManifestV2",
+  "type": "object"
+}

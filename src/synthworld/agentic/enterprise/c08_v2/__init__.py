@@ -7,6 +7,8 @@ from synthworld.agentic.enterprise.c08_v2.errors import (
 )
 from synthworld.agentic.enterprise.c08_v2.evaluation import evaluate_c08
 from synthworld.agentic.enterprise.c08_v2.models import (
+    C08_FROZEN_BENCHMARK_ID,
+    C08_FROZEN_SEED,
     C08CaseOutcomeV2,
     C08CaseResultV2,
     C08EvaluationMetricV2,
@@ -16,6 +18,8 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvidenceEventV2,
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
+    C08FrozenArtifactV2,
+    C08FrozenManifestV2,
     C08PublicActionV2,
     C08PublicInputV2,
     C08SourceActionV2,
@@ -45,6 +49,8 @@ from synthworld.agentic.enterprise.c08_v2.serialization import (
 )
 
 __all__ = [
+    "C08_FROZEN_BENCHMARK_ID",
+    "C08_FROZEN_SEED",
     "C08_REFERENCE_NAMESPACE",
     "DEFAULT_C08_REFERENCE_SEED",
     "C08CaseOutcomeV2",
@@ -57,6 +63,8 @@ __all__ = [
     "C08EvidenceEventV2",
     "C08EvidenceKindV2",
     "C08EvidenceObservationV2",
+    "C08FrozenArtifactV2",
+    "C08FrozenManifestV2",
     "C08ProjectionError",
     "C08PublicActionV2",
     "C08PublicInputV2",

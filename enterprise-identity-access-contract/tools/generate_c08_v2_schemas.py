@@ -14,6 +14,7 @@ from pydantic import BaseModel
 from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluationReportV2,
     C08EvaluatorTruthV2,
+    C08FrozenManifestV2,
     C08PublicInputV2,
     C08SubmissionV2,
 )
@@ -24,6 +25,9 @@ SCHEMA_MODELS: Final[dict[str, type[BaseModel]]] = {
     "c08-enterprise-evaluator-v2.schema.json": C08EvaluatorTruthV2,
     "c08-enterprise-submission-v2.schema.json": C08SubmissionV2,
     "c08-enterprise-report-v2.schema.json": C08EvaluationReportV2,
+}
+FROZEN_SCHEMA_MODELS: Final[dict[str, type[BaseModel]]] = {
+    "c08-enterprise-manifest-v2.schema.json": C08FrozenManifestV2,
 }
 
 
@@ -47,10 +51,27 @@ def expected_schema_files(root: Path = ROOT) -> dict[Path, bytes]:
     }
 
 
+def expected_frozen_schema_files(root: Path = ROOT) -> dict[Path, bytes]:
+    """Return the separate frozen-manifest schema bytes."""
+
+    schema_dir = root / "schemas"
+    return {
+        schema_dir / filename: _json_bytes(model.model_json_schema())
+        for filename, model in FROZEN_SCHEMA_MODELS.items()
+    }
+
+
+def _all_expected_schema_files(root: Path = ROOT) -> dict[Path, bytes]:
+    return {
+        **expected_schema_files(root),
+        **expected_frozen_schema_files(root),
+    }
+
+
 def write_schema_files(root: Path = ROOT) -> None:
     """Write all C08 v2 schemas from the authoritative models."""
 
-    for path, payload in expected_schema_files(root).items():
+    for path, payload in _all_expected_schema_files(root).items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(payload)
 
@@ -59,7 +80,7 @@ def check_schema_files(root: Path = ROOT) -> None:
     """Fail without writing when any expected C08 v2 schema is missing or stale."""
 
     problems: list[str] = []
-    expected_files = expected_schema_files(root)
+    expected_files = _all_expected_schema_files(root)
     expected_names = {path.name for path in expected_files}
     schema_dir = root / "schemas"
     problems.extend(
