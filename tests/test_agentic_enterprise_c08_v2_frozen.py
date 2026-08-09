@@ -663,10 +663,42 @@ def test_manifest_model_rejects_cross_visibility_inventory_paths(
         byte_size=0,
         sha256="0" * 64,
     )
-    with pytest.raises(ValueError, match="must stay under"):
+    with pytest.raises(
+        ValueError,
+        match="C08 frozen inventory path escapes its tree",
+    ):
         C08FrozenManifestV2.model_validate(
             {
                 **manifest.model_dump(mode="json"),
                 inventory_name: [wrong.model_dump(mode="json")],
+            }
+        )
+
+
+@pytest.mark.parametrize(
+    ("inventory_name", "escape_path"),
+    (
+        ("public_inventory", "public/.."),
+        ("evaluator_inventory", "evaluator/.."),
+    ),
+)
+def test_manifest_model_rejects_same_tree_parent_escapes(
+    inventory_name: str,
+    escape_path: str,
+) -> None:
+    manifest = load_packaged_frozen_benchmark().manifest
+    escaping = C08FrozenArtifactV2(
+        path=escape_path,
+        byte_size=0,
+        sha256="0" * 64,
+    )
+    with pytest.raises(
+        ValueError,
+        match="C08 frozen inventory path escapes its tree",
+    ):
+        C08FrozenManifestV2.model_validate(
+            {
+                **manifest.model_dump(mode="json"),
+                inventory_name: [escaping.model_dump(mode="json")],
             }
         )

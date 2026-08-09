@@ -37,6 +37,7 @@ from synthworld.agentic.enterprise.c08_v2 import (
     validate_c08_truth_against_public,
 )
 from synthworld.agentic.enterprise.c08_v2.models import (
+    C08_REPORT_LIMITATIONS,
     C08EvaluationReportV2,
     C08EvidenceRequirementV2,
     C08MeasurementScopeV2,
@@ -809,6 +810,11 @@ def test_public_and_evaluator_models_reject_remaining_canonicality_failures() ->
 
     with pytest.raises(ValidationError, match="report limitations are fixed"):
         C08MeasurementScopeV2(limitations=("unsupported live claim",))
+
+
+def test_measurement_scope_accepts_explicit_canonical_limitations() -> None:
+    scope = C08MeasurementScopeV2(limitations=C08_REPORT_LIMITATIONS)
+    assert scope.limitations == C08_REPORT_LIMITATIONS
 
 
 def test_truth_validation_rejects_each_public_binding_mismatch() -> None:
