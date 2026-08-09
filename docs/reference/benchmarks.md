@@ -1,11 +1,9 @@
 # Benchmarks
 
-> **Dependency notice.** Validated benchmark metadata is being integrated by the
-> prerequisite governance work and is not yet present on this branch's `main` base.
-
-This page intentionally publishes no hand-maintained catalogue. Once the prerequisite
-lands, `docs/_data/benchmarks.resolved.json` becomes the machine-readable source. The
-existing human-readable generated inventory remains
+The [registry catalogue](/benchmarks/catalogue) is generated during documentation
+preparation from `docs/_data/benchmarks.resolved.json`. It is an explicitly
+allowlisted public projection rather than a hand-maintained status table or a copy
+of the raw registry. The existing human-readable generated inventory remains
 [BENCHMARKS.md](../../BENCHMARKS.md).
 
 Keep these axes separate:

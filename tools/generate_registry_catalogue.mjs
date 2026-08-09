@@ -41,12 +41,18 @@ function markdown(value) {
     .replace(/[\r\n\t]+/g, " ");
 }
 
+function compare(left, right) {
+  if (left < right) return -1;
+  if (left > right) return 1;
+  return 0;
+}
+
 function ordered(records, context) {
   const ids = new Set();
   return [...records]
     .map((value, index) => object(value, `${context}[${index}]`))
     .sort((left, right) =>
-      string(left, "id", context).localeCompare(string(right, "id", context)),
+      compare(string(left, "id", context), string(right, "id", context)),
     )
     .map((record) => {
       const id = string(record, "id", context);
@@ -70,6 +76,13 @@ function interfaceSummary(capability, name) {
 }
 
 function gateSummary(benchmark) {
+  if (benchmark.publication_gate === null) {
+    return {
+      catalogueStatus: "Registry-only; no publication gate assigned",
+      checks: "not evaluated",
+      decision: "not assigned",
+    };
+  }
   const gate = object(benchmark.publication_gate, "benchmark.publication_gate");
   const decision = string(gate, "decision", "benchmark.publication_gate");
   const targets = array(
@@ -92,7 +105,7 @@ function gateSummary(benchmark) {
     counts.set(status, (counts.get(status) ?? 0) + 1);
   }
   const checks = [...counts.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
+    .sort(([left], [right]) => compare(left, right))
     .map(([status, count]) => `${markdown(status)}: ${count}`)
     .join(", ");
   return {
