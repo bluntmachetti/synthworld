@@ -306,7 +306,9 @@
         "schema:agent-authority-contract/schemas/c08-asteria-report-v2.schema.json",
         "schema:agent-authority-contract/schemas/c08-asteria-submission-v2.schema.json"
       ],
-      "roadmap_routes": [],
+      "roadmap_routes": [
+        "route:ROADMAP.md#ai-agents-and-non-human-identities"
+      ],
       "since": "unreleased",
       "summary": "Generate, freeze, load, and evaluate the deterministic Asteria C08 v2 public/evaluator benchmark split.",
       "support": "Supported for repository-local candidate generation and offline evaluation while publication gates remain pending.",
@@ -808,7 +810,9 @@
         "schema:enterprise-identity-access-contract/schemas/c08-enterprise-report-v2.schema.json",
         "schema:enterprise-identity-access-contract/schemas/c08-enterprise-submission-v2.schema.json"
       ],
-      "roadmap_routes": [],
+      "roadmap_routes": [
+        "route:ROADMAP.md#ai-agents-and-non-human-identities"
+      ],
       "since": "unreleased",
       "summary": "Generate, freeze, load, and evaluate the deterministic enterprise C08 v2 public/evaluator benchmark split.",
       "support": "Supported for repository-local candidate generation and offline evaluation while publication gates remain pending.",
