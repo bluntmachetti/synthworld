@@ -1,0 +1,174 @@
+{
+  "$defs": {
+    "C08EvidenceEventV2": {
+      "additionalProperties": false,
+      "description": "Public evidence semantics with an opaque, non-oracle evidence ID.",
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/C08EvidenceKindV2"
+        },
+        "payload_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Payload Digest",
+          "type": "string"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sequence",
+        "evidence_id",
+        "action_id",
+        "tenant_id",
+        "resource_id",
+        "action",
+        "tick",
+        "kind",
+        "payload_digest"
+      ],
+      "title": "C08EvidenceEventV2",
+      "type": "object"
+    },
+    "C08EvidenceKindV2": {
+      "enum": [
+        "authority",
+        "identity",
+        "policy",
+        "revocation"
+      ],
+      "title": "C08EvidenceKindV2",
+      "type": "string"
+    },
+    "C08PublicActionV2": {
+      "additionalProperties": false,
+      "description": "Product-facing action with no answer-key evidence binding.",
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/C08EvidenceKindV2"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "action_id",
+        "tenant_id",
+        "resource_id",
+        "action",
+        "tick",
+        "required_evidence_kinds"
+      ],
+      "title": "C08PublicActionV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "actions": {
+      "items": {
+        "$ref": "#/$defs/C08PublicActionV2"
+      },
+      "minItems": 1,
+      "title": "Actions",
+      "type": "array"
+    },
+    "evidence_events": {
+      "items": {
+        "$ref": "#/$defs/C08EvidenceEventV2"
+      },
+      "minItems": 1,
+      "title": "Evidence Events",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "actions",
+    "evidence_events"
+  ],
+  "title": "C08PublicInputV2",
+  "type": "object"
+}

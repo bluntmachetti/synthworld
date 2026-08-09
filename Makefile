@@ -65,7 +65,9 @@ schemas:
 	$(UV) run python agent-authority-contract/reference-deployment/run.py --check-contract
 	$(UV) run python agent-authority-contract/tools/generate_trace_schema.py --check
 	$(UV) run python agent-authority-contract/tools/generate_protocol_schemas.py --check
+	$(UV) run python agent-authority-contract/tools/generate_c08_v2_schemas.py --check
 	$(UV) run python enterprise-identity-access-contract/tools/generate_contract.py --check
+	$(UV) run python enterprise-identity-access-contract/tools/generate_c08_v2_schemas.py --check
 	$(UV) run python contextual-access-contract/tools/generate_contract.py --check
 	$(UV) run python authority-governance-contract/tools/generate_contract.py --check
 	$(UV) run python continuous-assurance-contract/tools/generate_contract.py --check

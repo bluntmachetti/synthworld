@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "C08EvidenceBindingV2": {
+      "additionalProperties": false,
+      "description": "Evaluator-only binding between one action and its evidence universe.",
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "required_evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Ids",
+          "type": "array"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/C08EvidenceKindV2"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action_id",
+        "tenant_id",
+        "required_evidence_kinds",
+        "required_evidence_ids"
+      ],
+      "title": "C08EvidenceBindingV2",
+      "type": "object"
+    },
+    "C08EvidenceKindV2": {
+      "enum": [
+        "authority",
+        "identity",
+        "policy",
+        "revocation"
+      ],
+      "title": "C08EvidenceKindV2",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "bindings": {
+      "items": {
+        "$ref": "#/$defs/C08EvidenceBindingV2"
+      },
+      "minItems": 1,
+      "title": "Bindings",
+      "type": "array"
+    },
+    "public_input_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Public Input Digest",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "public_input_digest",
+    "bindings"
+  ],
+  "title": "C08EvaluatorTruthV2",
+  "type": "object"
+}

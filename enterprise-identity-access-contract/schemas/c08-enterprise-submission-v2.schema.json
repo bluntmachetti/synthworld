@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "C08EvidenceObservationV2": {
+      "additionalProperties": false,
+      "description": "One ordered evidence observation submitted for an action.",
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "evidence_id": {
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "observation_id": {
+          "minLength": 1,
+          "title": "Observation Id",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 0,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "observation_id",
+        "sequence",
+        "action_id",
+        "tenant_id",
+        "evidence_id"
+      ],
+      "title": "C08EvidenceObservationV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "observations": {
+      "items": {
+        "$ref": "#/$defs/C08EvidenceObservationV2"
+      },
+      "title": "Observations",
+      "type": "array"
+    },
+    "public_input_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Public Input Digest",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "public_input_digest",
+    "observations"
+  ],
+  "title": "C08SubmissionV2",
+  "type": "object"
+}
