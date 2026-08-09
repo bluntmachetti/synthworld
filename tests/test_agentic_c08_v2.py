@@ -602,8 +602,7 @@ def test_submission_alignment_and_model_ordering_are_fail_closed() -> None:
             {
                 **reference.model_dump(mode="json"),
                 "rows": [
-                    row.model_dump(mode="json")
-                    for row in reversed(reference.rows)
+                    row.model_dump(mode="json") for row in reversed(reference.rows)
                 ],
             }
         )
