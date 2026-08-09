@@ -310,6 +310,24 @@ four files and refuses to run if the output root already exists:
 | `evaluator/canonical-binding-truth.json` | `EnterpriseCanonicalBindingTruthV1` | evaluator-only |
 | `evaluator/manifest.json` | `EnterpriseArtifactManifestV1(visibility="evaluator")` | evaluator-only |
 
+### C08 v2 frozen-artifact candidates
+
+| Artifact | Schema version | Visibility | Meaning |
+|---|---|---|---|
+| `asteria-agentic-c08-v2/public/c08-asteria-public.json` | `2.0.0` | public | Actions, public observations, and evidence kinds for offline C08 scoring. |
+| `asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json` | `2.0.0` | evaluator | Exact required-observation bindings and scenario labels, bound to the public-input digest. |
+| `enterprise-agentic-c08-v2/public/public-input.json` | `2.0.0` | public | Enterprise actions and ordered evidence events for offline C08 scoring. |
+| `enterprise-agentic-c08-v2/evaluator/truth.json` | `2.0.0` | evaluator | Exact required evidence-ID and tenant bindings, bound to the public-input digest. |
+
+The two lineages are independently typed and serialised. Asteria records
+per-visibility manifests plus a root manifest; the visibility manifest excludes
+itself from its own artifact-set digest, while the root includes the visibility
+manifests and excludes itself. Enterprise records the public/evaluator inventory
+in `manifest.json` and path-bearing hashes in `SHA256SUMS`, which excludes
+itself; it has no separately published aggregate root digest. These artifacts
+are offline scoring inputs and evaluator truth, not claims about live evidence
+retention, durable logging, enforcement, deployment, or EADS compatibility.
+
 The withheld fact is precise: `EnterpriseAccountV1` publishes `account_id`, `tenant_id`,
 `authorization_target_id`, and `account_kind` but **no `principal_id`**. Recovering the
 account-to-principal binding is the task, and that mapping exists only in the evaluator tree.

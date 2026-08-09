@@ -34,12 +34,26 @@ remaining docs are the two narrative files listed below.
 | `reference-deployment/` | Working opt-in live Compose lab; observation v2, full L01-L06, exact L07, measured/unsupported L08 |
 | `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
-| `docs/c08-v2-transition.md` | Implemented contract candidate for evaluator-bound evidence completeness across separate Asteria and enterprise v2 lineages; not yet a frozen benchmark |
+| `docs/c08-v2-transition.md` | Frozen-artifact candidate for evaluator-bound evidence completeness across separate Asteria and enterprise v2 lineages; package and CI integrity gates remain pending |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
 the trace contract. The schemas here are a projection of them, not an independent
 definition — where the two disagree the model is right and the schema is stale.
+
+## C08 v2 candidate boundary
+
+`asteria-agentic-c08-v2` and `enterprise-agentic-c08-v2` are separate offline
+evidence-completeness candidates, each pinned to seed `20260809` and schema
+version `2.0.0`. Their public and evaluator artifacts are physically separate,
+but the split is API hygiene, not a secrecy or anti-cheating claim. No result
+from these candidates proves live evidence retention, durable logging,
+enforcement, deployment, real-export compatibility, or EADS compatibility.
+
+The digest inventories, checksum self-exclusion rules, baseline discrimination
+records, v1 preservation locks, scope exclusions, and explicitly pending CI and
+packaging gates are maintained in the repository-level
+[`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md).
 
 ## Schemas
 

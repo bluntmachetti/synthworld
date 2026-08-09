@@ -205,3 +205,113 @@ inventory/path/encoding/type/checksum tampering, and verify the packaged wheel.
 No existing golden artifact or checksum changed in this transition. Asteria v1,
 the post-#77 ambiguity baseline, and `src/synthworld/temporal.py` remain outside
 the new tree and byte-identical to their pre-transition versions.
+
+## C08 v2 Asteria and enterprise candidate review record
+
+Reviewed: 2026-08-09. Seed: `20260809`. Schema version: `2.0.0`.
+
+This record covers two independently versioned, offline C08 evidence-completeness
+artifact candidates: `asteria-agentic-c08-v2` and
+`enterprise-agentic-c08-v2`. They are not a combined schema or a claim of
+interoperability. Their public inputs, evaluator truth, serialisation, and
+checksum conventions intentionally remain lineage-specific.
+
+### Asteria artifact inventory and digests
+
+The Asteria root manifest records these four non-root-manifest files:
+
+| Path | Bytes | SHA-256 |
+|---|---:|---|
+| `public/c08-asteria-public.json` | 5272 | `a0890759311552d99300420f0770792dba0b6daee9d5fb7f1b6552f252e676cd` |
+| `public/manifest.json` | 346 | `9b49d963aca311e203bfc557b589acea112d021a78332a1aa3b90dfd3d9d7995` |
+| `evaluator/c08-asteria-evaluator.json` | 1871 | `c9f855143ed78922f38045a3e74441f1dec6b81a8018fac9322aef3aae727b5b` |
+| `evaluator/manifest.json` | 441 | `1ce34b25cd8e45b2e036ed4281cf175ad466ff1c7dbcba187da4cdd24b90a677` |
+
+`public/manifest.json` binds only `c08-asteria-public.json` and records public
+artifact-set digest
+`064bb7752f388d695e05905f2981a9dc0f02efdcaf7c596b430e86febdfdc732`.
+`evaluator/manifest.json` binds only `c08-asteria-evaluator.json`, cross-binds
+the public-input digest
+`a0890759311552d99300420f0770792dba0b6daee9d5fb7f1b6552f252e676cd`, and
+records evaluator artifact-set digest
+`92d62f85f5e82676c116bd01a3e14f1f5808538f24b4fff3f3f8d66f307ac4ae`.
+The root `manifest.json` records those two roots, the same public-input digest,
+and combined artifact-set digest
+`a1c72b05a391416ccfacf6eb4bc18ecca342f834b007ee9b1bb0c26a795d21e8`.
+
+The self-exclusion rule is explicit in the inventory: each visibility manifest
+is excluded from its own visibility root; the root manifest includes the two
+visibility manifests and data files but excludes its own bytes. This avoids a
+self-referential digest without silently omitting either visibility manifest
+from the combined record.
+
+### Enterprise artifact inventory and checksums
+
+The enterprise root `manifest.json` records the public and evaluator inventories:
+
+| Path | Bytes | SHA-256 |
+|---|---:|---|
+| `public/public-input.json` | 3682 | `56274ccd6548a2734e5075728aecddb0a6c9b7d67ed93229ca1e5e7b75676810` |
+| `evaluator/truth.json` | 877 | `3de3a7bffcb7adc09fa523e41e8383d23f0ba552e671efefa2f069ad44036557` |
+| `manifest.json` | recorded by `SHA256SUMS` | `6091c901612658bbd70efa26d159b0ef1c223000b25f4379a7c22328f6127b9b` |
+
+`SHA256SUMS` uses SHA-256 lines with relative paths for those three files and
+explicitly excludes `SHA256SUMS` itself. The committed enterprise records do
+not publish a separate aggregate root digest. This review therefore does not
+invent one: the authoritative enterprise integrity record is the path-bearing
+checksum list plus the manifest's public-input digest
+`56274ccd6548a2734e5075728aecddb0a6c9b7d67ed93229ca1e5e7b75676810`.
+
+### Public/evaluator boundary review
+
+Both packs physically separate public input from evaluator truth. Asteria's
+public file contains action and observation metadata and required evidence
+kinds, while evaluator truth carries exact required-observation bindings and
+scenario labels. Enterprise public input contains actions and evidence events;
+enterprise evaluator truth carries the exact required evidence IDs and tenant
+bindings. No verdict, expected metric result, or evaluator case label is present
+in either public artifact.
+
+This is API-hygiene and accidental-leakage protection, not a secrecy or
+anti-cheating guarantee. Public action requirements and observation kinds can
+make portions of the required set inferable to a reader of the public artifact.
+The evaluator artifact is shipped with the package, so it must never be treated
+as confidential. Boundary and adversarial validation remain required gates.
+
+### Determinism, baselines, and pending gates
+
+The committed files were materialised by the deterministic C08 v2 generators
+for the pinned seed. This review does **not** claim a passed test suite,
+byte-for-byte regeneration comparison, checksum-verifier run, wheel build,
+isolated-wheel load, or CI run. Those integrity, canonical-JSON, packaging,
+and clean-install gates remain pending until CI supplies the evidence.
+
+Committed baseline records exercise exact, missing, fabricated, wrong-action,
+and extra evidence in both lineages; Asteria also records discarded evidence.
+The exact records are kept under `tests/fixtures/c08_v2/`, separate from the
+benchmark trees. Asteria's exact case is perfect; each non-exact case lowers its
+dedicated metric to `5/6`: missing and discarded lower
+`missing_or_discarded_free`, fabricated lowers `fabricated_evidence_free`,
+wrong action lowers `wrong_action_evidence_free`, and extra lowers
+`extra_evidence_free` (each also lowers exact match). Enterprise missing records
+completeness `5/6` and exact match `2/3`; fabricated, wrong-action, and extra
+each record action binding `6/7` and exact match `2/3`, with respectively
+fabrication, wrong-action, or extra rate `1/7`. These are discrimination records,
+not evidence that their tests have run in this review.
+
+The existing Asteria Agentic v1 lock values remain public artifact-set digest
+`9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594` and
+evaluator artifact-set digest
+`3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f`.
+This documentation-only packet does not modify any v1 artifact path. CI must
+still prove their byte and hash preservation. There is no frozen enterprise C08
+v1 tree with a corresponding preservation digest.
+
+### Scope and limitations
+
+C08 v2 scores offline artifact submissions only. It does not prove live evidence
+retention, durable production logging, side-effect or policy enforcement,
+deployment behaviour, real Asteria export compatibility, EADS compatibility,
+or a real EADS export. D8 authorises only this C08 v2 transition: C13, C15/C16,
+Face A, EADS compatibility, deployment, and generated-world demonstrations are
+explicitly excluded.

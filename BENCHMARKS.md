@@ -164,3 +164,20 @@ flowchart TD
 - Numbers change only through a deliberate benchmark-version transition.
 
 See [DATA_DICTIONARY.md](DATA_DICTIONARY.md) for field definitions and [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md) for the frozen benchmark review record.
+
+## C08 v2 reference failure records
+
+The C08 v2 fixture records under `tests/fixtures/c08_v2/` are deterministic
+failure-mode baselines for the independently versioned Asteria and enterprise
+offline evidence-completeness candidates. They are not leaderboard results and
+are not produced by this document's baseline command.
+
+| Lineage | Cases | Discriminating committed result |
+|---|---|---|
+| Asteria | exact, missing, fabricated, wrong action, extra, discarded | Each non-exact case lowers exact match and its dedicated quality metric to `5/6`; exact is `6/6`. |
+| Enterprise | exact, missing, fabricated, wrong action, extra | Missing lowers completeness to `5/6` and exact match to `2/3`; the other failures lower exact match to `2/3` and expose their dedicated rate at `1/7`. |
+
+The candidate public/evaluator inventories, digests, and pending verification
+gates are recorded in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md). The data measures
+offline artifact scoring only; it does not prove live retention, durable logging,
+enforcement, deployment, or EADS compatibility.

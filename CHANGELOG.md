@@ -9,6 +9,15 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Added
+
+- **C08 v2 frozen-artifact candidate documentation.** The independent Asteria
+  and enterprise C08 evidence-completeness candidates pin seed `20260809` and
+  schema version `2.0.0`, with separate public/evaluator artifact inventories,
+  checksum records, baseline discrimination fixtures, and explicit offline-only
+  limits. Package, clean-install, deterministic regeneration, and CI gates are
+  deliberately recorded as pending rather than claimed complete.
+
 ## [0.13.0] - 2026-08-06
 
 ### Added

@@ -28,6 +28,22 @@ principal/account bindings are emitted separately under the evaluator tree.
 Observed state may later disagree with those bindings without rewriting either
 artifact.
 
+## Enterprise C08 v2 candidate
+
+`enterprise-agentic-c08-v2` is an enterprise-specific offline C08
+evidence-completeness candidate, independent of `asteria-agentic-c08-v2`. It
+pins seed `20260809` and schema version `2.0.0`; public input and evaluator
+truth are physically separate and the evaluator cross-binds the public-input
+digest. `SHA256SUMS` is the path-bearing integrity list and excludes itself;
+the committed enterprise record has no separate aggregate root digest.
+
+The candidate scores artifact submissions only. It does not demonstrate a live
+enterprise system, durable evidence retention or logging, policy enforcement,
+deployment, EADS compatibility, or compatibility with a real EADS export. C13,
+C15/C16, Face A, deployment, and generated-world demonstrations remain outside
+the authorised D8 scope. The complete candidate review and pending package/CI
+gates are in [`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md).
+
 ## Pinned standards profile
 
 `standards-profile-ledger.json` records the exact external editions reviewed on

@@ -138,6 +138,22 @@ synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 truth, so an adapter author can iterate without the answer key. It examines every
 line rather than stopping at the first failure.
 
+## C08 v2 offline evidence-completeness candidates
+
+The independently versioned `asteria-agentic-c08-v2` and
+`enterprise-agentic-c08-v2` candidates pin seed `20260809` and schema version
+`2.0.0`. Each has separate public and evaluator artifacts and its own submission
+and scoring contract. They assess offline evidence-binding completeness, not the
+Asteria Agentic v1 authority, attribution, temporal, provenance, or side-effect
+dimensions.
+
+The public/evaluator split prevents accidental answer-key use by product inputs;
+it is not a secrecy claim. The evaluator artifacts are package data. C08 v2 does
+not establish live evidence retention, durable logging, policy enforcement,
+deployment behaviour, real-export compatibility, or EADS compatibility. The
+authoritative candidate inventory, digests, self-exclusion rules, baseline
+records, and pending package/CI gates are in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
+
 | code | severity | meaning |
 |---|---|---|
 | `malformed_json` | error | the line is not valid JSON |
