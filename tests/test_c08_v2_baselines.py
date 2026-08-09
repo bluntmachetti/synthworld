@@ -267,7 +267,7 @@ def test_generator_rejects_symlinked_inventory_entry(tmp_path: Path) -> None:
     target = tmp_path / "target"
     target.write_bytes(b"{}\n")
     (tmp_path / "linked.json").symlink_to(target)
-    with pytest.raises(RuntimeError, match="linked.json"):
+    with pytest.raises(RuntimeError, match=r"linked\.json"):
         tool.write_baselines(tmp_path)
 
 
