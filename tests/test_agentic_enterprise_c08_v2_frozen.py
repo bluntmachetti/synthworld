@@ -164,7 +164,6 @@ def test_frozen_generation_is_byte_identical(tmp_path: Path) -> None:
 
 
 def test_public_tree_has_no_evaluator_fields_or_case_truth() -> None:
-    tree = load_packaged_frozen_benchmark()
     public_bytes = b"".join(
         payload
         for path, payload in _files(_PACKAGED_ROOT).items()

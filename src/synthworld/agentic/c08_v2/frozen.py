@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import TypeAlias
 
 from pydantic import BaseModel
 
@@ -43,7 +42,7 @@ C08_FROZEN_ROOT_INVENTORY = (
 C08_FROZEN_PUBLIC_INVENTORY = (C08_FROZEN_MANIFEST, C08_PUBLIC_ARTIFACT)
 C08_FROZEN_EVALUATOR_INVENTORY = (C08_FROZEN_MANIFEST, C08_EVALUATOR_ARTIFACT)
 
-FrozenNode: TypeAlias = Path | Traversable
+type FrozenNode = Path | Traversable
 
 
 class C08FrozenArtifactError(ValueError):
@@ -192,7 +191,8 @@ def _assert_directory(node: FrozenNode, expected: tuple[str, ...], label: str) -
     actual = {child.name for child in node.iterdir()}
     if actual != set(expected):
         raise C08FrozenArtifactError(
-            f"{label} inventory mismatch: expected {sorted(expected)}, got {sorted(actual)}"
+            f"{label} inventory mismatch: expected {sorted(expected)}, "
+            f"got {sorted(actual)}"
         )
 
 
@@ -365,7 +365,10 @@ def load_c08_v2_frozen_tree(root: FrozenNode) -> C08FrozenBundle:
     ):
         raise C08FrozenArtifactError("root cross-artifact binding mismatch")
     generated = generate_c08_asteria_v2(C08_FROZEN_SEED)
-    if public_model != generated.public or evaluator_model != generated.evaluator:
+    if (
+        public_model != generated.public
+        or evaluator_model != generated.evaluator
+    ):
         raise C08FrozenArtifactError("frozen payload does not match the fixed reference")
     return C08FrozenBundle(
         public=public_model,

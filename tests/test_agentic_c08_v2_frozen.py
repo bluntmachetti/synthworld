@@ -219,7 +219,8 @@ def test_missing_file_is_rejected(tmp_path: Path, relative: str) -> None:
 @pytest.mark.parametrize("relative", ("", "public", "evaluator"))
 def test_extra_file_is_rejected(tmp_path: Path, relative: str) -> None:
     root = _copy_tree(tmp_path)
-    (root / relative / "extra.json" if relative else root / "extra.json").write_bytes(b"{}\n")
+    extra = root / relative / "extra.json" if relative else root / "extra.json"
+    extra.write_bytes(b"{}\n")
     with pytest.raises(C08FrozenArtifactError):
         load_c08_v2_frozen_tree(root)
 
@@ -272,7 +273,9 @@ def test_evaluator_public_digest_cross_binding_is_rejected(tmp_path: Path) -> No
     root = _copy_tree(tmp_path)
     evaluator = json.loads((root / C08_FROZEN_EVALUATOR_PAYLOAD).read_bytes())
     evaluator["public_input_digest"] = "0" * 64
-    (root / C08_FROZEN_EVALUATOR_PAYLOAD).write_bytes(canonical_json_value_bytes(evaluator))
+    (root / C08_FROZEN_EVALUATOR_PAYLOAD).write_bytes(
+        canonical_json_value_bytes(evaluator)
+    )
     _refresh_evaluator_and_root_manifests(root)
     with pytest.raises(C08FrozenArtifactError):
         load_c08_v2_frozen_tree(root)

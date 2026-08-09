@@ -95,7 +95,9 @@ def _asteria_submission(
         if item.scenario_kind.value == failure_mode
     )
     row = next(
-        item for item in reference.rows if item.action_event_id == binding.action_event_id
+        item
+        for item in reference.rows
+        if item.action_event_id == binding.action_event_id
     )
     if failure_mode in {"missing", "discarded"}:
         return _replace_asteria_row(
@@ -310,9 +312,9 @@ def _assert_inventory(root: Path) -> None:
         relative = path.relative_to(root).as_posix()
         if path.is_symlink():
             unexpected.append(relative)
-        elif path.is_dir() and relative in allowed_directories:
-            continue
-        elif path.is_file() and relative in expected_files:
+        elif (path.is_dir() and relative in allowed_directories) or (
+            path.is_file() and relative in expected_files
+        ):
             continue
         else:
             unexpected.append(relative)

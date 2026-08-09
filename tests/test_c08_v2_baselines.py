@@ -6,6 +6,7 @@ import importlib.util
 import json
 import re
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
 import pytest
@@ -31,7 +32,7 @@ ENTERPRISE_FAILURE_MODES = (
 )
 
 
-def _load_tool() -> Any:
+def _load_tool() -> ModuleType:
     path = Path("tools/generate_c08_v2_baselines.py")
     spec = importlib.util.spec_from_file_location("c08_baseline_generator", path)
     assert spec is not None and spec.loader is not None

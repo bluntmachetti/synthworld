@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 from pydantic import ValidationError
 
 from synthworld.agentic.enterprise.c08_v2 import (
-    DEFAULT_C08_REFERENCE_SEED,
     C08CaseOutcomeV2,
     C08EvaluationError,
     C08EvaluationMetricV2,
@@ -24,6 +24,7 @@ from synthworld.agentic.enterprise.c08_v2 import (
     C08SourceActionV2,
     C08SourceWorldV2,
     C08SubmissionV2,
+    DEFAULT_C08_REFERENCE_SEED,
     compile_c08_truth,
     c08_public_observation_id,
     evaluate_c08,
@@ -476,7 +477,9 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             ),
             required_evidence_ids=("z-2", "z-1"),
         )
-    with pytest.raises(ValidationError, match="IDs and requirements must have equal length"):
+    with pytest.raises(
+        ValidationError, match="IDs and requirements must have equal length"
+    ):
         C08SourceActionV2(
             action_id="action-z",
             tenant_id="tenant-z",
@@ -721,7 +724,9 @@ def test_report_models_require_canonical_order() -> None:
             actions=tuple(reversed(public.actions)),
             evidence_events=public.evidence_events,
         )
-    with pytest.raises(ValidationError, match="IDs and requirements must have equal length"):
+    with pytest.raises(
+        ValidationError, match="IDs and requirements must have equal length"
+    ):
         C08EvidenceBindingV2(
             action_id="action-x",
             tenant_id="tenant-x",

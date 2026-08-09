@@ -138,7 +138,7 @@ def _build_source(seed: int) -> C08SourceWorldV2:
                             candidate_index,
                         ),
                         "payload_digest": hashlib.sha256(
-                            f"{seed}:{evidence_id}:payload".encode("utf-8")
+                            f"{seed}:{evidence_id}:payload".encode()
                         ).hexdigest(),
                     }
                 )
