@@ -26,10 +26,10 @@ from synthworld.agentic.enterprise.c08_v2 import (
     compile_c08_truth,
     evaluate_c08,
     export_c08_artifacts,
+    generate_c08_reference,
     load_c08_evaluator,
     load_c08_public,
     load_c08_submission,
-    generate_c08_reference,
     project_c08_public,
     reference_submission_from_public,
     serialize_c08_public,
@@ -560,7 +560,7 @@ def test_report_order_and_serialization_are_canonical_and_separate(
     noncanonical = json.dumps(public.model_dump(mode="json"), indent=2).encode()
     path = tmp_path / "noncanonical.json"
     path.write_bytes(noncanonical)
-        with pytest.raises(C08SerializationError, match=r"not canonical"):
+    with pytest.raises(C08SerializationError, match=r"not canonical"):
         load_c08_public(path)
     assert serialize_c08_public(public).endswith(b"\n")
 

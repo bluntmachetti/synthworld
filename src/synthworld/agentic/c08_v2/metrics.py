@@ -46,10 +46,15 @@ def evaluate_c08_submission(
     if submission.benchmark_id != benchmark.benchmark_id:
         raise C08EvaluationError("C08 submission benchmark id differs")
     public_digest = hashlib.sha256(canonical_json_bytes(benchmark.public)).hexdigest()
+    if benchmark.evaluator.public_input_digest != public_digest:
+        raise C08EvaluationError("C08 evaluator/public digest binding differs")
     if submission.public_input_digest != public_digest:
         raise C08EvaluationError("C08 submission/public digest binding differs")
     action_ids = tuple(item.action_event_id for item in benchmark.public.actions)
-    rows = {item.action_event_id: set(item.retained_observation_ids) for item in submission.rows}
+    rows = {
+        item.action_event_id: set(item.retained_observation_ids)
+        for item in submission.rows
+    }
     expected = set(action_ids)
     actual = set(rows)
     if actual != expected:
@@ -123,9 +128,7 @@ def evaluate_c08_submission(
     if tuple(item.name for item in metrics) != C08_METRIC_NAMES:
         raise AssertionError("C08 metric construction order changed")
     return C08MetricsReportV2(
-        public_input_digest=hashlib.sha256(
-            canonical_json_bytes(benchmark.public)
-        ).hexdigest(),
+        public_input_digest=public_digest,
         measurement_scope=benchmark.public.measurement_scope,
         metrics=metrics,
     )

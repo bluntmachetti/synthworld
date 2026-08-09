@@ -68,6 +68,14 @@ def write_schema_directory(directory: Path = SCHEMA_DIRECTORY) -> None:
 def check_schema_directory(directory: Path = SCHEMA_DIRECTORY) -> None:
     """Fail if any generated C08 schema is missing or byte-different."""
 
+    expected = {filename for filename, _ in SCHEMA_SPECS}
+    unexpected = sorted(
+        path.name
+        for path in directory.glob("c08-asteria-*-v2.schema.json")
+        if path.is_file() and path.name not in expected
+    )
+    if unexpected:
+        raise RuntimeError(f"unexpected generated schema: {', '.join(unexpected)}")
     for filename, payload in schema_documents().items():
         path = directory / filename
         if not path.is_file():

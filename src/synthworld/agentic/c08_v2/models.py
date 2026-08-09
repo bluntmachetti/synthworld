@@ -195,19 +195,38 @@ class C08AsteriaBenchmarkV2(SyntheticModel):
 
     @model_validator(mode="after")
     def bind_public_and_evaluator(self) -> Self:
-        public_ids = {item.action_event_id for item in self.public.actions}
-        binding_ids = {item.action_event_id for item in self.evaluator.bindings}
-        observation_ids = {
-            item.observation_id for item in self.public.evidence_observations
+        public_actions = {
+            item.action_event_id: item for item in self.public.actions
         }
-        if public_ids != binding_ids:
+        binding_ids = {item.action_event_id for item in self.evaluator.bindings}
+        observations = {
+            item.observation_id: item for item in self.public.evidence_observations
+        }
+        if set(public_actions) != binding_ids:
             raise ValueError("public actions and evaluator bindings must match")
-        if any(
-            required not in observation_ids
-            for binding in self.evaluator.bindings
-            for required in binding.required_observation_ids
-        ):
-            raise ValueError("evaluator binding references an unknown observation")
+        for binding in self.evaluator.bindings:
+            required = tuple(
+                observations.get(observation_id)
+                for observation_id in binding.required_observation_ids
+            )
+            if any(item is None for item in required):
+                raise ValueError("evaluator binding references an unknown observation")
+            action = public_actions[binding.action_event_id]
+            if any(
+                item.action_event_id != binding.action_event_id
+                for item in required
+                if item is not None
+            ):
+                raise ValueError("evaluator binding crosses public actions")
+            required_kinds = {
+                item.evidence_kind for item in required if item is not None
+            }
+            if len(required) != len(action.required_evidence_kinds) or (
+                required_kinds != set(action.required_evidence_kinds)
+            ):
+                raise ValueError(
+                    "evaluator binding evidence kinds differ from public action"
+                )
         return self
 
 

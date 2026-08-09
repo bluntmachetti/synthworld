@@ -123,7 +123,9 @@ def validate_c08_truth_against_public(
                     "C08 evaluator evidence does not match its public action"
                 )
             bound_events.append(event)
-        if tuple(event.kind for event in bound_events) != binding.required_evidence_kinds:
+        if tuple(event.kind for event in bound_events) != (
+            binding.required_evidence_kinds
+        ):
             raise C08ProjectionError(
                 "C08 evaluator evidence kinds do not match bound public evidence"
             )

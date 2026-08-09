@@ -160,6 +160,61 @@ def test_public_requirement_semantics_construct_a_reference_without_exact_truth(
         and "scenario_kind" not in action.model_dump(mode="json")
         for action in benchmark.public.actions
     )
+    extra_action = next(
+        action
+        for action in benchmark.public.actions
+        if action.resource_id == "resource-005"
+    )
+    extra_observations = tuple(
+        item
+        for item in benchmark.public.evidence_observations
+        if item.action_event_id == extra_action.action_event_id
+    )
+    assert tuple(item.evidence_kind.value for item in extra_observations) == (
+        "authority_record",
+        "policy_record",
+    )
+
+
+def test_evaluator_bindings_match_public_action_and_required_kinds() -> None:
+    benchmark = _benchmark()
+    binding = benchmark.evaluator.bindings[0]
+    other_observation = next(
+        item
+        for item in benchmark.public.evidence_observations
+        if item.action_event_id != binding.action_event_id
+    )
+    crossed_binding = binding.model_copy(
+        update={"required_observation_ids": (other_observation.observation_id,)}
+    )
+    crossed_evaluator = benchmark.evaluator.model_copy(
+        update={
+            "bindings": (crossed_binding, *benchmark.evaluator.bindings[1:]),
+        }
+    )
+    with pytest.raises(ValidationError, match="crosses public actions"):
+        C08AsteriaBenchmarkV2(
+            schema_version=benchmark.schema_version,
+            benchmark_id=benchmark.benchmark_id,
+            public=benchmark.public,
+            evaluator=crossed_evaluator,
+        )
+
+    incomplete_binding = binding.model_copy(
+        update={"required_observation_ids": (binding.required_observation_ids[0],)}
+    )
+    incomplete_evaluator = benchmark.evaluator.model_copy(
+        update={
+            "bindings": (incomplete_binding, *benchmark.evaluator.bindings[1:]),
+        }
+    )
+    with pytest.raises(ValidationError, match="evidence kinds"):
+        C08AsteriaBenchmarkV2(
+            schema_version=benchmark.schema_version,
+            benchmark_id=benchmark.benchmark_id,
+            public=benchmark.public,
+            evaluator=incomplete_evaluator,
+        )
 
 
 def test_manifest_and_cross_tree_digest_fail_closed() -> None:
@@ -339,6 +394,20 @@ def test_submission_digest_rejects_cross_public_replay_in_evaluation_and_loading
             build_c08_evaluator_artifacts(target.evaluator),
             build_c08_submission_artifacts(submission),
         )
+    wrong_digest = "0" * 64
+    if wrong_digest == source.evaluator.public_input_digest:
+        wrong_digest = "1" * 64
+    tampered_benchmark = source.model_copy(
+        update={
+            "evaluator": source.evaluator.model_copy(
+                update={"public_input_digest": wrong_digest}
+            )
+        }
+    )
+    with pytest.raises(C08EvaluationError, match="evaluator/public digest"):
+        evaluate_c08_submission(
+            tampered_benchmark, reference_c08_submission(source)
+        )
 
 
 def test_schema_tool_is_deterministic_and_check_detects_drift_and_missing(
@@ -363,6 +432,10 @@ def test_schema_tool_is_deterministic_and_check_detects_drift_and_missing(
         )
         (tmp_path / filename).write_bytes(payload)
     tool.check_schema_directory(tmp_path)
+    (tmp_path / "c08-asteria-unexpected-v2.schema.json").write_bytes(b"{}\n")
+    with pytest.raises(RuntimeError, match="unexpected"):
+        tool.check_schema_directory(tmp_path)
+    (tmp_path / "c08-asteria-unexpected-v2.schema.json").unlink()
     report = tmp_path / "c08-asteria-report-v2.schema.json"
     report.write_bytes(b"{}\n")
     with pytest.raises(RuntimeError, match="drift"):

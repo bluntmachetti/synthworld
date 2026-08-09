@@ -127,22 +127,23 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
                 required_evidence_kinds=required_kinds,
             )
         )
-        observation_count = (
-            3 if scenario in {C08ScenarioKind.EXTRA, C08ScenarioKind.DISCARDED} else 2
+        extra_kinds = (
+            (C08EvidenceKind.POLICY_RECORD,)
+            if scenario
+            in {
+                C08ScenarioKind.FABRICATED,
+                C08ScenarioKind.WRONG_ACTION,
+                C08ScenarioKind.EXTRA,
+                C08ScenarioKind.DISCARDED,
+            }
+            else ()
         )
+        observation_kinds = (*required_kinds, *extra_kinds)
         action_observation_ids: list[str] = []
-        required_count = (
-            2 if scenario in {C08ScenarioKind.EXACT, C08ScenarioKind.MISSING} else 1
-        )
-        for local_index in range(1, observation_count + 1):
+        for local_index, kind in enumerate(observation_kinds, start=1):
             observation_order += 1
             observation_id = _stable_id(
                 seed, "observation", action_index * 10 + local_index
-            )
-            kind = (
-                C08EvidenceKind.AUTHORITY_RECORD
-                if local_index == 1
-                else C08EvidenceKind.POLICY_RECORD
             )
             observations.append(
                 C08EvidenceObservationV2(
@@ -158,7 +159,7 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
                     ),
                 )
             )
-            if local_index <= required_count:
+            if local_index <= len(required_kinds):
                 action_observation_ids.append(observation_id)
         bindings.append(
             C08EvidenceBindingV2(

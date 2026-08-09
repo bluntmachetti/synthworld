@@ -28,9 +28,9 @@ from synthworld.agentic.enterprise.c08_v2.projection import (
     validate_c08_truth_against_public,
 )
 from synthworld.agentic.enterprise.c08_v2.reference import (
-    C08ReferenceBundleV2,
     C08_REFERENCE_NAMESPACE,
     DEFAULT_C08_REFERENCE_SEED,
+    C08ReferenceBundleV2,
     generate_c08_reference,
     reference_submission_from_public,
 )
@@ -45,6 +45,7 @@ from synthworld.agentic.enterprise.c08_v2.serialization import (
 )
 
 __all__ = [
+    "C08_REFERENCE_NAMESPACE",
     "C08CaseOutcomeV2",
     "C08CaseResultV2",
     "C08EvaluationError",
@@ -63,9 +64,6 @@ __all__ = [
     "C08SourceActionV2",
     "C08SourceWorldV2",
     "C08SubmissionV2",
-    "C08_REFERENCE_NAMESPACE",
-    "DEFAULT_C08_REFERENCE_SEED",
-    "C08_REFERENCE_NAMESPACE",
     "DEFAULT_C08_REFERENCE_SEED",
     "compile_c08_truth",
     "evaluate_c08",
@@ -76,8 +74,8 @@ __all__ = [
     "load_c08_submission",
     "project_c08_public",
     "reference_submission_from_public",
-    "validate_c08_truth_against_public",
     "serialize_c08_evaluator",
     "serialize_c08_public",
     "serialize_c08_submission",
+    "validate_c08_truth_against_public",
 ]
