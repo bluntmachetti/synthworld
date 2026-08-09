@@ -516,7 +516,7 @@ def test_asteria_v2_rejects_partial_extra_and_contract_drift() -> None:
     for removed in artifacts:
         changed = dict(artifacts)
         changed.pop(removed)
-        memberships = {path: [] for path in changed}
+        memberships: dict[str, list[str]] = {path: [] for path in changed}
         with pytest.raises(registry.RegistryError, match="inventory differs"):
             registry._verify_asteria_v2(changed, memberships, [])
     changed = {**artifacts, f"{root}/extra.json": b"{}\n"}
@@ -636,11 +636,11 @@ def test_path_bound_manifest_rejects_unknown_binding_inventory_and_set_digest() 
         ),
     )
     for manifest, expected_members, message in failures:
-        kwargs = {}
-        if expected_members is not None:
-            kwargs["expected_members"] = expected_members
         with pytest.raises(registry.RegistryError, match=message):
-            _verify_path_bound_fixture(manifest, **kwargs)
+            if expected_members is None:
+                _verify_path_bound_fixture(manifest)
+            else:
+                _verify_path_bound_fixture(manifest, expected_members=expected_members)
 
 
 def test_enterprise_c08_v2_requires_the_exact_checksum_inventory() -> None:
