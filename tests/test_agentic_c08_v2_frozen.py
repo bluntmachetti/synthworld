@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 from synthworld.agentic.c08_v2 import (
     C08_FROZEN_BENCHMARK_PATH,
@@ -16,12 +17,18 @@ from synthworld.agentic.c08_v2 import (
     C08_FROZEN_PUBLIC_MANIFEST,
     C08_FROZEN_PUBLIC_PAYLOAD,
     C08FrozenArtifactError,
+    C08FrozenEvaluatorManifestV2,
+    C08FrozenPublicManifestV2,
+    C08FrozenRootManifestV2,
     c08_frozen_artifact_set_digest,
     freeze_c08_v2_benchmark,
     load_c08_v2_frozen_tree,
     load_packaged_c08_v2_benchmark,
 )
-from synthworld.enterprise.canonical import canonical_json_value_bytes
+from synthworld.enterprise.canonical import (
+    canonical_json_bytes,
+    canonical_json_value_bytes,
+)
 
 REPOSITORY_ROOT = Path(__file__).parents[1]
 FROZEN_TREE = REPOSITORY_ROOT / C08_FROZEN_BENCHMARK_PATH
@@ -32,6 +39,27 @@ EXPECTED_FILES = {
     C08_FROZEN_EVALUATOR_PAYLOAD,
     C08_FROZEN_EVALUATOR_MANIFEST,
 }
+V1_PUBLIC_FILES = (
+    "organisation.json",
+    "principals.jsonl",
+    "agents.jsonl",
+    "runtimes.jsonl",
+    "resources.jsonl",
+    "public_credentials.jsonl",
+    "public_delegations.jsonl",
+    "public_events.jsonl",
+    "tool_schemas/procurement-tools.json",
+    "scenarios/procurement-delegation.json",
+)
+V1_EVALUATOR_FILES = (
+    "canonical_bindings.json",
+    "authority_truth.jsonl",
+    "cases.jsonl",
+    "expected_decisions.jsonl",
+    "expected_side_effects.jsonl",
+    "expected_provenance.jsonl",
+    "evidence_epochs.jsonl",
+)
 
 
 def _copy_tree(tmp_path: Path) -> Path:
@@ -53,10 +81,9 @@ def _refresh_evaluator_and_root_manifests(root: Path) -> None:
     evaluator_payload = evaluator_payload_path.read_bytes()
     evaluator_manifest_path = root / C08_FROZEN_EVALUATOR_MANIFEST
     evaluator_manifest = json.loads(evaluator_manifest_path.read_bytes())
-    evaluator_manifest["artifacts"]["c08-asteria-evaluator.json"] = {
-        "byte_size": len(evaluator_payload),
-        "sha256": hashlib.sha256(evaluator_payload).hexdigest(),
-    }
+    evaluator_descriptor = evaluator_manifest["artifacts"][0]
+    evaluator_descriptor["byte_size"] = len(evaluator_payload)
+    evaluator_descriptor["sha256"] = hashlib.sha256(evaluator_payload).hexdigest()
     evaluator_manifest["artifact_set_digest"] = c08_frozen_artifact_set_digest(
         {"c08-asteria-evaluator.json": evaluator_payload}
     )
@@ -69,10 +96,11 @@ def _refresh_evaluator_and_root_manifests(root: Path) -> None:
         if relative != C08_FROZEN_MANIFEST
     }
     for relative, payload in files.items():
-        root_manifest["artifacts"][relative] = {
-            "byte_size": len(payload),
-            "sha256": hashlib.sha256(payload).hexdigest(),
-        }
+        descriptor = next(
+            item for item in root_manifest["artifacts"] if item["path"] == relative
+        )
+        descriptor["byte_size"] = len(payload)
+        descriptor["sha256"] = hashlib.sha256(payload).hexdigest()
     root_manifest["artifact_set_digest"] = c08_frozen_artifact_set_digest(files)
     root_manifest_path.write_bytes(canonical_json_value_bytes(root_manifest))
 
@@ -95,6 +123,9 @@ def test_regeneration_is_byte_for_byte_identical(tmp_path: Path) -> None:
     assert first_bundle == second_bundle
     assert _tree_bytes(first) == _tree_bytes(second)
     assert _tree_bytes(first) == _tree_bytes(FROZEN_TREE)
+    with pytest.raises(C08FrozenArtifactError, match="overwrite"):
+        freeze_c08_v2_benchmark(first)
+    assert freeze_c08_v2_benchmark(first, replace=True) == first_bundle
 
 
 def test_frozen_format_and_public_tree_have_no_evaluator_leakage() -> None:
@@ -129,23 +160,41 @@ def test_root_digest_excludes_only_root_manifest() -> None:
         for path in FROZEN_TREE.rglob("*")
         if path.is_file()
     }
-    manifest = json.loads((FROZEN_TREE / C08_FROZEN_MANIFEST).read_bytes())
-    assert manifest["artifact_set_digest"] == c08_frozen_artifact_set_digest(
+    manifest = C08FrozenRootManifestV2.model_validate_json(
+        (FROZEN_TREE / C08_FROZEN_MANIFEST).read_bytes()
+    )
+    assert manifest.artifact_set_digest == c08_frozen_artifact_set_digest(
         files, excluded_paths=(C08_FROZEN_MANIFEST,)
     )
 
 
-def test_v1_checksums_are_preserved() -> None:
-    checksums = json.loads(
-        (
-            REPOSITORY_ROOT
-            / "src/synthworld/benchmarks/asteria-agentic-v1/evaluator/checksums.json"
-        ).read_bytes()
-    )
-    assert checksums["public_artifact_set_digest"] == (
+def test_frozen_manifests_use_governed_immutable_models() -> None:
+    public_payload = (FROZEN_TREE / C08_FROZEN_PUBLIC_MANIFEST).read_bytes()
+    evaluator_payload = (FROZEN_TREE / C08_FROZEN_EVALUATOR_MANIFEST).read_bytes()
+    root_payload = (FROZEN_TREE / C08_FROZEN_MANIFEST).read_bytes()
+    public = C08FrozenPublicManifestV2.model_validate_json(public_payload)
+    evaluator = C08FrozenEvaluatorManifestV2.model_validate_json(evaluator_payload)
+    root = C08FrozenRootManifestV2.model_validate_json(root_payload)
+    assert canonical_json_bytes(public) == public_payload
+    assert canonical_json_bytes(evaluator) == evaluator_payload
+    assert canonical_json_bytes(root) == root_payload
+    with pytest.raises(ValidationError, match="frozen"):
+        public.visibility = "evaluator"
+
+
+def test_v1_payload_digests_are_recomputed_and_preserved() -> None:
+    root = REPOSITORY_ROOT / "src/synthworld/benchmarks/asteria-agentic-v1"
+    public_payloads = {
+        path: (root / "public" / path).read_bytes() for path in V1_PUBLIC_FILES
+    }
+    evaluator_payloads = {
+        path: (root / "evaluator" / path).read_bytes()
+        for path in V1_EVALUATOR_FILES
+    }
+    assert c08_frozen_artifact_set_digest(public_payloads) == (
         "9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594"
     )
-    assert checksums["evaluator_artifact_set_digest"] == (
+    assert c08_frozen_artifact_set_digest(evaluator_payloads) == (
         "3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f"
     )
 
@@ -213,7 +262,7 @@ def test_noncanonical_json_and_digest_mismatch_are_rejected(tmp_path: Path) -> N
     root = _copy_tree(tmp_path / "digest")
     payload = root / C08_FROZEN_PUBLIC_PAYLOAD
     document = json.loads(payload.read_bytes())
-    document["actions"][0]["action_id"] = "tampered-action"
+    document["actions"][0]["action_event_id"] = "tampered-action"
     payload.write_bytes(canonical_json_value_bytes(document))
     with pytest.raises(C08FrozenArtifactError):
         load_c08_v2_frozen_tree(root)
@@ -225,5 +274,30 @@ def test_evaluator_public_digest_cross_binding_is_rejected(tmp_path: Path) -> No
     evaluator["public_input_digest"] = "0" * 64
     (root / C08_FROZEN_EVALUATOR_PAYLOAD).write_bytes(canonical_json_value_bytes(evaluator))
     _refresh_evaluator_and_root_manifests(root)
+    with pytest.raises(C08FrozenArtifactError):
+        load_c08_v2_frozen_tree(root)
+
+
+@pytest.mark.parametrize(
+    ("relative", "field"),
+    (
+        (C08_FROZEN_PUBLIC_MANIFEST, "visibility"),
+        (C08_FROZEN_EVALUATOR_MANIFEST, "seed"),
+        (C08_FROZEN_MANIFEST, "artifacts"),
+    ),
+)
+def test_typed_manifest_contracts_reject_wrong_shapes(
+    tmp_path: Path, relative: str, field: str
+) -> None:
+    root = _copy_tree(tmp_path)
+    path = root / relative
+    document = json.loads(path.read_bytes())
+    if field == "visibility":
+        document[field] = "evaluator"
+    elif field == "seed":
+        document[field] = 1
+    else:
+        document[field] = document[field][:-1]
+    path.write_bytes(canonical_json_value_bytes(document))
     with pytest.raises(C08FrozenArtifactError):
         load_c08_v2_frozen_tree(root)

@@ -15,8 +15,9 @@ from synthworld.agentic.c08_v2.frozen import (
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=C08_FROZEN_BENCHMARK_PATH)
+    parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
-    bundle = freeze_c08_v2_benchmark(args.output)
+    bundle = freeze_c08_v2_benchmark(args.output, replace=args.replace)
     print(
         json.dumps(
             {

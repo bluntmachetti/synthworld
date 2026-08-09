@@ -15,6 +15,7 @@ from synthworld.agentic.c08_v2.models import (
     C08EvidenceBindingV2,
     C08EvidenceKind,
     C08EvidenceObservationV2,
+    C08EvidenceRequirementV2,
     C08MeasurementScopeV2,
     C08PublicActionV2,
     C08ScenarioKind,
@@ -37,8 +38,8 @@ _DOES_NOT_PROVE = (
 )
 
 
-def _stable_id(seed: int, kind: str, ordinal: int) -> str:
-    return str(uuid5(_NAMESPACE, f"{seed}:{kind}:{ordinal}"))
+def _stable_named_id(seed: int, kind: str, stable_key: str) -> str:
+    return str(uuid5(_NAMESPACE, f"{seed}:{kind}:{stable_key}"))
 
 
 def _payload_digest(*parts: str) -> str:
@@ -58,65 +59,116 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
         raise ValueError("C08 seed must be nonnegative")
 
     benchmark_id = C08_BENCHMARK_ID
-    action_specs = (
+    public_action_specs = (
         (
+            "ledger-read",
             "read",
-            "resource-001",
             ("read",),
-            C08ScenarioKind.EXACT,
             (C08EvidenceKind.AUTHORITY_RECORD, C08EvidenceKind.POLICY_RECORD),
         ),
         (
+            "archive-read",
             "read",
-            "resource-002",
             ("read",),
-            C08ScenarioKind.MISSING,
             (C08EvidenceKind.AUTHORITY_RECORD, C08EvidenceKind.POLICY_RECORD),
         ),
         (
+            "register-write",
             "write",
-            "resource-003",
             ("write",),
-            C08ScenarioKind.FABRICATED,
             (C08EvidenceKind.AUTHORITY_RECORD,),
         ),
         (
+            "record-delete",
             "delete",
-            "resource-004",
             ("delete",),
-            C08ScenarioKind.WRONG_ACTION,
             (C08EvidenceKind.AUTHORITY_RECORD,),
         ),
         (
+            "bundle-export",
             "export",
-            "resource-005",
             ("export",),
-            C08ScenarioKind.EXTRA,
             (C08EvidenceKind.AUTHORITY_RECORD,),
         ),
         (
+            "catalogue-read",
             "read",
-            "resource-006",
             ("read",),
-            C08ScenarioKind.DISCARDED,
             (C08EvidenceKind.AUTHORITY_RECORD,),
         ),
     )
+    evaluator_scenarios = {
+        "archive-read": C08ScenarioKind.MISSING,
+        "bundle-export": C08ScenarioKind.EXTRA,
+        "catalogue-read": C08ScenarioKind.DISCARDED,
+        "ledger-read": C08ScenarioKind.EXACT,
+        "record-delete": C08ScenarioKind.WRONG_ACTION,
+        "register-write": C08ScenarioKind.FABRICATED,
+    }
+    ordered_action_specs = tuple(
+        sorted(
+            public_action_specs,
+            key=lambda item: (
+                _payload_digest(str(seed), "action-order", item[0]),
+                item[0],
+            ),
+        )
+    )
     public_actions: list[C08PublicActionV2] = []
-    observations: list[C08EvidenceObservationV2] = []
+    observation_specs: list[
+        tuple[str, str, C08EvidenceKind, str, str]
+    ] = []
     bindings: list[C08EvidenceBindingV2] = []
-    observation_order = 0
 
     for action_index, (
+        stable_key,
         action,
-        resource_id,
         scope,
-        scenario,
         required_kinds,
     ) in enumerate(
-        action_specs, start=1
+        ordered_action_specs, start=1
     ):
-        action_id = _stable_id(seed, "action", action_index)
+        action_id = _stable_named_id(seed, "action", stable_key)
+        resource_id = _stable_named_id(seed, "resource", stable_key)
+        requirements: list[C08EvidenceRequirementV2] = []
+        action_observation_ids: list[str] = []
+        for local_index, kind in enumerate(required_kinds, start=1):
+            requirement_key = f"{stable_key}:{kind.value}:{local_index}"
+            binding_handle = _stable_named_id(
+                seed, "binding-handle", requirement_key
+            )
+            distractor_handle = _stable_named_id(
+                seed, "distractor-binding-handle", requirement_key
+            )
+            requirements.append(
+                C08EvidenceRequirementV2(
+                    evidence_kind=kind,
+                    binding_handle=binding_handle,
+                )
+            )
+            required_observation_id = _stable_named_id(
+                seed, "required-observation", requirement_key
+            )
+            distractor_observation_id = _stable_named_id(
+                seed, "distractor-observation", requirement_key
+            )
+            action_observation_ids.append(required_observation_id)
+            for observation_id, candidate_handle in (
+                (required_observation_id, binding_handle),
+                (distractor_observation_id, distractor_handle),
+            ):
+                ordering_key = _payload_digest(
+                    str(seed), "candidate-order", observation_id
+                )
+                observation_specs.append(
+                    (
+                        ordering_key,
+                        action_id,
+                        kind,
+                        candidate_handle,
+                        observation_id,
+                    )
+                )
         public_actions.append(
             C08PublicActionV2(
                 action_event_id=action_id,
@@ -124,57 +176,48 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
                 action=action,
                 resource_id=resource_id,
                 requested_scope=scope,
-                required_evidence_kinds=required_kinds,
+                required_evidence=tuple(requirements),
             )
         )
-        extra_kinds = (
-            (C08EvidenceKind.POLICY_RECORD,)
-            if scenario
-            in {
-                C08ScenarioKind.FABRICATED,
-                C08ScenarioKind.WRONG_ACTION,
-                C08ScenarioKind.EXTRA,
-                C08ScenarioKind.DISCARDED,
-            }
-            else ()
-        )
-        observation_kinds = (*required_kinds, *extra_kinds)
-        action_observation_ids: list[str] = []
-        for local_index, kind in enumerate(observation_kinds, start=1):
-            observation_order += 1
-            observation_id = _stable_id(
-                seed, "observation", action_index * 10 + local_index
-            )
-            observations.append(
-                C08EvidenceObservationV2(
-                    observation_id=observation_id,
-                    action_event_id=action_id,
-                    observation_order=observation_order,
-                    evidence_kind=kind,
-                    payload_digest=_payload_digest(
-                        benchmark_id,
-                        str(seed),
-                        action_id,
-                        observation_id,
-                    ),
-                )
-            )
-            if local_index <= len(required_kinds):
-                action_observation_ids.append(observation_id)
         bindings.append(
             C08EvidenceBindingV2(
                 action_event_id=action_id,
                 required_observation_ids=tuple(action_observation_ids),
-                scenario_kind=scenario,
+                scenario_kind=evaluator_scenarios[stable_key],
             )
         )
+
+    observations = tuple(
+        C08EvidenceObservationV2(
+            observation_id=observation_id,
+            action_event_id=action_id,
+            observation_order=observation_order,
+            evidence_kind=kind,
+            binding_handle=binding_handle,
+            payload_digest=_payload_digest(
+                benchmark_id,
+                str(seed),
+                action_id,
+                kind.value,
+                binding_handle,
+                observation_id,
+            ),
+        )
+        for observation_order, (
+            _,
+            action_id,
+            kind,
+            binding_handle,
+            observation_id,
+        ) in enumerate(sorted(observation_specs), start=1)
+    )
 
     public = C08AsteriaPublicInputV2(
         schema_version=C08_SCHEMA_VERSION,
         benchmark_id=benchmark_id,
         measurement_scope=_scope(),
         actions=tuple(public_actions),
-        evidence_observations=tuple(observations),
+        evidence_observations=observations,
     )
     public_digest = hashlib.sha256(canonical_json_bytes(public)).hexdigest()
     evaluator = C08AsteriaEvaluatorV2(
@@ -216,7 +259,7 @@ def reference_c08_submission(
 def semantic_c08_submission(
     public: C08AsteriaPublicInputV2,
 ) -> C08AsteriaSubmissionV2:
-    """Construct a submission from public requirement kinds, not evaluator truth."""
+    """Construct a submission from public correlation semantics alone."""
 
     observations_by_action: dict[str, list[C08EvidenceObservationV2]] = {}
     for observation in public.evidence_observations:
@@ -227,14 +270,19 @@ def semantic_c08_submission(
     for action in public.actions:
         selected: list[str] = []
         action_observations = observations_by_action.get(action.action_event_id, [])
-        for kind in action.required_evidence_kinds:
+        for requirement in action.required_evidence:
             matches = [
-                item for item in action_observations if item.evidence_kind is kind
+                item
+                for item in action_observations
+                if item.evidence_kind is requirement.evidence_kind
+                and item.binding_handle == requirement.binding_handle
             ]
             if len(matches) != 1:
                 raise ValueError(
                     "public evidence requirement is not uniquely solvable for "
-                    f"{action.action_event_id}:{kind.value}"
+                    f"{action.action_event_id}:"
+                    f"{requirement.evidence_kind.value}:"
+                    f"{requirement.binding_handle}"
                 )
             selected.append(matches[0].observation_id)
         rows.append(

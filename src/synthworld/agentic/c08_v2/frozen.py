@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from importlib.resources import files
@@ -11,16 +10,20 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import TypeAlias
 
+from pydantic import BaseModel
+
 from synthworld.agentic.c08_v2.generator import generate_c08_asteria_v2
 from synthworld.agentic.c08_v2.models import (
-    C08AsteriaEvaluatorV2,
-    C08AsteriaPublicInputV2,
-    C08_BENCHMARK_ID,
     C08_EVALUATOR_ARTIFACT,
     C08_PUBLIC_ARTIFACT,
-    C08_SCHEMA_VERSION,
+    C08ArtifactDescriptorV2,
+    C08AsteriaEvaluatorV2,
+    C08AsteriaPublicInputV2,
+    C08FrozenEvaluatorManifestV2,
+    C08FrozenPublicManifestV2,
+    C08FrozenRootManifestV2,
 )
-from synthworld.enterprise.canonical import canonical_json_bytes, canonical_json_value_bytes
+from synthworld.enterprise.canonical import canonical_json_bytes
 
 C08_FROZEN_SEED = 20260809
 C08_FROZEN_BENCHMARK_PATH = Path("src/synthworld/benchmarks/asteria-agentic-c08-v2")
@@ -62,7 +65,7 @@ class C08FrozenBundle:
 def c08_frozen_artifact_set_digest(
     files_by_path: Mapping[str, bytes], *, excluded_paths: Iterable[str] = ()
 ) -> str:
-    """Return the canonical path-bound digest for a set of file payloads."""
+    """Hash sorted UTF-8 paths and payload hashes, excluding named self-files."""
 
     excluded = frozenset(excluded_paths)
     digest = hashlib.sha256()
@@ -79,30 +82,35 @@ def _sha256(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _descriptor(payload: bytes) -> dict[str, int | str]:
-    return {"byte_size": len(payload), "sha256": _sha256(payload)}
+def _descriptor(path: str, payload: bytes) -> C08ArtifactDescriptorV2:
+    return C08ArtifactDescriptorV2(
+        path=path,
+        byte_size=len(payload),
+        sha256=_sha256(payload),
+    )
 
 
-def _manifest_bytes(
-    *,
-    artifact_path: str,
-    payload: bytes,
-    visibility: str,
-    public_input_digest: str | None = None,
+def _public_manifest_bytes(payload: bytes) -> bytes:
+    manifest = C08FrozenPublicManifestV2(
+        artifact_set_digest=c08_frozen_artifact_set_digest(
+            {C08_PUBLIC_ARTIFACT: payload}
+        ),
+        artifacts=(_descriptor(C08_PUBLIC_ARTIFACT, payload),),
+    )
+    return canonical_json_bytes(manifest)
+
+
+def _evaluator_manifest_bytes(
+    payload: bytes, public_input_digest: str
 ) -> bytes:
-    payload_name = artifact_path.rsplit("/", 1)[-1]
-    manifest: dict[str, object] = {
-        "artifact_set_digest": c08_frozen_artifact_set_digest({payload_name: payload}),
-        "artifacts": {payload_name: _descriptor(payload)},
-        "benchmark_id": C08_BENCHMARK_ID,
-        "schema_version": C08_SCHEMA_VERSION,
-        "seed": C08_FROZEN_SEED,
-        "synthetic": True,
-        "visibility": visibility,
-    }
-    if public_input_digest is not None:
-        manifest["public_input_digest"] = public_input_digest
-    return canonical_json_value_bytes(manifest)
+    manifest = C08FrozenEvaluatorManifestV2(
+        public_input_digest=public_input_digest,
+        artifact_set_digest=c08_frozen_artifact_set_digest(
+            {C08_EVALUATOR_ARTIFACT: payload}
+        ),
+        artifacts=(_descriptor(C08_EVALUATOR_ARTIFACT, payload),),
+    )
+    return canonical_json_bytes(manifest)
 
 
 def _root_manifest_bytes(
@@ -112,26 +120,21 @@ def _root_manifest_bytes(
     public_artifact_set_digest: str,
     evaluator_artifact_set_digest: str,
 ) -> bytes:
-    artifacts = {
-        path: _descriptor(payload)
-        for path, payload in sorted(files_by_path.items())
-    }
-    manifest = {
-        "artifact_set_digest": c08_frozen_artifact_set_digest(
-            files_by_path, excluded_paths=(C08_FROZEN_MANIFEST,)
+    manifest = C08FrozenRootManifestV2(
+        public_input_digest=public_input_digest,
+        evaluator_public_input_digest=public_input_digest,
+        public_artifact_set_digest=public_artifact_set_digest,
+        evaluator_artifact_set_digest=evaluator_artifact_set_digest,
+        artifact_set_digest=c08_frozen_artifact_set_digest(
+            files_by_path,
+            excluded_paths=(C08_FROZEN_MANIFEST,),
         ),
-        "artifacts": artifacts,
-        "benchmark_id": C08_BENCHMARK_ID,
-        "evaluator_artifact_set_digest": evaluator_artifact_set_digest,
-        "evaluator_public_input_digest": public_input_digest,
-        "public_artifact_set_digest": public_artifact_set_digest,
-        "public_input_digest": public_input_digest,
-        "schema_version": C08_SCHEMA_VERSION,
-        "seed": C08_FROZEN_SEED,
-        "synthetic": True,
-        "visibility": "root",
-    }
-    return canonical_json_value_bytes(manifest)
+        artifacts=tuple(
+            _descriptor(path, payload)
+            for path, payload in sorted(files_by_path.items())
+        ),
+    )
+    return canonical_json_bytes(manifest)
 
 
 def _build_frozen_files() -> tuple[dict[str, bytes], C08FrozenBundle]:
@@ -147,18 +150,11 @@ def _build_frozen_files() -> tuple[dict[str, bytes], C08FrozenBundle]:
     )
     files_by_path = {
         C08_FROZEN_EVALUATOR_PAYLOAD: evaluator_payload,
-        C08_FROZEN_EVALUATOR_MANIFEST: _manifest_bytes(
-            artifact_path=C08_FROZEN_EVALUATOR_PAYLOAD,
-            payload=evaluator_payload,
-            visibility="evaluator",
-            public_input_digest=public_input_digest,
+        C08_FROZEN_EVALUATOR_MANIFEST: _evaluator_manifest_bytes(
+            evaluator_payload, public_input_digest
         ),
         C08_FROZEN_PUBLIC_PAYLOAD: public_payload,
-        C08_FROZEN_PUBLIC_MANIFEST: _manifest_bytes(
-            artifact_path=C08_FROZEN_PUBLIC_PAYLOAD,
-            payload=public_payload,
-            visibility="public",
-        ),
+        C08_FROZEN_PUBLIC_MANIFEST: _public_manifest_bytes(public_payload),
     }
     root_manifest = _root_manifest_bytes(
         files_by_path,
@@ -174,24 +170,10 @@ def _build_frozen_files() -> tuple[dict[str, bytes], C08FrozenBundle]:
         public_artifact_set_digest=public_artifact_set_digest,
         evaluator_artifact_set_digest=evaluator_artifact_set_digest,
         root_artifact_set_digest=c08_frozen_artifact_set_digest(
-            all_files, excluded_paths=(C08_FROZEN_MANIFEST,)
+            all_files,
+            excluded_paths=(C08_FROZEN_MANIFEST,),
         ),
     )
-
-
-def freeze_c08_v2_benchmark(
-    output: Path = C08_FROZEN_BENCHMARK_PATH,
-) -> C08FrozenBundle:
-    """Materialize the deterministic Asteria C08 v2 frozen tree."""
-
-    if output.exists() or output.is_symlink():
-        raise C08FrozenArtifactError(f"refusing to overwrite existing path: {output}")
-    files_by_path, bundle = _build_frozen_files()
-    for relative_path, payload in sorted(files_by_path.items()):
-        destination = output / relative_path
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(payload)
-    return bundle
 
 
 def _is_symlink(node: FrozenNode) -> bool:
@@ -223,167 +205,163 @@ def _read_file(node: FrozenNode, label: str) -> bytes:
         raise C08FrozenArtifactError(f"cannot read {label}") from exc
 
 
-def _canonical_document(payload: bytes, label: str) -> dict[str, object]:
+def _read_canonical_model[ModelT: BaseModel](
+    node: FrozenNode, label: str, model: type[ModelT]
+) -> tuple[bytes, ModelT]:
+    payload = _read_file(node, label)
     try:
-        document = json.loads(payload)
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise C08FrozenArtifactError(f"{label} is not valid UTF-8 JSON") from exc
-    if not isinstance(document, dict):
-        raise C08FrozenArtifactError(f"{label} must contain a JSON object")
-    if canonical_json_value_bytes(document) != payload:
+        parsed = model.model_validate_json(payload)
+    except (TypeError, ValueError) as exc:
+        raise C08FrozenArtifactError(f"{label} is not valid governed JSON") from exc
+    if canonical_json_bytes(parsed) != payload:
         raise C08FrozenArtifactError(f"{label} is not canonical JSON")
-    return document
-
-
-def _require_document_keys(
-    document: dict[str, object], expected: frozenset[str], label: str
-) -> None:
-    if frozenset(document) != expected:
-        raise C08FrozenArtifactError(f"{label} has an invalid field set")
-
-
-def _validate_descriptor(
-    descriptor: object, payload: bytes, label: str
-) -> None:
-    if not isinstance(descriptor, dict):
-        raise C08FrozenArtifactError(f"{label} descriptor must be an object")
-    if frozenset(descriptor) != frozenset(("byte_size", "sha256")):
-        raise C08FrozenArtifactError(f"{label} descriptor has an invalid field set")
-    if descriptor["byte_size"] != len(payload) or descriptor["sha256"] != _sha256(payload):
-        raise C08FrozenArtifactError(f"{label} descriptor does not match its payload")
+    return payload, parsed
 
 
 def _validate_tree_manifest(
-    document: dict[str, object],
+    manifest: C08FrozenPublicManifestV2 | C08FrozenEvaluatorManifestV2,
     *,
     payload_name: str,
     payload: bytes,
-    visibility: str,
-    public_input_digest: str | None,
 ) -> str:
-    expected = {"artifact_set_digest", "artifacts", "benchmark_id", "schema_version", "seed", "synthetic", "visibility"}
-    if public_input_digest is not None:
-        expected.add("public_input_digest")
-    _require_document_keys(document, frozenset(expected), f"{visibility} manifest")
+    descriptor = manifest.artifacts[0]
     if (
-        document["benchmark_id"] != C08_BENCHMARK_ID
-        or document["schema_version"] != C08_SCHEMA_VERSION
-        or document["seed"] != C08_FROZEN_SEED
-        or document["synthetic"] is not True
-        or document["visibility"] != visibility
+        descriptor.path != payload_name
+        or descriptor.byte_size != len(payload)
+        or descriptor.sha256 != _sha256(payload)
     ):
-        raise C08FrozenArtifactError(f"{visibility} manifest metadata mismatch")
-    artifacts = document["artifacts"]
-    if not isinstance(artifacts, dict) or frozenset(artifacts) != frozenset((payload_name,)):
-        raise C08FrozenArtifactError(f"{visibility} manifest inventory mismatch")
-    _validate_descriptor(artifacts[payload_name], payload, f"{visibility}/{payload_name}")
+        raise C08FrozenArtifactError("frozen tree descriptor mismatch")
     expected_digest = c08_frozen_artifact_set_digest({payload_name: payload})
-    if document["artifact_set_digest"] != expected_digest:
-        raise C08FrozenArtifactError(f"{visibility} artifact-set digest mismatch")
-    if public_input_digest is not None and document["public_input_digest"] != public_input_digest:
-        raise C08FrozenArtifactError("evaluator/public digest binding mismatch")
+    if manifest.artifact_set_digest != expected_digest:
+        raise C08FrozenArtifactError("frozen tree artifact-set digest mismatch")
     return expected_digest
 
 
 def _validate_root_manifest(
-    document: dict[str, object], files_by_path: Mapping[str, bytes]
+    manifest: C08FrozenRootManifestV2,
+    files_by_path: Mapping[str, bytes],
 ) -> str:
-    expected = {
-        "artifact_set_digest",
-        "artifacts",
-        "benchmark_id",
-        "evaluator_artifact_set_digest",
-        "evaluator_public_input_digest",
-        "public_artifact_set_digest",
-        "public_input_digest",
-        "schema_version",
-        "seed",
-        "synthetic",
-        "visibility",
-    }
-    _require_document_keys(document, frozenset(expected), "root manifest")
-    if (
-        document["benchmark_id"] != C08_BENCHMARK_ID
-        or document["schema_version"] != C08_SCHEMA_VERSION
-        or document["seed"] != C08_FROZEN_SEED
-        or document["synthetic"] is not True
-        or document["visibility"] != "root"
-    ):
-        raise C08FrozenArtifactError("root manifest metadata mismatch")
-    artifacts = document["artifacts"]
-    if not isinstance(artifacts, dict) or frozenset(artifacts) != frozenset(files_by_path):
-        raise C08FrozenArtifactError("root manifest inventory mismatch")
+    descriptors = {item.path: item for item in manifest.artifacts}
     for path, payload in files_by_path.items():
-        _validate_descriptor(artifacts[path], payload, path)
+        descriptor = descriptors[path]
+        if (
+            descriptor.byte_size != len(payload)
+            or descriptor.sha256 != _sha256(payload)
+        ):
+            raise C08FrozenArtifactError(f"root descriptor mismatch: {path}")
     expected_digest = c08_frozen_artifact_set_digest(
-        files_by_path, excluded_paths=(C08_FROZEN_MANIFEST,)
+        files_by_path,
+        excluded_paths=(C08_FROZEN_MANIFEST,),
     )
-    if document["artifact_set_digest"] != expected_digest:
+    if manifest.artifact_set_digest != expected_digest:
         raise C08FrozenArtifactError("root artifact-set digest mismatch")
     return expected_digest
+
+
+def freeze_c08_v2_benchmark(
+    output: Path = C08_FROZEN_BENCHMARK_PATH,
+    *,
+    replace: bool = False,
+) -> C08FrozenBundle:
+    """Materialize the deterministic Asteria C08 v2 frozen tree."""
+
+    if output.exists() or output.is_symlink():
+        if not replace:
+            raise C08FrozenArtifactError(
+                f"refusing to overwrite existing path: {output}"
+            )
+        _assert_directory(output, C08_FROZEN_ROOT_INVENTORY, "frozen root")
+        public = output / C08_FROZEN_PUBLIC_DIR
+        evaluator = output / C08_FROZEN_EVALUATOR_DIR
+        _assert_directory(public, C08_FROZEN_PUBLIC_INVENTORY, "public tree")
+        _assert_directory(evaluator, C08_FROZEN_EVALUATOR_INVENTORY, "evaluator tree")
+        for relative_path in (
+            C08_FROZEN_MANIFEST,
+            C08_FROZEN_PUBLIC_PAYLOAD,
+            C08_FROZEN_PUBLIC_MANIFEST,
+            C08_FROZEN_EVALUATOR_PAYLOAD,
+            C08_FROZEN_EVALUATOR_MANIFEST,
+        ):
+            _read_file(output / relative_path, relative_path)
+    files_by_path, bundle = _build_frozen_files()
+    write_order = (
+        *sorted(path for path in files_by_path if path != C08_FROZEN_MANIFEST),
+        C08_FROZEN_MANIFEST,
+    )
+    for relative_path in write_order:
+        destination = output / relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(files_by_path[relative_path])
+    return bundle
 
 
 def load_c08_v2_frozen_tree(root: FrozenNode) -> C08FrozenBundle:
     """Load and verify a filesystem or packaged Asteria C08 v2 tree."""
 
     _assert_directory(root, C08_FROZEN_ROOT_INVENTORY, "frozen root")
-    public = _child(root, C08_FROZEN_PUBLIC_DIR)
-    evaluator = _child(root, C08_FROZEN_EVALUATOR_DIR)
-    _assert_directory(public, C08_FROZEN_PUBLIC_INVENTORY, "public tree")
-    _assert_directory(evaluator, C08_FROZEN_EVALUATOR_INVENTORY, "evaluator tree")
-
-    public_payload = _read_file(_child(public, C08_PUBLIC_ARTIFACT), C08_FROZEN_PUBLIC_PAYLOAD)
-    evaluator_payload = _read_file(
-        _child(evaluator, C08_EVALUATOR_ARTIFACT), C08_FROZEN_EVALUATOR_PAYLOAD
+    public_root = _child(root, C08_FROZEN_PUBLIC_DIR)
+    evaluator_root = _child(root, C08_FROZEN_EVALUATOR_DIR)
+    _assert_directory(public_root, C08_FROZEN_PUBLIC_INVENTORY, "public tree")
+    _assert_directory(
+        evaluator_root,
+        C08_FROZEN_EVALUATOR_INVENTORY,
+        "evaluator tree",
     )
-    public_manifest = _canonical_document(
-        _read_file(_child(public, C08_FROZEN_MANIFEST), C08_FROZEN_PUBLIC_MANIFEST),
+
+    public_payload, public_model = _read_canonical_model(
+        _child(public_root, C08_PUBLIC_ARTIFACT),
+        C08_FROZEN_PUBLIC_PAYLOAD,
+        C08AsteriaPublicInputV2,
+    )
+    evaluator_payload, evaluator_model = _read_canonical_model(
+        _child(evaluator_root, C08_EVALUATOR_ARTIFACT),
+        C08_FROZEN_EVALUATOR_PAYLOAD,
+        C08AsteriaEvaluatorV2,
+    )
+    public_manifest_payload, public_manifest = _read_canonical_model(
+        _child(public_root, C08_FROZEN_MANIFEST),
         C08_FROZEN_PUBLIC_MANIFEST,
+        C08FrozenPublicManifestV2,
     )
-    evaluator_manifest = _canonical_document(
-        _read_file(_child(evaluator, C08_FROZEN_MANIFEST), C08_FROZEN_EVALUATOR_MANIFEST),
+    evaluator_manifest_payload, evaluator_manifest = _read_canonical_model(
+        _child(evaluator_root, C08_FROZEN_MANIFEST),
         C08_FROZEN_EVALUATOR_MANIFEST,
+        C08FrozenEvaluatorManifestV2,
     )
-    root_payload = _read_file(_child(root, C08_FROZEN_MANIFEST), C08_FROZEN_MANIFEST)
-    root_manifest = _canonical_document(root_payload, C08_FROZEN_MANIFEST)
+    _, root_manifest = _read_canonical_model(
+        _child(root, C08_FROZEN_MANIFEST),
+        C08_FROZEN_MANIFEST,
+        C08FrozenRootManifestV2,
+    )
 
-    public_document = _canonical_document(public_payload, C08_FROZEN_PUBLIC_PAYLOAD)
-    evaluator_document = _canonical_document(evaluator_payload, C08_FROZEN_EVALUATOR_PAYLOAD)
-    public_model = C08AsteriaPublicInputV2.model_validate(public_document)
-    evaluator_model = C08AsteriaEvaluatorV2.model_validate(evaluator_document)
     public_digest = _sha256(public_payload)
     public_set_digest = _validate_tree_manifest(
         public_manifest,
         payload_name=C08_PUBLIC_ARTIFACT,
         payload=public_payload,
-        visibility="public",
-        public_input_digest=None,
     )
     evaluator_set_digest = _validate_tree_manifest(
         evaluator_manifest,
         payload_name=C08_EVALUATOR_ARTIFACT,
         payload=evaluator_payload,
-        visibility="evaluator",
-        public_input_digest=public_digest,
     )
-    if evaluator_model.public_input_digest != public_digest:
+    if (
+        evaluator_model.public_input_digest != public_digest
+        or evaluator_manifest.public_input_digest != public_digest
+    ):
         raise C08FrozenArtifactError("evaluator/public digest binding mismatch")
     root_files = {
-        C08_FROZEN_EVALUATOR_MANIFEST: _read_file(
-            _child(evaluator, C08_FROZEN_MANIFEST), C08_FROZEN_EVALUATOR_MANIFEST
-        ),
+        C08_FROZEN_EVALUATOR_MANIFEST: evaluator_manifest_payload,
         C08_FROZEN_EVALUATOR_PAYLOAD: evaluator_payload,
-        C08_FROZEN_PUBLIC_MANIFEST: _read_file(
-            _child(public, C08_FROZEN_MANIFEST), C08_FROZEN_PUBLIC_MANIFEST
-        ),
+        C08_FROZEN_PUBLIC_MANIFEST: public_manifest_payload,
         C08_FROZEN_PUBLIC_PAYLOAD: public_payload,
     }
     root_set_digest = _validate_root_manifest(root_manifest, root_files)
     if (
-        root_manifest["public_input_digest"] != public_digest
-        or root_manifest["evaluator_public_input_digest"] != public_digest
-        or root_manifest["public_artifact_set_digest"] != public_set_digest
-        or root_manifest["evaluator_artifact_set_digest"] != evaluator_set_digest
+        root_manifest.public_input_digest != public_digest
+        or root_manifest.evaluator_public_input_digest != public_digest
+        or root_manifest.public_artifact_set_digest != public_set_digest
+        or root_manifest.evaluator_artifact_set_digest != evaluator_set_digest
     ):
         raise C08FrozenArtifactError("root cross-artifact binding mismatch")
     generated = generate_c08_asteria_v2(C08_FROZEN_SEED)
