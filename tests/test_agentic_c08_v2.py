@@ -34,7 +34,7 @@ from synthworld.agentic.c08_v2 import (
     reference_c08_submission,
     semantic_c08_submission,
 )
-from synthworld.agentic.c08_v2.models import C08ScenarioKind
+from synthworld.agentic.c08_v2.models import C08_METRIC_NAMES, C08ScenarioKind
 from synthworld.enterprise.canonical import (
     canonical_json_bytes,
     canonical_json_value_bytes,
@@ -952,7 +952,7 @@ def test_solver_and_evaluator_defensive_invariants(
     monkeypatch.setattr(
         c08_metrics,
         "C08_METRIC_NAMES",
-        tuple(reversed(c08_metrics.C08_METRIC_NAMES)),
+        tuple(reversed(C08_METRIC_NAMES)),
     )
     with pytest.raises(AssertionError, match="construction order"):
         evaluate_c08_submission(benchmark, reference)
