@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import shutil
+from collections.abc import Mapping
 from pathlib import Path
 
 import pytest
@@ -155,7 +156,7 @@ def _tree_bytes(root: Path) -> dict[str, bytes]:
     }
 
 
-def _v1_metadata_bytes(document: dict[str, object]) -> bytes:
+def _v1_metadata_bytes(document: Mapping[str, object]) -> bytes:
     return (json.dumps(document, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
@@ -265,7 +266,7 @@ def test_frozen_manifests_use_governed_immutable_models() -> None:
     assert canonical_json_bytes(evaluator) == evaluator_payload
     assert canonical_json_bytes(root) == root_payload
     with pytest.raises(ValidationError, match="frozen"):
-        public.visibility = "evaluator"
+        setattr(public, "visibility", "evaluator")
 
 
 def test_v1_complete_source_tree_bytes_are_preserved() -> None:

@@ -502,8 +502,9 @@ def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
             benchmark, action_index, ("fabricated-observation",)
         )
     report = evaluate_c08_submission(benchmark, changed)
-    assert _metric(report, metric_name).value is not None
-    assert _metric(report, metric_name).value < 1.0
+    metric = _metric(report, metric_name)
+    assert metric.value is not None
+    assert metric.value < 1.0
 
 
 def test_discarded_scenario_is_not_distinguishable_from_missing_submission() -> None:

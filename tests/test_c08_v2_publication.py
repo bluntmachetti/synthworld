@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path
@@ -185,7 +186,7 @@ def _assert_canonical_files(payloads: dict[str, bytes]) -> None:
             assert canonical_json_value_bytes(json.loads(payload)) == payload
 
 
-def _v1_metadata_bytes(document: dict[str, object]) -> bytes:
+def _v1_metadata_bytes(document: Mapping[str, object]) -> bytes:
     return (json.dumps(document, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
