@@ -266,7 +266,7 @@ def test_frozen_manifests_use_governed_immutable_models() -> None:
     assert canonical_json_bytes(evaluator) == evaluator_payload
     assert canonical_json_bytes(root) == root_payload
     with pytest.raises(ValidationError, match="frozen"):
-        setattr(public, "visibility", "evaluator")
+        public.visibility = "public"
 
 
 def test_v1_complete_source_tree_bytes_are_preserved() -> None:

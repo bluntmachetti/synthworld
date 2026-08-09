@@ -15,11 +15,11 @@ from synthworld.agentic.c08_v2.models import (
     C08_SUBMISSION_ARTIFACT,
     C08ArtifactDescriptorV2,
     C08ArtifactManifestV2,
+    C08ArtifactVisibility,
     C08AsteriaBenchmarkV2,
     C08AsteriaEvaluatorV2,
     C08AsteriaPublicInputV2,
     C08AsteriaSubmissionV2,
-    C08ArtifactVisibility,
     C08BenchmarkId,
 )
 from synthworld.enterprise.canonical import canonical_json_bytes
