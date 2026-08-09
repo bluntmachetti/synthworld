@@ -8,8 +8,8 @@ from synthworld.agentic.c08_v2.models import (
     C08_METRIC_NAMES,
     C08AsteriaBenchmarkV2,
     C08AsteriaSubmissionV2,
-    C08MetricV2,
     C08MetricsReportV2,
+    C08MetricV2,
 )
 from synthworld.enterprise.canonical import canonical_json_bytes
 
