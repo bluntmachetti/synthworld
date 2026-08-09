@@ -719,9 +719,7 @@ def test_measurement_scope_strings_are_nonblank_unique_and_canonical(
 ) -> None:
     scope = _benchmark().public.measurement_scope
     with pytest.raises(ValidationError, match=message):
-        type(scope).model_validate(
-            {**scope.model_dump(mode="json"), "proves": values}
-        )
+        type(scope).model_validate({**scope.model_dump(mode="json"), "proves": values})
 
 
 def test_public_action_and_stream_canonical_contracts_fail_closed() -> None:
@@ -909,9 +907,7 @@ def test_serialization_rejects_invalid_payload_and_manifest_bindings() -> None:
     mismatched_manifest = dict(public_artifacts)
     manifest_document = json.loads(mismatched_manifest["manifest.json"])
     manifest_document["visibility"] = "evaluator"
-    mismatched_manifest["manifest.json"] = canonical_json_value_bytes(
-        manifest_document
-    )
+    mismatched_manifest["manifest.json"] = canonical_json_value_bytes(manifest_document)
     with pytest.raises(C08ArtifactError, match="manifest binding"):
         load_c08_public_artifacts(mismatched_manifest)
 
