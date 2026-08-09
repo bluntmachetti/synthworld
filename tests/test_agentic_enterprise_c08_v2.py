@@ -9,6 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from synthworld.agentic.enterprise.c08_v2 import (
+    DEFAULT_C08_REFERENCE_SEED,
     C08CaseOutcomeV2,
     C08EvaluationError,
     C08EvaluationMetricV2,
@@ -22,7 +23,6 @@ from synthworld.agentic.enterprise.c08_v2 import (
     C08SourceActionV2,
     C08SourceWorldV2,
     C08SubmissionV2,
-    DEFAULT_C08_REFERENCE_SEED,
     compile_c08_truth,
     evaluate_c08,
     export_c08_artifacts,
