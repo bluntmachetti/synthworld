@@ -212,9 +212,9 @@ Reviewed: 2026-08-09. Seed: `20260809`. Schema version: `2.0.0`.
 
 This record covers independently versioned `asteria-agentic-c08-v2` and
 `enterprise-agentic-c08-v2` committed frozen-artifact candidates. It records
-current committed bytes after native adversarial corrections `0b46a8a`,
-`93e8546`, `694dbe6`, and `4dfb191`. It is not a publication record or a claim
-that verification gates passed.
+current committed bytes after native adversarial correction and CI hardening.
+It is not an external publication or deployment record. Repository verification
+evidence is recorded below.
 
 ### Asteria inventory and digest roots
 
@@ -240,9 +240,9 @@ only root `manifest.json`.
 
 The root, public, and evaluator frozen manifests are independent immutable
 models. Their generated schema files have committed SHA-256 values
-`528593f43667c5d036509f92b67f68c159ce0bddc9e5445971ac69086ece5b82`,
-`93a17d3f2136e4bc180b5428d66c3fa41edd7b9ea86aa57935ac0117618c57e8`,
-and `a7629b3d2ef75bcad3d6dc7cb22fe921f1eda13184c8473d2f326f9ed9c7457a`
+`37e2f49fac5d2a32de1de9d444276682adbc154f0e71a0a638018fc1b6d7e614`,
+`005f39c54d54470be50bd940b0432abd010113e6aad7d9541d5516eb7b723156`,
+and `cb46c9f67ef98bdf607f042ed05b0acc3e7753cb8628284d871d2abc2a1f93a3`
 respectively.
 
 ### Enterprise inventory and checksum record
@@ -300,7 +300,8 @@ no submission rows, observations, evidence IDs, action IDs, outcomes, evaluator,
 or truth. Asteria's missing/discarded, fabricated, wrong-action, and extra records
 each lower their dedicated metric from `6/6` to `5/6`. Enterprise missing lowers
 completeness to `5/6`; fabricated, wrong-action, and extra expose their dedicated
-rate at `1/7`. These committed records do not prove their reproduction tests ran.
+rate at `1/7`. GitHub Actions run `31329844103` reproduced these records from
+seed `20260809` without changing the committed fixture bytes.
 
 ### Completed native adversarial findings
 
@@ -343,14 +344,19 @@ and `3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f`.
 | `schemas/enterprise-agentic-public-input.schema.json` | `97418f7200ffdbc9665562e0560ce55cdf3ab65f3ee4baa4843a114f8aae9b1b` |
 | `schemas/enterprise-agentic-truth.schema.json` | `5a3352b538fcac485e3d9d0449760586201207cb91897d113371e2ff4b377a1a` |
 
-The assertions exist, but this documentation reconciliation did not run them.
+GitHub Actions run `31329844103` executed the preservation assertions and passed.
 
-### Pending evidence, scope, and publication status
+### Verification evidence, scope, and publication status
 
-CI, Ruff lint, Ruff format checking, schema `--check`, package build,
-isolated-wheel execution, clean-install loading, and byte-for-byte regeneration
-verification remain pending. The current publication test also pins an earlier
-`a0b012...`; no passing checksum-root gate is claimed.
+GitHub Actions run `31329844103` at head `60df649` passed on Python 3.12 and
+Python 3.14. Both matrix legs completed Ruff lint, Ruff format checking, mypy,
+`2227` tests with 100% branch coverage, generated-document and generated-schema
+checks, package build and wheel checks, clean-install loading, public-consumer
+boundary checks, and byte-for-byte regeneration and integrity verification. The
+secret scan also passed. Publication gates pin enterprise checksum-record digest
+`a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123`
+and Asteria root artifact-set digest
+`5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a`.
 
 Reports measure offline artifact submissions only. They do not prove live
 evidence retention, durable logging, enforcement behavior, deployment, real
@@ -377,7 +383,6 @@ Enterprise additionally requires a same-action/same-kind different-handle
 distractor for every requirement, and measurement_scope is schema-required on
 reports after 4de6df8.
 
-This records implemented contract corrections and completed native adversarial
-resolutions only. CI, Ruff lint and format, schema --check, package builds,
-isolated-wheel execution, clean-install checks, and regeneration verification
-remain pending; no registry or publication completion is asserted.
+This records implemented contract corrections, completed native adversarial
+resolutions, and the passing repository verification run above. No registry,
+external publication, deployment, or live-system completion is asserted.
