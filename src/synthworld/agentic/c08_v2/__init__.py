@@ -59,3 +59,26 @@ __all__ = [
     "reference_c08_submission",
     "semantic_c08_submission",
 ]
+from synthworld.agentic.c08_v2.frozen import (
+    C08_FROZEN_BENCHMARK_PATH,
+    C08_FROZEN_DIGEST_ALGORITHM,
+    C08_FROZEN_SEED,
+    C08FrozenArtifactError,
+    C08FrozenBundle,
+    c08_frozen_artifact_set_digest,
+    freeze_c08_v2_benchmark,
+    load_c08_v2_frozen_tree,
+    load_packaged_c08_v2_benchmark,
+)
+
+__all__ += (
+    "C08_FROZEN_BENCHMARK_PATH",
+    "C08_FROZEN_DIGEST_ALGORITHM",
+    "C08_FROZEN_SEED",
+    "C08FrozenArtifactError",
+    "C08FrozenBundle",
+    "c08_frozen_artifact_set_digest",
+    "freeze_c08_v2_benchmark",
+    "load_c08_v2_frozen_tree",
+    "load_packaged_c08_v2_benchmark",
+)
