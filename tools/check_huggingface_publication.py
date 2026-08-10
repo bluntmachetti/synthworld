@@ -125,9 +125,7 @@ def read_card_configs(path: Path) -> list[dict[str, Any]]:
                 or not isinstance(data_file.get("split"), str)
             ):
                 raise PublicationError("dataset card: data file has invalid fields")
-            data_files.append(
-                {"path": data_file["path"], "split": data_file["split"]}
-            )
+            data_files.append({"path": data_file["path"], "split": data_file["split"]})
         normalized.append(
             {
                 "config_name": config["config_name"],
@@ -303,9 +301,8 @@ def derive_registry_state(
                     evaluator_marker = re.compile(
                         r"(?:^|[-_./])(evaluator|answer|truth)(?:$|[-_./])"
                     )
-                    if (
-                        artifact_kind != "public_input"
-                        or evaluator_marker.search(source_path.casefold())
+                    if artifact_kind != "public_input" or evaluator_marker.search(
+                        source_path.casefold()
                     ):
                         raise PublicationError(
                             f"{artifact_id}: Viewer publication requires "
@@ -466,9 +463,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("docs/_schemas/benchmarks-resolved.schema.json"),
     )
-    parser.add_argument(
-        "--card", type=Path, default=Path("huggingface/README.md")
-    )
+    parser.add_argument("--card", type=Path, default=Path("huggingface/README.md"))
     parser.add_argument("--repository-root", type=Path, default=Path("."))
     parser.add_argument("--emit-plan", type=Path)
     return parser

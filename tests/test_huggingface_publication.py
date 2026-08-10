@@ -237,9 +237,7 @@ def test_registry_ignores_valid_non_hf_gate_targets() -> None:
         }
     )
 
-    operations, benchmarks, summary = publication.derive_registry_state(
-        registry, ROOT
-    )
+    operations, benchmarks, summary = publication.derive_registry_state(registry, ROOT)
 
     assert operations == []
     assert benchmarks == []
@@ -741,7 +739,7 @@ def test_registry_binds_artifact_identity(tmp_path: Path, field: str) -> None:
                     "benchmark_version": "1.0.0",
                     "id": "sample",
                     "lifecycle": "published",
-                "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
+                    "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
                 }
             ]
         }
@@ -756,9 +754,7 @@ def test_registry_binds_artifact_identity(tmp_path: Path, field: str) -> None:
 
 
 @pytest.mark.parametrize("source_path", [".", "../escape.json", "absolute"])
-def test_registry_rejects_source_path_escape(
-    tmp_path: Path, source_path: str
-) -> None:
+def test_registry_rejects_source_path_escape(tmp_path: Path, source_path: str) -> None:
     if source_path == "absolute":
         source_path = str(tmp_path.parent / "escape.json")
     with pytest.raises(publication.PublicationError, match="escapes repository"):
@@ -937,8 +933,7 @@ def test_protected_workflow_has_no_hf_credential_or_upload_command() -> None:
     assert protected["environment"] == "hugging-face-publication"
     condition = " ".join(protected["if"].split())
     assert condition == (
-        "github.event_name == 'workflow_dispatch' && "
-        "github.ref == 'refs/heads/main'"
+        "github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'"
     )
     assert "permissions:\n  contents: read" in workflow
     assert "persist-credentials: false" in workflow
@@ -950,8 +945,7 @@ def test_protected_workflow_has_no_hf_credential_or_upload_command() -> None:
     ]
     assert action_refs
     assert all(
-        len(ref) == 40 and set(ref) <= set("0123456789abcdef")
-        for ref in action_refs
+        len(ref) == 40 and set(ref) <= set("0123456789abcdef") for ref in action_refs
     )
     lowered = workflow.lower()
     for forbidden in (
