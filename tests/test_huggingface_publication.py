@@ -52,7 +52,8 @@ def _complete_registry(registry: dict[str, Any]) -> dict[str, Any]:
 
 
 def _manifest() -> dict[str, Any]:
-    return json.loads(MANIFEST.read_text(encoding="utf-8"))
+    manifest: dict[str, Any] = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    return manifest
 
 
 def _write_json(path: Path, value: object) -> None:
@@ -393,7 +394,7 @@ def test_registry_rejects_non_dict_gate() -> None:
 
 
 def test_registry_rejects_missing_gate_id() -> None:
-    registry = {
+    registry: dict[str, Any] = {
         "benchmarks": [
             {
                 "artifact_ids": [],

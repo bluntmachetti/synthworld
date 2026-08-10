@@ -193,7 +193,7 @@ def _approved_hf_gate(
         raise PublicationError(
             f"{benchmark_id}: required HF publication checks did not pass"
         )
-    return gate_targets
+    return set(gate_targets)
 
 
 def derive_registry_state(
