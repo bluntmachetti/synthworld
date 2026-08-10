@@ -60,7 +60,7 @@ _CLI_EXIT_CODES = {
 }
 
 
-class _CliFailure(Exception):
+class _CliError(Exception):
     def __init__(self, category: _CliErrorCategory) -> None:
         super().__init__(category.value)
         self.category = category
@@ -204,7 +204,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     try:
         payload = _load_source(arguments.source)
-    except _CliFailure as error:
+    except _CliError as error:
         return _emit_cli_failure(error.category)
     try:
         namespace_salt = _load_namespace_salt(arguments.namespace_salt_file)
@@ -215,7 +215,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 arguments.max_principals_per_organisation
             ),
         )
-    except _CliFailure as error:
+    except _CliError as error:
         return _emit_cli_failure(error.category)
     except (TypeError, ValueError, ValidationError):
         return _emit_cli_failure(_CliErrorCategory.CONFIGURATION)
@@ -269,11 +269,11 @@ def _load_source(path: Path) -> Mapping[str, object]:
         else:
             raise ValueError("unsupported_source_suffix")
     except (UnicodeError, ValueError, json.JSONDecodeError, yaml.YAMLError) as error:
-        raise _CliFailure(_CliErrorCategory.SOURCE) from error
+        raise _CliError(_CliErrorCategory.SOURCE) from error
     except (MemoryError, RecursionError) as error:
-        raise _CliFailure(_CliErrorCategory.RESOURCE_LIMIT) from error
+        raise _CliError(_CliErrorCategory.RESOURCE_LIMIT) from error
     if not isinstance(loaded, Mapping):
-        raise _CliFailure(_CliErrorCategory.SOURCE)
+        raise _CliError(_CliErrorCategory.SOURCE)
     return cast(Mapping[str, object], loaded)
 
 
@@ -284,11 +284,11 @@ def _read_bounded_regular_file(
     failure_category: _CliErrorCategory,
 ) -> bytes:
     if not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_NONBLOCK"):
-        raise _CliFailure(_CliErrorCategory.PATH_SAFETY)
+        raise _CliError(_CliErrorCategory.PATH_SAFETY)
     try:
         before = path.lstat()
         if stat.S_ISLNK(before.st_mode) or not stat.S_ISREG(before.st_mode):
-            raise _CliFailure(_CliErrorCategory.PATH_SAFETY)
+            raise _CliError(_CliErrorCategory.PATH_SAFETY)
         flags = (
             os.O_RDONLY
             | os.O_NOFOLLOW
@@ -304,14 +304,14 @@ def _read_bounded_regular_file(
                 or opened.st_dev != before.st_dev
                 or opened.st_ino != before.st_ino
             ):
-                raise _CliFailure(_CliErrorCategory.PATH_SAFETY)
+                raise _CliError(_CliErrorCategory.PATH_SAFETY)
             payload = source.read(max_bytes + 1)
-    except _CliFailure:
+    except _CliError:
         raise
     except OSError as error:
-        raise _CliFailure(failure_category) from error
+        raise _CliError(failure_category) from error
     if len(payload) > max_bytes:
-        raise _CliFailure(_CliErrorCategory.RESOURCE_LIMIT)
+        raise _CliError(_CliErrorCategory.RESOURCE_LIMIT)
     return payload
 
 
@@ -324,13 +324,13 @@ def _load_namespace_salt(path: Path) -> str:
     if payload.endswith(b"\n"):
         payload = payload[:-1]
     if len(payload) != 64:
-        raise _CliFailure(_CliErrorCategory.CONFIGURATION)
+        raise _CliError(_CliErrorCategory.CONFIGURATION)
     try:
         salt = payload.decode("ascii")
     except UnicodeDecodeError as error:
-        raise _CliFailure(_CliErrorCategory.CONFIGURATION) from error
+        raise _CliError(_CliErrorCategory.CONFIGURATION) from error
     if any(character not in "0123456789abcdef" for character in salt):
-        raise _CliFailure(_CliErrorCategory.CONFIGURATION)
+        raise _CliError(_CliErrorCategory.CONFIGURATION)
     return salt
 
 

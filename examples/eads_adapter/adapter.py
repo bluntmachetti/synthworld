@@ -22,8 +22,14 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import Final, Literal, Self, cast
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
-from pydantic import model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from examples.eads_adapter.models import (
     MAX_SOURCE_BYTES,

@@ -297,7 +297,9 @@ def test_mapping_and_downscale_declarations_are_explicit(tmp_path: Path) -> None
     assert report.max_principals_per_organisation == 16
     assert any(value == 16 for value in declaration.values())
     assert outcome.artifacts
-    assert not any(gap.code is AdapterCode.NO_SUPPORTED_ACCESS_MAPPING for gap in report.gaps)
+    assert not any(
+        gap.code is AdapterCode.NO_SUPPORTED_ACCESS_MAPPING for gap in report.gaps
+    )
 
 
 @pytest.mark.parametrize("seed", [-1, MAX_SEED + 1, True, 1.5])
@@ -633,13 +635,19 @@ def test_cli_json_enforces_api_node_depth_string_and_collection_limits(
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_NODES", 8)
     node_exit = cli_module.main(_cli_args(source, salt, tmp_path / "nodes"))
     assert node_exit == 1
-    assert _report_from_disk(tmp_path / "nodes").error is AdapterCode.SOURCE_NODE_LIMIT_EXCEEDED
+    assert (
+        _report_from_disk(tmp_path / "nodes").error
+        is AdapterCode.SOURCE_NODE_LIMIT_EXCEEDED
+    )
 
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_NODES", 100_000)
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_DEPTH", 2)
     depth_exit = cli_module.main(_cli_args(source, salt, tmp_path / "depth"))
     assert depth_exit == 1
-    assert _report_from_disk(tmp_path / "depth").error is AdapterCode.SOURCE_DEPTH_LIMIT_EXCEEDED
+    assert (
+        _report_from_disk(tmp_path / "depth").error
+        is AdapterCode.SOURCE_DEPTH_LIMIT_EXCEEDED
+    )
 
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_DEPTH", 64)
     payload = _source_payload()
@@ -945,7 +953,10 @@ def test_duplicate_organisation_is_fail_closed_and_emits_no_artifacts(
     assert any(
         gap.code is AdapterCode.DUPLICATE_ORGANISATION_ID for gap in report.gaps
     )
-    assert all(outcome.status.value == "failed" for outcome in report.organisation_outcomes)
+    assert all(
+        outcome.status.value == "failed"
+        for outcome in report.organisation_outcomes
+    )
     assert _all_artifacts(report) == ()
 
 
@@ -1109,9 +1120,9 @@ def test_artifact_inventories_are_exact_typed_and_byte_bound(tmp_path: Path) -> 
     )
     first = _all_artifacts(report)[0]
     moved = first.model_copy(update={"path": f"moved/{first.path}"})
-    assert adapter_module._artifact_set_digest((moved,) + _all_artifacts(report)[1:]) != (
-        report.artifact_set_digest
-    )
+    assert adapter_module._artifact_set_digest(
+        (moved, *_all_artifacts(report)[1:]),
+    ) != report.artifact_set_digest
 
 
 def test_all_json_artifacts_are_canonical_lf_with_one_trailing_newline(
@@ -1183,7 +1194,9 @@ def test_public_loader_is_independent_of_private_and_evaluator_trees(
 ) -> None:
     output_root, report = _run(tmp_path, _source_payload())
     public_input = next(
-        record for record in report.public_artifacts if record.kind is ArtifactKind.PUBLIC_INPUT
+        record
+        for record in report.public_artifacts
+        if record.kind is ArtifactKind.PUBLIC_INPUT
     )
     source_public = (output_root / public_input.path).parent
     public_only_root = tmp_path / "public-only"

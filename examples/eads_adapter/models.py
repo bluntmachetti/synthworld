@@ -369,6 +369,6 @@ __all__ = (
     "MAX_SOURCE_DEPTH",
     "MAX_SOURCE_NODES",
     "MAX_SOURCE_TEXT_BYTES",
-    "SourceVintage",
     "parse_source",
+    "SourceVintage",
 )
