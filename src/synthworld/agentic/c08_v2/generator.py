@@ -113,9 +113,7 @@ def generate_c08_asteria_v2(seed: int = 20260809) -> C08AsteriaBenchmarkV2:
         scope,
         scenario,
         required_kinds,
-    ) in enumerate(
-        action_specs, start=1
-    ):
+    ) in enumerate(action_specs, start=1):
         action_id = _stable_id(seed, "action", action_index)
         public_actions.append(
             C08PublicActionV2(

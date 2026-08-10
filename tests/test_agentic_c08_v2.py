@@ -83,8 +83,7 @@ def test_generation_is_deterministic_and_scope_is_honest() -> None:
     assert first == second
     assert first.public.measurement_scope.offline_artifacts_only is True
     assert (
-        "production logging behavior"
-        in first.public.measurement_scope.does_not_prove
+        "production logging behavior" in first.public.measurement_scope.does_not_prove
     )
     public_json = first.public.model_dump_json()
     assert "required_observation_ids" not in public_json
@@ -135,13 +134,14 @@ def test_public_evaluator_submission_artifacts_are_separate_and_bound() -> None:
         "c08-asteria-submission.json",
         "manifest.json",
     }
-    assert b"required_observation_ids" not in public_artifacts[
-        "c08-asteria-public.json"
-    ]
+    assert (
+        b"required_observation_ids" not in public_artifacts["c08-asteria-public.json"]
+    )
     assert all(payload.endswith(b"\n") for payload in public_artifacts.values())
-    assert load_c08_bundle(
-        public_artifacts, evaluator_artifacts, submission_artifacts
-    ) == benchmark
+    assert (
+        load_c08_bundle(public_artifacts, evaluator_artifacts, submission_artifacts)
+        == benchmark
+    )
     assert load_c08_public_artifacts(public_artifacts) == benchmark.public
     assert load_c08_evaluator_artifacts(evaluator_artifacts) == benchmark.evaluator
     assert load_c08_submission_artifacts(
@@ -149,8 +149,9 @@ def test_public_evaluator_submission_artifacts_are_separate_and_bound() -> None:
     ) == reference_c08_submission(benchmark)
 
 
-def test_public_requirement_semantics_construct_a_reference_without_exact_truth(
-) -> None:
+def test_public_requirement_semantics_construct_a_reference_without_exact_truth() -> (
+    None
+):
     benchmark = _benchmark()
     semantic_submission = semantic_c08_submission(benchmark.public)
     assert semantic_submission == reference_c08_submission(benchmark)
@@ -304,9 +305,7 @@ def test_discarded_scenario_is_not_distinguishable_from_missing_submission() -> 
         update={
             "rows": (
                 *reference.rows[:-1],
-                reference.rows[-1].model_copy(
-                    update={"retained_observation_ids": ()}
-                ),
+                reference.rows[-1].model_copy(update={"retained_observation_ids": ()}),
             )
         }
     )
@@ -328,7 +327,7 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
                 retained_observation_ids=(),
             )
             for action in benchmark.public.actions
-        )
+        ),
     )
     report = evaluate_c08_submission(benchmark, empty)
     assert _metric(report, "exact_evidence_match").value == 0.0
@@ -381,8 +380,9 @@ def test_deterministic_digest_and_input_validation() -> None:
         generate_c08_asteria_v2(-1)
 
 
-def test_submission_digest_rejects_cross_public_replay_in_evaluation_and_loading(
-) -> None:
+def test_submission_digest_rejects_cross_public_replay_in_evaluation_and_loading() -> (
+    None
+):
     source = _benchmark()
     target = generate_c08_asteria_v2(8)
     submission = reference_c08_submission(source)
@@ -405,9 +405,7 @@ def test_submission_digest_rejects_cross_public_replay_in_evaluation_and_loading
         }
     )
     with pytest.raises(C08EvaluationError, match="evaluator/public digest"):
-        evaluate_c08_submission(
-            tampered_benchmark, reference_c08_submission(source)
-        )
+        evaluate_c08_submission(tampered_benchmark, reference_c08_submission(source))
 
 
 def test_schema_tool_is_deterministic_and_check_detects_drift_and_missing(

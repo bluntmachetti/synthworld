@@ -116,9 +116,7 @@ class C08SourceWorldV2(SyntheticModel):
         for event in self.evidence_events:
             action_kind = (event.action_id, event.kind)
             if action_kind in observed_action_kinds:
-                raise ValueError(
-                    "C08 evidence kinds must be unique per action"
-                )
+                raise ValueError("C08 evidence kinds must be unique per action")
             observed_action_kinds.add(action_kind)
             action = actions.get(event.action_id)
             if action is None:
@@ -197,9 +195,7 @@ class C08PublicInputV2(SyntheticModel):
         for event in self.evidence_events:
             action_kind = (event.action_id, event.kind)
             if action_kind in observed_action_kinds:
-                raise ValueError(
-                    "C08 public evidence kinds must be unique per action"
-                )
+                raise ValueError("C08 public evidence kinds must be unique per action")
             observed_action_kinds.add(action_kind)
             action = actions_by_id.get(event.action_id)
             if action is None:

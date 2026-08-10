@@ -116,9 +116,7 @@ class C08AsteriaPublicInputV2(SyntheticModel):
         observation_orders = tuple(
             item.observation_order for item in self.evidence_observations
         )
-        if observation_orders != tuple(
-            range(1, len(self.evidence_observations) + 1)
-        ):
+        if observation_orders != tuple(range(1, len(self.evidence_observations) + 1)):
             raise ValueError("public observations must preserve order")
         if any(
             item.action_event_id not in set(action_ids)
@@ -195,9 +193,7 @@ class C08AsteriaBenchmarkV2(SyntheticModel):
 
     @model_validator(mode="after")
     def bind_public_and_evaluator(self) -> Self:
-        public_actions = {
-            item.action_event_id: item for item in self.public.actions
-        }
+        public_actions = {item.action_event_id: item for item in self.public.actions}
         binding_ids = {item.action_event_id for item in self.evaluator.bindings}
         observations = {
             item.observation_id: item for item in self.public.evidence_observations

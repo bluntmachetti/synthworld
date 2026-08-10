@@ -55,9 +55,9 @@ def _evidence_id(
     kind_index: int,
     kind: C08EvidenceKindV2,
 ) -> str:
-    suffix = _reference_id(
-        seed, "evidence", action_index * 10 + kind_index
-    ).split("-", 1)[1]
+    suffix = _reference_id(seed, "evidence", action_index * 10 + kind_index).split(
+        "-", 1
+    )[1]
     return f"evidence-{kind.value}-{suffix}"
 
 
@@ -92,9 +92,11 @@ def _build_source(seed: int) -> C08SourceWorldV2:
                 if kind_index < len(required_kinds)
                 else f"evidence-{kind.value}-{extra_id}"
             )
-            payload_digest = _reference_id(
-                seed, "payload", index * 10 + kind_index
-            ).split("-", 1)[1].ljust(64, "0")
+            payload_digest = (
+                _reference_id(seed, "payload", index * 10 + kind_index)
+                .split("-", 1)[1]
+                .ljust(64, "0")
+            )
             events.append(
                 {
                     "sequence": sequence,
@@ -115,9 +117,7 @@ def _build_source(seed: int) -> C08SourceWorldV2:
 def reference_submission_from_public(public: C08PublicInputV2) -> C08SubmissionV2:
     """Construct the exact reference submission using only public evidence semantics."""
 
-    events_by_semantics: dict[
-        tuple[str, C08EvidenceKindV2], C08EvidenceEventV2
-    ] = {}
+    events_by_semantics: dict[tuple[str, C08EvidenceKindV2], C08EvidenceEventV2] = {}
     for event in public.evidence_events:
         key = (event.action_id, event.kind)
         if key in events_by_semantics:
