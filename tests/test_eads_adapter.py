@@ -5,9 +5,9 @@ import hashlib
 import json
 import os
 import shutil
-from collections.abc import Iterator, Mapping
+from collections.abc import ItemsView, Iterator, Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
@@ -27,8 +27,8 @@ from examples.eads_adapter import __main__ as cli_module
 from examples.eads_adapter import adapter as adapter_module
 from examples.eads_adapter.models import (
     MAX_ORGANISATIONS,
-    MAX_SEED,
     MAX_SOURCE_TEXT_BYTES,
+    SourceVintage,
 )
 from synthworld.enterprise.serialization import (
     load_public_enterprise_identity_access_universe,
@@ -42,6 +42,7 @@ REPORT_RELATIVE_PATH = Path("private/reports/eads-adapter-gap-report.json")
 NAMESPACE_SALT = "a" * 64
 REPORT_SCHEMA_VERSION = "2.0.0"
 EXPECTED_ADAPTER_VERSION = "repository-eads-shaped-structure-v1"
+MAX_SEED = adapter_module.MAX_SEED
 
 
 def _canonical_json_bytes(value: object) -> bytes:
@@ -85,8 +86,9 @@ def _run(
 ) -> tuple[Path, AdapterRunReport]:
     output_root = tmp_path / name
     report = run_adapter(
-        source_payload=payload,
-        output_root=output_root,
+        payload=cast(Mapping[str, object], payload),
+        vintage=SourceVintage.SDK_SIZE_V1,
+        output_dir=output_root,
         config=config or _config(),
     )
     return output_root, report
@@ -232,11 +234,14 @@ class _StatefulSource(Mapping[str, object]):
     def __len__(self) -> int:
         return len(self.payload)
 
-    def items(self) -> Iterator[tuple[str, object]]:
-        stable_items = tuple(self.payload.items())
-        yield from stable_items
-        self.payload["organisations"] = [object()]
-        self.exhausted = True
+    def items(self) -> ItemsView[str, object]:
+        def stateful_items() -> Iterator[tuple[str, object]]:
+            stable_items = tuple(self.payload.items())
+            yield from stable_items
+            self.payload["organisations"] = [object()]
+            self.exhausted = True
+
+        return cast(ItemsView[str, object], stateful_items())
 
 
 def test_fixture_is_safely_fictional_and_current_contract_compiles(
@@ -257,7 +262,7 @@ def test_fixture_is_safely_fictional_and_current_contract_compiles(
     assert report.network_access is False
     assert report.real_eads_compatibility is False
     assert report.status.value == "succeeded"
-    assert report.error is None
+    assert report.error_code is None
     assert _report_from_disk(output_root) == report
 
 
@@ -273,8 +278,8 @@ def test_fictional_names_do_not_drive_mapping_or_exclusion(tmp_path: Path) -> No
     _, report = _run(tmp_path, payload)
 
     assert report.status.value == "succeeded"
-    assert len(report.organisation_outcomes) == 1
-    assert report.organisation_outcomes[0].status.value == "compiled"
+    assert len(report.outcomes) == 1
+    assert report.outcomes[0].status.value == "compiled"
 
 
 def test_mapping_and_downscale_declarations_are_explicit(tmp_path: Path) -> None:
@@ -285,7 +290,7 @@ def test_mapping_and_downscale_declarations_are_explicit(tmp_path: Path) -> None
         config=_config(max_principals_per_organisation=16),
     )
 
-    outcome = report.organisation_outcomes[0]
+    outcome = report.outcomes[0]
     assert outcome.downscale is not None
     declaration = outcome.downscale.model_dump(mode="json")
     assert report.max_principals_per_organisation == 16
@@ -344,14 +349,14 @@ def test_source_semantic_discriminators_are_ascii_only() -> None:
     organisation["services"][0]["service_type"] = "ficti\u00f3nal-api"
 
     with pytest.raises(ValidationError, match="ascii"):
-        parse_source(payload)
+        parse_source(payload, SourceVintage.SDK_SIZE_V1)
 
 
 def test_source_descriptive_strings_allow_nfc_unicode() -> None:
     payload = _source_payload()
     _first_organisation(payload)["name"] = "Fictional Caf\u00e9 Organisation"
 
-    source = parse_source(payload)
+    source = parse_source(payload, SourceVintage.SDK_SIZE_V1)
 
     assert source.organisations[0].name == "Fictional Caf\u00e9 Organisation"
 
@@ -362,12 +367,12 @@ def test_api_rejects_non_nfc_and_byte_oversized_source_strings(
     non_nfc = _source_payload()
     _first_organisation(non_nfc)["name"] = "Cafe\u0301"
     _, non_nfc_report = _run(tmp_path, non_nfc, name="non-nfc")
-    assert non_nfc_report.error is AdapterCode.SOURCE_TEXT_NOT_NFC
+    assert non_nfc_report.error_code is AdapterCode.SOURCE_TEXT_NOT_NFC
 
     oversized = _source_payload()
     _first_organisation(oversized)["name"] = "x" * (MAX_SOURCE_TEXT_BYTES + 1)
     _, oversized_report = _run(tmp_path, oversized, name="oversized-text")
-    assert oversized_report.error is AdapterCode.SOURCE_TEXT_BYTE_LIMIT_EXCEEDED
+    assert oversized_report.error_code is AdapterCode.SOURCE_TEXT_BYTE_LIMIT_EXCEEDED
 
 
 def test_api_snapshots_mutable_payload_without_mutating_it(tmp_path: Path) -> None:
@@ -402,8 +407,8 @@ def test_api_rejects_non_json_payloads(
     _, report = _run(tmp_path, unsupported, name=f"non-json-{id(unsupported)}")
 
     assert report.status.value == "failed"
-    assert report.error is AdapterCode.SOURCE_PAYLOAD_NOT_JSON_COMPATIBLE
-    assert report.organisation_outcomes == ()
+    assert report.error_code is AdapterCode.SOURCE_PAYLOAD_NOT_JSON_COMPATIBLE
+    assert report.outcomes == ()
 
 
 def test_api_rejects_cyclic_payload_without_recursing_forever(tmp_path: Path) -> None:
@@ -415,7 +420,7 @@ def test_api_rejects_cyclic_payload_without_recursing_forever(tmp_path: Path) ->
     _, report = _run(tmp_path, payload)
 
     assert report.status.value == "failed"
-    assert report.error is AdapterCode.SOURCE_DEPTH_LIMIT_EXCEEDED
+    assert report.error_code is AdapterCode.SOURCE_DEPTH_LIMIT_EXCEEDED
 
 
 def test_api_enforces_node_depth_and_snapshot_byte_limits(
@@ -424,17 +429,17 @@ def test_api_enforces_node_depth_and_snapshot_byte_limits(
 ) -> None:
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_NODES", 8)
     _, nodes = _run(tmp_path, _source_payload(), name="nodes")
-    assert nodes.error is AdapterCode.SOURCE_NODE_LIMIT_EXCEEDED
+    assert nodes.error_code is AdapterCode.SOURCE_NODE_LIMIT_EXCEEDED
 
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_NODES", 100_000)
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_DEPTH", 2)
     _, depth = _run(tmp_path, _source_payload(), name="depth")
-    assert depth.error is AdapterCode.SOURCE_DEPTH_LIMIT_EXCEEDED
+    assert depth.error_code is AdapterCode.SOURCE_DEPTH_LIMIT_EXCEEDED
 
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_DEPTH", 64)
     monkeypatch.setattr(adapter_module, "MAX_SOURCE_BYTES", 16)
     _, size = _run(tmp_path, _source_payload(), name="bytes")
-    assert size.error is AdapterCode.SOURCE_BYTE_LIMIT_EXCEEDED
+    assert size.error_code is AdapterCode.SOURCE_BYTE_LIMIT_EXCEEDED
 
 
 def test_api_enforces_source_collection_limit(tmp_path: Path) -> None:
@@ -449,7 +454,7 @@ def test_api_enforces_source_collection_limit(tmp_path: Path) -> None:
     _, report = _run(tmp_path, payload)
 
     assert report.status.value == "failed"
-    assert report.error is AdapterCode.SOURCE_VALIDATION_FAILED
+    assert report.error_code is AdapterCode.SOURCE_VALIDATION_FAILED
 
 
 def test_run_requires_an_absent_output_root(tmp_path: Path) -> None:
@@ -468,8 +473,9 @@ def test_run_requires_an_absent_output_root(tmp_path: Path) -> None:
                 pytest.skip("platform cannot create directory symlinks")
         with pytest.raises(FileExistsError):
             run_adapter(
-                source_payload=_source_payload(),
-                output_root=output_root,
+                payload=_source_payload(),
+                vintage=SourceVintage.SDK_SIZE_V1,
+                output_dir=output_root,
                 config=_config(),
             )
 
@@ -630,7 +636,7 @@ def test_cli_json_enforces_api_node_depth_string_and_collection_limits(
     node_exit = cli_module.main(_cli_args(source, salt, tmp_path / "nodes"))
     assert node_exit == 1
     assert (
-        _report_from_disk(tmp_path / "nodes").error
+        _report_from_disk(tmp_path / "nodes").error_code
         is AdapterCode.SOURCE_NODE_LIMIT_EXCEEDED
     )
 
@@ -639,7 +645,7 @@ def test_cli_json_enforces_api_node_depth_string_and_collection_limits(
     depth_exit = cli_module.main(_cli_args(source, salt, tmp_path / "depth"))
     assert depth_exit == 1
     assert (
-        _report_from_disk(tmp_path / "depth").error
+        _report_from_disk(tmp_path / "depth").error_code
         is AdapterCode.SOURCE_DEPTH_LIMIT_EXCEEDED
     )
 
@@ -650,7 +656,7 @@ def test_cli_json_enforces_api_node_depth_string_and_collection_limits(
     string_exit = cli_module.main(_cli_args(source, salt, tmp_path / "string"))
     assert string_exit == 1
     assert (
-        _report_from_disk(tmp_path / "string").error
+        _report_from_disk(tmp_path / "string").error_code
         is AdapterCode.SOURCE_TEXT_BYTE_LIMIT_EXCEEDED
     )
 
@@ -667,7 +673,7 @@ def test_cli_json_enforces_api_node_depth_string_and_collection_limits(
     )
     assert collection_exit == 1
     assert (
-        _report_from_disk(tmp_path / "collection").error
+        _report_from_disk(tmp_path / "collection").error_code
         is AdapterCode.SOURCE_VALIDATION_FAILED
     )
     assert capsys.readouterr().err == ""
@@ -766,7 +772,7 @@ def test_cli_fails_closed_when_path_safety_primitives_are_unavailable(
     if not hasattr(os, primitive):
         pytest.skip(f"platform does not expose {primitive}")
     source, salt = _write_cli_inputs(tmp_path)
-    monkeypatch.delattr(cli_module.os, primitive)
+    monkeypatch.delattr(os, primitive)
 
     exit_code = cli_module.main(_cli_args(source, salt, tmp_path / "output"))
 
@@ -945,9 +951,7 @@ def test_duplicate_organisation_is_fail_closed_and_emits_no_artifacts(
 
     assert report.status.value == "failed"
     assert any(gap.code is AdapterCode.DUPLICATE_ORGANISATION_ID for gap in report.gaps)
-    assert all(
-        outcome.status.value == "failed" for outcome in report.organisation_outcomes
-    )
+    assert all(outcome.status.value == "failed" for outcome in report.outcomes)
     assert _all_artifacts(report) == ()
 
 
@@ -964,8 +968,8 @@ def test_partial_success_keeps_success_artifacts_and_reports_failure(
     output_root, report = _run(tmp_path, payload)
 
     assert report.status.value == "failed"
-    assert report.error is AdapterCode.ORGANISATION_FAILURES_PRESENT
-    assert {outcome.status.value for outcome in report.organisation_outcomes} == {
+    assert report.error_code is AdapterCode.ORGANISATION_FAILURES_PRESENT
+    assert {outcome.status.value for outcome in report.outcomes} == {
         "compiled",
         "failed",
     }
@@ -981,13 +985,15 @@ def test_zero_success_without_outcomes_is_explicit(
     class _EmptySource:
         organisations: tuple[()] = ()
 
-    monkeypatch.setattr(adapter_module, "parse_source", lambda _: _EmptySource())
+    monkeypatch.setattr(
+        adapter_module, "parse_source", lambda _payload, _vintage: _EmptySource()
+    )
 
     _, report = _run(tmp_path, {"organisations": []})
 
     assert report.status.value == "failed"
-    assert report.error is AdapterCode.NO_ORGANISATIONS_COMPILED
-    assert report.organisation_outcomes == ()
+    assert report.error_code is AdapterCode.NO_ORGANISATIONS_COMPILED
+    assert report.outcomes == ()
     assert _all_artifacts(report) == ()
 
 
@@ -1069,7 +1075,7 @@ def test_unknown_record_mapping_values_fail_closed(
 def test_artifact_inventories_are_exact_typed_and_byte_bound(tmp_path: Path) -> None:
     output_root, report = _run(tmp_path, _source_payload())
 
-    assert report.artifact_digest_profile == "path-bound-artifact-records-v1"
+    assert report.artifact_set_digest_profile == "path-bound-artifact-records-v1"
     assert len(report.private_artifacts) == 1
     assert len(report.public_artifacts) == 2
     assert len(report.evaluator_artifacts) == 2
@@ -1224,19 +1230,19 @@ def test_report_rejects_noncanonical_duplicate_outcomes(tmp_path: Path) -> None:
     payload = _source_payload()
     _duplicate_organisation(payload, organisation_id="fictional-canary-second")
     _, report = _run(tmp_path, payload)
-    assert len(report.organisation_outcomes) == 2
+    assert len(report.outcomes) == 2
 
     unordered = _validation_payload(report)
-    unordered["organisation_outcomes"] = list(
-        reversed(unordered["organisation_outcomes"]),
+    unordered["outcomes"] = list(
+        reversed(unordered["outcomes"]),
     )
     with pytest.raises(ValidationError, match="organisation_outcomes_not_canonical"):
         AdapterRunReport.model_validate(unordered, strict=True)
 
     duplicate = _validation_payload(report)
-    duplicate["organisation_outcomes"] = [
-        duplicate["organisation_outcomes"][0],
-        duplicate["organisation_outcomes"][0],
+    duplicate["outcomes"] = [
+        duplicate["outcomes"][0],
+        duplicate["outcomes"][0],
     ]
     with pytest.raises(ValidationError, match="duplicate_organisation_outcome"):
         AdapterRunReport.model_validate(duplicate, strict=True)

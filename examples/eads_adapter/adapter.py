@@ -386,7 +386,7 @@ class AdapterRunReport(_StrictFrozenModel):
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     artifact_set_excludes: tuple[
         Literal["private/reports/eads-adapter-gap-report.json"], ...
-    ] = (REPORT_PATH,)
+    ] = ("private/reports/eads-adapter-gap-report.json",)
 
     @field_validator("gaps")
     @classmethod
