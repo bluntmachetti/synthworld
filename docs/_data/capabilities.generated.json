@@ -4770,7 +4770,7 @@
     {
       "assignment_required": true,
       "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_BENCHMARK_PATH",
-      "implementation_module": "pathlib._local",
+      "implementation_module": "pathlib",
       "kind": "python_export",
       "name": "C08_FROZEN_BENCHMARK_PATH",
       "source": "src/synthworld/agentic/c08_v2/__init__.py",
