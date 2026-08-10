@@ -18,6 +18,7 @@ from synthworld.agent_authority.reference import (
     reference_plan,
 )
 from synthworld.assurance.models import EvaluationStatus
+from synthworld.assurance.models_v2 import RunReceiptManifestV2
 
 _TOOL_PATH = Path("agent-authority-contract/tools/render_pattern_coverage.py")
 _CATALOGUE_PATH = Path("agent-authority-contract/control-catalogue.yaml")
@@ -43,6 +44,12 @@ def reference_receipt(tmp_path: Path) -> Path:
     root = tmp_path / "reference-receipt"
     build_reference_agent_authority_run_receipt(root)
     return root
+
+
+def test_aggregation_provenance_fields_match_manifest(renderer: ModuleType) -> None:
+    assert renderer._AGGREGATION_PROVENANCE_FIELDS <= set(
+        RunReceiptManifestV2.model_fields
+    )
 
 
 def _evaluated_manifest(**overrides: object) -> SimpleNamespace:
@@ -281,7 +288,7 @@ def test_selected_control_requires_a_catalogue_compatible_declared_pattern(
     )
     _write_plan(root, plan)
 
-    with pytest.raises(ValueError, match=r"SW-AA-L03.*catalogue-compatible"):
+    with pytest.raises(ValueError, match="no catalogue-compatible declared"):
         renderer.pattern_coverage_rows(
             (root,),
             validator=lambda _root: _evaluated_manifest(),

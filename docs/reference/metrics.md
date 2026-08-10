@@ -10,7 +10,7 @@ Metric envelopes are independently versioned and are not field-identical:
   denominator for its direct ratios; agentic authorization F1 instead uses support as
   classification support and is derived from the separately reported precision and
   recall.
-- Enterprise authorization metrics expose numerator, denominator, support,
+- Enterprise authorization metrics expose numerator, denominator, support, family,
   denominator meaning, value, and empty behavior; support equals denominator.
 - C08 v2 metrics expose numerator, denominator, denominator meaning, value, and an
   undefined reason, but no separate support field.

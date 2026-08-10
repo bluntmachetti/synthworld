@@ -391,6 +391,8 @@ def discover_python_exports(
                 implementation_module = getattr(value, "__module__", module_name)
                 if not isinstance(implementation_module, str):
                     implementation_module = module_name
+                elif implementation_module.startswith("pathlib._"):
+                    implementation_module = "pathlib"
                 surfaces.append(
                     {
                         "assignment_required": True,
