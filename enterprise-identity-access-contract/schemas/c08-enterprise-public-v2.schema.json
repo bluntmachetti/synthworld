@@ -14,11 +14,6 @@
           "title": "Action Id",
           "type": "string"
         },
-        "binding_handle": {
-          "minLength": 16,
-          "title": "Binding Handle",
-          "type": "string"
-        },
         "evidence_id": {
           "minLength": 1,
           "title": "Evidence Id",
@@ -68,7 +63,6 @@
         "action",
         "tick",
         "kind",
-        "binding_handle",
         "payload_digest"
       ],
       "title": "C08EvidenceEventV2",
@@ -84,32 +78,6 @@
       "title": "C08EvidenceKindV2",
       "type": "string"
     },
-    "C08EvidenceRequirementV2": {
-      "additionalProperties": false,
-      "description": "Public non-oracle requirement semantics for one evidence candidate.",
-      "properties": {
-        "binding_handle": {
-          "minLength": 16,
-          "title": "Binding Handle",
-          "type": "string"
-        },
-        "kind": {
-          "$ref": "#/$defs/C08EvidenceKindV2"
-        },
-        "synthetic": {
-          "const": true,
-          "default": true,
-          "title": "Synthetic",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "kind",
-        "binding_handle"
-      ],
-      "title": "C08EvidenceRequirementV2",
-      "type": "object"
-    },
     "C08PublicActionV2": {
       "additionalProperties": false,
       "description": "Product-facing action with no answer-key evidence binding.",
@@ -124,12 +92,12 @@
           "title": "Action Id",
           "type": "string"
         },
-        "required_evidence": {
+        "required_evidence_kinds": {
           "items": {
-            "$ref": "#/$defs/C08EvidenceRequirementV2"
+            "$ref": "#/$defs/C08EvidenceKindV2"
           },
           "minItems": 1,
-          "title": "Required Evidence",
+          "title": "Required Evidence Kinds",
           "type": "array"
         },
         "resource_id": {
@@ -160,7 +128,7 @@
         "resource_id",
         "action",
         "tick",
-        "required_evidence"
+        "required_evidence_kinds"
       ],
       "title": "C08PublicActionV2",
       "type": "object"

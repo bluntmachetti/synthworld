@@ -9,20 +9,20 @@
           "title": "Action Id",
           "type": "string"
         },
-        "required_evidence": {
-          "items": {
-            "$ref": "#/$defs/C08EvidenceRequirementV2"
-          },
-          "minItems": 1,
-          "title": "Required Evidence",
-          "type": "array"
-        },
-        "required_observation_ids": {
+        "required_evidence_ids": {
           "items": {
             "type": "string"
           },
           "minItems": 1,
-          "title": "Required Observation Ids",
+          "title": "Required Evidence Ids",
+          "type": "array"
+        },
+        "required_evidence_kinds": {
+          "items": {
+            "$ref": "#/$defs/C08EvidenceKindV2"
+          },
+          "minItems": 1,
+          "title": "Required Evidence Kinds",
           "type": "array"
         },
         "synthetic": {
@@ -40,8 +40,8 @@
       "required": [
         "action_id",
         "tenant_id",
-        "required_evidence",
-        "required_observation_ids"
+        "required_evidence_kinds",
+        "required_evidence_ids"
       ],
       "title": "C08EvidenceBindingV2",
       "type": "object"
@@ -55,32 +55,6 @@
       ],
       "title": "C08EvidenceKindV2",
       "type": "string"
-    },
-    "C08EvidenceRequirementV2": {
-      "additionalProperties": false,
-      "description": "Public non-oracle requirement semantics for one evidence candidate.",
-      "properties": {
-        "binding_handle": {
-          "minLength": 16,
-          "title": "Binding Handle",
-          "type": "string"
-        },
-        "kind": {
-          "$ref": "#/$defs/C08EvidenceKindV2"
-        },
-        "synthetic": {
-          "const": true,
-          "default": true,
-          "title": "Synthetic",
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "kind",
-        "binding_handle"
-      ],
-      "title": "C08EvidenceRequirementV2",
-      "type": "object"
     }
   },
   "additionalProperties": false,
