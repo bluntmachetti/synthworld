@@ -501,21 +501,17 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             ),
         )
     with pytest.raises(ValidationError, match="contiguous sequence"):
-        _submission(
-            c08_public_input_digest(public),
-            (("action-a", "tenant-a", "evidence-a-1"),),
-        ).model_copy(
-            update={
-                "observations": (
-                    C08EvidenceObservationV2(
-                        observation_id="observation-0",
-                        sequence=1,
-                        action_id="action-a",
-                        tenant_id="tenant-a",
-                        evidence_id="evidence-a-1",
-                    ),
-                )
-            }
+        C08SubmissionV2(
+            public_input_digest=c08_public_input_digest(public),
+            observations=(
+                C08EvidenceObservationV2(
+                    observation_id="observation-0",
+                    sequence=1,
+                    action_id="action-a",
+                    tenant_id="tenant-a",
+                    evidence_id="evidence-a-1",
+                ),
+            ),
         )
     with pytest.raises(ValidationError, match="binding action identifiers"):
         C08EvaluatorTruthV2(
