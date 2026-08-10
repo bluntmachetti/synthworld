@@ -477,7 +477,6 @@ def test_schema_tool_is_deterministic_and_check_detects_drift_and_missing(
     (
         (("",), "nonblank"),
         (("duplicate", "duplicate"), "unique"),
-        (("z-last", "a-first"), "canonical order"),
     ),
 )
 def test_measurement_scope_strings_are_nonblank_unique_and_canonical(
@@ -486,6 +485,10 @@ def test_measurement_scope_strings_are_nonblank_unique_and_canonical(
     scope = _benchmark().public.measurement_scope
     with pytest.raises(ValidationError, match=message):
         type(scope).model_validate({**scope.model_dump(mode="json"), "proves": values})
+    canonicalized = type(scope).model_validate(
+        {**scope.model_dump(mode="json"), "proves": ("z-last", "a-first")}
+    )
+    assert canonicalized.proves == ("a-first", "z-last")
 
 
 def test_public_action_and_stream_canonical_contracts_fail_closed() -> None:
@@ -662,16 +665,19 @@ def test_report_and_manifest_collections_require_fixed_canonical_order() -> None
         C08ArtifactManifestV2.model_validate(
             {**manifest_document, "artifacts": (descriptor, descriptor)}
         )
-    with pytest.raises(ValidationError, match="canonical order"):
-        C08ArtifactManifestV2.model_validate(
-            {
-                **manifest_document,
-                "artifacts": (
-                    {**descriptor, "path": "z-last.json"},
-                    {**descriptor, "path": "a-first.json"},
-                ),
-            }
-        )
+    canonicalized = C08ArtifactManifestV2.model_validate(
+        {
+            **manifest_document,
+            "artifacts": (
+                {**descriptor, "path": "z-last.json"},
+                {**descriptor, "path": "a-first.json"},
+            ),
+        }
+    )
+    assert tuple(item.path for item in canonicalized.artifacts) == (
+        "a-first.json",
+        "z-last.json",
+    )
 
 
 def test_serialization_rejects_invalid_payload_and_manifest_bindings() -> None:
