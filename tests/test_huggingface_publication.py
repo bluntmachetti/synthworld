@@ -129,6 +129,7 @@ def test_validate_schema_rejects_invalid_schema() -> None:
             "---\nconfigs:\n- config_name: sample\n"
             "  data_files: []\n  default: 'false'\n---\nbody\n"
         ),
+        "---\nconfigs:\n- config_name: 1\n  data_files: []\n---\nbody\n",
         (
             "---\nconfigs:\n- config_name: sample\n  data_files:\n"
             "  - path: sample.json\n---\nbody\n"
@@ -569,6 +570,43 @@ def test_registry_rejects_viewer_evaluator_marker_for_public_input(
         )
 
 
+def test_registry_allows_viewer_safe_public_input(tmp_path: Path) -> None:
+    source = tmp_path / "public/sample.json"
+    source.parent.mkdir()
+    source.write_bytes(b"{}\n")
+    registry = {
+        "benchmarks": [
+            {
+                "artifacts": [
+                    {
+                        "answer_key_label": None,
+                        "approved_sha256": hashlib.sha256(
+                            source.read_bytes()
+                        ).hexdigest(),
+                        "approved_targets": ["hugging_face_viewer"],
+                        "id": "sample:public",
+                        "kind": "public_input",
+                        "path": "public/sample.json",
+                        "sensitivity": "public_input",
+                    }
+                ],
+                "benchmark_version": "1.0.0",
+                "id": "sample",
+                "lifecycle": "published",
+                "publication_gate": _approved_hf_gate("sample", "hugging_face_viewer"),
+            }
+        ]
+    }
+
+    operations, _, _ = publication.derive_registry_state(
+        _complete_registry(registry),
+        tmp_path,
+    )
+
+    assert operations[0]["target"] == "hugging_face_viewer"
+    assert operations[0]["source_path"] == "public/sample.json"
+
+
 def test_registry_allows_explicitly_labeled_raw_evaluator_artifact(
     tmp_path: Path,
 ) -> None:
@@ -811,6 +849,21 @@ def test_noncanonical_manifest_is_rejected(tmp_path: Path) -> None:
     path.write_text(MANIFEST.read_text(encoding="utf-8") + " ", encoding="utf-8")
 
     with pytest.raises(publication.PublicationError, match="not canonical"):
+        _validate(path)
+
+
+def test_unreadable_canonical_manifest_bytes_are_rejected(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    path = tmp_path / "manifest.json"
+    path.write_text(MANIFEST.read_text(encoding="utf-8"), encoding="utf-8")
+
+    def fail_read_bytes(_path: Path) -> bytes:
+        raise OSError("synthetic read failure")
+
+    monkeypatch.setattr(Path, "read_bytes", fail_read_bytes)
+    with pytest.raises(publication.PublicationError, match="canonical bytes"):
         _validate(path)
 
 
