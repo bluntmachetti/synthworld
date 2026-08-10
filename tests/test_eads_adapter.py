@@ -132,7 +132,7 @@ def _duplicate_organisation(
     organisation_id: str,
 ) -> dict[str, Any]:
     duplicate = copy.deepcopy(_first_organisation(payload))
-    duplicate["id"] = organisation_id
+    duplicate["organisation_id"] = organisation_id
     duplicate["name"] = f"Fictional Canary Organisation {organisation_id}"
     payload["organisations"].append(duplicate)
     return duplicate
@@ -188,9 +188,11 @@ def _cli_args(
     return [
         "--source",
         str(source),
+        "--vintage",
+        SourceVintage.SDK_SIZE_V1.value,
         "--namespace-salt-file",
         str(salt),
-        "--output-root",
+        "--output",
         str(output_root),
         "--seed",
         seed,
@@ -215,7 +217,7 @@ def _assert_closed_cli_error(
 
 
 def _validation_payload(report: AdapterRunReport) -> dict[str, Any]:
-    return report.model_dump(mode="json")
+    return report.model_dump()
 
 
 class _StatefulSource(Mapping[str, object]):
@@ -847,7 +849,9 @@ def test_cli_rejects_fifo_without_hanging(
 ) -> None:
     if not hasattr(os, "mkfifo"):
         pytest.skip("platform cannot create FIFOs")
-    _, salt = _write_cli_inputs(tmp_path)
+    inputs = tmp_path / "inputs"
+    inputs.mkdir()
+    _, salt = _write_cli_inputs(inputs)
     source = tmp_path / "source.json"
     try:
         os.mkfifo(source)
@@ -1216,12 +1220,12 @@ def test_report_rejects_noncanonical_duplicate_gaps(tmp_path: Path) -> None:
     assert len(report.gaps) >= 2
 
     unordered = _validation_payload(report)
-    unordered["gaps"] = list(reversed(unordered["gaps"]))
+    unordered["gaps"] = tuple(reversed(unordered["gaps"]))
     with pytest.raises(ValidationError, match="adapter_gaps_not_canonical"):
         AdapterRunReport.model_validate(unordered, strict=True)
 
     duplicate = _validation_payload(report)
-    duplicate["gaps"] = [duplicate["gaps"][0], duplicate["gaps"][0]]
+    duplicate["gaps"] = (duplicate["gaps"][0], duplicate["gaps"][0])
     with pytest.raises(ValidationError, match="duplicate_adapter_gap"):
         AdapterRunReport.model_validate(duplicate, strict=True)
 
@@ -1233,17 +1237,17 @@ def test_report_rejects_noncanonical_duplicate_outcomes(tmp_path: Path) -> None:
     assert len(report.outcomes) == 2
 
     unordered = _validation_payload(report)
-    unordered["outcomes"] = list(
+    unordered["outcomes"] = tuple(
         reversed(unordered["outcomes"]),
     )
     with pytest.raises(ValidationError, match="organisation_outcomes_not_canonical"):
         AdapterRunReport.model_validate(unordered, strict=True)
 
     duplicate = _validation_payload(report)
-    duplicate["outcomes"] = [
+    duplicate["outcomes"] = (
         duplicate["outcomes"][0],
         duplicate["outcomes"][0],
-    ]
+    )
     with pytest.raises(ValidationError, match="duplicate_organisation_outcome"):
         AdapterRunReport.model_validate(duplicate, strict=True)
 
@@ -1254,15 +1258,15 @@ def test_report_rejects_inventory_order_duplicates_and_digest_drift(
     _, report = _run(tmp_path, _source_payload())
 
     unordered = _validation_payload(report)
-    unordered["public_artifacts"] = list(reversed(unordered["public_artifacts"]))
+    unordered["public_artifacts"] = tuple(reversed(unordered["public_artifacts"]))
     with pytest.raises(ValidationError, match="canonical"):
         AdapterRunReport.model_validate(unordered, strict=True)
 
     duplicate = _validation_payload(report)
-    duplicate["public_artifacts"] = [
+    duplicate["public_artifacts"] = (
         duplicate["public_artifacts"][0],
         duplicate["public_artifacts"][0],
-    ]
+    )
     with pytest.raises(ValidationError, match="duplicate"):
         AdapterRunReport.model_validate(duplicate, strict=True)
 
@@ -1278,17 +1282,17 @@ def test_report_rejects_status_and_inventory_consistency_drift(
     _, report = _run(tmp_path, _source_payload())
 
     succeeded_with_error = _validation_payload(report)
-    succeeded_with_error["error"] = AdapterCode.SOURCE_VALIDATION_FAILED.value
+    succeeded_with_error["error_code"] = AdapterCode.SOURCE_VALIDATION_FAILED
     with pytest.raises(ValidationError, match="successful"):
         AdapterRunReport.model_validate(succeeded_with_error, strict=True)
 
     failed_without_error = _validation_payload(report)
-    failed_without_error["status"] = "failed"
+    failed_without_error["status"] = adapter_module.RunStatus.FAILED
     with pytest.raises(ValidationError, match="failed"):
         AdapterRunReport.model_validate(failed_without_error, strict=True)
 
     missing_inventory = _validation_payload(report)
-    missing_inventory["public_artifacts"] = []
+    missing_inventory["public_artifacts"] = ()
     with pytest.raises(ValidationError, match="inventor"):
         AdapterRunReport.model_validate(missing_inventory, strict=True)
 

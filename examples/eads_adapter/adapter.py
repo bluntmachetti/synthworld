@@ -134,8 +134,6 @@ _INDUSTRY_FACTORS = {
     "research": (1, 1),
     "technology": (3, 2),
 }
-_GENERAL_FACTOR = (1, 1)
-
 _SERVICE_TYPES = {
     "api": TargetKind.API,
     "application": TargetKind.APPLICATION,
@@ -926,13 +924,7 @@ def _prepare_organisation(
     industry = _token(organisation.industry)
     industry_factor = _INDUSTRY_FACTORS.get(industry)
     if industry_factor is None:
-        industry_factor = _GENERAL_FACTOR
-        gaps.append(
-            AdapterGap(
-                code=AdapterCode.UNKNOWN_INDUSTRY,
-                organisation_ref=organisation_ref,
-            )
-        )
+        raise _AdapterError(AdapterCode.UNKNOWN_INDUSTRY, gaps)
 
     for team in sorted_teams:
         team_ref = opaque("team", organisation.organisation_id, team.team_id)
@@ -951,14 +943,7 @@ def _prepare_organisation(
         team_type = _TEAM_ALIASES.get(_token(team.team_type), _token(team.team_type))
         team_factor = _TEAM_FACTORS.get(team_type)
         if team_factor is None:
-            team_factor = _GENERAL_FACTOR
-            gaps.append(
-                AdapterGap(
-                    code=AdapterCode.UNKNOWN_TEAM_TYPE,
-                    organisation_ref=organisation_ref,
-                    subject_ref=team_ref,
-                )
-            )
+            raise _AdapterError(AdapterCode.UNKNOWN_TEAM_TYPE, gaps)
         raw_counts[team.team_id] = _population_count(
             scale_base=_SCALE_BASE[scale],
             team_factor=team_factor,
@@ -1470,7 +1455,7 @@ def _prepare_output_parent(output_root: Path) -> None:
     except FileNotFoundError:
         pass
     else:
-        raise AdapterPathError(AdapterCode.OUTPUT_ROOT_EXISTS)
+        raise FileExistsError(AdapterCode.OUTPUT_ROOT_EXISTS.value)
     _reject_symlinked_components(output_root.parent)
     output_root.parent.mkdir(parents=True, exist_ok=True)
     _reject_symlinked_components(output_root.parent)
@@ -1483,7 +1468,7 @@ def _promote_staged_output(staged_output: Path, output_root: Path) -> None:
     except FileNotFoundError:
         pass
     else:
-        raise AdapterPathError(AdapterCode.OUTPUT_ROOT_EXISTS)
+        raise FileExistsError(AdapterCode.OUTPUT_ROOT_EXISTS.value)
     staged_output.rename(output_root)
 
 
