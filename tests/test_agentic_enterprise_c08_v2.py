@@ -33,6 +33,7 @@ from synthworld.agentic.enterprise.c08_v2 import (
     project_c08_public,
     reference_submission_from_public,
     serialize_c08_public,
+    validate_c08_truth_against_public,
 )
 from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluationReportV2,
@@ -755,3 +756,238 @@ def test_generated_c08_schemas_are_model_authoritative_and_checkable(
     drifted.unlink()
     with pytest.raises(tool.C08SchemaDriftError, match="missing"):
         tool.check_schema_files(tmp_path)
+
+
+def test_remaining_enterprise_model_contract_branches() -> None:
+    source = _source()
+    action = source.actions[0]
+    action_document = action.model_dump(mode="json")
+    with pytest.raises(ValidationError, match="nonblank identifiers"):
+        C08SourceActionV2.model_validate(
+            {**action_document, "required_evidence_ids": (" ", "evidence-a-2")}
+        )
+    with pytest.raises(ValidationError, match="kinds must not contain duplicates"):
+        C08SourceActionV2.model_validate(
+            {
+                **action_document,
+                "required_evidence_kinds": (
+                    C08EvidenceKindV2.AUTHORITY,
+                    C08EvidenceKindV2.AUTHORITY,
+                ),
+            }
+        )
+    with pytest.raises(ValidationError, match="kinds must be sorted"):
+        C08SourceActionV2.model_validate(
+            {
+                **action_document,
+                "required_evidence_kinds": tuple(
+                    reversed(action.required_evidence_kinds)
+                ),
+            }
+        )
+
+    with pytest.raises(ValidationError, match="contiguous sequence order"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(
+                source.evidence_events[0].model_copy(update={"sequence": 1}),
+                *source.evidence_events[1:],
+            ),
+        )
+    duplicate_kind = source.evidence_events[0].model_copy(
+        update={
+            "sequence": len(source.evidence_events),
+            "evidence_id": "evidence-duplicate-kind",
+        }
+    )
+    with pytest.raises(ValidationError, match="kinds must be unique per action"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(*source.evidence_events, duplicate_kind),
+        )
+    unknown_action = source.evidence_events[0].model_copy(
+        update={"action_id": "action-unknown"}
+    )
+    with pytest.raises(ValidationError, match="references an unknown action"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(unknown_action, *source.evidence_events[1:]),
+        )
+    wrong_semantics = source.evidence_events[0].model_copy(
+        update={"resource_id": "resource-wrong"}
+    )
+    with pytest.raises(ValidationError, match="semantics differ from its action"):
+        C08SourceWorldV2(
+            actions=source.actions,
+            evidence_events=(wrong_semantics, *source.evidence_events[1:]),
+        )
+    wrong_required_kinds = action.model_copy(
+        update={
+            "required_evidence_kinds": (
+                C08EvidenceKindV2.AUTHORITY,
+                C08EvidenceKindV2.POLICY,
+            )
+        }
+    )
+    with pytest.raises(ValidationError, match="kinds differ from required IDs"):
+        C08SourceWorldV2(
+            actions=(wrong_required_kinds, source.actions[1]),
+            evidence_events=source.evidence_events,
+        )
+
+    public, evaluator = _bundle()
+    public_action = public.actions[0]
+    public_action_document = public_action.model_dump(mode="json")
+    with pytest.raises(ValidationError, match="kinds must not contain duplicates"):
+        type(public_action).model_validate(
+            {
+                **public_action_document,
+                "required_evidence_kinds": (
+                    C08EvidenceKindV2.AUTHORITY,
+                    C08EvidenceKindV2.AUTHORITY,
+                ),
+            }
+        )
+    with pytest.raises(ValidationError, match="kinds must be sorted"):
+        type(public_action).model_validate(
+            {
+                **public_action_document,
+                "required_evidence_kinds": tuple(
+                    reversed(public_action.required_evidence_kinds)
+                ),
+            }
+        )
+    duplicate_evidence_id = public.evidence_events[1].model_copy(
+        update={"evidence_id": public.evidence_events[0].evidence_id}
+    )
+    with pytest.raises(ValidationError, match="evidence identifiers must be unique"):
+        C08PublicInputV2(
+            actions=public.actions,
+            evidence_events=(
+                public.evidence_events[0],
+                duplicate_evidence_id,
+                *public.evidence_events[2:],
+            ),
+        )
+    unknown_public_action = public.evidence_events[0].model_copy(
+        update={"action_id": "action-unknown"}
+    )
+    with pytest.raises(ValidationError, match="references unknown action"):
+        C08PublicInputV2(
+            actions=public.actions,
+            evidence_events=(
+                unknown_public_action,
+                *public.evidence_events[1:],
+            ),
+        )
+
+    binding = evaluator.bindings[0]
+    binding_document = binding.model_dump(mode="json")
+    with pytest.raises(ValidationError, match="kinds must not contain duplicates"):
+        C08EvidenceBindingV2.model_validate(
+            {
+                **binding_document,
+                "required_evidence_kinds": (
+                    C08EvidenceKindV2.AUTHORITY,
+                    C08EvidenceKindV2.AUTHORITY,
+                ),
+            }
+        )
+    with pytest.raises(ValidationError, match="kinds must be sorted"):
+        C08EvidenceBindingV2.model_validate(
+            {
+                **binding_document,
+                "required_evidence_kinds": tuple(
+                    reversed(binding.required_evidence_kinds)
+                ),
+            }
+        )
+    with pytest.raises(ValidationError, match="bindings must be sorted"):
+        C08EvaluatorTruthV2(
+            public_input_digest=evaluator.public_input_digest,
+            bindings=tuple(reversed(evaluator.bindings)),
+        )
+
+
+def test_truth_validation_rejects_remaining_public_binding_mismatches() -> None:
+    public, evaluator = _bundle()
+    with pytest.raises(C08ProjectionError, match="do not cover public actions"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(update={"bindings": evaluator.bindings[:1]}),
+        )
+
+    first = evaluator.bindings[0]
+    wrong_tenant = first.model_copy(update={"tenant_id": "tenant-wrong"})
+    with pytest.raises(C08ProjectionError, match="tenant binding differs"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(
+                update={"bindings": (wrong_tenant, *evaluator.bindings[1:])}
+            ),
+        )
+
+    wrong_kinds = first.model_copy(
+        update={
+            "required_evidence_kinds": (
+                C08EvidenceKindV2.AUTHORITY,
+                C08EvidenceKindV2.POLICY,
+            )
+        }
+    )
+    with pytest.raises(C08ProjectionError, match="evidence kinds differ"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(
+                update={"bindings": (wrong_kinds, *evaluator.bindings[1:])}
+            ),
+        )
+
+    wrong_bound_kinds = first.model_copy(
+        update={
+            "required_evidence_ids": (
+                first.required_evidence_ids[0],
+                "evidence-a-extra",
+            )
+        }
+    )
+    with pytest.raises(C08ProjectionError, match="bound public evidence"):
+        validate_c08_truth_against_public(
+            public,
+            evaluator.model_copy(
+                update={"bindings": (wrong_bound_kinds, *evaluator.bindings[1:])}
+            ),
+        )
+
+
+def test_serialization_rejects_invalid_models_and_export_write_failures(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    malformed = tmp_path / "malformed.json"
+    malformed.write_bytes(b"{\n")
+    with pytest.raises(C08SerializationError, match="invalid C08 public artifact"):
+        load_c08_public(malformed)
+
+    public, evaluator = _bundle()
+    submission = _reference_submission(public)
+    without_report = tmp_path / "without-report"
+    export_c08_artifacts(
+        without_report,
+        public=public,
+        evaluator=evaluator,
+        submission=submission,
+    )
+    assert not (without_report / "evaluator" / "report.json").exists()
+
+    def fail_write(_path: Path, _payload: bytes) -> int:
+        raise OSError("synthetic write failure")
+
+    monkeypatch.setattr(Path, "write_bytes", fail_write)
+    with pytest.raises(C08SerializationError, match="artifact export failed"):
+        export_c08_artifacts(
+            tmp_path / "write-failure",
+            public=public,
+            evaluator=evaluator,
+            submission=submission,
+        )
