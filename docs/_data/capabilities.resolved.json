@@ -1938,7 +1938,7 @@
             {
               "assignment_required": true,
               "id": "python:synthworld.agentic.c08_v2.C08_FROZEN_BENCHMARK_PATH",
-              "implementation_module": "pathlib",
+              "implementation_module": "pathlib._local",
               "kind": "python_export",
               "name": "C08_FROZEN_BENCHMARK_PATH",
               "source": "src/synthworld/agentic/c08_v2/__init__.py",
@@ -8413,7 +8413,7 @@
   ],
   "input_digests": {
     "curated_sha256": "25450d4389cb99e344cc1fb5bd8c1f3f4355be9c5830905e446d96802761b54a",
-    "generated_sha256": "68825704919d02b345d592a88f3cca4f80c67541d0177a1078f41f79671625b0"
+    "generated_sha256": "84cf160357f5000f6306208be8180d629eda62141967023b7e2b3e68bf6b332b"
   },
   "schema_version": "1.0.0"
 }
