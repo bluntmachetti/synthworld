@@ -341,6 +341,7 @@ def test_duplicate_same_kind_public_evidence_is_rejected() -> None:
         update={
             "evidence_id": "evidence-duplicate-authority",
             "kind": C08EvidenceKindV2.AUTHORITY,
+            "sequence": len(public.evidence_events),
         }
     )
     invalid_public = public.model_copy(
@@ -464,7 +465,7 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             evidence_events=tuple(reversed(public.evidence_events)),
         )
     tenant_tampered = public.evidence_events[0].model_copy(
-        update={"tenant_id": "tenant-b"}
+        update={"tenant_id": "tenant-tampered"}
     )
     with pytest.raises(ValidationError, match="semantics differ"):
         C08PublicInputV2(

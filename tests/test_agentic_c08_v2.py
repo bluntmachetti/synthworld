@@ -65,8 +65,14 @@ def _changed_submission(
 ) -> C08AsteriaSubmissionV2:
     reference = reference_c08_submission(benchmark)
     rows = list(reference.rows)
-    row = rows[action_index]
-    rows[action_index] = row.model_copy(
+    action_event_id = benchmark.evaluator.bindings[action_index].action_event_id
+    row_index = next(
+        index
+        for index, item in enumerate(rows)
+        if item.action_event_id == action_event_id
+    )
+    row = rows[row_index]
+    rows[row_index] = row.model_copy(
         update={
             "retained_observation_ids": (
                 *row.retained_observation_ids,
@@ -262,12 +268,18 @@ def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
 ) -> None:
     benchmark = _benchmark()
     reference = reference_c08_submission(benchmark)
+    binding = benchmark.evaluator.bindings[action_index]
     if action_index == 1:
-        row = reference.rows[action_index]
+        row_index = next(
+            index
+            for index, item in enumerate(reference.rows)
+            if item.action_event_id == binding.action_event_id
+        )
+        row = reference.rows[row_index]
         changed = reference.model_copy(
             update={
                 "rows": (
-                    *reference.rows[:action_index],
+                    *reference.rows[:row_index],
                     row.model_copy(
                         update={
                             "retained_observation_ids": (
@@ -275,18 +287,22 @@ def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
                             )
                         }
                     ),
-                    *reference.rows[action_index + 1 :],
+                    *reference.rows[row_index + 1 :],
                 )
             }
         )
     elif action_index == 3:
-        other = reference.rows[0].retained_observation_ids[0]
+        other = next(
+            row.retained_observation_ids[0]
+            for row in reference.rows
+            if row.action_event_id != binding.action_event_id
+        )
         changed = _changed_submission(benchmark, action_index, (other,))
     elif action_index == 4:
         observations = [
             item
             for item in benchmark.public.evidence_observations
-            if item.action_event_id == reference.rows[action_index].action_event_id
+            if item.action_event_id == binding.action_event_id
         ]
         changed = _changed_submission(
             benchmark, action_index, (observations[-1].observation_id,)
