@@ -47,7 +47,7 @@ def reference_receipt(tmp_path: Path) -> Path:
 
 
 def test_aggregation_provenance_fields_match_manifest(renderer: ModuleType) -> None:
-    assert renderer._AGGREGATION_PROVENANCE_FIELDS <= set(
+    assert renderer._AGGREGATION_PROVENANCE_FIELDS.issubset(
         RunReceiptManifestV2.model_fields
     )
 
