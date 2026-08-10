@@ -1723,6 +1723,174 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "authority-source",
+      "heading": "Authority source",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#authority-source",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "c15-cases",
+      "heading": "C15 cases",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#c15-cases",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "c15-issuance-contract",
+      "heading": "C15 issuance contract",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#c15-issuance-contract",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "c15-metrics",
+      "heading": "C15 metrics",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#c15-metrics",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "c15c16-agent-authority-contract-design",
+      "heading": "C15/C16 agent-authority contract design",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#c15c16-agent-authority-contract-design",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "c16-approval-and-parameter-contract",
+      "heading": "C16 approval and parameter contract",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#c16-approval-and-parameter-contract",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "c16-cases",
+      "heading": "C16 cases",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#c16-cases",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "c16-metrics",
+      "heading": "C16 metrics",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#c16-metrics",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "canonical-payload-digest",
+      "heading": "Canonical payload digest",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#canonical-payload-digest",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "contract-identity-and-composition",
+      "heading": "Contract identity and composition",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#contract-identity-and-composition",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "credential-authority-envelope",
+      "heading": "Credential authority envelope",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#credential-authority-envelope",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "decision-summary",
+      "heading": "Decision summary",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#decision-summary",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "determinism-safety-and-budgets",
+      "heading": "Determinism, safety, and budgets",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#determinism-safety-and-budgets",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "discriminating-generation-cases",
+      "heading": "Discriminating generation cases",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#discriminating-generation-cases",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "exact-action-payload-and-approval",
+      "heading": "Exact action payload and approval",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#exact-action-payload-and-approval",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "independent-metrics",
+      "heading": "Independent metrics",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#independent-metrics",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "issuer-entitlement",
+      "heading": "Issuer entitlement",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#issuer-entitlement",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "normalized-transaction-parameters",
+      "heading": "Normalized transaction parameters",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#normalized-transaction-parameters",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "opaque-credential-record",
+      "heading": "Opaque credential record",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#opaque-credential-record",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "provisional-choices-and-remaining-acceptance-gates",
+      "heading": "Provisional choices and remaining acceptance gates",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#provisional-choices-and-remaining-acceptance-gates",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "public-evaluator-and-submission-boundaries",
+      "heading": "Public, evaluator, and submission boundaries",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#public-evaluator-and-submission-boundaries",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "public-request",
+      "heading": "Public request",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#public-request",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "shared-semantic-vocabulary",
+      "heading": "Shared semantic vocabulary",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#shared-semantic-vocabulary",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "structural-validity-versus-scoreable-truth",
+      "heading": "Structural validity versus scoreable truth",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#structural-validity-versus-scoreable-truth",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "use-time-replay",
+      "heading": "Use-time replay",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#use-time-replay",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "version-transition-and-migration-cost",
+      "heading": "Version transition and migration cost",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#version-transition-and-migration-cost",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "why-existing-contracts-cannot-be-extended-in-place",
+      "heading": "Why existing contracts cannot be extended in place",
+      "id": "route:agent-authority-contract/docs/c15-c16-contract-design.md#why-existing-contracts-cannot-be-extended-in-place",
+      "path": "agent-authority-contract/docs/c15-c16-contract-design.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:agent-authority-contract/docs/design-intent-assumptions.md",
       "path": "agent-authority-contract/docs/design-intent-assumptions.md"
     },
