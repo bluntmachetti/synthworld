@@ -1,0 +1,37 @@
+{
+  "organisations": [
+    {
+      "organisation_id": "example-harbour-works",
+      "name": "Harbour Works Example Ltd",
+      "industry": "logistics",
+      "scale": "medium",
+      "regions": [
+        {"region_id": "example-north", "name": "Example North"},
+        {"region_id": "example-south", "name": "Example South"}
+      ],
+      "domains": [
+        {
+          "domain_id": "operations",
+          "name": "Operations",
+          "children": [
+            {"domain_id": "operations-routing", "name": "Routing", "children": []}
+          ]
+        },
+        {"domain_id": "assurance", "name": "Assurance", "children": []}
+      ],
+      "teams": [
+        {"team_id": "route-planning", "name": "Route Planning", "team_type": "product", "domain_id": "operations-routing", "region_ids": ["example-north"], "size": 400},
+        {"team_id": "service-desk", "name": "Service Desk", "team_type": "operations", "domain_id": "operations", "region_ids": ["example-north", "example-south"], "size": 400},
+        {"team_id": "risk-review", "name": "Risk Review", "team_type": "control", "domain_id": "assurance", "region_ids": ["example-south"], "size": 400}
+      ],
+      "services": [
+        {"service_id": "example-routing-api", "name": "Example Routing API", "service_type": "api", "classification": "internal", "owning_team_id": "route-planning"},
+        {"service_id": "example-case-console", "name": "Example Case Console", "service_type": "application", "classification": "restricted", "owning_team_id": "service-desk"}
+      ],
+      "ownerships": [
+        {"team_id": "route-planning", "service_id": "example-routing-api", "relationship": "owner"},
+        {"team_id": "risk-review", "service_id": "example-case-console", "relationship": "approver"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "organisations": [
+    {
+      "organisation_id": "fictional-canary-boundary",
+      "name": "Fictional Canary Organisation",
+      "industry": "technology",
+      "scale": "medium",
+      "regions": [
+        {
+          "region_id": "fictional-canary-region",
+          "name": "Fictional Canary Region"
+        }
+      ],
+      "domains": [
+        {
+          "domain_id": "fictional-canary-identity",
+          "name": "Fictional Canary Identity Domain",
+          "children": []
+        }
+      ],
+      "teams": [
+        {
+          "team_id": "fictional-canary-team",
+          "name": "Fictional Canary Access Team",
+          "team_type": "platform",
+          "domain_id": "fictional-canary-identity",
+          "region_ids": [
+            "fictional-canary-region"
+          ],
+          "size": 250
+        }
+      ],
+      "services": [
+        {
+          "service_id": "fictional-canary-service",
+          "name": "Fictional Canary Identity Service",
+          "service_type": "application",
+          "classification": "confidential",
+          "owning_team_id": "fictional-canary-team"
+        }
+      ],
+      "ownerships": [
+        {
+          "team_id": "fictional-canary-team",
+          "service_id": "fictional-canary-service",
+          "relationship": "owner"
+        }
+      ]
+    }
+  ]
+}

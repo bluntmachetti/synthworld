@@ -8,6 +8,7 @@
 /Makefile @bluntmachetti
 /pyproject.toml @bluntmachetti
 /huggingface/** @bluntmachetti
+/examples/eads_adapter/** @bluntmachetti
 /src/synthworld/**/*adapter*.py @bluntmachetti
 /src/synthworld/benchmark_reproduction.py @bluntmachetti
 /src/synthworld/benchmarks/** @bluntmachetti
