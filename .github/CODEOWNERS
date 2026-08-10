@@ -15,6 +15,7 @@
 /docs/_data/** @bluntmachetti
 /docs/_schemas/capabilities*.json @bluntmachetti
 /docs/_schemas/** @bluntmachetti
+/docs/decisions/** @bluntmachetti
 /tools/** @bluntmachetti
 /tests/test_capability_governance*.py @bluntmachetti
 /tests/test_public_repository_boundary.py @bluntmachetti

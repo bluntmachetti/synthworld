@@ -6,7 +6,7 @@ on:
     paths:
       - ".github/workflows/huggingface-publication.yml"
       - "docs/_data/benchmark-publication-gates.json"
-      - "docs/_data/benchmark-publication-transitions.json"
+      - "docs/_data/benchmark-transitions.json"
       - "docs/_data/benchmarks.curated.json"
       - "docs/_data/benchmarks.generated.json"
       - "docs/_data/benchmarks.resolved.json"
@@ -21,7 +21,7 @@ on:
     paths:
       - ".github/workflows/huggingface-publication.yml"
       - "docs/_data/benchmark-publication-gates.json"
-      - "docs/_data/benchmark-publication-transitions.json"
+      - "docs/_data/benchmark-transitions.json"
       - "docs/_data/benchmarks.curated.json"
       - "docs/_data/benchmarks.generated.json"
       - "docs/_data/benchmarks.resolved.json"
