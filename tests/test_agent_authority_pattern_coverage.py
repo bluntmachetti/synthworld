@@ -280,7 +280,7 @@ def test_selected_control_requires_a_catalogue_compatible_declared_pattern(
     )
     _write_plan(root, plan)
 
-    with pytest.raises(ValueError, match="SW-AA-L03.*catalogue-compatible"):
+    with pytest.raises(ValueError, match=r"SW-AA-L03.*catalogue-compatible"):
         renderer.pattern_coverage_rows(
             (root,),
             validator=lambda _root: _evaluated_manifest(),
