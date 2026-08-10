@@ -151,13 +151,13 @@
   },
   "registry": {
     "path": "docs/_data/benchmarks.resolved.json",
-    "sha256": "16160bbf11c73285319374133aa9d5caf3d8699393029fc9d3dd58e89d848818"
+    "sha256": "798adb82aad084b4311169aa32a9cdbcadbf77b93ae47ad5e133b8eb6e22ec0f"
   },
   "registry_summary": {
-    "candidate": 8,
+    "candidate": 10,
     "hf_authorized_artifacts": 0,
     "published": 7,
-    "total": 15
+    "total": 17
   },
   "schema_version": "1.0.0"
 }
