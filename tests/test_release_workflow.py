@@ -5,7 +5,6 @@ from typing import Any, cast
 
 import yaml
 
-
 ROOT = Path(__file__).parents[1]
 RELEASE_WORKFLOW = ROOT / ".github/workflows/release.yml"
 
