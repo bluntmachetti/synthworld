@@ -83,7 +83,8 @@ def test_generation_is_deterministic_and_scope_is_honest() -> None:
     assert first == second
     assert first.public.measurement_scope.offline_artifacts_only is True
     assert (
-        "production logging behavior" in first.public.measurement_scope.does_not_prove
+        "live enforcement or production logging behavior"
+        in first.public.measurement_scope.does_not_prove
     )
     public_json = first.public.model_dump_json()
     assert "required_observation_ids" not in public_json
@@ -346,8 +347,11 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
 def test_submission_alignment_and_model_ordering_are_fail_closed() -> None:
     benchmark = _benchmark()
     reference = reference_c08_submission(benchmark)
-    reversed_rows = reference.model_copy(
-        update={"rows": tuple(reversed(reference.rows))}
+    reversed_rows = C08AsteriaSubmissionV2.model_validate(
+        {
+            **reference.model_dump(mode="json"),
+            "rows": [row.model_dump(mode="json") for row in reversed(reference.rows)],
+        }
     )
     assert reversed_rows.rows == tuple(
         sorted(reference.rows, key=lambda item: item.action_event_id)

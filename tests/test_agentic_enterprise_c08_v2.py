@@ -338,7 +338,10 @@ def test_compile_orders_evaluator_bindings_by_action_id() -> None:
 def test_duplicate_same_kind_public_evidence_is_rejected() -> None:
     public, _ = _bundle()
     duplicate = public.evidence_events[2].model_copy(
-        update={"kind": C08EvidenceKindV2.AUTHORITY}
+        update={
+            "evidence_id": "evidence-duplicate-authority",
+            "kind": C08EvidenceKindV2.AUTHORITY,
+        }
     )
     invalid_public = public.model_copy(
         update={"evidence_events": (*public.evidence_events, duplicate)}
@@ -455,7 +458,7 @@ def test_model_boundaries_reject_unordered_duplicate_and_unknown_records() -> No
             ),
         )
     public, evaluator = _bundle()
-    with pytest.raises(ValidationError, match="contiguous and ordered"):
+    with pytest.raises(ValidationError, match="contiguous sequence order"):
         C08PublicInputV2(
             actions=public.actions,
             evidence_events=tuple(reversed(public.evidence_events)),
@@ -651,7 +654,7 @@ def test_report_models_require_canonical_order() -> None:
             action_id="action-x",
             tenant_id="tenant-x",
             required_evidence_kinds=(C08EvidenceKindV2.AUTHORITY,),
-            required_evidence_ids=("x-required", "x-extra"),
+            required_evidence_ids=("x-extra", "x-required"),
         )
     with pytest.raises(ValidationError, match="binding evidence identifiers"):
         C08EvidenceBindingV2(

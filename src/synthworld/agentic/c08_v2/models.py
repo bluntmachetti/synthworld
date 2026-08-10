@@ -185,15 +185,15 @@ class C08AsteriaSubmissionV2(SyntheticModel):
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     rows: tuple[C08SubmissionRowV2, ...] = Field(min_length=1)
 
-    @model_validator(mode="after")
-    def canonical_rows(self) -> Self:
-        ids = tuple(item.action_event_id for item in self.rows)
+    @field_validator("rows")
+    @classmethod
+    def canonical_rows(
+        cls, value: tuple[C08SubmissionRowV2, ...]
+    ) -> tuple[C08SubmissionRowV2, ...]:
+        ids = tuple(item.action_event_id for item in value)
         if len(set(ids)) != len(ids):
             raise ValueError("submission action ids must be unique")
-        ordered = tuple(sorted(self.rows, key=lambda item: item.action_event_id))
-        if ordered != self.rows:
-            return self.model_copy(update={"rows": ordered})
-        return self
+        return tuple(sorted(value, key=lambda item: item.action_event_id))
 
 
 class C08AsteriaBenchmarkV2(SyntheticModel):
@@ -295,15 +295,15 @@ class C08ArtifactManifestV2(SyntheticModel):
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=1)
 
-    @model_validator(mode="after")
-    def canonical_artifacts(self) -> Self:
-        paths = tuple(item.path for item in self.artifacts)
+    @field_validator("artifacts")
+    @classmethod
+    def canonical_artifacts(
+        cls, value: tuple[C08ArtifactDescriptorV2, ...]
+    ) -> tuple[C08ArtifactDescriptorV2, ...]:
+        paths = tuple(item.path for item in value)
         if len(set(paths)) != len(paths):
             raise ValueError("manifest artifact paths must be unique")
-        ordered = tuple(sorted(self.artifacts, key=lambda item: item.path))
-        if ordered != self.artifacts:
-            return self.model_copy(update={"artifacts": ordered})
-        return self
+        return tuple(sorted(value, key=lambda item: item.path))
 
 
 __all__ = [
