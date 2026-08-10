@@ -55,8 +55,8 @@ const allowedTextExtensions = new Set([
   ".txt",
   ".xml",
 ]);
-const allowedTextBasenames = new Set();
-const allowedBinaryExtensions = new Set();
+const allowedTextBasenames = new Set(["_headers"]);
+const allowedBinaryExtensions = new Set([".woff2"]);
 const allowedBinaryBasenames = new Set();
 
 async function walk(directory) {

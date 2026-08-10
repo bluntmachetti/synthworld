@@ -39,6 +39,11 @@ def _write_minimal_dist(root: Path) -> Path:
         "body { background: #fff; }\n",
         encoding="utf-8",
     )
+    (dist / "assets" / "site.woff2").write_bytes(b"wOF2fixture")
+    (dist / "_headers").write_text(
+        "/*\n  X-Content-Type-Options: nosniff\n",
+        encoding="utf-8",
+    )
     return dist
 
 
