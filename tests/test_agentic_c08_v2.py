@@ -491,18 +491,26 @@ def test_measurement_scope_strings_are_nonblank_unique_and_canonical(
 def test_public_action_and_stream_canonical_contracts_fail_closed() -> None:
     benchmark = _benchmark()
     action = next(
-        item for item in benchmark.public.actions if len(item.required_evidence) > 1
+        item
+        for item in benchmark.public.actions
+        if len(item.required_evidence_kinds) > 1
     )
     action_document = action.model_dump(mode="json")
-    requirements = action_document["required_evidence"]
+    requirements = action_document["required_evidence_kinds"]
     with pytest.raises(ValidationError, match="unique"):
         type(action).model_validate(
-            {**action_document, "required_evidence": (requirements[0], requirements[0])}
+            {
+                **action_document,
+                "required_evidence_kinds": (requirements[0], requirements[0]),
+            }
         )
-    with pytest.raises(ValidationError, match="canonical order"):
-        type(action).model_validate(
-            {**action_document, "required_evidence": tuple(reversed(requirements))}
-        )
+    canonicalized = type(action).model_validate(
+        {
+            **action_document,
+            "required_evidence_kinds": tuple(reversed(requirements)),
+        }
+    )
+    assert canonicalized.required_evidence_kinds == action.required_evidence_kinds
 
     public_document = benchmark.public.model_dump(mode="json")
     duplicate_actions = [dict(item) for item in public_document["actions"]]
@@ -528,20 +536,24 @@ def test_public_action_and_stream_canonical_contracts_fail_closed() -> None:
             {**public_document, "evidence_observations": unordered_observations}
         )
 
-    unsolvable_actions = [dict(item) for item in public_document["actions"]]
-    unsolvable_requirements = [
-        dict(item) for item in unsolvable_actions[0]["required_evidence"]
+    duplicate_observations = [
+        dict(item) for item in public_document["evidence_observations"]
     ]
-    unsolvable_requirements[0]["binding_handle"] = (
-        "00000000-0000-0000-0000-000000000000"
-    )
-    unsolvable_requirements.sort(
-        key=lambda item: (item["evidence_kind"], item["binding_handle"])
-    )
-    unsolvable_actions[0]["required_evidence"] = unsolvable_requirements
-    with pytest.raises(ValidationError, match="exactly one binding handle"):
+    duplicate_observations[1]["observation_id"] = duplicate_observations[0][
+        "observation_id"
+    ]
+    with pytest.raises(ValidationError, match="observation ids"):
         C08AsteriaPublicInputV2.model_validate(
-            {**public_document, "actions": unsolvable_actions}
+            {**public_document, "evidence_observations": duplicate_observations}
+        )
+
+    unknown_observations = [
+        dict(item) for item in public_document["evidence_observations"]
+    ]
+    unknown_observations[0]["action_event_id"] = "unknown-action"
+    with pytest.raises(ValidationError, match="unknown action"):
+        C08AsteriaPublicInputV2.model_validate(
+            {**public_document, "evidence_observations": unknown_observations}
         )
 
 
@@ -694,16 +706,25 @@ def test_solver_and_evaluator_defensive_invariants(
 ) -> None:
     benchmark = _benchmark()
     action = benchmark.public.actions[0]
-    requirement = action.required_evidence[0].model_copy(
-        update={"binding_handle": "00000000-0000-0000-0000-000000000000"}
+    observation = next(
+        item
+        for item in benchmark.public.evidence_observations
+        if item.action_event_id == action.action_event_id
+        and item.evidence_kind is action.required_evidence_kinds[0]
     )
-    corrupted_action = action.model_copy(
+    duplicate_observation = observation.model_copy(
         update={
-            "required_evidence": (requirement, *action.required_evidence[1:]),
+            "observation_id": "duplicate-kind-observation",
+            "observation_order": len(benchmark.public.evidence_observations) + 1,
         }
     )
     corrupted_public = benchmark.public.model_copy(
-        update={"actions": (corrupted_action, *benchmark.public.actions[1:])}
+        update={
+            "evidence_observations": (
+                *benchmark.public.evidence_observations,
+                duplicate_observation,
+            )
+        }
     )
     with pytest.raises(ValueError, match="not uniquely solvable"):
         semantic_c08_submission(corrupted_public)
