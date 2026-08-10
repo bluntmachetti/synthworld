@@ -35,6 +35,7 @@ remaining docs are the two narrative files listed below.
 | `docs/design-intent-assumptions.md` | Assumptions + scored table + declaration-only pattern matrix |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
 | `docs/c08-v2-transition.md` | Reconciled frozen-artifact candidate contract for separate Asteria and enterprise C08 v2 lineages; exact committed digests and repository verification recorded, external publication pending |
+| `docs/c15-c16-contract-design.md` | Design under review for separate Asteria and enterprise C15/C16 v1 contract families; no implementation or coverage claim |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
@@ -59,8 +60,8 @@ No result proves live evidence retention, durable logging, enforcement,
 deployment, real-export compatibility, or EADS compatibility. Exact committed
 digests, resolved native adversarial findings, expanded v1 locks, D8 exclusions,
 and pending CI/package evidence are in
-[`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md). There is no registry or publication
-claim.
+[`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md). The C08 candidates are registered in
+the repository catalogue but remain externally unpublished.
 
 ## Schemas
 
