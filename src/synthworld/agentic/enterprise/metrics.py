@@ -210,7 +210,10 @@ def _evidence_metrics(
             set(truth[case_id].required_evidence_refs)
             <= set(rows[case_id].evidence_refs)
         ),
-        meaning="enterprise-agentic cases with required evidence references",
+        meaning=(
+            "enterprise-agentic cases; compares reported evidence-reference labels "
+            "to evaluator requirements, without checking underlying evidence retention"
+        ),
     )
     exact = _accuracy(
         family="observability",
@@ -220,7 +223,10 @@ def _evidence_metrics(
             set(rows[case_id].evidence_refs)
             == set(truth[case_id].required_evidence_refs)
         ),
-        meaning="enterprise-agentic cases with exact evidence-reference truth",
+        meaning=(
+            "enterprise-agentic cases; compares reported evidence-reference labels "
+            "to evaluator requirements, without checking underlying evidence retention"
+        ),
     )
     reconstructability = _accuracy(
         family="observability",
@@ -230,7 +236,11 @@ def _evidence_metrics(
             rows[case_id].reconstructable_at_audit
             == truth[case_id].reconstructable_at_audit
         ),
-        meaning="enterprise-agentic cases assessed at the declared audit event",
+        meaning=(
+            "enterprise-agentic cases; compares the reported reconstructability "
+            "claim to evaluator truth, without reconstructing or inspecting retained "
+            "evidence"
+        ),
     )
     submitted = sum(len(set(rows[case_id].evidence_refs)) for case_id in case_ids)
     correct: int = sum(
@@ -245,7 +255,10 @@ def _evidence_metrics(
         name="evidence_precision",
         numerator=correct,
         denominator=submitted,
-        meaning="distinct evidence references submitted across all cases",
+        meaning=(
+            "distinct reported evidence references across all cases; compares labels "
+            "to evaluator requirements, without checking underlying evidence retention"
+        ),
     )
     return completeness, exact, reconstructability, precision
 

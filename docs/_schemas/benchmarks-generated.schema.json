@@ -25,7 +25,7 @@
           "id": {"type": "string"},
           "members": {"items": {"type": "string"}, "type": "array"},
           "path": {"type": "string"},
-          "scheme": {"enum": ["sha256sum", "sha256-artifact-set-v1", "sha256-size-manifest-v1"]}
+          "scheme": {"enum": ["sha256sum", "sha256-artifact-set-v1", "sha256-size-manifest-v1", "sha256-path-bound-v1"]}
         },
         "required": ["id", "members", "path", "scheme"],
         "type": "object"

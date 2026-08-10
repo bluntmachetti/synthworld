@@ -28,6 +28,37 @@ principal/account bindings are emitted separately under the evaluator tree.
 Observed state may later disagree with those bindings without rewriting either
 artifact.
 
+## Enterprise C08 v2 candidate
+
+`enterprise-agentic-c08-v2` is an enterprise-specific offline C08
+evidence-completeness candidate, independent of `asteria-agentic-c08-v2`. It
+pins seed `20260809` and schema version `2.0.0`; public input and evaluator
+truth are physically separate and the evaluator cross-binds the public-input
+digest. Its exact tree is root `manifest.json`, root `SHA256SUMS`,
+`public/public-input.json`, and `evaluator/truth.json`. There are no visibility
+manifests. `SHA256SUMS` binds the other three files and excludes itself; the
+committed checksum-record bytes hash to
+`a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123`,
+and this lineage defines no separate aggregate artifact-set digest.
+
+Public requirements and events carry evidence kind plus opaque binding handle.
+Each requirement has a same-kind distractor with another handle; source evidence
+IDs are replaced by separately derived public observation IDs. The packaged
+loader validates integrity and semantics, then compares the complete tree and
+models with fixed seed `20260809` generation, rejecting self-consistent alternate
+roots. The immutable root manifest has its own generated v2 schema.
+
+The candidate scores artifact submissions only. It does not demonstrate a live
+enterprise system, durable evidence retention or logging, policy enforcement,
+deployment, EADS compatibility, or compatibility with a real EADS export. C13,
+C15/C16, Face A, deployment, and generated-world demonstrations remain outside
+the authorised D8 scope. Exactly one aggregate enterprise baseline file records
+metric-only dedicated discrimination, paired with one Asteria file. The complete
+candidate review, current committed digests, resolved adversarial findings, and
+pending CI/Ruff/schema/package/isolated-wheel/clean-install/regeneration evidence
+are in [`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md). There is no registry or
+publication claim.
+
 ## Pinned standards profile
 
 `standards-profile-ledger.json` records the exact external editions reviewed on
@@ -302,3 +333,14 @@ uv run python enterprise-identity-access-contract/tools/generate_contract.py --c
 
 The enterprise work is independent of ambiguity issue #80. It does not modify
 ambiguity schemas, fixtures, checksums, or `GOLDEN_REVIEW.md`.
+
+### C08 v2 corrective boundary
+
+Enterprise C08 v2 exposes candidate observation/evidence IDs and binding handles
+in public inputs while retaining evaluator-selected bindings, required-ID sets,
+expected outcomes, and scenario truth in evaluator truth. Every requirement
+must have a same-action/same-kind different-handle distractor, and reports must
+carry schema-required measurement_scope after 4de6df8. The publication gate
+pins committed SHA256SUMS bytes to
+a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123;
+execution gates remain pending until CI.

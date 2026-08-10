@@ -41,7 +41,7 @@ body:
     attributes:
       label: Versions
       description: Include the SynthWorld and Python versions when relevant.
-      placeholder: idcognito-synthworld 0.8.0, Python 3.12
+      placeholder: idcognito-synthworld 0.x.y, Python 3.12
 
   - type: checkboxes
     id: safety

@@ -111,6 +111,56 @@
       "sha256": "217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a"
     },
     {
+      "byte_size": 1871,
+      "format": "json",
+      "integrity_record_ids": [
+        "c08-asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "package_path": "synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json",
+      "sha256": "b94fc5791e36e43e2b2586cdab0c7aaec9c249700e060a784ccc582b13b777f4"
+    },
+    {
+      "byte_size": 465,
+      "format": "json",
+      "integrity_record_ids": [
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "package_path": "synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+      "sha256": "bc701080cf88c8a446e31d5d379c360b29939bf51a7e3e017ce41f417bfce45c"
+    },
+    {
+      "byte_size": 1201,
+      "format": "json",
+      "integrity_record_ids": [],
+      "package_path": "synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json",
+      "sha256": "cb8deb43ab6216c4d913e294a7a88d882aabb75a6ecbc87f66011eb8099ad50b"
+    },
+    {
+      "byte_size": 8106,
+      "format": "json",
+      "integrity_record_ids": [
+        "c08-asteria-public:src/synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json",
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "package_path": "synthworld/benchmarks/asteria-agentic-c08-v2/public/c08-asteria-public.json",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/c08-asteria-public.json",
+      "sha256": "b9ed17cac90721a276b28570bd91b5c6f41b106dad5be15fa1257a7e9a16ade3"
+    },
+    {
+      "byte_size": 370,
+      "format": "json",
+      "integrity_record_ids": [
+        "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json"
+      ],
+      "package_path": "synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json",
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json",
+      "sha256": "5313551de8dbf5f6cdf97447fe9ade9c0fa73500dfd8fd387aa8aa4954de69c3"
+    },
+    {
       "byte_size": 6406,
       "format": "jsonl",
       "integrity_record_ids": [
@@ -367,6 +417,44 @@
       "sha256": "fa896ae417f75d6fc4ac650ec26683a39b3994bc004c743fc1fcc71f605ff17e"
     },
     {
+      "byte_size": 258,
+      "format": "sha256sum",
+      "integrity_record_ids": [],
+      "package_path": "synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS",
+      "sha256": "a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123"
+    },
+    {
+      "byte_size": 1428,
+      "format": "json",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS"
+      ],
+      "package_path": "synthworld/benchmarks/enterprise-agentic-c08-v2/evaluator/truth.json",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/evaluator/truth.json",
+      "sha256": "7fb510dfad3ef71b7aa895c51c1810b2a9fb354509220ae65fa92e27e254736b"
+    },
+    {
+      "byte_size": 619,
+      "format": "json",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS"
+      ],
+      "package_path": "synthworld/benchmarks/enterprise-agentic-c08-v2/manifest.json",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/manifest.json",
+      "sha256": "af0697c8af4715786d4af1c4b6c9c228bdc2f0b795c69d195355be42b14af3c3"
+    },
+    {
+      "byte_size": 5943,
+      "format": "json",
+      "integrity_record_ids": [
+        "sha256sum:src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS"
+      ],
+      "package_path": "synthworld/benchmarks/enterprise-agentic-c08-v2/public/public-input.json",
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/public/public-input.json",
+      "sha256": "d7a525cfeb53fcbd62adef9ee9c11dbb5b222ffa47874a8c5a0226d43deb61f0"
+    },
+    {
       "byte_size": 43841,
       "format": "json",
       "integrity_record_ids": [
@@ -486,6 +574,33 @@
       "scheme": "sha256-size-manifest-v1"
     },
     {
+      "id": "c08-asteria-evaluator:src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+      "members": [
+        "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json"
+      ],
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+      "scheme": "sha256-path-bound-v1"
+    },
+    {
+      "id": "c08-asteria-public:src/synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json",
+      "members": [
+        "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/c08-asteria-public.json"
+      ],
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json",
+      "scheme": "sha256-path-bound-v1"
+    },
+    {
+      "id": "c08-asteria-root:src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json",
+      "members": [
+        "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json",
+        "src/synthworld/benchmarks/asteria-agentic-c08-v2/evaluator/manifest.json",
+        "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/c08-asteria-public.json",
+        "src/synthworld/benchmarks/asteria-agentic-c08-v2/public/manifest.json"
+      ],
+      "path": "src/synthworld/benchmarks/asteria-agentic-c08-v2/manifest.json",
+      "scheme": "sha256-path-bound-v1"
+    },
+    {
       "id": "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS",
       "members": [
         "src/synthworld/benchmarks/ambiguity-dispositions-v1.json",
@@ -577,8 +692,18 @@
       ],
       "path": "src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
       "scheme": "sha256sum"
+    },
+    {
+      "id": "sha256sum:src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS",
+      "members": [
+        "src/synthworld/benchmarks/enterprise-agentic-c08-v2/evaluator/truth.json",
+        "src/synthworld/benchmarks/enterprise-agentic-c08-v2/manifest.json",
+        "src/synthworld/benchmarks/enterprise-agentic-c08-v2/public/public-input.json"
+      ],
+      "path": "src/synthworld/benchmarks/enterprise-agentic-c08-v2/SHA256SUMS",
+      "scheme": "sha256sum"
     }
   ],
-  "inventory_digest": "39636756d9a0f2d536ebcadcef59aa0d0c87952a0bb10aef06b93a9e93030658",
+  "inventory_digest": "7259808e7a91b0c8e5b4477ccc0cab7bdd1de2af40df35cfb2f5529e5a201ae4",
   "schema_version": "1.0.0"
 }

@@ -1,1 +1,1 @@
-"""Repository governance tools."""
+"""Repository governance tools covered by the project quality gates."""

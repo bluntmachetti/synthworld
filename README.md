@@ -20,16 +20,20 @@ SynthWorld began as the ground-truth harness for Idcognito and is deliberately
 usable as an independent Apache-2.0 Python package. It is not an anonymisation
 tool and does not transform sensitive real-world data into a safe dataset.
 
+The additive [documentation hub](docs/index.md) provides journey-led navigation
+while this README and the [user guide](USER_GUIDE.md) retain their full existing
+detail during migration.
+
 ## Choose what you want to do
 
 | Your goal | Start here | Availability |
 |---|---|---|
 | Inspect the data without installing anything | [Browse the frozen benchmarks on Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks) | Available |
 | Test agent identity and delegated authority | Use [Asteria Agentic v1](AGENTIC_BENCHMARK.md) | Available |
-| Model an enterprise identity/access world and test RBAC, ABAC, or ReBAC authorization | See [the enterprise surface](#enterprise-identity-and-access) | Partial: contracts published, unreleased |
+| Model an enterprise identity/access world and test RBAC, ABAC, or ReBAC authorization | See [the enterprise surface](#enterprise-identity-and-access) | Partial: released in `0.13.0` with contract-specific limits |
 | Create safe connected identities for tests or demos | Run `synthworld generate` | Available |
 | Evaluate PII extraction, entity matching, relationship inference, or risk scoring | Follow the [user guide](USER_GUIDE.md) | Available |
-| Explore breach, search, broker, and social exposure scenarios | Generate an exposure corpus | Partial: generation and integrity metrics |
+| Explore breach, search, broker, and social exposure scenarios | Generate an exposure corpus | Partial: corpus metrics plus released broker-removal evaluation |
 | Test broader IAM, RAG privacy, wallets, or disaster identity | See the [roadmap](ROADMAP.md) | Planned |
 
 New to benchmark evaluation? The [user guide](USER_GUIDE.md) explains the
@@ -367,8 +371,9 @@ generated JSON Schemas and examples, regenerated and checked by
   never conflated with a draft or a research paper. The dated AIIM MCP interop
   snapshot is `community_work`/`draft` and supplies experimental scenario
   vocabulary only.
-- **This surface is unreleased.** It sits under `[Unreleased]` in
-  [CHANGELOG.md](CHANGELOG.md) and is not yet covered by a tagged release.
+- **This surface shipped in `0.13.0`.** Later additions may still be marked
+  `[Unreleased]`; use [CHANGELOG.md](CHANGELOG.md) and the matching Git tag to
+  distinguish released behavior from current `main`.
 
 ## Install
 
@@ -481,9 +486,10 @@ SynthWorld provides a unified command line tool to score predictions against sep
 synthworld evaluate <task> --predictions PATH [--seed S] [--persona-count N] [--summary]
 ```
 
-Where `task` is one of `agentic`, `extraction`, `entity-resolution`,
-`relationship`, or `risk`. Agentic predictions use JSONL; the other tasks use
-JSON.
+For this unified command, `task` is one of `agentic`, `broker`,
+`continuous-assurance`, `contextual-access`, `enterprise-agentic`, `extraction`,
+`entity-resolution`, `relationship`, or `risk`. Trace and prediction formats are
+task-specific; use the relevant guide or contract before constructing a submission.
 
 - `--predictions`: Path to the system predictions JSON or JSONL file,
   conforming to the task-specific schema.
@@ -506,13 +512,14 @@ prediction and report schemas.
 ## Roadmap and integrations
 
 SynthWorld is intended to remain a focused ground-truth identity layer rather
-than become a second general-purpose simulator. Planned work is organised as
+than become a second general-purpose simulator. Remaining work is organised as
 packs and adapters:
 
-- data-broker deletion and reappearance for Personal Identity protection solutions;
+- broader longitudinal broker behavior, building on the released broker-removal evaluator;
 - broader AI-agent and non-human identity profiles for Enterprise simulation systems,
   building on the available Asteria Agentic v1 conformance fixture;
-- enterprise IAM and identity-governance scenarios;
+- broader enterprise depth and consumer projections, building on the released
+  `0.13.0` identity/access foundation;
 - LLM, RAG, and agent-memory privacy evaluation;
 - digital-wallet and verifiable-credential testing;
 - disaster identity continuity scenario testing.

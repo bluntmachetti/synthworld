@@ -1,4 +1,4 @@
-"""Run public-only baseline adapters for all five SynthWorld evaluation tasks.
+"""Run public-only baseline adapters for five foundational evaluation tasks.
 
 This example creates predictions from only the data a real system is allowed to
 see, then lets each evaluator load its separate truth. It demonstrates:

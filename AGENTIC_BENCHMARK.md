@@ -138,6 +138,37 @@ synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 truth, so an adapter author can iterate without the answer key. It examines every
 line rather than stopping at the first failure.
 
+## C08 v2 offline evidence-completeness candidates
+
+The independently versioned `asteria-agentic-c08-v2` and
+`enterprise-agentic-c08-v2` committed candidates pin seed `20260809` and schema
+version `2.0.0`. Each has separate public and evaluator artifacts, an independent
+frozen manifest contract, a packaged loader with fixed-reference comparison, and
+its own submission and scoring contract.
+
+Public actions declare `(evidence kind, binding handle)` requirements. Each
+requirement has a same-action, same-kind distractor with a different handle, and
+exactly one observation matches the required handle. Products therefore correlate
+public action semantics and handles rather than echoing a unique kind or a public
+expected ID. Exact required observation IDs and case truth remain evaluator-only.
+Enterprise additionally derives opaque public observation IDs separately from its
+source evidence IDs.
+
+Asteria has exactly five candidate files: root manifest, public payload/manifest,
+and evaluator payload/manifest. Its public, evaluator, and root artifact-set
+digests are respectively `fe59c2...`, `68cefa...`, and `5fc98e...`. Enterprise
+has exactly four: root manifest, `SHA256SUMS`, public payload, and evaluator truth;
+its checksum-record bytes hash to `a0b012...`, and that lineage defines no separate
+aggregate artifact-set digest. Exactly two metric-only baseline files record
+dedicated discrimination without submission rows or evaluator truth.
+
+Reports explicitly mark `offline_artifacts_only`. They do not establish live
+evidence retention, durable logging, enforcement, deployment behaviour,
+real-export compatibility, or EADS compatibility. CI, Ruff/format, schema check,
+package, isolated-wheel, clean-install, and regeneration evidence remain pending;
+there is no registry or publication claim. Exact committed hashes and D8 exclusions
+are in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
+
 | code | severity | meaning |
 |---|---|---|
 | `malformed_json` | error | the line is not valid JSON |
@@ -285,10 +316,10 @@ aggregate hides which you have.
 | authority_replay | `delegation_chain_integrity` | the delegation chain matches the one the action-time check selected, root first | it does not | scored action events |
 | accountability | `attribution_integrity` | the attributed actor matches the evaluator's canonical binding | it does not — note two attribution paths can be equally defensible, so this scores agreement with the canonical choice rather than objective correctness | scored action events |
 | | `accountable_owner_chain_integrity` | the chain of principals accountable for the action is correct | it is not | scored action events |
-| observability | `provenance_completeness` | every event carried its complete required evidence set | no event carried a complete set — which happens well short of submitting nothing | scored action events |
-| | `provenance_exact_match` | the evidence set is exactly the required one — nothing missing, nothing extra | it is not. An extra reference is one not required *for this action*; the scorer does not establish it was invented | scored action events |
-| | `provenance_precision` | every submitted reference was required for the action it was submitted against | none was. A genuine reference filed against the wrong action counts here, so this measures misfiling as well as invention | distinct action-event and evidence-reference pairs submitted |
-| | `audit_reconstructability_accuracy` | the claim about whether the decision can be rebuilt from retained evidence is right | it is not | scored action events |
+| observability | `provenance_completeness` | every event's reported reference set includes every evaluator-required reference | no event's reported reference set includes every required reference — which happens well short of submitting nothing | scored action events |
+| | `provenance_exact_match` | each reported reference set is exactly the evaluator-required one — nothing missing, nothing extra | it is not. An extra reported reference is one not required *for this action*; the scorer does not establish it was invented | scored action events |
+| | `provenance_precision` | every reported reference was required for the action it was reported against | none was. A genuine reference reported against the wrong action counts here, so this measures misfiling as well as invention | distinct action-event and evidence-reference pairs reported |
+| | `audit_reconstructability_accuracy` | the reported claim about whether the decision can be rebuilt from retained evidence matches evaluator truth | it does not | scored action events |
 | | `expected_side_effect_accuracy` | the side effect the action should record is named correctly | it is not | scored action events |
 | | `least_privilege_accuracy` | nothing truth denies was allowed | everything truth denies was allowed | actions truth denies |
 | | `excess_authority_rate` | every action truth denies was allowed — this is the **bad** end | nothing truth denies was allowed | actions truth denies |
@@ -343,16 +374,22 @@ allow/deny with missing evidence can therefore score perfectly on decision
 accuracy while scoring below one on provenance; there is no aggregate score
 that conceals that difference.
 
-`provenance_completeness` is the fraction of actions whose submitted evidence
-contains every required reference. It deliberately retains its original
-subset-based meaning. `provenance_exact_match` is the fraction of actions whose
-distinct submitted and required evidence sets are equal. `provenance_precision`
-is micro precision over distinct `(action, evidence reference)` pairs; its
-support is the number submitted and its value is undefined at zero support.
-Consequently, fabricated extras can leave completeness at one while lowering
-exact match and precision. `delegation_chain_integrity` already compares the
-ordered chain IDs exactly; those IDs resolve to public delegations containing
-each delegator, grantee, parent, policy, and capability.
+`provenance_completeness` is the fraction of actions whose reported evidence
+reference set contains every required reference. It deliberately retains its
+original subset-based meaning. `provenance_exact_match` is the fraction of
+actions whose distinct reported and required reference sets are equal.
+`provenance_precision` is micro precision over distinct `(action, evidence
+reference)` pairs; its support is the number reported and its value is undefined
+at zero support. Consequently, fabricated extras can leave completeness at one
+while lowering exact match and precision.
+
+These are reference-reporting metrics, not evidence-retention tests. The scorer
+compares submitted reference labels, and the submitted reconstructability claim,
+with evaluator truth. It does not retrieve, reconstruct from, or otherwise prove
+the retention of the underlying evidence. A perfect C08 score therefore does not
+establish that the cited evidence remains available. `delegation_chain_integrity`
+already compares the ordered chain IDs exactly; those IDs resolve to public
+delegations containing each delegator, grantee, parent, policy, and capability.
 
 Two public-only baselines are available in `synthworld.agentic`: an
 `always_deny_agentic_trace` baseline and a `current_state_agentic_trace`
@@ -416,3 +453,17 @@ world-authoring UI. Adding generated organisations, scale tiers, and custom
 scenario authoring belongs to the follow-on temporal/profile work. Those worlds
 can reuse this event and evaluation boundary without changing the frozen
 Asteria bytes.
+
+## C08 v2 public identifier and report correction
+
+Candidate observation/evidence IDs and binding handles are public benchmark
+inputs. They provide the literal identifiers needed to submit a selection.
+Evaluator-selected binding rows, required-ID sets, expected outcomes, and
+scenario truth remain confined to evaluator artifacts.
+
+For enterprise C08 v2, each requirement must have a same-action/same-kind
+candidate with a different binding handle. This runtime invariant makes the
+handle discriminating and prevents kind-only matching. Since 4de6df8,
+measurement_scope is required by the report schema; it must describe the
+offline measurement boundary and must not imply live retention, durable
+logging, enforcement, deployment, or EADS compatibility.

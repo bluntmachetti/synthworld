@@ -10,6 +10,10 @@ This roadmap records direction rather than a release promise. Schema contracts
 remain independently versioned, and the existing frozen benchmarks must not
 change without an explicit benchmark-version transition.
 
+For a journey-led Now/Next/Later view, see the additive
+[documentation roadmap](docs/roadmap/index.md). This file remains the concise
+repository-readable source of direction.
+
 ## Product principles
 
 1. **Ground truth first.** Every generated ambiguity, relationship, lifecycle
@@ -113,7 +117,8 @@ existing capabilities and the wider project portfolio.
 
 - [#5 — Add a data-broker deletion and reappearance benchmark pack](https://github.com/bluntmachetti/synthworld/issues/5)
 
-This extends the existing broker lifecycle into multi-broker discovery,
+Issue #5 shipped in `0.13.0`, extending the existing broker lifecycle into
+multi-broker discovery,
 verification, removal, downstream propagation, partial deletion, and
 reappearance testing. Idcognito can consume the public side while SynthWorld
 retains definitive lifecycle truth.
@@ -135,10 +140,15 @@ resources and business impact; SynthWorld remains the benchmark oracle.
 **Objective:** project the ground-truth identity layer into enterprise and AI
 systems without duplicating their simulation kernels.
 
+The `0.13.0` release established the enterprise identity/access universe and
+independently scored identity-fabric, agentic, contextual, governance, assurance,
+and standards-projection contracts. The open issues below cover broader generated
+depth and consumer projections; they do not make the released foundation planned.
+
 - [#7 — Add an enterprise IAM and identity-governance benchmark pack](https://github.com/bluntmachetti/synthworld/issues/7)
 - [#8 — Add an LLM, RAG, and agent-memory privacy benchmark pack](https://github.com/bluntmachetti/synthworld/issues/8)
 
-Expected outcomes:
+Remaining outcomes:
 
 - joiner, mover, leaver, orphan-account, excessive-privilege, and toxic-access
   benchmarks;
@@ -163,8 +173,9 @@ records, and safe inter-agency matching.
 
 ## Use-case map
 
-Availability describes the packaged `0.9.x` model, not the eventual scope of
-the roadmap.
+Availability describes the latest tagged package recorded in
+[CHANGELOG.md](CHANGELOG.md). Current `main` may be ahead; use the matching Git tag
+when a released contract is required.
 
 | Availability | Use case | SynthWorld responsibility | Consumer or adapter |
 |---|---|---|---|
@@ -173,10 +184,10 @@ the roadmap.
 | Available | Entity resolution | Conflicting public records, separate membership truth, and merge/split scoring | Matcher or identity-resolution system |
 | Available | Relationship inference | Public associations, reciprocal truth, unilateral controls, and evidence scoring | Graph or inference system |
 | Available | Breach-risk calibration | Public breach observations, separate score/band truth, and calibration scoring | Risk model or rules engine |
-| Partial | Privacy exposure and broker removal | Breach, broker, search, and social fixtures including basic reappearance; full deletion-action evaluation is planned | Idcognito or privacy product |
+| Partial | Privacy exposure and broker removal | Breach, broker, search, and social fixtures plus a released broker-removal evaluator; broader longitudinal product behavior remains planned | Idcognito or privacy product |
 | Available | Asteria agent authority conformance | Principals, runtimes, credentials, grants, temporal replay, revocation, evidence, and scoring | Generic JSONL, ZeroID, Arena, EADS |
 | Planned | Generated agent and workload identity profiles | Configurable organisations, graph profiles, and scale tiers | ZeroID, Arena, EADS |
-| Planned | Enterprise IAM and governance | Accounts, entitlements, ownership, and policy truth | EADS, Arena |
+| Partial | Enterprise IAM and governance | Released accounts, entitlements, ownership, policy truth, and independently scored contract packs; broader generated depth and consumer projections remain planned | EADS, Arena |
 | Planned | LLM and RAG privacy | Fact ownership, sensitivity, authorisation, and current-state truth | Model, RAG, or agent harness |
 | Planned | Digital wallets and credentials | Issuers, holders, claims, presentations, and validity truth | Wallet or verifier adapter |
 | Planned | Disaster identity continuity | Households, records, matching, and status truth | Aftershock |

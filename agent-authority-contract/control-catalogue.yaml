@@ -163,9 +163,10 @@ meta:
     C11's expected_policy_version is now derived from the covering delegation
     rather than copied from the public attempt, but on this fixture every action
     still has attempted equal to effective, so an echo continues to score 1.0
-    here - see that control's core_limitations for what remains. C08's four
-    required evidence refs are derivable from public data, so a system retaining
-    nothing can score 1.0. C09's metric covers three case kinds while four
+    here - see that control's core_limitations for what remains. C08's required
+    evidence refs - three base references plus one per delegation-chain member -
+    are derivable from public data, so a system retaining nothing can score 1.0.
+    C09's metric covers three case kinds while four
     actually diverge between action and audit, and one of its three
     (post_revocation_action) does not diverge at all - so two diverging cases are
     unscored. credential_invalid and policy_version_mismatch are labellable case

@@ -198,7 +198,7 @@ def _rewrite_documents(
 
 def test_current_repository_discovers_exact_governed_inventory() -> None:
     generated = registry.discover_generated(PROJECT_ROOT)
-    assert len(generated["artifacts"]) == 46
+    assert len(generated["artifacts"]) == 55
     assert generated["artifacts"] == sorted(
         generated["artifacts"], key=lambda item: item["path"]
     )
@@ -215,8 +215,18 @@ def test_current_repository_discovers_exact_governed_inventory() -> None:
     assert schemes == {
         "sha256sum",
         "sha256-artifact-set-v1",
+        "sha256-path-bound-v1",
         "sha256-size-manifest-v1",
     }
+
+
+def test_tracked_artifact_reader_rejects_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "target.json"
+    target.write_bytes(b"{}\n")
+    (tmp_path / "linked.json").symlink_to(target)
+
+    with pytest.raises(registry.RegistryError, match="tracked artifact is a symlink"):
+        registry._read_artifact_bytes(tmp_path, ("linked.json",))
 
 
 def test_write_check_canonicalization_drift_and_cli(
@@ -399,6 +409,313 @@ def test_asteria_rejects_incomplete_invalid_maps_inventory_and_digest() -> None:
     changed[evaluator_owner.replace("checksums.json", "extra.json")] = b"{}\n"
     with pytest.raises(registry.RegistryError, match="inventory differs"):
         _verify_asteria(changed)
+
+
+def _path_bound_descriptor(path: str, payload: bytes) -> JsonObject:
+    return {
+        "byte_size": len(payload),
+        "path": path,
+        "sha256": hashlib.sha256(payload).hexdigest(),
+    }
+
+
+def _asteria_v2_mapping() -> dict[str, bytes]:
+    root = f"{registry.BENCHMARK_PREFIX}asteria-agentic-c08-v2"
+    public_payload = b"public\n"
+    evaluator_payload = b"truth\n"
+    public_files = {"c08-asteria-public.json": public_payload}
+    evaluator_files = {"c08-asteria-evaluator.json": evaluator_payload}
+    public_manifest = registry.canonical_json(
+        {
+            "artifact_set_digest": registry.artifact_set_digest(public_files),
+            "artifacts": [
+                {
+                    **_path_bound_descriptor("c08-asteria-public.json", public_payload),
+                    "synthetic": True,
+                }
+            ],
+            "benchmark_id": "asteria-agentic-c08-v2",
+            "schema_version": "2.0.0",
+            "seed": 20260809,
+            "synthetic": True,
+            "visibility": "public",
+        }
+    )
+    evaluator_manifest = registry.canonical_json(
+        {
+            "artifact_set_digest": registry.artifact_set_digest(evaluator_files),
+            "artifacts": [
+                {
+                    **_path_bound_descriptor(
+                        "c08-asteria-evaluator.json", evaluator_payload
+                    ),
+                    "synthetic": True,
+                }
+            ],
+            "benchmark_id": "asteria-agentic-c08-v2",
+            "public_input_digest": hashlib.sha256(public_payload).hexdigest(),
+            "schema_version": "2.0.0",
+            "seed": 20260809,
+            "synthetic": True,
+            "visibility": "evaluator",
+        }
+    )
+    root_files = {
+        "evaluator/manifest.json": evaluator_manifest,
+        "evaluator/c08-asteria-evaluator.json": evaluator_payload,
+        "public/c08-asteria-public.json": public_payload,
+        "public/manifest.json": public_manifest,
+    }
+    root_manifest = registry.canonical_json(
+        {
+            "artifact_set_digest": registry.artifact_set_digest(root_files),
+            "artifacts": [
+                {**_path_bound_descriptor(path, payload), "synthetic": True}
+                for path, payload in sorted(root_files.items())
+            ],
+            "benchmark_id": "asteria-agentic-c08-v2",
+            "evaluator_artifact_set_digest": registry.artifact_set_digest(
+                evaluator_files
+            ),
+            "evaluator_public_input_digest": hashlib.sha256(public_payload).hexdigest(),
+            "public_artifact_set_digest": registry.artifact_set_digest(public_files),
+            "public_input_digest": hashlib.sha256(public_payload).hexdigest(),
+            "schema_version": "2.0.0",
+            "seed": 20260809,
+            "synthetic": True,
+            "visibility": "root",
+        }
+    )
+    return {
+        f"{root}/manifest.json": root_manifest,
+        f"{root}/public/c08-asteria-public.json": public_payload,
+        f"{root}/public/manifest.json": public_manifest,
+        f"{root}/evaluator/c08-asteria-evaluator.json": evaluator_payload,
+        f"{root}/evaluator/manifest.json": evaluator_manifest,
+    }
+
+
+def test_asteria_v2_path_bound_manifests_record_layered_integrity() -> None:
+    artifacts = _asteria_v2_mapping()
+    memberships: dict[str, list[str]] = {path: [] for path in artifacts}
+    records: list[JsonObject] = []
+    registry._verify_asteria_v2(artifacts, memberships, records)
+
+    root = f"{registry.BENCHMARK_PREFIX}asteria-agentic-c08-v2"
+    root_record = f"c08-asteria-root:{root}/manifest.json"
+    public_record = f"c08-asteria-public:{root}/public/manifest.json"
+    evaluator_record = f"c08-asteria-evaluator:{root}/evaluator/manifest.json"
+    assert memberships[f"{root}/public/c08-asteria-public.json"] == [
+        root_record,
+        public_record,
+    ]
+    assert memberships[f"{root}/evaluator/c08-asteria-evaluator.json"] == [
+        root_record,
+        evaluator_record,
+    ]
+    assert memberships[f"{root}/public/manifest.json"] == [root_record]
+    assert memberships[f"{root}/evaluator/manifest.json"] == [root_record]
+    assert {record["scheme"] for record in records} == {"sha256-path-bound-v1"}
+
+
+def test_asteria_v2_rejects_partial_extra_and_contract_drift() -> None:
+    artifacts = _asteria_v2_mapping()
+    root = f"{registry.BENCHMARK_PREFIX}asteria-agentic-c08-v2"
+    registry._verify_asteria_v2({}, {}, [])
+    for removed in artifacts:
+        changed = dict(artifacts)
+        changed.pop(removed)
+        memberships: dict[str, list[str]] = {path: [] for path in changed}
+        with pytest.raises(registry.RegistryError, match="inventory differs"):
+            registry._verify_asteria_v2(changed, memberships, [])
+    changed = {**artifacts, f"{root}/extra.json": b"{}\n"}
+    with pytest.raises(registry.RegistryError, match="inventory differs"):
+        registry._verify_asteria_v2(changed, {path: [] for path in changed}, [])
+    for owner, field in (
+        (f"{root}/public/manifest.json", "benchmark_id"),
+        (f"{root}/evaluator/manifest.json", "public_input_digest"),
+        (f"{root}/manifest.json", "public_artifact_set_digest"),
+    ):
+        changed = dict(artifacts)
+        document = registry._decode_json(changed[owner], owner)
+        document[field] = "wrong"
+        changed[owner] = registry.canonical_json(document)
+        if owner != f"{root}/manifest.json":
+            root_owner = f"{root}/manifest.json"
+            root_document = registry._decode_json(changed[root_owner], root_owner)
+            root_files = {
+                path.removeprefix(f"{root}/"): payload
+                for path, payload in changed.items()
+                if path != root_owner
+            }
+            root_document["artifact_set_digest"] = registry.artifact_set_digest(
+                root_files
+            )
+            root_document["artifacts"] = [
+                {**_path_bound_descriptor(path, payload), "synthetic": True}
+                for path, payload in sorted(root_files.items())
+            ]
+            changed[root_owner] = registry.canonical_json(root_document)
+        memberships = {path: [] for path in changed}
+        with pytest.raises(registry.RegistryError, match="manifest contract differs"):
+            registry._verify_asteria_v2(changed, memberships, [])
+
+
+def _verify_path_bound_fixture(
+    manifest: JsonObject,
+    *,
+    expected_members: tuple[str, ...] | None = None,
+    include_owner: bool = True,
+) -> None:
+    owner = f"{registry.BENCHMARK_PREFIX}path-bound/manifest.json"
+    payload_path = f"{registry.BENCHMARK_PREFIX}path-bound/input.json"
+    artifacts = {payload_path: b"payload\n"}
+    if include_owner:
+        artifacts[owner] = registry.canonical_json(manifest)
+    memberships: dict[str, list[str]] = {path: [] for path in artifacts}
+    registry._verify_path_bound_manifest(
+        artifacts,
+        memberships,
+        [],
+        owner=owner,
+        record_prefix="path-bound",
+        expected_members=expected_members or (payload_path,),
+    )
+
+
+def test_path_bound_manifest_rejects_missing_invalid_and_duplicate_descriptors() -> (
+    None
+):
+    payload = b"payload\n"
+    valid = _path_bound_descriptor("input.json", payload)
+    digest = registry.artifact_set_digest({"input.json": payload})
+    with pytest.raises(registry.RegistryError, match="missing manifest"):
+        _verify_path_bound_fixture({}, include_owner=False)
+    for descriptors in (
+        None,
+        [],
+        [None],
+        [{**valid, "path": None}],
+        [valid, valid],
+        [{**valid, "sha256": None}],
+        [{**valid, "sha256": "invalid"}],
+        [{**valid, "byte_size": None}],
+    ):
+        with pytest.raises(registry.RegistryError, match="invalid artifact descriptor"):
+            _verify_path_bound_fixture(
+                {"artifact_set_digest": digest, "artifacts": descriptors}
+            )
+
+
+def test_path_bound_manifest_rejects_unknown_binding_inventory_and_set_digest() -> None:
+    payload = b"payload\n"
+    valid = _path_bound_descriptor("input.json", payload)
+    digest = registry.artifact_set_digest({"input.json": payload})
+    failures = (
+        (
+            {"artifact_set_digest": digest, "artifacts": [{**valid, "path": "x"}]},
+            None,
+            "unknown manifest member",
+        ),
+        (
+            {
+                "artifact_set_digest": digest,
+                "artifacts": [{**valid, "byte_size": len(payload) + 1}],
+            },
+            None,
+            "manifest binding differs",
+        ),
+        (
+            {
+                "artifact_set_digest": digest,
+                "artifacts": [{**valid, "sha256": "0" * 64}],
+            },
+            None,
+            "manifest binding differs",
+        ),
+        (
+            {"artifact_set_digest": digest, "artifacts": [valid]},
+            (f"{registry.BENCHMARK_PREFIX}path-bound/extra.json",),
+            "artifact inventory differs",
+        ),
+        (
+            {"artifact_set_digest": "0" * 64, "artifacts": [valid]},
+            None,
+            "artifact set digest differs",
+        ),
+    )
+    for manifest, expected_members, message in failures:
+        with pytest.raises(registry.RegistryError, match=message):
+            if expected_members is None:
+                _verify_path_bound_fixture(manifest)
+            else:
+                _verify_path_bound_fixture(manifest, expected_members=expected_members)
+
+
+def test_enterprise_c08_v2_requires_the_exact_checksum_inventory() -> None:
+    root = f"{registry.BENCHMARK_PREFIX}enterprise-agentic-c08-v2"
+    owner = f"{root}/SHA256SUMS"
+    members = {
+        "evaluator/truth.json": b"truth\n",
+        "public/public-input.json": b"public\n",
+    }
+    manifest = {
+        "benchmark_id": "enterprise-agentic-c08-v2",
+        "checksum_algorithm": "sha256",
+        "checksum_excludes": ["SHA256SUMS"],
+        "checksum_file": "SHA256SUMS",
+        "evaluator_inventory": [
+            {
+                **_path_bound_descriptor(
+                    "evaluator/truth.json", members["evaluator/truth.json"]
+                ),
+                "synthetic": True,
+            }
+        ],
+        "public_input_digest": hashlib.sha256(
+            members["public/public-input.json"]
+        ).hexdigest(),
+        "public_inventory": [
+            {
+                **_path_bound_descriptor(
+                    "public/public-input.json", members["public/public-input.json"]
+                ),
+                "synthetic": True,
+            }
+        ],
+        "schema_version": "2.0.0",
+        "seed": 20260809,
+        "synthetic": True,
+    }
+    members["manifest.json"] = registry.canonical_json(manifest)
+    checksum = "".join(
+        f"{hashlib.sha256(payload).hexdigest()}  {path}\n"
+        for path, payload in sorted(members.items())
+    ).encode("ascii")
+    artifacts = {owner: checksum}
+    artifacts.update({f"{root}/{path}": payload for path, payload in members.items()})
+    registry._verify_enterprise_c08_v2({})
+    registry._verify_enterprise_c08_v2(artifacts)
+
+    partial = dict(artifacts)
+    partial.pop(owner)
+    with pytest.raises(registry.RegistryError, match="inventory differs"):
+        registry._verify_enterprise_c08_v2(partial)
+    extra = {**artifacts, f"{root}/extra.json": b"{}\n"}
+    with pytest.raises(registry.RegistryError, match="inventory differs"):
+        registry._verify_enterprise_c08_v2(extra)
+    reordered = dict(artifacts)
+    reordered[owner] = b"".join(reversed(checksum.splitlines(keepends=True)))
+    with pytest.raises(registry.RegistryError, match="checksum rows differ"):
+        registry._verify_enterprise_c08_v2(reordered)
+    invalid_manifest = dict(artifacts)
+    invalid_manifest[f"{root}/manifest.json"] = b"{}\n"
+    invalid_manifest[owner] = checksum.replace(
+        hashlib.sha256(members["manifest.json"]).hexdigest().encode("ascii"),
+        hashlib.sha256(b"{}\n").hexdigest().encode("ascii"),
+    )
+    with pytest.raises(registry.RegistryError, match="manifest differs"):
+        registry._verify_enterprise_c08_v2(invalid_manifest)
 
 
 def _authority_mapping() -> dict[str, bytes]:

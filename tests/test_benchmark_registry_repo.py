@@ -117,7 +117,7 @@ def test_benchmark_kinds_have_the_correct_evaluation_mode() -> None:
         "generated_benchmark": "generated_evaluation",
         "projection": "public_reference",
     }
-    assert len(benchmarks) == 15
+    assert len(benchmarks) == 17
     assert all(
         item["evaluation_mode"] == expected_modes[item["benchmark_kind"]]
         for item in benchmarks
@@ -143,11 +143,24 @@ def test_reproduction_contract_distinguishes_published_replay_from_examples() ->
             "{output_dir}",
         ]
 
-    assert len(candidates) == 8
+    assert len(candidates) == 10
     assert all(item["reproduction"] is None for item in candidates)
-    assert all(isinstance(item["example_command"], str) for item in candidates)
+    commandless_candidate_ids = {
+        "asteria-agentic-c08-v2",
+        "enterprise-agentic-c08-v2",
+    }
+    assert {
+        item["id"] for item in candidates if item["example_command"] is None
+    } == commandless_candidate_ids
     assert all(
-        "reproduce-benchmark" not in item["example_command"] for item in candidates
+        isinstance(item["example_command"], str)
+        for item in candidates
+        if item["id"] not in commandless_candidate_ids
+    )
+    assert all(
+        "reproduce-benchmark" not in item["example_command"]
+        for item in candidates
+        if item["example_command"] is not None
     )
 
 
@@ -168,14 +181,66 @@ def test_registry_assigns_the_exact_generated_benchmark_inventory_once() -> None
     generated_paths = {
         cast(str, item["path"]) for item in discover_generated(ROOT)["artifacts"]
     }
-    assert len(generated_paths) == 46
+    assert len(generated_paths) == 55
     assert set(assigned_paths) == generated_paths
-    assert len(assigned_paths) == len(set(assigned_paths)) == 46
+    assert len(assigned_paths) == len(set(assigned_paths)) == 55
     artifact_ids = [item["id"] for item in artifacts]
     assert len(artifact_ids) == len(set(artifact_ids))
     benchmark_ids = {item["id"] for item in registry["benchmarks"]}
     assert {item["benchmark_id"] for item in artifacts} <= benchmark_ids
     assert all(item["approved_sha256"] for item in public_artifacts)
+
+
+def test_c08_v2_candidates_have_exact_registry_semantics() -> None:
+    registry = _load(CURATED)
+    benchmarks = {item["id"]: item for item in registry["benchmarks"]}
+    artifacts = {
+        item["id"]: item
+        for item in registry["artifacts"]
+        if item["benchmark_id"]
+        in {
+            "asteria-agentic-c08-v2",
+            "enterprise-agentic-c08-v2",
+        }
+    }
+    expected_routes = {
+        "asteria-agentic-c08-v2": (
+            "route:agent-authority-contract/docs/c08-v2-transition.md#asteria-frozen-inventory-and-digests"
+        ),
+        "enterprise-agentic-c08-v2": (
+            "route:agent-authority-contract/docs/c08-v2-transition.md#enterprise-frozen-inventory-and-digests"
+        ),
+    }
+    for benchmark_id, route in expected_routes.items():
+        benchmark = benchmarks[benchmark_id]
+        assert benchmark["lifecycle"] == "candidate"
+        assert benchmark["benchmark_kind"] == "conformance_fixture"
+        assert benchmark["evaluation_mode"] == "public_conformance"
+        assert benchmark["introduced_in"] == "unreleased"
+        assert benchmark["docs_route_ids"] == [route]
+        assert benchmark["publication_gate_id"] is None
+        assert benchmark["reproduction"] is None
+    assert len(artifacts) == 9
+    assert all(item["frozen"] for item in artifacts.values())
+    assert all(
+        item["present_in"]
+        == item["approved_targets"]
+        == ["repository", "python_package"]
+        for item in artifacts.values()
+    )
+    assert artifacts["asteria-agentic-c08-v2:public-input"]["sensitivity"] == (
+        "public_input"
+    )
+    assert artifacts["enterprise-agentic-c08-v2:public-input"]["sensitivity"] == (
+        "public_input"
+    )
+    truth_sensitive = [
+        item
+        for item in artifacts.values()
+        if item["sensitivity"] == "public_reference_truth"
+    ]
+    assert len(truth_sensitive) == 6
+    assert all(item["answer_key_label"] for item in truth_sensitive)
 
 
 def test_evaluator_truth_is_explicitly_public_reference_not_path_inference() -> None:

@@ -34,11 +34,33 @@ remaining docs are the two narrative files listed below.
 | `reference-deployment/` | Working opt-in live Compose lab; observation v2, full L01-L06, exact L07, measured/unsupported L08 |
 | `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
+| `docs/c08-v2-transition.md` | Reconciled frozen-artifact candidate contract for separate Asteria and enterprise C08 v2 lineages; exact committed digests recorded, verification/publication pending |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
 the trace contract. The schemas here are a projection of them, not an independent
 definition — where the two disagree the model is right and the schema is stale.
+
+## C08 v2 candidate boundary
+
+`asteria-agentic-c08-v2` and `enterprise-agentic-c08-v2` are separate offline
+evidence-completeness candidates pinned to seed `20260809` and schema `2.0.0`.
+Asteria has an exact five-file root/public/evaluator manifest tree; enterprise
+has an exact four-file root-manifest/`SHA256SUMS` tree. Their frozen manifest
+contracts are independently typed and generated.
+
+Public requirements and observations correlate through opaque binding handles.
+Every required kind has a same-kind distractor with another handle, while exact
+required observation IDs remain evaluator-only. This split is API hygiene, not
+secrecy. Both packaged loaders compare validated artifacts with fixed-reference
+generation. Exactly two aggregate baseline files retain only digests and metrics.
+
+No result proves live evidence retention, durable logging, enforcement,
+deployment, real-export compatibility, or EADS compatibility. Exact committed
+digests, resolved native adversarial findings, expanded v1 locks, D8 exclusions,
+and pending CI/package evidence are in
+[`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md). There is no registry or publication
+claim.
 
 ## Schemas
 
@@ -326,3 +348,12 @@ nothing.
 - **Control IDs are permanent.** Never renumber, never reuse a retired ID.
 - **Do not add a control without an observable invariant.** If it cannot be stated
   without naming a product or a draft, it is not a control yet.
+
+### C08 v2 corrective boundary
+
+C08 v2 public inputs include literal candidate observation/evidence IDs and
+binding handles so selections are constructible without evaluator bytes.
+Evaluator-selected bindings, required-ID sets, expected outcomes, and scenario
+truth remain evaluator-only. The Asteria publication gate pins root digest
+5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a;
+execution gates remain pending until CI.
