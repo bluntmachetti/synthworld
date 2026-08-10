@@ -251,6 +251,25 @@ def test_registry_ignores_valid_non_hf_gate_targets() -> None:
     }
 
 
+def test_registry_rejects_hf_gate_for_candidate_lifecycle() -> None:
+    registry = _complete_registry(
+        {
+            "benchmarks": [
+                {
+                    "artifacts": [],
+                    "benchmark_version": "1.0.0",
+                    "id": "sample",
+                    "lifecycle": "candidate",
+                    "publication_gate": _approved_hf_gate("sample", "hugging_face_raw"),
+                }
+            ]
+        }
+    )
+
+    with pytest.raises(publication.PublicationError, match="published lifecycle"):
+        publication.derive_registry_state(registry, ROOT)
+
+
 def test_registry_rejects_duplicate_benchmark_identity() -> None:
     registry = _complete_registry(
         {
@@ -800,6 +819,15 @@ def test_registry_rejects_source_path_escape(tmp_path: Path, source_path: str) -
         publication._source_file(tmp_path, source_path)
 
 
+def test_registry_rejects_symlink_source_path(tmp_path: Path) -> None:
+    target = tmp_path / "target.json"
+    target.write_bytes(b"{}\n")
+    (tmp_path / "linked.json").symlink_to(target)
+
+    with pytest.raises(publication.PublicationError, match="path is a symlink"):
+        publication._source_file(tmp_path, "linked.json")
+
+
 def test_registry_rejects_source_digest_drift(tmp_path: Path) -> None:
     source = tmp_path / "sample.json"
     source.write_bytes(b"actual\n")
@@ -977,10 +1005,22 @@ def test_protected_workflow_has_no_hf_credential_or_upload_command() -> None:
     parsed = yaml.safe_load(workflow.replace("\non:", '\n"on":', 1))
 
     assert set(parsed["on"]) == {"pull_request", "push", "workflow_dispatch"}
-    assert set(parsed["on"]["push"]["paths"]) >= {"pyproject.toml", "uv.lock"}
+    registry_inputs = {
+        "docs/_data/benchmark-publication-gates.json",
+        "docs/_data/benchmark-publication-transitions.json",
+        "docs/_data/benchmarks.curated.json",
+        "docs/_data/benchmarks.generated.json",
+        "tools/generate_benchmark_registry.py",
+    }
+    assert set(parsed["on"]["push"]["paths"]) >= {
+        "pyproject.toml",
+        "uv.lock",
+        *registry_inputs,
+    }
     assert set(parsed["on"]["pull_request"]["paths"]) >= {
         "pyproject.toml",
         "uv.lock",
+        *registry_inputs,
     }
     assert parsed["on"]["push"]["branches"] == ["main"]
     protected = parsed["jobs"]["protected-dry-run"]
@@ -991,7 +1031,8 @@ def test_protected_workflow_has_no_hf_credential_or_upload_command() -> None:
     )
     assert "permissions:\n  contents: read" in workflow
     assert "persist-credentials: false" in workflow
-    assert workflow.count("uv run --offline --frozen") == 2
+    assert workflow.count("uv run --offline --frozen") == 3
+    assert "tools/generate_benchmark_registry.py" in workflow
     action_refs = [
         line.split("@", 1)[1].split()[0]
         for line in workflow.splitlines()

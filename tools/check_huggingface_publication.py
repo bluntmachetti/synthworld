@@ -150,7 +150,10 @@ def _target_set(value: object, label: str) -> set[str]:
 
 def _source_file(repository_root: Path, source_path: str) -> Path:
     root = repository_root.resolve()
-    candidate = (root / source_path).resolve()
+    source = root / source_path
+    if source.is_symlink():
+        raise PublicationError(f"artifact path is a symlink: {source_path}")
+    candidate = source.resolve()
     if candidate == root or root not in candidate.parents:
         raise PublicationError(f"artifact path escapes repository: {source_path}")
     return candidate
@@ -258,6 +261,10 @@ def derive_registry_state(
             )
         else:
             raise PublicationError("resolved registry: malformed publication gate")
+        if gate_targets and lifecycle != "published":
+            raise PublicationError(
+                f"{benchmark_id}: HF publication requires published lifecycle"
+            )
 
         observed_artifact_ids: list[str] = []
         for artifact in artifacts:
