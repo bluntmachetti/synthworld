@@ -12,6 +12,7 @@ import pytest
 import yaml
 
 from synthworld.agent_authority.common import CONTROL_ORDER, DeploymentPattern
+from synthworld.agent_authority.models import AgentAuthorityRunPlanV1
 from synthworld.agent_authority.reference import (
     build_reference_agent_authority_run_receipt,
     reference_plan,
@@ -74,7 +75,7 @@ def _evaluated_manifest(**overrides: object) -> SimpleNamespace:
     )
 
 
-def _write_plan(root: Path, plan: object) -> None:
+def _write_plan(root: Path, plan: AgentAuthorityRunPlanV1) -> None:
     (root / "context").mkdir(parents=True)
     (root / "context" / "run-plan.json").write_text(
         json.dumps(plan.model_dump(mode="json")), encoding="utf-8"
