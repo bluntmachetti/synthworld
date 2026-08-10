@@ -11,6 +11,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
     C08PublicInputV2,
+    C08SourceActionV2,
     C08SourceWorldV2,
     C08SubmissionV2,
 )
@@ -62,8 +63,8 @@ def _evidence_id(
 
 
 def _build_source(seed: int) -> C08SourceWorldV2:
-    actions = []
-    events = []
+    actions: list[C08SourceActionV2] = []
+    events: list[C08EvidenceEventV2] = []
     sequence = 0
     for index, (action_name, required_kinds) in enumerate(_REFERENCE_ACTIONS):
         action_id = _reference_id(seed, "action", index)
@@ -75,15 +76,15 @@ def _build_source(seed: int) -> C08SourceWorldV2:
             for kind_index, kind in enumerate(required_kinds)
         )
         actions.append(
-            {
-                "action_id": action_id,
-                "tenant_id": tenant_id,
-                "resource_id": resource_id,
-                "action": action_name,
-                "tick": tick,
-                "required_evidence_kinds": required_kinds,
-                "required_evidence_ids": required_ids,
-            }
+            C08SourceActionV2(
+                action_id=action_id,
+                tenant_id=tenant_id,
+                resource_id=resource_id,
+                action=action_name,
+                tick=tick,
+                required_evidence_kinds=required_kinds,
+                required_evidence_ids=required_ids,
+            )
         )
         for kind_index, kind in enumerate((*required_kinds, _EXTRA_EVIDENCE_KIND)):
             extra_id = _reference_id(seed, "extra", index).split("-", 1)[1]
@@ -98,17 +99,17 @@ def _build_source(seed: int) -> C08SourceWorldV2:
                 .ljust(64, "0")
             )
             events.append(
-                {
-                    "sequence": sequence,
-                    "evidence_id": evidence_id,
-                    "action_id": action_id,
-                    "tenant_id": tenant_id,
-                    "resource_id": resource_id,
-                    "action": action_name,
-                    "tick": tick,
-                    "kind": kind,
-                    "payload_digest": payload_digest,
-                }
+                C08EvidenceEventV2(
+                    sequence=sequence,
+                    evidence_id=evidence_id,
+                    action_id=action_id,
+                    tenant_id=tenant_id,
+                    resource_id=resource_id,
+                    action=action_name,
+                    tick=tick,
+                    kind=kind,
+                    payload_digest=payload_digest,
+                )
             )
             sequence += 1
     return C08SourceWorldV2(actions=tuple(actions), evidence_events=tuple(events))

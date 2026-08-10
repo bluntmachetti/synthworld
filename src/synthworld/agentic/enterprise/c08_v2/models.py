@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import math
 from enum import StrEnum
-from typing import Literal, Self
+from typing import Final, Literal, Self
 
 from pydantic import Field, field_validator, model_validator
 
 from synthworld.models import SyntheticModel
 
-C08_V2_SCHEMA_VERSION = "2.0.0"
+C08_V2_SCHEMA_VERSION: Final[Literal["2.0.0"]] = "2.0.0"
 
 
 def _ordered_ids(value: tuple[str, ...], label: str) -> tuple[str, ...]:

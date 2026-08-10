@@ -8,6 +8,7 @@ from synthworld.agentic.c08_v2.models import (
     C08_METRIC_NAMES,
     C08AsteriaBenchmarkV2,
     C08AsteriaSubmissionV2,
+    C08MetricName,
     C08MetricsReportV2,
     C08MetricV2,
 )
@@ -19,7 +20,7 @@ class C08EvaluationError(ValueError):
 
 
 def _metric(
-    name: str,
+    name: C08MetricName,
     passed: tuple[bool, ...],
     denominator_meaning: str,
 ) -> C08MetricV2:

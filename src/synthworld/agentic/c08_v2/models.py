@@ -4,19 +4,30 @@ from __future__ import annotations
 
 import math
 from enum import StrEnum
-from typing import Literal, Self
+from typing import Final, Literal, Self
 
 from pydantic import Field, field_validator, model_validator
 
 from synthworld.models import SyntheticModel
 
-C08_SCHEMA_VERSION = "2.0.0"
-C08_BENCHMARK_ID = "asteria-agentic-c08-v2"
+type C08SchemaVersion = Literal["2.0.0"]
+type C08BenchmarkId = Literal["asteria-agentic-c08-v2"]
+type C08ArtifactVisibility = Literal["public", "evaluator", "submission"]
+type C08MetricName = Literal[
+    "exact_evidence_match",
+    "missing_or_discarded_free",
+    "fabricated_evidence_free",
+    "wrong_action_evidence_free",
+    "extra_evidence_free",
+]
+
+C08_SCHEMA_VERSION: Final[C08SchemaVersion] = "2.0.0"
+C08_BENCHMARK_ID: Final[C08BenchmarkId] = "asteria-agentic-c08-v2"
 C08_PUBLIC_ARTIFACT = "c08-asteria-public.json"
 C08_EVALUATOR_ARTIFACT = "c08-asteria-evaluator.json"
 C08_SUBMISSION_ARTIFACT = "c08-asteria-submission.json"
 C08_MANIFEST_ARTIFACT = "manifest.json"
-C08_METRIC_NAMES = (
+C08_METRIC_NAMES: Final[tuple[C08MetricName, ...]] = (
     "exact_evidence_match",
     "missing_or_discarded_free",
     "fabricated_evidence_free",
@@ -93,8 +104,8 @@ class C08EvidenceObservationV2(SyntheticModel):
 
 
 class C08AsteriaPublicInputV2(SyntheticModel):
-    schema_version: Literal["2.0.0"] = C08_SCHEMA_VERSION
-    benchmark_id: Literal["asteria-agentic-c08-v2"] = C08_BENCHMARK_ID
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
     measurement_scope: C08MeasurementScopeV2
     actions: tuple[C08PublicActionV2, ...] = Field(min_length=1)
     evidence_observations: tuple[C08EvidenceObservationV2, ...] = Field(min_length=1)
@@ -140,8 +151,8 @@ class C08EvidenceBindingV2(SyntheticModel):
 
 
 class C08AsteriaEvaluatorV2(SyntheticModel):
-    schema_version: Literal["2.0.0"] = C08_SCHEMA_VERSION
-    benchmark_id: Literal["asteria-agentic-c08-v2"] = C08_BENCHMARK_ID
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     measurement_scope: C08MeasurementScopeV2
     bindings: tuple[C08EvidenceBindingV2, ...] = Field(min_length=1)
@@ -169,8 +180,8 @@ class C08SubmissionRowV2(SyntheticModel):
 
 
 class C08AsteriaSubmissionV2(SyntheticModel):
-    schema_version: Literal["2.0.0"] = C08_SCHEMA_VERSION
-    benchmark_id: Literal["asteria-agentic-c08-v2"] = C08_BENCHMARK_ID
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     rows: tuple[C08SubmissionRowV2, ...] = Field(min_length=1)
 
@@ -186,8 +197,8 @@ class C08AsteriaSubmissionV2(SyntheticModel):
 
 
 class C08AsteriaBenchmarkV2(SyntheticModel):
-    schema_version: Literal["2.0.0"] = C08_SCHEMA_VERSION
-    benchmark_id: Literal["asteria-agentic-c08-v2"] = C08_BENCHMARK_ID
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
     public: C08AsteriaPublicInputV2
     evaluator: C08AsteriaEvaluatorV2
 
@@ -227,13 +238,7 @@ class C08AsteriaBenchmarkV2(SyntheticModel):
 
 
 class C08MetricV2(SyntheticModel):
-    name: Literal[
-        "exact_evidence_match",
-        "missing_or_discarded_free",
-        "fabricated_evidence_free",
-        "wrong_action_evidence_free",
-        "extra_evidence_free",
-    ]
+    name: C08MetricName
     numerator: int = Field(ge=0)
     denominator: int = Field(ge=0)
     value: float | None
@@ -261,8 +266,8 @@ class C08MetricV2(SyntheticModel):
 
 
 class C08MetricsReportV2(SyntheticModel):
-    schema_version: Literal["2.0.0"] = C08_SCHEMA_VERSION
-    benchmark_id: Literal["asteria-agentic-c08-v2"] = C08_BENCHMARK_ID
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     measurement_scope: C08MeasurementScopeV2
     metrics: tuple[C08MetricV2, ...] = Field(min_length=len(C08_METRIC_NAMES))
@@ -284,9 +289,9 @@ class C08ArtifactDescriptorV2(SyntheticModel):
 
 
 class C08ArtifactManifestV2(SyntheticModel):
-    schema_version: Literal["2.0.0"] = C08_SCHEMA_VERSION
-    benchmark_id: Literal["asteria-agentic-c08-v2"] = C08_BENCHMARK_ID
-    visibility: Literal["public", "evaluator", "submission"]
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
+    visibility: C08ArtifactVisibility
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=1)
 
