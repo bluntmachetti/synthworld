@@ -33,20 +33,27 @@ coverage status of either control. Both remain `absent` for Asteria v1.
   and evaluator bindings in separately typed evaluator artifacts.
 - Score decisions and false-allow/false-deny behavior independently. Reporting a
   public grant reference or digest is observability, not proof of enforcement.
-- Gate the EADS adapter implementation plan's Phase 2 agent/NHI conversion, not the
-  repository roadmap's phase numbering, on an accepted and implemented enterprise
-  C15/C16 target. Generating credentials against a lineage without C15 would
-  reproduce the known gap at scale.
+- Gate any future EADS agent/NHI conversion on an accepted and implemented
+  enterprise C15/C16 target. Generating credentials against a lineage without C15
+  would reproduce the known gap at scale.
 
 ## Contract identity and composition
 
 The names below are reserved by this design. They are not aliases for Asteria v1,
 enterprise v1, or either frozen C08 v2 lineage.
 
-| Lineage | Python package | Contract family ID | Schema version | Benchmark ID prefix | Manifest kind |
-|---|---|---|---|---|---|
-| Asteria | `synthworld.agentic.c15_c16_v1` | `asteria-agentic-c15-c16-v1` | `1.0.0` | `asteria-agentic-c15-c16-v1` | `asteria-agentic-c15-c16-run-manifest-1.0.0` |
-| Enterprise | `synthworld.agentic.enterprise.c15_c16_v1` | `enterprise-agentic-c15-c16-v1` | `1.0.0` | `enterprise-agentic-c15-c16-v1` | `enterprise-agentic-c15-c16-run-manifest-1.0.0` |
+| Lineage | Python package | Contract family ID | Schema version | Benchmark ID prefix |
+|---|---|---|---|---|
+| Asteria | `synthworld.agentic.c15_c16_v1` | `asteria-agentic-c15-c16-v1` | `1.0.0` | `asteria-agentic-c15-c16-v1` |
+| Enterprise | `synthworld.agentic.enterprise.c15_c16_v1` | `enterprise-agentic-c15-c16-v1` | `1.0.0` | `enterprise-agentic-c15-c16-v1` |
+
+Each lineage reserves three separately typed manifest kinds:
+
+| Surface | Asteria manifest kind | Enterprise manifest kind | Visibility |
+|---|---|---|---|
+| Public | `asteria-agentic-c15-c16-public-manifest-1.0.0` | `enterprise-agentic-c15-c16-public-manifest-1.0.0` | Public |
+| Evaluator | `asteria-agentic-c15-c16-evaluator-manifest-1.0.0` | `enterprise-agentic-c15-c16-evaluator-manifest-1.0.0` | Evaluator only |
+| Control | `asteria-agentic-c15-c16-control-manifest-1.0.0` | `enterprise-agentic-c15-c16-control-manifest-1.0.0` | Evaluator-only root binding both trees |
 
 The `v1` suffix means the first version of this separate C15/C16 family. It does
 not mean Asteria v1 coverage and it does not reopen the already-owned `2.0.0`
@@ -95,8 +102,8 @@ models, clocks, identifiers, and release versions.
 
 The capability reference is explicit so chain splicing can be detected. The
 referenced capability must be the capability attached to the referenced grant or
-delegation. Asteria v2 must promote its embedded capabilities to first-class,
-ID-bearing records. Each `CapabilityV2` owns one
+delegation. Asteria C15/C16 v1 must promote its embedded capabilities to first-class,
+ID-bearing records. Each `CapabilityC15C16V1` owns one
 `CredentialAuthorityEnvelopeC15C16V1`; grants and delegations reference that capability
 rather than copying its authority fields.
 
@@ -110,7 +117,7 @@ audience_ids
 resource_ids
 actions
 scopes
-purpose (required nonblank scalar for Asteria; absent for enterprise v2)
+purpose (required nonblank scalar for Asteria; absent for enterprise C15/C16 v1)
 ```
 
 Credentials may attenuate their source authority. They may never amplify it:
@@ -135,8 +142,8 @@ credential to cover `(audience A, resource 1)` and `(audience B, resource 2)` wh
 denying the confused pair `(audience A, resource 2)`.
 
 Purpose support is a lineage-level schema choice, not a nullable per-record choice.
-Asteria v2 requires the same nonblank scalar purpose on every source capability,
-credential envelope, approval payload, and attempt payload. Enterprise v2 omits
+Asteria C15/C16 v1 requires the same nonblank scalar purpose on every source capability,
+credential envelope, approval payload, and attempt payload. Enterprise C15/C16 v1 omits
 purpose from all four until that lineage defines purpose semantics. A purpose
 substitution case and denominator therefore exist only in a purpose-bearing lineage.
 
@@ -284,12 +291,14 @@ normalization profile ID
 normalized material parameters
 ```
 
-Enterprise includes the access atom that defines its authorization context. It does
-not include request IDs or cell IDs that identify evaluation plumbing rather than
-the approved transaction.
+Enterprise uses one `access_atom` object as the authoritative representation of
+`tenant_id`, `organization_id`, `resource_id`, `action`, and sorted
+`scope_ids`. It does not duplicate those values in sibling target, action, or
+scope fields, and it does not include request IDs or cell IDs that identify
+evaluation plumbing rather than the approved transaction.
 
 `ActionApprovalC15C16V1` contains an ID, approving principal, approved agent, the exact
-approved payload, validity, and `max_successful_uses`. The initial v2 supports exact
+approved payload, validity, and `max_successful_uses`. The initial C15/C16 v1 release supports exact
 payloads only. Ranges, predicates, arbitrary policy expressions, and idempotency
 semantics are deferred.
 
@@ -336,9 +345,11 @@ UUID names. Domain strings are literal ASCII and the remaining parts are NFC UTF
 No delimiter-joined or implementation-native tuple encoding is conforming.
 
 The projection excludes the digest, approval ID, event ID, clock value, evidence
-references, and wrapper metadata. It includes target/resource, action, scope,
-purpose when applicable, profile ID, and normalized parameters. Consequently, equal
-parameters cannot authorize a different target or action.
+references, and wrapper metadata. Asteria includes target/resource, action, scope,
+purpose, profile ID, and normalized parameters. Enterprise includes the complete
+`access_atom`, profile ID, and normalized parameters. Consequently, equal
+parameters cannot authorize a different tenant, organization, target, action, or
+scope.
 
 `canonical_json_bytes_with_lf` is a new contract-scoped function, not a behavior
 change to any existing serializer. It first constructs the recursively normalized
@@ -350,8 +361,8 @@ of negative zero to `0`. The accepted input grammar already excludes leading int
 zeroes and an empty integer part.
 
 Existing canonical and digest functions are frozen wherever v1 checksums depend on
-them. A v2 behavior change requires a new function and profile version; it must not
-modify a shared v1 helper in place.
+them. A C15/C16 canonicalization behavior change requires a new function and profile version; it must not
+modify a shared existing helper in place.
 
 The digest profile must publish cross-language vectors covering Unicode values,
 precomposed/decomposed member-name collisions, decimals, nesting, empty values,
@@ -466,7 +477,7 @@ Structural validation and benchmark truth stay separate.
 | Dangling authority, capability, profile, or audience reference in a world record | Structurally invalid world |
 | Duplicate materialized credential handle, approval definition ID, or contradictory lifecycle history | Structurally invalid world |
 | Unknown `presented_handle` or `presented_approval_id` in an attempt | Scoreable action denial |
-| Repeated candidate handle in a scored issuance request | Scoreable issuance denial |
+| Candidate handle materialized by an earlier permitted request or pre-issued record | Scoreable issuance denial |
 | Evaluator-derived digest does not match its enclosed evaluator payload | Integrity failure |
 | Submitted digest does not match the evaluator-derived digest | Scoreable reporting failure |
 | Issued-record fixture violates its own issuance provenance | Integrity failure |
@@ -662,13 +673,15 @@ Proposed by this design:
 - Keep mismatch paths evaluator-only and optional in submissions.
 - Keep frozen materiality profiles benchmark-owned and generated-world profiles
   explicit and manifest-bound.
-- Do not attempt implicit v1-to-v2 migration.
+- Do not attempt implicit migration from an existing family into a C15/C16 v1 family.
 
 Remaining gates:
 
 - Numeric budget defaults and hard ceilings, established by implementation evidence.
 - Cross-language digest, UUID-framing, normalized-key-collision, and
   answer-independent-ordering vectors.
+- Conformance vectors binding the complete enterprise access atom into payload
+  equality and digest computation.
 - Independent acceptance review of the exact package, schema, benchmark, and
   manifest identities above.
 - The catalogue's unverified `KLRC` section 10.7 mapping is not normative input and
@@ -677,5 +690,4 @@ Remaining gates:
 
 This revision does not resolve Stage 3 acceptance. It records a reviewable contract
 and the remaining gates. It does not claim implementation, benchmark coverage,
-publication authorization, or permission to run the EADS adapter plan's Phase 2
-agent/NHI conversion.
+publication authorization, or permission to run any EADS agent/NHI conversion.
