@@ -36,7 +36,8 @@
 #                          for those controls this list records which cases exercise
 #                          the invariant, not which cases the scorer slices.
 #   authority_failure_reasons  Exact AuthorityFailureReason values in scope.
-#   applicable_patterns    Pattern classes under test. Classes, not products.
+#   applicable_patterns    Declared pattern applicability. Classes, not products,
+#                          and not evidence that any pattern was exercised.
 #   external_mappings      Clause-level references, each carrying its own status.
 #   core_limitations       What this control cannot prove without networked execution.
 #   lab_extension          The experiment that completes it.
@@ -58,6 +59,20 @@
 # A clause may be `partial` coverage from an `individual-draft`: that combination
 # says "this text states a real obligation, and the text has no standing yet".
 # Both facts matter and neither substitutes for the other.
+#
+# Skeleton promotion criteria
+#   Keep `catalogue_version` draft-suffixed and `status: skeleton` until an
+#   implementation owner has reviewed every control, every external mapping has
+#   been re-pinned or dropped, metric polarity and denominator semantics have been
+#   checked against the named scorer version, and each promoted status has a
+#   discriminating case or separately identified live-lab evidence.
+#
+#   A control x pattern matrix formed from `applicable_patterns` and a run's declared
+#   deployment patterns is declaration-only unless each cell binds an observed run
+#   and evidence appropriate to that control. It may report identifiers and missing
+#   evidence, but it must not be converted into a coverage percentage, treated as
+#   proof that token exchange, SVID issuance, or enforcement occurred, or used by
+#   itself to promote a control or pattern claim.
 #
 # Sources are pinned by revision and retrieval date so drift is visible. Re-pin
 # every mapping before any external publication that cites it.
@@ -125,7 +140,10 @@ meta:
       - policy_version_mismatch
   notes: >-
     Skeleton. No control here has been reviewed by an implementation owner, and
-    nothing in this file constitutes a comparative or vendor claim.
+    nothing in this file constitutes a comparative or vendor claim. Promotion
+    requires the owner, source, metric-semantics, discriminating-evidence, and
+    per-pattern evidence criteria stated in the header; declared applicability or a
+    declaration-only control-by-pattern matrix is not execution evidence.
   revision_notes: >-
     0.2.0-draft applies an adversarial review (2026-07-29) whose central finding
     was that several invariants were written as claims about enforcement or
@@ -840,8 +858,9 @@ controls:
         clause: "S2 least privilege per-request access"
         mapping_status: informative
     core_limitations: >-
-      A deny-everything system scores perfectly here, so this control is only
-      meaningful read alongside SW-AA-C06's recall - never report it alone. The two
+      A deny-everything or decision-abstaining system scores perfectly here, so this
+      control is only meaningful read alongside SW-AA-C06's recall - never report it
+      alone. The two
       cited metrics are exact complements computed from the same false-allow count,
       so they are one measurement presented two ways, not two pieces of evidence.
       Renamed from "No excess authority" after review: this control does NOT test
@@ -849,7 +868,9 @@ controls:
       was granted but never exercised - over-broad grants and credentials belong to
       SW-AA-C04, SW-AA-C05 and SW-AA-C15. The scorer's metric name
       `least_privilege_accuracy` is therefore misleading and should be treated as
-      denial correctness; renaming it would be a scoring-protocol change.
+      false-allow avoidance over truth-denied actions, not denial correctness: a null
+      decision receives the same credit as deny. Renaming it would be a scoring-
+      protocol change.
       SW-AA-C06, SW-AA-C09 and this control are three views on one decision axis
       rather than independent controls: C06 owns the action-time decision, C09 the
       audit-time decision, and this control the false-allow rate over denials.

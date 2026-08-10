@@ -44,6 +44,43 @@ def reference_receipt(tmp_path: Path) -> Path:
     return root
 
 
+def _evaluated_manifest(**overrides: object) -> SimpleNamespace:
+    provenance: dict[str, object] = {
+        "adapter": {"name": "adapter", "source_digest": "adapter-digest"},
+        "benchmark": {"benchmark_id": "reference-benchmark", "version": "1.0.0"},
+        "build_environment": {"lock_digest": "lock-digest"},
+        "digest_algorithm": "sha256",
+        "event_schedule": [{"key": "schedule", "value": "1.0.0"}],
+        "evidence_claim": {"kind": "reference-declaration"},
+        "generator_configuration": [{"key": "seed", "value": "0"}],
+        "schema_versions": [{"role": "run_receipt", "version": "2.0.0"}],
+        "scoring_formula_versions": [
+            {"role": "agent_authority_lab", "version": "1.0.0"}
+        ],
+        "serialization": {"encoding": "utf-8"},
+        "systems_under_test": [
+            {"component_id": "reference-sut", "configuration_digest": "config-digest"}
+        ],
+    }
+    provenance.update(overrides)
+
+    def model_dump(*, mode: str, include: set[str]) -> dict[str, object]:
+        assert mode == "json"
+        return {field: provenance[field] for field in include}
+
+    return SimpleNamespace(
+        evaluation_status=EvaluationStatus.EVALUATED,
+        model_dump=model_dump,
+    )
+
+
+def _write_plan(root: Path, plan: object) -> None:
+    (root / "context").mkdir(parents=True)
+    (root / "context" / "run-plan.json").write_text(
+        json.dumps(plan.model_dump(mode="json")), encoding="utf-8"
+    )
+
+
 def _catalogue_with(
     tmp_path: Path,
     *,
@@ -174,14 +211,11 @@ def test_catalogue_and_materially_different_receipt_order_do_not_change_output(
         ),
     ):
         plan = reference_plan().model_copy(update={"deployment_patterns": patterns})
-        (root / "context").mkdir(parents=True)
-        (root / "context" / "run-plan.json").write_text(
-            json.dumps(plan.model_dump(mode="json")), encoding="utf-8"
-        )
+        _write_plan(root, plan)
     reordered_catalogue = _catalogue_with(tmp_path, reverse_patterns=True)
 
     def evaluated_validator(_root: Path) -> SimpleNamespace:
-        return SimpleNamespace(evaluation_status=EvaluationStatus.EVALUATED)
+        return _evaluated_manifest()
 
     expected = renderer.render_table(
         renderer.pattern_coverage_rows((first, second), validator=evaluated_validator)
@@ -195,6 +229,62 @@ def test_catalogue_and_materially_different_receipt_order_do_not_change_output(
     )
 
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    ("provenance_field", "changed_value"),
+    [
+        (
+            "systems_under_test",
+            [
+                {
+                    "component_id": "different-sut",
+                    "configuration_digest": "config-digest",
+                }
+            ],
+        ),
+        (
+            "generator_configuration",
+            [{"key": "seed", "value": "1"}],
+        ),
+    ],
+)
+def test_heterogeneous_receipt_provenance_fails_before_union(
+    renderer: ModuleType,
+    tmp_path: Path,
+    provenance_field: str,
+    changed_value: object,
+) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    _write_plan(first, reference_plan())
+    _write_plan(second, reference_plan())
+    manifests = {
+        first.resolve(): _evaluated_manifest(),
+        second.resolve(): _evaluated_manifest(**{provenance_field: changed_value}),
+    }
+
+    with pytest.raises(ValueError, match="heterogeneous immutable"):
+        renderer.pattern_coverage_rows(
+            (first, second),
+            validator=lambda root: manifests[root],
+        )
+
+
+def test_selected_control_requires_a_catalogue_compatible_declared_pattern(
+    renderer: ModuleType, tmp_path: Path
+) -> None:
+    root = tmp_path / "incompatible"
+    plan = reference_plan().model_copy(
+        update={"deployment_patterns": (DeploymentPattern.SHORT_LIVED_MINTING,)}
+    )
+    _write_plan(root, plan)
+
+    with pytest.raises(ValueError, match="SW-AA-L03.*catalogue-compatible"):
+        renderer.pattern_coverage_rows(
+            (root,),
+            validator=lambda _root: _evaluated_manifest(),
+        )
 
 
 @pytest.mark.parametrize(

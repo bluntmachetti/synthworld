@@ -31,10 +31,10 @@ remaining docs are the two narrative files listed below.
 | `synthworld validate agent-authority-receipt` | Shipped — validates the complete digest-bound receipt |
 | `examples/` (design-intent traces) | Generated for three pattern classes |
 | `adapter-template/` | Working; runs and produces a valid trace as shipped |
-| `reference-deployment/` | Working opt-in live Compose lab; observation v2, full L01-L06, exact L07, measured/unsupported L08 |
-| `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
+| `reference-deployment/` | Working opt-in live Compose lab; a completed local receipt reports L01-L06 findings, exact L07, and measured/unsupported L08 for that harness only, not per-pattern support |
+| `docs/design-intent-assumptions.md` | Assumptions + scored table + declaration-only pattern matrix |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
-| `docs/c08-v2-transition.md` | Reconciled frozen-artifact candidate contract for separate Asteria and enterprise C08 v2 lineages; exact committed digests recorded, verification/publication pending |
+| `docs/c08-v2-transition.md` | Reconciled frozen-artifact candidate contract for separate Asteria and enterprise C08 v2 lineages; exact committed digests and repository verification recorded, external publication pending |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for

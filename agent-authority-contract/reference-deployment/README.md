@@ -3,7 +3,8 @@
 This opt-in Docker Compose lab proves that the agent-authority run protocol can
 be executed against real process and network boundaries. It is a reference
 harness, not a production authorization system, vendor emulator, topology
-model, or performance claim.
+model, performance claim, or claim that every control is supported by every
+declared deployment pattern.
 
 The runner consumes the public `enterprise-agentic-smoke-1.0.0` world and
 adapts it to a plan that is persisted before any service starts. Only then does
@@ -12,6 +13,10 @@ target, and forbidden-egress networks are distinct Docker `internal` networks;
 no host ports are published.
 
 ## What it exercises
+
+These are harness-specific experiments. The run plan declares deployment patterns at
+run level, so neither this list nor its receipt attributes an individual control result
+to one pattern or establishes a control-by-pattern support matrix.
 
 - L01 scans context, log, memory, and trace channels after exercising prompt,
   tool-output, environment, and memory-recall extraction vectors.
@@ -51,10 +56,11 @@ uv run python agent-authority-contract/reference-deployment/run.py \
   --operator-id your-operator-id
 ```
 
-The output directory must not already exist. Successful output reports ten
-passing L01-L06 findings, three complete L07 stages, L08 statuses of `measured`
-and `unsupported`, evidence claim `live_lab_conformance`, observation schema
-`2.0.0`, and scoring formula `2.0.0`.
+The output directory must not already exist. When an operator completes the live run,
+that local receipt reports ten passing L01-L06 findings, three complete L07 stages,
+L08 statuses of `measured` and `unsupported`, evidence claim
+`live_lab_conformance`, observation schema `2.0.0`, and scoring formula `2.0.0`.
+This describes the expected receipt contract, not evidence that a current run passed.
 
 A failed execution leaves a partial, non-evaluated receipt for diagnosis but
 still tears down containers and volumes. Use a new output directory for the next
@@ -70,4 +76,6 @@ not transfer to a vendor, production configuration, or hosted service. SGNL and
 other vendor pilots use the same external receipt protocol but remain separate
 credentialed evaluations. Evaluation-key custody also remains an
 operator-approved runbook concern; the disposable runtime canary is not an
-evaluation key.
+evaluation key. Multiple receipts may support a declaration-only pattern report only
+when their immutable benchmark, adapter, SUT, and configuration provenance matches;
+even then, the report is not per-control exercise or enforcement proof.

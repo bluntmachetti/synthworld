@@ -166,6 +166,12 @@ agent-authority receipt. The rows join a control's catalogue applicability with
 run-level deployment-pattern declarations. A cell is populated only when an
 evaluated receipt selected that control and declared a compatible pattern.
 
+The checked-in table uses the deterministic reference receipt, not the live Compose
+harness. When explicit receipt roots are supplied, declarations are combined only if
+their immutable benchmark, build, schema, scorer, generator, schedule, adapter, SUT,
+serialization, and evidence-claim provenance is identical. Heterogeneous receipts
+fail closed rather than producing a union that could look like deployment support.
+
 **This is not per-control exercise, observation, or runtime proof.** It does not show
 that a token exchange, SVID issuance, egress path, policy decision point, or
 enforcement topology operated successfully. It reports declared receipt context after
@@ -214,7 +220,7 @@ ceilings, useful for deciding what to test first.
 
 ## Reproducing the table
 
-Both generators carry a `--check` mode and both run in `make ci`, so a stale trace or
+All three generators carry a `--check` mode and run in `make ci`, so a stale trace or
 a stale table fails the build:
 
 ```bash
@@ -223,9 +229,11 @@ uv run python agent-authority-contract/tools/render_coverage_table.py --check
 uv run python agent-authority-contract/tools/render_pattern_coverage.py --check
 ```
 
-The numbers are verified from the other direction too.
+The scored numbers are verified from the other direction too.
 `tests/test_design_intent_coverage_table.py` parses the committed markdown and
 recomputes every cell from the public API **without importing the renderer**, so the
 scorer, the writer and the reader are three separate paths. It also asserts that
 every metric the scorer emits appears in the table, which is what removes selection
-as an editorial lever.
+as an editorial lever. The declaration-only pattern table has focused tests for
+catalogue vocabulary, compatible selection, immutable-provenance aggregation, and
+deterministic rendering; those tests do not convert declarations into live evidence.

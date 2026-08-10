@@ -341,8 +341,9 @@ Exactly two aggregate baseline files live under `tests/fixtures/c08_v2/`, one pe
 lineage. They contain public/submission digests and denominator-bearing metrics,
 but no submission rows, observations, IDs, outcomes, or evaluator truth. Reports
 carry an offline measurement scope and do not prove live retention, durable
-logging, enforcement, deployment, or EADS compatibility. Verification and
-publication evidence remains pending; see `GOLDEN_REVIEW.md`.
+logging, enforcement, deployment, or EADS compatibility. Repository verification
+and candidate registry/capability checks have passed; external publication evidence
+remains pending. See `GOLDEN_REVIEW.md`.
 
 The withheld fact is precise: `EnterpriseAccountV1` publishes `account_id`, `tenant_id`,
 `authorization_target_id`, and `account_kind` but **no `principal_id`**. Recovering the
