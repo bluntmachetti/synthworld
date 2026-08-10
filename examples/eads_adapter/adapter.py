@@ -96,9 +96,7 @@ POPULATION_POLICY_VERSION: Final[PopulationPolicyVersion] = (
     "eads-human-population-policy-v1"
 )
 SOURCE_CONTRACT: Final[SourceContract] = "repository-fictional-eads-shaped-v1"
-ARTIFACT_DIGEST_PROFILE: Final[ArtifactDigestProfile] = (
-    "path-bound-artifact-records-v1"
-)
+ARTIFACT_DIGEST_PROFILE: Final[ArtifactDigestProfile] = "path-bound-artifact-records-v1"
 REPORT_PATH = "private/reports/eads-adapter-gap-report.json"
 MAX_SEED = (1 << 63) - 1
 
@@ -277,8 +275,7 @@ class DownscaleDeclaration(_StrictFrozenModel):
                 raise ValueError("inactive_downscale_inconsistent")
         elif (
             self.emitted_total >= self.raw_total
-            or self.emitted_total * self.denominator
-            != self.raw_total * self.numerator
+            or self.emitted_total * self.denominator != self.raw_total * self.numerator
             or math.gcd(self.numerator, self.denominator) != 1
         ):
             raise ValueError("active_downscale_inconsistent")
@@ -339,9 +336,7 @@ class OrganisationOutcome(_StrictFrozenModel):
     emitted_population: int = Field(ge=0)
     downscale: DownscaleDeclaration | None = None
 
-    _canonical_artifacts = field_validator("artifacts")(
-        _require_canonical_artifacts
-    )
+    _canonical_artifacts = field_validator("artifacts")(_require_canonical_artifacts)
 
     @model_validator(mode="after")
     def coherent_status(self) -> Self:
@@ -389,9 +384,9 @@ class AdapterRunReport(_StrictFrozenModel):
     evaluator_artifacts: tuple[ArtifactRecord, ...] = ()
     artifact_set_digest_profile: ArtifactDigestProfile = ARTIFACT_DIGEST_PROFILE
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
-    artifact_set_excludes: tuple[Literal[
-        "private/reports/eads-adapter-gap-report.json"
-    ], ...] = (REPORT_PATH,)
+    artifact_set_excludes: tuple[
+        Literal["private/reports/eads-adapter-gap-report.json"], ...
+    ] = (REPORT_PATH,)
 
     @field_validator("gaps")
     @classmethod
@@ -440,9 +435,7 @@ class AdapterRunReport(_StrictFrozenModel):
             raise ValueError("adapter_config_digest_mismatch")
 
         inventories = (
-            self.private_artifacts
-            + self.public_artifacts
-            + self.evaluator_artifacts
+            self.private_artifacts + self.public_artifacts + self.evaluator_artifacts
         )
         inventory_paths = tuple(item.path for item in inventories)
         if len(inventory_paths) != len(set(inventory_paths)):
@@ -463,8 +456,7 @@ class AdapterRunReport(_StrictFrozenModel):
             raise ValueError("artifact_set_digest_mismatch")
 
         compiled = any(
-            outcome.status is OrganisationStatus.COMPILED
-            for outcome in self.outcomes
+            outcome.status is OrganisationStatus.COMPILED for outcome in self.outcomes
         )
         failed = any(
             outcome.status is OrganisationStatus.FAILED for outcome in self.outcomes
@@ -531,17 +523,13 @@ def _snapshot_source_payload(payload: Mapping[str, object]) -> bytes:
             return value
         if isinstance(value, float):
             if not math.isfinite(value):
-                raise SourcePayloadError(
-                    AdapterCode.SOURCE_PAYLOAD_NOT_JSON_COMPATIBLE
-                )
+                raise SourcePayloadError(AdapterCode.SOURCE_PAYLOAD_NOT_JSON_COMPATIBLE)
             return value
         if isinstance(value, str):
             if unicodedata.normalize("NFC", value) != value:
                 raise SourcePayloadError(AdapterCode.SOURCE_TEXT_NOT_NFC)
             if len(value.encode("utf-8")) > MAX_SOURCE_TEXT_BYTES:
-                raise SourcePayloadError(
-                    AdapterCode.SOURCE_TEXT_BYTE_LIMIT_EXCEEDED
-                )
+                raise SourcePayloadError(AdapterCode.SOURCE_TEXT_BYTE_LIMIT_EXCEEDED)
             return value
         if isinstance(value, Mapping):
             result: dict[str, object] = {}
@@ -757,9 +745,7 @@ def _run_adapter(
             )
         )
 
-    compiled_any = any(
-        item.status is OrganisationStatus.COMPILED for item in outcomes
-    )
+    compiled_any = any(item.status is OrganisationStatus.COMPILED for item in outcomes)
     has_failures = any(item.status is OrganisationStatus.FAILED for item in outcomes)
     failed = has_failures or not compiled_any
     report = _build_report(
@@ -873,8 +859,7 @@ def _prepare_organisation(
             )
         elif (
             relationship == "owner"
-            and services_by_id[ownership.service_id].owning_team_id
-            != ownership.team_id
+            and services_by_id[ownership.service_id].owning_team_id != ownership.team_id
         ):
             gaps.append(
                 AdapterGap(
@@ -1273,9 +1258,7 @@ def _namespace_salt(
 ) -> str:
     return hmac.new(
         bytes.fromhex(namespace_salt),
-        (
-            f"{_IDENTIFIER_DERIVATION_VERSION}\x00{seed}\x00{organisation_ref}"
-        ).encode(),
+        (f"{_IDENTIFIER_DERIVATION_VERSION}\x00{seed}\x00{organisation_ref}").encode(),
         hashlib.sha256,
     ).hexdigest()
 
@@ -1395,9 +1378,7 @@ def _build_report(
             ),
         )
     )
-    canonical_outcomes = tuple(
-        sorted(outcomes, key=lambda item: item.organisation_ref)
-    )
+    canonical_outcomes = tuple(sorted(outcomes, key=lambda item: item.organisation_ref))
     all_artifacts = tuple(
         sorted(
             (
@@ -1409,23 +1390,17 @@ def _build_report(
         )
     )
     private_artifacts = tuple(
-        item
-        for item in all_artifacts
-        if item.visibility is ArtifactVisibility.PRIVATE
+        item for item in all_artifacts if item.visibility is ArtifactVisibility.PRIVATE
     )
     public_artifacts = tuple(
-        item
-        for item in all_artifacts
-        if item.visibility is ArtifactVisibility.PUBLIC
+        item for item in all_artifacts if item.visibility is ArtifactVisibility.PUBLIC
     )
     evaluator_artifacts = tuple(
         item
         for item in all_artifacts
         if item.visibility is ArtifactVisibility.EVALUATOR
     )
-    salt_fingerprint = hashlib.sha256(
-        bytes.fromhex(config.namespace_salt)
-    ).hexdigest()
+    salt_fingerprint = hashlib.sha256(bytes.fromhex(config.namespace_salt)).hexdigest()
     config_digest = _adapter_config_digest_values(
         seed=config.seed,
         max_principals_per_organisation=config.max_principals_per_organisation,

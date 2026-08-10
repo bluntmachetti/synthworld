@@ -36,11 +36,7 @@ from synthworld.enterprise.serialization import (
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = (
-    ROOT
-    / "examples"
-    / "eads_adapter"
-    / "fixtures"
-    / "fictionalisation-boundary.json"
+    ROOT / "examples" / "eads_adapter" / "fixtures" / "fictionalisation-boundary.json"
 )
 REPORT_RELATIVE_PATH = Path("private/reports/eads-adapter-gap-report.json")
 NAMESPACE_SALT = "a" * 64
@@ -105,9 +101,7 @@ def _report_from_disk(output_root: Path) -> AdapterRunReport:
 
 def _all_artifacts(report: AdapterRunReport) -> tuple[ArtifactRecord, ...]:
     return (
-        report.evaluator_artifacts
-        + report.private_artifacts
-        + report.public_artifacts
+        report.evaluator_artifacts + report.private_artifacts + report.public_artifacts
     )
 
 
@@ -950,12 +944,9 @@ def test_duplicate_organisation_is_fail_closed_and_emits_no_artifacts(
     _, report = _run(tmp_path, payload)
 
     assert report.status.value == "failed"
-    assert any(
-        gap.code is AdapterCode.DUPLICATE_ORGANISATION_ID for gap in report.gaps
-    )
+    assert any(gap.code is AdapterCode.DUPLICATE_ORGANISATION_ID for gap in report.gaps)
     assert all(
-        outcome.status.value == "failed"
-        for outcome in report.organisation_outcomes
+        outcome.status.value == "failed" for outcome in report.organisation_outcomes
     )
     assert _all_artifacts(report) == ()
 
@@ -1120,9 +1111,12 @@ def test_artifact_inventories_are_exact_typed_and_byte_bound(tmp_path: Path) -> 
     )
     first = _all_artifacts(report)[0]
     moved = first.model_copy(update={"path": f"moved/{first.path}"})
-    assert adapter_module._artifact_set_digest(
-        (moved, *_all_artifacts(report)[1:]),
-    ) != report.artifact_set_digest
+    assert (
+        adapter_module._artifact_set_digest(
+            (moved, *_all_artifacts(report)[1:]),
+        )
+        != report.artifact_set_digest
+    )
 
 
 def test_all_json_artifacts_are_canonical_lf_with_one_trailing_newline(

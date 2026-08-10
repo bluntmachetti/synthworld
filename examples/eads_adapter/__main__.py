@@ -211,9 +211,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         config = AdapterConfig(
             seed=arguments.seed,
             namespace_salt=namespace_salt,
-            max_principals_per_organisation=(
-                arguments.max_principals_per_organisation
-            ),
+            max_principals_per_organisation=(arguments.max_principals_per_organisation),
         )
     except _CliError as error:
         return _emit_cli_failure(error.category)
