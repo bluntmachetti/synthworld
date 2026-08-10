@@ -258,8 +258,11 @@ def _parse_sha256sum(payload: bytes, owner: str) -> tuple[tuple[str, str], ...]:
 def _read_artifact_bytes(root: Path, paths: Iterable[str]) -> dict[str, bytes]:
     result: dict[str, bytes] = {}
     for relative_path in paths:
+        path = root / relative_path
+        if path.is_symlink():
+            raise RegistryError(f"tracked artifact is a symlink: {relative_path}")
         try:
-            result[relative_path] = (root / relative_path).read_bytes()
+            result[relative_path] = path.read_bytes()
         except OSError as error:
             raise RegistryError(
                 f"cannot read tracked artifact {relative_path}"

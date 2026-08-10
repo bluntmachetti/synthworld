@@ -262,6 +262,12 @@ def test_load_json_and_tracked_file_failures_are_concise(
     with pytest.raises(tool.CapabilityError, match="tracked source is missing"):
         tool._source_path(tmp_path, "missing.txt")
 
+    target = tmp_path / "target.txt"
+    target.write_text("content", encoding="utf-8")
+    (tmp_path / "linked.txt").symlink_to(target)
+    with pytest.raises(tool.CapabilityError, match="not a regular file"):
+        tool._source_path(tmp_path, "linked.txt")
+
 
 @pytest.mark.parametrize(
     ("curated", "message"),

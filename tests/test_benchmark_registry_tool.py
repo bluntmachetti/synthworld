@@ -220,6 +220,15 @@ def test_current_repository_discovers_exact_governed_inventory() -> None:
     }
 
 
+def test_tracked_artifact_reader_rejects_symlink(tmp_path: Path) -> None:
+    target = tmp_path / "target.json"
+    target.write_bytes(b"{}\n")
+    (tmp_path / "linked.json").symlink_to(target)
+
+    with pytest.raises(registry.RegistryError, match="tracked artifact is a symlink"):
+        registry._read_artifact_bytes(tmp_path, ("linked.json",))
+
+
 def test_write_check_canonicalization_drift_and_cli(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

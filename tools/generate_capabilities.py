@@ -141,6 +141,8 @@ def tracked_files(root: Path) -> tuple[str, ...]:
 
 def _source_path(root: Path, relative: str) -> Path:
     path = root / relative
+    if path.is_symlink():
+        fail(f"tracked source is not a regular file: {relative}")
     if not path.is_file():
         fail(f"tracked source is missing: {relative}")
     return path
