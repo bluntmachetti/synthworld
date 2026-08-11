@@ -1957,6 +1957,108 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "adapter-evidence-and-future-bridge",
+      "heading": "Adapter evidence and future bridge",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#adapter-evidence-and-future-bridge",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "adapter-gap-disposition",
+      "heading": "Adapter-gap disposition",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#adapter-gap-disposition",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "artifact-and-visibility-contract",
+      "heading": "Artifact and visibility contract",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#artifact-and-visibility-contract",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "compiled-universe-intake",
+      "heading": "Compiled-universe intake",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#compiled-universe-intake",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "decision-summary",
+      "heading": "Decision summary",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#decision-summary",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "design-acceptance-criteria",
+      "heading": "Design acceptance criteria",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#design-acceptance-criteria",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "determinism-and-provenance",
+      "heading": "Determinism and provenance",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#determinism-and-provenance",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "deterministic-case-planning",
+      "heading": "Deterministic case planning",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#deterministic-case-planning",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "face-b-compiled-universe-contract-design",
+      "heading": "Face B compiled-universe contract design",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#face-b-compiled-universe-contract-design",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "family-identity-and-coexistence",
+      "heading": "Family identity and coexistence",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#family-identity-and-coexistence",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "implementation-freeze-and-publication-gates",
+      "heading": "Implementation, freeze, and publication gates",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#implementation-freeze-and-publication-gates",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "public-solvability-and-evaluator-separation",
+      "heading": "Public solvability and evaluator separation",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#public-solvability-and-evaluator-separation",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "required-envelope-bindings",
+      "heading": "Required envelope bindings",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#required-envelope-bindings",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "scope-and-non-goals",
+      "heading": "Scope and non-goals",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#scope-and-non-goals",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "tenant-organisation-topology-and-placement",
+      "heading": "Tenant, organisation, topology, and placement",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#tenant-organisation-topology-and-placement",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "tier-and-case-family-gate",
+      "heading": "Tier and case-family gate",
+      "id": "route:agent-authority-contract/docs/face-b-compiled-universe-design.md#tier-and-case-family-gate",
+      "path": "agent-authority-contract/docs/face-b-compiled-universe-design.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:agent-authority-contract/docs/failure-reason-precedence.md",
       "path": "agent-authority-contract/docs/failure-reason-precedence.md"
     },

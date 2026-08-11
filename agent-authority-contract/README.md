@@ -36,6 +36,7 @@ remaining docs are the two narrative files listed below.
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
 | `docs/c08-v2-transition.md` | Reconciled frozen-artifact candidate contract for separate Asteria and enterprise C08 v2 lineages; exact committed digests and repository verification recorded, external publication pending |
 | `docs/c15-c16-contract-design.md` | Design under review for separate Asteria and enterprise C15/C16 v1 contract families; no implementation or coverage claim |
+| `docs/face-b-compiled-universe-design.md` | Face B v1 compiled-universe design under review; separate family identity, no implementation, freeze, or publication claim |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for
