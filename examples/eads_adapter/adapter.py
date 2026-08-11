@@ -432,6 +432,18 @@ class AdapterRunReport(_StrictFrozenModel):
         if self.adapter_config_digest != expected_config_digest:
             raise ValueError("adapter_config_digest_mismatch")
 
+        visibility_inventories = (
+            (self.private_artifacts, ArtifactVisibility.PRIVATE),
+            (self.public_artifacts, ArtifactVisibility.PUBLIC),
+            (self.evaluator_artifacts, ArtifactVisibility.EVALUATOR),
+        )
+        if not all(
+            artifact.visibility is expected_visibility
+            for inventory, expected_visibility in visibility_inventories
+            for artifact in inventory
+        ):
+            raise ValueError("artifact_inventory_visibility_mismatch")
+
         inventories = (
             self.private_artifacts + self.public_artifacts + self.evaluator_artifacts
         )

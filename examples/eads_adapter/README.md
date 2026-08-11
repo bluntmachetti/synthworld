@@ -19,7 +19,8 @@ The supported input contract is intentionally bounded:
 - human principals only;
 - the profile's declared regions, domains, teams, services, and ownerships;
 - explicit seed and configuration values supplied to the adapter; and
-- repository fixture files that are canonical UTF-8 JSON regular files.
+- repository fixture files that are canonical UTF-8 JSON or restricted YAML
+  regular files.
 
 Agent and non-human identity projections remain deferred until the C15/C16
 contracts are implemented. The design currently under review is documented in
@@ -48,16 +49,18 @@ custodians, upload artifacts, or change access controls.
 ## Determinism and inventories
 
 The output is bound to explicit seed and configuration inputs. Provenance
-records the adapter contract version, source fixture identity, seed,
-configuration, and the ordered input and output inventories needed to
-reproduce the transformation.
+records the adapter contract version, source vintage, digest of the canonical
+parsed source payload, seed, configuration digest, and ordered output
+inventories needed to reproduce the transformation.
 
 Digest inventories are typed rather than represented as unlabelled hashes:
-each row identifies the digest algorithm, artifact role, canonical relative
-path, media type, byte length, and digest value. Input inventory entries bind
-the exact source fixture and configuration bytes; output inventory entries bind
-every generated artifact. Private provenance remains a custody-controlled
-record and is not copied into a wider-visibility artifact by implication.
+each artifact row identifies its role, visibility, canonical relative path,
+byte length, and SHA-256 digest. The report separately binds the canonical
+source snapshot and adapter configuration through SHA-256 digests. Artifact
+rows bind every generated output except the private report itself, whose
+exclusion is explicit in the report. Private provenance remains a custody-
+controlled record and is not copied into a wider-visibility artifact by
+implication.
 
 ## Fictionalisation boundary
 

@@ -35,9 +35,11 @@ from synthworld.enterprise.serialization import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = (
-    ROOT / "examples" / "eads_adapter" / "fixtures" / "fictionalisation-boundary.json"
-)
+FIXTURES = ROOT / "examples" / "eads_adapter" / "fixtures"
+FIXTURE = FIXTURES / "fictionalisation-boundary.json"
+SDK_GAPS_FIXTURE = FIXTURES / "sdk-size-v1-gaps.json"
+SDK_HUMANS_FIXTURE = FIXTURES / "sdk-size-v1-humans.json"
+TOPOLOGY_FIXTURE = FIXTURES / "topology-headcount-v1-anchor.yaml"
 REPORT_RELATIVE_PATH = Path("private/reports/eads-adapter-gap-report.json")
 NAMESPACE_SALT = "a" * 64
 REPORT_SCHEMA_VERSION = "2.0.0"
@@ -58,10 +60,14 @@ def _canonical_json_bytes(value: object) -> bytes:
     )
 
 
-def _source_payload() -> dict[str, Any]:
-    payload = json.loads(FIXTURE.read_bytes())
+def _json_fixture_payload(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_bytes())
     assert isinstance(payload, dict)
     return payload
+
+
+def _source_payload() -> dict[str, Any]:
+    return _json_fixture_payload(FIXTURE)
 
 
 def _config(
@@ -184,12 +190,13 @@ def _cli_args(
     *,
     seed: str = "20260809",
     maximum: str = "128",
+    vintage: SourceVintage = SourceVintage.SDK_SIZE_V1,
 ) -> list[str]:
     return [
         "--source",
         str(source),
         "--vintage",
-        SourceVintage.SDK_SIZE_V1.value,
+        vintage.value,
         "--namespace-salt-file",
         str(salt),
         "--output",
@@ -267,6 +274,67 @@ def test_fixture_is_safely_fictional_and_current_contract_compiles(
     assert report.status.value == "succeeded"
     assert report.error_code is None
     assert _report_from_disk(output_root) == report
+
+
+def test_sdk_humans_fixture_compiles_with_declared_population(
+    tmp_path: Path,
+) -> None:
+    output_root, report = _run(
+        tmp_path,
+        _json_fixture_payload(SDK_HUMANS_FIXTURE),
+    )
+
+    assert report.source_vintage is SourceVintage.SDK_SIZE_V1
+    assert report.status.value == "succeeded"
+    assert len(report.outcomes) == 1
+    outcome = report.outcomes[0]
+    assert outcome.raw_population == 1200
+    assert outcome.emitted_population == 128
+    assert outcome.downscale is not None
+    assert outcome.downscale.applied is True
+    assert _report_from_disk(output_root) == report
+
+
+def test_sdk_gaps_fixture_exercises_declared_gap_taxonomy(tmp_path: Path) -> None:
+    _, report = _run(tmp_path, _json_fixture_payload(SDK_GAPS_FIXTURE))
+
+    codes = {gap.code for gap in report.gaps}
+    assert {
+        AdapterCode.DEEP_HIERARCHY_COLLAPSED,
+        AdapterCode.IGNORED_SOURCE_POPULATION_FIELD,
+        AdapterCode.NULL_CLASSIFICATION,
+        AdapterCode.UNSUPPORTED_OWNERSHIP_SEMANTICS,
+    } <= codes
+
+
+def test_topology_yaml_fixture_compiles_through_cli(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    source, salt = _write_cli_inputs(
+        tmp_path,
+        source_bytes=TOPOLOGY_FIXTURE.read_bytes(),
+        source_suffix=".yaml",
+    )
+    output_root = tmp_path / "topology-output"
+
+    exit_code = cli_module.main(
+        _cli_args(
+            source,
+            salt,
+            output_root,
+            vintage=SourceVintage.TOPOLOGY_HEADCOUNT,
+        )
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert captured.out == ""
+    assert captured.err == ""
+    report = _report_from_disk(output_root)
+    assert report.source_vintage is SourceVintage.TOPOLOGY_HEADCOUNT
+    assert report.status.value == "succeeded"
+    assert report.outcomes[0].raw_population == 120
 
 
 def test_fictional_names_do_not_drive_mapping_or_exclusion(tmp_path: Path) -> None:
@@ -1275,6 +1343,24 @@ def test_report_rejects_inventory_order_duplicates_and_digest_drift(
     digest_drift["artifact_set_digest"] = "0" * 64
     with pytest.raises(ValidationError, match="artifact_set_digest"):
         AdapterRunReport.model_validate(digest_drift, strict=True)
+
+
+def test_report_rejects_artifact_in_wrong_visibility_inventory(
+    tmp_path: Path,
+) -> None:
+    _, report = _run(tmp_path, _source_payload())
+    misfiled = _validation_payload(report)
+    evaluator_record = misfiled["evaluator_artifacts"][0]
+    misfiled["evaluator_artifacts"] = ()
+    misfiled["public_artifacts"] = tuple(
+        sorted(
+            (*misfiled["public_artifacts"], evaluator_record),
+            key=lambda artifact: artifact["path"],
+        )
+    )
+
+    with pytest.raises(ValidationError, match="inventory_visibility"):
+        AdapterRunReport.model_validate(misfiled, strict=True)
 
 
 def test_report_rejects_status_and_inventory_consistency_drift(
