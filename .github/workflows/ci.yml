@@ -9,6 +9,24 @@ permissions:
   contents: read
 
 jobs:
+  capability-governance:
+    name: Capability governance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: uv sync --locked --all-groups
+      - name: Enforce capability governance
+        run: uv run python tools/generate_capabilities.py --check --require-tags
+
   public-boundary:
     name: Public consumer boundary
     runs-on: ubuntu-latest
@@ -24,6 +42,24 @@ jobs:
         run: uv sync --locked --all-groups
       - name: Enforce public consumer boundary
         run: uv run pytest --no-cov tests/test_public_repository_boundary.py
+
+  benchmark-registry:
+    name: Benchmark registry governance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: uv sync --locked --all-groups
+      - name: Validate benchmark registry
+        run: uv run python tools/generate_benchmark_registry.py --check --require-tags --base-ref origin/main
 
   quality:
     name: Python ${{ matrix.python-version }} full gates

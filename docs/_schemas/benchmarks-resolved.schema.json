@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "generated": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_size": {"minimum": 0, "type": "integer"},
+        "format": {"enum": ["json", "jsonl", "sha256sum"]},
+        "integrity_record_ids": {"items": {"type": "string"}, "type": "array"},
+        "package_path": {"type": "string"},
+        "path": {"type": "string"},
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "required": ["byte_size", "format", "integrity_record_ids", "package_path", "path", "sha256"],
+      "type": "object"
+    },
+    "artifact": {
+      "additionalProperties": false,
+      "properties": {
+        "answer_key_label": {"type": ["string", "null"]},
+        "approved_sha256": {"type": ["string", "null"]},
+        "approved_targets": {"items": {"type": "string"}, "type": "array"},
+        "benchmark_id": {"type": "string"},
+        "frozen": {"type": "boolean"},
+        "generated": {"anyOf": [{"$ref": "#/$defs/generated"}, {"type": "null"}]},
+        "id": {"type": "string"},
+        "integrity_record_ids": {"items": {"type": "string"}, "type": "array"},
+        "kind": {"type": "string"},
+        "path": {"type": ["string", "null"]},
+        "present_in": {"items": {"type": "string"}, "type": "array"},
+        "sensitivity": {"type": "string"}
+      },
+      "required": ["id", "benchmark_id", "path", "kind", "sensitivity", "frozen", "approved_sha256", "integrity_record_ids", "present_in", "approved_targets", "answer_key_label", "generated"],
+      "type": "object"
+    },
+    "check": {
+      "additionalProperties": false,
+      "properties": {"name": {"type": "string"}, "rationale": {"type": ["string", "null"]}, "status": {"type": "string"}},
+      "required": ["name", "status", "rationale"],
+      "type": "object"
+    },
+    "gate": {
+      "additionalProperties": false,
+      "properties": {
+        "approved_targets": {"items": {"type": "string"}, "type": "array"},
+        "benchmark_id": {"type": "string"},
+        "benchmark_version": {"type": "string"},
+        "checks": {"items": {"$ref": "#/$defs/check"}, "type": "array"},
+        "decision": {"type": "string"},
+        "id": {"type": "string"},
+        "release_tag": {"type": "string"},
+        "review_route_id": {"type": "string"}
+      },
+      "required": ["id", "benchmark_id", "benchmark_version", "decision", "approved_targets", "review_route_id", "release_tag", "checks"],
+      "type": "object"
+    },
+    "reproduction": {
+      "additionalProperties": false,
+      "properties": {
+        "argv": {
+          "items": false,
+          "maxItems": 6,
+          "minItems": 6,
+          "prefixItems": [
+            {"const": "synthworld"},
+            {"const": "reproduce-benchmark"},
+            {"const": "--benchmark"},
+            {"minLength": 1, "type": "string"},
+            {"const": "--output"},
+            {"const": "{output_dir}"}
+          ],
+          "type": "array"
+        },
+        "mode": {"const": "regenerate_and_compare"}
+      },
+      "required": ["mode", "argv"],
+      "type": "object"
+    },
+    "benchmark": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_ids": {"items": {"type": "string"}, "type": "array"},
+        "artifacts": {"items": {"$ref": "#/$defs/artifact"}, "type": "array"},
+        "benchmark_kind": {"type": "string"},
+        "benchmark_version": {"type": "string"},
+        "docs_route_ids": {"items": {"type": "string"}, "type": "array"},
+        "evaluation_mode": {"type": "string"},
+        "example_command": {"type": ["string", "null"]},
+        "id": {"type": "string"},
+        "introduced_in": {"type": "string"},
+        "lifecycle": {"type": "string"},
+        "limitations_route_id": {"type": ["string", "null"]},
+        "publication_gate": {"anyOf": [{"$ref": "#/$defs/gate"}, {"type": "null"}]},
+        "publication_gate_id": {"type": ["string", "null"]},
+        "replacement_id": {"type": ["string", "null"]},
+        "reproduction": {"anyOf": [{"$ref": "#/$defs/reproduction"}, {"type": "null"}]},
+        "title": {"type": "string"}
+      },
+      "required": ["id", "title", "lifecycle", "benchmark_kind", "benchmark_version", "evaluation_mode", "introduced_in", "artifact_ids", "reproduction", "example_command", "docs_route_ids", "limitations_route_id", "publication_gate_id", "replacement_id", "artifacts", "publication_gate"],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "benchmarks": {"items": {"$ref": "#/$defs/benchmark"}, "type": "array"},
+    "input_digests": {
+      "additionalProperties": false,
+      "properties": {
+        "benchmark_publication_gates": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "benchmark_transitions": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "benchmarks_curated": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "benchmarks_generated": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "required": ["benchmark_publication_gates", "benchmark_transitions", "benchmarks_curated", "benchmarks_generated"],
+      "type": "object"
+    },
+    "schema_version": {"const": "1.0.0"}
+  },
+  "required": ["schema_version", "input_digests", "benchmarks"],
+  "type": "object"
+}

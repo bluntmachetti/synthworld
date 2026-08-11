@@ -81,6 +81,7 @@ addopts = [
   "--strict-config",
   "--strict-markers",
   "--cov=src/synthworld",
+  "--cov=tools",
   "--cov-branch",
   "--cov-report=term-missing",
   "--cov-report=xml",
@@ -91,7 +92,7 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["src/synthworld"]
+source = ["src/synthworld", "tools"]
 
 [tool.coverage.report]
 exclude_also = [
@@ -114,5 +115,5 @@ select = ["A", "ANN", "B", "E", "F", "I", "N", "RUF", "S", "SIM", "UP"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["src/synthworld", "tests", "examples", "conftest.py"]
+files = ["src/synthworld", "tools", "tests", "examples", "conftest.py"]
 mypy_path = ["src"]

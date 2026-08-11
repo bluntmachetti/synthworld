@@ -362,7 +362,18 @@ Reports measure offline artifact submissions only. They do not prove live
 evidence retention, durable logging, enforcement behavior, deployment, real
 Asteria/EADS compatibility, or a real EADS export. D8 excludes C13, C15/C16,
 Face A, EADS compatibility, deployment, and generated-world demonstrations.
-There is no registry entry, external publication, or publication claim.
+PR #114 head `b2fffc179cfae4cb86e41f398407ea3520cad7d6` passed repository-local
+candidate registry and capability verification in CI run `31340599669` on
+2026-08-09. The Python 3.12 leg ran 2,432 tests with 100% statement and branch
+coverage, including 100% coverage for `tools/generate_c08_v2_baselines.py`.
+Docs dark preview passed in run `31340599662`. The verified registry integration
+did not change the frozen C08 v2 benchmark bytes.
+
+Repository-local candidate registry entries exist for `asteria-agentic-c08-v2`
+and `enterprise-agentic-c08-v2`, but all publication gates remain pending. The
+entries support candidate discovery only; they do not represent external
+publication, publication approval, or verification of any external host,
+viewer, download, or re-download path.
 
 ## C08 v2 corrective audit closure
 
@@ -386,3 +397,32 @@ reports after 4de6df8.
 This records implemented contract corrections, completed native adversarial
 resolutions, and the passing repository verification run above. No registry,
 external publication, deployment, or live-system completion is asserted.
+## Risk-v1 review record
+
+Reviewed: 2026-08-08. Seed: `20260719`. Risk benchmark and schema versions:
+`1.0.0`.
+
+This record reviews the existing frozen risk-v1 publication without re-cutting
+or changing its artifacts. The public input is
+`src/synthworld/benchmarks/risk-public-golden-v1.json`; the separate evaluator
+answer is `src/synthworld/benchmarks/risk-answer-golden-v1.json`. The evaluator
+answer is published reference truth, not a private held-out artifact. Their
+checked-in checksum manifests are
+`src/synthworld/benchmarks/RISK_PUBLIC_SHA256SUMS` and
+`src/synthworld/benchmarks/RISK_ANSWER_SHA256SUMS`.
+
+The recorded SHA-256 values are
+`690c2fb081826f72970af1e729651819c3563d9aa590190d566af24424238b33` for the
+public payload,
+`32479aa077887a63d31a4de3dfbc822f01f6622f09ea6dd6d2a87e3af3cb319e` for the
+evaluator answer,
+`16f95e9d9e9f7539e8f14fab4688cf5c0ed995bb539ad415456ec77c08688a73` for the
+public checksum manifest, and
+`07e300c8eee695c0eef60af9a4701cd5df03457215f5c310b1a9d7e05ff087cd` for the
+evaluator checksum manifest.
+
+The review confirms that the public and evaluator payloads remain physically
+separate, that the evaluator truth is not inferred from a path or mislabeled as
+private, and that the four existing files and their recorded checksums remain
+the publication boundary. This is an artifact-integrity and boundary record;
+it makes no new held-out-evaluation or Hugging Face publication claim.

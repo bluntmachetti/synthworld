@@ -70,7 +70,7 @@ fabricating data about real people.
 
 These artifacts are the frozen golden benchmarks of the
 [SynthWorld generator](https://github.com/bluntmachetti/synthworld)
-(`pip install idcognito-synthworld`, v0.9.0+). They are generated from seed
+(`pip install idcognito-synthworld==0.13.0`; SynthWorld v0.13.0). They are generated from seed
 `20260719` and authenticated by SHA-256 manifests. Generator CI recreates the
 artifacts byte-for-byte and fails on drift, so results remain tied to exact
 benchmark bytes.
@@ -93,6 +93,12 @@ This dataset must never be used to impersonate, target, or investigate a
 person. No real person's data was used.
 
 ## Authoritative data and viewer projections
+
+This card is a historical partial publication view, not the publication
+authorization source. The repository benchmark registry and its approved
+publication gates govern future distribution decisions; this card does not
+authorize additional Hugging Face artifacts. A later Hugging Face refresh must
+consume the resolved registry rather than infer authorization from this card.
 
 `frozen/` contains the authoritative artifacts shipped by the Python package.
 `viewer/` contains derived JSONL tables for convenient browsing. Viewer-created
@@ -146,7 +152,7 @@ boundary. Competitive evaluation requires held-out private worlds.
 
 ### Use Asteria
 
-Install v0.9.0 or later and export the frozen package:
+Install SynthWorld v0.13.0 and export the frozen package:
 
 The SynthWorld Python package requires Python 3.12 or newer; Python 3.11 and
 earlier are not supported.

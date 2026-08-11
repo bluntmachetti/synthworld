@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Questions and usage help
+    url: https://github.com/bluntmachetti/synthworld/discussions/categories/q-a
+    about: Ask ordinary questions in GitHub Discussions after checking the documentation.
   - name: Private safety or security report
     url: https://github.com/bluntmachetti/synthworld/security/advisories/new
     about: >-

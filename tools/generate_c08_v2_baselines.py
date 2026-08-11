@@ -92,6 +92,10 @@ def _asteria_submission(
     reference = semantic_c08_submission(benchmark.public)
     if failure_mode == "exact":
         return reference
+    if failure_mode not in ASTERIA_FAILURE_MODES:
+        raise ValueError(
+            f"unsupported Asteria C08 baseline failure mode: {failure_mode}"
+        )
     binding = next(
         item
         for item in benchmark.evaluator.bindings
@@ -125,19 +129,17 @@ def _asteria_submission(
             binding.action_event_id,
             (other_observation_id,),
         )
-    if failure_mode == "extra":
-        extra_observation_id = next(
-            item.observation_id
-            for item in benchmark.public.evidence_observations
-            if item.action_event_id == binding.action_event_id
-            and item.observation_id not in row.retained_observation_ids
-        )
-        return _replace_asteria_row(
-            reference,
-            binding.action_event_id,
-            (*row.retained_observation_ids, extra_observation_id),
-        )
-    raise ValueError(f"unsupported Asteria C08 baseline failure mode: {failure_mode}")
+    extra_observation_id = next(
+        item.observation_id
+        for item in benchmark.public.evidence_observations
+        if item.action_event_id == binding.action_event_id
+        and item.observation_id not in row.retained_observation_ids
+    )
+    return _replace_asteria_row(
+        reference,
+        binding.action_event_id,
+        (*row.retained_observation_ids, extra_observation_id),
+    )
 
 
 def _asteria_baseline_submission_bytes(

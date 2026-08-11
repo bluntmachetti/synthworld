@@ -5,6 +5,19 @@ reproducible. Open an issue before a large change so its intended benchmark or
 schema impact can be agreed first. Participation in this project is governed
 by the [code of conduct](CODE_OF_CONDUCT.md).
 
+Ask ordinary usage and design questions in
+[GitHub Discussions](https://github.com/bluntmachetti/synthworld/discussions).
+Use Issues for reproducible defects or agreed work, and keep sensitive reports on
+the private route described below.
+
+## Documentation
+
+Start with [the documentation contribution guide](docs/support/contributing-documentation.md).
+Authored pages must remain useful as plain Markdown on GitHub. Link to generated
+registries, schemas, data dictionaries, and contract READMEs instead of copying
+their facts into a second hand-maintained source. Documentation describes current
+`main`; unreleased behavior must be labelled `Unreleased` or `Preview on main`.
+
 ## Development
 
 Install [uv](https://docs.astral.sh/uv/), then run:

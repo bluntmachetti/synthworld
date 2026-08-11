@@ -1,7 +1,8 @@
 # C08 evidence-binding v2 transition
 
 Status: implemented frozen-artifact candidate, 2026-08-09. Candidate bytes are
-committed; verification and publication gates remain pending.
+committed; repository verification passed and external publication gates remain
+pending.
 
 This transition gives `SW-AA-C08` independently versioned Asteria and enterprise
 surfaces for evidence completeness. Existing v1 models, metric names, schemas,
@@ -69,9 +70,9 @@ families for drift.
 
 ## Locked C08-only freeze contract
 
-The following decisions describe the committed candidate bytes. They do not assert
-that CI, schema drift, packaging, clean-install, regeneration, or publication gates
-have passed.
+The following decisions describe the committed candidate bytes. Repository CI,
+schema drift, packaging, clean-install, and regeneration verification has passed;
+external publication gates remain pending.
 
 ### Identity and deterministic inputs
 
@@ -252,15 +253,16 @@ may imply that an excluded item has shipped or been validated.
 ## Pending verification and publication evidence
 
 The candidate trees, loaders, governed schemas, adversarial hardening, baseline
-records, and expanded v1 assertions are implemented. None of the following has
-run for the current committed bytes: CI, Ruff lint, Ruff format checking, schema
-`--check`, package build, isolated-wheel execution, clean-install loading, or
-byte-for-byte regeneration verification. The enterprise publication test also
-committed `a0b012...`; that gate must be reconciled before it can pass.
+records, and expanded v1 assertions are implemented. GitHub Actions runs
+`31329844103` and `31330774589` verified the frozen bytes, repository gates,
+generated documents, schemas, and package paths recorded in `GOLDEN_REVIEW.md`.
 
-There is no benchmark-registry entry, external publication, or publication claim
-for these candidates. Until the pending evidence is produced, they remain
-committed frozen-artifact candidates, not published benchmarks.
+Repository-local candidate registry entries now exist for both C08 v2 benchmark
+identities. Registry and capability metadata verification passed for PR #114 at
+`b2fffc179cfae4cb86e41f398407ea3520cad7d6` in CI run `31340599669`. The entries
+do not represent external publication, publication approval, or verification of
+an external host, viewer, download, or re-download path; the artifacts remain
+frozen candidates, not published benchmarks.
 
 ## Corrective audit reconciliation
 
