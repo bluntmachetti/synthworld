@@ -323,7 +323,7 @@ def test_topology_yaml_fixture_compiles_through_cli(
             source,
             salt,
             output_root,
-            vintage=SourceVintage.TOPOLOGY_HEADCOUNT,
+            vintage=SourceVintage.TOPOLOGY_HEADCOUNT_V1,
         )
     )
 
@@ -332,7 +332,7 @@ def test_topology_yaml_fixture_compiles_through_cli(
     assert captured.out == ""
     assert captured.err == ""
     report = _report_from_disk(output_root)
-    assert report.source_vintage is SourceVintage.TOPOLOGY_HEADCOUNT
+    assert report.source_vintage is SourceVintage.TOPOLOGY_HEADCOUNT_V1
     assert report.status.value == "succeeded"
     assert report.outcomes[0].raw_population == 120
 
