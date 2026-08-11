@@ -438,7 +438,7 @@
       "evaluation_mode": "public_conformance",
       "example_command": null,
       "id": "asteria-agentic-c08-v2",
-      "introduced_in": "unreleased",
+      "introduced_in": "0.14.0",
       "lifecycle": "candidate",
       "limitations_route_id": "route:agent-authority-contract/docs/c08-v2-transition.md#evaluation-boundary-and-v1-preservation",
       "publication_gate": null,
@@ -2069,7 +2069,7 @@
       "evaluation_mode": "public_conformance",
       "example_command": null,
       "id": "enterprise-agentic-c08-v2",
-      "introduced_in": "unreleased",
+      "introduced_in": "0.14.0",
       "lifecycle": "candidate",
       "limitations_route_id": "route:agent-authority-contract/docs/c08-v2-transition.md#evaluation-boundary-and-v1-preservation",
       "publication_gate": null,
@@ -2766,7 +2766,7 @@
   "input_digests": {
     "benchmark_publication_gates": "981975169df617ebfd30a782ccaca7863ad695f23354e2d83fb816b09f64b945",
     "benchmark_transitions": "7c598ad3b0f89773628bf81d3b9faf37f528be5d22b857e8f41fa1ba2812c77d",
-    "benchmarks_curated": "db4fde95f318e4d4ac5643865c6d352770a304f41bee72dd7d0aca6417fed1a9",
+    "benchmarks_curated": "1521590fda022a14c149a73318a6527addf61d99cc730ad5801102d92337ce50",
     "benchmarks_generated": "9023aa536f58096310041353b8ec836d430df153cc8c0ac9cf0de045fe5b7560"
   },
   "schema_version": "1.0.0"
