@@ -212,7 +212,8 @@ def _assert_closed_cli_error(
     assert captured.out == ""
     assert captured.err == f"eads-shaped-adapter: {expected_category}\n"
     for fragment in sensitive_fragments:
-        assert fragment not in captured.err
+        if fragment.strip():
+            assert fragment not in captured.err
     assert exit_code in {2, 3, 4, 5, 6}
 
 

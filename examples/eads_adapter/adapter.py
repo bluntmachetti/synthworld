@@ -1450,15 +1450,15 @@ def _write_new(path: Path, payload: bytes) -> None:
 
 def _prepare_output_parent(output_root: Path) -> None:
     _require_path_safety_primitives()
+    _reject_symlinked_components(output_root.parent)
+    output_root.parent.mkdir(parents=True, exist_ok=True)
+    _reject_symlinked_components(output_root.parent)
     try:
         output_root.lstat()
     except FileNotFoundError:
         pass
     else:
         raise FileExistsError(AdapterCode.OUTPUT_ROOT_EXISTS.value)
-    _reject_symlinked_components(output_root.parent)
-    output_root.parent.mkdir(parents=True, exist_ok=True)
-    _reject_symlinked_components(output_root.parent)
 
 
 def _promote_staged_output(staged_output: Path, output_root: Path) -> None:

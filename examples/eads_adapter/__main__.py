@@ -11,7 +11,7 @@ import sys
 from collections.abc import Hashable, Mapping, Sequence
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, NoReturn, cast
 
 import yaml
 from pydantic import ValidationError
@@ -44,11 +44,11 @@ _JSON_NODE_TAGS = _JSON_SCALAR_TAGS | {
 
 
 class _CliErrorCategory(StrEnum):
-    CONFIGURATION = "configuration_error"
-    OUTPUT = "output_error"
-    PATH_SAFETY = "path_safety_error"
-    RESOURCE_LIMIT = "resource_limit_error"
-    SOURCE = "source_error"
+    CONFIGURATION = "config"
+    OUTPUT = "output"
+    PATH_SAFETY = "path-safety"
+    RESOURCE_LIMIT = "resource"
+    SOURCE = "source"
 
 
 _CLI_EXIT_CODES = {
@@ -64,6 +64,12 @@ class _CliError(Exception):
     def __init__(self, category: _CliErrorCategory) -> None:
         super().__init__(category.value)
         self.category = category
+
+
+class _ClosedArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> NoReturn:
+        del message
+        raise _CliError(_CliErrorCategory.CONFIGURATION)
 
 
 class _RestrictedSourceYamlLoader(yaml.SafeLoader):
@@ -185,7 +191,7 @@ def _is_json_number(value: str) -> bool:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = _ClosedArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument(
         "--vintage",
@@ -200,7 +206,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=int,
         default=10_000,
     )
-    arguments = parser.parse_args(argv)
+    try:
+        arguments = parser.parse_args(argv)
+    except _CliError as error:
+        return _emit_cli_failure(error.category)
 
     try:
         payload = _load_source(arguments.source)
@@ -316,7 +325,7 @@ def _read_bounded_regular_file(
 def _load_namespace_salt(path: Path) -> str:
     payload = _read_bounded_regular_file(
         path,
-        max_bytes=65,
+        max_bytes=66,
         failure_category=_CliErrorCategory.CONFIGURATION,
     )
     if payload.endswith(b"\n"):
