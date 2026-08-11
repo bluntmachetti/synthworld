@@ -21,7 +21,7 @@ adapter.
 
 Agent and non-human identity support is deferred behind implemented C15 and C16
 contracts. The active dependency is the
-[C15/C16 v2 design under review](../agent-authority-contract/docs/c15-c16-v2-design.md),
+[C15/C16 contract-family design under review](../agent-authority-contract/docs/c15-c16-contract-design.md),
 not the earlier issue #27 assumptions. Until those contracts are implemented,
 the adapter remains humans-only and must not introduce provisional agent or NHI
 records, identifiers, authority fields, lifecycle states, or target bindings.

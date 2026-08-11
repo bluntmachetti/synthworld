@@ -24,7 +24,7 @@ The supported input contract is intentionally bounded:
 
 Agent and non-human identity projections remain deferred until the C15/C16
 contracts are implemented. The design currently under review is documented in
-[C15/C16 v2 design under review](../../agent-authority-contract/docs/c15-c16-v2-design.md).
+[C15/C16 contract-family design under review](../../agent-authority-contract/docs/c15-c16-contract-design.md).
 This adapter must not anticipate that design by inventing agent or NHI fields.
 
 Input trees and files are opened without following symbolic links. Supported
