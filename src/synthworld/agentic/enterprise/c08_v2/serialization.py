@@ -14,6 +14,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08PublicInputV2,
     C08SubmissionV2,
 )
+from synthworld.agentic.enterprise.c08_v2.projection import c08_public_input_digest
 from synthworld.enterprise.canonical import canonical_json_bytes
 
 PUBLIC_DIR = "public"
@@ -105,6 +106,15 @@ def export_c08_artifacts(
 ) -> None:
     """Write public, evaluator, and submission roots without overwriting files."""
 
+    public_digest = c08_public_input_digest(public)
+    if evaluator.public_input_digest != public_digest:
+        raise C08SerializationError(
+            "evaluator truth binds to a different C08 public input"
+        )
+    if submission.public_input_digest != public_digest:
+        raise C08SerializationError("submission binds to a different C08 public input")
+    if report is not None and report.public_input_digest != public_digest:
+        raise C08SerializationError("report binds to a different C08 public input")
     if root.exists():
         raise C08SerializationError("C08 artifact root already exists")
     try:
