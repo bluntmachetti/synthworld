@@ -34,6 +34,7 @@ remaining docs are the two narrative files listed below.
 | `reference-deployment/` | Working opt-in live Compose lab; observation v2, full L01-L06, exact L07, measured/unsupported L08 |
 | `docs/design-intent-assumptions.md` | Assumptions + scored coverage table |
 | `docs/failure-reason-precedence.md` | Draft `0.1.0-draft` — normative resolution rule for `AuthorityTruth` failure reasons, chains and `expected_policy_version`; exhaustive conformance test in `tests/` |
+| `docs/c08-v2-transition.md` | Implemented contract candidate for evaluator-bound evidence completeness across separate Asteria and enterprise v2 lineages; not yet a frozen benchmark |
 | `docs/control-mappings.md`, `docs/limitations.md` | Not started |
 
 The pydantic models in `src/synthworld/agentic/models.py` remain authoritative for

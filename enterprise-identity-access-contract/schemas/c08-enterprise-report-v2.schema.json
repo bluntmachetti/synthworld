@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "C08CaseOutcomeV2": {
+      "enum": [
+        "exact",
+        "missing",
+        "fabricated",
+        "wrong_action",
+        "extra"
+      ],
+      "title": "C08CaseOutcomeV2",
+      "type": "string"
+    },
+    "C08CaseResultV2": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "minLength": 1,
+          "title": "Action Id",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/C08CaseOutcomeV2"
+        },
+        "required_count": {
+          "minimum": 1,
+          "title": "Required Count",
+          "type": "integer"
+        },
+        "submitted_count": {
+          "minimum": 0,
+          "title": "Submitted Count",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "action_id",
+        "outcome",
+        "required_count",
+        "submitted_count"
+      ],
+      "title": "C08CaseResultV2",
+      "type": "object"
+    },
+    "C08EvaluationMetricV2": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "undefined_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Undefined Reason"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "numerator",
+        "denominator",
+        "denominator_meaning"
+      ],
+      "title": "C08EvaluationMetricV2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/C08EvaluationMetricV2"
+      },
+      "minItems": 1,
+      "title": "Metrics",
+      "type": "array"
+    },
+    "outcomes": {
+      "items": {
+        "$ref": "#/$defs/C08CaseResultV2"
+      },
+      "minItems": 1,
+      "title": "Outcomes",
+      "type": "array"
+    },
+    "public_input_digest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Public Input Digest",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "2.0.0",
+      "default": "2.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "public_input_digest",
+    "outcomes",
+    "metrics"
+  ],
+  "title": "C08EvaluationReportV2",
+  "type": "object"
+}
