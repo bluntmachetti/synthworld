@@ -9,6 +9,19 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Added
+
+- **Independent C08 v2 frozen-artifact candidates.** Asteria now commits an exact
+  five-file root/public/evaluator manifest tree; enterprise commits an exact
+  four-file root-manifest/`SHA256SUMS` tree with a packaged fail-closed loader and
+  fixed-seed identity comparison. Both public contracts use opaque binding
+  handles plus same-kind distractors instead of exposing a unique kind-to-ID
+  answer. Independent manifest schemas, expanded v1 hash locks, explicit offline
+  report scope, and exactly two metric-only discrimination records accompany the
+  candidate bytes. Native adversarial findings are recorded as resolved, while
+  CI, Ruff/format, schema check, package, isolated-wheel, clean-install, and
+  regeneration evidence remain pending. Nothing is registered or published.
+
 ## [0.13.0] - 2026-08-06
 
 ### Added

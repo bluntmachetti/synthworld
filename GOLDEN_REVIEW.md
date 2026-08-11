@@ -205,3 +205,184 @@ inventory/path/encoding/type/checksum tampering, and verify the packaged wheel.
 No existing golden artifact or checksum changed in this transition. Asteria v1,
 the post-#77 ambiguity baseline, and `src/synthworld/temporal.py` remain outside
 the new tree and byte-identical to their pre-transition versions.
+
+## C08 v2 Asteria and enterprise candidate review record
+
+Reviewed: 2026-08-09. Seed: `20260809`. Schema version: `2.0.0`.
+
+This record covers independently versioned `asteria-agentic-c08-v2` and
+`enterprise-agentic-c08-v2` committed frozen-artifact candidates. It records
+current committed bytes after native adversarial correction and CI hardening.
+It is not an external publication or deployment record. Repository verification
+evidence is recorded below.
+
+### Asteria inventory and digest roots
+
+| Path | Bytes | SHA-256 |
+|---|---:|---|
+| `manifest.json` | 1,201 | `cb8deb43ab6216c4d913e294a7a88d882aabb75a6ecbc87f66011eb8099ad50b` |
+| `public/c08-asteria-public.json` | 8,106 | `b9ed17cac90721a276b28570bd91b5c6f41b106dad5be15fa1257a7e9a16ade3` |
+| `public/manifest.json` | 370 | `5313551de8dbf5f6cdf97447fe9ade9c0fa73500dfd8fd387aa8aa4954de69c3` |
+| `evaluator/c08-asteria-evaluator.json` | 1,871 | `b94fc5791e36e43e2b2586cdab0c7aaec9c249700e060a784ccc582b13b777f4` |
+| `evaluator/manifest.json` | 465 | `bc701080cf88c8a446e31d5d379c360b29939bf51a7e3e017ce41f417bfce45c` |
+
+`sha256-path-bound-v1` binds sorted relative UTF-8 paths, a NUL separator,
+and each payload's raw SHA-256. The visibility sets contain only their payload;
+the root set contains both payloads and both visibility manifests and excludes
+only root `manifest.json`.
+
+| Digest | Value |
+|---|---|
+| public input/raw payload | `b9ed17cac90721a276b28570bd91b5c6f41b106dad5be15fa1257a7e9a16ade3` |
+| public artifact set | `fe59c2d365194572c57f1afa892d3a86fffb41e07f5e77ac8936f8117db96db4` |
+| evaluator artifact set | `68cefaa573ab2e28336cf20023147eb21c6a2b2c1cd0c53c6b8dff1c6d3f00dd` |
+| root artifact set | `5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a` |
+
+The root, public, and evaluator frozen manifests are independent immutable
+models. Their generated schema files have committed SHA-256 values
+`37e2f49fac5d2a32de1de9d444276682adbc154f0e71a0a638018fc1b6d7e614`,
+`005f39c54d54470be50bd940b0432abd010113e6aad7d9541d5516eb7b723156`,
+and `cb46c9f67ef98bdf607f042ed05b0acc3e7753cb8628284d871d2abc2a1f93a3`
+respectively.
+
+### Enterprise inventory and checksum record
+
+| Path | Bytes | SHA-256 |
+|---|---:|---|
+| `manifest.json` | 619 | `af0697c8af4715786d4af1c4b6c9c228bdc2f0b795c69d195355be42b14af3c3` |
+| `SHA256SUMS` | 258 | `a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123` |
+| `public/public-input.json` | 5,943 | `d7a525cfeb53fcbd62adef9ee9c11dbb5b222ffa47874a8c5a0226d43deb61f0` |
+| `evaluator/truth.json` | 1,428 | `7fb510dfad3ef71b7aa895c51c1810b2a9fb354509220ae65fa92e27e254736b` |
+
+Root `manifest.json` inventories the public and evaluator payloads and binds
+public-input digest
+`d7a525cfeb53fcbd62adef9ee9c11dbb5b222ffa47874a8c5a0226d43deb61f0`.
+`SHA256SUMS` lists evaluator payload, root manifest, and public payload in sorted
+relative-path order and excludes itself. This lineage publishes no separate
+aggregate artifact-set digest; the checksum-record bytes have SHA-256
+`a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123`.
+The independent frozen manifest schema
+`c08-enterprise-manifest-v2.schema.json` has SHA-256
+`cfbf56a9c4b1ee9c78b2e2f13dada01ce0a132e75ad66d9cea23c935d033bab2`.
+
+The enterprise packaged loader validates exact inventory, regular-file and
+symlink boundaries, canonical JSON, all checksum rows, manifest descriptors,
+public/evaluator digest and semantic bindings, and then compares all bytes and
+models with `generate_c08_reference(20260809)`. Integrity-valid alternate seed
+bytes are therefore rejected as the wrong fixed-reference identity.
+
+### Public binding-handle and distractor semantics
+
+Both public contracts expose requirements as evidence kind plus opaque binding
+handle, not expected observation ID. Each required kind has at least one
+same-action, same-kind distractor with a different handle, while exactly one
+observation matches the required handle. A reference submission can be built
+from public correlation semantics without evaluator truth. Asteria makes public
+IDs and ordinals scenario-neutral. Enterprise derives public observation IDs in
+a separate namespace so source evidence IDs are absent from public bytes.
+Evaluator truth retains exact IDs, tenant/action binding, and Asteria case labels.
+
+This boundary prevents accidental answer-key use; it is not secrecy. The task is
+deliberately publicly solvable by correlating handles and action semantics.
+
+### Metric-only baseline records
+
+The fixture inventory is exactly:
+
+| Path | Bytes | SHA-256 |
+|---|---:|---|
+| `tests/fixtures/c08_v2/asteria/baseline-records.json` | 5,739 | `df2e1b321677d44ab99b48103f8d2b856938332dd3601aa35c746611a67b3731` |
+| `tests/fixtures/c08_v2/enterprise/baseline-records.json` | 5,028 | `cf3424f7fe463d50fd77b07444cfba2cfa5c1820af1dac6a5126a5ae734b6787` |
+
+Each aggregate file contains benchmark ID, schema version, public-input digest,
+failure mode, submission digest, and denominator-bearing metrics only. It contains
+no submission rows, observations, evidence IDs, action IDs, outcomes, evaluator,
+or truth. Asteria's missing/discarded, fabricated, wrong-action, and extra records
+each lower their dedicated metric from `6/6` to `5/6`. Enterprise missing lowers
+completeness to `5/6`; fabricated, wrong-action, and extra expose their dedicated
+rate at `1/7`. GitHub Actions run `31329844103` reproduced these records from
+seed `20260809` without changing the committed fixture bytes.
+
+### Completed native adversarial findings
+
+- Kind-only candidate uniqueness was answer-revealing. Binding handles plus
+  same-kind distractors now require actual correlation.
+- Public ordering and source identifiers could encode labels or source truth.
+  Ordering is canonical and scenario-neutral; enterprise public IDs are separately
+  derived opaque observation IDs.
+- Untyped/incomplete manifests and checksum-only acceptance allowed
+  self-consistent replacement risk. Independent immutable manifest schemas,
+  exact inventories, cross-bindings, and fixed-reference comparison close it.
+- Publication checks bypassed the enterprise packaged loader. They now call both
+  packaged loaders.
+- Eleven per-case baseline files over-disclosed structure. They are replaced by
+  exactly two aggregate metric-only files with dedicated discrimination.
+- V1 evidence trusted recorded metadata or covered only four enterprise examples.
+  The candidate now recomputes Asteria roots from explicit ten-public/seven-
+  evaluator inventories and pins all ten enterprise agentic examples and schemas.
+- Enterprise reports did not carry the limitation strongly enough. Every report
+  now serializes `offline_artifacts_only=true` and explicit limitations for live
+  retention, durable logging, and enforcement behavior.
+
+### Expanded v1 hash evidence
+
+Asteria's explicit ten-file public and seven-file evaluator base inventories
+recompute to the unchanged roots
+`9ef217b5d604f42a68b7c97596c550698293f1a44f402dbc3d39a2cef19c4594`
+and `3d856f39a5c34ca891ec61298a40ee5bfcb134feae5db7b8a20f6ce9078b2b3f`.
+
+| Enterprise v1 path | SHA-256 |
+|---|---|
+| `examples/enterprise-agentic-evaluator.json` | `9fbf331d8a037e444d3b756007ce1ab2426b3cd39ab46461cb1343bbccbfb723` |
+| `examples/enterprise-agentic-metrics.json` | `983f5abb9ee17b91dbfec39fd029c8ebce3ed1de738f500a32dc01f4b61864c7` |
+| `examples/enterprise-agentic-prediction.json` | `c8af6e28c4d7e47f86969cff9a669081414414c498abc9ae1cd46ccb5252a2bd` |
+| `examples/enterprise-agentic-public-input.json` | `ca581923b57927c9595a6e3f44e783bcdc02bd329f6bd9b79eee11ea034f28a3` |
+| `schemas/enterprise-agentic-benchmark.schema.json` | `7ca6c5fa4de53ff527b535871663606750c2dce1ddb143e1971cbaad89531f10` |
+| `schemas/enterprise-agentic-evaluator.schema.json` | `b1d5ee7109c4cf0e151c30ec414976bc7fbd210607bdf2bd50ae07e930c6dbfc` |
+| `schemas/enterprise-agentic-metrics.schema.json` | `979d31dc1c55e1dd034eb2840e06c3730558e17872d14fd798f520c7f6948862` |
+| `schemas/enterprise-agentic-prediction.schema.json` | `f3cd117cd476176e79a2fb5264e04fb7f671815a335db6f6976578c4890bccb6` |
+| `schemas/enterprise-agentic-public-input.schema.json` | `97418f7200ffdbc9665562e0560ce55cdf3ab65f3ee4baa4843a114f8aae9b1b` |
+| `schemas/enterprise-agentic-truth.schema.json` | `5a3352b538fcac485e3d9d0449760586201207cb91897d113371e2ff4b377a1a` |
+
+GitHub Actions run `31329844103` executed the preservation assertions and passed.
+
+### Verification evidence, scope, and publication status
+
+GitHub Actions run `31329844103` at head `60df649` passed on Python 3.12 and
+Python 3.14. Both matrix legs completed Ruff lint, Ruff format checking, mypy,
+`2227` tests with 100% branch coverage, generated-document and generated-schema
+checks, package build and wheel checks, clean-install loading, public-consumer
+boundary checks, and byte-for-byte regeneration and integrity verification. The
+secret scan also passed. Publication gates pin enterprise checksum-record digest
+`a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123`
+and Asteria root artifact-set digest
+`5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a`.
+
+Reports measure offline artifact submissions only. They do not prove live
+evidence retention, durable logging, enforcement behavior, deployment, real
+Asteria/EADS compatibility, or a real EADS export. D8 excludes C13, C15/C16,
+Face A, EADS compatibility, deployment, and generated-world demonstrations.
+There is no registry entry, external publication, or publication claim.
+
+## C08 v2 corrective audit closure
+
+Fresh-audit finding 4 is resolved in the documented boundary: literal candidate
+observation/evidence IDs and public binding handles are public and necessary for
+solvability. Only evaluator-selected binding rows, required-ID sets, expected
+outcomes, and scenario truth are evaluator-only.
+
+Fresh-audit finding 6 is resolved by the implemented lineage evidence: after
+dd40fd9, preservation covers all 19 frozen Asteria v1 files, not only the
+previous public/evaluator root subsets. No v1 byte is authorized to change.
+
+The publication-gate pins are enterprise SHA256SUMS
+a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123
+and Asteria root artifact-set digest
+5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a.
+Enterprise additionally requires a same-action/same-kind different-handle
+distractor for every requirement, and measurement_scope is schema-required on
+reports after 4de6df8.
+
+This records implemented contract corrections, completed native adversarial
+resolutions, and the passing repository verification run above. No registry,
+external publication, deployment, or live-system completion is asserted.

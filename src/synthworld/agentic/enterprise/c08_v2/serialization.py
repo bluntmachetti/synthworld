@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -40,9 +41,31 @@ def serialize_c08_report(model: C08EvaluationReportV2) -> bytes:
     return canonical_json_bytes(model)
 
 
+def require_c08_canonical_json_bytes(payload: bytes, label: str) -> None:
+    """Reject malformed or noncanonical JSON before typed model validation."""
+
+    try:
+        value = json.loads(payload)
+        canonical = (
+            json.dumps(
+                value,
+                allow_nan=False,
+                ensure_ascii=False,
+                separators=(",", ":"),
+                sort_keys=True,
+            ).encode("utf-8")
+            + b"\n"
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, TypeError, ValueError) as error:
+        raise C08SerializationError(f"invalid C08 {label} artifact") from error
+    if payload != canonical:
+        raise C08SerializationError(f"C08 {label} artifact is not canonical JSON")
+
+
 def _parse[ModelT: BaseModel](
     payload: bytes, model: type[ModelT], label: str
 ) -> ModelT:
+    require_c08_canonical_json_bytes(payload, label)
     try:
         parsed = model.model_validate_json(payload)
     except (TypeError, ValueError) as error:
@@ -115,6 +138,7 @@ __all__ = [
     "load_c08_evaluator",
     "load_c08_public",
     "load_c08_submission",
+    "require_c08_canonical_json_bytes",
     "serialize_c08_evaluator",
     "serialize_c08_public",
     "serialize_c08_report",

@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 from typing import Protocol, cast
+from uuid import UUID
 
 import pytest
 from pydantic import ValidationError
@@ -33,7 +34,7 @@ from synthworld.agentic.c08_v2 import (
     reference_c08_submission,
     semantic_c08_submission,
 )
-from synthworld.agentic.c08_v2.models import C08_METRIC_NAMES
+from synthworld.agentic.c08_v2.models import C08_METRIC_NAMES, C08ScenarioKind
 from synthworld.enterprise.canonical import (
     canonical_json_bytes,
     canonical_json_value_bytes,
@@ -66,6 +67,20 @@ def _metric(report: C08MetricsReportV2, name: str) -> C08MetricV2:
     return next(item for item in report.metrics if item.name == name)
 
 
+def _recursive_keys(value: object) -> set[str]:
+    if isinstance(value, dict):
+        keys = set(value)
+        for item in value.values():
+            keys.update(_recursive_keys(item))
+        return keys
+    if isinstance(value, list):
+        list_keys: set[str] = set()
+        for item in value:
+            list_keys.update(_recursive_keys(item))
+        return list_keys
+    return set()
+
+
 def _changed_submission(
     benchmark: C08AsteriaBenchmarkV2,
     action_index: int,
@@ -73,14 +88,8 @@ def _changed_submission(
 ) -> C08AsteriaSubmissionV2:
     reference = reference_c08_submission(benchmark)
     rows = list(reference.rows)
-    action_event_id = benchmark.evaluator.bindings[action_index].action_event_id
-    row_index = next(
-        index
-        for index, item in enumerate(rows)
-        if item.action_event_id == action_event_id
-    )
-    row = rows[row_index]
-    rows[row_index] = row.model_copy(
+    row = rows[action_index]
+    rows[action_index] = row.model_copy(
         update={
             "retained_observation_ids": (
                 *row.retained_observation_ids,
@@ -89,6 +98,22 @@ def _changed_submission(
         }
     )
     return reference.model_copy(update={"rows": tuple(rows)})
+
+
+def _row_index_for_scenario(
+    benchmark: C08AsteriaBenchmarkV2, scenario: C08ScenarioKind
+) -> int:
+    action_id = next(
+        item.action_event_id
+        for item in benchmark.evaluator.bindings
+        if item.scenario_kind is scenario
+    )
+    reference = reference_c08_submission(benchmark)
+    return next(
+        index
+        for index, row in enumerate(reference.rows)
+        if row.action_event_id == action_id
+    )
 
 
 def test_generation_is_deterministic_and_scope_is_honest() -> None:
@@ -100,10 +125,16 @@ def test_generation_is_deterministic_and_scope_is_honest() -> None:
         "live enforcement or production logging behavior"
         in first.public.measurement_scope.does_not_prove
     )
-    public_json = first.public.model_dump_json()
-    assert "required_observation_ids" not in public_json
-    assert "scenario_kind" not in public_json
-    assert "availability" not in public_json
+    public_keys = _recursive_keys(first.public.model_dump(mode="json"))
+    assert {
+        "availability",
+        "bindings",
+        "evaluator",
+        "expected_verdict",
+        "outcome",
+        "required_observation_ids",
+        "scenario_kind",
+    }.isdisjoint(public_keys)
     assert first.evaluator.bindings
 
 
@@ -149,9 +180,18 @@ def test_public_evaluator_submission_artifacts_are_separate_and_bound() -> None:
         "c08-asteria-submission.json",
         "manifest.json",
     }
-    assert (
-        b"required_observation_ids" not in public_artifacts["c08-asteria-public.json"]
+    public_keys = _recursive_keys(
+        json.loads(public_artifacts["c08-asteria-public.json"])
     )
+    assert {
+        "availability",
+        "bindings",
+        "evaluator",
+        "expected_verdict",
+        "outcome",
+        "required_observation_ids",
+        "scenario_kind",
+    }.isdisjoint(public_keys)
     assert all(payload.endswith(b"\n") for payload in public_artifacts.values())
     assert (
         load_c08_bundle(public_artifacts, evaluator_artifacts, submission_artifacts)
@@ -170,26 +210,160 @@ def test_public_requirement_semantics_construct_a_reference_without_exact_truth(
     benchmark = _benchmark()
     semantic_submission = semantic_c08_submission(benchmark.public)
     assert semantic_submission == reference_c08_submission(benchmark)
-    assert all(action.required_evidence_kinds for action in benchmark.public.actions)
+    assert all(action.required_evidence for action in benchmark.public.actions)
     assert all(
         "required_observation_ids" not in action.model_dump(mode="json")
         and "scenario_kind" not in action.model_dump(mode="json")
         for action in benchmark.public.actions
     )
-    extra_action = next(
-        action
-        for action in benchmark.public.actions
-        if action.resource_id == "resource-005"
+    for action in benchmark.public.actions:
+        action_observations = tuple(
+            item
+            for item in benchmark.public.evidence_observations
+            if item.action_event_id == action.action_event_id
+        )
+        for requirement in action.required_evidence:
+            candidates = tuple(
+                item
+                for item in action_observations
+                if item.evidence_kind is requirement.evidence_kind
+            )
+            assert len(candidates) >= 2
+            assert len({item.binding_handle for item in candidates}) == len(candidates)
+            matching = tuple(
+                item
+                for item in candidates
+                if item.binding_handle == requirement.binding_handle
+            )
+            assert len(matching) == 1
+
+
+def test_public_solver_is_order_independent_and_unsolvable_inputs_fail() -> None:
+    benchmark = _benchmark()
+    reordered_observations = tuple(
+        observation.model_copy(update={"observation_order": index})
+        for index, observation in enumerate(
+            reversed(benchmark.public.evidence_observations), start=1
+        )
     )
-    extra_observations = tuple(
+    reordered_public = C08AsteriaPublicInputV2.model_validate(
+        {
+            **benchmark.public.model_dump(mode="json"),
+            "evidence_observations": [
+                item.model_dump(mode="json") for item in reordered_observations
+            ],
+        }
+    )
+    assert semantic_c08_submission(reordered_public).rows == (
+        reference_c08_submission(benchmark).rows
+    )
+
+    action = benchmark.public.actions[0]
+    requirement = action.required_evidence[0]
+    without_distractor = tuple(
         item
         for item in benchmark.public.evidence_observations
-        if item.action_event_id == extra_action.action_event_id
+        if not (
+            item.action_event_id == action.action_event_id
+            and item.evidence_kind is requirement.evidence_kind
+            and item.binding_handle != requirement.binding_handle
+        )
     )
-    assert tuple(item.evidence_kind.value for item in extra_observations) == (
-        "authority_record",
-        "policy_record",
+    reindexed = tuple(
+        item.model_copy(update={"observation_order": index})
+        for index, item in enumerate(without_distractor, start=1)
     )
+    with pytest.raises(ValidationError, match="distractor"):
+        C08AsteriaPublicInputV2.model_validate(
+            {
+                **benchmark.public.model_dump(mode="json"),
+                "evidence_observations": [
+                    item.model_dump(mode="json") for item in reindexed
+                ],
+            }
+        )
+
+
+def test_public_candidate_identities_and_evaluator_order_are_canonical() -> None:
+    benchmark = _benchmark()
+    observation = benchmark.public.evidence_observations[0]
+    duplicate_binding = observation.model_copy(
+        update={
+            "observation_id": "duplicate-binding-observation",
+            "observation_order": len(benchmark.public.evidence_observations) + 1,
+        }
+    )
+    with pytest.raises(ValidationError, match="action/kind/binding-handle"):
+        C08AsteriaPublicInputV2.model_validate(
+            {
+                **benchmark.public.model_dump(mode="json"),
+                "evidence_observations": [
+                    *(
+                        item.model_dump(mode="json")
+                        for item in benchmark.public.evidence_observations
+                    ),
+                    duplicate_binding.model_dump(mode="json"),
+                ],
+            }
+        )
+    duplicate_id = benchmark.public.evidence_observations[1].model_copy(
+        update={
+            "observation_id": observation.observation_id,
+            "observation_order": len(benchmark.public.evidence_observations) + 1,
+        }
+    )
+    with pytest.raises(ValidationError, match="observation ids"):
+        C08AsteriaPublicInputV2.model_validate(
+            {
+                **benchmark.public.model_dump(mode="json"),
+                "evidence_observations": [
+                    *(
+                        item.model_dump(mode="json")
+                        for item in benchmark.public.evidence_observations
+                    ),
+                    duplicate_id.model_dump(mode="json"),
+                ],
+            }
+        )
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08AsteriaEvaluatorV2.model_validate(
+            {
+                **benchmark.evaluator.model_dump(mode="json"),
+                "bindings": [
+                    item.model_dump(mode="json")
+                    for item in reversed(benchmark.evaluator.bindings)
+                ],
+            }
+        )
+
+
+def test_public_ordinals_and_opaque_ids_do_not_recover_scenario_labels() -> None:
+    benchmark = _benchmark()
+    bindings = {
+        item.action_event_id: item.scenario_kind
+        for item in benchmark.evaluator.bindings
+    }
+    label_order = tuple(
+        bindings[action.action_event_id] for action in benchmark.public.actions
+    )
+    ordinal_guess = tuple(C08ScenarioKind)
+    assert any(
+        label is not ordinal_guess[action.event_order - 1]
+        for action, label in zip(benchmark.public.actions, label_order, strict=True)
+    )
+    for action in benchmark.public.actions:
+        UUID(action.action_event_id)
+        UUID(action.resource_id)
+        assert all(
+            label.value not in action.action_event_id
+            and label.value not in action.resource_id
+            for label in C08ScenarioKind
+        )
+    for observation in benchmark.public.evidence_observations:
+        UUID(observation.observation_id)
+        assert all(
+            label.value not in observation.observation_id for label in C08ScenarioKind
+        )
 
 
 def test_evaluator_bindings_match_public_action_and_required_kinds() -> None:
@@ -224,12 +398,56 @@ def test_evaluator_bindings_match_public_action_and_required_kinds() -> None:
             "bindings": (incomplete_binding, *benchmark.evaluator.bindings[1:]),
         }
     )
-    with pytest.raises(ValidationError, match="evidence kinds"):
+    with pytest.raises(ValidationError, match="evidence handles"):
         C08AsteriaBenchmarkV2(
             schema_version=benchmark.schema_version,
             benchmark_id=benchmark.benchmark_id,
             public=benchmark.public,
             evaluator=incomplete_evaluator,
+        )
+
+    action = next(
+        item
+        for item in benchmark.public.actions
+        if item.action_event_id == binding.action_event_id
+    )
+    requirement = action.required_evidence[0]
+    required_observation = next(
+        item
+        for item in benchmark.public.evidence_observations
+        if item.observation_id in binding.required_observation_ids
+        and item.evidence_kind is requirement.evidence_kind
+        and item.binding_handle == requirement.binding_handle
+    )
+    distractor = next(
+        item
+        for item in benchmark.public.evidence_observations
+        if item.action_event_id == binding.action_event_id
+        and item.evidence_kind is requirement.evidence_kind
+        and item.binding_handle != requirement.binding_handle
+    )
+    wrong_handle_binding = binding.model_copy(
+        update={
+            "required_observation_ids": tuple(
+                distractor.observation_id
+                if item == required_observation.observation_id
+                else item
+                for item in binding.required_observation_ids
+            )
+        }
+    )
+    wrong_handle_evaluator = benchmark.evaluator.model_copy(
+        update={
+            "bindings": tuple(
+                wrong_handle_binding if item == binding else item
+                for item in benchmark.evaluator.bindings
+            )
+        }
+    )
+    with pytest.raises(ValidationError, match="evidence handles"):
+        C08AsteriaBenchmarkV2(
+            public=benchmark.public,
+            evaluator=wrong_handle_evaluator,
         )
 
 
@@ -261,33 +479,27 @@ def test_reference_submission_scores_each_dimension_independently() -> None:
 
 
 @pytest.mark.parametrize(
-    ("action_index", "addition", "metric_name"),
+    ("scenario", "metric_name"),
     [
-        (1, (), "exact_evidence_match"),
-        (2, ("fabricated-observation",), "fabricated_evidence_free"),
-        (3, (), "wrong_action_evidence_free"),
-        (4, (), "extra_evidence_free"),
+        (C08ScenarioKind.MISSING, "exact_evidence_match"),
+        (C08ScenarioKind.FABRICATED, "fabricated_evidence_free"),
+        (C08ScenarioKind.WRONG_ACTION, "wrong_action_evidence_free"),
+        (C08ScenarioKind.EXTRA, "extra_evidence_free"),
     ],
 )
 def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
-    action_index: int,
-    addition: tuple[str, ...],
+    scenario: C08ScenarioKind,
     metric_name: str,
 ) -> None:
     benchmark = _benchmark()
     reference = reference_c08_submission(benchmark)
-    binding = benchmark.evaluator.bindings[action_index]
-    if action_index == 1:
-        row_index = next(
-            index
-            for index, item in enumerate(reference.rows)
-            if item.action_event_id == binding.action_event_id
-        )
-        row = reference.rows[row_index]
+    action_index = _row_index_for_scenario(benchmark, scenario)
+    if scenario is C08ScenarioKind.MISSING:
+        row = reference.rows[action_index]
         changed = reference.model_copy(
             update={
                 "rows": (
-                    *reference.rows[:row_index],
+                    *reference.rows[:action_index],
                     row.model_copy(
                         update={
                             "retained_observation_ids": (
@@ -295,28 +507,33 @@ def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
                             )
                         }
                     ),
-                    *reference.rows[row_index + 1 :],
+                    *reference.rows[action_index + 1 :],
                 )
             }
         )
-    elif action_index == 3:
-        other = next(
-            row.retained_observation_ids[0]
-            for row in reference.rows
-            if row.action_event_id != binding.action_event_id
-        )
+    elif scenario is C08ScenarioKind.WRONG_ACTION:
+        other = reference.rows[0].retained_observation_ids[0]
+        if (
+            reference.rows[0].action_event_id
+            == reference.rows[action_index].action_event_id
+        ):
+            other = reference.rows[1].retained_observation_ids[0]
         changed = _changed_submission(benchmark, action_index, (other,))
-    elif action_index == 4:
+    elif scenario is C08ScenarioKind.EXTRA:
+        required_ids = set(reference.rows[action_index].retained_observation_ids)
         observations = [
             item
             for item in benchmark.public.evidence_observations
-            if item.action_event_id == binding.action_event_id
+            if item.action_event_id == reference.rows[action_index].action_event_id
+            and item.observation_id not in required_ids
         ]
         changed = _changed_submission(
-            benchmark, action_index, (observations[-1].observation_id,)
+            benchmark, action_index, (observations[0].observation_id,)
         )
     else:
-        changed = _changed_submission(benchmark, action_index, addition)
+        changed = _changed_submission(
+            benchmark, action_index, ("fabricated-observation",)
+        )
     report = evaluate_c08_submission(benchmark, changed)
     metric = _metric(report, metric_name)
     assert metric.value is not None
@@ -325,20 +542,31 @@ def test_missing_fabricated_wrong_action_and_extra_are_distinguished(
 
 def test_discarded_scenario_is_not_distinguishable_from_missing_submission() -> None:
     benchmark = _benchmark()
-    binding = benchmark.evaluator.bindings[-1]
+    binding = next(
+        item
+        for item in benchmark.evaluator.bindings
+        if item.scenario_kind is C08ScenarioKind.DISCARDED
+    )
     reference = reference_c08_submission(benchmark)
+    row_index = next(
+        index
+        for index, row in enumerate(reference.rows)
+        if row.action_event_id == binding.action_event_id
+    )
+    row = reference.rows[row_index]
     changed = reference.model_copy(
         update={
             "rows": (
-                *reference.rows[:-1],
-                reference.rows[-1].model_copy(update={"retained_observation_ids": ()}),
+                *reference.rows[:row_index],
+                row.model_copy(update={"retained_observation_ids": ()}),
+                *reference.rows[row_index + 1 :],
             )
         }
     )
     report = evaluate_c08_submission(benchmark, changed)
     assert _metric(report, "missing_or_discarded_free").value == 5 / 6
     assert binding.scenario_kind.value == "discarded"
-    assert reference.rows[-1].retained_observation_ids
+    assert row.retained_observation_ids
 
 
 def test_empty_evidence_has_explicit_undefined_support() -> None:
@@ -352,7 +580,10 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
                 action_event_id=action.action_event_id,
                 retained_observation_ids=(),
             )
-            for action in benchmark.public.actions
+            for action in sorted(
+                benchmark.public.actions,
+                key=lambda item: item.action_event_id,
+            )
         ),
     )
     report = evaluate_c08_submission(benchmark, empty)
@@ -371,15 +602,15 @@ def test_empty_evidence_has_explicit_undefined_support() -> None:
 def test_submission_alignment_and_model_ordering_are_fail_closed() -> None:
     benchmark = _benchmark()
     reference = reference_c08_submission(benchmark)
-    reversed_rows = C08AsteriaSubmissionV2.model_validate(
-        {
-            **reference.model_dump(mode="json"),
-            "rows": [row.model_dump(mode="json") for row in reversed(reference.rows)],
-        }
-    )
-    assert reversed_rows.rows == tuple(
-        sorted(reference.rows, key=lambda item: item.action_event_id)
-    )
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08AsteriaSubmissionV2.model_validate(
+            {
+                **reference.model_dump(mode="json"),
+                "rows": [
+                    row.model_dump(mode="json") for row in reversed(reference.rows)
+                ],
+            }
+        )
     with pytest.raises(C08EvaluationError, match="missing"):
         evaluate_c08_submission(
             benchmark, reference.model_copy(update={"rows": reference.rows[:-1]})
@@ -448,6 +679,9 @@ def test_schema_tool_is_deterministic_and_check_detects_drift_and_missing(
         "c08-asteria-evaluator-v2.schema.json",
         "c08-asteria-submission-v2.schema.json",
         "c08-asteria-manifest-v2.schema.json",
+        "c08-asteria-frozen-public-manifest-v2.schema.json",
+        "c08-asteria-frozen-evaluator-manifest-v2.schema.json",
+        "c08-asteria-frozen-root-manifest-v2.schema.json",
         "c08-asteria-report-v2.schema.json",
     }
     for filename, payload in first.items():
@@ -477,6 +711,7 @@ def test_schema_tool_is_deterministic_and_check_detects_drift_and_missing(
     (
         (("",), "nonblank"),
         (("duplicate", "duplicate"), "unique"),
+        (("z-last", "a-first"), "canonical order"),
     ),
 )
 def test_measurement_scope_strings_are_nonblank_unique_and_canonical(
@@ -485,35 +720,23 @@ def test_measurement_scope_strings_are_nonblank_unique_and_canonical(
     scope = _benchmark().public.measurement_scope
     with pytest.raises(ValidationError, match=message):
         type(scope).model_validate({**scope.model_dump(mode="json"), "proves": values})
-    canonicalized = type(scope).model_validate(
-        {**scope.model_dump(mode="json"), "proves": ("z-last", "a-first")}
-    )
-    assert canonicalized.proves == ("a-first", "z-last")
 
 
 def test_public_action_and_stream_canonical_contracts_fail_closed() -> None:
     benchmark = _benchmark()
     action = next(
-        item
-        for item in benchmark.public.actions
-        if len(item.required_evidence_kinds) > 1
+        item for item in benchmark.public.actions if len(item.required_evidence) > 1
     )
     action_document = action.model_dump(mode="json")
-    requirements = action_document["required_evidence_kinds"]
+    requirements = action_document["required_evidence"]
     with pytest.raises(ValidationError, match="unique"):
         type(action).model_validate(
-            {
-                **action_document,
-                "required_evidence_kinds": (requirements[0], requirements[0]),
-            }
+            {**action_document, "required_evidence": (requirements[0], requirements[0])}
         )
-    canonicalized = type(action).model_validate(
-        {
-            **action_document,
-            "required_evidence_kinds": tuple(reversed(requirements)),
-        }
-    )
-    assert canonicalized.required_evidence_kinds == action.required_evidence_kinds
+    with pytest.raises(ValidationError, match="canonical order"):
+        type(action).model_validate(
+            {**action_document, "required_evidence": tuple(reversed(requirements))}
+        )
 
     public_document = benchmark.public.model_dump(mode="json")
     duplicate_actions = [dict(item) for item in public_document["actions"]]
@@ -539,24 +762,20 @@ def test_public_action_and_stream_canonical_contracts_fail_closed() -> None:
             {**public_document, "evidence_observations": unordered_observations}
         )
 
-    duplicate_observations = [
-        dict(item) for item in public_document["evidence_observations"]
+    unsolvable_actions = [dict(item) for item in public_document["actions"]]
+    unsolvable_requirements = [
+        dict(item) for item in unsolvable_actions[0]["required_evidence"]
     ]
-    duplicate_observations[1]["observation_id"] = duplicate_observations[0][
-        "observation_id"
-    ]
-    with pytest.raises(ValidationError, match="observation ids"):
+    unsolvable_requirements[0]["binding_handle"] = (
+        "00000000-0000-0000-0000-000000000000"
+    )
+    unsolvable_requirements.sort(
+        key=lambda item: (item["evidence_kind"], item["binding_handle"])
+    )
+    unsolvable_actions[0]["required_evidence"] = unsolvable_requirements
+    with pytest.raises(ValidationError, match="exactly one binding handle"):
         C08AsteriaPublicInputV2.model_validate(
-            {**public_document, "evidence_observations": duplicate_observations}
-        )
-
-    unknown_observations = [
-        dict(item) for item in public_document["evidence_observations"]
-    ]
-    unknown_observations[0]["action_event_id"] = "unknown-action"
-    with pytest.raises(ValidationError, match="unknown action"):
-        C08AsteriaPublicInputV2.model_validate(
-            {**public_document, "evidence_observations": unknown_observations}
+            {**public_document, "actions": unsolvable_actions}
         )
 
 
@@ -571,6 +790,11 @@ def test_evaluator_submission_and_benchmark_identities_fail_closed() -> None:
 
     with pytest.raises(ValidationError, match="nonblank"):
         C08SubmissionRowV2(action_event_id="action", retained_observation_ids=("",))
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08SubmissionRowV2(
+            action_event_id="action",
+            retained_observation_ids=("z-observation", "a-observation"),
+        )
 
     reference = reference_c08_submission(benchmark)
     reference_document = reference.model_dump(mode="json")
@@ -665,19 +889,16 @@ def test_report_and_manifest_collections_require_fixed_canonical_order() -> None
         C08ArtifactManifestV2.model_validate(
             {**manifest_document, "artifacts": (descriptor, descriptor)}
         )
-    canonicalized = C08ArtifactManifestV2.model_validate(
-        {
-            **manifest_document,
-            "artifacts": (
-                {**descriptor, "path": "z-last.json"},
-                {**descriptor, "path": "a-first.json"},
-            ),
-        }
-    )
-    assert tuple(item.path for item in canonicalized.artifacts) == (
-        "a-first.json",
-        "z-last.json",
-    )
+    with pytest.raises(ValidationError, match="canonical order"):
+        C08ArtifactManifestV2.model_validate(
+            {
+                **manifest_document,
+                "artifacts": (
+                    {**descriptor, "path": "z-last.json"},
+                    {**descriptor, "path": "a-first.json"},
+                ),
+            }
+        )
 
 
 def test_serialization_rejects_invalid_payload_and_manifest_bindings() -> None:
@@ -712,25 +933,16 @@ def test_solver_and_evaluator_defensive_invariants(
 ) -> None:
     benchmark = _benchmark()
     action = benchmark.public.actions[0]
-    observation = next(
-        item
-        for item in benchmark.public.evidence_observations
-        if item.action_event_id == action.action_event_id
-        and item.evidence_kind is action.required_evidence_kinds[0]
+    requirement = action.required_evidence[0].model_copy(
+        update={"binding_handle": "00000000-0000-0000-0000-000000000000"}
     )
-    duplicate_observation = observation.model_copy(
+    corrupted_action = action.model_copy(
         update={
-            "observation_id": "duplicate-kind-observation",
-            "observation_order": len(benchmark.public.evidence_observations) + 1,
+            "required_evidence": (requirement, *action.required_evidence[1:]),
         }
     )
     corrupted_public = benchmark.public.model_copy(
-        update={
-            "evidence_observations": (
-                *benchmark.public.evidence_observations,
-                duplicate_observation,
-            )
-        }
+        update={"actions": (corrupted_action, *benchmark.public.actions[1:])}
     )
     with pytest.raises(ValueError, match="not uniquely solvable"):
         semantic_c08_submission(corrupted_public)

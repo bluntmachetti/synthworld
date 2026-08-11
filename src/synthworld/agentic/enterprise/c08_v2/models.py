@@ -11,6 +11,15 @@ from pydantic import Field, field_validator, model_validator
 from synthworld.models import SyntheticModel
 
 C08_V2_SCHEMA_VERSION: Final[Literal["2.0.0"]] = "2.0.0"
+C08_FROZEN_BENCHMARK_ID: Final[Literal["enterprise-agentic-c08-v2"]] = (
+    "enterprise-agentic-c08-v2"
+)
+C08_FROZEN_SEED: Final[Literal[20260809]] = 20260809
+C08_REPORT_LIMITATIONS = (
+    "offline scoring does not prove live evidence retention",
+    "offline scoring does not prove durable logging",
+    "offline scoring does not prove enforcement behavior",
+)
 
 
 def _ordered_ids(value: tuple[str, ...], label: str) -> tuple[str, ...]:
@@ -38,6 +47,13 @@ class C08EvidenceKindV2(StrEnum):
     REVOCATION = "revocation"
 
 
+class C08EvidenceRequirementV2(SyntheticModel):
+    """Public non-oracle requirement semantics for one evidence candidate."""
+
+    kind: C08EvidenceKindV2
+    binding_handle: str = Field(min_length=16)
+
+
 class C08SourceActionV2(SyntheticModel):
     """Oracle-bearing source record, never serialized as public input."""
 
@@ -46,7 +62,7 @@ class C08SourceActionV2(SyntheticModel):
     resource_id: str = Field(min_length=1)
     action: str = Field(min_length=1)
     tick: int = Field(ge=0)
-    required_evidence_kinds: tuple[C08EvidenceKindV2, ...] = Field(min_length=1)
+    required_evidence: tuple[C08EvidenceRequirementV2, ...] = Field(min_length=1)
     required_evidence_ids: tuple[str, ...] = Field(min_length=1)
 
     @field_validator("required_evidence_ids")
@@ -54,22 +70,23 @@ class C08SourceActionV2(SyntheticModel):
     def canonical_evidence_ids(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         return _ordered_ids(value, "C08 evidence identifiers")
 
-    @field_validator("required_evidence_kinds")
+    @field_validator("required_evidence")
     @classmethod
-    def canonical_evidence_kinds(
-        cls, value: tuple[C08EvidenceKindV2, ...]
-    ) -> tuple[C08EvidenceKindV2, ...]:
-        if len(set(value)) != len(value):
-            raise ValueError("C08 evidence kinds must not contain duplicates")
-        if value != tuple(sorted(value, key=lambda item: item.value)):
-            raise ValueError("C08 evidence kinds must be sorted")
+    def canonical_evidence_requirements(
+        cls, value: tuple[C08EvidenceRequirementV2, ...]
+    ) -> tuple[C08EvidenceRequirementV2, ...]:
+        keys = tuple((item.kind.value, item.binding_handle) for item in value)
+        if len(set(keys)) != len(keys):
+            raise ValueError("C08 evidence requirements must not contain duplicates")
+        if keys != tuple(sorted(keys)):
+            raise ValueError("C08 evidence requirements must be sorted")
         return value
 
     @model_validator(mode="after")
     def required_evidence_shapes_match(self) -> Self:
-        if len(self.required_evidence_ids) != len(self.required_evidence_kinds):
+        if len(self.required_evidence_ids) != len(self.required_evidence):
             raise ValueError(
-                "C08 required evidence IDs and kinds must have equal length"
+                "C08 required evidence IDs and requirements must have equal length"
             )
         return self
 
@@ -85,6 +102,7 @@ class C08EvidenceEventV2(SyntheticModel):
     action: str = Field(min_length=1)
     tick: int = Field(ge=0)
     kind: C08EvidenceKindV2
+    binding_handle: str = Field(min_length=16)
     payload_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
@@ -111,13 +129,15 @@ class C08SourceWorldV2(SyntheticModel):
             range(len(self.evidence_events))
         ):
             raise ValueError("C08 evidence events must have contiguous sequence order")
-        observed_action_kinds: set[tuple[str, C08EvidenceKindV2]] = set()
+        observed_bindings: set[tuple[str, C08EvidenceKindV2, str]] = set()
         actions = {item.action_id: item for item in self.actions}
         for event in self.evidence_events:
-            action_kind = (event.action_id, event.kind)
-            if action_kind in observed_action_kinds:
-                raise ValueError("C08 evidence kinds must be unique per action")
-            observed_action_kinds.add(action_kind)
+            binding = (event.action_id, event.kind, event.binding_handle)
+            if binding in observed_bindings:
+                raise ValueError(
+                    "C08 evidence action/kind/handle bindings must be unique"
+                )
+            observed_bindings.add(binding)
             action = actions.get(event.action_id)
             if action is None:
                 raise ValueError("C08 evidence event references an unknown action")
@@ -132,15 +152,25 @@ class C08SourceWorldV2(SyntheticModel):
         for action in self.actions:
             try:
                 required = tuple(
-                    events_by_id[item].kind for item in action.required_evidence_ids
+                    (
+                        events_by_id[item].kind.value,
+                        events_by_id[item].binding_handle,
+                    )
+                    for item in action.required_evidence_ids
                 )
             except KeyError as error:
                 raise ValueError(
                     "C08 required evidence ID is not in the evidence stream"
                 ) from error
-            required_kinds = tuple(sorted(required, key=lambda item: item.value))
-            if required_kinds != action.required_evidence_kinds:
-                raise ValueError("C08 required evidence kinds differ from required IDs")
+            required_bindings = tuple(sorted(required))
+            expected_bindings = tuple(
+                (item.kind.value, item.binding_handle)
+                for item in action.required_evidence
+            )
+            if required_bindings != expected_bindings:
+                raise ValueError(
+                    "C08 required evidence semantics differ from required IDs"
+                )
         return self
 
 
@@ -152,17 +182,18 @@ class C08PublicActionV2(SyntheticModel):
     resource_id: str = Field(min_length=1)
     action: str = Field(min_length=1)
     tick: int = Field(ge=0)
-    required_evidence_kinds: tuple[C08EvidenceKindV2, ...] = Field(min_length=1)
+    required_evidence: tuple[C08EvidenceRequirementV2, ...] = Field(min_length=1)
 
-    @field_validator("required_evidence_kinds")
+    @field_validator("required_evidence")
     @classmethod
-    def canonical_evidence_kinds(
-        cls, value: tuple[C08EvidenceKindV2, ...]
-    ) -> tuple[C08EvidenceKindV2, ...]:
-        if len(set(value)) != len(value):
-            raise ValueError("C08 public evidence kinds must not contain duplicates")
-        if value != tuple(sorted(value, key=lambda item: item.value)):
-            raise ValueError("C08 public evidence kinds must be sorted")
+    def canonical_evidence_requirements(
+        cls, value: tuple[C08EvidenceRequirementV2, ...]
+    ) -> tuple[C08EvidenceRequirementV2, ...]:
+        keys = tuple((item.kind.value, item.binding_handle) for item in value)
+        if len(set(keys)) != len(keys):
+            raise ValueError("C08 public requirements must not contain duplicates")
+        if keys != tuple(sorted(keys)):
+            raise ValueError("C08 public requirements must be sorted")
         return value
 
 
@@ -190,13 +221,15 @@ class C08PublicInputV2(SyntheticModel):
             raise ValueError(
                 "C08 public evidence events must have contiguous sequence order"
             )
-        observed_action_kinds: set[tuple[str, C08EvidenceKindV2]] = set()
+        observed_bindings: set[tuple[str, C08EvidenceKindV2, str]] = set()
         actions_by_id = {item.action_id: item for item in self.actions}
         for event in self.evidence_events:
-            action_kind = (event.action_id, event.kind)
-            if action_kind in observed_action_kinds:
-                raise ValueError("C08 public evidence kinds must be unique per action")
-            observed_action_kinds.add(action_kind)
+            binding = (event.action_id, event.kind, event.binding_handle)
+            if binding in observed_bindings:
+                raise ValueError(
+                    "C08 public action/kind/handle bindings must be unique"
+                )
+            observed_bindings.add(binding)
             action = actions_by_id.get(event.action_id)
             if action is None:
                 raise ValueError("C08 public evidence event references unknown action")
@@ -210,15 +243,38 @@ class C08PublicInputV2(SyntheticModel):
                     "C08 public evidence event semantics differ from action"
                 )
         for action in self.actions:
-            observed_kinds = {
-                event.kind
-                for event in self.evidence_events
-                if event.action_id == action.action_id
+            required_handles_by_kind = {
+                requirement.kind: {
+                    item.binding_handle
+                    for item in action.required_evidence
+                    if item.kind is requirement.kind
+                }
+                for requirement in action.required_evidence
             }
-            if not set(action.required_evidence_kinds) <= observed_kinds:
-                raise ValueError(
-                    "C08 public evidence kinds are not observable for an action"
+            for requirement in action.required_evidence:
+                matches = sum(
+                    event.action_id == action.action_id
+                    and event.kind is requirement.kind
+                    and event.binding_handle == requirement.binding_handle
+                    for event in self.evidence_events
                 )
+                if matches != 1:
+                    raise ValueError(
+                        "C08 public requirement must resolve to exactly one observation"
+                    )
+                has_distractor = any(
+                    event.action_id == action.action_id
+                    and event.kind is requirement.kind
+                    and event.binding_handle
+                    not in required_handles_by_kind[requirement.kind]
+                    for event in self.evidence_events
+                )
+                if not has_distractor:
+                    raise ValueError(
+                        "C08 public requirement must have at least one "
+                        "same-action/same-kind distractor with a different "
+                        "binding handle"
+                    )
         return self
 
 
@@ -227,30 +283,31 @@ class C08EvidenceBindingV2(SyntheticModel):
 
     action_id: str = Field(min_length=1)
     tenant_id: str = Field(min_length=1)
-    required_evidence_kinds: tuple[C08EvidenceKindV2, ...] = Field(min_length=1)
-    required_evidence_ids: tuple[str, ...] = Field(min_length=1)
+    required_evidence: tuple[C08EvidenceRequirementV2, ...] = Field(min_length=1)
+    required_observation_ids: tuple[str, ...] = Field(min_length=1)
 
-    @field_validator("required_evidence_ids")
+    @field_validator("required_observation_ids")
     @classmethod
-    def canonical_evidence_ids(cls, value: tuple[str, ...]) -> tuple[str, ...]:
-        return _ordered_ids(value, "C08 binding evidence identifiers")
+    def canonical_observation_ids(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        return _ordered_ids(value, "C08 binding observation identifiers")
 
-    @field_validator("required_evidence_kinds")
+    @field_validator("required_evidence")
     @classmethod
-    def canonical_evidence_kinds(
-        cls, value: tuple[C08EvidenceKindV2, ...]
-    ) -> tuple[C08EvidenceKindV2, ...]:
-        if len(set(value)) != len(value):
-            raise ValueError("C08 binding evidence kinds must not contain duplicates")
-        if value != tuple(sorted(value, key=lambda item: item.value)):
-            raise ValueError("C08 binding evidence kinds must be sorted")
+    def canonical_evidence_requirements(
+        cls, value: tuple[C08EvidenceRequirementV2, ...]
+    ) -> tuple[C08EvidenceRequirementV2, ...]:
+        keys = tuple((item.kind.value, item.binding_handle) for item in value)
+        if len(set(keys)) != len(keys):
+            raise ValueError("C08 binding requirements must not contain duplicates")
+        if keys != tuple(sorted(keys)):
+            raise ValueError("C08 binding requirements must be sorted")
         return value
 
     @model_validator(mode="after")
     def required_evidence_shapes_match(self) -> Self:
-        if len(self.required_evidence_ids) != len(self.required_evidence_kinds):
+        if len(self.required_observation_ids) != len(self.required_evidence):
             raise ValueError(
-                "C08 binding evidence IDs and kinds must have equal length"
+                "C08 binding observation IDs and requirements must have equal length"
             )
         return self
 
@@ -270,13 +327,13 @@ class C08EvaluatorTruthV2(SyntheticModel):
         ):
             raise ValueError("C08 bindings must be sorted by action ID")
         required_ids = tuple(
-            evidence_id
+            observation_id
             for binding in self.bindings
-            for evidence_id in binding.required_evidence_ids
+            for observation_id in binding.required_observation_ids
         )
         if len(set(required_ids)) != len(required_ids):
             raise ValueError(
-                "C08 binding required evidence identifiers must be globally unique"
+                "C08 required observation identifiers must be globally unique"
             )
         return self
 
@@ -346,9 +403,24 @@ class C08EvaluationMetricV2(SyntheticModel):
         return self
 
 
+class C08MeasurementScopeV2(SyntheticModel):
+    """Claims explicitly bounded to deterministic offline artifact scoring."""
+
+    offline_artifacts_only: Literal[True] = True
+    limitations: tuple[str, ...] = C08_REPORT_LIMITATIONS
+
+    @field_validator("limitations")
+    @classmethod
+    def fixed_limitations(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        if value != C08_REPORT_LIMITATIONS:
+            raise ValueError("C08 report limitations are fixed")
+        return value
+
+
 class C08EvaluationReportV2(SyntheticModel):
     schema_version: Literal["2.0.0"] = C08_V2_SCHEMA_VERSION
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    measurement_scope: C08MeasurementScopeV2
     outcomes: tuple[C08CaseResultV2, ...] = Field(min_length=1)
     metrics: tuple[C08EvaluationMetricV2, ...] = Field(min_length=1)
 
@@ -363,7 +435,53 @@ class C08EvaluationReportV2(SyntheticModel):
         return self
 
 
+class C08FrozenArtifactV2(SyntheticModel):
+    """Manifest entry for one payload in the frozen public/evaluator tree."""
+
+    path: str = Field(pattern=r"^(public|evaluator)/[A-Za-z0-9._-]+$")
+    byte_size: int = Field(ge=0)
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @field_validator("path")
+    @classmethod
+    def path_names_a_file(cls, value: str) -> str:
+        if value.rsplit("/", maxsplit=1)[-1] in {".", ".."}:
+            raise ValueError("C08 frozen artifact path must name a file")
+        return value
+
+
+class C08FrozenManifestV2(SyntheticModel):
+    """Separate immutable contract for the enterprise frozen benchmark tree."""
+
+    schema_version: Literal["2.0.0"] = C08_V2_SCHEMA_VERSION
+    benchmark_id: Literal["enterprise-agentic-c08-v2"] = C08_FROZEN_BENCHMARK_ID
+    seed: Literal[20260809] = C08_FROZEN_SEED
+    public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    checksum_algorithm: Literal["sha256"] = "sha256"
+    checksum_file: Literal["SHA256SUMS"] = "SHA256SUMS"
+    checksum_excludes: tuple[Literal["SHA256SUMS"], ...] = ("SHA256SUMS",)
+    public_inventory: tuple[C08FrozenArtifactV2, ...] = Field(min_length=1)
+    evaluator_inventory: tuple[C08FrozenArtifactV2, ...] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_inventory(self) -> Self:
+        if self.checksum_excludes != ("SHA256SUMS",):
+            raise ValueError("C08 frozen checksum self-exclusion is fixed")
+        for inventory, prefix in (
+            (self.public_inventory, "public/"),
+            (self.evaluator_inventory, "evaluator/"),
+        ):
+            paths = tuple(item.path for item in inventory)
+            if paths != tuple(sorted(paths)) or len(set(paths)) != len(paths):
+                raise ValueError("C08 frozen inventories must be unique and sorted")
+            if any(not path.startswith(prefix) for path in paths):
+                raise ValueError("C08 frozen inventory path escapes its tree")
+        return self
+
+
 __all__ = [
+    "C08_FROZEN_BENCHMARK_ID",
+    "C08_FROZEN_SEED",
     "C08CaseOutcomeV2",
     "C08CaseResultV2",
     "C08EvaluationMetricV2",
@@ -373,6 +491,10 @@ __all__ = [
     "C08EvidenceEventV2",
     "C08EvidenceKindV2",
     "C08EvidenceObservationV2",
+    "C08EvidenceRequirementV2",
+    "C08FrozenArtifactV2",
+    "C08FrozenManifestV2",
+    "C08MeasurementScopeV2",
     "C08PublicActionV2",
     "C08PublicInputV2",
     "C08SourceActionV2",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from uuid import UUID, uuid5
 
@@ -10,6 +11,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvidenceEventV2,
     C08EvidenceKindV2,
     C08EvidenceObservationV2,
+    C08EvidenceRequirementV2,
     C08PublicInputV2,
     C08SourceActionV2,
     C08SourceWorldV2,
@@ -17,6 +19,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
 )
 from synthworld.agentic.enterprise.c08_v2.projection import (
     c08_public_input_digest,
+    c08_public_observation_id,
     compile_c08_truth,
     project_c08_public,
 )
@@ -28,7 +31,6 @@ _REFERENCE_ACTIONS = (
     ("write", (C08EvidenceKindV2.IDENTITY, C08EvidenceKindV2.POLICY)),
     ("delete", (C08EvidenceKindV2.AUTHORITY, C08EvidenceKindV2.POLICY)),
 )
-_EXTRA_EVIDENCE_KIND = C08EvidenceKindV2.REVOCATION
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,26 +56,50 @@ def _evidence_id(
     seed: int,
     action_index: int,
     kind_index: int,
+    candidate_index: int,
     kind: C08EvidenceKindV2,
 ) -> str:
-    suffix = _reference_id(seed, "evidence", action_index * 10 + kind_index).split(
-        "-", 1
-    )[1]
+    suffix = _reference_id(
+        seed,
+        "evidence",
+        action_index * 100 + kind_index * 10 + candidate_index,
+    ).split("-", 1)[1]
     return f"evidence-{kind.value}-{suffix}"
+
+
+def _binding_handle(
+    seed: int,
+    action_index: int,
+    kind_index: int,
+    candidate_index: int,
+) -> str:
+    value = uuid5(
+        C08_REFERENCE_NAMESPACE,
+        f"binding-handle:{seed}:{action_index}:{kind_index}:{candidate_index}",
+    )
+    return f"c08h_{value.hex}"
 
 
 def _build_source(seed: int) -> C08SourceWorldV2:
     actions: list[C08SourceActionV2] = []
     events: list[C08EvidenceEventV2] = []
-    sequence = 0
     for index, (action_name, required_kinds) in enumerate(_REFERENCE_ACTIONS):
         action_id = _reference_id(seed, "action", index)
         tenant_id = _reference_id(seed, "tenant", index)
         resource_id = _reference_id(seed, "resource", index)
         tick = index + 1
-        required_ids = tuple(
-            _evidence_id(seed, index, kind_index, kind)
+        requirements = tuple(
+            C08EvidenceRequirementV2(
+                kind=kind,
+                binding_handle=_binding_handle(seed, index, kind_index, 0),
+            )
             for kind_index, kind in enumerate(required_kinds)
+        )
+        required_ids = tuple(
+            sorted(
+                _evidence_id(seed, index, kind_index, 0, kind)
+                for kind_index, kind in enumerate(required_kinds)
+            )
         )
         actions.append(
             C08SourceActionV2(
@@ -82,58 +108,76 @@ def _build_source(seed: int) -> C08SourceWorldV2:
                 resource_id=resource_id,
                 action=action_name,
                 tick=tick,
-                required_evidence_kinds=required_kinds,
+                required_evidence=requirements,
                 required_evidence_ids=required_ids,
             )
         )
-        for kind_index, kind in enumerate((*required_kinds, _EXTRA_EVIDENCE_KIND)):
-            extra_id = _reference_id(seed, "extra", index).split("-", 1)[1]
-            evidence_id = (
-                required_ids[kind_index]
-                if kind_index < len(required_kinds)
-                else f"evidence-{kind.value}-{extra_id}"
-            )
-            payload_digest = (
-                _reference_id(seed, "payload", index * 10 + kind_index)
-                .split("-", 1)[1]
-                .ljust(64, "0")
-            )
-            events.append(
-                C08EvidenceEventV2(
-                    sequence=sequence,
-                    evidence_id=evidence_id,
-                    action_id=action_id,
-                    tenant_id=tenant_id,
-                    resource_id=resource_id,
-                    action=action_name,
-                    tick=tick,
-                    kind=kind,
-                    payload_digest=payload_digest,
+        for kind_index, kind in enumerate(required_kinds):
+            for candidate_index in (0, 1):
+                evidence_id = _evidence_id(
+                    seed,
+                    index,
+                    kind_index,
+                    candidate_index,
+                    kind,
                 )
-            )
-            sequence += 1
-    return C08SourceWorldV2(actions=tuple(actions), evidence_events=tuple(events))
+                events.append(
+                    C08EvidenceEventV2(
+                        sequence=0,
+                        evidence_id=evidence_id,
+                        action_id=action_id,
+                        tenant_id=tenant_id,
+                        resource_id=resource_id,
+                        action=action_name,
+                        tick=tick,
+                        kind=kind,
+                        binding_handle=_binding_handle(
+                            seed,
+                            index,
+                            kind_index,
+                            candidate_index,
+                        ),
+                        payload_digest=hashlib.sha256(
+                            f"{seed}:{evidence_id}:payload".encode()
+                        ).hexdigest(),
+                    )
+                )
+    ordered_events = sorted(
+        events,
+        key=lambda item: c08_public_observation_id(item.evidence_id),
+    )
+    return C08SourceWorldV2(
+        actions=tuple(actions),
+        evidence_events=tuple(
+            event.model_copy(update={"sequence": sequence})
+            for sequence, event in enumerate(ordered_events)
+        ),
+    )
 
 
 def reference_submission_from_public(public: C08PublicInputV2) -> C08SubmissionV2:
     """Construct the exact reference submission using only public evidence semantics."""
 
-    events_by_semantics: dict[tuple[str, C08EvidenceKindV2], C08EvidenceEventV2] = {}
+    events_by_semantics: dict[
+        tuple[str, C08EvidenceKindV2, str], C08EvidenceEventV2
+    ] = {}
     for event in public.evidence_events:
-        key = (event.action_id, event.kind)
+        key = (event.action_id, event.kind, event.binding_handle)
         if key in events_by_semantics:
             raise ValueError(
-                "C08 public evidence is ambiguous for an action and evidence kind"
+                "C08 public evidence is ambiguous for an action/kind/handle"
             )
         events_by_semantics[key] = event
     rows = tuple(
         (
             action.action_id,
             action.tenant_id,
-            events_by_semantics[(action.action_id, kind)],
+            events_by_semantics[
+                (action.action_id, requirement.kind, requirement.binding_handle)
+            ],
         )
         for action in public.actions
-        for kind in action.required_evidence_kinds
+        for requirement in action.required_evidence
     )
     return C08SubmissionV2(
         public_input_digest=c08_public_input_digest(public),

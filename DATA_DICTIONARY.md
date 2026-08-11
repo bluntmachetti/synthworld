@@ -310,6 +310,40 @@ four files and refuses to run if the output root already exists:
 | `evaluator/canonical-binding-truth.json` | `EnterpriseCanonicalBindingTruthV1` | evaluator-only |
 | `evaluator/manifest.json` | `EnterpriseArtifactManifestV1(visibility="evaluator")` | evaluator-only |
 
+### C08 v2 frozen-artifact candidates
+
+| Artifact | Schema version | Visibility | Meaning |
+|---|---|---|---|
+| `asteria-agentic-c08-v2/manifest.json` | `2.0.0` | root | Four-child exact inventory and public/evaluator/root digest cross-bindings. |
+| `asteria-agentic-c08-v2/public/c08-asteria-public.json` | `2.0.0` | public | Actions, `(kind, binding_handle)` requirements, and opaque observations with same-kind distractors. |
+| `asteria-agentic-c08-v2/public/manifest.json` | `2.0.0` | public | One-payload public inventory and artifact-set digest. |
+| `asteria-agentic-c08-v2/evaluator/c08-asteria-evaluator.json` | `2.0.0` | evaluator | Exact observation bindings and scenario labels, bound to public bytes. |
+| `asteria-agentic-c08-v2/evaluator/manifest.json` | `2.0.0` | evaluator | One-payload evaluator inventory, artifact-set digest, and public-input digest. |
+| `enterprise-agentic-c08-v2/manifest.json` | `2.0.0` | root | Independent public/evaluator payload inventories and public-input binding. |
+| `enterprise-agentic-c08-v2/SHA256SUMS` | n/a | root | Sorted path-bearing hashes for manifest and both payloads; excludes itself. |
+| `enterprise-agentic-c08-v2/public/public-input.json` | `2.0.0` | public | Actions, binding-handle requirements, separately derived opaque observation IDs, and same-kind distractors. |
+| `enterprise-agentic-c08-v2/evaluator/truth.json` | `2.0.0` | evaluator | Exact observation-ID, handle, tenant, and action bindings. |
+
+Asteria uses independent frozen root/public/evaluator manifest schemas. Its
+visibility artifact sets contain only their payload; its root artifact set includes
+both payloads and both visibility manifests and excludes only root manifest.
+Enterprise uses one independent frozen manifest schema and has no visibility
+manifests or aggregate artifact-set digest. Its `SHA256SUMS` excludes itself.
+
+`C08EvidenceRequirementV2` carries kind plus binding handle. The corresponding
+public observation model carries action semantics, an opaque observation ID, and
+the handle. Same-kind distractors make kind-only matching insufficient while one
+handle match keeps the public task deterministically solvable. The evaluator keeps
+the exact required IDs. Packaged loaders reject integrity-valid alternate seeds by
+comparing parsed models and bytes with fixed seed `20260809` generation.
+
+Exactly two aggregate baseline files live under `tests/fixtures/c08_v2/`, one per
+lineage. They contain public/submission digests and denominator-bearing metrics,
+but no submission rows, observations, IDs, outcomes, or evaluator truth. Reports
+carry an offline measurement scope and do not prove live retention, durable
+logging, enforcement, deployment, or EADS compatibility. Verification and
+publication evidence remains pending; see `GOLDEN_REVIEW.md`.
+
 The withheld fact is precise: `EnterpriseAccountV1` publishes `account_id`, `tenant_id`,
 `authorization_target_id`, and `account_kind` but **no `principal_id`**. Recovering the
 account-to-principal binding is the task, and that mapping exists only in the evaluator tree.
@@ -1282,3 +1316,15 @@ All prediction schemas are Pydantic models supporting `.model_validate_json(text
 ### Error handling
 - `EvaluationInputError`: Raised (inheriting from `ValueError`) if the submission is malformed or invalid for the benchmark (e.g. partitioning incorrect records, or missing case IDs), rather than merely scoring poorly.
 - Pydantic's `ValidationError` is raised if predictions violate the schema.
+
+## C08 v2 corrective field boundary
+
+- Candidate observation_id and evidence_id values are public identifiers for
+  selectable records.
+- binding_handle is public and is required to correlate a requirement with the
+  intended candidate among same-action/same-kind distractors.
+- Evaluator-selected binding rows, required-ID sets, expected outcomes, and
+  scenario truth are evaluator-only.
+- Enterprise measurement_scope is a schema-required report field after
+  4de6df8; it records offline measurement limitations rather than operational
+  proof.

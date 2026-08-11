@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from uuid import UUID, uuid5
+
 from synthworld.agentic.enterprise.c08_v2.errors import C08ProjectionError
 from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluatorTruthV2,
@@ -14,6 +16,14 @@ from synthworld.agentic.enterprise.c08_v2.models import (
 )
 from synthworld.enterprise.canonical import canonical_json_bytes, synthetic_digest
 
+_PUBLIC_OBSERVATION_NAMESPACE = UUID("ce4f822e-c4a5-57dd-87ee-74d7cb385ba8")
+
+
+def c08_public_observation_id(source_evidence_id: str) -> str:
+    """Derive an opaque stable public identity without exposing the source ID."""
+
+    return f"observation-{uuid5(_PUBLIC_OBSERVATION_NAMESPACE, source_evidence_id).hex}"
+
 
 def _public_action(source: C08SourceActionV2) -> C08PublicActionV2:
     return C08PublicActionV2(
@@ -22,7 +32,7 @@ def _public_action(source: C08SourceActionV2) -> C08PublicActionV2:
         resource_id=source.resource_id,
         action=source.action,
         tick=source.tick,
-        required_evidence_kinds=source.required_evidence_kinds,
+        required_evidence=source.required_evidence,
     )
 
 
@@ -35,17 +45,23 @@ def project_c08_public(source: C08SourceWorldV2) -> C08PublicInputV2:
         actions=tuple(_public_action(item) for item in source.actions),
         evidence_events=tuple(
             C08EvidenceEventV2(
-                sequence=event.sequence,
-                evidence_id=event.evidence_id,
+                sequence=sequence,
+                evidence_id=c08_public_observation_id(event.evidence_id),
                 action_id=event.action_id,
                 tenant_id=event.tenant_id,
                 resource_id=event.resource_id,
                 action=event.action,
                 tick=event.tick,
                 kind=event.kind,
+                binding_handle=event.binding_handle,
                 payload_digest=event.payload_digest,
             )
-            for event in source.evidence_events
+            for sequence, event in enumerate(
+                sorted(
+                    source.evidence_events,
+                    key=lambda item: c08_public_observation_id(item.evidence_id),
+                )
+            )
         ),
     )
 
@@ -74,8 +90,13 @@ def compile_c08_truth(
             C08EvidenceBindingV2(
                 action_id=action.action_id,
                 tenant_id=action.tenant_id,
-                required_evidence_kinds=action.required_evidence_kinds,
-                required_evidence_ids=action.required_evidence_ids,
+                required_evidence=action.required_evidence,
+                required_observation_ids=tuple(
+                    sorted(
+                        c08_public_observation_id(item)
+                        for item in action.required_evidence_ids
+                    )
+                ),
             )
             for action in sorted(source.actions, key=lambda item: item.action_id)
         ),
@@ -101,12 +122,12 @@ def validate_c08_truth_against_public(
             raise C08ProjectionError(
                 "C08 evaluator tenant binding differs from public action"
             )
-        if binding.required_evidence_kinds != action.required_evidence_kinds:
+        if binding.required_evidence != action.required_evidence:
             raise C08ProjectionError(
                 "C08 evaluator evidence kinds differ from public action"
             )
         bound_events: list[C08EvidenceEventV2] = []
-        for evidence_id in binding.required_evidence_ids:
+        for evidence_id in binding.required_observation_ids:
             event = events_by_id.get(evidence_id)
             if event is None:
                 raise C08ProjectionError(
@@ -123,9 +144,13 @@ def validate_c08_truth_against_public(
                     "C08 evaluator evidence does not match its public action"
                 )
             bound_events.append(event)
-        if tuple(event.kind for event in bound_events) != (
-            binding.required_evidence_kinds
-        ):
+        bound_requirements = {
+            (event.kind, event.binding_handle) for event in bound_events
+        }
+        expected_requirements = {
+            (item.kind, item.binding_handle) for item in binding.required_evidence
+        }
+        if bound_requirements != expected_requirements:
             raise C08ProjectionError(
                 "C08 evaluator evidence kinds do not match bound public evidence"
             )
@@ -133,6 +158,7 @@ def validate_c08_truth_against_public(
 
 __all__ = [
     "c08_public_input_digest",
+    "c08_public_observation_id",
     "compile_c08_truth",
     "project_c08_public",
     "validate_c08_truth_against_public",

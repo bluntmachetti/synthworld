@@ -41,7 +41,9 @@ def _canonical_strings(values: tuple[str, ...], label: str) -> tuple[str, ...]:
         raise ValueError(f"{label} must contain nonblank values")
     if len(set(values)) != len(values):
         raise ValueError(f"{label} must be unique")
-    return tuple(sorted(values))
+    if values != tuple(sorted(values)):
+        raise ValueError(f"{label} must use canonical order")
+    return values
 
 
 class C08EvidenceKind(StrEnum):
@@ -72,27 +74,45 @@ class C08MeasurementScopeV2(SyntheticModel):
     )
 
 
+class C08EvidenceRequirementV2(SyntheticModel):
+    """Public evidence semantics without an expected observation identity."""
+
+    evidence_kind: C08EvidenceKind
+    binding_handle: str = Field(
+        pattern=r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    )
+
+
 class C08PublicActionV2(SyntheticModel):
     action_event_id: str = Field(min_length=1)
     event_order: int = Field(ge=1)
     action: str = Field(min_length=1)
     resource_id: str = Field(min_length=1)
     requested_scope: tuple[str, ...] = Field(min_length=1)
-    required_evidence_kinds: tuple[C08EvidenceKind, ...] = Field(min_length=1)
+    required_evidence: tuple[C08EvidenceRequirementV2, ...] = Field(min_length=1)
 
     @field_validator("requested_scope")
     @classmethod
     def canonical_scope(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         return _canonical_strings(value, "requested_scope")
 
-    @field_validator("required_evidence_kinds")
+    @field_validator("required_evidence")
     @classmethod
-    def canonical_requirement_kinds(
-        cls, value: tuple[C08EvidenceKind, ...]
-    ) -> tuple[C08EvidenceKind, ...]:
-        if len(set(value)) != len(value):
-            raise ValueError("required evidence kinds must be unique")
-        return tuple(sorted(value, key=lambda item: item.value))
+    def canonical_requirements(
+        cls, value: tuple[C08EvidenceRequirementV2, ...]
+    ) -> tuple[C08EvidenceRequirementV2, ...]:
+        identities = tuple((item.evidence_kind, item.binding_handle) for item in value)
+        if len(set(identities)) != len(identities):
+            raise ValueError("required evidence kind/handle pairs must be unique")
+        ordered = tuple(
+            sorted(
+                value,
+                key=lambda item: (item.evidence_kind.value, item.binding_handle),
+            )
+        )
+        if ordered != value:
+            raise ValueError("required evidence must use canonical order")
+        return value
 
 
 class C08EvidenceObservationV2(SyntheticModel):
@@ -100,6 +120,9 @@ class C08EvidenceObservationV2(SyntheticModel):
     action_event_id: str = Field(min_length=1)
     observation_order: int = Field(ge=1)
     evidence_kind: C08EvidenceKind
+    binding_handle: str = Field(
+        pattern=r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    )
     payload_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
@@ -134,6 +157,46 @@ class C08AsteriaPublicInputV2(SyntheticModel):
             for item in self.evidence_observations
         ):
             raise ValueError("public observation references an unknown action")
+        observation_bindings = tuple(
+            (item.action_event_id, item.evidence_kind, item.binding_handle)
+            for item in self.evidence_observations
+        )
+        if len(set(observation_bindings)) != len(observation_bindings):
+            raise ValueError(
+                "public action/kind/binding-handle observations must be unique"
+            )
+        observations_by_action = {
+            action_id: tuple(
+                item
+                for item in self.evidence_observations
+                if item.action_event_id == action_id
+            )
+            for action_id in action_ids
+        }
+        for action in self.actions:
+            action_observations = observations_by_action[action.action_event_id]
+            for requirement in action.required_evidence:
+                same_kind = tuple(
+                    item
+                    for item in action_observations
+                    if item.evidence_kind is requirement.evidence_kind
+                )
+                matching = tuple(
+                    item
+                    for item in same_kind
+                    if item.binding_handle == requirement.binding_handle
+                )
+                if len(matching) != 1:
+                    raise ValueError(
+                        "public requirement must select exactly one binding handle"
+                    )
+                if not any(
+                    item.binding_handle != requirement.binding_handle
+                    for item in same_kind
+                ):
+                    raise ValueError(
+                        "public requirement must have a same-kind binding distractor"
+                    )
         return self
 
 
@@ -157,12 +220,17 @@ class C08AsteriaEvaluatorV2(SyntheticModel):
     measurement_scope: C08MeasurementScopeV2
     bindings: tuple[C08EvidenceBindingV2, ...] = Field(min_length=1)
 
-    @model_validator(mode="after")
-    def require_unique_bindings(self) -> Self:
-        ids = tuple(item.action_event_id for item in self.bindings)
+    @field_validator("bindings")
+    @classmethod
+    def canonical_bindings(
+        cls, value: tuple[C08EvidenceBindingV2, ...]
+    ) -> tuple[C08EvidenceBindingV2, ...]:
+        ids = tuple(item.action_event_id for item in value)
         if len(set(ids)) != len(ids):
             raise ValueError("evaluator binding action ids must be unique")
-        return self
+        if value != tuple(sorted(value, key=lambda item: item.action_event_id)):
+            raise ValueError("evaluator bindings must use canonical order")
+        return value
 
 
 class C08SubmissionRowV2(SyntheticModel):
@@ -176,7 +244,9 @@ class C08SubmissionRowV2(SyntheticModel):
             raise ValueError("retained observation ids must be unique")
         if any(not item.strip() for item in value):
             raise ValueError("retained observation ids must be nonblank")
-        return tuple(sorted(value))
+        if value != tuple(sorted(value)):
+            raise ValueError("retained observation ids must use canonical order")
+        return value
 
 
 class C08AsteriaSubmissionV2(SyntheticModel):
@@ -185,15 +255,15 @@ class C08AsteriaSubmissionV2(SyntheticModel):
     public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     rows: tuple[C08SubmissionRowV2, ...] = Field(min_length=1)
 
-    @field_validator("rows")
-    @classmethod
-    def canonical_rows(
-        cls, value: tuple[C08SubmissionRowV2, ...]
-    ) -> tuple[C08SubmissionRowV2, ...]:
-        ids = tuple(item.action_event_id for item in value)
+    @model_validator(mode="after")
+    def canonical_rows(self) -> Self:
+        ids = tuple(item.action_event_id for item in self.rows)
         if len(set(ids)) != len(ids):
             raise ValueError("submission action ids must be unique")
-        return tuple(sorted(value, key=lambda item: item.action_event_id))
+        ordered = tuple(sorted(self.rows, key=lambda item: item.action_event_id))
+        if ordered != self.rows:
+            raise ValueError("submission rows must use canonical order")
+        return self
 
 
 class C08AsteriaBenchmarkV2(SyntheticModel):
@@ -225,14 +295,20 @@ class C08AsteriaBenchmarkV2(SyntheticModel):
                 if item is not None
             ):
                 raise ValueError("evaluator binding crosses public actions")
-            required_kinds = {
-                item.evidence_kind for item in required if item is not None
+            required_semantics = {
+                (item.evidence_kind, item.binding_handle)
+                for item in required
+                if item is not None
             }
-            if len(required) != len(action.required_evidence_kinds) or (
-                required_kinds != set(action.required_evidence_kinds)
+            public_semantics = {
+                (item.evidence_kind, item.binding_handle)
+                for item in action.required_evidence
+            }
+            if len(required) != len(action.required_evidence) or (
+                required_semantics != public_semantics
             ):
                 raise ValueError(
-                    "evaluator binding evidence kinds differ from public action"
+                    "evaluator binding evidence handles differ from public action"
                 )
         return self
 
@@ -295,15 +371,85 @@ class C08ArtifactManifestV2(SyntheticModel):
     artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=1)
 
-    @field_validator("artifacts")
-    @classmethod
-    def canonical_artifacts(
-        cls, value: tuple[C08ArtifactDescriptorV2, ...]
-    ) -> tuple[C08ArtifactDescriptorV2, ...]:
-        paths = tuple(item.path for item in value)
+    @model_validator(mode="after")
+    def canonical_artifacts(self) -> Self:
+        paths = tuple(item.path for item in self.artifacts)
         if len(set(paths)) != len(paths):
             raise ValueError("manifest artifact paths must be unique")
-        return tuple(sorted(value, key=lambda item: item.path))
+        ordered = tuple(sorted(self.artifacts, key=lambda item: item.path))
+        if ordered != self.artifacts:
+            raise ValueError("manifest artifacts must use canonical order")
+        return self
+
+
+def _canonical_frozen_artifacts(
+    artifacts: tuple[C08ArtifactDescriptorV2, ...],
+) -> tuple[C08ArtifactDescriptorV2, ...]:
+    paths = tuple(item.path for item in artifacts)
+    if len(set(paths)) != len(paths):
+        raise ValueError("frozen manifest artifact paths must be unique")
+    if artifacts != tuple(sorted(artifacts, key=lambda item: item.path)):
+        raise ValueError("frozen manifest artifacts must use canonical order")
+    return artifacts
+
+
+class C08FrozenPublicManifestV2(SyntheticModel):
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
+    seed: Literal[20260809] = 20260809
+    visibility: Literal["public"] = "public"
+    artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=1, max_length=1)
+
+    @model_validator(mode="after")
+    def validate_inventory(self) -> Self:
+        ordered = _canonical_frozen_artifacts(self.artifacts)
+        if tuple(item.path for item in ordered) != (C08_PUBLIC_ARTIFACT,):
+            raise ValueError("frozen public manifest inventory differs")
+        return self
+
+
+class C08FrozenEvaluatorManifestV2(SyntheticModel):
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
+    seed: Literal[20260809] = 20260809
+    visibility: Literal["evaluator"] = "evaluator"
+    public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=1, max_length=1)
+
+    @model_validator(mode="after")
+    def validate_inventory(self) -> Self:
+        ordered = _canonical_frozen_artifacts(self.artifacts)
+        if tuple(item.path for item in ordered) != (C08_EVALUATOR_ARTIFACT,):
+            raise ValueError("frozen evaluator manifest inventory differs")
+        return self
+
+
+class C08FrozenRootManifestV2(SyntheticModel):
+    schema_version: C08SchemaVersion = C08_SCHEMA_VERSION
+    benchmark_id: C08BenchmarkId = C08_BENCHMARK_ID
+    seed: Literal[20260809] = 20260809
+    visibility: Literal["root"] = "root"
+    public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    evaluator_public_input_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    public_artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    evaluator_artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    artifacts: tuple[C08ArtifactDescriptorV2, ...] = Field(min_length=4, max_length=4)
+
+    @model_validator(mode="after")
+    def validate_inventory(self) -> Self:
+        ordered = _canonical_frozen_artifacts(self.artifacts)
+        expected = (
+            "evaluator/c08-asteria-evaluator.json",
+            "evaluator/manifest.json",
+            "public/c08-asteria-public.json",
+            "public/manifest.json",
+        )
+        if tuple(item.path for item in ordered) != expected:
+            raise ValueError("frozen root manifest inventory differs")
+        return self
 
 
 __all__ = [
@@ -323,6 +469,10 @@ __all__ = [
     "C08EvidenceBindingV2",
     "C08EvidenceKind",
     "C08EvidenceObservationV2",
+    "C08EvidenceRequirementV2",
+    "C08FrozenEvaluatorManifestV2",
+    "C08FrozenPublicManifestV2",
+    "C08FrozenRootManifestV2",
     "C08MeasurementScopeV2",
     "C08MetricV2",
     "C08MetricsReportV2",

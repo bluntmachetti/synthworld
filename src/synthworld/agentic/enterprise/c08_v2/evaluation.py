@@ -15,6 +15,7 @@ from synthworld.agentic.enterprise.c08_v2.models import (
     C08EvaluationReportV2,
     C08EvaluatorTruthV2,
     C08EvidenceObservationV2,
+    C08MeasurementScopeV2,
     C08PublicInputV2,
     C08SubmissionV2,
 )
@@ -86,13 +87,13 @@ def evaluate_c08(
     wrong_action_count = 0
     extra_count = 0
     required_count = sum(
-        len(binding.required_evidence_ids) for binding in evaluator.bindings
+        len(binding.required_observation_ids) for binding in evaluator.bindings
     )
 
     for action in public.actions:
         binding = bindings[action.action_id]
         observations = by_action[action.action_id]
-        required = set(binding.required_evidence_ids)
+        required = set(binding.required_observation_ids)
         seen_required: set[str] = set()
         action_fabricated = False
         action_wrong = False
@@ -177,6 +178,7 @@ def evaluate_c08(
     )
     return C08EvaluationReportV2(
         public_input_digest=expected_digest,
+        measurement_scope=C08MeasurementScopeV2(),
         outcomes=tuple(sorted(outcomes, key=lambda item: item.action_id)),
         metrics=tuple(sorted(metrics, key=lambda item: item.name)),
     )

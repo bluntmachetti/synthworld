@@ -14,6 +14,9 @@ from synthworld.agentic.c08_v2.models import (
     C08AsteriaEvaluatorV2,
     C08AsteriaPublicInputV2,
     C08AsteriaSubmissionV2,
+    C08FrozenEvaluatorManifestV2,
+    C08FrozenPublicManifestV2,
+    C08FrozenRootManifestV2,
     C08MetricsReportV2,
 )
 
@@ -23,6 +26,18 @@ SCHEMA_SPECS: tuple[tuple[str, type[BaseModel]], ...] = (
     ("c08-asteria-evaluator-v2.schema.json", C08AsteriaEvaluatorV2),
     ("c08-asteria-submission-v2.schema.json", C08AsteriaSubmissionV2),
     ("c08-asteria-manifest-v2.schema.json", C08ArtifactManifestV2),
+    (
+        "c08-asteria-frozen-public-manifest-v2.schema.json",
+        C08FrozenPublicManifestV2,
+    ),
+    (
+        "c08-asteria-frozen-evaluator-manifest-v2.schema.json",
+        C08FrozenEvaluatorManifestV2,
+    ),
+    (
+        "c08-asteria-frozen-root-manifest-v2.schema.json",
+        C08FrozenRootManifestV2,
+    ),
     ("c08-asteria-report-v2.schema.json", C08MetricsReportV2),
 )
 
