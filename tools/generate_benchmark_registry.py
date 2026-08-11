@@ -1174,6 +1174,17 @@ def validate_base_transition(
                 )
         old_artifacts = {item["id"]: item for item in old_benchmark["artifacts"]}
         new_artifacts = {item["id"]: item for item in new_benchmark["artifacts"]}
+        added_artifact_ids = set(new_artifacts) - set(old_artifacts)
+        if (
+            old_benchmark["lifecycle"] == "published"
+            and old_benchmark["benchmark_version"] == new_benchmark["benchmark_version"]
+            and added_artifact_ids
+        ):
+            added = ", ".join(sorted(added_artifact_ids))
+            raise RegistryError(
+                f"{benchmark_id}: frozen benchmark artifact added without a "
+                f"version transition: {added}"
+            )
         for artifact_id, old_artifact in old_artifacts.items():
             if not old_artifact["frozen"]:
                 continue
