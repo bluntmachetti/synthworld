@@ -79,7 +79,7 @@ def test_repository_manifest_derives_no_upload_operations() -> None:
         "network_access": False,
         "operations": [],
         "registry_sha256": (
-            "798adb82aad084b4311169aa32a9cdbcadbf77b93ae47ad5e133b8eb6e22ec0f"
+            "cc98aa4b8b5d44b2bafbadefc23b82faf409713b14c0e11b0ea7c6520004928f"
         ),
         "status": "blocked_no_authorized_targets",
         "upload_enabled": False,

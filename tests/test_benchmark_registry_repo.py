@@ -216,7 +216,7 @@ def test_c08_v2_candidates_have_exact_registry_semantics() -> None:
         assert benchmark["lifecycle"] == "candidate"
         assert benchmark["benchmark_kind"] == "conformance_fixture"
         assert benchmark["evaluation_mode"] == "public_conformance"
-        assert benchmark["introduced_in"] == "unreleased"
+        assert benchmark["introduced_in"] == "0.14.0"
         assert benchmark["docs_route_ids"] == [route]
         assert benchmark["publication_gate_id"] is None
         assert benchmark["reproduction"] is None
