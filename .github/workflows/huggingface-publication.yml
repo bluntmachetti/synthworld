@@ -1,0 +1,114 @@
+name: Hugging Face publication controls
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/huggingface-publication.yml"
+      - "docs/_data/benchmark-publication-gates.json"
+      - "docs/_data/benchmark-publication-transitions.json"
+      - "docs/_data/benchmarks.curated.json"
+      - "docs/_data/benchmarks.generated.json"
+      - "docs/_data/benchmarks.resolved.json"
+      - "docs/_schemas/benchmarks-resolved.schema.json"
+      - "huggingface/**"
+      - "pyproject.toml"
+      - "tests/test_huggingface_publication.py"
+      - "tools/check_huggingface_publication.py"
+      - "tools/generate_benchmark_registry.py"
+      - "uv.lock"
+  pull_request:
+    paths:
+      - ".github/workflows/huggingface-publication.yml"
+      - "docs/_data/benchmark-publication-gates.json"
+      - "docs/_data/benchmark-publication-transitions.json"
+      - "docs/_data/benchmarks.curated.json"
+      - "docs/_data/benchmarks.generated.json"
+      - "docs/_data/benchmarks.resolved.json"
+      - "docs/_schemas/benchmarks-resolved.schema.json"
+      - "huggingface/**"
+      - "pyproject.toml"
+      - "tests/test_huggingface_publication.py"
+      - "tools/check_huggingface_publication.py"
+      - "tools/generate_benchmark_registry.py"
+      - "uv.lock"
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Enter DRY_RUN_ONLY; this workflow cannot upload to Hugging Face."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate local-only publication plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Bootstrap locked dependencies (network permitted)
+        run: uv sync --locked --all-groups
+      - name: Verify resolved registry against authoritative inputs
+        run: >-
+          uv run --offline --frozen python tools/generate_benchmark_registry.py
+          --check
+      - name: Validate with dependency resolution offline
+        env:
+          HF_HUB_OFFLINE: "1"
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: ""
+          TRANSFORMERS_OFFLINE: "1"
+        run: uv run --offline --frozen python tools/check_huggingface_publication.py
+
+  protected-dry-run:
+    name: Protected publication dry run
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: hugging-face-publication
+    steps:
+      - name: Require explicit dry-run confirmation
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: test "$CONFIRMATION" = "DRY_RUN_ONLY"
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Bootstrap locked dependencies (network permitted)
+        run: uv sync --locked --all-groups
+      - name: Emit no-network dry-run plan
+        env:
+          HF_HUB_OFFLINE: "1"
+          HTTPS_PROXY: http://127.0.0.1:9
+          HTTP_PROXY: http://127.0.0.1:9
+          NO_PROXY: ""
+          TRANSFORMERS_OFFLINE: "1"
+        run: >-
+          uv run --offline --frozen python tools/check_huggingface_publication.py
+          --emit-plan publication-dry-run.json
+      - name: Upload dry-run evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: hugging-face-publication-dry-run
+          path: publication-dry-run.json
+          if-no-files-found: error
+          retention-days: 14
