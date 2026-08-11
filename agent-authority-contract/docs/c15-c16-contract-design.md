@@ -1,6 +1,6 @@
 # C15/C16 agent-authority contract design
 
-Status: design under review, revised 2026-08-10.
+Status: design under review, revised 2026-08-11.
 Design version: `0.2.0-design`.
 
 This note defines the target shape for `SW-AA-C15` (trusted issuance and
@@ -297,14 +297,32 @@ Enterprise uses one `access_atom` object as the authoritative representation of
 scope fields, and it does not include request IDs or cell IDs that identify
 evaluation plumbing rather than the approved transaction.
 
-`ActionApprovalC15C16V1` contains an ID, approving principal, approved agent, the exact
-approved payload, validity, and `max_successful_uses`. The initial C15/C16 v1 release supports exact
-payloads only. Ranges, predicates, arbitrary policy expressions, and idempotency
-semantics are deferred.
+`ActionApprovalC15C16V1` contains an ID, approving principal, approved logical agent,
+the exact credential authority reference, the exact approved payload, validity, and
+`max_successful_uses`. The authority reference must equal the reference on the
+credential presented by an attempt; shared ancestry is not equality. The initial
+C15/C16 v1 release supports exact payloads only. Ranges, predicates, arbitrary
+policy expressions, and idempotency semantics are deferred.
 
-`ActionAttemptC15C16V1` contains `presented_approval_id` and one `attempted_payload` with
-no precomputed public digest. It must not retain duplicate top-level action, target,
-scope, or purpose fields that can disagree with the payload.
+Approval authority is lineage-specific and exact:
+
+| Lineage and source | Required approving-principal relationship |
+|---|---|
+| Asteria delegated or direct-grant source | `approving_principal_id` equals the resolved source's `originating_principal_id` |
+| Enterprise delegated human-context source | `approving_principal_id` equals the resolved delegation's `human_principal_id` and the attempt mapping's `human_principal_id` |
+| Enterprise direct agent-as-principal source | `approving_principal_id` equals the exact enterprise subject in the attempt mapping and the direct grant |
+
+Every row also requires `approved_logical_agent_id` to equal the presented
+credential's logical agent and all approval, credential, source, runtime, and
+attempt records to name the same tenant. A future lineage that permits a different
+approver must introduce a separately typed, exact-reference approval entitlement;
+C15/C16 v1 does not infer approval authority from ownership, ancestry, or interaction
+with the same agent.
+
+`ActionAttemptC15C16V1` contains `presented_credential_handle`,
+`presented_approval_id`, and one `attempted_payload` with no precomputed public
+digest. It must not retain duplicate top-level action, target, scope, or purpose
+fields that can disagree with the payload.
 
 Approval use is consumed only after a final allow. A denied mutation must not let an
 attacker exhaust a valid approval. Payload equality and replay limits are separate
@@ -400,8 +418,9 @@ hold:
 4. The source grant/delegation and every ancestor are active at issuance.
 5. The referenced capability is exactly attached to the referenced authority
    source.
-6. Subject and logical agent match the source grantee, and the runtime belongs to
-   that subject/agent.
+6. Subject, logical agent, and runtime satisfy the lineage-specific binding below.
+   There is no cross-lineage rule that equates both subject and logical agent to a
+   source grantee.
 7. Requested audience, resource, action, scope, purpose when applicable, and
    validity are within both issuer entitlement and every capability in the source
    chain. In a purpose-bearing lineage, every source capability and the request have
@@ -410,6 +429,18 @@ hold:
    requested resource/target.
 8. The candidate handle has not already been materialized by an earlier permitted
    request or pre-issued credential record.
+
+The lineage-specific subject, agent, and runtime predicates are:
+
+| Lineage | Exact required binding |
+|---|---|
+| Asteria | `logical_agent_id` equals the resolved source's `grantee_agent_id`; the resolved runtime's `logical_agent_id` equals that logical agent; its `runtime_principal_id` equals `subject_principal_id`; and its `owner_principal_id` equals the logical agent's `owner_principal_id`. The subject is therefore the workload/runtime principal, not the delegation grantee. |
+| Enterprise delegated | `subject_principal_id` and `logical_agent_id` equal the resolved delegation's `agent_principal_id`; the runtime names that same agent principal and the delegation's `agent_account_id`. |
+| Enterprise direct capability | `subject_principal_id` and `logical_agent_id` equal the direct grant and capability's `agent_principal_id`; the runtime names that same agent principal and the grant's exact agent account. |
+
+These predicates are evaluated independently. In particular, a valid Asteria
+request pairing a logical agent with its distinct workload principal must not be
+rejected by comparing the workload principal to `grantee_agent_id`.
 
 Scored issuance requests and action-use credentials are separate fixture sets. A
 request whose decision is scored must not be followed by a public issued-record
@@ -439,9 +470,10 @@ evaluated at issuance only. Its later expiry or revocation
 does not retroactively invalidate an already issued credential; explicit credential
 revocation or source-chain revocation does. Use additionally requires issuance
 before action, credential validity at `not_before <= action_time < expires_at`, no
-direct credential revocation, an active source chain, exact subject/agent/runtime
-binding, a permitted audience, an attempted target/resource permitted by that
-specific audience, and action payload authority within the credential envelope. In
+direct credential revocation, an active source chain, the exact lineage-specific
+subject/agent/runtime binding above, a permitted audience, an attempted
+target/resource permitted by that specific audience, and action payload authority
+within the credential envelope. In
 a purpose-bearing lineage, scalar purpose intersects by transitive equality:
 disagreement at any source-chain link, credential, approval, or attempt is a denial.
 In a purpose-absent lineage no purpose field or purpose metric is synthesized.
@@ -453,14 +485,20 @@ requiring a separate credential-revocation event.
 
 Before each attempt, replay materializes approvals in semantic event order and then:
 
-1. Resolves the presented approval without fallback.
-2. Checks approving principal, approved agent, validity, revocation, and use limit.
-3. Computes the approved and attempted payload digests from the public payloads.
-4. Compares the complete payload projections, not parameters alone.
-5. Denies target, action, scope, purpose, field, value, or approval substitution.
-6. Computes canonical mismatch paths for evaluator diagnostics.
-7. Evaluates C15 and all other authority gates independently.
-8. Consumes one use only if the final decision is allow.
+1. Resolves the presented credential and approval without fallback.
+2. Evaluates an approval-binding gate requiring exact authority-reference equality,
+   the lineage-specific approving-principal relationship above, approved-agent
+   equality with the credential logical agent, and tenant equality.
+3. Evaluates approval validity, revocation, and successful-use-limit gates.
+4. Computes the approved and attempted payload digests from the public payloads.
+5. Evaluates the parameter-integrity gate by comparing the complete payload
+   projections, not parameters alone.
+6. Denies target, action, scope, purpose, field, value, principal, authority-source,
+   agent, or approval substitution at the corresponding gate.
+7. Computes canonical mismatch paths for evaluator diagnostics.
+8. Evaluates C15 and all other authority gates independently; one gate's denial
+   must not turn another gate's false allow into a pass.
+9. Consumes one use only if the final decision is allow.
 
 The first C15/C16 v1 release uses exact equality after declared normalization. Constraint/range
 approvals need a separate bounded constraint language and are not approximated here.
@@ -485,6 +523,7 @@ Structural validation and benchmark truth stay separate.
 | Known source is inactive or requested envelope amplifies it | Scoreable issuance denial |
 | Attempt uses a valid digest different from its approval | Scoreable action denial |
 | Material field is omitted, added, changed, or replaced by null | Scoreable action denial |
+| Approval names a different authority source, approving principal, or logical agent than the presented credential and attempt context | Scoreable action denial |
 | Attempt precedes approval or follows revocation/expiry | Scoreable action denial |
 | Exact payload exceeds successful-use limit | Scoreable replay denial |
 
@@ -496,8 +535,8 @@ independent gate and final-decision metrics.
 
 | Surface | Contents |
 |---|---|
-| Public input | Entitlements, issuance-policy records and activations, audiences, authority records, scored issuance requests, separately pre-issued credential records, revocations, normalization profiles, approvals and attempts without precomputed payload digests, event order, schema/generator/policy versions |
-| Evaluator truth | Expected issuance and action decisions, ordered reasons, canonical authority binding, effective-authority digest, approved and attempted payload digests, approval resolution, mismatch paths, use count before attempt, case labels |
+| Public input | Entitlements, issuance-policy records and activations, audiences, authority records, scored issuance requests, separately pre-issued credential records, revocations, normalization profiles, approvals with exact authority references, attempts without precomputed payload digests, event order, schema/generator/policy versions |
+| Evaluator truth | Expected issuance and action decisions, independent expected gate decisions, ordered reasons, canonical credential and approval authority bindings, expected approving principal and approved logical agent, effective-authority digest, approved and attempted payload digests, approval resolution, mismatch paths, use count before attempt, case labels |
 | Submission | Issuance decision observations, resolved credential/approval observations, per-gate decisions, final decision, ordered reasons, optional computed digests and diagnostic bindings |
 
 Public projection is constructed field by field and serialized separately from
@@ -550,6 +589,7 @@ positive counterpart. At minimum, generators plant these cases explicitly.
 | Amount or beneficiary substitution | Deny payload mismatch |
 | Nested partial mutation, omission, addition, or null replacement | Deny payload mismatch |
 | Action, target, scope, or purpose substitution in a purpose-bearing lineage | Deny payload mismatch |
+| Approving-principal, approved-agent, or authority-source substitution | Deny approval binding |
 | Approval substitution | Deny |
 | Exact replay after successful use | Deny replay limit |
 | Failed mutation followed by exact use | Deny, then allow |
@@ -590,9 +630,9 @@ deny-everything system cannot appear strong.
 | Metric | Numerator / denominator |
 |---|---|
 | `parameter_integrity_gate_accuracy` | Correct parameter-gate decisions / all C16 cases |
-| `parameter_mismatch_false_allow_rate` | Mismatch cases finally allowed / all payload-mismatch cases |
-| `approval_substitution_false_allow_rate` | Substitution cases allowed / all substitution cases |
-| `approval_replay_false_allow_rate` | Exhausted approvals allowed / all replay-limit cases |
+| `parameter_mismatch_false_allow_rate` | Payload-mismatch cases allowed by the parameter-integrity gate / all payload-mismatch cases |
+| `approval_substitution_false_allow_rate` | Principal, agent, authority-source, or approval-substitution cases allowed by the approval-binding gate / all approval-substitution cases |
+| `approval_replay_false_allow_rate` | Exhausted approvals allowed by the successful-use-limit gate / all replay-limit cases |
 | `valid_parameter_false_deny_rate` | Matching active unused approvals denied by the parameter gate / all matching cases |
 | `parameter_failure_reason_exact_match` | Exact ordered reason reports / all C16 denial cases |
 

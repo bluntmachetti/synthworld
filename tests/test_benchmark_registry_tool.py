@@ -2005,6 +2005,12 @@ def test_base_comparison_remaining_structural_failures(
         registry.validate_base_transition(
             tmp_path, "HEAD", removed, {"transitions": []}
         )
+    added = copy.deepcopy(same)
+    added["benchmarks"][0]["artifacts"].append(
+        {"id": "new", "frozen": False, "approved_sha256": "1" * 64}
+    )
+    with pytest.raises(registry.RegistryError, match="frozen benchmark artifact added"):
+        registry.validate_base_transition(tmp_path, "HEAD", added, {"transitions": []})
     registry.validate_base_transition(tmp_path, "HEAD", same, {"transitions": []})
     base["benchmarks"][0]["artifacts"][0]["frozen"] = False
     registry.validate_base_transition(tmp_path, "HEAD", same, {"transitions": []})

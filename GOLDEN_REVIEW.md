@@ -395,8 +395,8 @@ distractor for every requirement, and measurement_scope is schema-required on
 reports after 4de6df8.
 
 This records implemented contract corrections, completed native adversarial
-resolutions, and the passing repository verification run above. No registry,
-external publication, deployment, or live-system completion is asserted.
+resolutions, and the passing repository verification run above. No external
+publication, deployment, or live-system completion is asserted.
 ## Risk-v1 review record
 
 Reviewed: 2026-08-08. Seed: `20260719`. Risk benchmark and schema versions:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import errno
 import json
 import math
 import os
@@ -290,7 +291,12 @@ def _read_bounded_regular_file(
     max_bytes: int,
     failure_category: _CliErrorCategory,
 ) -> bytes:
-    if not hasattr(os, "O_NOFOLLOW") or not hasattr(os, "O_NONBLOCK"):
+    if (
+        not hasattr(os, "O_NOFOLLOW")
+        or not hasattr(os, "O_NONBLOCK")
+        or not hasattr(os, "O_DIRECTORY")
+        or os.open not in os.supports_dir_fd
+    ):
         raise _CliError(_CliErrorCategory.PATH_SAFETY)
     try:
         before = path.lstat()
@@ -303,7 +309,11 @@ def _read_bounded_regular_file(
             | getattr(os, "O_BINARY", 0)
             | getattr(os, "O_CLOEXEC", 0)
         )
-        descriptor = os.open(path, flags)
+        descriptor = _open_without_symlink_components(
+            path,
+            flags=flags,
+            failure_category=failure_category,
+        )
         with os.fdopen(descriptor, "rb") as source:
             opened = os.fstat(source.fileno())
             if (
@@ -320,6 +330,39 @@ def _read_bounded_regular_file(
     if len(payload) > max_bytes:
         raise _CliError(_CliErrorCategory.RESOURCE_LIMIT)
     return payload
+
+
+def _open_without_symlink_components(
+    path: Path,
+    *,
+    flags: int,
+    failure_category: _CliErrorCategory,
+) -> int:
+    directory_flags = (
+        os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | getattr(os, "O_CLOEXEC", 0)
+    )
+    anchored_path = Path.cwd() / path
+    components = anchored_path.parts[1:]
+    descriptor = os.open(anchored_path.anchor, directory_flags)
+    try:
+        for index, component in enumerate(components):
+            component_flags = flags if index == len(components) - 1 else directory_flags
+            next_descriptor = os.open(
+                component,
+                component_flags,
+                dir_fd=descriptor,
+            )
+            os.close(descriptor)
+            descriptor = next_descriptor
+    except OSError as error:
+        os.close(descriptor)
+        category = (
+            _CliErrorCategory.PATH_SAFETY
+            if error.errno in {errno.ELOOP, errno.ENOTDIR}
+            else failure_category
+        )
+        raise _CliError(category) from error
+    return descriptor
 
 
 def _load_namespace_salt(path: Path) -> str:

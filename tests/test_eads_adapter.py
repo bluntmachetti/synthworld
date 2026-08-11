@@ -836,17 +836,25 @@ def test_cli_population_config_validation_is_closed(
     assert exit_code == 3
 
 
-@pytest.mark.parametrize("primitive", ["O_NOFOLLOW", "O_NONBLOCK"])
+@pytest.mark.parametrize(
+    "primitive",
+    ["O_NOFOLLOW", "O_NONBLOCK", "O_DIRECTORY", "dir_fd"],
+)
 def test_cli_fails_closed_when_path_safety_primitives_are_unavailable(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
     primitive: str,
 ) -> None:
-    if not hasattr(os, primitive):
-        pytest.skip(f"platform does not expose {primitive}")
     source, salt = _write_cli_inputs(tmp_path)
-    monkeypatch.delattr(os, primitive)
+    if primitive == "dir_fd":
+        if os.open not in os.supports_dir_fd:
+            pytest.skip("platform does not expose openat-style dir_fd")
+        monkeypatch.setattr(os, "supports_dir_fd", os.supports_dir_fd - {os.open})
+    else:
+        if not hasattr(os, primitive):
+            pytest.skip(f"platform does not expose {primitive}")
+        monkeypatch.delattr(os, primitive)
 
     exit_code = cli_module.main(_cli_args(source, salt, tmp_path / "output"))
 
@@ -913,6 +921,38 @@ def test_cli_rejects_source_and_salt_symlinks(
         sensitive_fragments=(str(salt_link),),
     )
     assert salt_exit == 4
+
+
+@pytest.mark.parametrize("input_kind", ["source", "salt"])
+def test_cli_rejects_symlinked_input_parent(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    input_kind: str,
+) -> None:
+    real_inputs = tmp_path / "real-inputs"
+    real_inputs.mkdir()
+    source, salt = _write_cli_inputs(real_inputs)
+    linked_inputs = tmp_path / "linked-inputs"
+    try:
+        linked_inputs.symlink_to(real_inputs, target_is_directory=True)
+    except (NotImplementedError, OSError):
+        pytest.skip("platform cannot create directory symlinks")
+    linked_source = linked_inputs / source.name
+    linked_salt = linked_inputs / salt.name
+    selected_source = linked_source if input_kind == "source" else source
+    selected_salt = linked_salt if input_kind == "salt" else salt
+
+    exit_code = cli_module.main(
+        _cli_args(selected_source, selected_salt, tmp_path / f"{input_kind}-output"),
+    )
+
+    _assert_closed_cli_error(
+        capsys,
+        expected_category="path-safety",
+        exit_code=exit_code,
+        sensitive_fragments=(str(linked_inputs),),
+    )
+    assert exit_code == 4
 
 
 def test_cli_rejects_fifo_without_hanging(
