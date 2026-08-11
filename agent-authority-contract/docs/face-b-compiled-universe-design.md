@@ -291,9 +291,13 @@ manifest and destination root.
 The public and evaluator manifests exclude themselves from their row sets and
 bind the exact bytes in their respective roots. The root visibility manifest
 binds the paths, sizes, digests, identities, and versions of both manifests and
-their artifact-set digests. It excludes itself; the benchmark root digest is the
-SHA-256 digest of its canonical bytes. Canonical JSON uses UTF-8, LF line
-endings, sorted keys, compact separators, and one trailing newline.
+their artifact-set digests. It also binds `compiled_intake_digest`, the
+lowercase SHA-256 digest of the canonical bytes of the complete validated
+`FaceBCompiledUniverseInputV1` envelope. The intake digest uses the same
+canonical JSON profile and is not a field of that envelope, avoiding a
+self-referential digest. The root manifest excludes itself; the benchmark root
+digest is the SHA-256 digest of its canonical bytes. Canonical JSON uses UTF-8,
+LF line endings, sorted keys, compact separators, and one trailing newline.
 
 Packaged loaders must validate path safety, visibility, size, digest, exact disk
 inventory, cross-bindings, and fixed-reference generation before exposing
@@ -306,11 +310,12 @@ projection configuration, tier, contract versions, case plan, and event
 schedule. Wall-clock time, random UUIDs, locale, host state, filesystem order,
 and source paths are forbidden inputs.
 
-The root manifest binds at least the compiled-intake and compiler versions,
-Face B generator and projection versions, tier, seed, configuration digest,
-compiled public and evaluator universe digests, case-plan and event-schedule
-digests, public and evaluator artifact-set digests, and canonically ordered
-provenance edges. Set-like collections use canonical ordering; event streams and
+The root manifest binds at least the compiled-intake and compiler versions, the
+canonical digest of the complete validated compiled-intake envelope, Face B
+generator and projection versions, tier, seed, configuration digest, compiled
+public and evaluator universe digests, case-plan and event-schedule digests,
+public and evaluator artifact-set digests, and canonically ordered provenance
+edges. Set-like collections use canonical ordering; event streams and
 provenance chains use stable semantic ordering.
 
 ## Adapter-gap disposition
@@ -369,6 +374,8 @@ The design can advance only when review confirms:
   private fidelity bytes;
 - the adapter bridge and mapping-fidelity record are separately typed and
   version-bound;
+- the root manifest binds the canonical digest of the complete validated
+  compiled-intake envelope;
 - the frozen inventory excludes run outputs and private source evidence;
 - manifest self-exclusion, visibility, path, size, digest, and cross-binding
   rules are complete;
