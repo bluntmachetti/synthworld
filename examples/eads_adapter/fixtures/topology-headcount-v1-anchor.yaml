@@ -1,0 +1,32 @@
+organisations:
+  - organisation_id: example-aurelia-anchor
+    name: Aurelia Example Cooperative
+    industry: public-services
+    scale: small
+    regions:
+      - region_id: example-central
+        name: Example Central
+    domains:
+      - domain_id: citizen-operations
+        name: Citizen Operations
+        children:
+          - domain_id: case-handling
+            name: Case Handling
+            children: []
+    teams:
+      - team_id: case-intake
+        name: Case Intake
+        team_type: operations
+        domain_id: case-handling
+        region_ids: [example-central]
+        headcount: 120
+    services:
+      - service_id: example-intake-register
+        name: Example Intake Register
+        service_type: application
+        classification: internal
+        owning_team_id: case-intake
+    ownerships:
+      - team_id: case-intake
+        service_id: example-intake-register
+        relationship: owner

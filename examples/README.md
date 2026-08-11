@@ -52,6 +52,23 @@ See [`AGENTIC_BENCHMARK.md`](../AGENTIC_BENCHMARK.md) for the public package
 layout and the independent identity, authority, temporal, attribution,
 ownership, provenance, and side-effect metrics.
 
+## Fictional EADS-shaped fixture adapter
+
+[`eads_adapter/`](eads_adapter/) is a repository-only adapter for fictional,
+EADS-shaped fixtures. It is not compatible with any real EADS product, API,
+schema, deployment, or organisation. Its contract is deliberately bounded to
+human identity fixtures, an absent-only output root, and no-follow regular-file
+inputs. Agent and non-human identities remain deferred until C15/C16 are
+implemented.
+
+The example records explicit seed, configuration, provenance, and typed digest
+inventories. It does not provide a registry, lifecycle management, or target
+authorisation. Generated files are staged repository artifacts; changing their
+visibility or custody requires a separate output-promotion decision.
+
+See the [adapter boundary and usage notes](eads_adapter/README.md) and the
+[tracked contract gaps](../enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md).
+
 ## Sample output
 
 Full, frozen sample outputs ship inside the package as the golden benchmarks

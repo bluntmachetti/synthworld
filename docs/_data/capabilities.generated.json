@@ -2677,6 +2677,36 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md",
+      "path": "enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md"
+    },
+    {
+      "anchor": "current-implemented-boundary",
+      "heading": "Current implemented boundary",
+      "id": "route:enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md#current-implemented-boundary",
+      "path": "enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md"
+    },
+    {
+      "anchor": "deferred-work",
+      "heading": "Deferred work",
+      "id": "route:enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md#deferred-work",
+      "path": "enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md"
+    },
+    {
+      "anchor": "fictional-eads-shaped-fixture-adapter-gaps",
+      "heading": "Fictional EADS-shaped fixture adapter gaps",
+      "id": "route:enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md#fictional-eads-shaped-fixture-adapter-gaps",
+      "path": "enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md"
+    },
+    {
+      "anchor": "out-of-scope",
+      "heading": "Out of scope",
+      "id": "route:enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md#out-of-scope",
+      "path": "enterprise-identity-access-contract/EADS_ADAPTER_GAPS.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:enterprise-identity-access-contract/README.md",
       "path": "enterprise-identity-access-contract/README.md"
     },
@@ -2708,6 +2738,12 @@
       "anchor": "enterprise-identityaccess-contract-v1",
       "heading": "Enterprise identity/access contract v1",
       "id": "route:enterprise-identity-access-contract/README.md#enterprise-identityaccess-contract-v1",
+      "path": "enterprise-identity-access-contract/README.md"
+    },
+    {
+      "anchor": "fictional-eads-shaped-fixture-adapter",
+      "heading": "Fictional EADS-shaped fixture adapter",
+      "id": "route:enterprise-identity-access-contract/README.md#fictional-eads-shaped-fixture-adapter",
       "path": "enterprise-identity-access-contract/README.md"
     },
     {
@@ -2747,6 +2783,12 @@
       "path": "examples/README.md"
     },
     {
+      "anchor": "fictional-eads-shaped-fixture-adapter",
+      "heading": "Fictional EADS-shaped fixture adapter",
+      "id": "route:examples/README.md#fictional-eads-shaped-fixture-adapter",
+      "path": "examples/README.md"
+    },
+    {
       "anchor": "sample-output",
       "heading": "Sample output",
       "id": "route:examples/README.md#sample-output",
@@ -2763,6 +2805,48 @@
       "heading": "Worked evaluation: public-only baseline walkthrough",
       "id": "route:examples/README.md#worked-evaluation-public-only-baseline-walkthrough",
       "path": "examples/README.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:examples/eads_adapter/README.md",
+      "path": "examples/eads_adapter/README.md"
+    },
+    {
+      "anchor": "determinism-and-inventories",
+      "heading": "Determinism and inventories",
+      "id": "route:examples/eads_adapter/README.md#determinism-and-inventories",
+      "path": "examples/eads_adapter/README.md"
+    },
+    {
+      "anchor": "explicit-non-goals",
+      "heading": "Explicit non-goals",
+      "id": "route:examples/eads_adapter/README.md#explicit-non-goals",
+      "path": "examples/eads_adapter/README.md"
+    },
+    {
+      "anchor": "fictional-eads-shaped-fixture-adapter",
+      "heading": "Fictional EADS-shaped fixture adapter",
+      "id": "route:examples/eads_adapter/README.md#fictional-eads-shaped-fixture-adapter",
+      "path": "examples/eads_adapter/README.md"
+    },
+    {
+      "anchor": "fictionalisation-boundary",
+      "heading": "Fictionalisation boundary",
+      "id": "route:examples/eads_adapter/README.md#fictionalisation-boundary",
+      "path": "examples/eads_adapter/README.md"
+    },
+    {
+      "anchor": "output-root-and-promotion",
+      "heading": "Output root and promotion",
+      "id": "route:examples/eads_adapter/README.md#output-root-and-promotion",
+      "path": "examples/eads_adapter/README.md"
+    },
+    {
+      "anchor": "supported-scope",
+      "heading": "Supported scope",
+      "id": "route:examples/eads_adapter/README.md#supported-scope",
+      "path": "examples/eads_adapter/README.md"
     },
     {
       "anchor": "",

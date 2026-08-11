@@ -21,6 +21,27 @@ scalars are rejected. CSV and ZIP readers use fixed allowlists and explicit limi
 they do not infer a dialect, extract archives, follow links, or silently repair
 rows.
 
+## Fictional EADS-shaped fixture adapter
+
+The repository includes a
+[fictional EADS-shaped fixture adapter](../examples/eads_adapter/README.md) as a
+bounded example only. It is repository-only and is not compatible with any
+real EADS product, API, schema, deployment, or organisation.
+
+The adapter accepts only its declared shared human-identity input contract. It
+requires an absent output root and no-follow regular-file support, and binds
+deterministic output to explicit seed, configuration, provenance, and typed
+input/output digest inventories. Generated files remain staged artifacts until
+a separately authorised output-promotion decision changes their visibility or
+custody.
+
+It defines no registry, lifecycle management, target authorisation,
+provisioning, or enforcement. Agent and non-human identity support remains
+deferred until C15/C16 are implemented; the dependency is the
+[C15/C16 v2 design under review](../agent-authority-contract/docs/c15-c16-v2-design.md).
+Current exclusions are recorded in
+[`EADS_ADAPTER_GAPS.md`](EADS_ADAPTER_GAPS.md).
+
 The generated public universe freezes principals, unbound account slots, groups,
 roles, permissions, opaque authorization targets, relationship anchors, and sparse
 candidate access atoms before any authorization mechanism is evaluated. Canonical
