@@ -71,6 +71,7 @@ schemas:
 	$(UV) run python continuous-assurance-contract/tools/generate_contract.py --check
 	$(UV) run python agent-authority-contract/tools/generate_design_intent_traces.py --check
 	$(UV) run python agent-authority-contract/tools/render_coverage_table.py --check
+	$(UV) run python agent-authority-contract/tools/render_pattern_coverage.py --check
 	$(UV) run python -c "import subprocess,sys,tempfile; from pathlib import Path; d=Path(tempfile.mkdtemp()); subprocess.run([sys.executable,'-m','synthworld.cli' if False else 'synthworld'],capture_output=True); from synthworld.cli import main; assert main(['generate-agentic','--output',str(d/'a')])==0; subprocess.run([sys.executable,'agent-authority-contract/adapter-template/adapter.py','--public-dir',str(d/'a/public'),'--output',str(d/'t.jsonl')],check=True,capture_output=True); assert main(['validate','agentic-trace','--predictions',str(d/'t.jsonl')])==0, 'the shipped adapter template must produce a valid trace'"
 
 ci: lint typecheck package test metrics examples baselines schemas

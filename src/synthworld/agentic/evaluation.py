@@ -74,13 +74,26 @@ _METRIC_FAMILIES: dict[str, tuple[str, str]] = {
     "delegation_chain_integrity": ("authority_replay", "scored action events"),
     "attribution_integrity": ("accountability", "scored action events"),
     "accountable_owner_chain_integrity": ("accountability", "scored action events"),
-    "provenance_completeness": ("observability", "scored action events"),
-    "provenance_exact_match": ("observability", "scored action events"),
+    "provenance_completeness": (
+        "observability",
+        "scored action events; compares reported evidence-reference labels to "
+        "evaluator requirements, without checking underlying evidence retention",
+    ),
+    "provenance_exact_match": (
+        "observability",
+        "scored action events; compares reported evidence-reference labels to "
+        "evaluator requirements, without checking underlying evidence retention",
+    ),
     "provenance_precision": (
         "observability",
-        "evidence references the trace submitted",
+        "reported evidence references the trace submitted; compares labels to "
+        "evaluator requirements, without checking underlying evidence retention",
     ),
-    "audit_reconstructability_accuracy": ("observability", "scored action events"),
+    "audit_reconstructability_accuracy": (
+        "observability",
+        "scored action events; compares the reported reconstructability claim to "
+        "evaluator truth, without reconstructing or inspecting retained evidence",
+    ),
     "expected_side_effect_accuracy": ("observability", "scored action events"),
     # Folded into authorization_decision rather than standing alone. They are exact
     # complements over one support, so as a family their mean is 0.5 whatever the trace

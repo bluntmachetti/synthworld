@@ -178,9 +178,12 @@ The agentic scorer independently reports identity-role accuracy,
 authorisation precision/recall/F1 and accuracy, temporal validity,
 least-privilege/excess-authority measures, delegation-chain integrity,
 attribution and owner-chain integrity, provenance completeness, audit
-reconstructability, policy version, and side-effect correctness. Case labels
-are open strings so other worlds can reuse the generic contract without being
-forced to reproduce Asteria's exact case set.
+reconstructability, policy version, and side-effect correctness. The provenance
+and audit-reconstructability metrics compare reported reference labels and a
+reported reconstructability claim with evaluator truth; they do not verify that
+the underlying evidence was retained. Case labels are open strings so other
+worlds can reuse the generic contract without being forced to reproduce
+Asteria's exact case set.
 
 ## Trace validation report
 
@@ -768,6 +771,11 @@ The reference pack scores **20** metrics across the families `enterprise_authori
 `empty_behaviour: null_if_empty`. **There is no agentic aggregate score.** The pack is 20 cases,
 so every denominator is at most 20 and the delegation-gate denominator is 10. Scoring is
 strict-inventory: the prediction's case set must equal the truth case set exactly.
+
+The four enterprise-agentic observability metrics score reported evidence-reference
+labels and the reported audit reconstructability claim against evaluator truth. They
+do not retrieve, reconstruct from, or otherwise verify retention of the underlying
+evidence.
 
 Scenario tags are evaluator-only and fixed; they derive from the pinned AIIM snapshot, which
 supplies experimental scenario vocabulary only and defines neither a normative protocol nor a
