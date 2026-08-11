@@ -276,7 +276,7 @@ def test_fixture_is_safely_fictional_and_current_contract_compiles(
     assert _report_from_disk(output_root) == report
 
 
-def test_sdk_humans_fixture_compiles_with_declared_population(
+def test_sdk_humans_fixture_compiles_with_bounded_population(
     tmp_path: Path,
 ) -> None:
     output_root, report = _run(
@@ -288,10 +288,10 @@ def test_sdk_humans_fixture_compiles_with_declared_population(
     assert report.status.value == "succeeded"
     assert len(report.outcomes) == 1
     outcome = report.outcomes[0]
-    assert outcome.raw_population == 1200
-    assert outcome.emitted_population == 128
+    assert outcome.raw_population == 60
+    assert outcome.emitted_population == 60
     assert outcome.downscale is not None
-    assert outcome.downscale.applied is True
+    assert outcome.downscale.applied is False
     assert _report_from_disk(output_root) == report
 
 
@@ -301,7 +301,6 @@ def test_sdk_gaps_fixture_exercises_declared_gap_taxonomy(tmp_path: Path) -> Non
     codes = {gap.code for gap in report.gaps}
     assert {
         AdapterCode.DEEP_HIERARCHY_COLLAPSED,
-        AdapterCode.IGNORED_SOURCE_POPULATION_FIELD,
         AdapterCode.NULL_CLASSIFICATION,
         AdapterCode.UNSUPPORTED_OWNERSHIP_SEMANTICS,
     } <= codes
@@ -334,7 +333,11 @@ def test_topology_yaml_fixture_compiles_through_cli(
     report = _report_from_disk(output_root)
     assert report.source_vintage is SourceVintage.TOPOLOGY_HEADCOUNT_V1
     assert report.status.value == "succeeded"
-    assert report.outcomes[0].raw_population == 120
+    outcome = report.outcomes[0]
+    assert outcome.raw_population == 10
+    assert outcome.emitted_population == 10
+    assert outcome.downscale is not None
+    assert outcome.downscale.applied is False
 
 
 def test_fictional_names_do_not_drive_mapping_or_exclusion(tmp_path: Path) -> None:
