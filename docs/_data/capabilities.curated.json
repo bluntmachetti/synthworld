@@ -309,7 +309,7 @@
       "roadmap_routes": [
         "route:ROADMAP.md#ai-agents-and-non-human-identities"
       ],
-      "since": "unreleased",
+      "since": "0.14.0",
       "summary": "Generate, freeze, load, and evaluate the deterministic Asteria C08 v2 public/evaluator benchmark split.",
       "support": "Supported for repository-local candidate generation and offline evaluation while publication gates remain pending.",
       "title": "Asteria C08 evidence-binding v2"
@@ -813,7 +813,7 @@
       "roadmap_routes": [
         "route:ROADMAP.md#ai-agents-and-non-human-identities"
       ],
-      "since": "unreleased",
+      "since": "0.14.0",
       "summary": "Generate, freeze, load, and evaluate the deterministic enterprise C08 v2 public/evaluator benchmark split.",
       "support": "Supported for repository-local candidate generation and offline evaluation while publication gates remain pending.",
       "title": "Enterprise C08 evidence-binding v2"

@@ -9,8 +9,16 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-08-11
+
 ### Added
 
+- **Independent C08 evidence-binding v2 contracts.** Asteria and enterprise
+  lineages now have separately versioned public input, evaluator truth,
+  submission, report, manifest, deterministic reference-generation, and
+  evidence-quality metric contracts. Public inputs expose opaque binding
+  handles and same-kind distractors while exact required bindings remain in
+  evaluator truth. Existing v1 contracts and frozen bytes remain unchanged.
 - **C08 v2 candidate registry metadata.** Repository-local metadata records the
   Asteria and enterprise C08 v2 benchmark identities as candidates with pending
   publication gates. These entries do not publish either benchmark externally
@@ -29,6 +37,36 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 - A curated benchmark registry now records independent lifecycle, benchmark-kind,
   evaluation-mode, artifact-sensitivity, integrity, and publication-gate evidence
   for every current benchmark family.
+- **A source-complete Blume documentation site.** The repository now carries a
+  structured public documentation tree, generated capability and benchmark
+  catalogues, dark-preview builds, documentation-impact routing, and distribution
+  audits. The site is ready for a separately authorized deployment but is not
+  published by this release.
+- **Guarded Hugging Face publication planning.** A local publication manifest,
+  offline validator, and protected dry-run workflow bind publication authority to
+  the resolved benchmark registry. Uploads remain disabled: no benchmark or
+  operation is authorized and the outstanding external gates remain explicit.
+- **A safely fictional EADS-shaped adapter example.** The repository-only,
+  humans-only example accepts bounded JSON or YAML fixtures, emits separately
+  typed public and evaluator projections, and records deterministic path-bound
+  provenance. It is not shipped in the wheel, performs no network access, and
+  makes no real-EADS compatibility claim.
+- **Future enterprise authority designs.** Reviewed design records reserve
+  non-conflicting C15/C16 v1 and Face B contract, schema, package, benchmark, and
+  manifest identities. They define canonical normalization, collision rejection,
+  UUID5 domain separation, public/evaluator boundaries, and staged gates without
+  implementing or freezing those deferred families.
+
+### Changed
+
+- Agentic evidence metrics and deployment-pattern coverage now state their
+  reporting-only limits, metric polarity, denominators, null and abstention
+  semantics, and declaration-versus-observation boundary without changing metric
+  values, scoring versions, schemas, or frozen artifacts.
+- Benchmark, documentation, release, and Hugging Face governance now fail closed
+  on same-version frozen-inventory additions, compare push transitions with the
+  pre-push commit, audit the exact documentation distribution, and publish the
+  already-verified release artifact rather than rebuilding it.
 
 ## [0.13.0] - 2026-08-06
 
@@ -500,7 +538,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/bluntmachetti/synthworld/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bluntmachetti/synthworld/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bluntmachetti/synthworld/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/bluntmachetti/synthworld/compare/v0.10.0...v0.11.0
