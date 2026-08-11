@@ -5,6 +5,11 @@ the control catalogue's ``applicable_patterns``. These are run-level declaration
 intersected with selected-control applicability, not per-control exercise,
 observation, runtime topology, or enforcement proof.
 
+Multiple evaluated receipts may contribute declarations only when their immutable
+benchmark, SUT, adapter, configuration, and run-topology provenance is identical.
+The renderer fails rather than constructing a support-looking union across
+heterogeneous runs.
+
 Usage::
 
     uv run python agent-authority-contract/tools/render_pattern_coverage.py
@@ -50,10 +55,30 @@ DOC_PATH = CONTRACT_DIR / "docs" / "design-intent-assumptions.md"
 BEGIN = "<!-- BEGIN GENERATED: pattern-coverage (render_pattern_coverage.py) -->"
 END = "<!-- END GENERATED: pattern-coverage -->"
 
+_AGGREGATION_PROVENANCE_FIELDS = {
+    "adapter",
+    "benchmark",
+    "build_environment",
+    "digest_algorithm",
+    "event_schedule",
+    "evidence_claim",
+    "generator_configuration",
+    "schema_versions",
+    "scoring_formula_versions",
+    "serialization",
+    "systems_under_test",
+}
+_AGGREGATION_TOPOLOGY_FIELDS = {
+    "authority_path_component_ids",
+    "direct_path_reachability",
+    "enforcement_point_ids",
+    "isolation_mechanism",
+}
+
 
 @dataclass(frozen=True)
 class PatternCoverageRow:
-    """One control's declared applicable and observed deployment patterns."""
+    """One control's applicable and run-level declared deployment patterns."""
 
     control_id: AgentAuthorityControlId
     applicable_patterns: tuple[str, ...]
@@ -126,6 +151,30 @@ def _canonical_receipt_roots(receipt_roots: Iterable[Path]) -> tuple[Path, ...]:
     return tuple(sorted({Path(root).resolve() for root in receipt_roots}, key=str))
 
 
+def _aggregation_provenance(
+    manifest: RunReceiptManifestV2,
+    plan: AgentAuthorityRunPlanV1,
+) -> str:
+    """Return canonical immutable provenance for safe declaration aggregation."""
+
+    document = {
+        "manifest": manifest.model_dump(
+            mode="json",
+            include=_AGGREGATION_PROVENANCE_FIELDS,
+        ),
+        "run_plan_topology": plan.model_dump(
+            mode="json",
+            include=_AGGREGATION_TOPOLOGY_FIELDS,
+        ),
+    }
+    return json.dumps(
+        document,
+        ensure_ascii=True,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+
+
 def pattern_coverage_rows(
     receipt_roots: Iterable[Path],
     *,
@@ -140,6 +189,7 @@ def pattern_coverage_rows(
     declared_compatible: dict[AgentAuthorityControlId, set[str]] = {
         control_id: set() for control_id in CONTROL_ORDER
     }
+    aggregation_provenance: str | None = None
     for root in _canonical_receipt_roots(receipt_roots):
         manifest = validator(root)
         if manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED:
@@ -147,6 +197,14 @@ def pattern_coverage_rows(
         plan = AgentAuthorityRunPlanV1.model_validate(
             json.loads((root / RUN_PLAN_PATH).read_text(encoding="utf-8"))
         )
+        receipt_provenance = _aggregation_provenance(manifest, plan)
+        if aggregation_provenance is None:
+            aggregation_provenance = receipt_provenance
+        elif receipt_provenance != aggregation_provenance:
+            raise ValueError(
+                "cannot aggregate evaluated receipts with heterogeneous immutable "
+                "receipt/SUT/config/topology provenance"
+            )
         declared_patterns = {
             _pattern_name(pattern) for pattern in plan.deployment_patterns
         }
@@ -156,9 +214,13 @@ def pattern_coverage_rows(
             if entry.disposition is CoverageDisposition.SELECTED
         )
         for control_id in selected_controls:
-            declared_compatible[control_id].update(
-                set(catalogue[control_id]) & declared_patterns
-            )
+            compatible_patterns = set(catalogue[control_id]) & declared_patterns
+            if not compatible_patterns:
+                raise ValueError(
+                    f"{control_id.value} is selected but has no "
+                    "catalogue-compatible declared deployment pattern"
+                )
+            declared_compatible[control_id].update(compatible_patterns)
 
     return tuple(
         PatternCoverageRow(

@@ -164,10 +164,11 @@ dedicated discrimination without submission rows or evaluator truth.
 
 Reports explicitly mark `offline_artifacts_only`. They do not establish live
 evidence retention, durable logging, enforcement, deployment behaviour,
-real-export compatibility, or EADS compatibility. CI, Ruff/format, schema check,
-package, isolated-wheel, clean-install, and regeneration evidence remain pending;
-there is no registry or publication claim. Exact committed hashes and D8 exclusions
-are in [GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
+real-export compatibility, or EADS compatibility. Repository verification has
+passed and both lineages are registered as repository-local candidates. External
+publication gates remain pending, so registration is not an external publication
+or deployment claim. Exact committed hashes and D8 exclusions are in
+[GOLDEN_REVIEW.md](GOLDEN_REVIEW.md).
 
 | code | severity | meaning |
 |---|---|---|
@@ -293,8 +294,11 @@ report = evaluate_agentic_trace(submission)
 
 ## Metrics and baselines
 
-Every metric names the family it belongs to and what its denominator counts, so a
-report can be read by family and each ratio re-derived rather than trusted.
+The legacy `TaskMetric` envelope records `value`, `support`, `family`, and
+`support_meaning`; it does not serialize a numerator or denominator. For each direct
+ratio below, `support` is its denominator and the integer numerator can be recovered
+from the value. `authorization_decision_f1` is the exception: its support is
+classification support, not its denominator.
 
 The split that carries the most information is **observability against everything
 else**. An agent can decide well and record badly, or the reverse, and those need
@@ -310,10 +314,10 @@ aggregate hides which you have.
 | authorization_decision | `authorization_decision_accuracy` | allow/deny matches truth | it never does | scored action events |
 | | `authorization_decision_precision` | nothing the trace allowed should have been denied | everything it allowed should have been denied | actions the trace allowed at action time |
 | | `authorization_decision_recall` | every action truth allows was reported `allow` | none was — note a null decision is neither allow nor deny, so this is not the same as "all were denied" | actions truth allows at action time |
-| | `authorization_decision_f1` | harmonic mean of the two above | precision and recall are both zero | classification support — **not** this metric's denominator, which is why it is derived from the two rows above rather than from `support` |
-| | `temporal_validity_accuracy` | the audit-time verdict is right on every event labelled `valid_then_revoked`, `post_revocation_action` or `invalid_then_later_granted` | it is wrong on all of them | events carrying one of those three case labels |
+| | `authorization_decision_f1` | harmonic mean of the two above | no numeric `0.0` is emitted: when precision and recall are both zero the value is `null` | classification support — **not** this metric's denominator, which is why it is derived from the two rows above rather than from `support` |
+| authority_replay | `temporal_validity_accuracy` | the audit-time verdict is right on every event labelled `valid_then_revoked`, `post_revocation_action` or `invalid_then_later_granted` | it is wrong on all of them | events carrying one of those three case labels |
 | | `policy_version_accuracy` | the expected policy version is named correctly — the covering delegation's where a chain exists, and the attempt's own where truth records no chain | it is not | scored action events |
-| authority_replay | `delegation_chain_integrity` | the delegation chain matches the one the action-time check selected, root first | it does not | scored action events |
+| | `delegation_chain_integrity` | the delegation chain matches the one the action-time check selected, root first | it does not | scored action events |
 | accountability | `attribution_integrity` | the attributed actor matches the evaluator's canonical binding | it does not — note two attribution paths can be equally defensible, so this scores agreement with the canonical choice rather than objective correctness | scored action events |
 | | `accountable_owner_chain_integrity` | the chain of principals accountable for the action is correct | it is not | scored action events |
 | observability | `provenance_completeness` | every event's reported reference set includes every evaluator-required reference | no event's reported reference set includes every required reference — which happens well short of submitting nothing | scored action events |
@@ -321,16 +325,17 @@ aggregate hides which you have.
 | | `provenance_precision` | every reported reference was required for the action it was reported against | none was. A genuine reference reported against the wrong action counts here, so this measures misfiling as well as invention | distinct action-event and evidence-reference pairs reported |
 | | `audit_reconstructability_accuracy` | the reported claim about whether the decision can be rebuilt from retained evidence matches evaluator truth | it does not | scored action events |
 | | `expected_side_effect_accuracy` | the side effect the action should record is named correctly | it is not | scored action events |
-| | `least_privilege_accuracy` | nothing truth denies was allowed | everything truth denies was allowed | actions truth denies |
+| authorization_decision | `least_privilege_accuracy` | nothing truth denies was explicitly reported `allow`; `null` receives the same credit as `deny` | everything truth denies was allowed | actions truth denies |
 | | `excess_authority_rate` | every action truth denies was allowed — this is the **bad** end | nothing truth denies was allowed | actions truth denies |
 
-`excess_authority_rate` is the only metric where zero is the good score, so its row
-reads in the opposite direction to every other. Note also that `support` is not always
-a denominator: for every metric but `authorization_decision_f1` the value is
-`numerator / support` and the numerator is recoverable, while F1 comes from the
-precision and recall reported beside it. It is the exact complement of
-`least_privilege_accuracy`, and both are reported so a reader scanning for failures
-does not have to invert one in their head.
+`excess_authority_rate` is the only Asteria v1 metric where zero is the good score,
+so its row reads in the opposite direction to every other. It is the exact complement
+of `least_privilege_accuracy`: both use the same false-allow count over truth-denied
+actions. A `null` decision is not an explicit false allow, so it earns the same credit
+as `deny` on `least_privilege_accuracy` and contributes no excess authority. Neither
+metric proves decision coverage or correct denial, and they must be read with allow
+recall. They are reported both ways so a reader scanning for failures does not have
+to invert one in their head.
 
 Families name where a failure comes from, not how a denominator is shaped. Precision
 and recall differ only in denominator and sit together, because a reader chasing one
@@ -340,9 +345,10 @@ so as a family of their own their mean would be 0.5 whatever the trace did.
 
 A metric is `null` rather than `0.0` when it cannot be computed. Usually that is an
 empty denominator — a world with no timing cases cannot score temporal validity, and
-zero would read as total failure at something never asked. It is not only that:
-`authorization_decision_f1` is null whenever precision and recall are both zero, which
-can happen with a perfectly non-empty denominator.
+zero would read as total failure at something never asked. The frozen protocol also
+returns `null` whenever authorization precision and recall are both zero, even though
+the equivalent confusion-matrix F1 denominator can be non-empty. This is a historical
+protocol convention, not evidence that no allow/deny cases were scored.
 
 Agentic reports use scoring protocol `0.3.0`; other SynthWorld tasks remain on
 their existing scoring protocols. Grouping metrics into families changed the report's *shape*, not any metric's

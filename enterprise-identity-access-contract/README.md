@@ -55,9 +55,10 @@ C15/C16, Face A, deployment, and generated-world demonstrations remain outside
 the authorised D8 scope. Exactly one aggregate enterprise baseline file records
 metric-only dedicated discrimination, paired with one Asteria file. The complete
 candidate review, current committed digests, resolved adversarial findings, and
-pending CI/Ruff/schema/package/isolated-wheel/clean-install/regeneration evidence
-are in [`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md). There is no registry or
-publication claim.
+passed CI/Ruff/schema/package/isolated-wheel/clean-install/regeneration evidence
+are in [`GOLDEN_REVIEW.md`](../GOLDEN_REVIEW.md). Candidate registry and capability
+verification has passed, but those discovery records are not publication approval;
+external publication gates remain pending.
 
 ## Pinned standards profile
 
@@ -343,4 +344,5 @@ must have a same-action/same-kind different-handle distractor, and reports must
 carry schema-required measurement_scope after 4de6df8. The publication gate
 pins committed SHA256SUMS bytes to
 a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123;
-execution gates remain pending until CI.
+repository verification has passed, while external publication and real-system
+execution claims remain gated.

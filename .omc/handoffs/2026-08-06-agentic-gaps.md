@@ -3,6 +3,12 @@
 Written 2026-08-06, after #97 merged (squash `2e67642`). Verified against that tree; file and symbol
 references are given so a fresh session can re-check rather than trust this document.
 
+Stage 0 reconciliation, 2026-08-10: the 20-metric correction and the
+cross-lineage C08 finding below are applied. The unchanged v1 contracts retain
+their reporting-only limitation. The independently versioned C08 v2 frozen
+candidates close the kind-only echo path and have passed repository verification;
+external publication gates remain pending.
+
 Supersedes an earlier draft of this file that conflated two agentic lineages and mis-ranked the work.
 See §2 — the correction matters.
 
@@ -129,16 +135,23 @@ security.
 
 These are not debts. A generator-plus-scorer cannot close them, and saying so is the honest output.
 
-### Separate: C08 is a measurement-validity defect
+### Separate: C08 is a v1 measurement-validity defect with a v2 candidate repair
 
-Not a coverage gap. In both the Asteria and enterprise agentic lineages, the required evidence refs —
-three base references plus one per delegation-chain member — are **derivable from public data alone**,
-so a system that computes the expected identifiers while retaining no evidence scores 1.0 on all four
-metrics.
+Not a coverage gap. In the frozen Asteria Agentic v1 and enterprise-agentic v1
+contracts, the required evidence refs -- three base references plus one per
+delegation-chain member -- are **derivable from public data alone**, so a system
+that computes the expected identifiers while retaining no evidence scores 1.0 on
+all four metrics. Their metric descriptions therefore state that they measure
+reported reference labels and reconstructability claims, not evidence retention.
 
 That is a metric rewarding transcription over work, the same family as the ambiguity-pack leaks
-(#80, #84). Treat it with that seriousness: either bind the refs to something not publicly derivable,
-or restate what the metric measures.
+(#80, #84). The independently versioned `asteria-agentic-c08-v2` and
+`enterprise-agentic-c08-v2` candidates repair that defect with public
+`(kind, binding_handle)` requirements and same-action, same-kind distractors while
+keeping exact required IDs in evaluator truth. Their frozen artifacts and repository
+checks are verified, but they remain externally unpublished candidates and establish
+only offline binding reconstruction, not live retention or durable logging. Existing
+v1 models, schemas, artifacts, checksums, loaders, and scoring remain unchanged.
 
 ## 5. What you can test today
 
@@ -163,7 +176,8 @@ Generate an enterprise world, project it, run your authorization policy, submit 
 
 - Whether a credential was legitimately **issued**, or bound to the grant it is exercised under (§4A)
 - Whether action **parameters** match what was approved (§4A)
-- Whether your system **retained** evidence, versus recomputing refs from public data (C08)
+- Whether your system **retained** evidence: v1 can recompute refs from public data,
+  while v2 establishes only offline binding reconstruction (C08)
 - **Purpose** correctness — inert, single constant across the fixture
 - Anything requiring a live system — secret extraction, replay, bypass, network policy, revocation latency
 
@@ -171,12 +185,16 @@ Generate an enterprise world, project it, run your authorization policy, submit 
 
 **The target is discrimination, not coverage.** Driving every `partial` to `supported` is the wrong
 goal: the cheapest route there is metrics that are easy to pass, which is exactly where C08 already
-sits and where the ambiguity pack sat before #80. A `partial` with an honest, specific explanation is
+sits in v1 and where the ambiguity pack sat before #80. The v2 C08 candidate repairs
+that echo path without changing v1. A `partial` with an honest, specific explanation is
 a **finished state**, not a debt.
 
 Ordered by value per unit effort:
 
-1. **C08** — measurement validity. A metric that scores 1.0 without the work is worse than no metric.
+1. **C08 -- complete for the authorised v2 candidate scope.** V1 metric meanings
+   remain reporting-only; the v2 rebind and frozen repository verification are
+   complete. External publication gates remain pending, and neither version proves
+   live evidence retention.
 2. **§4B measurement gaps** — score `resource_id` and `requested_scope`; add a failure-reason field to
    `ObservedActionTrace` if Asteria v1 is to keep parity with the enterprise lineage. Trace-schema
    changes are published-contract changes (`schema_version` bump, `DATA_DICTIONARY.md`, contract README).

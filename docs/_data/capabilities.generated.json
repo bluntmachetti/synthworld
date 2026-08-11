@@ -143,9 +143,9 @@
       "path": ".omc/handoffs/2026-08-06-agentic-gaps.md"
     },
     {
-      "anchor": "separate-c08-is-a-measurement-validity-defect",
-      "heading": "Separate: C08 is a measurement-validity defect",
-      "id": "route:.omc/handoffs/2026-08-06-agentic-gaps.md#separate-c08-is-a-measurement-validity-defect",
+      "anchor": "separate-c08-is-a-v1-measurement-validity-defect-with-a-v2-candidate-repair",
+      "heading": "Separate: C08 is a v1 measurement-validity defect with a v2 candidate repair",
+      "id": "route:.omc/handoffs/2026-08-06-agentic-gaps.md#separate-c08-is-a-v1-measurement-validity-defect-with-a-v2-candidate-repair",
       "path": ".omc/handoffs/2026-08-06-agentic-gaps.md"
     },
     {
@@ -1709,9 +1709,9 @@
       "path": "agent-authority-contract/docs/c08-v2-transition.md"
     },
     {
-      "anchor": "pending-verification-and-publication-evidence",
-      "heading": "Pending verification and publication evidence",
-      "id": "route:agent-authority-contract/docs/c08-v2-transition.md#pending-verification-and-publication-evidence",
+      "anchor": "repository-verification-and-pending-publication-evidence",
+      "heading": "Repository verification and pending publication evidence",
+      "id": "route:agent-authority-contract/docs/c08-v2-transition.md#repository-verification-and-pending-publication-evidence",
       "path": "agent-authority-contract/docs/c08-v2-transition.md"
     },
     {

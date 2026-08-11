@@ -50,6 +50,27 @@ Every metric states its numerator, denominator, denominator meaning, and undefin
 state. Exactness, completeness, fabrication, wrong-action assignment, and excess
 evidence remain independent rather than being hidden behind one aggregate score.
 
+| Lineage and metric | Numerator / denominator | Polarity | Empty behavior and interpretation |
+|---|---|---|---|
+| Asteria `exact_evidence_match` | actions whose selected set exactly equals evaluator-required IDs / all public actions | higher is better | Public actions are non-empty. |
+| Asteria `missing_or_discarded_free` | actions containing every evaluator-required ID / all public actions | higher is better | Missing and discarded evidence are intentionally indistinguishable offline. |
+| Asteria `fabricated_evidence_free` | active action rows containing only known observation IDs / action rows submitting at least one ID | higher is better | `null` when no row submits evidence; omission is measured by `missing_or_discarded_free`. |
+| Asteria `wrong_action_evidence_free` | active action rows with no known ID owned by another action / action rows submitting at least one ID | higher is better | `null` when no row submits evidence; fabricated IDs are handled independently. |
+| Asteria `extra_evidence_free` | active action rows with no known same-action, non-required ID / action rows submitting at least one ID | higher is better | `null` when no row submits evidence. |
+| Enterprise `evidence_action_binding_accuracy` | distinct, evaluator-required submitted observations with correct action and tenant binding / all submitted observations | higher is better | `null` with no submissions. A same-action distractor is an extra, not numerator credit. |
+| Enterprise `evidence_completeness_recall` | matched required observations / all evaluator-required observations | higher is better | Required observations are non-empty; omissions lower this metric. |
+| Enterprise `evidence_exact_match_accuracy` | exact action outcomes / all public actions | higher is better | Exactness requires no missing, fabricated, wrong-action, or extra observation. |
+| Enterprise `evidence_extra_rate` | submitted observations classified extra / all submitted observations | lower is better | `null` with no submissions. |
+| Enterprise `evidence_fabrication_rate` | submitted observations with unknown IDs / all submitted observations | lower is better | `null` with no submissions. |
+| Enterprise `evidence_wrong_action_rate` | known observations bound to another action or tenant / all submitted observations | lower is better | `null` with no submissions. |
+
+The denominators are deliberately independent. A submission can score `1.0` on an
+active-row or submitted-observation metric while omitting required evidence; the
+all-action completeness metric exposes that omission. Likewise, enterprise error
+rates are not extra aggregate penalties and the Asteria `*_free` values are not error
+rates. Interpret the complete metric tuple, never one value as an overall evidence or
+retention score.
+
 This is still offline synthetic artifact evaluation. It establishes whether a
 submission reconstructs the required evidence bindings from the observations made
 available by the fixture. It does not prove live storage durability, production log
@@ -195,8 +216,9 @@ lowers `fabricated_evidence_free`, wrong action lowers
 `wrong_action_evidence_free`, and extra lowers `extra_evidence_free`, each from
 `6/6` to `5/6`. Enterprise records `exact`, `missing`, `fabricated`,
 `wrong_action`, and `extra`. Missing lowers completeness to `5/6`; fabricated,
-wrong action, and extra expose their dedicated rate at `1/7`. These are committed
-metric records, not evidence that their reproduction test has run.
+wrong action, and extra expose their dedicated rate at `1/7`. These committed metric
+records are not by themselves evidence that reproduction ran; repository verification
+is recorded separately, and external publication remains gated.
 
 ### Native adversarial findings resolved in the candidate
 
@@ -250,7 +272,7 @@ enterprise lineages. It does not include:
 No C08-only artifact, registry entry, documentation claim, or checksum record
 may imply that an excluded item has shipped or been validated.
 
-## Pending verification and publication evidence
+## Repository verification and pending publication evidence
 
 The candidate trees, loaders, governed schemas, adversarial hardening, baseline
 records, and expanded v1 assertions are implemented. GitHub Actions runs
@@ -282,11 +304,12 @@ The publication gates pin the committed enterprise SHA256SUMS bytes to
 a0b012bda161183ce925ca75b754cd7cbae942bf7fb4787a7b1258293210e123
 and the Asteria root artifact set to
 5fc98eafd7435580ed50581adacd3cbbecae45c02295f3733bdc87da3d59629a.
-These are gate expectations, not a claim that publication or any execution gate
-has passed.
+These are publication-gate expectations, not a claim that publication or any
+real-system execution gate has passed.
 
 After dd40fd9, Asteria v1 preservation evidence covers the complete frozen
 19-file inventory. It extends the earlier public/evaluator root evidence without
-changing any v1 byte. CI, Ruff lint and format, schema --check, package builds,
-isolated-wheel execution, clean-install checks, and regeneration verification
-remain pending.
+changing any v1 byte. CI, Ruff lint and format, schema `--check`, package builds,
+isolated-wheel execution, clean-install checks, and regeneration verification have
+passed for the repository-local candidate scope. External publication and real-system
+execution gates remain pending.
