@@ -334,7 +334,9 @@ def test_make_ci_and_ownership_require_registry_governance() -> None:
         "\n  quality:", 1
     )[0]
     assert "fetch-depth: 0" in benchmark_job
-    assert "--check --require-tags --base-ref origin/main" in benchmark_job
+    assert "github.event.before" in benchmark_job
+    assert "github.event.pull_request.base.sha" in benchmark_job
+    assert '--check --require-tags --base-ref "$BASE_REF"' in benchmark_job
     owner_patterns = {
         line.split()[0]
         for line in owners.splitlines()

@@ -50,6 +50,9 @@ def test_aggregation_provenance_fields_match_manifest(renderer: ModuleType) -> N
     assert renderer._AGGREGATION_PROVENANCE_FIELDS.issubset(
         RunReceiptManifestV2.model_fields
     )
+    assert renderer._AGGREGATION_TOPOLOGY_FIELDS.issubset(
+        AgentAuthorityRunPlanV1.model_fields
+    )
 
 
 def _evaluated_manifest(**overrides: object) -> SimpleNamespace:
@@ -276,6 +279,33 @@ def test_heterogeneous_receipt_provenance_fails_before_union(
         renderer.pattern_coverage_rows(
             (first, second),
             validator=lambda root: manifests[root],
+        )
+
+
+def test_heterogeneous_run_plan_topology_fails_before_union(
+    renderer: ModuleType,
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    plan = reference_plan()
+    _write_plan(first, plan)
+    _write_plan(
+        second,
+        plan.model_copy(
+            update={
+                "authority_path_component_ids": (
+                    *plan.authority_path_component_ids,
+                    "different-authority-path-component",
+                )
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="heterogeneous immutable"):
+        renderer.pattern_coverage_rows(
+            (first, second),
+            validator=lambda _root: _evaluated_manifest(),
         )
 
 

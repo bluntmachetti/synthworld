@@ -964,6 +964,33 @@ def test_report_order_and_serialization_are_canonical_and_separate(
     assert serialize_c08_public(public).endswith(b"\n")
 
 
+@pytest.mark.parametrize("artifact", ["evaluator", "submission", "report"])
+def test_export_rejects_digest_mismatch_before_creating_root(
+    tmp_path: Path,
+    artifact: str,
+) -> None:
+    public, evaluator = _bundle()
+    submission = _reference_submission(public)
+    report = evaluate_c08(public=public, evaluator=evaluator, submission=submission)
+    if artifact == "evaluator":
+        evaluator = evaluator.model_copy(update={"public_input_digest": "0" * 64})
+    elif artifact == "submission":
+        submission = submission.model_copy(update={"public_input_digest": "0" * 64})
+    else:
+        report = report.model_copy(update={"public_input_digest": "0" * 64})
+    root = tmp_path / artifact
+
+    with pytest.raises(C08SerializationError, match=rf"{artifact}.*binds"):
+        export_c08_artifacts(
+            root,
+            public=public,
+            evaluator=evaluator,
+            submission=submission,
+            report=report,
+        )
+    assert not root.exists()
+
+
 def test_serialization_rejects_invalid_models_and_canonical_default_omission(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

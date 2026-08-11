@@ -6,8 +6,9 @@ intersected with selected-control applicability, not per-control exercise,
 observation, runtime topology, or enforcement proof.
 
 Multiple evaluated receipts may contribute declarations only when their immutable
-benchmark, SUT, adapter, and configuration provenance is identical. The renderer
-fails rather than constructing a support-looking union across heterogeneous runs.
+benchmark, SUT, adapter, configuration, and run-topology provenance is identical.
+The renderer fails rather than constructing a support-looking union across
+heterogeneous runs.
 
 Usage::
 
@@ -66,6 +67,12 @@ _AGGREGATION_PROVENANCE_FIELDS = {
     "scoring_formula_versions",
     "serialization",
     "systems_under_test",
+}
+_AGGREGATION_TOPOLOGY_FIELDS = {
+    "authority_path_component_ids",
+    "direct_path_reachability",
+    "enforcement_point_ids",
+    "isolation_mechanism",
 }
 
 
@@ -144,13 +151,22 @@ def _canonical_receipt_roots(receipt_roots: Iterable[Path]) -> tuple[Path, ...]:
     return tuple(sorted({Path(root).resolve() for root in receipt_roots}, key=str))
 
 
-def _aggregation_provenance(manifest: RunReceiptManifestV2) -> str:
+def _aggregation_provenance(
+    manifest: RunReceiptManifestV2,
+    plan: AgentAuthorityRunPlanV1,
+) -> str:
     """Return canonical immutable provenance for safe declaration aggregation."""
 
-    document = manifest.model_dump(
-        mode="json",
-        include=_AGGREGATION_PROVENANCE_FIELDS,
-    )
+    document = {
+        "manifest": manifest.model_dump(
+            mode="json",
+            include=_AGGREGATION_PROVENANCE_FIELDS,
+        ),
+        "run_plan_topology": plan.model_dump(
+            mode="json",
+            include=_AGGREGATION_TOPOLOGY_FIELDS,
+        ),
+    }
     return json.dumps(
         document,
         ensure_ascii=True,
@@ -178,17 +194,17 @@ def pattern_coverage_rows(
         manifest = validator(root)
         if manifest.evaluation_status is EvaluationStatus.NOT_EVALUATED:
             continue
-        receipt_provenance = _aggregation_provenance(manifest)
+        plan = AgentAuthorityRunPlanV1.model_validate(
+            json.loads((root / RUN_PLAN_PATH).read_text(encoding="utf-8"))
+        )
+        receipt_provenance = _aggregation_provenance(manifest, plan)
         if aggregation_provenance is None:
             aggregation_provenance = receipt_provenance
         elif receipt_provenance != aggregation_provenance:
             raise ValueError(
                 "cannot aggregate evaluated receipts with heterogeneous immutable "
-                "receipt/SUT/config provenance"
+                "receipt/SUT/config/topology provenance"
             )
-        plan = AgentAuthorityRunPlanV1.model_validate(
-            json.loads((root / RUN_PLAN_PATH).read_text(encoding="utf-8"))
-        )
         declared_patterns = {
             _pattern_name(pattern) for pattern in plan.deployment_patterns
         }
