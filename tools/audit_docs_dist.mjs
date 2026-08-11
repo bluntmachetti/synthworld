@@ -1,5 +1,5 @@
-import { readFile, readdir, stat } from "node:fs/promises";
-import { extname, join, relative, sep } from "node:path";
+import { lstat, readFile, readdir } from "node:fs/promises";
+import { basename, extname, join, relative, sep } from "node:path";
 
 const outputRoot = "dist";
 const deploymentBase = "/synthworld";
@@ -44,18 +44,20 @@ const forbiddenLeakPatterns = [
     /(?:(?:"|'|&quot;|&#34;)?oracle(?:"|'|&quot;|&#34;)?)\s*[:=]\s*(?:\{|\[|"|'|&quot;|&#34;|true|false|null)/i,
   ],
 ];
-const textExtensions = new Set([
+const allowedTextExtensions = new Set([
   ".css",
   ".html",
   ".js",
   ".json",
-  ".map",
   ".md",
   ".mdx",
   ".svg",
   ".txt",
   ".xml",
 ]);
+const allowedTextBasenames = new Set(["_headers"]);
+const allowedBinaryExtensions = new Set([".woff2"]);
+const allowedBinaryBasenames = new Set();
 
 async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -64,12 +66,16 @@ async function walk(directory) {
     if (left.name < right.name) return -1;
     if (left.name > right.name) return 1;
     return 0;
-  })) {
+    })) {
     const path = join(directory, entry.name);
-    if (entry.isDirectory()) {
+    if (entry.isSymbolicLink()) {
+      fail(`unsupported symbolic link in docs output: ${displayPath(path)}`);
+    } else if (entry.isDirectory()) {
       paths.push(...(await walk(path)));
     } else if (entry.isFile()) {
       paths.push(path);
+    } else {
+      fail(`unsupported filesystem entry in docs output: ${displayPath(path)}`);
     }
   }
   return paths;
@@ -84,6 +90,28 @@ function fail(message) {
   process.exitCode = 1;
 }
 
+function classifyOutputFile(path) {
+  const name = basename(path);
+  const extension = extname(name).toLowerCase();
+
+  if (extension === ".map") {
+    fail(`source map emitted in docs output: ${displayPath(path)}`);
+    return null;
+  }
+  if (allowedTextBasenames.has(name) || allowedTextExtensions.has(extension)) {
+    return "text";
+  }
+  if (
+    allowedBinaryBasenames.has(name) ||
+    allowedBinaryExtensions.has(extension)
+  ) {
+    return "binary";
+  }
+
+  fail(`unsupported file type in docs output: ${displayPath(path)}`);
+  return null;
+}
+
 function auditRootReference(target, renderedPath) {
   const normalizedTarget = target.split(/[?#]/, 1)[0];
   if (
@@ -96,19 +124,37 @@ function auditRootReference(target, renderedPath) {
   }
 }
 
+let outputRootIsDirectory = false;
 try {
-  await stat(join(outputRoot, "index.html"));
-  await stat(join(outputRoot, "blume-search.json"));
-  await stat(join(outputRoot, "changelog", "CHANGELOG", "index.html"));
+  outputRootIsDirectory = (await lstat(outputRoot)).isDirectory();
 } catch {
-  fail("production HTML, changelog route, or the local search index is missing");
+  // The missing-output case is reported by the fail-closed check below.
+}
+if (!outputRootIsDirectory) {
+  fail("dist/ must exist as a real directory; run the production build first");
+}
+
+for (const requiredPath of [
+  join(outputRoot, "index.html"),
+  join(outputRoot, "blume-search.json"),
+  join(outputRoot, "changelog", "CHANGELOG", "index.html"),
+]) {
+  try {
+    if (!(await lstat(requiredPath)).isFile()) {
+      fail(`required docs output is not a regular file: ${displayPath(requiredPath)}`);
+    }
+  } catch {
+    fail(`required docs output is missing: ${displayPath(requiredPath)}`);
+  }
 }
 
 let outputFiles = [];
-try {
-  outputFiles = await walk(outputRoot);
-} catch {
-  fail("dist/ does not exist; run the production build first");
+if (outputRootIsDirectory) {
+  try {
+    outputFiles = await walk(outputRoot);
+  } catch {
+    fail("dist/ could not be audited");
+  }
 }
 
 for (const path of outputFiles) {
@@ -122,12 +168,13 @@ for (const path of outputFiles) {
   ) {
     fail(`forbidden agent-facing artifact emitted at ${renderedPath}`);
   }
-  const extension = extname(path);
+  const extension = extname(path).toLowerCase();
   if (forbiddenOpaqueExtensions.has(extension)) {
     fail(`opaque compressed artifact emitted at ${renderedPath}`);
   }
 
-  if (!textExtensions.has(extension)) {
+  const fileKind = classifyOutputFile(path);
+  if (fileKind !== "text") {
     continue;
   }
 

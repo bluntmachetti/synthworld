@@ -1005,23 +1005,23 @@ def test_protected_workflow_has_no_hf_credential_or_upload_command() -> None:
     parsed = yaml.safe_load(workflow.replace("\non:", '\n"on":', 1))
 
     assert set(parsed["on"]) == {"pull_request", "push", "workflow_dispatch"}
-    registry_inputs = {
+    publication_inputs = {
+        ".github/workflows/huggingface-publication.yml",
         "docs/_data/benchmark-publication-gates.json",
-        "docs/_data/benchmark-publication-transitions.json",
+        "docs/_data/benchmark-transitions.json",
         "docs/_data/benchmarks.curated.json",
         "docs/_data/benchmarks.generated.json",
+        "docs/_data/benchmarks.resolved.json",
+        "docs/_schemas/benchmarks-resolved.schema.json",
+        "huggingface/**",
+        "pyproject.toml",
+        "tests/test_huggingface_publication.py",
+        "tools/check_huggingface_publication.py",
         "tools/generate_benchmark_registry.py",
-    }
-    assert set(parsed["on"]["push"]["paths"]) >= {
-        "pyproject.toml",
         "uv.lock",
-        *registry_inputs,
     }
-    assert set(parsed["on"]["pull_request"]["paths"]) >= {
-        "pyproject.toml",
-        "uv.lock",
-        *registry_inputs,
-    }
+    assert set(parsed["on"]["push"]["paths"]) == publication_inputs
+    assert set(parsed["on"]["pull_request"]["paths"]) == publication_inputs
     assert parsed["on"]["push"]["branches"] == ["main"]
     protected = parsed["jobs"]["protected-dry-run"]
     assert protected["environment"] == "hugging-face-publication"

@@ -27,8 +27,6 @@ jobs:
           test "v${project_version}" = "${GITHUB_REF_NAME}"
       - name: Run full gates
         run: make ci
-      - name: Build distribution
-        run: uv build --clear
       - name: Upload distribution
         uses: actions/upload-artifact@v7
         with:

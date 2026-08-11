@@ -2125,6 +2125,30 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/decisions/benchmark-publication-governance.md",
+      "path": "docs/decisions/benchmark-publication-governance.md"
+    },
+    {
+      "anchor": "b6-independent-publication-axes",
+      "heading": "B6: independent publication axes",
+      "id": "route:docs/decisions/benchmark-publication-governance.md#b6-independent-publication-axes",
+      "path": "docs/decisions/benchmark-publication-governance.md"
+    },
+    {
+      "anchor": "b7-independent-section-13-review",
+      "heading": "B7: independent Section 13 review",
+      "id": "route:docs/decisions/benchmark-publication-governance.md#b7-independent-section-13-review",
+      "path": "docs/decisions/benchmark-publication-governance.md"
+    },
+    {
+      "anchor": "benchmark-publication-governance",
+      "heading": "Benchmark publication governance",
+      "id": "route:docs/decisions/benchmark-publication-governance.md#benchmark-publication-governance",
+      "path": "docs/decisions/benchmark-publication-governance.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/experiments/index.md",
       "path": "docs/experiments/index.md"
     },
