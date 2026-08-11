@@ -151,7 +151,7 @@
   },
   "registry": {
     "path": "docs/_data/benchmarks.resolved.json",
-    "sha256": "798adb82aad084b4311169aa32a9cdbcadbf77b93ae47ad5e133b8eb6e22ec0f"
+    "sha256": "cc98aa4b8b5d44b2bafbadefc23b82faf409713b14c0e11b0ea7c6520004928f"
   },
   "registry_summary": {
     "candidate": 10,
