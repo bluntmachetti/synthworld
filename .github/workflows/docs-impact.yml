@@ -56,6 +56,7 @@ jobs:
             blume.config.ts package.json package-lock.json \
             tsconfig.json .nvmrc tools/audit_docs_dist.mjs \
             tools/prepare_docs_content.mjs tools/generate_registry_catalogue.mjs \
+            .github/workflows/docs-deploy.yml \
             .github/workflows/docs-impact.yml; then
             echo "impacted=false" >> "$GITHUB_OUTPUT"
           else
@@ -96,7 +97,9 @@ jobs:
               --output /tmp/blume-preview.html --write-out '%{http_code}' \
               http://127.0.0.1:4321/synthworld/ || true)"
             if [[ "$response_code" == "200" ]] && \
-              grep --fixed-strings --quiet "Documentation preview" /tmp/blume-preview.html; then
+              grep --fixed-strings --quiet \
+                "Deterministic synthetic identity data and ground-truth benchmarks." \
+                /tmp/blume-preview.html; then
               ready=true
               break
             fi

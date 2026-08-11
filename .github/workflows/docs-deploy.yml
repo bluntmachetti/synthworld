@@ -1,0 +1,83 @@
+name: Deploy documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "AGENTIC_BENCHMARK.md"
+      - "BENCHMARKS.md"
+      - "CHANGELOG.md"
+      - "DATA_DICTIONARY.md"
+      - "EVALUATION_KEY_CUSTODY.md"
+      - "GOLDEN_REVIEW.md"
+      - "README.md"
+      - "ROADMAP.md"
+      - "USER_GUIDE.md"
+      - "agent-authority-contract/README.md"
+      - "authority-governance-contract/README.md"
+      - "contextual-access-contract/README.md"
+      - "continuous-assurance-contract/README.md"
+      - "enterprise-identity-access-contract/README.md"
+      - "huggingface/README.md"
+      - "blume.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - ".nvmrc"
+      - "tools/audit_docs_dist.mjs"
+      - "tools/prepare_docs_content.mjs"
+      - "tools/generate_registry_catalogue.mjs"
+      - ".github/workflows/docs-deploy.yml"
+      - ".github/workflows/docs-impact.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Set up pinned npm
+        run: npm install --global npm@10.9.0
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Install locked documentation dependencies
+        run: npm ci
+
+      - name: Build and audit documentation
+        run: npm run docs:check
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist/
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
