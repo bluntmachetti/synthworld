@@ -13,7 +13,8 @@
           "approved_sha256": "6cfc0483ccd43256010a88ef25df4869a5cfc1cd6e7b0f105b5a4b9cfca26986",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "ambiguity-v1",
           "frozen": true,
@@ -25,6 +26,7 @@
             "path": "src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS",
             "sha256": "6cfc0483ccd43256010a88ef25df4869a5cfc1cd6e7b0f105b5a4b9cfca26986"
           },
+          "hf_destination_path": "frozen/ambiguity-v1/SHA256SUMS",
           "id": "ambiguity-v1:checksum",
           "integrity_record_ids": [],
           "kind": "checksum_manifest",
@@ -40,7 +42,8 @@
           "approved_sha256": "334808680b46f58f78ac820c887548692b057eab97bb6cf41571d1e77dd87e11",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "ambiguity-v1",
           "frozen": true,
@@ -54,6 +57,7 @@
             "path": "src/synthworld/benchmarks/ambiguity-dispositions-v1.json",
             "sha256": "334808680b46f58f78ac820c887548692b057eab97bb6cf41571d1e77dd87e11"
           },
+          "hf_destination_path": "frozen/ambiguity-v1/ambiguity-dispositions-v1.json",
           "id": "ambiguity-v1:dispositions",
           "integrity_record_ids": [
             "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
@@ -71,7 +75,8 @@
           "approved_sha256": "42d7f52a4c4a058d2616630dce719fb8c659fd56d4789d91d0cfdee96a264a8e",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "ambiguity-v1",
           "frozen": true,
@@ -85,6 +90,7 @@
             "path": "src/synthworld/benchmarks/ambiguity-memberships-v1.json",
             "sha256": "42d7f52a4c4a058d2616630dce719fb8c659fd56d4789d91d0cfdee96a264a8e"
           },
+          "hf_destination_path": "frozen/ambiguity-v1/ambiguity-memberships-v1.json",
           "id": "ambiguity-v1:memberships",
           "integrity_record_ids": [
             "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
@@ -102,7 +108,8 @@
           "approved_sha256": "217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "ambiguity-v1",
           "frozen": true,
@@ -116,6 +123,7 @@
             "path": "src/synthworld/benchmarks/ambiguity-public-v1.json",
             "sha256": "217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a"
           },
+          "hf_destination_path": "frozen/ambiguity-v1/ambiguity-public-v1.json",
           "id": "ambiguity-v1:public",
           "integrity_record_ids": [
             "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
@@ -144,7 +152,8 @@
         "approved_targets": [
           "repository",
           "python_package",
-          "docs_catalog"
+          "docs_catalog",
+          "hugging_face_raw"
         ],
         "benchmark_id": "ambiguity-v1",
         "benchmark_version": "1.0.0",
@@ -201,7 +210,7 @@
           },
           {
             "name": "adversarial_review",
-            "rationale": null,
+            "rationale": "Independent Claude and Qwen 3.8 Max publication review on 2026-08-12 required per-artifact scope, a pinned remote baseline, canonical destinations, remote preconditions, and separate uploader review.",
             "status": "pass"
           },
           {
@@ -221,8 +230,8 @@
           },
           {
             "name": "catalogue_hf_metadata",
-            "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
-            "status": "not_applicable"
+            "rationale": "The v0.14.0 manifest pins benchmark version, source and destination paths, artifact kind and sensitivity, answer-key label, digest, byte size, content type, and remote precondition for each authorized raw artifact.",
+            "status": "pass"
           }
         ],
         "decision": "approved",
@@ -1182,7 +1191,8 @@
           "approved_sha256": "a856171b2a328614705340a0d8d8dcf1f6bc0794adf0853c377718f796eb585c",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "authority-governance-v1",
           "frozen": true,
@@ -1194,6 +1204,7 @@
             "path": "src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
             "sha256": "a856171b2a328614705340a0d8d8dcf1f6bc0794adf0853c377718f796eb585c"
           },
+          "hf_destination_path": "frozen/authority-governance-v1/SHA256SUMS",
           "id": "authority-governance-v1:checksum",
           "integrity_record_ids": [],
           "kind": "checksum_manifest",
@@ -1209,7 +1220,8 @@
           "approved_sha256": "7822846e7d5613741857cceed33df849f04606548a4c0e1ce789646aaae8e5e5",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "authority-governance-v1",
           "frozen": true,
@@ -1224,6 +1236,7 @@
             "path": "src/synthworld/benchmarks/authority-governance-v1/evaluator/authority-governance-evaluator.json",
             "sha256": "7822846e7d5613741857cceed33df849f04606548a4c0e1ce789646aaae8e5e5"
           },
+          "hf_destination_path": "frozen/authority-governance-v1/evaluator/authority-governance-evaluator.json",
           "id": "authority-governance-v1:evaluator",
           "integrity_record_ids": [
             "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
@@ -1242,7 +1255,8 @@
           "approved_sha256": "d9b5e3c19a74344ba9b28bfb58efde98ce8809e4157e8c0fa6b97639a7a36e18",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "authority-governance-v1",
           "frozen": true,
@@ -1256,6 +1270,7 @@
             "path": "src/synthworld/benchmarks/authority-governance-v1/evaluator/manifest.json",
             "sha256": "d9b5e3c19a74344ba9b28bfb58efde98ce8809e4157e8c0fa6b97639a7a36e18"
           },
+          "hf_destination_path": "frozen/authority-governance-v1/evaluator/manifest.json",
           "id": "authority-governance-v1:evaluator-manifest",
           "integrity_record_ids": [
             "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS"
@@ -1273,7 +1288,8 @@
           "approved_sha256": "340df0ed2b33db6c05805891258dda789f445e300084a0e347ee318044d3191b",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "authority-governance-v1",
           "frozen": true,
@@ -1288,6 +1304,7 @@
             "path": "src/synthworld/benchmarks/authority-governance-v1/public/authority-governance-input.json",
             "sha256": "340df0ed2b33db6c05805891258dda789f445e300084a0e347ee318044d3191b"
           },
+          "hf_destination_path": "frozen/authority-governance-v1/public/authority-governance-input.json",
           "id": "authority-governance-v1:public-input",
           "integrity_record_ids": [
             "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
@@ -1306,7 +1323,8 @@
           "approved_sha256": "60081ed11ff85b6909e57771f3aeffb8023136ae8b66e91bbaf4473ef7f27d92",
           "approved_targets": [
             "repository",
-            "python_package"
+            "python_package",
+            "hugging_face_raw"
           ],
           "benchmark_id": "authority-governance-v1",
           "frozen": true,
@@ -1320,6 +1338,7 @@
             "path": "src/synthworld/benchmarks/authority-governance-v1/public/manifest.json",
             "sha256": "60081ed11ff85b6909e57771f3aeffb8023136ae8b66e91bbaf4473ef7f27d92"
           },
+          "hf_destination_path": "frozen/authority-governance-v1/public/manifest.json",
           "id": "authority-governance-v1:public-manifest",
           "integrity_record_ids": [
             "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS"
@@ -1348,7 +1367,8 @@
         "approved_targets": [
           "repository",
           "python_package",
-          "docs_catalog"
+          "docs_catalog",
+          "hugging_face_raw"
         ],
         "benchmark_id": "authority-governance-v1",
         "benchmark_version": "1.0.0",
@@ -1405,8 +1425,8 @@
           },
           {
             "name": "adversarial_review",
-            "rationale": "This public conformance fixture does not claim a blind or held-out threat model; evaluator truth is explicitly published reference material.",
-            "status": "not_applicable"
+            "rationale": "Independent Claude and Qwen 3.8 Max publication review on 2026-08-12 required per-artifact scope, a pinned remote baseline, canonical destinations, remote preconditions, and separate uploader review.",
+            "status": "pass"
           },
           {
             "name": "safety_review",
@@ -1425,8 +1445,8 @@
           },
           {
             "name": "catalogue_hf_metadata",
-            "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
-            "status": "not_applicable"
+            "rationale": "The v0.14.0 manifest pins benchmark version, source and destination paths, artifact kind and sensitivity, answer-key label, digest, byte size, content type, and remote precondition for each authorized raw artifact.",
+            "status": "pass"
           }
         ],
         "decision": "approved",
@@ -2764,9 +2784,9 @@
     }
   ],
   "input_digests": {
-    "benchmark_publication_gates": "981975169df617ebfd30a782ccaca7863ad695f23354e2d83fb816b09f64b945",
+    "benchmark_publication_gates": "ce74a4e25e01978fcc1bd4ac5ec2196b12d2d78ed245d820079281f26b9cc099",
     "benchmark_transitions": "7c598ad3b0f89773628bf81d3b9faf37f528be5d22b857e8f41fa1ba2812c77d",
-    "benchmarks_curated": "1521590fda022a14c149a73318a6527addf61d99cc730ad5801102d92337ce50",
+    "benchmarks_curated": "a57f4dc3c24dd744e92481eaeb41c76972d5405caf7257b631fb6e2156635d2b",
     "benchmarks_generated": "9023aa536f58096310041353b8ec836d430df153cc8c0ac9cf0de045fe5b7560"
   },
   "schema_version": "1.0.0"
