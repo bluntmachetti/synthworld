@@ -8,16 +8,21 @@ resolved registry once its prerequisite governance changes land on `main`.
 
 - Keep frozen benchmarks byte-stable while tightening documentation and publication
   controls.
-- Expand deterministic enterprise inputs and document known fidelity gaps.
+- Document the shipped enterprise planning journey and known fidelity gaps without
+  implying automatic generated-agent composition.
 - Design credential-authority and parameter-integrity contracts before generating
   agent/NHI worlds against them.
 
 ## Next
 
-- Add renderer and dark-preview infrastructure only after the plain-Markdown journeys
-  and registry-backed references are accepted.
+- Build the first deterministic Explorer slice around published current worlds and a
+  versioned public/evaluator projection boundary.
 - Grow generated enterprise and agent/workload identity depth through independently
   versioned packs.
+
+The [Enterprise Identity Planning guide](../guides/enterprise-identity-planning.md)
+records the current journey. Generated enterprise-agentic tiers remain issue #27;
+large-world Explorer controls follow that generated contract rather than preceding it.
 
 ## Later
 

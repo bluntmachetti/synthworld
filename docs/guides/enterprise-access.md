@@ -11,3 +11,6 @@ is normative for schemas, budgets, output layout, and limitations.
 
 Importing structure is not anonymization. Keep source imports and namespace salts
 private. Shipped evaluator fixtures are public conformance truth, not held-out tests.
+
+For the end-to-end topology, planning, lifecycle and future agentic-composition
+journey, see [Enterprise Identity Planning](enterprise-identity-planning.md).

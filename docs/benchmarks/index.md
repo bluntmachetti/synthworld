@@ -25,6 +25,9 @@ published.
   keys.
 - [Experiments](/experiments) records experiment-oriented guidance without
   presenting provisional results as product claims.
+- [Enterprise Identity Planning](/guides/enterprise-identity-planning) separates
+  architecture-planning workflows from governed benchmark evaluation and marks
+  current versus planned composition explicitly.
 
 Existing frozen `1.0.0` benchmark artifacts remain byte-identical. Follow the
 publication status in the benchmark reference rather than inferring support

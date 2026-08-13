@@ -15,3 +15,7 @@ is normative for external traces and evidence claims.
 
 Reference truth ships publicly for conformance. This is not a blind or secret test,
 and core trace scoring does not prove deployed enforcement.
+
+See [Enterprise Identity Planning](enterprise-identity-planning.md) for how this
+separate reference world relates to today's human enterprise compiler and the
+planned generated composition under issue #27.
