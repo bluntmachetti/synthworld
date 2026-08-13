@@ -82,4 +82,4 @@ The generated v2 ambiguity work uses a different construction with overlapping e
 
 Do not infer benchmark truth from identifiers, ordering, or case labels. Public artifacts reject oracle-bearing fields rather than relying only on naming conventions.
 
-For general scorer integration see [Evaluating a system](evaluating-a-system.md).
+Use the documentation site's evaluation guide for the general scorer integration flow.
