@@ -76,6 +76,18 @@ using a benchmark scorer.
 A frozen conformance fixture is evidence that an adapter handles the declared cases;
 it is not automatically evidence of real-world transfer or a vendor leaderboard.
 
+## Current benchmark families
+
+Use the generated [benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) for governed current state and [BENCHMARKS.md](https://github.com/bluntmachetti/synthworld/blob/main/BENCHMARKS.md) for the human-readable inventory. Package presence does not by itself imply publication or maturity.
+
+## Enterprise identity and access
+
+The enterprise surface is documented in the [enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/) and its normative contract. It provides deterministic test inputs and evaluator truth; it is not a live IAM or enforcement service.
+
+## What the ambiguity pack does and does not measure
+
+The ambiguity families are conformance and generated evaluation surfaces, not claims of real-world transfer. Use the [identity-resolution guide](https://bluntmachetti.github.io/synthworld/guides/identity-resolution/) and [BENCHMARKS.md](https://github.com/bluntmachetti/synthworld/blob/main/BENCHMARKS.md) for their construction, limits, baselines, and current publication state.
+
 ## Benchmarks and documentation
 
 - [Documentation](https://bluntmachetti.github.io/synthworld/)
