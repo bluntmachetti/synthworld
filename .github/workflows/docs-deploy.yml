@@ -26,6 +26,7 @@ on:
       - "tsconfig.json"
       - ".nvmrc"
       - "tools/audit_docs_dist.mjs"
+      - "tools/audit_docs_headings.mjs"
       - "tools/prepare_docs_content.mjs"
       - "tools/generate_registry_catalogue.mjs"
       - "tools/normalize_blume_headings.mjs"
