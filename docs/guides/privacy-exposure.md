@@ -47,4 +47,4 @@ The search report keeps false accepts, false rejects, unwarranted decisions, cov
 
 Only artifacts explicitly documented as public belong on the product side. Annotated or evaluator bundles may contain expected results even when the same benchmark also provides a product-safe projection.
 
-For the general integration sequence see [Evaluating a system](evaluating-a-system.md). For schemas, formulas, benchmark identities, and frozen reference values use [DATA_DICTIONARY.md](../../DATA_DICTIONARY.md) and [BENCHMARKS.md](../../BENCHMARKS.md).
+Use the documentation site's evaluation guide for the general integration sequence. For schemas, formulas, benchmark identities, and frozen reference values use [DATA_DICTIONARY.md](../../DATA_DICTIONARY.md) and [BENCHMARKS.md](../../BENCHMARKS.md).
