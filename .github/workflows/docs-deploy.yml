@@ -28,6 +28,7 @@ on:
       - "tools/audit_docs_dist.mjs"
       - "tools/prepare_docs_content.mjs"
       - "tools/generate_registry_catalogue.mjs"
+      - "tools/normalize_blume_headings.mjs"
       - ".github/workflows/docs-deploy.yml"
       - ".github/workflows/docs-impact.yml"
   workflow_dispatch:
