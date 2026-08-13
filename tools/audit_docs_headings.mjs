@@ -3,10 +3,16 @@ import { extname, join, relative, sep } from "node:path";
 
 const outputRoot = process.argv[2] ?? "dist";
 
+function compareNames(left, right) {
+  if (left.name < right.name) return -1;
+  if (left.name > right.name) return 1;
+  return 0;
+}
+
 async function htmlFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort(compareNames)) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
       files.push(...(await htmlFiles(path)));
