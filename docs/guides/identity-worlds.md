@@ -8,4 +8,4 @@ synthworld generate --seed 20260719 --persona-count 100 --output world.json
 
 Treat the core world as a deterministic smoke surface, not as a transfer claim. Its frozen reference topology is intentionally simple, so use richer generated profiles when graph structure is part of the test.
 
-For current field contracts and benchmark limits, use [DATA_DICTIONARY.md](../../DATA_DICTIONARY.md) and [BENCHMARKS.md](../../BENCHMARKS.md). For evaluation flow, use [Evaluating a system](evaluating-a-system.md).
+For current field contracts and benchmark limits, use [DATA_DICTIONARY.md](../../DATA_DICTIONARY.md) and [BENCHMARKS.md](../../BENCHMARKS.md). Use the documentation site's evaluation guide for the general adapter and scoring flow.
