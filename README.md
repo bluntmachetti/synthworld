@@ -3,112 +3,81 @@
 [![CI](https://github.com/bluntmachetti/synthworld/actions/workflows/ci.yml/badge.svg)](https://github.com/bluntmachetti/synthworld/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/idcognito-synthworld?cacheSeconds=3600)](https://pypi.org/project/idcognito-synthworld/)
 [![Python versions](https://img.shields.io/pypi/pyversions/idcognito-synthworld?cacheSeconds=3600)](https://pypi.org/project/idcognito-synthworld/)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/bluntmachetti/synthworld/blob/main/LICENSE)
-[![Coverage: 100% enforced](https://img.shields.io/badge/coverage-100%25_enforced-brightgreen)](https://github.com/bluntmachetti/synthworld/blob/main/Makefile)
 
 **Deterministic synthetic identity worlds with adversarial evidence and ground-truth answer keys.**
 
-SynthWorld creates safely fictional, connected test worlds for evaluating privacy,
-identity resolution, relationship inference, access decisions, agent authority, and
-evidence quality. Public observations and evaluator truth are kept as separate
-artifacts so a system can be tested without feeding it its own answers.
+SynthWorld creates safely fictional connected test worlds and keeps public observations separate from evaluator truth. It is not an anonymisation tool.
 
-> **SynthWorld is not an anonymisation tool.** It does not transform sensitive real
-> data into a safe dataset, and it is not an IAM product, policy engine, or runtime
-> enforcement service.
+## Choose what you want to do
 
-## How it fits together
+Start with the [documentation site](https://bluntmachetti.github.io/synthworld/) or the generated [benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/).
 
-```text
-seed + explicit configuration
-          |
-          v
- deterministic world
-      /          \
-     v            v
-public input   evaluator truth
-     |            |
-     v            |
-system under test |
-     |            |
-     +-> prediction/trace
-                  |
-                  v
-          independent scoring
-```
+## Featured: agent authority
 
-## Choose your goal
+See the [agent authority guide](https://bluntmachetti.github.io/synthworld/guides/agent-authority/) and [Asteria Agentic v1](AGENTIC_BENCHMARK.md).
 
-| Goal | Start here |
-|---|---|
-| Install and create a first world | [Getting Started](https://bluntmachetti.github.io/synthworld/getting-started/) |
-| Build connected test worlds | [Identity worlds](https://bluntmachetti.github.io/synthworld/guides/identity-worlds/) |
-| Evaluate identity resolution | [Identity resolution](https://bluntmachetti.github.io/synthworld/guides/identity-resolution/) |
-| Evaluate privacy and exposure behavior | [Privacy and exposure](https://bluntmachetti.github.io/synthworld/guides/privacy-exposure/) |
-| Test agent delegation and audit evidence | [Agent authority](https://bluntmachetti.github.io/synthworld/guides/agent-authority/) |
-| Compile enterprise identity/access truth | [Enterprise access](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/) |
-| Connect a product or model to a scorer | [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/) |
-| Inspect benchmark status and publication state | [Benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) |
+## Why SynthWorld
 
-## Install and generate
+Repeatable inputs, connected fictional data, adversarial cases, separate evaluator truth, and versioned scoring make benchmark claims reproducible.
 
-SynthWorld requires Python 3.12 or newer.
+## Current benchmark families
+
+See the [benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) and [BENCHMARKS.md](BENCHMARKS.md).
+
+## The core identity world is a smoke surface
+
+See the [identity-world guide](https://bluntmachetti.github.io/synthworld/guides/identity-worlds/) for scope and limits.
+
+## What the ambiguity pack does and does not measure
+
+See the [identity-resolution guide](https://bluntmachetti.github.io/synthworld/guides/identity-resolution/) and [BENCHMARKS.md](BENCHMARKS.md).
+
+## Public input and evaluator truth
+
+Give systems only explicitly public inputs; keep evaluator artifacts on the scoring side.
+
+## Enterprise identity and access
+
+See the [enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/) and the normative enterprise contract.
+
+## What the enterprise surface does not claim
+
+The enterprise surface provides deterministic test artifacts and offline evaluation, not a deployed enforcement service.
+
+## Install
 
 ```bash
 pip install idcognito-synthworld
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
-The same explicit inputs reproduce the same deterministic fixture. Continue with
-[Getting Started](https://bluntmachetti.github.io/synthworld/getting-started/) before
-using a benchmark scorer.
+## Evaluate a system
 
-## Why SynthWorld
+See [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/).
 
-| Requirement | Approach |
-|---|---|
-| Repeatable evaluation | Explicit seeds/configuration, canonical ordering, frozen fixtures, and checksums |
-| Connected test data | Coherent worlds rather than independent fake rows |
-| Adversarial cases | Conflicts, ambiguity, lifecycle changes, and negative controls are planted deliberately |
-| Controlled oracle exposure | Product-facing observations and evaluator truth use separate artifacts and contracts |
-| Reproducible claims | Versioned schemas, scoring formulas, benchmark identities, and integrity metadata |
+## Validate before you score
 
-A frozen conformance fixture is evidence that an adapter handles the declared cases;
-it is not automatically evidence of real-world transfer or a vendor leaderboard.
+Use the task validator where one exists, then run the corresponding evaluator.
 
-## Current benchmark families
+## Use Asteria Agentic v1
 
-Use the generated [benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) for governed current state and [BENCHMARKS.md](https://github.com/bluntmachetti/synthworld/blob/main/BENCHMARKS.md) for the human-readable inventory. Package presence does not by itself imply publication or maturity.
+See [AGENTIC_BENCHMARK.md](AGENTIC_BENCHMARK.md) for the frozen fixture and replay contract.
 
-## Enterprise identity and access
+## Verify every claim
 
-The enterprise surface is documented in the [enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/) and its normative contract. It provides deterministic test inputs and evaluator truth; it is not a live IAM or enforcement service.
+Retain benchmark identity, versions, explicit inputs, checksums, and the submitted prediction or trace.
 
-## What the ambiguity pack does and does not measure
+## Roadmap and integrations
 
-The ambiguity families are conformance and generated evaluation surfaces, not claims of real-world transfer. Use the [identity-resolution guide](https://bluntmachetti.github.io/synthworld/guides/identity-resolution/) and [BENCHMARKS.md](https://github.com/bluntmachetti/synthworld/blob/main/BENCHMARKS.md) for their construction, limits, baselines, and current publication state.
+See the [roadmap](https://bluntmachetti.github.io/synthworld/roadmap/) and [ROADMAP.md](ROADMAP.md).
 
-## Benchmarks and documentation
+## Develop from source
 
-- [Documentation](https://bluntmachetti.github.io/synthworld/)
-- [Generated benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/)
-- [Human-readable benchmark inventory](https://github.com/bluntmachetti/synthworld/blob/main/BENCHMARKS.md)
-- [Asteria Agentic v1](https://github.com/bluntmachetti/synthworld/blob/main/AGENTIC_BENCHMARK.md)
-- [Data dictionary](https://github.com/bluntmachetti/synthworld/blob/main/DATA_DICTIONARY.md)
-- [Frozen tables on Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks)
-- [Roadmap](https://bluntmachetti.github.io/synthworld/roadmap/)
-- [Changelog](https://github.com/bluntmachetti/synthworld/blob/main/CHANGELOG.md)
+```bash
+uv sync --locked --all-groups
+make ci
+```
 
-## Community and project policy
+## License
 
-Questions and design discussions belong in
-[GitHub Discussions](https://github.com/bluntmachetti/synthworld/discussions). Bugs
-and scoped work belong in
-[Issues](https://github.com/bluntmachetti/synthworld/issues).
-
-Before contributing, read
-[CONTRIBUTING.md](https://github.com/bluntmachetti/synthworld/blob/main/CONTRIBUTING.md).
-Report security issues through the
-[security policy](https://github.com/bluntmachetti/synthworld/security/policy), not a
-public issue. SynthWorld is licensed under
-[Apache-2.0](https://github.com/bluntmachetti/synthworld/blob/main/LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).
