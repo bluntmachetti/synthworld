@@ -9,8 +9,10 @@
 **Deterministic synthetic identity worlds with adversarial evidence and ground-truth answer keys.**
 
 SynthWorld creates safely fictional, connected test worlds for evaluating identity,
-privacy, access, and agent systems. Public observations and evaluator truth are kept
-as separate artifacts so a system can be tested without feeding it its own answers.
+privacy, access, and agent systems. Where a benchmark provides a product-safe
+projection, public observations are serialized separately from evaluator truth so a
+system can be tested without feeding it its own answers. Other commands emit
+annotated or evaluator bundles and must not be treated as product input.
 
 > **SynthWorld is not an anonymisation tool.** It does not transform sensitive real
 > data into a safe dataset, and it is not an IAM product, policy engine, or runtime
@@ -91,8 +93,18 @@ for the current constructions, baselines, and limitations.
 
 ## Public input and evaluator truth
 
-Only inputs explicitly documented as public belong on the product side. Evaluator
-artifacts contain the information used to score the resulting prediction or trace.
+Only inputs explicitly documented as public belong on the product side. Do **not**
+assume that an artifact is product-safe merely because SynthWorld generated it.
+
+For example, `generate-public-extraction`, `generate-public-connections`, and
+`generate-risk-public` emit product-facing projections. By contrast,
+`generate-extraction` and `generate-connection-benchmark` emit evaluator or annotated
+bundles containing expected answers and must not be passed to the system under test.
+Some benchmark commands write both `public/` and `evaluator/` subtrees; in that case,
+pass only the documented public subtree to the product or model.
+
+Evaluator artifacts contain the information used to score the resulting prediction
+or trace.
 
 ```text
 public benchmark input
@@ -141,9 +153,9 @@ using a benchmark scorer.
 
 ## Evaluate a system
 
-Every integration follows the same pattern: give the system only public input,
-normalize its native output into the task-specific prediction or trace contract, then
-score it against separately loaded evaluator truth.
+Every integration follows the same pattern: give the system only explicitly public
+input, normalize its native output into the task-specific prediction or trace
+contract, then score it against separately loaded evaluator truth.
 
 See [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/)
 for runnable examples and metric interpretation.
