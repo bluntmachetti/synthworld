@@ -25,6 +25,22 @@ jobs:
         run: |
           project_version="$(uv run python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
           test "v${project_version}" = "${GITHUB_REF_NAME}"
+      - name: Validate PyPI long-description source
+        run: |
+          uv run --isolated --no-project --with 'readme-renderer[md]==45.0' python - <<'PY'
+          from pathlib import Path
+          import tomllib
+
+          from readme_renderer.markdown import render
+
+          project = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]
+          readme = project.get("readme")
+          if readme != {"file": "README.md", "content-type": "text/markdown"}:
+              raise SystemExit(f"unexpected project.readme configuration: {readme!r}")
+          source = Path("README.md").read_text(encoding="utf-8")
+          if render(source) is None:
+              raise SystemExit("README.md failed Warehouse Markdown rendering")
+          PY
       - name: Run full gates
         run: make ci
       - name: Upload distribution
