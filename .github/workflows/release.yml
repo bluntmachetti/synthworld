@@ -25,46 +25,24 @@ jobs:
         run: |
           project_version="$(uv run python -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
           test "v${project_version}" = "${GITHUB_REF_NAME}"
-      - name: Run full gates
-        run: make ci
-      - name: Validate PyPI long description
+      - name: Validate PyPI long-description source
         run: |
           uv run --isolated --no-project --with 'readme-renderer[md]==45.0' python - <<'PY'
-          from email import policy
-          from email.parser import Parser
           from pathlib import Path
-          from zipfile import ZipFile
+          import tomllib
 
           from readme_renderer.markdown import render
 
-          wheels = list(Path("dist").glob("*.whl"))
-          if len(wheels) != 1:
-              raise SystemExit(f"expected one wheel, found {len(wheels)}")
-          with ZipFile(wheels[0]) as archive:
-              metadata_paths = [
-                  name
-                  for name in archive.namelist()
-                  if name.endswith(".dist-info/METADATA")
-              ]
-              if len(metadata_paths) != 1:
-                  raise SystemExit(
-                      f"expected one METADATA file, found {len(metadata_paths)}"
-                  )
-              metadata_text = archive.read(metadata_paths[0]).decode("utf-8")
-
-          metadata = Parser(policy=policy.default).parsestr(metadata_text)
-          content_type = metadata.get("Description-Content-Type", "")
-          if not content_type.lower().startswith("text/markdown"):
-              raise SystemExit(
-                  f"unexpected Description-Content-Type: {content_type!r}"
-              )
-          description = metadata.get_payload()
+          project = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]
+          readme = project.get("readme")
+          if readme != {"file": "README.md", "content-type": "text/markdown"}:
+              raise SystemExit(f"unexpected project.readme configuration: {readme!r}")
           source = Path("README.md").read_text(encoding="utf-8")
-          if description.rstrip("\n") != source.rstrip("\n"):
-              raise SystemExit("built long description differs from README.md")
-          if render(description) is None:
+          if render(source) is None:
               raise SystemExit("README.md failed Warehouse Markdown rendering")
           PY
+      - name: Run full gates
+        run: make ci
       - name: Upload distribution
         uses: actions/upload-artifact@v7
         with:
