@@ -57,7 +57,43 @@ jobs:
       - name: Build distribution
         run: uv build --clear
       - name: Validate PyPI long description
-        run: uvx --from twine==6.2.0 twine check --strict dist/*
+        run: |
+          uv run --isolated --no-project --with 'readme-renderer[md]==45.0' python - <<'PY'
+          from email import policy
+          from email.parser import Parser
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          from readme_renderer.markdown import render
+
+          wheels = list(Path("dist").glob("*.whl"))
+          if len(wheels) != 1:
+              raise SystemExit(f"expected one wheel, found {len(wheels)}")
+          with ZipFile(wheels[0]) as archive:
+              metadata_paths = [
+                  name
+                  for name in archive.namelist()
+                  if name.endswith(".dist-info/METADATA")
+              ]
+              if len(metadata_paths) != 1:
+                  raise SystemExit(
+                      f"expected one METADATA file, found {len(metadata_paths)}"
+                  )
+              metadata_text = archive.read(metadata_paths[0]).decode("utf-8")
+
+          metadata = Parser(policy=policy.default).parsestr(metadata_text)
+          content_type = metadata.get("Description-Content-Type", "")
+          if not content_type.lower().startswith("text/markdown"):
+              raise SystemExit(
+                  f"unexpected Description-Content-Type: {content_type!r}"
+              )
+          description = metadata.get_payload()
+          source = Path("README.md").read_text(encoding="utf-8")
+          if description.rstrip("\n") != source.rstrip("\n"):
+              raise SystemExit("built long description differs from README.md")
+          if render(description) is None:
+              raise SystemExit("README.md failed Warehouse Markdown rendering")
+          PY
 
   benchmark-registry:
     name: Benchmark registry governance
