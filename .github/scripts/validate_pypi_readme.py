@@ -11,9 +11,7 @@ def resolve_readme_source(readme: object) -> Path:
     """Resolve supported PEP 621 README forms to the canonical README path."""
     if isinstance(readme, str):
         readme_file = readme
-        content_type = (
-            EXPECTED_CONTENT_TYPE if readme.lower().endswith(".md") else None
-        )
+        content_type = EXPECTED_CONTENT_TYPE if readme.lower().endswith(".md") else None
     elif isinstance(readme, dict):
         readme_file = readme.get("file")
         content_type = readme.get("content-type")
