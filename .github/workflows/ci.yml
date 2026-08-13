@@ -54,6 +54,9 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.12"
+      - name: Validate configured PyPI README source
+        run: |
+          uv run --isolated --no-project --with 'readme-renderer[md]==45.0' python .github/scripts/validate_pypi_readme.py
       - name: Build distribution
         run: uv build --clear
       - name: Validate PyPI long description
