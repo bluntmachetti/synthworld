@@ -35,6 +35,30 @@ The project includes deterministic world generation, multiple independent evalua
 
 These are exploration directions, not statements that the capability already exists.
 
+## Phase 1 — Benchmark adoption
+
+The shared evaluation framework and core benchmark families are established. Current maturity and publication state come from the generated registries rather than from this roadmap heading.
+
+## Phase 2 — World depth and longitudinal truth
+
+Richer graph profiles and broader deterministic temporal composition remain active directions under #3 and #2 while existing frozen fixtures stay stable.
+
+## Phase 3 — Priority market packs
+
+Priority market work includes the shipped broker lifecycle evaluator and frozen agent-authority conformance surfaces, with generated scale and deeper composition continuing separately.
+
+### Data-broker deletion and reappearance
+
+Broker lifecycle evaluation is shipped; broader longitudinal product behavior remains separately scoped. See the privacy/exposure documentation and governed benchmark catalogue for current status.
+
+### AI agents and non-human identities
+
+Asteria and enterprise agent-authority conformance surfaces are shipped. Configurable generated agent/NHI worlds and scale tiers remain tracked under #27 and #6.
+
+## Phase 4 — Portfolio and AI-system integrations
+
+The enterprise identity/access foundation and contextual/continuous assurance contracts are established. Remaining integration work should extend those bounded contracts without turning SynthWorld into a general runtime or enforcement product.
+
 ## Contribution guidance
 
 New benchmark packs should begin with an issue that defines public input, evaluator truth, versioning, deterministic inputs, metrics, negative controls, and the intended frozen-versus-generated artifact strategy.
