@@ -2668,6 +2668,12 @@
       "path": "docs/guides/evaluating-a-system.md"
     },
     {
+      "anchor": "relationship-inference-workflow",
+      "heading": "Relationship-inference workflow",
+      "id": "route:docs/guides/evaluating-a-system.md#relationship-inference-workflow",
+      "path": "docs/guides/evaluating-a-system.md"
+    },
+    {
       "anchor": "",
       "heading": "",
       "id": "route:docs/guides/identity-resolution.md",
@@ -2782,9 +2788,21 @@
       "path": "docs/migration-index.md"
     },
     {
-      "anchor": "documentation-migration-index",
-      "heading": "Documentation migration index",
-      "id": "route:docs/migration-index.md#documentation-migration-index",
+      "anchor": "canonical-ownership",
+      "heading": "Canonical ownership",
+      "id": "route:docs/migration-index.md#canonical-ownership",
+      "path": "docs/migration-index.md"
+    },
+    {
+      "anchor": "compatibility-exception",
+      "heading": "Compatibility exception",
+      "id": "route:docs/migration-index.md#compatibility-exception",
+      "path": "docs/migration-index.md"
+    },
+    {
+      "anchor": "documentation-ownership-record",
+      "heading": "Documentation ownership record",
+      "id": "route:docs/migration-index.md#documentation-ownership-record",
       "path": "docs/migration-index.md"
     },
     {
@@ -2863,6 +2881,36 @@
       "anchor": "",
       "heading": "",
       "id": "route:docs/reference/standards-profiles.md",
+      "path": "docs/reference/standards-profiles.md"
+    },
+    {
+      "anchor": "authzen",
+      "heading": "AuthZEN",
+      "id": "route:docs/reference/standards-profiles.md#authzen",
+      "path": "docs/reference/standards-profiles.md"
+    },
+    {
+      "anchor": "inspect-projection-loss",
+      "heading": "Inspect projection loss",
+      "id": "route:docs/reference/standards-profiles.md#inspect-projection-loss",
+      "path": "docs/reference/standards-profiles.md"
+    },
+    {
+      "anchor": "openfga",
+      "heading": "OpenFGA",
+      "id": "route:docs/reference/standards-profiles.md#openfga",
+      "path": "docs/reference/standards-profiles.md"
+    },
+    {
+      "anchor": "run-the-python-projection-apis",
+      "heading": "Run the Python projection APIs",
+      "id": "route:docs/reference/standards-profiles.md#run-the-python-projection-apis",
+      "path": "docs/reference/standards-profiles.md"
+    },
+    {
+      "anchor": "scim",
+      "heading": "SCIM",
+      "id": "route:docs/reference/standards-profiles.md#scim",
       "path": "docs/reference/standards-profiles.md"
     },
     {

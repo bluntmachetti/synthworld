@@ -28,5 +28,6 @@ Do not include evaluator answer keys, private imports, salts, keys, local receip
 real personal data, or proprietary integration details. Changes to benchmark claims
 must follow the validated capability and publication registries.
 
-Track migrations in [the migration index](../migration-index.md) and leave source
-content in place until its canonical destination is complete and validated.
+Use the [documentation ownership record](../migration-index.md) to find the
+canonical destination. Preserve historical `USER_GUIDE.md` headings that are still
+registered routes, but make substantive guidance changes in the canonical owner.

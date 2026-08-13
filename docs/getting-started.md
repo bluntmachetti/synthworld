@@ -52,5 +52,5 @@ list of every contract-specific evaluator.
 - [Enterprise Identity Planning](guides/enterprise-identity-planning.md)
 - [Evaluating a system](guides/evaluating-a-system.md)
 
-The legacy [user guide](../USER_GUIDE.md) remains available as a compatibility
-surface while detailed guidance moves to these canonical pages.
+The legacy [user guide](../USER_GUIDE.md) remains only as a compatibility index
+for historical repository anchors. These canonical pages own the detailed guidance.
