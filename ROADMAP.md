@@ -1,43 +1,18 @@
 # SynthWorld roadmap
 
-SynthWorld is a deterministic ground-truth layer for evaluating identity, privacy, access, and agent systems. This file records direction rather than a release promise. The user-facing Now/Next/Later view lives at https://bluntmachetti.github.io/synthworld/roadmap/ and governed registries remain authoritative for current capability and benchmark status.
+This file records direction rather than a release promise. The user-facing Now/Next/Later view lives at https://bluntmachetti.github.io/synthworld/roadmap/; governed registries remain authoritative for current capability and benchmark status.
 
-## Principles
+## Product principles
 
-1. Ground truth first.
-2. Keep public observations separate from evaluator truth.
-3. Preserve synthetic-data safeguards.
-4. Make replay inputs and versions explicit.
-5. Keep domain runtimes outside the SynthWorld core.
-6. Keep small frozen fixtures stable and generate larger workloads separately.
+Ground truth first; public observations stay separate from evaluator truth; synthetic-data safeguards remain mandatory; replay inputs and versions stay explicit; small frozen fixtures remain stable while larger workloads are generated separately.
 
-## Current foundation
+## Architecture direction
 
-The project includes deterministic world generation, multiple independent evaluator families, governed capability and benchmark registries, versioned contract families, a deployed documentation site, and guarded publication workflows. Newer candidate artifacts remain candidates until their explicit publication gates are satisfied.
-
-## Now
-
-- Complete user-journey documentation and enterprise planning guidance (#124).
-- Preserve frozen benchmark bytes while tightening publication and provenance controls.
-- Keep candidate-versus-published status explicit.
-
-## Next
-
-- Configurable generated `enterprise_agentic` profiles and scale tiers (#27, #6).
-- Deeper graph profiles and scalable workload tiers (#3).
-- Broader deterministic temporal composition for lifecycle and historical evaluation (#2).
-
-## Later
-
-- LLM, RAG, and agent-memory privacy evaluation (#8).
-- Digital-wallet and verifiable-credential ecosystems (#9).
-- Disaster identity-continuity scenarios (#10).
-
-These are exploration directions, not statements that the capability already exists.
+SynthWorld remains a deterministic identity/evaluation layer rather than a general runtime. Domain systems consume public projections and return predictions or traces for independent scoring.
 
 ## Phase 1 — Benchmark adoption
 
-The shared evaluation framework and core benchmark families are established. Current maturity and publication state come from the generated registries rather than from this roadmap heading.
+The shared evaluation framework and core benchmark families are established. Current work is documentation clarity, publication discipline, and reproducible benchmark consumption.
 
 ## Phase 2 — World depth and longitudinal truth
 
@@ -45,22 +20,32 @@ Richer graph profiles and broader deterministic temporal composition remain acti
 
 ## Phase 3 — Priority market packs
 
-Priority market work includes the shipped broker lifecycle evaluator and frozen agent-authority conformance surfaces, with generated scale and deeper composition continuing separately.
+Priority work builds on the shipped broker lifecycle and agent-authority surfaces while generated scale and deeper composition continue separately.
 
 ### Data-broker deletion and reappearance
 
-Broker lifecycle evaluation is shipped; broader longitudinal product behavior remains separately scoped. See the privacy/exposure documentation and governed benchmark catalogue for current status.
+Broker lifecycle evaluation is shipped; broader longitudinal product behavior remains separately scoped.
 
 ### AI agents and non-human identities
 
-Asteria and enterprise agent-authority conformance surfaces are shipped. Configurable generated agent/NHI worlds and scale tiers remain tracked under #27 and #6.
+Frozen agent-authority conformance surfaces are shipped. Configurable generated agent/NHI worlds and scale tiers remain tracked under #27 and #6.
 
 ## Phase 4 — Portfolio and AI-system integrations
 
-The enterprise identity/access foundation and contextual/continuous assurance contracts are established. Remaining integration work should extend those bounded contracts without turning SynthWorld into a general runtime or enforcement product.
+The enterprise identity/access foundation and contextual/continuous assurance contracts are established. Remaining work extends those bounded contracts without turning SynthWorld into a general enforcement product.
+
+## Phase 5 — Exploratory identity ecosystems
+
+Later exploration includes LLM/RAG privacy (#8), digital wallets and verifiable credentials (#9), and disaster identity continuity (#10).
+
+## Use-case map
+
+Use the [documentation site](https://bluntmachetti.github.io/synthworld/) for journey guidance and the generated [benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) for governed current state.
+
+## Explicit non-goals
+
+SynthWorld does not anonymise supplied real-world data, impersonate real people, replace domain runtimes, or turn deterministic benchmark scores into forecasts.
 
 ## Contribution guidance
 
-New benchmark packs should begin with an issue that defines public input, evaluator truth, versioning, deterministic inputs, metrics, negative controls, and the intended frozen-versus-generated artifact strategy.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md), the [documentation site](https://bluntmachetti.github.io/synthworld/), and the generated [benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/).
+New benchmark packs should begin with an issue that defines public input, evaluator truth, versioning, deterministic inputs, metrics, negative controls, and the frozen-versus-generated artifact strategy. See [CONTRIBUTING.md](CONTRIBUTING.md).
