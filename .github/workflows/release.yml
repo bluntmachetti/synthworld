@@ -27,7 +27,7 @@ jobs:
           test "v${project_version}" = "${GITHUB_REF_NAME}"
       - name: Validate PyPI long-description source
         run: |
-          uv run --isolated --no-project --with 'readme-renderer[md]==45.0' python tools/validate_pypi_readme.py
+          uv run --isolated --no-project --with 'readme-renderer[md]==45.0' python .github/scripts/validate_pypi_readme.py
       - name: Run full gates
         run: make ci
       - name: Upload distribution
