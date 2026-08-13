@@ -27,6 +27,8 @@ jobs:
           test "v${project_version}" = "${GITHUB_REF_NAME}"
       - name: Run full gates
         run: make ci
+      - name: Validate PyPI long description
+        run: uvx --from twine==6.2.0 twine check --strict dist/*
       - name: Upload distribution
         uses: actions/upload-artifact@v7
         with:
