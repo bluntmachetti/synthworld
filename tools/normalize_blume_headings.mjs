@@ -3,6 +3,12 @@ import { extname, join } from "node:path";
 
 const stagingRoot = process.argv[2] ?? ".blume-content";
 
+function compareNames(left, right) {
+  if (left.name < right.name) return -1;
+  if (left.name > right.name) return 1;
+  return 0;
+}
+
 function parseFrontmatterTitle(lines, end) {
   for (let index = 1; index < end; index++) {
     const match = /^title:\s*(.*?)\s*$/u.exec(lines[index]);
@@ -59,7 +65,7 @@ function normalizeDocument(content, path) {
   const heading = leadingH1(lines, metadata === null ? 0 : metadata.end + 1);
   if (heading === null) return content;
 
-  if (metadata?.title !== null && metadata !== null) {
+  if (metadata !== null && metadata.title !== null) {
     if (comparableTitle(metadata.title) !== comparableTitle(heading.title)) {
       return content;
     }
@@ -80,7 +86,7 @@ function normalizeDocument(content, path) {
 async function markdownFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort(compareNames)) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
       files.push(...(await markdownFiles(path)));
