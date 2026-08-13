@@ -1,216 +1,42 @@
 # SynthWorld roadmap
 
-SynthWorld is a deterministic ground-truth identity layer for evaluating privacy,
-identity, and agent systems. The project should remain narrower than a general
-simulation engine: it generates identities, records, relationships, events, and
-hidden truth; domain systems consume product-safe projections and return
-predictions or actions for evaluation.
+SynthWorld is a deterministic ground-truth layer for evaluating identity, privacy, access, and agent systems. This file records direction rather than a release promise. The user-facing Now/Next/Later view lives at https://bluntmachetti.github.io/synthworld/roadmap/ and governed registries remain authoritative for current capability and benchmark status.
 
-This roadmap records direction rather than a release promise. Schema contracts
-remain independently versioned, and the existing frozen benchmarks must not
-change without an explicit benchmark-version transition.
+## Principles
 
-For a journey-led Now/Next/Later view, see the additive
-[documentation roadmap](docs/roadmap/index.md). This file remains the concise
-repository-readable source of direction.
+1. Ground truth first.
+2. Keep public observations separate from evaluator truth.
+3. Preserve synthetic-data safeguards.
+4. Make replay inputs and versions explicit.
+5. Keep domain runtimes outside the SynthWorld core.
+6. Keep small frozen fixtures stable and generate larger workloads separately.
 
-## Product principles
+## Current foundation
 
-1. **Ground truth first.** Every generated ambiguity, relationship, lifecycle
-   event, and policy violation must have independently checkable truth.
-2. **No oracle leakage in public adapters.** Public-facing schemas must keep
-   product-safe observations physically and structurally separate from
-   evaluator-only truth.
-3. **Safely fictional by construction.** Reserved domains, fictional phone
-   ranges, obvious example addresses, invalid identifiers, and recursive
-   `synthetic: true` markers remain non-negotiable.
-4. **Deterministic replay.** A seed, configuration, schema version, and event
-   schedule must reproduce the same benchmark.
-5. **Packs, not a second simulator.** SynthWorld owns identity truth. Arena,
-   EADS, ZeroID, Idcognito, and Aftershock retain their own runtime and domain
-   responsibilities.
-6. **Small frozen benchmarks plus generated scale tiers.** CI fixtures should be
-   inspectable and byte-stable; larger workloads should be generated rather
-   than permanently embedded in the package.
+The project includes deterministic world generation, multiple independent evaluator families, governed capability and benchmark registries, versioned contract families, a deployed documentation site, and guarded publication workflows. Newer candidate artifacts remain candidates until their explicit publication gates are satisfied.
 
-## Architecture direction
+## Now
 
-```text
-synthworld-core
-  entities
-  observations
-  relationships
-  events
-  public/oracle boundary
-  deterministic generation
+- Complete user-journey documentation and enterprise planning guidance (#124).
+- Preserve frozen benchmark bytes while tightening publication and provenance controls.
+- Keep candidate-versus-published status explicit.
 
-packs/
-  privacy_exposure
-  broker_deletion
-  agent_nhi
-  enterprise_iam
-  llm_privacy
-  wallet_vc
-  disaster_identity
+## Next
 
-adapters/
-  idcognito
-  zeroid
-  eads
-  arena
-  aftershock
-  generic_jsonl
+- Configurable generated `enterprise_agentic` profiles and scale tiers (#27, #6).
+- Deeper graph profiles and scalable workload tiers (#3).
+- Broader deterministic temporal composition for lifecycle and historical evaluation (#2).
 
-evaluators/
-  extraction
-  entity_resolution
-  relationship_inference
-  calibration
-  delegation
-  lifecycle
-```
+## Later
 
-Adapters should depend on stable public schemas. Domain-specific behaviour and
-world mutation must not leak back into the SynthWorld core.
+- LLM, RAG, and agent-memory privacy evaluation (#8).
+- Digital-wallet and verifiable-credential ecosystems (#9).
+- Disaster identity-continuity scenarios (#10).
 
-## Phase 1 — Benchmark adoption
-
-**Objective:** make the existing benchmark families easy to evaluate and easy to
-understand before expanding their scope.
-
-- [#1 — Build a unified evaluation SDK and `synthworld evaluate` CLI](https://github.com/bluntmachetti/synthworld/issues/1)
-- [#11 — Publish baseline benchmark results and visual demonstrations](https://github.com/bluntmachetti/synthworld/issues/11)
-- [#13 — Add a public-only exact-span extraction corpus](https://github.com/bluntmachetti/synthworld/issues/13)
-
-Expected outcomes:
-
-- versioned prediction and evaluation-report schemas;
-- extraction, entity-resolution, relationship, and calibration metrics;
-- separately serialized public extraction pages and exact-span truth;
-- reproducible naive baselines that run in CI;
-- a clear visual explanation of public input versus evaluator truth;
-- benchmark cards that state size, limits, seed, schema versions, and checksums.
-
-## Phase 2 — World depth and longitudinal truth
-
-**Objective:** move from a small connected fixture toward configurable identity
-worlds while preserving the current frozen corpus.
-
-- [#2 — Add deterministic temporal identity worlds and event streams](https://github.com/bluntmachetti/synthworld/issues/2)
-- [#3 — Add realistic graph profiles and scalable benchmark tiers](https://github.com/bluntmachetti/synthworld/issues/3)
-- [#4 — Expand adversarial data quality, ambiguity, and confidence cases](https://github.com/bluntmachetti/synthworld/issues/4)
-
-Expected outcomes:
-
-- immutable initial snapshots plus replayable lifecycle events;
-- households, organisations, teams, communities, and overlapping membership;
-- named topology profiles rather than one mandatory relationship path;
-- smoke, standard, stress, and longitudinal workload tiers;
-- stale, missing, contradictory, transliterated, and miscalibrated records.
-
-## Phase 3 — Priority market packs
-
-**Objective:** demonstrate two differentiated use cases that build directly on
-existing capabilities and the wider project portfolio.
-
-### Data-broker deletion and reappearance
-
-- [#5 — Add a data-broker deletion and reappearance benchmark pack](https://github.com/bluntmachetti/synthworld/issues/5)
-
-Issue #5 shipped in `0.13.0`, extending the existing broker lifecycle into
-multi-broker discovery,
-verification, removal, downstream propagation, partial deletion, and
-reappearance testing. Idcognito can consume the public side while SynthWorld
-retains definitive lifecycle truth.
-
-### AI agents and non-human identities
-
-- [#23 — Asteria Agentic v1 reference world and vertical slice](https://github.com/bluntmachetti/synthworld/issues/23)
-- [#6 — Add an AI-agent and non-human identity benchmark pack](https://github.com/bluntmachetti/synthworld/issues/6)
-
-Asteria Agentic v1 now provides the small frozen vertical slice: agents,
-workloads, service accounts, credentials, scopes, delegation chains, temporal
-replay, revocation, evidence loss, a JSONL trace, and independent scoring.
-Issue #6 remains the broader generated pack. ZeroID can enforce runtime
-identity, Arena can exercise agent behaviour, and EADS can supply enterprise
-resources and business impact; SynthWorld remains the benchmark oracle.
-
-## Phase 4 — Portfolio and AI-system integrations
-
-**Objective:** project the ground-truth identity layer into enterprise and AI
-systems without duplicating their simulation kernels.
-
-The `0.13.0` release established the enterprise identity/access universe and
-independently scored identity-fabric, agentic, contextual, governance, assurance,
-and standards-projection contracts. The open issues below cover broader generated
-depth and consumer projections; they do not make the released foundation planned.
-
-- [#7 — Add an enterprise IAM and identity-governance benchmark pack](https://github.com/bluntmachetti/synthworld/issues/7)
-- [#8 — Add an LLM, RAG, and agent-memory privacy benchmark pack](https://github.com/bluntmachetti/synthworld/issues/8)
-
-Remaining outcomes:
-
-- joiner, mover, leaver, orphan-account, excessive-privilege, and toxic-access
-  benchmarks;
-- EADS projections for systems, entitlements, dependencies, and impact;
-- Arena scenarios for organisational remediation decisions;
-- mixed documents, messages, logs, retrieval chunks, and memory records with
-  fact ownership and authorisation truth;
-- evaluation of cross-user leakage, stale memory, incorrect entity merges, and
-  deletion propagation.
-
-## Phase 5 — Exploratory identity ecosystems
-
-**Objective:** validate adjacent markets only after the common evaluator,
-temporal model, and priority packs are stable.
-
-- [#9 — Add a digital-wallet and verifiable-credentials benchmark pack](https://github.com/bluntmachetti/synthworld/issues/9)
-- [#10 — Add a disaster identity-continuity benchmark and Aftershock adapter](https://github.com/bluntmachetti/synthworld/issues/10)
-
-These packs explore issuer-holder-verifier ecosystems, selective disclosure,
-credential lifecycle, family reunification, identity recovery, duplicate aid
-records, and safe inter-agency matching.
-
-## Use-case map
-
-Availability describes the latest tagged package recorded in
-[CHANGELOG.md](CHANGELOG.md). Current `main` may be ahead; use the matching Git tag
-when a released contract is required.
-
-| Availability | Use case | SynthWorld responsibility | Consumer or adapter |
-|---|---|---|---|
-| Available | Connected identity fixtures | Fictional personas, attributes, relationships, and evidence | Tests, demos, graph imports |
-| Available | Exact-span PII extraction | Public pages, separate spans, extraction scorer, and failure slices | Regex, NLP, LLM, or document pipeline |
-| Available | Entity resolution | Conflicting public records, separate membership truth, and merge/split scoring | Matcher or identity-resolution system |
-| Available | Relationship inference | Public associations, reciprocal truth, unilateral controls, and evidence scoring | Graph or inference system |
-| Available | Breach-risk calibration | Public breach observations, separate score/band truth, and calibration scoring | Risk model or rules engine |
-| Partial | Privacy exposure and broker removal | Breach, broker, search, and social fixtures plus a released broker-removal evaluator; broader longitudinal product behavior remains planned | Idcognito or privacy product |
-| Available | Asteria agent authority conformance | Principals, runtimes, credentials, grants, temporal replay, revocation, evidence, and scoring | Generic JSONL, ZeroID, Arena, EADS |
-| Planned | Generated agent and workload identity profiles | Configurable organisations, graph profiles, and scale tiers | ZeroID, Arena, EADS |
-| Partial | Enterprise IAM and governance | Released accounts, entitlements, ownership, policy truth, and independently scored contract packs; broader generated depth and consumer projections remain planned | EADS, Arena |
-| Planned | LLM and RAG privacy | Fact ownership, sensitivity, authorisation, and current-state truth | Model, RAG, or agent harness |
-| Planned | Digital wallets and credentials | Issuers, holders, claims, presentations, and validity truth | Wallet or verifier adapter |
-| Planned | Disaster identity continuity | Households, records, matching, and status truth | Aftershock |
-
-## Explicit non-goals
-
-- Generating plausible unmarked identifiers that could be mistaken for real
-  people.
-- Impersonation, targeting, investigation, or enrichment of real people.
-- Claiming that procedural synthetic fixtures anonymise a supplied real-world
-  dataset.
-- Replacing Arena, EADS, ZeroID, Idcognito, or Aftershock with a general-purpose
-  SynthWorld runtime.
-- Treating a deterministic descriptive risk index as a probability or forecast.
+These are exploration directions, not statements that the capability already exists.
 
 ## Contribution guidance
 
-New packs should begin with an issue that defines:
+New benchmark packs should begin with an issue that defines public input, evaluator truth, versioning, deterministic inputs, metrics, negative controls, and the intended frozen-versus-generated artifact strategy.
 
-- public input and evaluator truth;
-- schema and formula versioning;
-- safety invariants;
-- deterministic generation parameters;
-- evaluation metrics and negative controls;
-- the adapter boundary with any external project;
-- a frozen small benchmark and a generated scale path.
+See [CONTRIBUTING.md](CONTRIBUTING.md), the [documentation site](https://bluntmachetti.github.io/synthworld/), and the generated [benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/).
