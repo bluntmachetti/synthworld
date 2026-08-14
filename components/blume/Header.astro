@@ -1,0 +1,182 @@
+---
+import Ask from "blume:ask";
+import data from "blume:data";
+import { GITHUB_MARK } from "blume/components/github-mark.ts";
+import Icon from "blume/components/Icon.astro";
+import { withBase } from "blume/components/islands/base-path.ts";
+import LanguageSwitcher from "blume/components/layout/LanguageSwitcher.astro";
+import { resolveSlot } from "blume/components/layout/overrides.ts";
+import Search from "blume/components/layout/Search.astro";
+import type { ComponentOverride } from "blume/core/define-components.ts";
+import { EN_UI } from "blume/core/i18n-ui.ts";
+import type { UIStrings } from "blume/core/i18n-ui.ts";
+import type { LocaleSwitchOption, Navigation } from "blume/core/types.ts";
+
+interface Props {
+  site: { title: string };
+  navigation: Navigation;
+  route: string;
+  searchEnabled: boolean;
+  askEnabled?: boolean;
+  askStrings?: UIStrings["ask"];
+  hasSidebar?: boolean;
+  hasDrawer?: boolean;
+  searchStrings?: UIStrings["search"];
+  switcherStrings?: UIStrings["languageSwitcher"];
+  navStrings?: UIStrings["nav"];
+  localeSwitch?: LocaleSwitchOption[];
+  searchLocale?: string;
+  layout?: Record<string, ComponentOverride>;
+}
+
+const {
+  site,
+  navigation,
+  route,
+  searchEnabled,
+  askEnabled = Boolean(data.config.ask),
+  askStrings,
+  hasSidebar = true,
+  hasDrawer = true,
+  searchStrings,
+  switcherStrings,
+  navStrings,
+  localeSwitch,
+  searchLocale,
+  layout = {},
+} = Astro.props;
+
+const n = { ...EN_UI.nav, ...navStrings };
+const SearchSlot = resolveSlot(layout.Search, Search);
+const showNavToggle = hasDrawer && hasSidebar;
+
+const benchmarkRoots = new Set([
+  "/AGENTIC_BENCHMARK",
+  "/BENCHMARKS",
+  "/EVALUATION_KEY_CUSTODY",
+  "/GOLDEN_REVIEW",
+]);
+const primary = [
+  {
+    active: route === "/" || route === "/getting-started",
+    href: "/getting-started",
+    label: "Start",
+  },
+  {
+    active: route === "/guides" || route.startsWith("/guides/"),
+    href: "/guides",
+    label: "Guides",
+  },
+  {
+    active:
+      route === "/benchmarks" ||
+      route.startsWith("/benchmarks/") ||
+      benchmarkRoots.has(route),
+    href: "/benchmarks",
+    label: "Benchmarks",
+  },
+  {
+    active:
+      route === "/reference" ||
+      route.startsWith("/reference/") ||
+      route === "/DATA_DICTIONARY",
+    href: "/reference",
+    label: "Reference",
+  },
+];
+
+const clickScript = `(()=>{const dr=()=>{const h=document.querySelector("[data-blume-header]");if(h){document.documentElement.style.setProperty("--blume-drawer-top",h.getBoundingClientRect().bottom+"px");}};document.addEventListener("click",(e)=>{const t=e.target.closest("[data-blume-theme-toggle]");if(t){const d=document.documentElement;const next=d.dataset.theme==="dark"?"light":"dark";const s=document.createElement("style");s.appendChild(document.createTextNode("*,*::before,*::after{transition:none!important}"));document.head.appendChild(s);d.dataset.theme=next;localStorage.setItem("blume-theme",next);window.getComputedStyle(d).opacity;setTimeout(()=>document.head.removeChild(s),1);}const n=e.target.closest("[data-blume-nav-toggle]");if(n){const d=document.documentElement;const open=d.toggleAttribute("data-blume-nav-open");if(open){dr();}d.style.overflow=open?"hidden":"";}const b=e.target.closest("[data-blume-banner-dismiss]");if(b){const bar=b.closest("[data-blume-banner]");const k=bar&&bar.getAttribute("data-banner-key");if(k){localStorage.setItem("blume-banner:"+k,"1");}document.documentElement.setAttribute("data-blume-banner-hidden","");requestAnimationFrame(dr);}});addEventListener("resize",()=>{const d=document.documentElement;if(!d.hasAttribute("data-blume-nav-open")){return;}if(matchMedia("(min-width:64rem)").matches){d.removeAttribute("data-blume-nav-open");d.style.overflow="";}else{dr();}});})();`;
+---
+
+<header class="synth-command-bar" data-blume-header>
+  {
+    showNavToggle && (
+      <button
+        aria-label={n.toggleNavigation}
+        class="synth-icon-button synth-nav-toggle lg:hidden"
+        data-blume-nav-toggle
+        type="button"
+      >
+        <Icon name="menu" size={19} />
+      </button>
+    )
+  }
+
+  <a class="synth-brand" href={withBase("/")}>
+    <span class="synth-brand-mark" aria-hidden="true"><span></span></span>
+    <span class="synth-brand-copy">
+      <span class="synth-brand-name">{site.title}</span>
+      <span class="synth-brand-tag">Deterministic identity benchmarks</span>
+    </span>
+  </a>
+
+  <nav aria-label={n.sections} class="synth-primary-nav">
+    {
+      primary.map((item) => (
+        <a
+          aria-current={item.active ? "page" : undefined}
+          href={withBase(item.href)}
+        >
+          {item.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="synth-header-spacer"></div>
+
+  <div class="synth-header-tools">
+    {
+      localeSwitch && localeSwitch.length > 1 && (
+        <LanguageSwitcher
+          label={switcherStrings?.label ?? "Language"}
+          options={localeSwitch}
+          untranslatedLabel={switcherStrings?.untranslated ?? "Not translated"}
+        />
+      )
+    }
+    {
+      searchEnabled && (
+        <SearchSlot
+          askEnabled={askEnabled}
+          locale={searchLocale}
+          navigation={navigation}
+          popularPages={data.config.search.popular}
+          strings={searchStrings}
+        />
+      )
+    }
+    {
+      navigation.repoUrl && (
+        <a
+          aria-label={n.githubRepository}
+          class="synth-icon-button"
+          href={navigation.repoUrl}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <svg
+            aria-hidden="true"
+            fill="currentColor"
+            height="17"
+            set:html={GITHUB_MARK}
+            viewBox="0 0 16 16"
+            width="17"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </a>
+      )
+    }
+    <button
+      aria-label={n.toggleTheme}
+      class="synth-icon-button"
+      data-blume-theme-toggle
+      type="button"
+    >
+      <span class="inline-flex dark:hidden"><Icon name="sun" size={17} /></span>
+      <span class="hidden dark:inline-flex"><Icon name="moon" size={17} /></span>
+    </button>
+    {askEnabled && <Ask strings={askStrings} />}
+  </div>
+</header>
+<script is:inline set:html={clickScript} />

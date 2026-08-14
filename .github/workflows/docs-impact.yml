@@ -53,7 +53,8 @@ jobs:
             continuous-assurance-contract/README.md \
             enterprise-identity-access-contract/README.md \
             huggingface/README.md \
-            blume.config.ts package.json package-lock.json \
+            blume.config.ts components.ts components theme.css \
+            package.json package-lock.json \
             tsconfig.json .nvmrc tools/audit_docs_dist.mjs \
             tools/audit_docs_headings.mjs tools/prepare_docs_content.mjs \
             tools/generate_registry_catalogue.mjs tools/normalize_blume_headings.mjs \
