@@ -12,6 +12,18 @@ def test_catalogue_renderer_changes_trigger_docs_checks() -> None:
     assert "tools/generate_registry_catalogue.mjs" in workflow
 
 
+def test_heading_tool_changes_trigger_docs_checks_and_deploy() -> None:
+    impact = IMPACT_WORKFLOW.read_text(encoding="utf-8")
+    deploy = DEPLOY_WORKFLOW.read_text(encoding="utf-8")
+
+    for tool in (
+        "tools/normalize_blume_headings.mjs",
+        "tools/audit_docs_headings.mjs",
+    ):
+        assert tool in impact
+        assert tool in deploy
+
+
 def test_deployment_workflow_changes_trigger_docs_checks() -> None:
     workflow = IMPACT_WORKFLOW.read_text(encoding="utf-8")
     assert ".github/workflows/docs-deploy.yml" in workflow
