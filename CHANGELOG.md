@@ -9,6 +9,17 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Added
+
+- **Explorer v0.1 public projection contracts.** A preview Python API projects
+  the published Asteria Agentic v1 public package into deterministic graph and
+  timeline records, with independently versioned evaluator overlays and layout
+  manifests. Digest binding, UTC ordering, acyclic compound-node validation,
+  collision-safe UUID5 identities, typed collection properties, and explicit
+  public/evaluator separation are enforced. Interactive Cytoscape/ELK rendering,
+  CLI integration, additional benchmark adapters, and generated-scale support
+  remain deferred.
+
 ## [0.14.0] - 2026-08-11
 
 ### Added

@@ -1148,6 +1148,58 @@
       "title": "Exposure corpus"
     },
     {
+      "id": "explorer-v01",
+      "interfaces": {
+        "cli": {
+          "coverage": "none",
+          "subset_note": null,
+          "surface_ids": []
+        },
+        "python": {
+          "coverage": "full",
+          "subset_note": null,
+          "surface_ids": [
+            "python:synthworld.explorer.EVALUATOR_WATERMARK",
+            "python:synthworld.explorer.EXPLORER_EVALUATOR_SCHEMA_VERSION",
+            "python:synthworld.explorer.EXPLORER_LAYOUT_SCHEMA_VERSION",
+            "python:synthworld.explorer.EXPLORER_PROJECTION_SCHEMA_VERSION",
+            "python:synthworld.explorer.ExplorerCoordinateV1",
+            "python:synthworld.explorer.ExplorerEdgeKind",
+            "python:synthworld.explorer.ExplorerEdgeV1",
+            "python:synthworld.explorer.ExplorerEvaluatorAnnotationV1",
+            "python:synthworld.explorer.ExplorerEvaluatorOverlayV1",
+            "python:synthworld.explorer.ExplorerLayoutDirection",
+            "python:synthworld.explorer.ExplorerLayoutManifestV1",
+            "python:synthworld.explorer.ExplorerLayoutOptionsV1",
+            "python:synthworld.explorer.ExplorerNodeKind",
+            "python:synthworld.explorer.ExplorerNodeV1",
+            "python:synthworld.explorer.ExplorerPropertyV1",
+            "python:synthworld.explorer.ExplorerPublicProjectionV1",
+            "python:synthworld.explorer.ExplorerSourceV1",
+            "python:synthworld.explorer.ExplorerTimelineEventKind",
+            "python:synthworld.explorer.ExplorerTimelineEventV1",
+            "python:synthworld.explorer.ExplorerViewportV1",
+            "python:synthworld.explorer.canonical_json_bytes",
+            "python:synthworld.explorer.explorer_digest",
+            "python:synthworld.explorer.project_asteria_agent_authority_v1",
+            "python:synthworld.explorer.validate_evaluator_overlay",
+            "python:synthworld.explorer.validate_layout_manifest"
+          ]
+        }
+      },
+      "journey_route": "route:docs/concepts/explorer-v01.md#explorer-v01-contract-and-packaging-decision",
+      "maturity": "preview",
+      "notes": "This preview covers versioned projection contracts and the published Asteria v1 adapter only. Interactive rendering, CLI support, and generated-scale worlds remain deferred.",
+      "related_surface_ids": [],
+      "roadmap_routes": [
+        "route:ROADMAP.md#ai-agents-and-non-human-identities"
+      ],
+      "since": "unreleased",
+      "summary": "Project published SynthWorld packages into deterministic public and evaluator-safe visualisation artifacts.",
+      "support": "Preview Python contracts for Asteria v1 projection, evaluator overlays, and deterministic layout binding.",
+      "title": "Explorer v0.1 projection contracts"
+    },
+    {
       "id": "extraction-benchmark",
       "interfaces": {
         "cli": {
