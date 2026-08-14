@@ -27,6 +27,10 @@ contracts are implemented. The design currently under review is documented in
 [C15/C16 contract-family design under review](../../agent-authority-contract/docs/c15-c16-contract-design.md).
 This adapter must not anticipate that design by inventing agent or NHI fields.
 
+See [Enterprise Identity Planning](../../docs/guides/enterprise-identity-planning.md)
+for the complete current human-enterprise planning journey and the explicit boundary
+between this adapter and the planned generated agentic composition under issue #27.
+
 Input trees and files are opened without following symbolic links. Supported
 platforms must provide no-follow regular-file checks; a platform that cannot
 enforce those checks is outside the supported adapter boundary. Directories,

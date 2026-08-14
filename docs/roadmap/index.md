@@ -6,14 +6,19 @@ This is a navigation view, not a release promise. The canonical repository direc
 
 - Complete the documentation ownership transition so the Blume site is the detailed user surface and root files stay concise.
 - Preserve frozen benchmark bytes while enforcing publication, provenance, and evaluator-boundary controls.
-- Document end-to-end enterprise identity planning journeys without claiming functionality that has not shipped (#124).
+- Maintain the end-to-end enterprise identity planning journey without claiming automatic generated-agent composition (#124, #27).
 - Keep C08 v2 benchmark artifacts in their governed candidate state until explicit publication gates are satisfied.
 
 ## Next
 
 - Add configurable generated enterprise-agentic worlds and named scale tiers while preserving frozen Asteria reference artifacts (#27, #6).
 - Deepen deterministic graph and temporal profiles for lifecycle, authority, and longitudinal evaluation (#3, #2).
+- Add the interactive Explorer renderer and CLI on the shipped v0.1 projection contracts; defer generated-scale navigation until #27 defines those worlds.
 - Continue adversarial evidence and relationship hardening without silently changing existing frozen benchmark identities.
+
+The [Enterprise Identity Planning guide](../guides/enterprise-identity-planning.md)
+records the current journey. Generated enterprise-agentic tiers remain issue #27;
+large-world Explorer controls follow that generated contract rather than preceding it.
 
 ## Later
 

@@ -16,6 +16,10 @@ is normative for external traces and evidence claims.
 Reference truth ships publicly for conformance. This is not a blind or secret test,
 and core trace scoring does not prove deployed enforcement.
 
+See [Enterprise Identity Planning](https://bluntmachetti.github.io/synthworld/guides/enterprise-identity-planning/) for how this
+separate reference world relates to today's human enterprise compiler and the
+planned generated composition under issue #27.
+
 ## Explorer v0.1 preview
 
 The preview `synthworld.explorer` Python API can project the published Asteria

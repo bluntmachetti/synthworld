@@ -2562,6 +2562,102 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/guides/enterprise-identity-planning.md",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "1-compile-a-fictional-enterprise-identity-universe",
+      "heading": "1. Compile a fictional Enterprise Identity universe",
+      "id": "route:docs/guides/enterprise-identity-planning.md#1-compile-a-fictional-enterprise-identity-universe",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "2-explore-authorization-architecture-choices",
+      "heading": "2. Explore authorization architecture choices",
+      "id": "route:docs/guides/enterprise-identity-planning.md#2-explore-authorization-architecture-choices",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "3-plan-lifecycle-revocation-and-audit-evidence",
+      "heading": "3. Plan lifecycle, revocation and audit evidence",
+      "id": "route:docs/guides/enterprise-identity-planning.md#3-plan-lifecycle-revocation-and-audit-evidence",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "4-extend-planning-into-agentic-identity",
+      "heading": "4. Extend planning into Agentic Identity",
+      "id": "route:docs/guides/enterprise-identity-planning.md#4-extend-planning-into-agentic-identity",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "capability-map",
+      "heading": "Capability map",
+      "id": "route:docs/guides/enterprise-identity-planning.md#capability-map",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "enterprise-identity-planning",
+      "heading": "Enterprise Identity Planning",
+      "id": "route:docs/guides/enterprise-identity-planning.md#enterprise-identity-planning",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "generated-enterprise-agentic-composition",
+      "heading": "Generated enterprise-agentic composition",
+      "id": "route:docs/guides/enterprise-identity-planning.md#generated-enterprise-agentic-composition",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "planning-is-not-benchmark-publication",
+      "heading": "Planning is not benchmark publication",
+      "id": "route:docs/guides/enterprise-identity-planning.md#planning-is-not-benchmark-publication",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "scenario-a-role-breadth-across-tenant-boundaries",
+      "heading": "Scenario A: role breadth across tenant boundaries",
+      "id": "route:docs/guides/enterprise-identity-planning.md#scenario-a-role-breadth-across-tenant-boundaries",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "scenario-b-add-context-to-a-role-oriented-model",
+      "heading": "Scenario B: add context to a role-oriented model",
+      "id": "route:docs/guides/enterprise-identity-planning.md#scenario-b-add-context-to-a-role-oriented-model",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "scenario-c-credential-revoked-after-an-agent-action",
+      "heading": "Scenario C: credential revoked after an agent action",
+      "id": "route:docs/guides/enterprise-identity-planning.md#scenario-c-credential-revoked-after-an-agent-action",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "separate-reference-world",
+      "heading": "Separate reference world",
+      "id": "route:docs/guides/enterprise-identity-planning.md#separate-reference-world",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "starting-from-an-eads-shaped-source",
+      "heading": "Starting from an EADS-shaped source",
+      "id": "route:docs/guides/enterprise-identity-planning.md#starting-from-an-eads-shaped-source",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "the-planning-journey",
+      "heading": "The planning journey",
+      "id": "route:docs/guides/enterprise-identity-planning.md#the-planning-journey",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "three-concrete-planning-scenarios",
+      "heading": "Three concrete planning scenarios",
+      "id": "route:docs/guides/enterprise-identity-planning.md#three-concrete-planning-scenarios",
+      "path": "docs/guides/enterprise-identity-planning.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/guides/evaluating-a-system.md",
       "path": "docs/guides/evaluating-a-system.md"
     },
