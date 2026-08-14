@@ -53,15 +53,15 @@ synthworld generate --seed 20260719 --persona-count 10 --output world.json
 
 ## Capability and benchmark status
 
-Capability maturity and benchmark publication are different axes. Their validated
-resolved registries are being integrated by the prerequisite governance work; these
-pages intentionally do not invent a manual substitute:
+Capability maturity and benchmark publication are different axes. The documentation
+build consumes drift-checked resolved capability and benchmark registries and emits a
+public allowlisted catalogue:
 
 - [Capability reference](reference/capabilities.md)
 - [Benchmark publication reference](reference/benchmarks.md)
+- [Generated registry catalogue](/benchmarks/catalogue)
 
-Once present on `main`, the registry files are generated and drift-checked. A
-benchmark being packaged or published does not imply that every related capability
+A benchmark being packaged or published does not imply that every related capability
 is mature, and capability maturity does not authorize external publication.
 
 ## Featured benchmarks
@@ -72,9 +72,13 @@ is mature, and capability maturity does not authorize external publication.
 
 ## Current focus
 
-The project is tightening documentation, publication controls, generated enterprise
-depth, and agent/workload identity contracts without changing frozen v1 benchmark
-bytes. See the [roadmap view](roadmap/index.md) for Now/Next/Later framing.
+The project is preserving frozen benchmark bytes while improving user journeys,
+publication controls, generated enterprise/agent depth, and evidence-binding
+contracts. Candidate benchmark artifacts remain candidates until their explicit
+publication gates are satisfied.
+
+See the [roadmap view](roadmap/index.md) for Now/Next/Later framing and the generated
+registries for current maturity/publication state.
 
 ## Navigate
 

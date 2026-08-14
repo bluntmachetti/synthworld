@@ -1,24 +1,20 @@
 # Roadmap
 
-This is a navigation view, not a release promise. The canonical repository roadmap
-is [ROADMAP.md](../../ROADMAP.md). Capability facts will come from the validated
-resolved registry once its prerequisite governance changes land on `main`.
+This is a navigation view, not a release promise. The canonical repository direction is [ROADMAP.md](../../ROADMAP.md). Current capability and publication facts come from the generated registries; issue state alone never changes maturity.
 
 ## Now
 
-- Keep frozen benchmarks byte-stable while tightening documentation and publication
-  controls.
-- Document the shipped enterprise planning journey and known fidelity gaps without
-  implying automatic generated-agent composition.
-- Design credential-authority and parameter-integrity contracts before generating
-  agent/NHI worlds against them.
+- Complete the documentation ownership transition so the Blume site is the detailed user surface and root files stay concise.
+- Preserve frozen benchmark bytes while enforcing publication, provenance, and evaluator-boundary controls.
+- Maintain the end-to-end enterprise identity planning journey without claiming automatic generated-agent composition (#124, #27).
+- Keep C08 v2 benchmark artifacts in their governed candidate state until explicit publication gates are satisfied.
 
 ## Next
 
-- Build the first deterministic Explorer slice around published current worlds and a
-  versioned public/evaluator projection boundary.
-- Grow generated enterprise and agent/workload identity depth through independently
-  versioned packs.
+- Add configurable generated enterprise-agentic worlds and named scale tiers while preserving frozen Asteria reference artifacts (#27, #6).
+- Deepen deterministic graph and temporal profiles for lifecycle, authority, and longitudinal evaluation (#3, #2).
+- Add the interactive Explorer renderer and CLI on the shipped v0.1 projection contracts; defer generated-scale navigation until #27 defines those worlds.
+- Continue adversarial evidence and relationship hardening without silently changing existing frozen benchmark identities.
 
 The [Enterprise Identity Planning guide](../guides/enterprise-identity-planning.md)
 records the current journey. Generated enterprise-agentic tiers remain issue #27;
@@ -26,8 +22,8 @@ large-world Explorer controls follow that generated contract rather than precedi
 
 ## Later
 
-- Evaluate adjacent LLM/RAG privacy, wallet/credential, and disaster-identity packs
-  without expanding the core identity model into a general simulator.
+- Explore LLM/RAG and agent-memory privacy packs (#8).
+- Explore digital-wallet and verifiable-credential packs (#9).
+- Explore disaster identity-continuity scenarios with a bounded adapter boundary (#10).
 
-Check Issues and the canonical roadmap for accepted scope; issue state alone never
-changes capability maturity.
+Use the [benchmark catalogue](/benchmarks/catalogue) for governed current state and GitHub Issues for accepted future scope.

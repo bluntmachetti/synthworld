@@ -26,7 +26,7 @@ private enterprise structure
           v
 deterministic fictional identity/access universe
   organisations, tenants, units, principals, accounts
-  groups, roles, permissions, resources, ownership scopes
+  groups, roles, permissions, authorization targets, relationship anchors
           |
           v
 bounded authorization models
@@ -45,7 +45,7 @@ The responsibilities remain separate throughout:
 
 | Responsibility | Owner |
 |---|---|
-| Systems, services, dependencies, deployment/network structure and business impact | Enterprise source or EADS |
+| Systems, services, dependencies, deployment/network structure and business impact | Operator-provided enterprise source or topology system |
 | Safely fictional identities, relationships, authority evidence and evaluator truth | SynthWorld |
 | Access and runtime decisions | Authorization system under test |
 | Comparison with declared truth and independent metrics | SynthWorld evaluator |
@@ -96,14 +96,15 @@ tree to a system under test.
 ### Starting from an EADS-shaped source
 
 **Partially available.** The repository includes a
-[fictional EADS-shaped fixture adapter](../../enterprise-identity-access-contract/examples/eads_adapter/README.md)
+[fictional EADS-shaped fixture adapter](../../examples/eads_adapter/README.md)
 for one declared, humans-only input shape. It demonstrates sanitized translation
 into the bounded enterprise compiler.
 
 It is not compatible with a real EADS product, API, schema, deployment, or
-arbitrary export. A real source must first be sanitized and translated into the
-supported fictional input contract. EADS continues to own operational topology;
-SynthWorld consumes only the identity/access structure it needs.
+arbitrary export. An operator may build a separate sanitizing translation into the
+supported fictional input contract, but the repository does not validate that
+translation against a real export. The source system continues to own operational
+topology; SynthWorld consumes only the bounded identity/access structure it needs.
 
 ## 2. Explore authorization architecture choices
 
@@ -125,7 +126,7 @@ OpenFGA outputs are offline projections with explicit semantic-loss reports, not
 live endpoint integrations.
 
 For exact contracts and limitations, continue with
-[Enterprise identity and access](enterprise-access.md).
+[Enterprise identity and access](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/).
 
 ## 3. Plan lifecycle, revocation and audit evidence
 
@@ -163,11 +164,19 @@ synthworld evaluate agentic --predictions observed-actions.jsonl --summary
 It supports deterministic reasoning about runtime identity, credential subject,
 delegated capability, action-time authority, later audit state, accountable owner
 chains, provenance and reconstructability. It remains separate from an imported
-enterprise universe. See [Agent authority](agent-authority.md).
+enterprise universe. See [Agent authority](https://bluntmachetti.github.io/synthworld/guides/agent-authority/).
 
-Candidate C08 v2 artifacts may be present in the repository, but candidate status
-is not publication approval and this guide does not present them as published
-benchmarks.
+The separately versioned Asteria and enterprise C08 v2 frozen artifacts shipped in
+the `0.14.0` package as **repository-local candidates**. They test offline evidence
+binding and completeness with separate public input and evaluator truth; they do
+not establish live evidence retention, enforcement, deployment, or EADS
+compatibility. Candidate registration and packaging are not external publication
+approval. See [C08 v2 offline evidence-completeness candidates](../../AGENTIC_BENCHMARK.md#c08-v2-offline-evidence-completeness-candidates).
+
+The preview Explorer v0.1 Python API can project the published Asteria v1 public
+package into deterministic graph and timeline records. Its typed evaluator overlay
+and layout manifest remain separate artifacts. The interactive HTML renderer and
+`synthworld visualize` CLI are not yet shipped.
 
 ### Generated enterprise-agentic composition
 
@@ -185,45 +194,50 @@ current frozen reference worlds.
 
 ### Scenario A: role breadth across tenant boundaries
 
-**Available now.** Input a private blueprint with two isolated tenants, groups,
-roles, permissions and fictional resource targets. Explore whether a broad role or
-nested membership would cross a tenant boundary.
+**Available now.**
 
-Expected outputs and evidence:
+- **Input:** a private blueprint with two isolated tenants, groups, roles,
+  permissions, and fictional authorization targets.
+- **Question:** do memberships, role grants, and access declarations stay within
+  their tenant, and where would a proposed broad role violate that boundary?
+- **Expected output/evidence:** cross-tenant references fail validation with
+  typed diagnostics; a valid structure compiles to a deterministic public
+  universe and separately bound evaluator account mapping. Directory/RBAC
+  compilation can then retain derivation steps and mechanism-specific decisions
+  for the declared cells.
 
-- A deterministic public universe with opaque fictional principals and accounts.
-- A separately bound evaluator account mapping.
-- Directory/RBAC derivations and final access decisions per declared cell.
-- Independent policy-violation and derivation evidence rather than one aggregate
-  score.
+The output keeps policy violations and derivation evidence separate rather than
+hiding them behind one aggregate score.
 
 ### Scenario B: add context to a role-oriented model
 
-**Partially available.** Input the compiled universe, a directory/RBAC state, an
-ABAC fact/rule overlay and a fixed request corpus. Compare pure RBAC with RBAC
-guarded by tenant, ownership, assurance or network-zone facts.
+**Partially available.**
 
-Expected outputs and evidence:
+- **Input:** the compiled universe, a directory/RBAC state, an ABAC fact/rule
+  overlay, and a fixed request corpus.
+- **Question:** which declared decisions change when RBAC is guarded by tenant,
+  ownership, assurance, or network-zone facts?
+- **Expected output/evidence:** raw RBAC and ABAC outcomes remain independent;
+  missing facts and explicitly unknown facts remain distinct; invalid binding or
+  lifecycle state can apply final deny gates; and standards-shaped exports carry
+  a support matrix for exact, approximated, and unsupported semantics.
 
-- Raw RBAC and ABAC outcomes retained independently.
-- Missing versus explicitly unknown facts kept distinct.
-- Final deny gates for invalid binding or lifecycle state.
-- A support matrix explaining exact, approximated and unsupported projection
-  semantics when exporting to another authorization shape.
+This is a bounded, explicitly authored composition exercise, not an automatic
+policy recommendation or arbitrary-universe conversion.
 
 ### Scenario C: credential revoked after an agent action
 
-**Available now as a frozen conformance scenario.** Use Asteria's public world and
-an observed-action trace to compare authority at action time with audit-time
-credential and delegation state.
+**Available now as a frozen conformance scenario.**
 
-Expected outputs and evidence:
-
-- Separate identity, authorization, temporal-validity and reconstructability
-  metrics.
-- Expected action-time authority and later audit state in evaluator truth only.
-- No full credit for a correct verdict when required provenance cannot be
-  reconstructed.
+- **Input:** Asteria's public world plus a versioned observed-action trace from the
+  system under test.
+- **Question:** was the credential and delegation valid at action time, what had
+  changed by audit time, and was enough provenance retained to reconstruct the
+  decision?
+- **Expected output/evidence:** separate identity, authorization,
+  temporal-validity, evidence, and reconstructability metrics. Expected authority
+  and later audit state stay in evaluator truth, and a correct verdict does not
+  receive full evidence credit when required provenance is absent or fabricated.
 
 ## Planning is not benchmark publication
 
@@ -252,8 +266,9 @@ offline score does not prove live enforcement.
 | General temporal-world generation | **Planned** | Issue #2 |
 | Separate agent-authority reference evaluation | **Available now** | Asteria Agentic v1 |
 | Imported topology to generated multi-tier agentic world | **Planned** | Issue #27 and later contracts |
-| Interactive deterministic world exploration | **Planned** | [SynthWorld Explorer #52](https://github.com/bluntmachetti/synthworld/issues/52) |
+| Deterministic Asteria Explorer projection contracts | **Available now** | Preview Python API with separate public, evaluator-overlay, and layout contracts |
+| Interactive Explorer HTML and CLI | **Planned** | [SynthWorld Explorer #52](https://github.com/bluntmachetti/synthworld/issues/52) |
 
 Continue with the [benchmark catalogue](/benchmarks/catalogue) for governed
-lifecycle status and [Evaluating a system](evaluating-a-system.md) for the
+lifecycle status and [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/) for the
 prediction/evaluator workflow.

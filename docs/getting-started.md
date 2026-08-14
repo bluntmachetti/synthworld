@@ -52,4 +52,5 @@ list of every contract-specific evaluator.
 - [Enterprise Identity Planning](guides/enterprise-identity-planning.md)
 - [Evaluating a system](guides/evaluating-a-system.md)
 
-The detailed [user guide](../USER_GUIDE.md) remains available during migration.
+The legacy [user guide](../USER_GUIDE.md) remains available as a compatibility
+surface while detailed guidance moves to these canonical pages.
