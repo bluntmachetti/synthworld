@@ -41,6 +41,8 @@ separate physical artifact. Any evaluator-rendered HTML must display:
 > EVALUATOR VIEW - CONTAINS REFERENCE TRUTH
 
 Evaluator data must never be embedded in public HTML behind a client-side switch.
+The evaluator contract has its own schema-version identity even when its current
+version number matches the public projection version.
 
 ## Identity, normalization, and collisions
 
@@ -51,9 +53,11 @@ node and edge inputs. Duplicate resulting IDs, source-reference failures, and
 open graph references fail validation rather than receiving suffixes.
 
 Set-like nodes, edges, properties, annotations, references, and coordinates are
-sorted by stable identifiers or keys. Timeline events retain source event-index
-order and must also be strictly increasing in time. No ordering key may depend on
-an evaluator verdict, case kind, failure reason, or canonical binding.
+sorted by stable identifiers or keys. Collection-valued properties remain JSON
+arrays rather than delimiter-joined strings. Timeline events retain source
+event-index order, use UTC, and must also be strictly increasing in time. Compound
+node parents must be acyclic. No ordering key may depend on an evaluator verdict,
+case kind, failure reason, or canonical binding.
 
 Canonical JSON uses sorted object keys, compact separators, UTF-8, no NaN values,
 LF line endings, and exactly one trailing newline. Digests cover those exact bytes.
@@ -72,6 +76,9 @@ The layout manifest records all inputs that can alter coordinates:
 
 The renderer must not accept filesystem order, locale, host state, wall-clock time,
 or evaluator answers as layout inputs.
+Layout validation requires exactly one coordinate per bound projection node.
+Evaluator validation requires every annotation to bind a public action event and a
+known projection node, edge, or timeline event.
 
 ## Renderer packaging decision
 

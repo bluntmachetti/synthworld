@@ -10,9 +10,7 @@ from synthworld.explorer.models import (
 )
 
 type ExplorerArtifact = (
-    ExplorerPublicProjectionV1
-    | ExplorerEvaluatorOverlayV1
-    | ExplorerLayoutManifestV1
+    ExplorerPublicProjectionV1 | ExplorerEvaluatorOverlayV1 | ExplorerLayoutManifestV1
 )
 
 

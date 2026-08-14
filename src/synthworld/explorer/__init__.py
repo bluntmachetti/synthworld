@@ -3,6 +3,7 @@
 from synthworld.explorer.asteria import project_asteria_agent_authority_v1
 from synthworld.explorer.models import (
     EVALUATOR_WATERMARK,
+    EXPLORER_EVALUATOR_SCHEMA_VERSION,
     EXPLORER_LAYOUT_SCHEMA_VERSION,
     EXPLORER_PROJECTION_SCHEMA_VERSION,
     ExplorerCoordinateV1,
@@ -23,9 +24,14 @@ from synthworld.explorer.models import (
     ExplorerViewportV1,
 )
 from synthworld.explorer.serialization import canonical_json_bytes, explorer_digest
+from synthworld.explorer.validation import (
+    validate_evaluator_overlay,
+    validate_layout_manifest,
+)
 
 __all__ = [
     "EVALUATOR_WATERMARK",
+    "EXPLORER_EVALUATOR_SCHEMA_VERSION",
     "EXPLORER_LAYOUT_SCHEMA_VERSION",
     "EXPLORER_PROJECTION_SCHEMA_VERSION",
     "ExplorerCoordinateV1",
@@ -47,4 +53,6 @@ __all__ = [
     "canonical_json_bytes",
     "explorer_digest",
     "project_asteria_agent_authority_v1",
+    "validate_evaluator_overlay",
+    "validate_layout_manifest",
 ]

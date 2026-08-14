@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
-from typing import Literal, Self
+from typing import Final, Literal, Self
 
 from pydantic import Field, field_validator, model_validator
 
 from synthworld.models import SyntheticModel
 
-EXPLORER_PROJECTION_SCHEMA_VERSION = "1.0.0"
-EXPLORER_LAYOUT_SCHEMA_VERSION = "1.0.0"
-EVALUATOR_WATERMARK = "EVALUATOR VIEW - CONTAINS REFERENCE TRUTH"
+EXPLORER_PROJECTION_SCHEMA_VERSION: Final = "1.0.0"
+EXPLORER_EVALUATOR_SCHEMA_VERSION: Final = "1.0.0"
+EXPLORER_LAYOUT_SCHEMA_VERSION: Final = "1.0.0"
+EVALUATOR_WATERMARK: Final = "EVALUATOR VIEW - CONTAINS REFERENCE TRUTH"
 
 
 class ExplorerNodeKind(StrEnum):
@@ -61,17 +62,35 @@ class ExplorerLayoutDirection(StrEnum):
     RIGHT = "right"
 
 
+type _ExplorerPropertyValue = str | tuple[str, ...]
+
+
 class ExplorerPropertyV1(SyntheticModel):
     key: str
-    value: str
+    value: _ExplorerPropertyValue
 
-    @field_validator("key", "value")
+    @field_validator("key")
     @classmethod
-    def require_nonblank(cls, value: str) -> str:
+    def require_nonblank_key(cls, value: str) -> str:
         stripped = value.strip()
         if not stripped:
-            raise ValueError("Explorer properties must be nonblank")
+            raise ValueError("Explorer property keys must be nonblank")
         return stripped
+
+    @field_validator("value")
+    @classmethod
+    def require_nonblank_value(
+        cls, value: _ExplorerPropertyValue
+    ) -> _ExplorerPropertyValue:
+        if isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                raise ValueError("Explorer property values must be nonblank")
+            return stripped
+        stripped_items = tuple(item.strip() for item in value)
+        if not stripped_items or any(not item for item in stripped_items):
+            raise ValueError("Explorer property collections must be nonempty")
+        return stripped_items
 
 
 def _normalise_properties(
@@ -136,6 +155,13 @@ class ExplorerTimelineEventV1(SyntheticModel):
     related_edge_ids: tuple[str, ...] = ()
     properties: tuple[ExplorerPropertyV1, ...] = ()
 
+    @field_validator("occurred_at")
+    @classmethod
+    def require_utc(cls, value: datetime) -> datetime:
+        if value.utcoffset() != timedelta(0):
+            raise ValueError("Explorer timeline timestamps must use UTC")
+        return value
+
     @field_validator("related_node_ids", "related_edge_ids")
     @classmethod
     def sort_unique_references(cls, value: tuple[str, ...]) -> tuple[str, ...]:
@@ -194,9 +220,21 @@ class ExplorerPublicProjectionV1(SyntheticModel):
         _require_unique(edge_ids, "Explorer edge IDs")
         known_nodes = set(node_ids)
         known_edges = set(edge_ids)
+        parents = {node.id: node.parent_node_id for node in self.nodes}
         for node in self.nodes:
-            if node.parent_node_id is not None and node.parent_node_id not in known_nodes:
+            if (
+                node.parent_node_id is not None
+                and node.parent_node_id not in known_nodes
+            ):
                 raise ValueError("Explorer node references an unknown parent")
+        for node_id in node_ids:
+            visited: set[str] = set()
+            cursor = node_id
+            while (parent := parents[cursor]) is not None:
+                if parent == node_id or parent in visited:
+                    raise ValueError("Explorer node parents must be acyclic")
+                visited.add(cursor)
+                cursor = parent
         for edge in self.edges:
             if (
                 edge.source_node_id not in known_nodes
@@ -207,7 +245,9 @@ class ExplorerPublicProjectionV1(SyntheticModel):
         previous_time: datetime | None = None
         for event in self.timeline:
             if event.source_event_index <= previous_index:
-                raise ValueError("Explorer timeline indices must be strictly increasing")
+                raise ValueError(
+                    "Explorer timeline indices must be strictly increasing"
+                )
             if previous_time is not None and event.occurred_at <= previous_time:
                 raise ValueError("Explorer timeline times must be strictly increasing")
             if not set(event.related_node_ids) <= known_nodes:
@@ -242,11 +282,11 @@ class ExplorerEvaluatorAnnotationV1(SyntheticModel):
 
 
 class ExplorerEvaluatorOverlayV1(SyntheticModel):
-    schema_version: Literal["1.0.0"] = EXPLORER_PROJECTION_SCHEMA_VERSION
+    schema_version: Literal["1.0.0"] = EXPLORER_EVALUATOR_SCHEMA_VERSION
     visibility: Literal["evaluator"] = "evaluator"
-    watermark: Literal[
-        "EVALUATOR VIEW - CONTAINS REFERENCE TRUTH"
-    ] = EVALUATOR_WATERMARK
+    watermark: Literal["EVALUATOR VIEW - CONTAINS REFERENCE TRUTH"] = (
+        EVALUATOR_WATERMARK
+    )
     digest_algorithm: Literal["sha256"] = "sha256"
     public_projection_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
     evaluator_artifact_set_digest: str = Field(pattern=r"^[0-9a-f]{64}$")

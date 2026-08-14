@@ -2376,6 +2376,48 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/concepts/explorer-v01.md",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
+      "anchor": "artifact-boundary",
+      "heading": "Artifact boundary",
+      "id": "route:docs/concepts/explorer-v01.md#artifact-boundary",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
+      "anchor": "deterministic-layout-inputs",
+      "heading": "Deterministic layout inputs",
+      "id": "route:docs/concepts/explorer-v01.md#deterministic-layout-inputs",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
+      "anchor": "explorer-v01-contract-and-packaging-decision",
+      "heading": "Explorer v0.1 contract and packaging decision",
+      "id": "route:docs/concepts/explorer-v01.md#explorer-v01-contract-and-packaging-decision",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
+      "anchor": "identity-normalization-and-collisions",
+      "heading": "Identity, normalization, and collisions",
+      "id": "route:docs/concepts/explorer-v01.md#identity-normalization-and-collisions",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
+      "anchor": "immediate-scope",
+      "heading": "Immediate scope",
+      "id": "route:docs/concepts/explorer-v01.md#immediate-scope",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
+      "anchor": "renderer-packaging-decision",
+      "heading": "Renderer packaging decision",
+      "id": "route:docs/concepts/explorer-v01.md#renderer-packaging-decision",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/concepts/index.md",
       "path": "docs/concepts/index.md"
     },
@@ -9751,6 +9793,231 @@
       "name": "evaluate_world",
       "source": "src/synthworld/__init__.py",
       "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EVALUATOR_WATERMARK",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EVALUATOR_WATERMARK",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_EVALUATOR_SCHEMA_VERSION",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_EVALUATOR_SCHEMA_VERSION",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_LAYOUT_SCHEMA_VERSION",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_LAYOUT_SCHEMA_VERSION",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_PROJECTION_SCHEMA_VERSION",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_PROJECTION_SCHEMA_VERSION",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerCoordinateV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerCoordinateV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEdgeKind",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEdgeKind",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEdgeV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEdgeV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEvaluatorAnnotationV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEvaluatorAnnotationV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEvaluatorOverlayV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEvaluatorOverlayV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerLayoutDirection",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerLayoutDirection",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerLayoutManifestV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerLayoutManifestV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerLayoutOptionsV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerLayoutOptionsV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerNodeKind",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerNodeKind",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerNodeV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerNodeV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerPropertyV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerPropertyV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerPublicProjectionV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerPublicProjectionV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerSourceV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerSourceV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerTimelineEventKind",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerTimelineEventKind",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerTimelineEventV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerTimelineEventV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerViewportV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerViewportV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.canonical_json_bytes",
+      "implementation_module": "synthworld.explorer.serialization",
+      "kind": "python_export",
+      "name": "canonical_json_bytes",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.explorer_digest",
+      "implementation_module": "synthworld.explorer.serialization",
+      "kind": "python_export",
+      "name": "explorer_digest",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.project_asteria_agent_authority_v1",
+      "implementation_module": "synthworld.explorer.asteria",
+      "kind": "python_export",
+      "name": "project_asteria_agent_authority_v1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.validate_evaluator_overlay",
+      "implementation_module": "synthworld.explorer.validation",
+      "kind": "python_export",
+      "name": "validate_evaluator_overlay",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.validate_layout_manifest",
+      "implementation_module": "synthworld.explorer.validation",
+      "kind": "python_export",
+      "name": "validate_layout_manifest",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
     },
     {
       "assignment_required": true,

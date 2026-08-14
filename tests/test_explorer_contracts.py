@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from pydantic import ValidationError
 
 from synthworld.agentic import generate_asteria_agentic_v1
+from synthworld.agentic.models import ActionAttempted
 from synthworld.explorer import (
     EVALUATOR_WATERMARK,
     ExplorerCoordinateV1,
@@ -16,16 +18,19 @@ from synthworld.explorer import (
     ExplorerLayoutOptionsV1,
     ExplorerNodeKind,
     ExplorerPropertyV1,
+    ExplorerPublicProjectionV1,
     ExplorerViewportV1,
     canonical_json_bytes,
     explorer_digest,
     project_asteria_agent_authority_v1,
+    validate_evaluator_overlay,
+    validate_layout_manifest,
 )
 
 _PUBLIC_DIGEST = "a" * 64
 
 
-def _projection():  # type: ignore[no-untyped-def]
+def _projection() -> ExplorerPublicProjectionV1:
     return project_asteria_agent_authority_v1(
         generate_asteria_agentic_v1().public,
         public_artifact_set_digest=_PUBLIC_DIGEST,
@@ -71,9 +76,7 @@ def test_asteria_projection_is_deterministic_public_and_answer_independent() -> 
 def test_projection_exposes_public_authority_and_revocation_replay() -> None:
     projection = _projection()
     revocation = next(
-        event
-        for event in projection.timeline
-        if event.kind == "delegation_revoked"
+        event for event in projection.timeline if event.kind == "delegation_revoked"
     )
     action = next(
         event for event in projection.timeline if event.kind == "action_attempted"
@@ -94,7 +97,8 @@ def test_projection_exposes_public_authority_and_revocation_replay() -> None:
 
 
 def test_projection_contract_rejects_open_or_ambiguous_graphs() -> None:
-    projection_data = _projection().model_dump(mode="json")
+    projection = _projection()
+    projection_data = projection.model_dump(mode="json")
     mutations = []
 
     duplicate_node = deepcopy(projection_data)
@@ -118,9 +122,9 @@ def test_projection_contract_rejects_open_or_ambiguous_graphs() -> None:
     mutations.append((unknown_event_edge, "event references an unknown edge"))
 
     repeated_index = deepcopy(projection_data)
-    repeated_index["timeline"][1]["source_event_index"] = repeated_index["timeline"][
-        0
-    ]["source_event_index"]
+    repeated_index["timeline"][1]["source_event_index"] = repeated_index["timeline"][0][
+        "source_event_index"
+    ]
     mutations.append((repeated_index, "indices must be strictly increasing"))
 
     repeated_time = deepcopy(projection_data)
@@ -128,6 +132,20 @@ def test_projection_contract_rejects_open_or_ambiguous_graphs() -> None:
         "occurred_at"
     ]
     mutations.append((repeated_time, "times must be strictly increasing"))
+
+    parent_cycle = deepcopy(projection_data)
+    parent_cycle["nodes"][0]["parent_node_id"] = parent_cycle["nodes"][1]["id"]
+    parent_cycle["nodes"][1]["parent_node_id"] = parent_cycle["nodes"][0]["id"]
+    mutations.append((parent_cycle, "parents must be acyclic"))
+
+    non_utc = deepcopy(projection_data)
+    non_utc["timeline"][0]["occurred_at"] = datetime(
+        2026,
+        1,
+        1,
+        tzinfo=timezone(timedelta(hours=1)),
+    )
+    mutations.append((non_utc, "timestamps must use UTC"))
 
     for mutation, message in mutations:
         with pytest.raises(ValidationError, match=message):
@@ -156,6 +174,14 @@ def test_properties_and_event_references_are_canonical_and_unique() -> None:
         )
     with pytest.raises(ValidationError, match="nonblank"):
         ExplorerPropertyV1(key=" ", value="value")
+    with pytest.raises(ValidationError, match="values must be nonblank"):
+        ExplorerPropertyV1(key="member", value=" ")
+    first_collection = ExplorerPropertyV1(key="members", value=("a", "b|c"))
+    second_collection = ExplorerPropertyV1(key="members", value=("a|b", "c"))
+    assert first_collection.value == ("a", "b|c")
+    assert first_collection != second_collection
+    with pytest.raises(ValidationError, match="collections must be nonempty"):
+        ExplorerPropertyV1(key="members", value=())
     with pytest.raises(ValidationError, match="event references must be unique"):
         projection.timeline[0].__class__(
             **projection.timeline[0].model_dump(exclude={"related_node_ids"}),
@@ -165,13 +191,19 @@ def test_properties_and_event_references_are_canonical_and_unique() -> None:
 
 def test_evaluator_overlay_is_separate_watermarked_and_digest_bound() -> None:
     projection = _projection()
+    action_event_id = next(
+        event.source_event_id
+        for event in projection.timeline
+        if event.kind == "action_attempted"
+    )
     annotation = ExplorerEvaluatorAnnotationV1(
         id="annotation-1",
-        source_action_event_id="evt-004-authorised-action",
-        target_id="evt-004-authorised-action",
+        source_action_event_id=action_event_id,
+        target_id=action_event_id,
         kind="authority_decision",
         label="Expected authority decision",
         value="allow",
+        properties=(ExplorerPropertyV1(key="source", value="oracle"),),
     )
     overlay = ExplorerEvaluatorOverlayV1(
         public_projection_digest=explorer_digest(projection),
@@ -182,6 +214,36 @@ def test_evaluator_overlay_is_separate_watermarked_and_digest_bound() -> None:
     assert overlay.visibility == "evaluator"
     assert overlay.watermark == EVALUATOR_WATERMARK
     assert b"Expected authority decision" in canonical_json_bytes(overlay)
+    validate_evaluator_overlay(projection, overlay)
+    with pytest.raises(ValueError, match="does not bind"):
+        validate_evaluator_overlay(
+            projection,
+            overlay.model_copy(update={"public_projection_digest": "c" * 64}),
+        )
+    with pytest.raises(ValueError, match="unknown action event"):
+        validate_evaluator_overlay(
+            projection,
+            overlay.model_copy(
+                update={
+                    "annotations": (
+                        annotation.model_copy(
+                            update={"source_action_event_id": "missing"}
+                        ),
+                    )
+                }
+            ),
+        )
+    with pytest.raises(ValueError, match="unknown target"):
+        validate_evaluator_overlay(
+            projection,
+            overlay.model_copy(
+                update={
+                    "annotations": (
+                        annotation.model_copy(update={"target_id": "missing"}),
+                    )
+                }
+            ),
+        )
     with pytest.raises(ValidationError, match="annotation IDs must be unique"):
         ExplorerEvaluatorOverlayV1(
             public_projection_digest=explorer_digest(projection),
@@ -214,6 +276,17 @@ def test_layout_contract_pins_engine_viewport_precision_and_coordinates() -> Non
     )
     assert layout.options.engine == "elk"
     assert layout.coordinate_precision == 3
+    validate_layout_manifest(projection, layout)
+    with pytest.raises(ValueError, match="does not bind"):
+        validate_layout_manifest(
+            projection,
+            layout.model_copy(update={"public_projection_digest": "c" * 64}),
+        )
+    with pytest.raises(ValueError, match="cover exactly"):
+        validate_layout_manifest(
+            projection,
+            layout.model_copy(update={"coordinates": layout.coordinates[:-1]}),
+        )
     with pytest.raises(ValidationError, match="coordinates must be finite"):
         ExplorerCoordinateV1(
             node_id=projection.nodes[0].id,
@@ -243,3 +316,85 @@ def test_asteria_adapter_rejects_unpublished_world_identity() -> None:
             altered,
             public_artifact_set_digest=_PUBLIC_DIGEST,
         )
+
+
+def test_asteria_adapter_handles_optional_parents_and_unresolved_claims() -> None:
+    public = generate_asteria_agentic_v1().public
+    principals = list(public.snapshot.principals)
+    principal_index = next(
+        index
+        for index, principal in enumerate(principals)
+        if principal.organisation_id is not None
+    )
+    principal = principals[principal_index]
+    principals[principal_index] = principal.model_copy(update={"department_id": None})
+    organisation_parented = public.model_copy(
+        update={
+            "snapshot": public.snapshot.model_copy(
+                update={"principals": tuple(principals)}
+            )
+        }
+    )
+    projection = project_asteria_agent_authority_v1(
+        organisation_parented,
+        public_artifact_set_digest=_PUBLIC_DIGEST,
+    )
+    projected_principal = next(
+        node
+        for node in projection.nodes
+        if node.kind == ExplorerNodeKind.PRINCIPAL and node.source_id == principal.id
+    )
+    assert projected_principal.parent_node_id is not None
+
+    principals[principal_index] = principal.model_copy(
+        update={"department_id": None, "organisation_id": None}
+    )
+    unparented = public.model_copy(
+        update={
+            "snapshot": public.snapshot.model_copy(
+                update={"principals": tuple(principals)}
+            )
+        }
+    )
+    projection = project_asteria_agent_authority_v1(
+        unparented,
+        public_artifact_set_digest=_PUBLIC_DIGEST,
+    )
+    projected_principal = next(
+        node
+        for node in projection.nodes
+        if node.kind == ExplorerNodeKind.PRINCIPAL and node.source_id == principal.id
+    )
+    assert projected_principal.parent_node_id is None
+
+    events = list(public.events)
+    event_index = next(
+        index
+        for index, event in enumerate(events)
+        if isinstance(event.payload, ActionAttempted)
+    )
+    action_event = events[event_index]
+    assert isinstance(action_event.payload, ActionAttempted)
+    altered_attempt = action_event.payload.attempt.model_copy(
+        update={"originating_principal_claim": "principal-unresolved"}
+    )
+    events[event_index] = action_event.model_copy(
+        update={
+            "payload": action_event.payload.model_copy(
+                update={"attempt": altered_attempt}
+            )
+        }
+    )
+    unresolved_claim = public.model_copy(update={"events": tuple(events)})
+    projection = project_asteria_agent_authority_v1(
+        unresolved_claim,
+        public_artifact_set_digest=_PUBLIC_DIGEST,
+    )
+    action_node = next(
+        node
+        for node in projection.nodes
+        if node.source_id == action_event.id
+        and node.kind == ExplorerNodeKind.ACTION_ATTEMPT
+    )
+    properties = {item.key: item.value for item in action_node.properties}
+    assert properties["originating_principal_claim"] == "principal-unresolved"

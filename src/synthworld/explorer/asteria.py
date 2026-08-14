@@ -29,19 +29,22 @@ from synthworld.explorer.models import (
 
 _EXPLORER_NAMESPACE = UUID("8d21366a-84bf-5fa8-87bc-7e36aa36e782")
 
+type _PropertyValue = str | tuple[str, ...]
+
 
 def _framed_identifier(domain: str, *parts: str) -> str:
     framed = "".join(f"{len(part.encode())}:{part}" for part in parts)
-    return f"{domain}:{uuid5(_EXPLORER_NAMESPACE, f'{domain}\0{framed}') }"
+    uuid_name = f"{domain}\0{framed}"
+    return f"{domain}:{uuid5(_EXPLORER_NAMESPACE, uuid_name)}"
 
 
 def _properties(
-    *entries: tuple[str, str | None],
+    *entries: tuple[str, _PropertyValue | None],
 ) -> tuple[ExplorerPropertyV1, ...]:
     return tuple(
         ExplorerPropertyV1(key=key, value=value)
         for key, value in entries
-        if value is not None and value.strip()
+        if value is not None and value != ()
     )
 
 
@@ -107,9 +110,7 @@ class _ProjectionBuilder:
         return edge_id
 
 
-def _project_snapshot(
-    builder: _ProjectionBuilder, public: AgenticPublicBundle
-) -> None:
+def _project_snapshot(builder: _ProjectionBuilder, public: AgenticPublicBundle) -> None:
     snapshot = public.snapshot
     for organisation in snapshot.organisations:
         builder.add_node(
@@ -191,9 +192,7 @@ def _project_snapshot(
         if agent.parent_agent_id is not None:
             builder.add_edge(
                 ExplorerEdgeKind.PARENT_AGENT,
-                builder.node_id(
-                    ExplorerNodeKind.LOGICAL_AGENT, agent.parent_agent_id
-                ),
+                builder.node_id(ExplorerNodeKind.LOGICAL_AGENT, agent.parent_agent_id),
                 agent_node,
                 qualifier=agent.id,
                 label="parent agent",
@@ -208,7 +207,7 @@ def _project_snapshot(
             resource.display_name,
             parent_node_id=owner_node,
             properties=_properties(
-                ("actions", "|".join(resource.actions)),
+                ("actions", resource.actions),
                 ("organisation_id", resource.organisation_id),
             ),
         )
@@ -226,9 +225,7 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
         payload = event.payload
         related_nodes: list[str] = []
         related_edges: list[str] = []
-        event_properties = list(
-            _properties(("evidence_refs", "|".join(event.evidence_refs)))
-        )
+        event_properties = list(_properties(("evidence_refs", event.evidence_refs)))
         if isinstance(payload, DelegationGranted):
             delegation = payload.delegation
             delegation_node = builder.add_node(
@@ -239,9 +236,9 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
                     ExplorerNodeKind.LOGICAL_AGENT, delegation.grantee_agent_id
                 ),
                 properties=_properties(
-                    ("actions", "|".join(delegation.capability.actions)),
+                    ("actions", delegation.capability.actions),
                     ("purpose", delegation.capability.purpose),
-                    ("scopes", "|".join(delegation.capability.scopes)),
+                    ("scopes", delegation.capability.scopes),
                     ("policy_version", delegation.policy_version),
                     ("valid_from", delegation.valid_from.isoformat()),
                     ("expires_at", delegation.expires_at.isoformat()),
@@ -404,9 +401,12 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
                 properties=_properties(
                     ("action", attempt.action),
                     ("purpose", attempt.purpose),
-                    ("requested_scope", "|".join(attempt.requested_scope)),
+                    ("requested_scope", attempt.requested_scope),
                     ("policy_version", attempt.policy_version),
-                    ("originating_principal_claim", attempt.originating_principal_claim),
+                    (
+                        "originating_principal_claim",
+                        attempt.originating_principal_claim,
+                    ),
                     ("logical_agent_claim", attempt.logical_agent_claim),
                     ("runtime_principal_claim", attempt.runtime_principal_claim),
                     ("attributed_actor_claim", attempt.attributed_actor_claim),
@@ -465,9 +465,7 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
                     builder.add_edge(
                         ExplorerEdgeKind.ATTEMPTS,
                         action_node,
-                        builder.node_id(
-                            ExplorerNodeKind.RESOURCE, attempt.resource_id
-                        ),
+                        builder.node_id(ExplorerNodeKind.RESOURCE, attempt.resource_id),
                         qualifier=event.id,
                         label="attempts",
                         properties=_properties(("action", attempt.action)),
@@ -480,7 +478,7 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
             )
         if isinstance(payload, EvidenceDiscarded):
             event_properties.extend(
-                _properties(("discarded_evidence_refs", "|".join(payload.evidence_refs)))
+                _properties(("discarded_evidence_refs", payload.evidence_refs))
             )
         if isinstance(payload, AuditPerformed):
             event_properties.extend(_properties(("audit_id", payload.audit_id)))
