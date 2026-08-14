@@ -23,6 +23,7 @@ class ExplorerNodeKind(StrEnum):
     RUNTIME = "runtime"
     CREDENTIAL = "credential"
     DELEGATION = "delegation"
+    PROPOSED_DELEGATION = "proposed_delegation"
     RESOURCE = "resource"
     ACTION_ATTEMPT = "action_attempt"
 
@@ -33,6 +34,7 @@ class ExplorerEdgeKind(StrEnum):
     PARENT_AGENT = "parent_agent"
     ORIGINATES = "originates"
     DELEGATES = "delegates"
+    PARENT_DELEGATION = "parent_delegation"
     GRANTS_TO = "grants_to"
     TARGETS = "targets"
     ISSUES = "issues"
@@ -45,6 +47,7 @@ class ExplorerEdgeKind(StrEnum):
     CLAIMS_RUNTIME = "claims_runtime"
     PRESENTS = "presents"
     ATTEMPTS = "attempts"
+    PROPOSES_DELEGATION = "proposes_delegation"
 
 
 class ExplorerTimelineEventKind(StrEnum):
@@ -218,6 +221,10 @@ class ExplorerPublicProjectionV1(SyntheticModel):
         edge_ids = tuple(item.id for item in self.edges)
         _require_unique(node_ids, "Explorer node IDs")
         _require_unique(edge_ids, "Explorer edge IDs")
+        _require_unique(
+            tuple(event.source_event_id for event in self.timeline),
+            "Explorer timeline source event IDs",
+        )
         known_nodes = set(node_ids)
         known_edges = set(edge_ids)
         parents = {node.id: node.parent_node_id for node in self.nodes}
@@ -320,7 +327,9 @@ class ExplorerCoordinateV1(SyntheticModel):
 
     @model_validator(mode="after")
     def require_finite_coordinates(self) -> Self:
-        if not all(math.isfinite(value) for value in (self.x, self.y)):
+        if not all(
+            math.isfinite(value) for value in (self.x, self.y, self.width, self.height)
+        ):
             raise ValueError("Explorer coordinates must be finite")
         return self
 

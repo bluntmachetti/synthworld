@@ -237,6 +237,11 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
                 ),
                 properties=_properties(
                     ("actions", delegation.capability.actions),
+                    (
+                        "may_delegate",
+                        str(delegation.capability.may_delegate).lower(),
+                    ),
+                    ("parent_delegation_id", delegation.parent_delegation_id),
                     ("purpose", delegation.capability.purpose),
                     ("scopes", delegation.capability.scopes),
                     ("policy_version", delegation.policy_version),
@@ -264,6 +269,19 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
                         delegation_node,
                         qualifier=event.id,
                         label=label,
+                    )
+                )
+            if delegation.parent_delegation_id is not None:
+                related_edges.append(
+                    builder.add_edge(
+                        ExplorerEdgeKind.PARENT_DELEGATION,
+                        builder.node_id(
+                            ExplorerNodeKind.DELEGATION,
+                            delegation.parent_delegation_id,
+                        ),
+                        delegation_node,
+                        qualifier=event.id,
+                        label="parent delegation",
                     )
                 )
             related_edges.append(
@@ -420,6 +438,108 @@ def _project_events(builder: _ProjectionBuilder, public: AgenticPublicBundle) ->
                 ),
             )
             related_nodes.append(action_node)
+            proposed_delegation = attempt.proposed_delegation
+            if proposed_delegation is not None:
+                proposed_node = builder.add_node(
+                    ExplorerNodeKind.PROPOSED_DELEGATION,
+                    proposed_delegation.id,
+                    proposed_delegation.id,
+                    properties=_properties(
+                        (
+                            "originating_principal_id",
+                            proposed_delegation.originating_principal_id,
+                        ),
+                        (
+                            "delegator_principal_id",
+                            proposed_delegation.delegator_principal_id,
+                        ),
+                        ("grantee_agent_id", proposed_delegation.grantee_agent_id),
+                        (
+                            "parent_delegation_id",
+                            proposed_delegation.parent_delegation_id,
+                        ),
+                        (
+                            "resource_ids",
+                            proposed_delegation.capability.resource_ids,
+                        ),
+                        ("actions", proposed_delegation.capability.actions),
+                        ("scopes", proposed_delegation.capability.scopes),
+                        ("purpose", proposed_delegation.capability.purpose),
+                        (
+                            "may_delegate",
+                            str(proposed_delegation.capability.may_delegate).lower(),
+                        ),
+                        ("policy_version", proposed_delegation.policy_version),
+                        ("valid_from", proposed_delegation.valid_from.isoformat()),
+                        ("expires_at", proposed_delegation.expires_at.isoformat()),
+                    ),
+                )
+                related_nodes.append(proposed_node)
+                related_edges.append(
+                    builder.add_edge(
+                        ExplorerEdgeKind.PROPOSES_DELEGATION,
+                        action_node,
+                        proposed_node,
+                        qualifier=event.id,
+                        label="proposes delegation",
+                    )
+                )
+                for kind, source_id, label in (
+                    (
+                        ExplorerEdgeKind.ORIGINATES,
+                        proposed_delegation.originating_principal_id,
+                        "originates",
+                    ),
+                    (
+                        ExplorerEdgeKind.DELEGATES,
+                        proposed_delegation.delegator_principal_id,
+                        "delegates",
+                    ),
+                ):
+                    related_edges.append(
+                        builder.add_edge(
+                            kind,
+                            builder.node_id(ExplorerNodeKind.PRINCIPAL, source_id),
+                            proposed_node,
+                            qualifier=event.id,
+                            label=label,
+                        )
+                    )
+                if proposed_delegation.parent_delegation_id is not None:
+                    related_edges.append(
+                        builder.add_edge(
+                            ExplorerEdgeKind.PARENT_DELEGATION,
+                            builder.node_id(
+                                ExplorerNodeKind.DELEGATION,
+                                proposed_delegation.parent_delegation_id,
+                            ),
+                            proposed_node,
+                            qualifier=event.id,
+                            label="parent delegation",
+                        )
+                    )
+                related_edges.append(
+                    builder.add_edge(
+                        ExplorerEdgeKind.GRANTS_TO,
+                        proposed_node,
+                        builder.node_id(
+                            ExplorerNodeKind.LOGICAL_AGENT,
+                            proposed_delegation.grantee_agent_id,
+                        ),
+                        qualifier=event.id,
+                        label="grants to",
+                    )
+                )
+                for resource_id in proposed_delegation.capability.resource_ids:
+                    related_edges.append(
+                        builder.add_edge(
+                            ExplorerEdgeKind.TARGETS,
+                            proposed_node,
+                            builder.node_id(ExplorerNodeKind.RESOURCE, resource_id),
+                            qualifier=f"{event.id}:{resource_id}",
+                            label="targets",
+                        )
+                    )
             for kind, node_kind, claim, label in (
                 (
                     ExplorerEdgeKind.CLAIMS_ORIGINATOR,

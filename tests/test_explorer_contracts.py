@@ -8,10 +8,11 @@ import pytest
 from pydantic import ValidationError
 
 from synthworld.agentic import generate_asteria_agentic_v1
-from synthworld.agentic.models import ActionAttempted
+from synthworld.agentic.models import ActionAttempted, DelegationGranted
 from synthworld.explorer import (
     EVALUATOR_WATERMARK,
     ExplorerCoordinateV1,
+    ExplorerEdgeKind,
     ExplorerEvaluatorAnnotationV1,
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutManifestV1,
@@ -96,6 +97,155 @@ def test_projection_exposes_public_authority_and_revocation_replay() -> None:
     assert "expected_decision" not in action_properties
 
 
+def test_projection_preserves_granted_delegation_chain_semantics() -> None:
+    public = generate_asteria_agentic_v1().public
+    source_event = next(
+        event for event in public.events if event.id == "evt-009-child-delegated"
+    )
+    assert isinstance(source_event.payload, DelegationGranted)
+    source_delegation = source_event.payload.delegation
+    assert source_delegation.parent_delegation_id is not None
+    projection = project_asteria_agent_authority_v1(
+        public,
+        public_artifact_set_digest=_PUBLIC_DIGEST,
+    )
+    timeline_event = next(
+        event
+        for event in projection.timeline
+        if event.source_event_id == source_event.id
+    )
+    delegation_node = next(
+        node
+        for node in projection.nodes
+        if node.kind == ExplorerNodeKind.DELEGATION
+        and node.source_id == source_delegation.id
+    )
+    parent_node = next(
+        node
+        for node in projection.nodes
+        if node.kind == ExplorerNodeKind.DELEGATION
+        and node.source_id == source_delegation.parent_delegation_id
+    )
+    properties = {item.key: item.value for item in delegation_node.properties}
+
+    assert properties["parent_delegation_id"] == (
+        source_delegation.parent_delegation_id
+    )
+    assert (
+        properties["may_delegate"]
+        == str(source_delegation.capability.may_delegate).lower()
+    )
+    parent_edge = next(
+        edge
+        for edge in projection.edges
+        if edge.kind == ExplorerEdgeKind.PARENT_DELEGATION
+        and edge.source_node_id == parent_node.id
+        and edge.target_node_id == delegation_node.id
+    )
+    assert parent_edge.id in timeline_event.related_edge_ids
+
+
+def test_projection_preserves_proposed_delegation_payload() -> None:
+    public = generate_asteria_agentic_v1().public
+    source_event = next(
+        event
+        for event in public.events
+        if event.id == "evt-012-overprivileged-delegation"
+    )
+    assert isinstance(source_event.payload, ActionAttempted)
+    proposed = source_event.payload.attempt.proposed_delegation
+    assert proposed is not None
+    assert proposed.parent_delegation_id is not None
+    projection = project_asteria_agent_authority_v1(
+        public,
+        public_artifact_set_digest=_PUBLIC_DIGEST,
+    )
+    timeline_event = next(
+        event
+        for event in projection.timeline
+        if event.source_event_id == source_event.id
+    )
+    action_node = next(
+        node
+        for node in projection.nodes
+        if node.kind == ExplorerNodeKind.ACTION_ATTEMPT
+        and node.source_id == source_event.id
+    )
+    proposed_node = next(
+        node
+        for node in projection.nodes
+        if node.kind == ExplorerNodeKind.PROPOSED_DELEGATION
+        and node.source_id == proposed.id
+    )
+    properties = {item.key: item.value for item in proposed_node.properties}
+
+    assert proposed_node.id in timeline_event.related_node_ids
+    assert properties == {
+        "actions": proposed.capability.actions,
+        "delegator_principal_id": proposed.delegator_principal_id,
+        "expires_at": proposed.expires_at.isoformat(),
+        "grantee_agent_id": proposed.grantee_agent_id,
+        "may_delegate": str(proposed.capability.may_delegate).lower(),
+        "originating_principal_id": proposed.originating_principal_id,
+        "parent_delegation_id": proposed.parent_delegation_id,
+        "policy_version": proposed.policy_version,
+        "purpose": proposed.capability.purpose,
+        "resource_ids": proposed.capability.resource_ids,
+        "scopes": proposed.capability.scopes,
+        "valid_from": proposed.valid_from.isoformat(),
+    }
+    proposed_edge = next(
+        edge
+        for edge in projection.edges
+        if edge.kind == ExplorerEdgeKind.PROPOSES_DELEGATION
+        and edge.source_node_id == action_node.id
+        and edge.target_node_id == proposed_node.id
+    )
+    parent_edge = next(
+        edge
+        for edge in projection.edges
+        if edge.kind == ExplorerEdgeKind.PARENT_DELEGATION
+        and edge.target_node_id == proposed_node.id
+    )
+    assert proposed_edge.id in timeline_event.related_edge_ids
+    assert parent_edge.id in timeline_event.related_edge_ids
+
+    proposed_without_parent = proposed.model_copy(update={"parent_delegation_id": None})
+    attempt_without_parent = source_event.payload.attempt.model_copy(
+        update={"proposed_delegation": proposed_without_parent}
+    )
+    event_without_parent = source_event.model_copy(
+        update={
+            "payload": source_event.payload.model_copy(
+                update={"attempt": attempt_without_parent}
+            )
+        }
+    )
+    public_without_parent = public.model_copy(
+        update={
+            "events": tuple(
+                event_without_parent if event.id == source_event.id else event
+                for event in public.events
+            )
+        }
+    )
+    projection_without_parent = project_asteria_agent_authority_v1(
+        public_without_parent,
+        public_artifact_set_digest=_PUBLIC_DIGEST,
+    )
+    proposed_node_without_parent = next(
+        node
+        for node in projection_without_parent.nodes
+        if node.kind == ExplorerNodeKind.PROPOSED_DELEGATION
+        and node.source_id == proposed.id
+    )
+    assert not any(
+        edge.kind == ExplorerEdgeKind.PARENT_DELEGATION
+        and edge.target_node_id == proposed_node_without_parent.id
+        for edge in projection_without_parent.edges
+    )
+
+
 def test_projection_contract_rejects_open_or_ambiguous_graphs() -> None:
     projection = _projection()
     projection_data = projection.model_dump(mode="json")
@@ -132,6 +282,14 @@ def test_projection_contract_rejects_open_or_ambiguous_graphs() -> None:
         "occurred_at"
     ]
     mutations.append((repeated_time, "times must be strictly increasing"))
+
+    repeated_source_event_id = deepcopy(projection_data)
+    repeated_source_event_id["timeline"][1]["source_event_id"] = (
+        repeated_source_event_id["timeline"][0]["source_event_id"]
+    )
+    mutations.append(
+        (repeated_source_event_id, "timeline source event IDs must be unique")
+    )
 
     parent_cycle = deepcopy(projection_data)
     parent_cycle["nodes"][0]["parent_node_id"] = parent_cycle["nodes"][1]["id"]
@@ -295,6 +453,17 @@ def test_layout_contract_pins_engine_viewport_precision_and_coordinates() -> Non
             width=1.0,
             height=1.0,
         )
+    for dimension in ("width", "height"):
+        values = {
+            "node_id": projection.nodes[0].id,
+            "x": 0.0,
+            "y": 0.0,
+            "width": 1.0,
+            "height": 1.0,
+        }
+        values[dimension] = float("inf")
+        with pytest.raises(ValidationError, match="coordinates must be finite"):
+            ExplorerCoordinateV1.model_validate(values)
     with pytest.raises(ValidationError, match="layout node IDs must be unique"):
         ExplorerLayoutManifestV1(
             public_projection_digest=explorer_digest(projection),
