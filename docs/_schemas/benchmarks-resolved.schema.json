@@ -22,6 +22,7 @@
         "benchmark_id": {"type": "string"},
         "frozen": {"type": "boolean"},
         "generated": {"anyOf": [{"$ref": "#/$defs/generated"}, {"type": "null"}]},
+        "hf_destination_path": {"type": ["string", "null"]},
         "id": {"type": "string"},
         "integrity_record_ids": {"items": {"type": "string"}, "type": "array"},
         "kind": {"type": "string"},

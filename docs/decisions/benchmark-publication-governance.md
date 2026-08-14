@@ -44,3 +44,24 @@ This branch addresses those blockers through the aligned benchmark reference and
 workflow trigger. This decision record also preserves the durable B6/B7 owner
 decisions without adopting the historical Phase 0 inventories or migration index
 as current repository facts.
+
+## B8: bounded Hugging Face v0.14.0 authorization
+
+The first governed Hugging Face refresh treats commit
+`54a7d1e89f683ade507c3518b3e0c0bfddfbe528` and its 42-file inventory as an
+immutable remote baseline. It does not retroactively re-authorize, regenerate,
+delete, or relabel those files.
+
+Authorization is per artifact, not per published benchmark family. The bounded
+v0.14.0 tranche contains only the nine raw ambiguity-v1 and
+authority-governance-v1 artifacts enumerated by the publication manifest plus a
+single dataset-card replacement. Both C08 v2 benchmark identities remain
+explicitly prohibited. New paths expose the public/evaluator boundary in their
+directory structure, require an absent remote precondition, and are bound by
+source digest, byte size, content type, benchmark version, and canonical
+destination path.
+
+The authorization change remains dry-run-only. Network access, upload capability,
+deletion, protected-environment evidence, remote integrity evidence, and Viewer
+validation remain separate gates. A later uploader must consume only the reviewed
+manifest and use the pinned Hub commit as its compare-and-swap parent.

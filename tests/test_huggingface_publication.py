@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -48,6 +49,8 @@ def _complete_registry(registry: dict[str, Any]) -> dict[str, Any]:
         )
         for artifact in artifacts:
             artifact.setdefault("benchmark_id", benchmark["id"])
+            if set(artifact.get("approved_targets", [])) & publication.HF_TARGETS:
+                artifact.setdefault("hf_destination_path", artifact.get("path"))
     return registry
 
 
@@ -60,7 +63,7 @@ def _write_json(path: Path, value: object) -> None:
     path.write_text(publication.canonical_json(value), encoding="utf-8", newline="\n")
 
 
-def _validate(manifest_path: Path) -> dict[str, object]:
+def _validate(manifest_path: Path) -> dict[str, Any]:
     return publication.validate_publication(
         manifest_path,
         SCHEMA,
@@ -71,19 +74,291 @@ def _validate(manifest_path: Path) -> dict[str, object]:
     )
 
 
-def test_repository_manifest_derives_no_upload_operations() -> None:
+def _remote_baseline(
+    files: Sequence[object],
+    **overrides: object,
+) -> dict[str, object]:
+    valid_files = [item for item in files if isinstance(item, dict)]
+    baseline: dict[str, object] = {
+        "deletion_policy": "none",
+        "file_count": len(files),
+        "files": files,
+        "hub_commit_sha": "a" * 40,
+        "total_bytes": sum(
+            item.get("size_bytes", 0)
+            for item in valid_files
+            if type(item.get("size_bytes")) is int
+        ),
+    }
+    baseline.update(overrides)
+    return baseline
+
+
+def _remote_file(path: object = "frozen/sample.json") -> dict[str, object]:
+    return {"path": path, "sha256": "b" * 64, "size_bytes": 7}
+
+
+def test_repository_manifest_derives_bounded_dry_run_operations() -> None:
     plan = _validate(MANIFEST)
 
-    assert plan == {
-        "dataset_repository": "Bluntmachetti7/synthworld-benchmarks",
-        "network_access": False,
-        "operations": [],
-        "registry_sha256": (
-            "cc98aa4b8b5d44b2bafbadefc23b82faf409713b14c0e11b0ea7c6520004928f"
-        ),
-        "status": "blocked_no_authorized_targets",
-        "upload_enabled": False,
+    assert plan["dataset_repository"] == "Bluntmachetti7/synthworld-benchmarks"
+    assert plan["remote_parent_commit"] == ("54a7d1e89f683ade507c3518b3e0c0bfddfbe528")
+    assert plan["deletion_policy"] == "none"
+    assert plan["network_access"] is False
+    assert plan["upload_enabled"] is False
+    assert plan["status"] == "ready_for_protected_dry_run"
+    assert len(plan["operations"]) == 9
+    assert {operation["benchmark_id"] for operation in plan["operations"]} == {
+        "ambiguity-v1",
+        "authority-governance-v1",
     }
+    assert all(
+        operation["remote_precondition"] == {"sha256": None, "status": "absent"}
+        for operation in plan["operations"]
+    )
+    assert plan["card_operation"]["remote_precondition"]["status"] == "match"
+    assert plan["prohibited_benchmark_ids"] == [
+        "asteria-agentic-c08-v2",
+        "enterprise-agentic-c08-v2",
+    ]
+    assert {
+        operation["destination_path"]
+        for operation in plan["operations"]
+        if operation["benchmark_id"] == "ambiguity-v1"
+    } == {
+        "frozen/ambiguity-v1/SHA256SUMS",
+        "frozen/ambiguity-v1/ambiguity-dispositions-v1.json",
+        "frozen/ambiguity-v1/ambiguity-memberships-v1.json",
+        "frozen/ambiguity-v1/ambiguity-public-v1.json",
+    }
+
+
+def _checksum_operations(
+    tmp_path: Path,
+    *,
+    content: str,
+    payload_destination: str = "frozen/sample/payload.json",
+    payload_sha256: str = "a" * 64,
+    include_extra: bool = False,
+) -> list[dict[str, Any]]:
+    checksum = tmp_path / "SHA256SUMS"
+    checksum.write_text(content, encoding="utf-8", newline="\n")
+    operations: list[dict[str, Any]] = [
+        {
+            "artifact_id": "sample:checksum",
+            "artifact_kind": "checksum_manifest",
+            "benchmark_id": "sample",
+            "destination_path": "frozen/sample/SHA256SUMS",
+            "source_path": "SHA256SUMS",
+            "target": "hugging_face_raw",
+        },
+        {
+            "artifact_kind": "public_input",
+            "benchmark_id": "sample",
+            "destination_path": payload_destination,
+            "sha256": payload_sha256,
+            "target": "hugging_face_raw",
+        },
+    ]
+    if include_extra:
+        operations.append(
+            {
+                "artifact_kind": "evaluator_truth",
+                "benchmark_id": "sample",
+                "destination_path": "frozen/sample/extra.json",
+                "sha256": "b" * 64,
+                "target": "hugging_face_raw",
+            }
+        )
+    return operations
+
+
+def test_checksum_destinations_bind_relative_inventory(tmp_path: Path) -> None:
+    operations = _checksum_operations(tmp_path, content=f"{'a' * 64}  payload.json\n")
+
+    publication._validate_checksum_destinations(operations, tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("content", "payload_destination", "payload_sha256", "include_extra", "message"),
+    [
+        ("", "frozen/sample/payload.json", "a" * 64, False, "manifest is empty"),
+        (
+            "invalid\n",
+            "frozen/sample/payload.json",
+            "a" * 64,
+            False,
+            "invalid checksum line",
+        ),
+        (
+            f"{'a' * 64}  payload.json\n{'a' * 64}  payload.json\n",
+            "frozen/sample/payload.json",
+            "a" * 64,
+            False,
+            "duplicate checksum path",
+        ),
+        (
+            f"{'a' * 64}  payload.json\n",
+            "frozen/sample/renamed.json",
+            "a" * 64,
+            False,
+            "does not bind an authorized artifact",
+        ),
+        (
+            f"{'a' * 64}  payload.json\n",
+            "frozen/sample/payload.json",
+            "b" * 64,
+            False,
+            "does not bind an authorized artifact",
+        ),
+        (
+            f"{'a' * 64}  payload.json\n",
+            "frozen/sample/payload.json",
+            "a" * 64,
+            True,
+            "inventory differs",
+        ),
+    ],
+)
+def test_checksum_destinations_reject_broken_projection(
+    tmp_path: Path,
+    content: str,
+    payload_destination: str,
+    payload_sha256: str,
+    include_extra: bool,
+    message: str,
+) -> None:
+    operations = _checksum_operations(
+        tmp_path,
+        content=content,
+        payload_destination=payload_destination,
+        payload_sha256=payload_sha256,
+        include_extra=include_extra,
+    )
+
+    with pytest.raises(publication.PublicationError, match=message):
+        publication._validate_checksum_destinations(operations, tmp_path)
+
+
+def test_content_type_supports_jsonl_and_rejects_unknown_suffix() -> None:
+    assert publication._content_type(Path("sample.jsonl")) == "application/x-ndjson"
+    with pytest.raises(publication.PublicationError, match="unsupported"):
+        publication._content_type(Path("sample.csv"))
+
+
+@pytest.mark.parametrize(
+    ("path", "message"),
+    [
+        ("frozen/cafe\u0301.json", "NFC-normalized"),
+        ("README.md", "reserved for the dataset card"),
+        ("frozen/bad name.json", "forbidden characters"),
+        ("frozen//sample.json", "not canonical"),
+        ("frozen/../sample.json", "reserved segment"),
+        ("frozen/.hidden/sample.json", "reserved segment"),
+        ("frozen/trailing./sample.json", "reserved segment"),
+        ("frozen/CON/sample.json", "reserved segment"),
+    ],
+)
+def test_destination_path_rejects_noncanonical_or_reserved_forms(
+    path: str,
+    message: str,
+) -> None:
+    with pytest.raises(publication.PublicationError, match=message):
+        publication._validate_destination_path(path)
+
+
+def test_remote_baseline_requires_an_array() -> None:
+    with pytest.raises(publication.PublicationError, match="files must be an array"):
+        publication._remote_file_map({"files": "invalid"})
+
+
+@pytest.mark.parametrize(
+    "record",
+    [
+        None,
+        {"path": "frozen/sample.json"},
+        _remote_file(path=1),
+        {**_remote_file(), "sha256": 1},
+        {**_remote_file(), "sha256": "invalid"},
+        {**_remote_file(), "size_bytes": "7"},
+        {**_remote_file(), "size_bytes": True},
+        {**_remote_file(), "size_bytes": -1},
+    ],
+)
+def test_remote_baseline_rejects_malformed_file_records(record: object) -> None:
+    with pytest.raises(publication.PublicationError, match="malformed file record"):
+        publication._remote_file_map(_remote_baseline([record]))
+
+
+def test_remote_baseline_rejects_case_collisions_and_noncanonical_order() -> None:
+    collision = [_remote_file("frozen/A.json"), _remote_file("frozen/a.json")]
+    with pytest.raises(publication.PublicationError, match="path collision"):
+        publication._remote_file_map(_remote_baseline(collision))
+
+    unordered = [_remote_file("frozen/b.json"), _remote_file("frozen/a.json")]
+    with pytest.raises(publication.PublicationError, match="canonically ordered"):
+        publication._remote_file_map(_remote_baseline(unordered))
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"deletion_policy": "replace"},
+        {"hub_commit_sha": None},
+        {"hub_commit_sha": "invalid"},
+        {"file_count": 2},
+        {"total_bytes": 8},
+    ],
+)
+def test_remote_baseline_rejects_invalid_summary_or_policy(
+    overrides: dict[str, object],
+) -> None:
+    with pytest.raises(publication.PublicationError, match="summary or policy"):
+        publication._remote_file_map(_remote_baseline([_remote_file()], **overrides))
+
+
+def test_destination_inventory_allows_exact_remote_replacement() -> None:
+    remote = {"frozen/sample.json": _remote_file()}
+    publication._validate_destination_inventory(
+        [{"destination_path": "frozen/sample.json"}], remote
+    )
+
+
+def test_destination_inventory_rejects_operation_and_remote_case_collisions() -> None:
+    with pytest.raises(publication.PublicationError, match="destination collision"):
+        publication._validate_destination_inventory(
+            [
+                {"destination_path": "frozen/sample.json"},
+                {"destination_path": "FROZEN/SAMPLE.JSON"},
+            ],
+            {},
+        )
+
+    with pytest.raises(
+        publication.PublicationError, match="remote path case collision"
+    ):
+        publication._validate_destination_inventory(
+            [{"destination_path": "FROZEN/SAMPLE.JSON"}],
+            {"frozen/sample.json": _remote_file()},
+        )
+
+
+@pytest.mark.parametrize(
+    ("destination", "remote_path"),
+    [
+        ("frozen/existing/child.json", "frozen/existing"),
+        ("frozen/existing", "frozen/existing/child.json"),
+    ],
+)
+def test_destination_inventory_rejects_file_directory_collisions(
+    destination: str,
+    remote_path: str,
+) -> None:
+    with pytest.raises(publication.PublicationError, match="file/directory collision"):
+        publication._validate_destination_inventory(
+            [{"destination_path": destination}],
+            {remote_path: _remote_file(remote_path)},
+        )
 
 
 @pytest.mark.parametrize("content", ["[]\n", "not-json\n"])
@@ -203,8 +478,13 @@ def test_registry_target_intersection_requires_gate_and_artifact_approval(
             "artifact_id": "sample:public",
             "artifact_kind": "public_input",
             "benchmark_id": "sample",
+            "benchmark_version": "1.0.0",
+            "content_type": "application/json",
+            "destination_path": "frozen/sample.json",
+            "remote_precondition": {"sha256": None, "status": "absent"},
             "sha256": digest,
             "sensitivity": "public_input",
+            "size_bytes": 7,
             "source_path": "frozen/sample.json",
             "target": "hugging_face_raw",
         }
@@ -344,7 +624,10 @@ def test_registry_rejects_incomplete_authorized_artifact(
         ]
     }
 
-    with pytest.raises(publication.PublicationError, match="require a path and digest"):
+    with pytest.raises(
+        publication.PublicationError,
+        match="require a source path, destination path, and digest",
+    ):
         publication.derive_registry_state(
             _complete_registry(registry),
             tmp_path,
@@ -905,10 +1188,13 @@ def test_manifest_schema_failure_is_rejected(tmp_path: Path) -> None:
         _validate(path)
 
 
-@pytest.mark.parametrize("target", ["registry", "historical_card"])
+@pytest.mark.parametrize("target", ["registry", "dataset_card"])
 def test_manifest_digest_drift_is_rejected(tmp_path: Path, target: str) -> None:
     manifest = _manifest()
-    manifest[target]["sha256"] = "0" * 64
+    if target == "registry":
+        manifest[target]["sha256"] = "0" * 64
+    else:
+        manifest[target]["operation"]["sha256"] = "0" * 64
     path = tmp_path / "manifest.json"
     _write_json(path, manifest)
 
@@ -918,7 +1204,7 @@ def test_manifest_digest_drift_is_rejected(tmp_path: Path, target: str) -> None:
 
 def test_card_config_drift_is_rejected(tmp_path: Path) -> None:
     manifest = _manifest()
-    manifest["historical_card"]["configs"] = []
+    manifest["dataset_card"]["configs"] = []
     path = tmp_path / "manifest.json"
     _write_json(path, manifest)
 
@@ -926,23 +1212,47 @@ def test_card_config_drift_is_rejected(tmp_path: Path) -> None:
         _validate(path)
 
 
+def test_dataset_card_operation_must_be_derived(tmp_path: Path) -> None:
+    manifest = _manifest()
+    manifest["dataset_card"]["operation"]["size_bytes"] += 1
+    path = tmp_path / "manifest.json"
+    _write_json(path, manifest)
+
+    with pytest.raises(publication.PublicationError, match="operation is not derived"):
+        _validate(path)
+
+
+def test_prohibited_benchmark_cannot_be_authorized(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest = _manifest()
+
+    def prohibited_registry_state(
+        _registry: dict[str, Any],
+        _repository_root: Path,
+        _remote_baseline: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, int]]:
+        return (
+            [{"benchmark_id": "asteria-agentic-c08-v2"}],
+            manifest["authorized_benchmarks"],
+            manifest["registry_summary"],
+        )
+
+    monkeypatch.setattr(
+        publication,
+        "derive_registry_state",
+        prohibited_registry_state,
+    )
+    with pytest.raises(publication.PublicationError, match="prohibited benchmark"):
+        _validate(MANIFEST)
+
+
 @pytest.mark.parametrize(
     ("field", "replacement"),
     [
         (
             "operations",
-            [
-                {
-                    "answer_key_label": None,
-                    "artifact_id": "sample:public",
-                    "artifact_kind": "public_input",
-                    "benchmark_id": "sample",
-                    "sha256": "a" * 64,
-                    "sensitivity": "public_input",
-                    "source_path": "sample.json",
-                    "target": "hugging_face_raw",
-                }
-            ],
+            [],
         ),
         (
             "authorized_benchmarks",
@@ -985,9 +1295,9 @@ def test_cli_emits_plan_to_stdout_and_file(
 
     assert publication.main([]) == 0
     stdout = capsys.readouterr().out
-    assert json.loads(stdout)["status"] == "blocked_no_authorized_targets"
+    assert json.loads(stdout)["status"] == "ready_for_protected_dry_run"
     assert publication.main(["--emit-plan", str(output)]) == 0
-    assert json.loads(output.read_text(encoding="utf-8"))["operations"] == []
+    assert len(json.loads(output.read_text(encoding="utf-8"))["operations"]) == 9
 
 
 def test_cli_reports_validation_error() -> None:
@@ -1014,6 +1324,7 @@ def test_protected_workflow_has_no_hf_credential_or_upload_command() -> None:
         "docs/_data/benchmarks.resolved.json",
         "docs/_schemas/benchmarks-resolved.schema.json",
         "huggingface/**",
+        "src/synthworld/benchmarks/**",
         "pyproject.toml",
         "tests/test_huggingface_publication.py",
         "tools/check_huggingface_publication.py",

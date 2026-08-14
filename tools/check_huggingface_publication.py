@@ -6,8 +6,9 @@ import argparse
 import hashlib
 import json
 import re
+import unicodedata
 from collections import Counter, defaultdict
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import yaml
@@ -32,6 +33,16 @@ KNOWN_TARGETS = frozenset(
         "python_package",
         "repository",
     }
+)
+RAW_METADATA_KINDS = frozenset({"checksum_manifest", "manifest"})
+DESTINATION_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/-]*$")
+WINDOWS_RESERVED_NAMES = frozenset(
+    {"aux", "con", "nul", "prn"}
+    | {f"com{index}" for index in range(1, 10)}
+    | {f"lpt{index}" for index in range(1, 10)}
+)
+SHA256SUMS_LINE_PATTERN = re.compile(
+    r"^(?P<sha256>[0-9a-f]{64})  (?P<path>[A-Za-z0-9][A-Za-z0-9._/-]*)$"
 )
 
 
@@ -159,6 +170,186 @@ def _source_file(repository_root: Path, source_path: str) -> Path:
     return candidate
 
 
+def _content_type(path: Path) -> str:
+    if path.name.endswith("SHA256SUMS"):
+        return "text/plain; charset=utf-8"
+    if path.suffix == ".jsonl":
+        return "application/x-ndjson"
+    if path.suffix == ".json":
+        return "application/json"
+    raise PublicationError(f"unsupported Hugging Face content type: {path}")
+
+
+def _validate_destination_path(path: str, *, allow_card: bool = False) -> str:
+    if path != unicodedata.normalize("NFC", path):
+        raise PublicationError(f"destination path is not NFC-normalized: {path}")
+    if path == "README.md":
+        if allow_card:
+            return path
+        raise PublicationError("README.md is reserved for the dataset card")
+    if not DESTINATION_PATTERN.fullmatch(path):
+        raise PublicationError(f"destination path uses forbidden characters: {path}")
+    pure = PurePosixPath(path)
+    if pure.is_absolute() or str(pure) != path:
+        raise PublicationError(f"destination path is not canonical: {path}")
+    for part in pure.parts:
+        folded_stem = part.casefold().split(".", 1)[0]
+        if (
+            part in {".", ".."}
+            or part.startswith(".")
+            or part.endswith((".", " "))
+            or folded_stem in WINDOWS_RESERVED_NAMES
+        ):
+            raise PublicationError(f"destination path has a reserved segment: {path}")
+    return path
+
+
+def _remote_file_map(remote_baseline: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    files = remote_baseline.get("files")
+    if not isinstance(files, list):
+        raise PublicationError("remote baseline: files must be an array")
+    result: dict[str, dict[str, Any]] = {}
+    folded: set[str] = set()
+    for record in files:
+        if (
+            not isinstance(record, dict)
+            or set(record) != {"path", "sha256", "size_bytes"}
+            or not isinstance(record.get("path"), str)
+            or not isinstance(record.get("sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", record["sha256"])
+            or type(record.get("size_bytes")) is not int
+            or record["size_bytes"] < 0
+        ):
+            raise PublicationError("remote baseline: malformed file record")
+        path = record["path"]
+        if path not in {"README.md", ".gitattributes"}:
+            _validate_destination_path(path)
+        key = path.casefold()
+        if key in folded:
+            raise PublicationError(f"remote baseline: path collision at {path}")
+        folded.add(key)
+        result[path] = record
+    if list(result) != sorted(result):
+        raise PublicationError("remote baseline: files are not canonically ordered")
+    if (
+        remote_baseline.get("deletion_policy") != "none"
+        or not isinstance(remote_baseline.get("hub_commit_sha"), str)
+        or not re.fullmatch(r"[0-9a-f]{40}", remote_baseline["hub_commit_sha"])
+        or remote_baseline.get("file_count") != len(result)
+        or remote_baseline.get("total_bytes")
+        != sum(record["size_bytes"] for record in result.values())
+    ):
+        raise PublicationError("remote baseline: summary or policy is invalid")
+    return result
+
+
+def _remote_precondition(
+    destination_path: str,
+    remote_files: dict[str, dict[str, Any]],
+) -> dict[str, str | None]:
+    existing = remote_files.get(destination_path)
+    return (
+        {"sha256": existing["sha256"], "status": "match"}
+        if existing is not None
+        else {"sha256": None, "status": "absent"}
+    )
+
+
+def _validate_destination_inventory(
+    operations: list[dict[str, Any]],
+    remote_files: dict[str, dict[str, Any]],
+) -> None:
+    declared: dict[str, str] = {}
+    remote_by_folded = {path.casefold(): path for path in remote_files}
+    all_paths = list(remote_files)
+    for operation in operations:
+        destination = operation["destination_path"]
+        folded = destination.casefold()
+        if folded in declared:
+            raise PublicationError(f"Hugging Face destination collision: {destination}")
+        remote_path = remote_by_folded.get(folded)
+        if remote_path is not None and remote_path != destination:
+            raise PublicationError(
+                f"Hugging Face remote path case collision: {destination}"
+            )
+        declared[folded] = destination
+        for other in all_paths:
+            if other == destination:
+                continue
+            left = destination.casefold()
+            right = other.casefold()
+            if left.startswith(f"{right}/") or right.startswith(f"{left}/"):
+                raise PublicationError(
+                    f"Hugging Face file/directory collision: {destination}"
+                )
+        all_paths.append(destination)
+
+
+def _validate_checksum_destinations(
+    operations: list[dict[str, Any]], repository_root: Path
+) -> None:
+    """Keep published checksum-relative paths executable after projection."""
+
+    by_scope = {
+        (
+            operation["benchmark_id"],
+            operation["target"],
+            operation["destination_path"],
+        ): operation
+        for operation in operations
+    }
+    for checksum_operation in (
+        operation
+        for operation in operations
+        if operation["artifact_kind"] == "checksum_manifest"
+    ):
+        source = _source_file(repository_root, checksum_operation["source_path"])
+        lines = source.read_text(encoding="utf-8").splitlines()
+        if not lines:
+            raise PublicationError(
+                f"{checksum_operation['artifact_id']}: checksum manifest is empty"
+            )
+        checksum_parent = PurePosixPath(checksum_operation["destination_path"]).parent
+        declared_paths: set[str] = set()
+        for line in lines:
+            match = SHA256SUMS_LINE_PATTERN.fullmatch(line)
+            if match is None:
+                raise PublicationError(
+                    f"{checksum_operation['artifact_id']}: invalid checksum line"
+                )
+            destination = str(checksum_parent / match.group("path"))
+            _validate_destination_path(destination)
+            if destination in declared_paths:
+                raise PublicationError(
+                    f"{checksum_operation['artifact_id']}: duplicate checksum path"
+                )
+            declared_paths.add(destination)
+            referenced = by_scope.get(
+                (
+                    checksum_operation["benchmark_id"],
+                    checksum_operation["target"],
+                    destination,
+                )
+            )
+            if referenced is None or referenced["sha256"] != match.group("sha256"):
+                raise PublicationError(
+                    f"{checksum_operation['artifact_id']}: checksum destination "
+                    "does not bind an authorized artifact"
+                )
+        expected_paths = {
+            operation["destination_path"]
+            for operation in operations
+            if operation["benchmark_id"] == checksum_operation["benchmark_id"]
+            and operation["target"] == checksum_operation["target"]
+            and operation["artifact_kind"] != "checksum_manifest"
+        }
+        if declared_paths != expected_paths:
+            raise PublicationError(
+                f"{checksum_operation['artifact_id']}: checksum inventory differs "
+                "from authorized artifacts"
+            )
+
+
 def _approved_hf_gate(
     gate: dict[str, Any],
     benchmark_id: str,
@@ -202,6 +393,7 @@ def _approved_hf_gate(
 def derive_registry_state(
     registry: dict[str, Any],
     repository_root: Path,
+    remote_baseline: dict[str, Any] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, int]]:
     """Derive exactly what HF operations the resolved registry authorizes."""
 
@@ -210,6 +402,16 @@ def derive_registry_state(
         raise PublicationError("resolved registry: benchmarks must be an array")
 
     operations: list[dict[str, Any]] = []
+    remote_files = _remote_file_map(
+        remote_baseline
+        or {
+            "deletion_policy": "none",
+            "file_count": 0,
+            "files": [],
+            "hub_commit_sha": "0" * 40,
+            "total_bytes": 0,
+        }
+    )
     authorized_targets: defaultdict[tuple[str, str], set[str]] = defaultdict(set)
     lifecycle_counts: Counter[str] = Counter()
     seen_benchmark_identities: set[tuple[str, str]] = set()
@@ -291,13 +493,17 @@ def derive_registry_state(
             for target in targets:
                 source_path = artifact.get("path")
                 approved_sha256 = artifact.get("approved_sha256")
-                if not isinstance(source_path, str) or not isinstance(
-                    approved_sha256, str
+                destination_path = artifact.get("hf_destination_path")
+                if (
+                    not isinstance(source_path, str)
+                    or not isinstance(approved_sha256, str)
+                    or not isinstance(destination_path, str)
                 ):
                     raise PublicationError(
                         f"{artifact_id}: HF-authorized artifacts require "
-                        "a path and digest"
+                        "a source path, destination path, and digest"
                     )
+                _validate_destination_path(destination_path)
                 if artifact_kind == "public_input" and (
                     sensitivity != "public_input" or answer_key_label is not None
                 ):
@@ -309,21 +515,33 @@ def derive_registry_state(
                         r"(?:^|[-_./])(evaluator|answer|truth)(?:$|[-_./])"
                     )
                     if artifact_kind != "public_input" or evaluator_marker.search(
-                        source_path.casefold()
+                        destination_path.casefold()
                     ):
                         raise PublicationError(
                             f"{artifact_id}: Viewer publication requires "
                             "a public-only artifact"
                         )
-                elif artifact_kind != "public_input" and (
-                    artifact_kind != "evaluator_truth"
-                    or sensitivity != "public_reference_truth"
-                    or not answer_key_label
-                ):
-                    raise PublicationError(
-                        f"{artifact_id}: raw reference truth requires "
-                        "explicit evaluator labeling"
+                elif artifact_kind != "public_input":
+                    labeled_truth = sensitivity == "public_reference_truth" and bool(
+                        answer_key_label
                     )
+                    public_metadata = (
+                        artifact_kind in RAW_METADATA_KINDS
+                        and sensitivity == "public_input"
+                        and answer_key_label is None
+                    )
+                    labeled_metadata = (
+                        artifact_kind in RAW_METADATA_KINDS and labeled_truth
+                    )
+                    if not (
+                        (artifact_kind == "evaluator_truth" and labeled_truth)
+                        or public_metadata
+                        or labeled_metadata
+                    ):
+                        raise PublicationError(
+                            f"{artifact_id}: raw reference material requires "
+                            "an approved kind and explicit sensitivity labeling"
+                        )
                 source_file = _source_file(repository_root, source_path)
                 if file_sha256(source_file) != approved_sha256:
                     raise PublicationError(
@@ -335,8 +553,15 @@ def derive_registry_state(
                         "artifact_id": artifact_id,
                         "artifact_kind": artifact_kind,
                         "benchmark_id": benchmark_id,
+                        "benchmark_version": benchmark_version,
+                        "content_type": _content_type(source_file),
+                        "destination_path": destination_path,
+                        "remote_precondition": _remote_precondition(
+                            destination_path, remote_files
+                        ),
                         "sha256": approved_sha256,
                         "sensitivity": sensitivity,
+                        "size_bytes": source_file.stat().st_size,
                         "source_path": source_path,
                         "target": target,
                     }
@@ -370,6 +595,8 @@ def derive_registry_state(
         "published": lifecycle_counts["published"],
         "total": len(benchmarks),
     }
+    _validate_destination_inventory(operations, remote_files)
+    _validate_checksum_destinations(operations, repository_root)
     return operations, authorized_benchmarks, summary
 
 
@@ -379,9 +606,13 @@ def build_plan(
     """Construct the evidence artifact without adding upload capability."""
 
     return {
+        "card_operation": manifest["dataset_card"]["operation"],
         "dataset_repository": manifest["dataset_repository"],
+        "deletion_policy": manifest["remote_baseline"]["deletion_policy"],
         "network_access": False,
         "operations": operations,
+        "prohibited_benchmark_ids": manifest["prohibited_benchmark_ids"],
+        "remote_parent_commit": manifest["remote_baseline"]["hub_commit_sha"],
         "registry_sha256": manifest["registry"]["sha256"],
         "status": (
             "ready_for_protected_dry_run"
@@ -419,20 +650,40 @@ def validate_publication(
         raise PublicationError("publication manifest: JSON is not canonical")
     for label, path, expected in (
         ("resolved registry", registry_path, manifest["registry"]["sha256"]),
-        ("dataset card", card_path, manifest["historical_card"]["sha256"]),
+        ("dataset card", card_path, manifest["dataset_card"]["operation"]["sha256"]),
     ):
         if file_sha256(path) != expected:
             raise PublicationError(f"{label}: SHA-256 does not match the manifest")
 
     card_configs = read_card_configs(card_path)
-    if card_configs != manifest["historical_card"]["configs"]:
+    if card_configs != manifest["dataset_card"]["configs"]:
         raise PublicationError(
             "dataset card: config inventory does not match the manifest"
         )
 
+    remote_files = _remote_file_map(manifest["remote_baseline"])
+    card_operation = {
+        "content_type": "text/markdown; charset=utf-8",
+        "destination_path": _validate_destination_path(
+            manifest["dataset_card"]["operation"]["destination_path"],
+            allow_card=True,
+        ),
+        "remote_precondition": _remote_precondition("README.md", remote_files),
+        "sha256": file_sha256(card_path),
+        "size_bytes": card_path.stat().st_size,
+        "source_path": str(card_path.relative_to(repository_root)),
+    }
+    if card_operation != manifest["dataset_card"]["operation"]:
+        raise PublicationError(
+            "publication manifest: dataset-card operation is not derived"
+        )
+
     operations, authorized_benchmarks, summary = derive_registry_state(
-        registry, repository_root
+        registry, repository_root, manifest["remote_baseline"]
     )
+    prohibited = manifest["prohibited_benchmark_ids"]
+    if any(item["benchmark_id"] in prohibited for item in operations):
+        raise PublicationError("publication manifest: prohibited benchmark authorized")
     for field, derived in (
         ("operations", operations),
         ("authorized_benchmarks", authorized_benchmarks),

@@ -426,3 +426,25 @@ separate, that the evaluator truth is not inferred from a path or mislabeled as
 private, and that the four existing files and their recorded checksums remain
 the publication boundary. This is an artifact-integrity and boundary record;
 it makes no new held-out-evaluation or Hugging Face publication claim.
+
+## Hugging Face v0.14.0 authorization review record
+
+Reviewed: 2026-08-12. Publication manifest schema version: `2.0.0`.
+
+Independent adversarial passes were requested from Claude through `omc ask` and
+Qwen 3.8 Max through OpenRouter. The accepted findings require per-artifact
+authorization rather than a seven-family sweep; a complete 42-file remote
+baseline pinned to Hub commit
+`54a7d1e89f683ade507c3518b3e0c0bfddfbe528`; explicit canonical destination,
+version, digest, size, content-type, and remote-precondition fields; no deletion;
+and a separate manifest-only uploader reviewed after this dry-run contract.
+
+The review rejected two assumptions that conflict with the benchmark model.
+Evaluator truth remains deliberately public reference material rather than a
+private ACL boundary, and the protected GitHub environment governs deployment
+execution rather than substituting for pull-request review.
+
+This record authorizes only the nine raw ambiguity-v1 and
+authority-governance-v1 artifacts enumerated in the manifest and the governed
+dataset-card replacement. It does not authorize legacy-tree mutation, Viewer
+projection regeneration, C08 v2, network access, credential use, or upload.

@@ -8,6 +8,7 @@
         "approved_targets": {"items": {"$ref": "#/$defs/target"}, "type": "array"},
         "benchmark_id": {"type": "string"},
         "frozen": {"type": "boolean"},
+        "hf_destination_path": {"type": ["string", "null"]},
         "id": {"type": "string"},
         "integrity_record_ids": {"items": {"type": "string"}, "type": "array"},
         "kind": {"enum": ["public_input", "evaluator_truth", "joined_reference_fixture", "smoke_sample", "manifest", "checksum_manifest", "viewer_projection", "reproduction_metadata"]},

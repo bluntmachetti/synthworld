@@ -364,7 +364,8 @@
       "approved_targets": [
         "repository",
         "python_package",
-        "docs_catalog"
+        "docs_catalog",
+        "hugging_face_raw"
       ],
       "benchmark_id": "ambiguity-v1",
       "benchmark_version": "1.0.0",
@@ -421,7 +422,7 @@
         },
         {
           "name": "adversarial_review",
-          "rationale": null,
+          "rationale": "Independent Claude and Qwen 3.8 Max publication review on 2026-08-12 required per-artifact scope, a pinned remote baseline, canonical destinations, remote preconditions, and separate uploader review.",
           "status": "pass"
         },
         {
@@ -441,8 +442,8 @@
         },
         {
           "name": "catalogue_hf_metadata",
-          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
-          "status": "not_applicable"
+          "rationale": "The v0.14.0 manifest pins benchmark version, source and destination paths, artifact kind and sensitivity, answer-key label, digest, byte size, content type, and remote precondition for each authorized raw artifact.",
+          "status": "pass"
         }
       ],
       "decision": "approved",
@@ -544,7 +545,8 @@
       "approved_targets": [
         "repository",
         "python_package",
-        "docs_catalog"
+        "docs_catalog",
+        "hugging_face_raw"
       ],
       "benchmark_id": "authority-governance-v1",
       "benchmark_version": "1.0.0",
@@ -601,8 +603,8 @@
         },
         {
           "name": "adversarial_review",
-          "rationale": "This public conformance fixture does not claim a blind or held-out threat model; evaluator truth is explicitly published reference material.",
-          "status": "not_applicable"
+          "rationale": "Independent Claude and Qwen 3.8 Max publication review on 2026-08-12 required per-artifact scope, a pinned remote baseline, canonical destinations, remote preconditions, and separate uploader review.",
+          "status": "pass"
         },
         {
           "name": "safety_review",
@@ -621,8 +623,8 @@
         },
         {
           "name": "catalogue_hf_metadata",
-          "rationale": "Work Package D authorizes no Hugging Face target; the historical card is explicitly not the publication authorization source.",
-          "status": "not_applicable"
+          "rationale": "The v0.14.0 manifest pins benchmark version, source and destination paths, artifact kind and sensitivity, answer-key label, digest, byte size, content type, and remote precondition for each authorized raw artifact.",
+          "status": "pass"
         }
       ],
       "decision": "approved",

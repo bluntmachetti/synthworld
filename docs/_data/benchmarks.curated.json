@@ -5,10 +5,12 @@
       "approved_sha256": "6cfc0483ccd43256010a88ef25df4869a5cfc1cd6e7b0f105b5a4b9cfca26986",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "ambiguity-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/ambiguity-v1/SHA256SUMS",
       "id": "ambiguity-v1:checksum",
       "integrity_record_ids": [],
       "kind": "checksum_manifest",
@@ -24,10 +26,12 @@
       "approved_sha256": "334808680b46f58f78ac820c887548692b057eab97bb6cf41571d1e77dd87e11",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "ambiguity-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/ambiguity-v1/ambiguity-dispositions-v1.json",
       "id": "ambiguity-v1:dispositions",
       "integrity_record_ids": [
         "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
@@ -45,10 +49,12 @@
       "approved_sha256": "42d7f52a4c4a058d2616630dce719fb8c659fd56d4789d91d0cfdee96a264a8e",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "ambiguity-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/ambiguity-v1/ambiguity-memberships-v1.json",
       "id": "ambiguity-v1:memberships",
       "integrity_record_ids": [
         "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
@@ -66,10 +72,12 @@
       "approved_sha256": "217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "ambiguity-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/ambiguity-v1/ambiguity-public-v1.json",
       "id": "ambiguity-v1:public",
       "integrity_record_ids": [
         "sha256sum:src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS"
@@ -587,10 +595,12 @@
       "approved_sha256": "a856171b2a328614705340a0d8d8dcf1f6bc0794adf0853c377718f796eb585c",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "authority-governance-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/authority-governance-v1/SHA256SUMS",
       "id": "authority-governance-v1:checksum",
       "integrity_record_ids": [],
       "kind": "checksum_manifest",
@@ -606,10 +616,12 @@
       "approved_sha256": "7822846e7d5613741857cceed33df849f04606548a4c0e1ce789646aaae8e5e5",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "authority-governance-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/authority-governance-v1/evaluator/authority-governance-evaluator.json",
       "id": "authority-governance-v1:evaluator",
       "integrity_record_ids": [
         "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
@@ -628,10 +640,12 @@
       "approved_sha256": "d9b5e3c19a74344ba9b28bfb58efde98ce8809e4157e8c0fa6b97639a7a36e18",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "authority-governance-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/authority-governance-v1/evaluator/manifest.json",
       "id": "authority-governance-v1:evaluator-manifest",
       "integrity_record_ids": [
         "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS"
@@ -649,10 +663,12 @@
       "approved_sha256": "340df0ed2b33db6c05805891258dda789f445e300084a0e347ee318044d3191b",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "authority-governance-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/authority-governance-v1/public/authority-governance-input.json",
       "id": "authority-governance-v1:public-input",
       "integrity_record_ids": [
         "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
@@ -671,10 +687,12 @@
       "approved_sha256": "60081ed11ff85b6909e57771f3aeffb8023136ae8b66e91bbaf4473ef7f27d92",
       "approved_targets": [
         "repository",
-        "python_package"
+        "python_package",
+        "hugging_face_raw"
       ],
       "benchmark_id": "authority-governance-v1",
       "frozen": true,
+      "hf_destination_path": "frozen/authority-governance-v1/public/manifest.json",
       "id": "authority-governance-v1:public-manifest",
       "integrity_record_ids": [
         "sha256sum:src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS"

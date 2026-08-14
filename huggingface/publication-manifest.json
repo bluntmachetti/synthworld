@@ -1,29 +1,21 @@
 {
-  "authorized_benchmarks": [],
-  "dataset_repository": "Bluntmachetti7/synthworld-benchmarks",
-  "external_gates": [
+  "authorized_benchmarks": [
     {
-      "evidence_required": "Configure required reviewers on the hugging-face-publication GitHub environment.",
-      "id": "github_environment_protection",
-      "status": "pending"
+      "benchmark_id": "ambiguity-v1",
+      "benchmark_version": "1.0.0",
+      "targets": [
+        "hugging_face_raw"
+      ]
     },
     {
-      "evidence_required": "Verify repository ownership, access control, and intended file layout on Hugging Face.",
-      "id": "hf_repository_control",
-      "status": "pending"
-    },
-    {
-      "evidence_required": "Verify uploaded bytes and remote SHA-256 values after an explicitly authorized publication.",
-      "id": "post_upload_integrity",
-      "status": "pending"
-    },
-    {
-      "evidence_required": "Verify Viewer schemas, splits, row counts, and public/evaluator labels against the approved manifest.",
-      "id": "viewer_remote_validation",
-      "status": "pending"
+      "benchmark_id": "authority-governance-v1",
+      "benchmark_version": "1.0.0",
+      "targets": [
+        "hugging_face_raw"
+      ]
     }
   ],
-  "historical_card": {
+  "dataset_card": {
     "configs": [
       {
         "config_name": "personas",
@@ -136,11 +128,206 @@
         "default_explicit": false
       }
     ],
-    "path": "huggingface/README.md",
-    "sha256": "5bc5f87922fb98b77e0162dd330dbba4eaaa2f0f1f2c10204abafcb7f3861f7e",
-    "status": "historical_partial_publication_view"
+    "operation": {
+      "content_type": "text/markdown; charset=utf-8",
+      "destination_path": "README.md",
+      "remote_precondition": {
+        "sha256": "ed18ae65da54a073e7d7ef65f228d031c1bc014a3712caa279da0cf70a949bcd",
+        "status": "match"
+      },
+      "sha256": "0513eb412d788ac97549132fe926009a707d20418e77331f532797d208d4b28c",
+      "size_bytes": 10175,
+      "source_path": "huggingface/README.md"
+    },
+    "status": "governed_update_pending"
   },
-  "operations": [],
+  "dataset_repository": "Bluntmachetti7/synthworld-benchmarks",
+  "external_gates": [
+    {
+      "evidence_required": "Configure required reviewers on the hugging-face-publication GitHub environment.",
+      "id": "github_environment_protection",
+      "status": "pending"
+    },
+    {
+      "evidence_required": "Verify repository ownership, access control, and intended file layout on Hugging Face.",
+      "id": "hf_repository_control",
+      "status": "pending"
+    },
+    {
+      "evidence_required": "Verify uploaded bytes and remote SHA-256 values after an explicitly authorized publication.",
+      "id": "post_upload_integrity",
+      "status": "pending"
+    },
+    {
+      "evidence_required": "Verify Viewer schemas, splits, row counts, and public/evaluator labels against the approved manifest.",
+      "id": "viewer_remote_validation",
+      "status": "pending"
+    }
+  ],
+  "operations": [
+    {
+      "answer_key_label": "Checksums bind the public input and published reference truth.",
+      "artifact_id": "ambiguity-v1:checksum",
+      "artifact_kind": "checksum_manifest",
+      "benchmark_id": "ambiguity-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "text/plain; charset=utf-8",
+      "destination_path": "frozen/ambiguity-v1/SHA256SUMS",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_reference_truth",
+      "sha256": "6cfc0483ccd43256010a88ef25df4869a5cfc1cd6e7b0f105b5a4b9cfca26986",
+      "size_bytes": 284,
+      "source_path": "src/synthworld/benchmarks/AMBIGUITY_SHA256SUMS",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": "Published reference disposition truth; never product input.",
+      "artifact_id": "ambiguity-v1:dispositions",
+      "artifact_kind": "evaluator_truth",
+      "benchmark_id": "ambiguity-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "application/json",
+      "destination_path": "frozen/ambiguity-v1/ambiguity-dispositions-v1.json",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_reference_truth",
+      "sha256": "334808680b46f58f78ac820c887548692b057eab97bb6cf41571d1e77dd87e11",
+      "size_bytes": 4117,
+      "source_path": "src/synthworld/benchmarks/ambiguity-dispositions-v1.json",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": "Published reference membership truth; never product input.",
+      "artifact_id": "ambiguity-v1:memberships",
+      "artifact_kind": "evaluator_truth",
+      "benchmark_id": "ambiguity-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "application/json",
+      "destination_path": "frozen/ambiguity-v1/ambiguity-memberships-v1.json",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_reference_truth",
+      "sha256": "42d7f52a4c4a058d2616630dce719fb8c659fd56d4789d91d0cfdee96a264a8e",
+      "size_bytes": 3983,
+      "source_path": "src/synthworld/benchmarks/ambiguity-memberships-v1.json",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": null,
+      "artifact_id": "ambiguity-v1:public",
+      "artifact_kind": "public_input",
+      "benchmark_id": "ambiguity-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "application/json",
+      "destination_path": "frozen/ambiguity-v1/ambiguity-public-v1.json",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_input",
+      "sha256": "217b0eaeb772c8594ebd89a9b0d8ba205063ed3363d482dab32de15ef82d4b7a",
+      "size_bytes": 27251,
+      "source_path": "src/synthworld/benchmarks/ambiguity-public-v1.json",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": "Checksums bind public input and published evaluator reference truth.",
+      "artifact_id": "authority-governance-v1:checksum",
+      "artifact_kind": "checksum_manifest",
+      "benchmark_id": "authority-governance-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "text/plain; charset=utf-8",
+      "destination_path": "frozen/authority-governance-v1/SHA256SUMS",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_reference_truth",
+      "sha256": "a856171b2a328614705340a0d8d8dcf1f6bc0794adf0853c377718f796eb585c",
+      "size_bytes": 394,
+      "source_path": "src/synthworld/benchmarks/authority-governance-v1/SHA256SUMS",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": "Published evaluator reference truth; never product input.",
+      "artifact_id": "authority-governance-v1:evaluator",
+      "artifact_kind": "evaluator_truth",
+      "benchmark_id": "authority-governance-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "application/json",
+      "destination_path": "frozen/authority-governance-v1/evaluator/authority-governance-evaluator.json",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_reference_truth",
+      "sha256": "7822846e7d5613741857cceed33df849f04606548a4c0e1ce789646aaae8e5e5",
+      "size_bytes": 17186,
+      "source_path": "src/synthworld/benchmarks/authority-governance-v1/evaluator/authority-governance-evaluator.json",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": "Manifest for published evaluator reference truth.",
+      "artifact_id": "authority-governance-v1:evaluator-manifest",
+      "artifact_kind": "manifest",
+      "benchmark_id": "authority-governance-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "application/json",
+      "destination_path": "frozen/authority-governance-v1/evaluator/manifest.json",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_reference_truth",
+      "sha256": "d9b5e3c19a74344ba9b28bfb58efde98ce8809e4157e8c0fa6b97639a7a36e18",
+      "size_bytes": 314,
+      "source_path": "src/synthworld/benchmarks/authority-governance-v1/evaluator/manifest.json",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": null,
+      "artifact_id": "authority-governance-v1:public-input",
+      "artifact_kind": "public_input",
+      "benchmark_id": "authority-governance-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "application/json",
+      "destination_path": "frozen/authority-governance-v1/public/authority-governance-input.json",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_input",
+      "sha256": "340df0ed2b33db6c05805891258dda789f445e300084a0e347ee318044d3191b",
+      "size_bytes": 56058,
+      "source_path": "src/synthworld/benchmarks/authority-governance-v1/public/authority-governance-input.json",
+      "target": "hugging_face_raw"
+    },
+    {
+      "answer_key_label": null,
+      "artifact_id": "authority-governance-v1:public-manifest",
+      "artifact_kind": "manifest",
+      "benchmark_id": "authority-governance-v1",
+      "benchmark_version": "1.0.0",
+      "content_type": "application/json",
+      "destination_path": "frozen/authority-governance-v1/public/manifest.json",
+      "remote_precondition": {
+        "sha256": null,
+        "status": "absent"
+      },
+      "sensitivity": "public_input",
+      "sha256": "60081ed11ff85b6909e57771f3aeffb8023136ae8b66e91bbaf4473ef7f27d92",
+      "size_bytes": 307,
+      "source_path": "src/synthworld/benchmarks/authority-governance-v1/public/manifest.json",
+      "target": "hugging_face_raw"
+    }
+  ],
   "policy": {
     "network_access": false,
     "required_gate_targets": [
@@ -149,15 +336,237 @@
     ],
     "upload_enabled": false
   },
+  "prohibited_benchmark_ids": [
+    "asteria-agentic-c08-v2",
+    "enterprise-agentic-c08-v2"
+  ],
   "registry": {
     "path": "docs/_data/benchmarks.resolved.json",
-    "sha256": "cc98aa4b8b5d44b2bafbadefc23b82faf409713b14c0e11b0ea7c6520004928f"
+    "sha256": "84fb651b1a78f24b06cd781179e249da87444ece33cb6dcf990796721b6fa054"
   },
   "registry_summary": {
     "candidate": 10,
-    "hf_authorized_artifacts": 0,
+    "hf_authorized_artifacts": 9,
     "published": 7,
     "total": 17
   },
-  "schema_version": "1.0.0"
+  "remote_baseline": {
+    "deletion_policy": "none",
+    "file_count": 42,
+    "files": [
+      {
+        "path": ".gitattributes",
+        "sha256": "9e75dd981de037ec3769f24f790e126bc5a160b6871f510214e68dc70649aeeb",
+        "size_bytes": 2504
+      },
+      {
+        "path": "README.md",
+        "sha256": "ed18ae65da54a073e7d7ef65f228d031c1bc014a3712caa279da0cf70a949bcd",
+        "size_bytes": 8980
+      },
+      {
+        "path": "frozen/CONNECTION_PUBLIC_SHA256SUMS",
+        "sha256": "bd30a434b0f0cbd912f9e6fcd862c1f7f332deabd9f8bf2a9d83c49bcf39e204",
+        "size_bytes": 99
+      },
+      {
+        "path": "frozen/CONNECTION_SHA256SUMS",
+        "sha256": "c2a9612df25d37bea9a2dfeb0e968763f8bb3659b6a4aa8e47d4ea93058b4377",
+        "size_bytes": 92
+      },
+      {
+        "path": "frozen/EXTRACTION_ANSWER_SHA256SUMS",
+        "sha256": "62d59fb12c2b2fe5103bab1f554b4a3db439c5770d958e1d8a846adfd91459bf",
+        "size_bytes": 99
+      },
+      {
+        "path": "frozen/EXTRACTION_PUBLIC_SHA256SUMS",
+        "sha256": "f520af026f4d886b8903f79e7eae8ab95bd956bd177ac8c526d6e041bc387746",
+        "size_bytes": 99
+      },
+      {
+        "path": "frozen/EXTRACTION_SHA256SUMS",
+        "sha256": "7670a205b7dcc27622ce92648292489bf7517dc6cc359973554aa0d821b4e172",
+        "size_bytes": 92
+      },
+      {
+        "path": "frozen/RISK_ANSWER_SHA256SUMS",
+        "sha256": "07e300c8eee695c0eef60af9a4701cd5df03457215f5c310b1a9d7e05ff087cd",
+        "size_bytes": 93
+      },
+      {
+        "path": "frozen/RISK_PUBLIC_SHA256SUMS",
+        "sha256": "16f95e9d9e9f7539e8f14fab4688cf5c0ed995bb539ad415456ec77c08688a73",
+        "size_bytes": 93
+      },
+      {
+        "path": "frozen/SHA256SUMS",
+        "sha256": "bebeecf02c0cefdb580194731c5854b5665f11983b0bb8c5ed9cfc7609fbba4f",
+        "size_bytes": 81
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/authority_truth.jsonl",
+        "sha256": "093efedf08d1db33e04335bd846a50b58bb8222bb2395dca8358d8e2820536b0",
+        "size_bytes": 6406
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/canonical_bindings.json",
+        "sha256": "9ed29aa54a1c05d9ae2b62797059a85fb96c6710b762568465f98222fc844cdf",
+        "size_bytes": 6061
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/cases.jsonl",
+        "sha256": "a44d28143128da2051c665e8ae421e1b2d3af0cb2e364d42af099f0ecc8b35a5",
+        "size_bytes": 1061
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/checksums.json",
+        "sha256": "0b16503d3d481cad163f5ab70ed3c60d6ed0f028eabf14351734a08beae4d387",
+        "size_bytes": 997
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/evidence_epochs.jsonl",
+        "sha256": "e685ee9b0334eb5c2ae5905e930d6302160e525634eb92f0c4334a8a5c9d15a8",
+        "size_bytes": 3674
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/expected_decisions.jsonl",
+        "sha256": "49e68d770b3a68666d193d1304d0eaebc67eb689c66ff4697ba59db6be41be49",
+        "size_bytes": 2275
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/expected_provenance.jsonl",
+        "sha256": "05fedec838d2569ebc4ebbe7d9af8ab5757faf6bcfe1858ecae9d06423553fa1",
+        "size_bytes": 3597
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/evaluator/expected_side_effects.jsonl",
+        "sha256": "d5b4aeac96bface4331622c6eba307fad8b2cc5044fcdc2cfef8622c3ff61079",
+        "size_bytes": 915
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/agents.jsonl",
+        "sha256": "3e4884bdcde3ec9e2fbdc958c5fcc587c54e733273afeb4df00e64fac4e20279",
+        "size_bytes": 554
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/manifest.json",
+        "sha256": "a92bd0b4398fe59724d848978b673c85884adab99d1672ce9e4bfd34e320efbe",
+        "size_bytes": 1223
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/organisation.json",
+        "sha256": "bc29c6aa8e342e72c76e9ae58ca5e101beeb2e69f7956bf878890f714af29c08",
+        "size_bytes": 1346
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/principals.jsonl",
+        "sha256": "58163ce487ec8a0e986cac5380706ecac352819a1706d265518fbb515955874c",
+        "size_bytes": 2184
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/public_credentials.jsonl",
+        "sha256": "59e116652a078eb46b5e3ea1946d3b78a00b3945d2809a4af25c8875a5f42a93",
+        "size_bytes": 894
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/public_delegations.jsonl",
+        "sha256": "476df49d66e774c0303370739e9e5bc8011e66985652d14664c581535c743957",
+        "size_bytes": 2423
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/public_events.jsonl",
+        "sha256": "ab920f3866aaa86deeadbbe4c5882170205c12d8d2c1a0fa638c0415aa0ec6eb",
+        "size_bytes": 18272
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/resources.jsonl",
+        "sha256": "866a24fdf59e2bbd957717af9c0402a629b341046205d953724a15bddef19266",
+        "size_bytes": 1830
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/runtimes.jsonl",
+        "sha256": "d1d08d2b060e6b900029bc180a266e41cc3e4da7938fd27fb8c2577f27298704",
+        "size_bytes": 686
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/scenarios/procurement-delegation.json",
+        "sha256": "37f09e82146a249cc5a7f02ad3ec5abf95724d2eaf4dbc40da3b969f9ea88ec9",
+        "size_bytes": 805
+      },
+      {
+        "path": "frozen/asteria-agentic-v1/public/tool_schemas/procurement-tools.json",
+        "sha256": "11d22e49cb95b52d294d832d5df145e86c492fd16c3781f21c5e664b4ef6c6c8",
+        "size_bytes": 4908
+      },
+      {
+        "path": "frozen/connection-golden-v1.json",
+        "sha256": "044b52650039059b5841e0af9c512e2bbc7dbb089d43e465d43fda06889a8fe4",
+        "size_bytes": 18820
+      },
+      {
+        "path": "frozen/connection-public-golden-v1.json",
+        "sha256": "fa896ae417f75d6fc4ac650ec26683a39b3994bc004c743fc1fcc71f605ff17e",
+        "size_bytes": 13238
+      },
+      {
+        "path": "frozen/extraction-answer-golden-v1.json",
+        "sha256": "ffc6503df8cbb9d8f99161ee29324e8d0a0187901118e8eeaa590b49e7598f78",
+        "size_bytes": 43841
+      },
+      {
+        "path": "frozen/extraction-golden-v1.json",
+        "sha256": "69bf567bf122ed7831f0963883b0524c3b9d991b5ef0f7a5b6b7ce69ee234e57",
+        "size_bytes": 62450
+      },
+      {
+        "path": "frozen/extraction-public-golden-v1.json",
+        "sha256": "10632f000f8aeb8ccd8557476b18b940cfd35b91f7cb38dcf209269de987160e",
+        "size_bytes": 21870
+      },
+      {
+        "path": "frozen/golden-v1.json",
+        "sha256": "8b75fcd932dbbe2d0ea94d034f8c546c6c3857d3c99669180222f807cf48755d",
+        "size_bytes": 45833
+      },
+      {
+        "path": "frozen/risk-answer-golden-v1.json",
+        "sha256": "32479aa077887a63d31a4de3dfbc822f01f6622f09ea6dd6d2a87e3af3cb319e",
+        "size_bytes": 7810
+      },
+      {
+        "path": "frozen/risk-public-golden-v1.json",
+        "sha256": "690c2fb081826f72970af1e729651819c3563d9aa590190d566af24424238b33",
+        "size_bytes": 6499
+      },
+      {
+        "path": "viewer/extraction_answers.jsonl",
+        "sha256": "58ebed2eefab6893154600d3d568d0ddfd0376de7a3b3e77d0050c6708c4f447",
+        "size_bytes": 23337
+      },
+      {
+        "path": "viewer/personas.jsonl",
+        "sha256": "15214b2bcff05f0ed9955603ce4b0b9d32eb430eecac87e80d72200b0e27eda3",
+        "size_bytes": 8110
+      },
+      {
+        "path": "viewer/public_extraction_pages.jsonl",
+        "sha256": "cec3aab5a13ff024ae912079bf919b8ec26809d178ac21cb057917e9e5386d15",
+        "size_bytes": 18866
+      },
+      {
+        "path": "viewer/public_identity_records.jsonl",
+        "sha256": "f285d6f25ad0b60f291430010969c357e08839ce6ccb2d4cd80faa871b0f51e8",
+        "size_bytes": 9342
+      },
+      {
+        "path": "viewer/relationships.jsonl",
+        "sha256": "6448218f67f50de58e3d43eb6f4dc239626d08a37a7ec0c1f9a61d933aa203c1",
+        "size_bytes": 2346
+      }
+    ],
+    "hub_commit_sha": "54a7d1e89f683ade507c3518b3e0c0bfddfbe528",
+    "total_bytes": 354705
+  },
+  "schema_version": "2.0.0"
 }

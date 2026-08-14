@@ -70,7 +70,7 @@ fabricating data about real people.
 
 These artifacts are the frozen golden benchmarks of the
 [SynthWorld generator](https://github.com/bluntmachetti/synthworld)
-(`pip install idcognito-synthworld==0.13.0`; SynthWorld v0.13.0). They are generated from seed
+(`pip install idcognito-synthworld==0.14.0`; SynthWorld v0.14.0). They are generated from seed
 `20260719` and authenticated by SHA-256 manifests. Generator CI recreates the
 artifacts byte-for-byte and fails on drift, so results remain tied to exact
 benchmark bytes.
@@ -94,11 +94,11 @@ person. No real person's data was used.
 
 ## Authoritative data and viewer projections
 
-This card is a historical partial publication view, not the publication
-authorization source. The repository benchmark registry and its approved
-publication gates govern future distribution decisions; this card does not
-authorize additional Hugging Face artifacts. A later Hugging Face refresh must
-consume the resolved registry rather than infer authorization from this card.
+This card is the governed v0.14.0 publication view, not the publication
+authorization source. The repository benchmark registry, publication manifest,
+and approved gates govern distribution decisions. The five legacy viewer
+projections remain pinned to the pre-v0.14.0 Hub baseline and are not regenerated
+or reclassified by this release.
 
 `frozen/` contains the authoritative artifacts shipped by the Python package.
 `viewer/` contains derived JSONL tables for convenient browsing. Viewer-created
@@ -152,7 +152,7 @@ boundary. Competitive evaluation requires held-out private worlds.
 
 ### Use Asteria
 
-Install SynthWorld v0.13.0 and export the frozen package:
+Install SynthWorld v0.14.0 and export the frozen package:
 
 The SynthWorld Python package requires Python 3.12 or newer; Python 3.11 and
 earlier are not supported.
@@ -182,6 +182,22 @@ See the
 [complete Asteria guide](https://github.com/bluntmachetti/synthworld/blob/main/AGENTIC_BENCHMARK.md)
 for the JSONL contract, replay semantics, runnable public-only baseline, and
 Python API.
+
+## Ambiguity v1
+
+The authorized v0.14.0 raw tranche keeps the four ambiguity files together under
+`frozen/ambiguity-v1/`, preserving the frozen `SHA256SUMS` relative paths. The
+`ambiguity-public-v1.json` artifact is the oracle-free product input; files with
+`memberships` or `dispositions` in their names are separately labelled answer-key
+material and must never be supplied as product input.
+
+## Authority Governance v1
+
+The authority-governance conformance fixture is authorized for publication under
+`frozen/authority-governance-v1/`, with physically separate `public/` and
+`evaluator/` trees. Evaluator bytes are deliberately public reference truth,
+not private held-out data. C08 v2 remains a candidate and is not part of this
+Hugging Face authorization.
 
 ## Other benchmark families
 

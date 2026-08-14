@@ -39,6 +39,7 @@ ARTIFACT_FIELDS = {
     "approved_targets",
     "answer_key_label",
 }
+ARTIFACT_OPTIONAL_FIELDS = {"hf_destination_path"}
 PUBLICATION_CHECK_IDS = {
     "independent_versions",
     "public_input",
@@ -83,7 +84,10 @@ def test_registry_has_separate_strict_benchmark_and_artifact_axes() -> None:
     artifacts = registry["artifacts"]
     assert registry["schema_version"] == "1.0.0"
     assert all(set(item) == BENCHMARK_FIELDS for item in benchmarks)
-    assert all(set(item) == ARTIFACT_FIELDS for item in artifacts)
+    assert all(
+        ARTIFACT_FIELDS <= set(item) <= ARTIFACT_FIELDS | ARTIFACT_OPTIONAL_FIELDS
+        for item in artifacts
+    )
     assert {item["lifecycle"] for item in benchmarks} <= {
         "experimental",
         "candidate",
@@ -266,22 +270,38 @@ def test_candidates_have_no_hugging_face_authorization() -> None:
     registry = _load(CURATED)
     benchmarks = {item["id"]: item for item in registry["benchmarks"]}
     artifacts = registry["artifacts"]
-    artifact_benchmarks = {item["benchmark_id"] for item in artifacts}
     candidate_ids = {
-        "ambiguity-v2",
-        "search-projection",
-        "temporal-broker-removal",
-        "enterprise-identity-fabric",
-        "enterprise-agentic",
-        "contextual-access",
-        "continuous-assurance",
+        item["id"] for item in benchmarks.values() if item["lifecycle"] == "candidate"
     }
-    assert candidate_ids <= set(benchmarks)
-    assert all(benchmarks[item]["lifecycle"] == "candidate" for item in candidate_ids)
-    assert not candidate_ids & artifact_benchmarks
-    assert "households-smoke-v1" in artifact_benchmarks
+    candidate_artifacts = [
+        item for item in artifacts if item["benchmark_id"] in candidate_ids
+    ]
+    assert candidate_artifacts
     assert all(
-        not (set(item["approved_targets"]) & HUGGING_FACE_TARGETS) for item in artifacts
+        not (set(item["approved_targets"]) & HUGGING_FACE_TARGETS)
+        for item in candidate_artifacts
+    )
+    assert all("hf_destination_path" not in item for item in candidate_artifacts)
+
+    hf_artifacts = [
+        item
+        for item in artifacts
+        if set(item["approved_targets"]) & HUGGING_FACE_TARGETS
+    ]
+    assert len(hf_artifacts) == 9
+    assert {item["benchmark_id"] for item in hf_artifacts} == {
+        "ambiguity-v1",
+        "authority-governance-v1",
+    }
+    assert all(
+        set(item["approved_targets"]) & HUGGING_FACE_TARGETS == {"hugging_face_raw"}
+        for item in hf_artifacts
+    )
+    assert all(isinstance(item["hf_destination_path"], str) for item in hf_artifacts)
+    assert all(
+        "hf_destination_path" not in item
+        for item in artifacts
+        if item not in hf_artifacts
     )
     assert all("standards" not in item["id"] for item in benchmarks.values())
 
@@ -300,8 +320,16 @@ def test_published_benchmarks_have_complete_honest_approved_gates() -> None:
     assert all(
         item["review_route_id"].startswith("route:GOLDEN_REVIEW.md#") for item in gates
     )
+    hf_gates = [
+        item for item in gates if set(item["approved_targets"]) & HUGGING_FACE_TARGETS
+    ]
+    assert {item["benchmark_id"] for item in hf_gates} == {
+        "ambiguity-v1",
+        "authority-governance-v1",
+    }
     assert all(
-        not (set(item["approved_targets"]) & HUGGING_FACE_TARGETS) for item in gates
+        set(item["approved_targets"]) & HUGGING_FACE_TARGETS == {"hugging_face_raw"}
+        for item in hf_gates
     )
     for gate in gates:
         checks = gate["checks"]
@@ -358,9 +386,13 @@ def test_make_ci_and_ownership_require_registry_governance() -> None:
 def test_hugging_face_card_is_current_about_package_scope_and_authorization() -> None:
     card = (ROOT / "huggingface/README.md").read_text(encoding="utf-8")
     semantic_card = " ".join(card.split())
-    assert "id" + "cognito-synthworld==0.13.0" in semantic_card
+    assert "id" + "cognito-synthworld==0.14.0" in semantic_card
     assert (
-        "historical partial publication view, not the publication authorization source"
+        "governed v0.14.0 publication view, not the publication authorization source"
         in semantic_card
     )
-    assert "does not authorize additional Hugging Face artifacts" in semantic_card
+    assert (
+        "registry, publication manifest, and approved gates "
+        "govern distribution decisions" in semantic_card
+    )
+    assert "C08 v2 remains a candidate" in semantic_card

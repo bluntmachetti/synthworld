@@ -982,6 +982,12 @@
       "path": "GOLDEN_REVIEW.md"
     },
     {
+      "anchor": "hugging-face-v0140-authorization-review-record",
+      "heading": "Hugging Face v0.14.0 authorization review record",
+      "id": "route:GOLDEN_REVIEW.md#hugging-face-v0140-authorization-review-record",
+      "path": "GOLDEN_REVIEW.md"
+    },
+    {
       "anchor": "metric-only-baseline-records",
       "heading": "Metric-only baseline records",
       "id": "route:GOLDEN_REVIEW.md#metric-only-baseline-records",
@@ -2476,6 +2482,12 @@
       "path": "docs/decisions/benchmark-publication-governance.md"
     },
     {
+      "anchor": "b8-bounded-hugging-face-v0140-authorization",
+      "heading": "B8: bounded Hugging Face v0.14.0 authorization",
+      "id": "route:docs/decisions/benchmark-publication-governance.md#b8-bounded-hugging-face-v0140-authorization",
+      "path": "docs/decisions/benchmark-publication-governance.md"
+    },
+    {
       "anchor": "benchmark-publication-governance",
       "heading": "Benchmark publication governance",
       "id": "route:docs/decisions/benchmark-publication-governance.md#benchmark-publication-governance",
@@ -3172,6 +3184,12 @@
       "path": "huggingface/README.md"
     },
     {
+      "anchor": "ambiguity-v1",
+      "heading": "Ambiguity v1",
+      "id": "route:huggingface/README.md#ambiguity-v1",
+      "path": "huggingface/README.md"
+    },
+    {
       "anchor": "asteria-agentic-v1",
       "heading": "Asteria Agentic v1",
       "id": "route:huggingface/README.md#asteria-agentic-v1",
@@ -3181,6 +3199,12 @@
       "anchor": "authoritative-data-and-viewer-projections",
       "heading": "Authoritative data and viewer projections",
       "id": "route:huggingface/README.md#authoritative-data-and-viewer-projections",
+      "path": "huggingface/README.md"
+    },
+    {
+      "anchor": "authority-governance-v1",
+      "heading": "Authority Governance v1",
+      "id": "route:huggingface/README.md#authority-governance-v1",
       "path": "huggingface/README.md"
     },
     {
