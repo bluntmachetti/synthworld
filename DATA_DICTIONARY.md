@@ -819,14 +819,43 @@ core agent identity model.
 CLI: `synthworld generate-enterprise-agentic --tier smoke --seed <int> --output <dir>`,
 `synthworld validate enterprise-agentic-trace`, `synthworld evaluate enterprise-agentic`.
 
-Two CLI caveats, the same pair that applies to `generate-contextual-access` below. **`--tier` is
-accepted but never read**: `args.tier` is consumed at exactly one place in `cli.py`, the
-continuous-assurance handler; the enterprise-agentic handler passes only `args.seed`. And **the
-CLI default seed is not the reference seed** — `--seed` defaults to `20260719`, while
+For the default fixed profile, **`--tier` is accepted but has only the single allowed value
+`smoke`**. **The CLI default seed is not the reference seed** — `--seed` defaults to `20260719`, while
 `REFERENCE_ENTERPRISE_AGENTIC_SEED` is `20260804`. Generating without `--seed` produces a pack
 with a different public digest and different case IDs from the committed contract examples; the
 case count stays 20, so the difference is silent unless digests are compared. Pass
 `--seed 20260804` to reproduce the shipped pack.
+
+### Generated enterprise-agentic smoke profile
+
+`synthworld generate-enterprise-agentic --profile generated --tier smoke` selects an
+independently versioned generated family. It does not widen the fixed contracts above.
+`EnterpriseAgenticGenerationConfigV1` binds `profile_version`, `generator_version`,
+`canonical_serialization_version`, `event_schedule_version`, seed, tier, and the explicit
+`EnterpriseAgenticSmokeTopologyV1` counts. The topology currently supports exactly one
+organisation, 2–8 departments, 4–100 humans, 3–12 logical agents, 3–24 runtimes, and 3–24
+resources; every agent requires a runtime and an accountable human.
+
+| Record | Key fields | Meaning |
+|---|---|---|
+| `EnterpriseAgenticBenchmarkIdentityV1` | four implementation/serialization versions, `tier`, `seed`, `configuration_sha256`, `world_id` | Deterministic identity derived only from explicit inputs. Host platform, clock, filesystem, and Git state are excluded. |
+| `EnterpriseAgenticGeneratedPublicV1` | `config`, `identity`, `benchmark` | **Public.** Explicit config plus the base `AgenticPublicBundle`; no bindings, cases, expected decisions, or metrics. |
+| `EnterpriseAgenticGeneratedEvaluatorV1` | `identity`, `public_artifact_set_sha256`, `benchmark`, `metrics` | **Evaluator-only.** Base evaluator truth and derived integrity observations cross-bound to the entire public tree. |
+| `EnterpriseAgenticIntegrityMetricsV1` | count metrics, five supported distributions, principal component count, two integrity flags | Derived from the generated graph, replay state, cases, and truth. Every count or bucket states its denominator and denominator meaning. |
+
+Default smoke output contains one organisation, four departments, 25 humans, five logical
+agents, eight runtimes, six resources, ten opaque credentials, five delegations, and seven
+action cases. The case set covers allow, excess capability, wrong runtime, expired credential,
+valid-then-revoked, incorrect attribution, and post-revocation behavior. One delegation is an
+attenuated child, and discarded delegation evidence makes the revoked path non-reconstructable
+at audit.
+
+The generated package contains `public/public-input.json`, a separate scenario and tool schema,
+and `public/manifest.json`; evaluator output contains `evaluator/truth.json` and its manifest.
+The evaluator payload and manifest bind the digest of the complete public tree. Generated worlds
+are outputs, not committed golden fixtures. `standard` and `longitudinal` are not representable
+in this schema version and remain issue #27 work; runtime and memory measurements are external
+receipts keyed to artifact digests, not host state embedded in benchmark bytes.
 
 ## Contextual access
 
@@ -1053,10 +1082,12 @@ binds a continuous-assurance benchmark to an executed run.
 CLI: `synthworld generate-continuous-assurance --tier {smoke,standard,longitudinal,held_out}
 --seed <int> --risk-threshold <int> --justification-kind {business_need,case_assignment,emergency_access}
 --output <dir>` and `synthworld evaluate continuous-assurance`. This is the **one** generator
-whose `--tier` is actually read; the flag on `generate-enterprise-agentic` and
-`generate-contextual-access` is inert. Pass `--seed 20260804` to match the committed contract
-fixtures. Authority-governance has no CLI at all and is reached only through the Python API and
-through this pack, which consumes it as a source family.
+with a multi-value tier ladder. The fixed `generate-enterprise-agentic` and
+`generate-contextual-access` profiles each accept only `smoke`; the explicitly selected generated
+enterprise-agentic profile binds that selected smoke tier into its configuration identity. Pass
+`--seed 20260804` to match the committed continuous-assurance contract fixtures.
+Authority-governance has no CLI at all and is reached only through the Python API and through
+this pack, which consumes it as a source family.
 
 ## Run receipts
 

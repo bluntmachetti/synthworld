@@ -12,9 +12,12 @@ from synthworld.agent_authority.models import AgentAuthorityRunPlanV1
 from synthworld.agentic.enterprise import (
     EnterpriseAgenticArtifactError,
     EnterpriseAgenticEvaluationError,
+    EnterpriseAgenticGenerationConfigV1,
     enterprise_agentic_trace_from_jsonl,
     evaluate_enterprise_agentic_prediction,
     export_enterprise_agentic_benchmark,
+    export_generated_enterprise_agentic_benchmark,
+    generate_enterprise_agentic_world,
     load_evaluator_enterprise_agentic_benchmark,
     load_public_enterprise_agentic_benchmark,
     reference_enterprise_agentic,
@@ -519,6 +522,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     if args.command == "generate-enterprise-agentic":
+        if args.profile == "generated":
+            try:
+                generated = generate_enterprise_agentic_world(
+                    EnterpriseAgenticGenerationConfigV1(
+                        seed=args.seed,
+                        tier=args.tier,
+                    )
+                )
+                export_generated_enterprise_agentic_benchmark(args.output, generated)
+            except (OSError, ValidationError) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            print(
+                "Generated enterprise-agentic smoke world ready: "
+                f"{len(generated.public.snapshot.principals)} principals, "
+                f"{len(generated.evaluator.authority_truth)} actions -> {args.output}"
+            )
+            return 0
         enterprise_agentic = reference_enterprise_agentic(seed=args.seed)
         try:
             export_enterprise_agentic_benchmark(
@@ -909,9 +930,12 @@ def _parser() -> argparse.ArgumentParser:
 
     generate_enterprise_agentic = subparsers.add_parser(
         "generate-enterprise-agentic",
-        help="write the fixed-access enterprise-agentic smoke artifact trees",
+        help="write fixed-reference or generated enterprise-agentic artifacts",
     )
     _add_seed_argument(generate_enterprise_agentic)
+    generate_enterprise_agentic.add_argument(
+        "--profile", choices=("fixed", "generated"), default="fixed"
+    )
     generate_enterprise_agentic.add_argument(
         "--tier", choices=("smoke",), default="smoke"
     )

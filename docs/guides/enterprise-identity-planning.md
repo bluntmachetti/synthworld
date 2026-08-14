@@ -180,11 +180,17 @@ and layout manifest remain separate artifacts. The interactive HTML renderer and
 
 ### Generated enterprise-agentic composition
 
-**Planned.** Automatic composition of a compiled enterprise structure into
-configurable `smoke`, `standard`, and `longitudinal` agentic worlds remains under
-[#27](https://github.com/bluntmachetti/synthworld/issues/27). That work must define
-the generated profile, scale tiers, configuration identity, event schedule,
-metrics and public/evaluator package contract before planning tools rely on it.
+**Generated smoke slice available; multi-tier composition remains in progress.** A
+versioned `EnterpriseAgenticGenerationConfigV1` now produces a bounded generated
+smoke world through the hardened base agentic projection and evaluator. Its
+separate public/evaluator package contract, benchmark identity, event schedule,
+and derived integrity metrics establish the first vertical under
+[#27](https://github.com/bluntmachetti/synthworld/issues/27).
+
+The current slice is not yet automatic composition from an arbitrary compiled
+enterprise universe. `standard` and `longitudinal` topology/event contracts, scale
+measurements, and explicit benchmark-root evaluator loading remain follow-up work.
+Planning tools must not infer those capabilities from the smoke API.
 
 Face B compiled-universe work and C15/C16 authority-binding and principal-intent
 contracts are also design dependencies. Do not infer those capabilities from the
@@ -265,7 +271,8 @@ offline score does not prove live enforcement.
 | Action-time versus audit-time authority slices | **Available now** | Frozen conformance worlds |
 | General temporal-world generation | **Planned** | Issue #2 |
 | Separate agent-authority reference evaluation | **Available now** | Asteria Agentic v1 |
-| Imported topology to generated multi-tier agentic world | **Planned** | Issue #27 and later contracts |
+| Configured generated agentic smoke world | **Available** | `EnterpriseAgenticGenerationConfigV1` and `--profile generated` |
+| Imported topology to generated multi-tier agentic world | **Planned** | Remaining issue #27 contracts |
 | Deterministic Asteria Explorer projection contracts | **Available now** | Preview Python API with separate public, evaluator-overlay, and layout contracts |
 | Interactive Explorer HTML and CLI | **Planned** | [SynthWorld Explorer #52](https://github.com/bluntmachetti/synthworld/issues/52) |
 

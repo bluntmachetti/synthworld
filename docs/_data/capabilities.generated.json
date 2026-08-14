@@ -766,6 +766,12 @@
       "path": "DATA_DICTIONARY.md"
     },
     {
+      "anchor": "generated-enterprise-agentic-smoke-profile",
+      "heading": "Generated enterprise-agentic smoke profile",
+      "id": "route:DATA_DICTIONARY.md#generated-enterprise-agentic-smoke-profile",
+      "path": "DATA_DICTIONARY.md"
+    },
+    {
       "anchor": "identity-fabric-smoke-benchmark",
       "heading": "Identity-fabric smoke benchmark",
       "id": "route:DATA_DICTIONARY.md#identity-fabric-smoke-benchmark",
@@ -2557,6 +2563,12 @@
       "anchor": "explorer-v01-preview",
       "heading": "Explorer v0.1 preview",
       "id": "route:docs/guides/agent-authority.md#explorer-v01-preview",
+      "path": "docs/guides/agent-authority.md"
+    },
+    {
+      "anchor": "generated-enterprise-agentic-smoke-world",
+      "heading": "Generated enterprise-agentic smoke world",
+      "id": "route:docs/guides/agent-authority.md#generated-enterprise-agentic-smoke-world",
       "path": "docs/guides/agent-authority.md"
     },
     {
@@ -5836,10 +5848,37 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticGeneratedBenchmarkV1",
+      "implementation_module": "synthworld.agentic.enterprise.generated_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticGeneratedBenchmarkV1",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticGenerationConfigV1",
+      "implementation_module": "synthworld.agentic.enterprise.generated_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticGenerationConfigV1",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticIntegrityError",
       "implementation_module": "synthworld.agentic.enterprise.errors",
       "kind": "python_export",
       "name": "EnterpriseAgenticIntegrityError",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticIntegrityMetricsV1",
+      "implementation_module": "synthworld.agentic.enterprise.generated_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticIntegrityMetricsV1",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -5876,6 +5915,24 @@
       "implementation_module": "synthworld.agentic.enterprise.models",
       "kind": "python_export",
       "name": "EnterpriseAgenticPublicInputV1",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticScaleTier",
+      "implementation_module": "synthworld.agentic.enterprise.generated_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticScaleTier",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticSmokeTopologyV1",
+      "implementation_module": "synthworld.agentic.enterprise.generated_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticSmokeTopologyV1",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -6340,6 +6397,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.derive_enterprise_agentic_integrity_metrics",
+      "implementation_module": "synthworld.agentic.enterprise.generated",
+      "kind": "python_export",
+      "name": "derive_enterprise_agentic_integrity_metrics",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.enterprise_agentic_trace_from_jsonl",
       "implementation_module": "synthworld.agentic.enterprise.trace",
       "kind": "python_export",
@@ -6376,6 +6442,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.evaluate_generated_enterprise_agentic_trace",
+      "implementation_module": "synthworld.agentic.enterprise.generated_evaluation",
+      "kind": "python_export",
+      "name": "evaluate_generated_enterprise_agentic_trace",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.export_c08_artifacts",
       "implementation_module": "synthworld.agentic.enterprise.c08_v2.serialization",
       "kind": "python_export",
@@ -6394,10 +6469,55 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.export_generated_enterprise_agentic_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "export_generated_enterprise_agentic_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.generate_c08_reference",
       "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
       "kind": "python_export",
       "name": "generate_c08_reference",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generate_enterprise_agentic_world",
+      "implementation_module": "synthworld.agentic.enterprise.generated",
+      "kind": "python_export",
+      "name": "generate_enterprise_agentic_world",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_artifact_checksums",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "generated_enterprise_agentic_artifact_checksums",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_evaluator_artifacts",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "generated_enterprise_agentic_evaluator_artifacts",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_public_artifacts",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "generated_enterprise_agentic_public_artifacts",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
