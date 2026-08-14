@@ -436,6 +436,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "added-9",
+      "heading": "Added",
+      "id": "route:CHANGELOG.md#added-9",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "changed",
       "heading": "Changed",
       "id": "route:CHANGELOG.md#changed",
@@ -2533,6 +2539,12 @@
       "anchor": "agent-authority",
       "heading": "Agent authority",
       "id": "route:docs/guides/agent-authority.md#agent-authority",
+      "path": "docs/guides/agent-authority.md"
+    },
+    {
+      "anchor": "explorer-v01-preview",
+      "heading": "Explorer v0.1 preview",
+      "id": "route:docs/guides/agent-authority.md#explorer-v01-preview",
       "path": "docs/guides/agent-authority.md"
     },
     {
