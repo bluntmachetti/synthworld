@@ -54,7 +54,6 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         Path("docs/_data/capabilities.generated.json"),
         Path("Makefile"),
         Path("README.md"),
-        Path("USER_GUIDE.md"),
         Path("huggingface/README.md"),
         Path("pyproject.toml"),
         Path("uv.lock"),

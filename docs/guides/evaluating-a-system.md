@@ -19,6 +19,55 @@ uv run python examples/evaluate_all.py --predictions-dir predictions
 
 Replace an example rule with your own model, service, gateway, policy engine, or product while keeping the SynthWorld prediction-model construction as the adapter boundary.
 
+## Relationship-inference workflow
+
+Use this task to test whether a system infers a relationship only when public
+evidence supports it. The corpus includes unilateral associations specifically
+to catch systems that infer too much from one weak signal.
+
+Generate only the public product input:
+
+```bash
+synthworld generate-public-connections \
+  --seed 20260719 \
+  --persona-count 10 \
+  --output relationship-input.json
+```
+
+Give `relationship-input.json` to the system under test. Normalize its output as
+a `RelationshipPrediction`: each edge names two public records, the relationship
+kind, and the public association records cited as evidence. The identifiers below
+are placeholders; use identifiers from the generated input.
+
+```json
+{
+  "schema_version": "0.1.0",
+  "edges": [
+    {
+      "source_record_id": "record-uuid-a",
+      "target_record_id": "record-uuid-b",
+      "kind": "neighbor",
+      "evidence_association_ids": ["association-uuid-a", "association-uuid-b"]
+    }
+  ]
+}
+```
+
+Save that document as `relationship-prediction.json`, then score it with the same
+seed and persona count used to create the public input:
+
+```bash
+synthworld evaluate relationship \
+  --predictions relationship-prediction.json \
+  --seed 20260719 \
+  --persona-count 10
+```
+
+The report separates edge quality from citation quality, so a correct
+relationship with unsupported evidence remains visible. Do not give the system
+the output of `generate-connection-benchmark`; that annotated artifact contains
+evaluator truth.
+
 **Validate before scoring.** Use a task validator where one exists. Structural validity means a submission can be scored; it does not mean the system performed well.
 
 ```bash
