@@ -1210,7 +1210,7 @@
       "roadmap_routes": [
         "route:ROADMAP.md#ai-agents-and-non-human-identities"
       ],
-      "since": "unreleased",
+      "since": "0.15.0",
       "summary": "Project published SynthWorld packages into deterministic public and evaluator-safe visualisation artifacts.",
       "support": "Preview Python contracts for Asteria v1 projection, evaluator overlays, and deterministic layout binding.",
       "title": "Explorer v0.1 projection contracts"
