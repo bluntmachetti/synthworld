@@ -9,6 +9,8 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-08-15
+
 ### Added
 
 - **Generated enterprise-agentic smoke vertical (#27).** A new independently
@@ -563,7 +565,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bluntmachetti/synthworld/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bluntmachetti/synthworld/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/bluntmachetti/synthworld/compare/v0.11.0...v0.12.0

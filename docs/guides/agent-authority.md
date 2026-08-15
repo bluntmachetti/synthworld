@@ -22,8 +22,8 @@ generated enterprise-agentic work under issue #27.
 
 ## Generated enterprise-agentic smoke world
 
-> **Preview on main for 0.15.0.** The generation command is already available on
-> main. Artifact-root validation and evaluation described below require 0.15.0.
+> **Available in 0.15.0.** Generation, public-only artifact validation, and
+> complete-root evaluation are available through the Python and CLI surfaces below.
 
 The first configurable generated slice is separate from both frozen Asteria and
 the fixed-universe enterprise-agentic reference pack:
