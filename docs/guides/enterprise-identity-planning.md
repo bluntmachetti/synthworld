@@ -174,9 +174,10 @@ compatibility. Candidate registration and packaging are not external publication
 approval. See [C08 v2 offline evidence-completeness candidates](../../AGENTIC_BENCHMARK.md#c08-v2-offline-evidence-completeness-candidates).
 
 The preview Explorer v0.1 Python API can project the published Asteria v1 public
-package into deterministic graph and timeline records. Its typed evaluator overlay
-and layout manifest remain separate artifacts. The interactive HTML renderer and
-`synthworld visualize` CLI are not yet shipped.
+package into deterministic graph and timeline records. This is a projection-only
+data API: its typed evaluator overlay and layout manifest remain separate artifacts,
+and it emits no HTML. Neither the interactive renderer nor the packaged viewer has
+shipped, and there is no `synthworld visualize` CLI command.
 
 ### Generated enterprise-agentic composition
 
@@ -273,7 +274,7 @@ offline score does not prove live enforcement.
 | Separate agent-authority reference evaluation | **Available now** | Asteria Agentic v1 |
 | Configured generated agentic smoke world | **Available** | `EnterpriseAgenticGenerationConfigV1` and `--profile generated` |
 | Imported topology to generated multi-tier agentic world | **Planned** | Remaining issue #27 contracts |
-| Deterministic Asteria Explorer projection contracts | **Available now** | Preview Python API with separate public, evaluator-overlay, and layout contracts |
+| Deterministic Asteria Explorer projection contracts | **Available now** | Projection-only Python API with separate public, evaluator-overlay, and layout contracts; no HTML renderer |
 | Interactive Explorer HTML and CLI | **Planned** | [SynthWorld Explorer #52](https://github.com/bluntmachetti/synthworld/issues/52) |
 
 Continue with the [benchmark catalogue](/benchmarks/catalogue) for governed

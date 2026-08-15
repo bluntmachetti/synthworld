@@ -7679,14 +7679,14 @@
       },
       "journey_route": "route:docs/concepts/explorer-v01.md#explorer-v01-contract-and-packaging-decision",
       "maturity": "preview",
-      "notes": "This preview covers versioned projection contracts and the published Asteria v1 adapter only. Interactive rendering, CLI support, and generated-scale worlds remain deferred.",
+      "notes": "Version 0.15.0 ships projection contracts and the published Asteria v1 projector only. It does not ship an HTML renderer, packaged viewer, or visualization CLI; generated-scale worlds also remain deferred.",
       "related_surfaces": [],
       "roadmap_routes": [
         "route:ROADMAP.md#ai-agents-and-non-human-identities"
       ],
       "since": "0.15.0",
-      "summary": "Project published SynthWorld packages into deterministic public and evaluator-safe visualisation artifacts.",
-      "support": "Preview Python contracts for Asteria v1 projection, evaluator overlays, and deterministic layout binding.",
+      "summary": "Project the published Asteria Agentic v1 package into deterministic graph and timeline records for external renderers.",
+      "support": "Preview Python contracts and an Asteria v1 projector with evaluator overlays and deterministic layout binding; no renderer or CLI.",
       "title": "Explorer v0.1 projection contracts"
     },
     {
@@ -8806,7 +8806,7 @@
     }
   ],
   "input_digests": {
-    "curated_sha256": "559595355c9fa3727d8dd4f785ff51da6b6856b34639c862581ff4254f385460",
+    "curated_sha256": "4bd97b1d4ddb9b36b575aa5761b648ca3aebc83891710f800dd42e94f5212a2c",
     "generated_sha256": "5c2a46f531475f1b04b671f6a77a4aba6f783e620388e6627fc9845bae95b3d3"
   },
   "schema_version": "1.0.0"

@@ -144,11 +144,13 @@ not being widened to imply those lifecycle semantics.
 
 ## Explorer v0.1 preview
 
-The preview `synthworld.explorer` Python API can project the published Asteria
-Agentic v1 public package into deterministic nodes, relationships, and a replayable
-public event timeline. It also defines separately typed evaluator-overlay and
-layout-manifest contracts, with digest binding that prevents either artifact from
-silently attaching to a different public projection.
+Version 0.15.0 ships a projection-only `synthworld.explorer` Python API. It can
+project the published Asteria Agentic v1 public package into deterministic nodes,
+relationships, and a replayable public event timeline. It also defines separately
+typed evaluator-overlay and layout-manifest contracts, with digest binding that
+prevents either artifact from silently attaching to a different public projection.
+The projector returns data records; it does not render HTML or provide an
+interactive viewer.
 
 Available now:
 
