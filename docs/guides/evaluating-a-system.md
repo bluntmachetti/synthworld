@@ -74,6 +74,24 @@ evaluator truth.
 synthworld validate agentic-trace --predictions predictions/agentic.jsonl
 ```
 
+Generated enterprise-agentic worlds have an explicit artifact-root workflow in
+0.15.0. The validator reads only `public/`; the evaluator subsequently requires the
+complete checksum-bound root:
+
+```bash
+synthworld validate generated-enterprise-agentic-trace \
+  --benchmark-root generated-enterprise-agentic \
+  --predictions predictions/generated-agentic.jsonl
+synthworld evaluate generated-enterprise-agentic \
+  --benchmark-root generated-enterprise-agentic \
+  --predictions predictions/generated-agentic.jsonl \
+  --summary
+```
+
+The adapter must replay public events in their declared order and query the system
+at each action event. See [Agent authority](https://bluntmachetti.github.io/synthworld/guides/agent-authority/)
+for the temporal, topology, policy-decision-point, and provenance boundaries.
+
 Run the evaluator only after the system output is durably available. Do not expose evaluator truth to the adapter merely because a frozen reference fixture is publicly inspectable.
 
 **Interpret metrics independently.** A `null` metric is not zero; it means the prediction set did not make that metric meaningful under the task's documented empty behavior. Do not hide weak dimensions behind an aggregate. Interpret every metric using its own denominator, support, polarity, scoring version, and empty behavior.

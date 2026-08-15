@@ -19,7 +19,11 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   through the hardened base agentic projection, emits checksum-bound separate
   public/evaluator trees, derives denominated topology and integrity metrics, and
   can be selected explicitly with `generate-enterprise-agentic --profile
-  generated`. Existing fixed enterprise smoke and frozen Asteria/C08 bytes are
+  generated`. Public-only and complete artifact-root loaders now reject inventory,
+  canonicalization, checksum, cross-binding, semantic, derived-metric, and declared
+  generator drift; dedicated CLI tasks validate and score external generated traces.
+  An isolated-wheel consumer test and event-replay guidance preserve the oracle
+  boundary. Existing fixed enterprise smoke and frozen Asteria/C08 bytes are
   unchanged; standard and longitudinal generated tiers remain follow-up work.
 - **Explorer v0.1 public projection contracts.** A preview Python API projects
   the published Asteria Agentic v1 public package into deterministic graph and

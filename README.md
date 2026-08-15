@@ -184,7 +184,8 @@ side out of the adapter path even though the frozen reference truth is publicly
 inspectable. See the full [Asteria Agentic v1 guide](https://github.com/bluntmachetti/synthworld/blob/main/AGENTIC_BENCHMARK.md).
 
 For a configurable generated enterprise-agentic smoke world, explicitly select the
-generated profile:
+generated profile. Artifact-root validation and evaluation are previewed on main for
+0.15.0:
 
 ```bash
 synthworld generate-enterprise-agentic \
@@ -194,9 +195,27 @@ synthworld generate-enterprise-agentic \
   --output generated-enterprise-agentic
 ```
 
+An external adapter receives only `generated-enterprise-agentic/public`, replays its
+events in order, and writes the observations it actually obtained. Validate without
+evaluator access, then score in a separate evaluator process:
+
+```bash
+synthworld validate generated-enterprise-agentic-trace \
+  --benchmark-root generated-enterprise-agentic \
+  --predictions observed-actions.jsonl
+synthworld evaluate generated-enterprise-agentic \
+  --benchmark-root generated-enterprise-agentic \
+  --predictions observed-actions.jsonl \
+  --summary
+```
+
 This is a deterministic benchmark-data generator, not an IAM product, policy
 engine, agent framework, hosted simulator, or vendor leaderboard. Standard and
-longitudinal generated tiers remain tracked by issue #27.
+longitudinal generated tiers remain tracked by issue #27. A reference organisation
+topology can inform the supported count configuration; 0.15.0 does not import its
+named entities or relationships. See the
+[agent-authority guide](https://bluntmachetti.github.io/synthworld/guides/agent-authority/)
+for the replay, decision-only SUT, and provenance boundaries.
 
 ## Verify every claim
 

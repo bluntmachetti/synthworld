@@ -2572,6 +2572,12 @@
       "path": "docs/guides/agent-authority.md"
     },
     {
+      "anchor": "run-an-external-system-against-the-generated-world",
+      "heading": "Run an external system against the generated world",
+      "id": "route:docs/guides/agent-authority.md#run-an-external-system-against-the-generated-world",
+      "path": "docs/guides/agent-authority.md"
+    },
+    {
       "anchor": "",
       "heading": "",
       "id": "route:docs/guides/enterprise-access.md",
@@ -3362,6 +3368,14 @@
     },
     {
       "assignment_required": true,
+      "id": "cli:synthworld evaluate generated-enterprise-agentic",
+      "kind": "cli_command",
+      "name": "synthworld evaluate generated-enterprise-agentic",
+      "source": "src/synthworld/cli.py",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
       "id": "cli:synthworld evaluate relationship",
       "kind": "cli_command",
       "name": "synthworld evaluate relationship",
@@ -3581,6 +3595,14 @@
       "id": "cli:synthworld validate enterprise-agentic-trace",
       "kind": "cli_command",
       "name": "synthworld validate enterprise-agentic-trace",
+      "source": "src/synthworld/cli.py",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "cli:synthworld validate generated-enterprise-agentic-trace",
+      "kind": "cli_command",
+      "name": "synthworld validate generated-enterprise-agentic-trace",
       "source": "src/synthworld/cli.py",
       "visibility": "public"
     },
@@ -6559,10 +6581,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_generated_enterprise_agentic_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "load_generated_enterprise_agentic_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.load_public_enterprise_agentic_benchmark",
       "implementation_module": "synthworld.agentic.enterprise.serialization",
       "kind": "python_export",
       "name": "load_public_enterprise_agentic_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_public_generated_enterprise_agentic_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "load_public_generated_enterprise_agentic_benchmark",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },

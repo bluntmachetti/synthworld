@@ -22,6 +22,9 @@ generated enterprise-agentic work under issue #27.
 
 ## Generated enterprise-agentic smoke world
 
+> **Preview on main for 0.15.0.** The generation command is already available on
+> main. Artifact-root validation and evaluation described below require 0.15.0.
+
 The first configurable generated slice is separate from both frozen Asteria and
 the fixed-universe enterprise-agentic reference pack:
 
@@ -42,9 +45,12 @@ validated Python configuration model, not an unversioned promise hidden behind t
 tier name.
 
 ```python
+from pathlib import Path
+
 from synthworld.agentic.enterprise import (
     EnterpriseAgenticGenerationConfigV1,
     EnterpriseAgenticSmokeTopologyV1,
+    export_generated_enterprise_agentic_benchmark,
     generate_enterprise_agentic_world,
 )
 
@@ -59,6 +65,9 @@ config = EnterpriseAgenticGenerationConfigV1(
     ),
 )
 benchmark = generate_enterprise_agentic_world(config)
+export_generated_enterprise_agentic_benchmark(
+    Path("generated-enterprise-agentic"), benchmark
+)
 ```
 
 The output has physically separate `public/` and `evaluator/` trees. Public input,
@@ -72,6 +81,60 @@ serialization, event schedule, seed, tier, and resolved topology. It does not re
 the clock, filesystem order, Python version, platform, or Git state. Runtime and
 memory measurements are host observations and belong in a separate receipt keyed
 to the artifact digest.
+
+### Run an external system against the generated world
+
+Give an adapter only the `public/` subtree. Keep the complete benchmark root in a
+separate evaluator process. Public loading verifies canonical bytes, the exact
+inventory, manifests, the duplicated scenario, and the tool schema without listing
+or opening `evaluator/`. Complete loading additionally cross-checks the two trees,
+re-derives metrics, and reproduces the declared generator output from its versioned
+configuration.
+
+The adapter must process public events in `event_index` order. Apply runtime,
+credential, and delegation changes as they appear; query the system immediately
+when an `action_attempted` event appears; save that observation; then continue to
+later revocation, evidence-loss, and audit events. Evaluating every action against
+the final state destroys the distinction between valid-then-revoked and
+post-revocation cases.
+
+Normalize actual system observations into the `ObservedActionTrace` JSONL contract.
+Do not copy a principal, owner chain, delegation path, or evidence reference from
+SynthWorld into the trace unless the system or its captured execution evidence
+actually returned it. A decision-only policy decision point can legitimately submit
+only the event identifier and decision. Its authorization metrics are then the
+relevant result; zeroes in unobserved identity and provenance dimensions must not be
+presented as capabilities of that policy decision point.
+
+Validate in the public-only process:
+
+```bash
+synthworld validate generated-enterprise-agentic-trace \
+  --benchmark-root generated-enterprise-agentic \
+  --predictions observed-actions.jsonl
+```
+
+After the trace has been saved outside the product path, score it in the evaluator
+process:
+
+```bash
+synthworld evaluate generated-enterprise-agentic \
+  --benchmark-root generated-enterprise-agentic \
+  --predictions observed-actions.jsonl \
+  --summary
+```
+
+An external organisation YAML can be used as a sizing brief for the supported
+topology counts. Version 0.15.0 does not import named organisations, departments,
+people, or relationships from that file: SynthWorld creates its own safely fictional
+graph. Exact topology import would require a new versioned input contract.
+
+Generated manifests prove internal consistency. The public-only loader does not
+establish who created a tree. For a reproducible lab, retain the exact package or
+wheel digest, benchmark configuration and identity, public/evaluator artifact
+digests, trace bytes, adapter and policy digests, and observable system version.
+This is still an offline ground-truth evaluation unless separately captured
+execution evidence supports a stronger lab claim.
 
 This slice is an implementation-neutral deterministic benchmark generator. It is
 not an IAM product, policy engine, agent runtime, hosted simulator, vendor

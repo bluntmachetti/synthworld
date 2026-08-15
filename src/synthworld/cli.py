@@ -15,11 +15,14 @@ from synthworld.agentic.enterprise import (
     EnterpriseAgenticGenerationConfigV1,
     enterprise_agentic_trace_from_jsonl,
     evaluate_enterprise_agentic_prediction,
+    evaluate_generated_enterprise_agentic_trace,
     export_enterprise_agentic_benchmark,
     export_generated_enterprise_agentic_benchmark,
     generate_enterprise_agentic_world,
     load_evaluator_enterprise_agentic_benchmark,
+    load_generated_enterprise_agentic_benchmark,
     load_public_enterprise_agentic_benchmark,
+    load_public_generated_enterprise_agentic_benchmark,
     reference_enterprise_agentic,
     validate_enterprise_agentic_trace_jsonl,
 )
@@ -306,6 +309,36 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             return 0 if enterprise_validation.valid else 1
 
+        if args.task == "generated-enterprise-agentic-trace":
+            try:
+                generated_public = load_public_generated_enterprise_agentic_benchmark(
+                    args.benchmark_root
+                )
+                generated_validation = validate_trace_jsonl(
+                    args.predictions.read_text(encoding="utf-8-sig"),
+                    expected_event_ids=(
+                        generated_public.benchmark.scenario.action_event_ids
+                    ),
+                )
+            except (
+                OSError,
+                UnicodeDecodeError,
+                EnterpriseAgenticArtifactError,
+                ValidationError,
+            ) as error:
+                print(str(error), file=sys.stderr)
+                return 1
+            if args.json:
+                print(generated_validation.model_dump_json(indent=2))
+            else:
+                print(
+                    _validation_summary(
+                        generated_validation,
+                        label="generated-enterprise-agentic-trace",
+                    )
+                )
+            return 0 if generated_validation.valid else 1
+
         if args.task == "contextual-access-trace":
             try:
                 contextual_public = load_public_contextual_access_benchmark(
@@ -400,6 +433,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 else:
                     print(enterprise_report.model_dump_json(indent=2))
                 return 0
+            elif args.task == "generated-enterprise-agentic":
+                if args.benchmark_root is None:
+                    raise EnterpriseAgenticEvaluationError(
+                        "--benchmark-root is required for generated "
+                        "enterprise-agentic evaluation"
+                    )
+                generated = load_generated_enterprise_agentic_benchmark(
+                    args.benchmark_root
+                )
+                report = evaluate_generated_enterprise_agentic_trace(
+                    trace_submission_from_jsonl(text), generated
+                )
             elif args.task == "contextual-access":
                 if args.benchmark_root is None:
                     raise ContextualAccessEvaluationError(
@@ -1006,6 +1051,20 @@ def _parser() -> argparse.ArgumentParser:
     enterprise_agentic_trace.add_argument("--predictions", type=Path, required=True)
     enterprise_agentic_trace.add_argument("--benchmark-root", type=Path, required=True)
     enterprise_agentic_trace.add_argument("--json", action="store_true")
+    generated_enterprise_agentic_trace = validation_tasks.add_parser(
+        "generated-enterprise-agentic-trace",
+        help=(
+            "validate an observed-action JSONL trace against a generated public "
+            "benchmark"
+        ),
+    )
+    generated_enterprise_agentic_trace.add_argument(
+        "--predictions", type=Path, required=True
+    )
+    generated_enterprise_agentic_trace.add_argument(
+        "--benchmark-root", type=Path, required=True
+    )
+    generated_enterprise_agentic_trace.add_argument("--json", action="store_true")
     contextual_run_plan = validation_tasks.add_parser(
         "contextual-access-run-plan",
         help="structurally validate a pre-execution contextual-access run plan",
@@ -1033,6 +1092,7 @@ def _parser() -> argparse.ArgumentParser:
         choices=[
             "agentic",
             "enterprise-agentic",
+            "generated-enterprise-agentic",
             "contextual-access",
             "continuous-assurance",
             "extraction",
@@ -1086,7 +1146,9 @@ def _add_seed_argument(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--seed", type=int, default=20_260_719)
 
 
-def _validation_summary(report: TraceValidationReport) -> str:
+def _validation_summary(
+    report: TraceValidationReport, *, label: str = "agentic-trace"
+) -> str:
     """Render a validation report as a terminal diagnostic.
 
     Human-readable is the default here, inverting ``evaluate``, which prints JSON
@@ -1097,7 +1159,7 @@ def _validation_summary(report: TraceValidationReport) -> str:
 
     verdict = "valid" if report.valid else "invalid"
     lines = [
-        f"agentic-trace: {verdict}",
+        f"{label}: {verdict}",
         (
             f"rows {report.row_count}, "
             f"expected actions {report.expected_action_count}, "
