@@ -89,8 +89,8 @@ synthworld evaluate generated-enterprise-agentic \
 ```
 
 The adapter must replay public events in their declared order and query the system
-at each action event. See [Agent authority](agent-authority.md) for the temporal,
-topology, policy-decision-point, and provenance boundaries.
+at each action event. See [Agent authority](https://bluntmachetti.github.io/synthworld/guides/agent-authority/)
+for the temporal, topology, policy-decision-point, and provenance boundaries.
 
 Run the evaluator only after the system output is durably available. Do not expose evaluator truth to the adapter merely because a frozen reference fixture is publicly inspectable.
 
