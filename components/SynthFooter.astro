@@ -1,0 +1,35 @@
+---
+interface Props {
+  site: { title: string; description?: string };
+}
+
+const { site } = Astro.props;
+---
+
+<footer class="synth-footer">
+  <div class="synth-footer-inner">
+    <div class="synth-footer-brand">
+      <div class="synth-footer-lockup">
+        <span class="synth-brand-mark" aria-hidden="true"><span></span></span>
+        <span>{site.title}</span>
+      </div>
+      <p>
+        {site.description ?? "Deterministic synthetic identity benchmarks."}
+      </p>
+    </div>
+    <nav aria-label="Project links" class="synth-footer-links">
+      <a href="https://github.com/bluntmachetti/synthworld">Source ↗</a>
+      <a href="https://pypi.org/project/idcognito-synthworld/">PyPI ↗</a>
+      <a href="https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks"
+        >Hugging Face ↗</a
+      >
+      <a href="https://github.com/bluntmachetti/synthworld/discussions"
+        >Discussions ↗</a
+      >
+    </nav>
+  </div>
+  <div class="synth-footer-bottom">
+    <span>Deterministic · safely fictional · checksummed</span>
+    <span>Documentation powered by Blume</span>
+  </div>
+</footer>
