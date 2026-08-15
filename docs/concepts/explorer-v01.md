@@ -2,10 +2,16 @@
 
 Status: implementation contract for issue #52.
 
-Explorer v0.1 is a deterministic projection and rendering boundary for benchmark
-packages that SynthWorld already publishes. It is not a general graph browser, an
-authorization engine, or a generated-world interface for the planned
+Explorer v0.1 is a deterministic projection contract and renderer boundary for
+benchmark packages that SynthWorld already publishes. It is not a general graph
+browser, an authorization engine, or a generated-world interface for the planned
 `enterprise_agentic` tiers.
+
+> **0.15.0 release boundary:** the package ships Python projection contracts,
+> canonical serialization and digest helpers, validation helpers, and the Asteria
+> agent-authority projector. It does not ship an HTML renderer, a packaged viewer,
+> or a `synthworld visualize` CLI command. HTML produced by external code from these
+> projection records is an integration artifact, not a released SynthWorld render.
 
 ## Immediate scope
 
