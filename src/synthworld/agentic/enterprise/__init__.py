@@ -45,6 +45,8 @@ from synthworld.agentic.enterprise.generated_serialization import (
     generated_enterprise_agentic_artifact_checksums,
     generated_enterprise_agentic_evaluator_artifacts,
     generated_enterprise_agentic_public_artifacts,
+    load_generated_enterprise_agentic_benchmark,
+    load_public_generated_enterprise_agentic_benchmark,
 )
 from synthworld.agentic.enterprise.metrics import (
     evaluate_enterprise_agentic_prediction,
@@ -131,7 +133,9 @@ __all__ = [
     "load_c08_public",
     "load_c08_submission",
     "load_evaluator_enterprise_agentic_benchmark",
+    "load_generated_enterprise_agentic_benchmark",
     "load_public_enterprise_agentic_benchmark",
+    "load_public_generated_enterprise_agentic_benchmark",
     "materialize_enterprise_agentic_overlay",
     "perfect_enterprise_agentic_prediction",
     "project_c08_public",

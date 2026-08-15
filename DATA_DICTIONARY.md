@@ -857,6 +857,21 @@ are outputs, not committed golden fixtures. `standard` and `longitudinal` are no
 in this schema version and remain issue #27 work; runtime and memory measurements are external
 receipts keyed to artifact digests, not host state embedded in benchmark bytes.
 
+`load_public_generated_enterprise_agentic_benchmark` verifies only the public inventory,
+canonical bytes, manifest, scenario, tool schema, configuration, and identity; it does not inspect
+the evaluator subtree and establishes internal consistency rather than producer authenticity.
+`load_generated_enterprise_agentic_benchmark` additionally requires the exact two-directory root,
+cross-validates evaluator bindings, re-derives integrity metrics, and reproduces the declared
+generator output byte-for-byte. CLI consumers use
+`synthworld validate generated-enterprise-agentic-trace` in the public-only path and
+`synthworld evaluate generated-enterprise-agentic` in the evaluator path.
+
+External adapters replay `AgenticEvent` records in `event_index` order and query their system at
+each `action_attempted` position; final-state-only evaluation is not equivalent. A reference
+organisation document may inform the supported count knobs, but this version does not import its
+named topology. Trace fields represent observed SUT output: copying identity, delegation, or
+evidence values from public input would not demonstrate that a decision-only PDP produced them.
+
 ## Contextual access
 
 Contextual access is a bounded deterministic benchmark for relationship- and attribute-aware

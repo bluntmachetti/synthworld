@@ -41,6 +41,7 @@ package:
 	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python -c "from synthworld.authority_governance import load_golden_authority_governance_benchmark, reference_authority_governance; assert load_golden_authority_governance_benchmark() == reference_authority_governance()"
 	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python -c "import yaml; from synthworld.enterprise import compile_enterprise_identity_access_universe; from synthworld.enterprise.reference import reference_enterprise_identity_access_import; result=compile_enterprise_identity_access_universe(import_model=reference_enterprise_identity_access_import(),seed=20260804); assert len(result.public_universe.principals) == 6"
 	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python -c "from synthworld.continuous_assurance import evaluate_continuous_assurance_prediction, perfect_continuous_assurance_prediction, reference_continuous_assurance; b=reference_continuous_assurance(); r=evaluate_continuous_assurance_prediction(public=b.public,evaluator=b.evaluator,prediction=perfect_continuous_assurance_prediction(b.evaluator)); assert len(b.public.cases)==8 and len(r.metrics)==16"
+	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python .github/scripts/check_generated_agentic_wheel.py
 
 test:
 	$(UV) run pytest

@@ -665,8 +665,10 @@
           "subset_note": null,
           "surface_ids": [
             "cli:synthworld evaluate enterprise-agentic",
+            "cli:synthworld evaluate generated-enterprise-agentic",
             "cli:synthworld generate-enterprise-agentic",
-            "cli:synthworld validate enterprise-agentic-trace"
+            "cli:synthworld validate enterprise-agentic-trace",
+            "cli:synthworld validate generated-enterprise-agentic-trace"
           ]
         },
         "python": {
@@ -704,8 +706,10 @@
             "python:synthworld.agentic.enterprise.generated_enterprise_agentic_artifact_checksums",
             "python:synthworld.agentic.enterprise.generated_enterprise_agentic_evaluator_artifacts",
             "python:synthworld.agentic.enterprise.generated_enterprise_agentic_public_artifacts",
+            "python:synthworld.agentic.enterprise.load_generated_enterprise_agentic_benchmark",
             "python:synthworld.agentic.enterprise.load_evaluator_enterprise_agentic_benchmark",
             "python:synthworld.agentic.enterprise.load_public_enterprise_agentic_benchmark",
+            "python:synthworld.agentic.enterprise.load_public_generated_enterprise_agentic_benchmark",
             "python:synthworld.agentic.enterprise.materialize_enterprise_agentic_overlay",
             "python:synthworld.agentic.enterprise.perfect_enterprise_agentic_prediction",
             "python:synthworld.agentic.enterprise.project_enterprise_agentic_public",
