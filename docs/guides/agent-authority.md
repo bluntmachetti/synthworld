@@ -18,7 +18,66 @@ and core trace scoring does not prove deployed enforcement.
 
 See [Enterprise Identity Planning](https://bluntmachetti.github.io/synthworld/guides/enterprise-identity-planning/) for how this
 separate reference world relates to today's human enterprise compiler and the
-planned generated composition under issue #27.
+generated enterprise-agentic work under issue #27.
+
+## Generated enterprise-agentic smoke world
+
+The first configurable generated slice is separate from both frozen Asteria and
+the fixed-universe enterprise-agentic reference pack:
+
+```bash
+synthworld generate-enterprise-agentic \
+  --profile generated \
+  --tier smoke \
+  --seed 20260814 \
+  --output generated-enterprise-agentic
+```
+
+The default smoke topology contains one fictional organisation, 25 humans, five
+logical agents, eight runtimes, six resources, five delegations, and ten opaque
+credential records. Seven action cases exercise authorised access, excess
+capability, wrong runtime binding, expired credentials, valid-then-revoked access,
+incorrect attribution, and post-revocation access. Counts are defaults in a
+validated Python configuration model, not an unversioned promise hidden behind the
+tier name.
+
+```python
+from synthworld.agentic.enterprise import (
+    EnterpriseAgenticGenerationConfigV1,
+    EnterpriseAgenticSmokeTopologyV1,
+    generate_enterprise_agentic_world,
+)
+
+config = EnterpriseAgenticGenerationConfigV1(
+    seed=17,
+    topology=EnterpriseAgenticSmokeTopologyV1(
+        department_count=2,
+        human_principal_count=12,
+        logical_agent_count=3,
+        runtime_count=4,
+        resource_count=4,
+    ),
+)
+benchmark = generate_enterprise_agentic_world(config)
+```
+
+The output has physically separate `public/` and `evaluator/` trees. Public input,
+the scenario, and its tool schema are checksum-bound as one set; evaluator truth
+cross-binds that complete public-set digest and contains the independently derived
+topology, decision, case, and graph-integrity metrics. Only the `public/` tree is a
+product input.
+
+Benchmark identity binds the versioned configuration, generator, canonical
+serialization, event schedule, seed, tier, and resolved topology. It does not read
+the clock, filesystem order, Python version, platform, or Git state. Runtime and
+memory measurements are host observations and belong in a separate receipt keyed
+to the artifact digest.
+
+This slice is an implementation-neutral deterministic benchmark generator. It is
+not an IAM product, policy engine, agent runtime, hosted simulator, vendor
+leaderboard, or claim about deployed enforcement. `standard` and `longitudinal`
+generated tiers remain follow-up work in issue #27; the existing 1.0 event union is
+not being widened to imply those lifecycle semantics.
 
 ## Explorer v0.1 preview
 
@@ -43,7 +102,8 @@ Not yet available:
 
 - the `synthworld visualize` command;
 - the packaged interactive Cytoscape/ELK renderer;
-- adapters for candidate C08 v2 or generated `enterprise_agentic` worlds; and
+- Explorer adapters for candidate C08 v2 or generated `enterprise_agentic` worlds;
+  and
 - large-world filtering, tier comparison, or generated longitudinal navigation.
 
 See [Explorer v0.1 contract and packaging decision](../concepts/explorer-v01.md)

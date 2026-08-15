@@ -11,6 +11,16 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
+- **Generated enterprise-agentic smoke vertical (#27).** A new independently
+  versioned configuration and Python API deterministically generates a bounded
+  fictional organisation with humans, logical agents, runtimes, opaque
+  credentials, resources, ownership, attenuated delegation, revocation,
+  attribution, and authorised/adversarial action cases. Construction routes
+  through the hardened base agentic projection, emits checksum-bound separate
+  public/evaluator trees, derives denominated topology and integrity metrics, and
+  can be selected explicitly with `generate-enterprise-agentic --profile
+  generated`. Existing fixed enterprise smoke and frozen Asteria/C08 bytes are
+  unchanged; standard and longitudinal generated tiers remain follow-up work.
 - **Explorer v0.1 public projection contracts.** A preview Python API projects
   the published Asteria Agentic v1 public package into deterministic graph and
   timeline records, with independently versioned evaluator overlays and layout

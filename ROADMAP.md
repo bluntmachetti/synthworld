@@ -28,7 +28,9 @@ Broker lifecycle evaluation is shipped; broader longitudinal product behavior re
 
 ### AI agents and non-human identities
 
-Frozen agent-authority conformance surfaces are shipped. Configurable generated agent/NHI worlds and scale tiers remain tracked under #27 and #6.
+Frozen agent-authority conformance surfaces and a configurable generated smoke
+vertical are shipped. Standard and longitudinal generated agent/NHI tiers remain
+tracked under #27 and #6.
 
 ## Phase 4 — Portfolio and AI-system integrations
 
