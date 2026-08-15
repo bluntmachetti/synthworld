@@ -183,6 +183,21 @@ Give only the generated `public/` tree to the system under test. Keep the evalua
 side out of the adapter path even though the frozen reference truth is publicly
 inspectable. See the full [Asteria Agentic v1 guide](https://github.com/bluntmachetti/synthworld/blob/main/AGENTIC_BENCHMARK.md).
 
+For a configurable generated enterprise-agentic smoke world, explicitly select the
+generated profile:
+
+```bash
+synthworld generate-enterprise-agentic \
+  --profile generated \
+  --tier smoke \
+  --seed 20260814 \
+  --output generated-enterprise-agentic
+```
+
+This is a deterministic benchmark-data generator, not an IAM product, policy
+engine, agent framework, hosted simulator, or vendor leaderboard. Standard and
+longitudinal generated tiers remain tracked by issue #27.
+
 ## Verify every claim
 
 For reproducible evaluation, retain the benchmark identity, relevant seed and

@@ -26,6 +26,26 @@ from synthworld.agentic.enterprise.errors import (
     EnterpriseAgenticEvaluationError,
     EnterpriseAgenticIntegrityError,
 )
+from synthworld.agentic.enterprise.generated import (
+    derive_enterprise_agentic_integrity_metrics,
+    generate_enterprise_agentic_world,
+)
+from synthworld.agentic.enterprise.generated_evaluation import (
+    evaluate_generated_enterprise_agentic_trace,
+)
+from synthworld.agentic.enterprise.generated_models import (
+    EnterpriseAgenticGeneratedBenchmarkV1,
+    EnterpriseAgenticGenerationConfigV1,
+    EnterpriseAgenticIntegrityMetricsV1,
+    EnterpriseAgenticScaleTier,
+    EnterpriseAgenticSmokeTopologyV1,
+)
+from synthworld.agentic.enterprise.generated_serialization import (
+    export_generated_enterprise_agentic_benchmark,
+    generated_enterprise_agentic_artifact_checksums,
+    generated_enterprise_agentic_evaluator_artifacts,
+    generated_enterprise_agentic_public_artifacts,
+)
 from synthworld.agentic.enterprise.metrics import (
     evaluate_enterprise_agentic_prediction,
     perfect_enterprise_agentic_prediction,
@@ -79,22 +99,34 @@ __all__ = [
     "EnterpriseAgenticArtifactError",
     "EnterpriseAgenticEvaluationError",
     "EnterpriseAgenticEvaluatorArtifactsV1",
+    "EnterpriseAgenticGeneratedBenchmarkV1",
+    "EnterpriseAgenticGenerationConfigV1",
     "EnterpriseAgenticIntegrityError",
+    "EnterpriseAgenticIntegrityMetricsV1",
     "EnterpriseAgenticMetricsV1",
     "EnterpriseAgenticPredictionV1",
     "EnterpriseAgenticProjectionConfigV1",
     "EnterpriseAgenticPublicInputV1",
+    "EnterpriseAgenticScaleTier",
+    "EnterpriseAgenticSmokeTopologyV1",
     "EnterpriseAgenticTraceRowV1",
     "ReferenceEnterpriseAgenticV1",
     "compile_c08_truth",
     "compile_enterprise_agentic_truth",
+    "derive_enterprise_agentic_integrity_metrics",
     "enterprise_agentic_trace_from_jsonl",
     "enterprise_agentic_trace_to_jsonl",
     "evaluate_c08",
     "evaluate_enterprise_agentic_prediction",
+    "evaluate_generated_enterprise_agentic_trace",
     "export_c08_artifacts",
     "export_enterprise_agentic_benchmark",
+    "export_generated_enterprise_agentic_benchmark",
     "generate_c08_reference",
+    "generate_enterprise_agentic_world",
+    "generated_enterprise_agentic_artifact_checksums",
+    "generated_enterprise_agentic_evaluator_artifacts",
+    "generated_enterprise_agentic_public_artifacts",
     "load_c08_evaluator",
     "load_c08_public",
     "load_c08_submission",
