@@ -739,7 +739,7 @@ main#blume-content > ol:first-child {
     gap: 6px;
   }
 
-  .synth-header-tools .synth-icon-button:last-of-type {
+  .synth-repository-link {
     display: none;
   }
 
