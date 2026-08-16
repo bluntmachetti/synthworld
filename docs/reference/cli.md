@@ -11,6 +11,12 @@ The unified `synthworld evaluate <task>` command accepts `agentic`, `broker`,
 and `risk`. Some additional package surfaces remain Python-only; use the relevant
 contract rather than inferring a CLI.
 
+Enterprise authorization currently has CLI commands only for scaffolding,
+validating, and compiling the identity/access import. Corpus construction,
+directory/RBAC, ABAC, ReBAC, composition, prediction, and scoring use the
+documented `synthworld.enterprise.consumer` Python API. See
+[Build and score an enterprise authorization experiment](../guides/enterprise-authorization-python.md).
+
 `generate-enterprise-agentic` preserves its fixed-reference default. Select the
 new generated smoke profile explicitly:
 

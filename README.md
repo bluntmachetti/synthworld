@@ -28,6 +28,7 @@ annotated or evaluator bundles and must not be treated as product input.
 | Evaluate privacy, extraction, exposure, or broker behavior | [Privacy and exposure guide](https://bluntmachetti.github.io/synthworld/guides/privacy-exposure/) |
 | Test agent delegation, authority, and audit evidence | [Agent authority guide](https://bluntmachetti.github.io/synthworld/guides/agent-authority/) |
 | Build or evaluate enterprise identity/access worlds | [Enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/) |
+| Build and score an enterprise authorization experiment | [Enterprise authorization guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-authorization-python/) |
 | Connect a product or model to a SynthWorld scorer | [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/) |
 | Check current benchmark maturity and publication state | [Benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) |
 
@@ -128,8 +129,11 @@ safely fictional identity/access universe and provides bounded reference benchma
 and projection surfaces around it. Public product inputs and canonical evaluator
 truth remain separate.
 
-Start with the [enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/)
-and the [normative enterprise contract](https://github.com/bluntmachetti/synthworld/blob/main/enterprise-identity-access-contract/README.md).
+Start with the [enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/),
+follow the [enterprise authorization guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-authorization-python/)
+for the installed-package experiment path, and use the
+[normative enterprise contract](https://github.com/bluntmachetti/synthworld/blob/main/enterprise-identity-access-contract/README.md)
+for the versioned artifact requirements.
 
 ## What the enterprise surface does not claim
 

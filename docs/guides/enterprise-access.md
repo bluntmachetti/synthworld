@@ -31,6 +31,10 @@ Do not generalize one generator's seed behavior to another SynthWorld surface. R
 
 Some tasks expose command-line generation/evaluation; others are Python-only. Use the [CLI reference](../reference/cli.md), the relevant contract README, and the generated [capability catalogue](/benchmarks/catalogue) for the current boundary.
 
+For the released-package Python workflow from this compiled universe through a
+public-only authorization adapter and independent scorer, use
+[Build and score an enterprise authorization experiment](https://bluntmachetti.github.io/synthworld/guides/enterprise-authorization-python/).
+
 Reference packs are conformance fixtures. Their evaluator truth may be published in the repository, so physical separation prevents accidental oracle use but does not turn a public reference pack into a blind test. A perfect reference score is evidence of conformance to the declared cases, not generalization.
 
 **Standards-shaped projections.** SCIM, OpenFGA, AuthZEN, and Shared Signals/CAEP mappings are documented in [Standards profiles](../reference/standards-profiles.md). These are bounded offline mapping surfaces; a mapping declaration is not proof of protocol transport, signing, interoperability, or deployed enforcement.
