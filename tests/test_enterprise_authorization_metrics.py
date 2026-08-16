@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from synthworld.enterprise.authorization.metrics import (
     AuthorizationScoredDimension,
     EnterpriseAuthorizationCellPredictionV1,
+    EnterpriseAuthorizationEvaluatedSystemV1,
     EnterpriseAuthorizationEvaluationScopeV1,
     EnterpriseAuthorizationExecutionMetadataV1,
     EnterpriseAuthorizationMechanismPredictionV1,
@@ -183,6 +184,38 @@ def test_perfect_composed_prediction_reports_independent_metrics_and_bindings() 
         for marker in ("intended", "path", "predicate", "ssd", "dsd")
     )
     assert canonical_json_bytes(_evaluate(prediction)) == canonical_json_bytes(report)
+
+
+def test_evaluated_system_preserves_operator_owned_metadata() -> None:
+    prediction = _prediction()
+    report = _evaluate(prediction)
+    expected = prediction.execution.model_dump(mode="json")
+    observed = report.evaluated_system.model_dump(mode="json")
+
+    assert report.model_dump(mode="json")["synthetic"] is True
+    assert observed == expected
+    assert "synthetic" not in observed
+
+    evaluated_system_schema = EnterpriseAuthorizationMetricsV1.model_json_schema()[
+        "$defs"
+    ]["EnterpriseAuthorizationEvaluatedSystemV1"]
+    assert evaluated_system_schema["additionalProperties"] is False
+    assert "synthetic" not in evaluated_system_schema["properties"]
+
+    with pytest.raises(ValidationError):
+        EnterpriseAuthorizationEvaluatedSystemV1(**{**expected, "synthetic": True})
+    with pytest.raises(ValidationError):
+        EnterpriseAuthorizationEvaluatedSystemV1(**{**expected, "system_name": ""})
+    with pytest.raises(ValidationError):
+        EnterpriseAuthorizationEvaluatedSystemV1(
+            **{**expected, "policy_sha256": "not-a-digest"}
+        )
+    with pytest.raises(ValidationError):
+        EnterpriseAuthorizationEvaluatedSystemV1(
+            **{**expected, "system_name": b"external-authorizer"}
+        )
+    with pytest.raises(ValidationError, match="Instance is frozen"):
+        report.evaluated_system.system_name = "changed"
 
 
 def test_mechanism_and_composed_failures_remain_independently_visible() -> None:

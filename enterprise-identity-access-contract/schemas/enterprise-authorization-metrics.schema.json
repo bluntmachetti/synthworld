@@ -5,40 +5,42 @@
       "description": "Evaluator-retained copy of the submitted product and policy identity.",
       "properties": {
         "adapter_name": {
+          "minLength": 1,
           "title": "Adapter Name",
           "type": "string"
         },
         "adapter_version": {
+          "minLength": 1,
           "title": "Adapter Version",
           "type": "string"
         },
         "policy_name": {
+          "minLength": 1,
           "title": "Policy Name",
           "type": "string"
         },
         "policy_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
           "title": "Policy Sha256",
           "type": "string"
         },
         "policy_version": {
+          "minLength": 1,
           "title": "Policy Version",
           "type": "string"
         },
-        "synthetic": {
-          "const": true,
-          "default": true,
-          "title": "Synthetic",
-          "type": "boolean"
-        },
         "synthworld_package_version": {
+          "minLength": 1,
           "title": "Synthworld Package Version",
           "type": "string"
         },
         "system_name": {
+          "minLength": 1,
           "title": "System Name",
           "type": "string"
         },
         "system_version": {
+          "minLength": 1,
           "title": "System Version",
           "type": "string"
         }

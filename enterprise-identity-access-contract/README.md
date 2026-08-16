@@ -213,7 +213,10 @@ one observation for every public cell ID. Each row retains the mechanism outcome
 reported by the system, the pre-runtime-gate effective decision, the enforced final
 decision, conflict detection and any reported binding/lifecycle status. The
 submission also records deterministic package, adapter, system and policy identity;
-it contains no timestamp or host-derived value.
+it contains no timestamp or host-derived value. The evaluator retains that
+operator-owned identity without a synthetic marker inside the otherwise synthetic
+metrics report. It records the submitter's claim and is not an attestation that the
+named system, adapter, or policy produced the observations.
 
 `evaluate_enterprise_authorization` rejects missing, duplicate, unknown or
 cross-artifact cells and reports independent denominators for effective and final

@@ -140,17 +140,10 @@ class EnterpriseAuthorizationPredictionV1(EnterpriseOperatorModel):
         )
 
 
-class EnterpriseAuthorizationEvaluatedSystemV1(SyntheticModel):
+class EnterpriseAuthorizationEvaluatedSystemV1(
+    EnterpriseAuthorizationExecutionMetadataV1
+):
     """Evaluator-retained copy of the submitted product and policy identity."""
-
-    synthworld_package_version: str
-    adapter_name: str
-    adapter_version: str
-    system_name: str
-    system_version: str
-    policy_name: str
-    policy_version: str
-    policy_sha256: str
 
 
 class EnterpriseAuthorizationMetricsV1(SyntheticModel):
