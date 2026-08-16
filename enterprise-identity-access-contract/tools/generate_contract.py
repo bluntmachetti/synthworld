@@ -112,6 +112,7 @@ from synthworld.enterprise.projections.support import (
     ProjectionMappingProfileV1,
     ProjectionSupportMatrixV1,
 )
+from synthworld.enterprise.provenance import EnterpriseCompilerProvenanceV1
 from synthworld.enterprise.rbac.corpus_models import (
     EnterpriseEvaluationCaseInventoryV1,
     EnterpriseEvaluationCorpusConfigV1,
@@ -167,6 +168,7 @@ SCHEMAS: dict[str, type[BaseModel]] = {
         EnterpriseIdentityAccessUniverseV1
     ),
     "enterprise-canonical-binding-truth.schema.json": EnterpriseCanonicalBindingTruthV1,
+    "enterprise-compiler-provenance.schema.json": EnterpriseCompilerProvenanceV1,
     "standards-profile-ledger.schema.json": StandardsProfileLedgerV1,
     "enterprise-evaluation-corpus-config.schema.json": (
         EnterpriseEvaluationCorpusConfigV1

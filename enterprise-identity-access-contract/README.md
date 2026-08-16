@@ -116,6 +116,14 @@ explicit seed, schema versions, and compiler version. Compilation writes only th
 fixed universe beneath `public/` and canonical account-binding truth beneath
 `evaluator/`; the public loader never traverses the evaluator tree.
 
+The separately versioned `EnterpriseCompilerProvenanceV1` operator artifact maps
+each canonical authored topology and directory-policy row to its compiled opaque
+identifiers. Its source locations are JSON Pointers into the validated,
+canonically ordered import, not source-file line numbers. The artifact contains
+private logical keys, so it belongs with operator configuration and is never
+written into the public product-input or evaluator trees. Its schema is
+`schemas/enterprise-compiler-provenance.schema.json`.
+
 `directory_rbac_state` in this version is a structurally validated input contract.
 The independently versioned PR3 corpus declares exact context, subject-bound
 session, activation-request, access-request, and access-cell slots. Its compiler
@@ -194,7 +202,8 @@ unconditional final-deny gates. Intended, effective, and final decisions and
 pre-combination conflicts remain separate evaluator records.
 
 Authorization export is physically split. The public tree contains ABAC/ReBAC
-state and intent, composition, and the cell/profile kernel. The evaluator tree
+state and intent, composition, evaluation scope, and the cell/profile kernel. The
+evaluator tree
 contains ABAC/ReBAC component truth and compiled aggregate access state. Both
 trees have exact canonical inventories and digest-bound manifests; loaders reject
 extra, missing, non-regular, noncanonical, stale, or cross-bound artifacts.

@@ -11,6 +11,15 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
+- **Stable enterprise authorization consumer API (#139).** A curated
+  `synthworld.enterprise.consumer` namespace now exposes the authoring rows,
+  vocabularies, limits, artifact/result wrappers, compilers, prediction rows,
+  evaluators, and exact canonical digest helpers needed for a released-wheel
+  workflow. A versioned operator-side compiler provenance artifact maps canonical
+  topology and directory-policy locations to compiled opaque IDs without entering
+  public product input or evaluator truth. Authorization public bundles now carry
+  their evaluation scope, and an isolated-wheel test exercises topology import,
+  all three mechanism families, composition, public-only prediction, and scoring.
 - **Publicly solvable composed enterprise authorization scoring (#137).** New
   independently versioned public evaluation-scope, system submission, and
   evaluation-report contracts score effective and final decisions separately

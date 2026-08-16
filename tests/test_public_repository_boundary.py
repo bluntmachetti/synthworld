@@ -44,6 +44,11 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         # explicitly excludes consumer integration code. Reviewed with the Phase 2
         # freeze and composed-scoring contract on 2026-08-16.
         Path("docs/experiments/enterprise-authorization.md"),
+        # The enterprise authorization guide and isolated-wheel check name only the
+        # released distribution while enforcing the public API boundary. Reviewed
+        # with the enterprise consumer API in PR #143 on 2026-08-16.
+        Path(".github/scripts/check_enterprise_consumer_wheel.py"),
+        Path("docs/guides/enterprise-authorization-python.md"),
         # The worked broker adapter names the consumer once, in its module docstring,
         # to say whose integration pattern it demonstrates - reviewed 2026-08-04 with
         # PR #95, which is the review this allowlist exists to force.
