@@ -1,0 +1,109 @@
+{
+  "$defs": {
+    "AuthorizationScoredDimension": {
+      "enum": [
+        "effective_decision",
+        "final_decision",
+        "policy_conflict",
+        "binding_status",
+        "lifecycle_status"
+      ],
+      "title": "AuthorizationScoredDimension",
+      "type": "string"
+    },
+    "EnterpriseAuthorizationScopeCellV1": {
+      "additionalProperties": false,
+      "properties": {
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "scored_dimensions": {
+          "items": {
+            "$ref": "#/$defs/AuthorizationScoredDimension"
+          },
+          "minItems": 1,
+          "title": "Scored Dimensions",
+          "type": "array"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cell_id",
+        "scored_dimensions"
+      ],
+      "title": "EnterpriseAuthorizationScopeCellV1",
+      "type": "object"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Public declaration of the dimensions eligible for scoring per cell.",
+  "properties": {
+    "authorization_kernel_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "cells": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationScopeCellV1"
+      },
+      "minItems": 1,
+      "title": "Cells",
+      "type": "array"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "evaluation_corpus_digest",
+    "authorization_kernel_digest",
+    "cells"
+  ],
+  "title": "EnterpriseAuthorizationEvaluationScopeV1",
+  "type": "object"
+}

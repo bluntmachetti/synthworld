@@ -49,6 +49,11 @@ from synthworld.enterprise.authorization.compiler import (
     compile_enterprise_authorization_kernel,
     compose_enterprise_authorization,
 )
+from synthworld.enterprise.authorization.metrics import (
+    AuthorizationScoredDimension,
+    EnterpriseAuthorizationEvaluationScopeV1,
+    EnterpriseAuthorizationScopeCellV1,
+)
 from synthworld.enterprise.authorization.models import (
     AuthorizationCellProfileV1,
     AuthorizationEvaluationProfileV1,
@@ -62,7 +67,11 @@ from synthworld.enterprise.authorization_common import (
     RuleEffect,
 )
 from synthworld.enterprise.canonical import canonical_json_bytes, synthetic_digest
-from synthworld.enterprise.models import PrincipalKind, SyntheticDigestV1
+from synthworld.enterprise.models import (
+    AccessSubjectKind,
+    PrincipalKind,
+    SyntheticDigestV1,
+)
 from synthworld.enterprise.rbac.compiler import (
     compile_enterprise_directory_rbac_truth,
 )
@@ -97,6 +106,7 @@ class ReferenceEnterpriseAuthorizationInputsV1:
     evaluation_profile: AuthorizationEvaluationProfileV1
     composition: EnterpriseAuthorizationCompositionV1
     authorization_kernel: EnterpriseAuthorizationKernelV1
+    evaluation_scope: EnterpriseAuthorizationEvaluationScopeV1
     access_state: CompiledEnterpriseAccessStateV1
 
 
@@ -152,6 +162,7 @@ def reference_enterprise_authorization_inputs() -> (
         composition=composition,
         evaluation_profile=evaluation_profile,
     )
+    evaluation_scope = _evaluation_scope(rbac, kernel)
     access_state = compile_enterprise_access_state(
         universe=universe,
         canonical_binding_truth=rbac.universe_result.evaluator_canonical_binding_truth,
@@ -174,7 +185,48 @@ def reference_enterprise_authorization_inputs() -> (
         evaluation_profile=evaluation_profile,
         composition=composition,
         authorization_kernel=kernel,
+        evaluation_scope=evaluation_scope,
         access_state=access_state,
+    )
+
+
+def _evaluation_scope(
+    rbac: ReferenceEnterpriseRbacInputsV1,
+    kernel: EnterpriseAuthorizationKernelV1,
+) -> EnterpriseAuthorizationEvaluationScopeV1:
+    """Select only dimensions derivable from the reference public artifacts."""
+
+    universe = rbac.universe_result.public_universe
+    corpus = rbac.corpus_result.public_corpus
+    atom_by_id = {item.access_atom_id: item for item in universe.access_atoms}
+    subject_kind_by_id = {
+        item.subject_id: item.subject_kind for item in universe.access_subjects
+    }
+    corpus_cell_by_id = {item.cell_id: item for item in corpus.evaluation_cells}
+    cells: list[EnterpriseAuthorizationScopeCellV1] = []
+    for kernel_cell in kernel.cells:
+        corpus_cell = corpus_cell_by_id[kernel_cell.cell_id]
+        subject_kind = subject_kind_by_id[
+            atom_by_id[corpus_cell.access_atom_id].subject_id
+        ]
+        dimensions = [
+            AuthorizationScoredDimension.EFFECTIVE_DECISION,
+            AuthorizationScoredDimension.POLICY_CONFLICT,
+        ]
+        if subject_kind is AccessSubjectKind.PRINCIPAL:
+            dimensions.append(AuthorizationScoredDimension.FINAL_DECISION)
+        else:
+            dimensions.append(AuthorizationScoredDimension.LIFECYCLE_STATUS)
+        cells.append(
+            EnterpriseAuthorizationScopeCellV1(
+                cell_id=kernel_cell.cell_id,
+                scored_dimensions=tuple(dimensions),
+            )
+        )
+    return EnterpriseAuthorizationEvaluationScopeV1(
+        evaluation_corpus_digest=kernel.evaluation_corpus_digest,
+        authorization_kernel_digest=synthetic_digest(canonical_json_bytes(kernel)),
+        cells=tuple(cells),
     )
 
 

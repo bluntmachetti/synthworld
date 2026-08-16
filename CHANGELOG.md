@@ -9,6 +9,16 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Added
+
+- **Publicly solvable composed enterprise authorization scoring (#137).** New
+  independently versioned public evaluation-scope, system submission, and
+  evaluation-report contracts score effective and final decisions separately
+  from RBAC, ABAC, ReBAC, conflict, binding, lifecycle, and runtime-gate
+  outcomes. Exact public cell inventories, artifact and schema bindings,
+  deterministic system/policy metadata, and per-metric denominators are
+  enforced without changing existing `1.0.0` schemas or golden bytes.
+
 ## [0.15.0] - 2026-08-15
 
 ### Added
