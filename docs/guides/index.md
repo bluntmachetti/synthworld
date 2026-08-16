@@ -7,6 +7,7 @@ Choose a journey rather than a package module:
 - [Evaluate privacy and exposure behavior](privacy-exposure.md)
 - [Evaluate agent authority](agent-authority.md)
 - [Compile enterprise identity/access truth](enterprise-access.md)
+- [Build and score enterprise authorization](enterprise-authorization-python.md)
 - [Plan with a fictional Enterprise Identity universe](enterprise-identity-planning.md)
 - [Connect and evaluate a system](evaluating-a-system.md)
 

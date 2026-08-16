@@ -37,6 +37,7 @@ explicit seed + config + schema version + event schedule
 | Evaluate matching or privacy behavior | [Identity resolution](guides/identity-resolution.md) or [privacy exposure](guides/privacy-exposure.md) |
 | Test agent delegation and audit evidence | [Agent authority](guides/agent-authority.md) |
 | Compile enterprise identity and access truth | [Enterprise access](guides/enterprise-access.md) |
+| Build and score an enterprise authorization experiment | [Enterprise authorization](guides/enterprise-authorization-python.md) |
 | Plan an enterprise identity and authorization journey | [Enterprise Identity Planning](guides/enterprise-identity-planning.md) |
 | Connect a system to an evaluator | [Evaluating a system](guides/evaluating-a-system.md) |
 | Understand benchmark contracts and boundaries | [Concepts](concepts/index.md) |

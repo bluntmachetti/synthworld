@@ -71,6 +71,7 @@ def _public(
         rebac_state=reference.rebac_state,
         rebac_intent=reference.rebac_intent,
         composition=reference.composition,
+        evaluation_scope=reference.evaluation_scope,
         kernel=reference.authorization_kernel,
     )
 
@@ -482,17 +483,29 @@ def test_authorization_artifacts_are_canonical_and_physically_split(
     )
     assert load_public_enterprise_authorization(root) == _public(reference)
     assert load_evaluator_enterprise_authorization(root) == _evaluator(reference)
-    public_bytes = b"".join(
-        item.read_bytes() for item in sorted((root / "public").glob("*.json"))
+
+    def object_keys(value: object) -> set[str]:
+        if isinstance(value, dict):
+            return set(value) | set().union(
+                *(object_keys(item) for item in value.values())
+            )
+        if isinstance(value, list):
+            return set().union(*(object_keys(item) for item in value))
+        return set()
+
+    public_files = sorted((root / "public").glob("*.json"))
+    public_bytes = b"".join(item.read_bytes() for item in public_files)
+    public_keys = set().union(
+        *(object_keys(json.loads(item.read_bytes())) for item in public_files)
     )
     for forbidden in (
-        b'"actual_outcome"',
-        b'"intended_outcome"',
-        b'"final_decision"',
-        b'"policy_conflicts"',
-        b'"predicate_truth"',
+        "actual_outcome",
+        "intended_outcome",
+        "final_decision",
+        "policy_conflicts",
+        "predicate_truth",
     ):
-        assert forbidden not in public_bytes
+        assert forbidden not in public_keys
     assert b'"component_digest"' in public_bytes
     with pytest.raises(EnterpriseAuthorizationArtifactError, match="already exists"):
         export_enterprise_authorization(
@@ -608,6 +621,7 @@ def test_authorization_public_bindings_and_loader_shapes_fail_closed(
                 rebac_state=public.rebac_state,
                 rebac_intent=public.rebac_intent,
                 composition=public.composition,
+                evaluation_scope=public.evaluation_scope,
                 kernel=public.kernel,
             )
         )
@@ -621,9 +635,44 @@ def test_authorization_public_bindings_and_loader_shapes_fail_closed(
                 rebac_state=public.rebac_state,
                 rebac_intent=public.rebac_intent,
                 composition=public.composition,
+                evaluation_scope=public.evaluation_scope,
                 kernel=public.kernel.model_copy(
                     update={"composition_digest": synthetic_digest(b"changed\n")}
                 ),
+            )
+        )
+
+    with pytest.raises(EnterpriseAuthorizationArtifactError, match="scope kernel"):
+        _validate_public_bindings(
+            EnterpriseAuthorizationPublicArtifactsV1(
+                abac_state=public.abac_state,
+                abac_intent=public.abac_intent,
+                rebac_state=public.rebac_state,
+                rebac_intent=public.rebac_intent,
+                composition=public.composition,
+                evaluation_scope=public.evaluation_scope.model_copy(
+                    update={
+                        "authorization_kernel_digest": synthetic_digest(b"changed\n")
+                    }
+                ),
+                kernel=public.kernel,
+            )
+        )
+
+    with pytest.raises(
+        EnterpriseAuthorizationArtifactError, match="scope cell inventory"
+    ):
+        _validate_public_bindings(
+            EnterpriseAuthorizationPublicArtifactsV1(
+                abac_state=public.abac_state,
+                abac_intent=public.abac_intent,
+                rebac_state=public.rebac_state,
+                rebac_intent=public.rebac_intent,
+                composition=public.composition,
+                evaluation_scope=public.evaluation_scope.model_copy(
+                    update={"cells": public.evaluation_scope.cells[:-1]}
+                ),
+                kernel=public.kernel,
             )
         )
 
