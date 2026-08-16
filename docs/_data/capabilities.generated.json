@@ -405,6 +405,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "added-10",
+      "heading": "Added",
+      "id": "route:CHANGELOG.md#added-10",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "added-2",
       "heading": "Added",
       "id": "route:CHANGELOG.md#added-2",
@@ -2509,6 +2515,78 @@
       "heading": "Benchmark publication governance",
       "id": "route:docs/decisions/benchmark-publication-governance.md#benchmark-publication-governance",
       "path": "docs/decisions/benchmark-publication-governance.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/experiments/enterprise-authorization.md",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "contract-work-before-phase-3",
+      "heading": "Contract work before Phase 3",
+      "id": "route:docs/experiments/enterprise-authorization.md#contract-work-before-phase-3",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "enterprise-authorization-with-topaz",
+      "heading": "Enterprise authorization with Topaz",
+      "id": "route:docs/experiments/enterprise-authorization.md#enterprise-authorization-with-topaz",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "evidence-status",
+      "heading": "Evidence status",
+      "id": "route:docs/experiments/enterprise-authorization.md#evidence-status",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "isolation-was-auditable-not-enforced",
+      "heading": "Isolation was auditable, not enforced",
+      "id": "route:docs/experiments/enterprise-authorization.md#isolation-was-auditable-not-enforced",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "material-limitations-found-by-phase-2",
+      "heading": "Material limitations found by Phase 2",
+      "id": "route:docs/experiments/enterprise-authorization.md#material-limitations-found-by-phase-2",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "phase-1-directory-feasibility",
+      "heading": "Phase 1: directory feasibility",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-1-directory-feasibility",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "phase-2-authorization-feasibility",
+      "heading": "Phase 2: authorization feasibility",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-2-authorization-feasibility",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "public-policy-could-reveal-the-negative-cohort",
+      "heading": "Public policy could reveal the negative cohort",
+      "id": "route:docs/experiments/enterprise-authorization.md#public-policy-could-reveal-the-negative-cohort",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "some-submitted-metrics-were-not-publicly-solvable",
+      "heading": "Some submitted metrics were not publicly solvable",
+      "id": "route:docs/experiments/enterprise-authorization.md#some-submitted-metrics-were-not-publicly-solvable",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "the-binding-cohort-did-not-test-binding",
+      "heading": "The binding cohort did not test binding",
+      "id": "route:docs/experiments/enterprise-authorization.md#the-binding-cohort-did-not-test-binding",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "the-composed-decision-was-not-scored",
+      "heading": "The composed decision was not scored",
+      "id": "route:docs/experiments/enterprise-authorization.md#the-composed-decision-was-not-scored",
+      "path": "docs/experiments/enterprise-authorization.md"
     },
     {
       "anchor": "",
