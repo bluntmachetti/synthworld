@@ -2541,6 +2541,18 @@
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
+      "anchor": "experiment-boundary",
+      "heading": "Experiment boundary",
+      "id": "route:docs/experiments/enterprise-authorization.md#experiment-boundary",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "inputs-and-provenance",
+      "heading": "Inputs and provenance",
+      "id": "route:docs/experiments/enterprise-authorization.md#inputs-and-provenance",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
       "anchor": "isolation-was-auditable-not-enforced",
       "heading": "Isolation was auditable, not enforced",
       "id": "route:docs/experiments/enterprise-authorization.md#isolation-was-auditable-not-enforced",
@@ -2553,21 +2565,51 @@
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
+      "anchor": "method",
+      "heading": "Method",
+      "id": "route:docs/experiments/enterprise-authorization.md#method",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
       "anchor": "phase-1-directory-feasibility",
       "heading": "Phase 1: directory feasibility",
       "id": "route:docs/experiments/enterprise-authorization.md#phase-1-directory-feasibility",
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
-      "anchor": "phase-2-authorization-feasibility",
-      "heading": "Phase 2: authorization feasibility",
-      "id": "route:docs/experiments/enterprise-authorization.md#phase-2-authorization-feasibility",
+      "anchor": "phase-2-frozen-local-run",
+      "heading": "Phase 2: frozen local run",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-2-frozen-local-run",
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
       "anchor": "public-policy-could-reveal-the-negative-cohort",
       "heading": "Public policy could reveal the negative cohort",
       "id": "route:docs/experiments/enterprise-authorization.md#public-policy-could-reveal-the-negative-cohort",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "reproducing-versus-adapting",
+      "heading": "Reproducing versus adapting",
+      "id": "route:docs/experiments/enterprise-authorization.md#reproducing-versus-adapting",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "reproduction-materials",
+      "heading": "Reproduction materials",
+      "id": "route:docs/experiments/enterprise-authorization.md#reproduction-materials",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "results-and-evidence",
+      "heading": "Results and evidence",
+      "id": "route:docs/experiments/enterprise-authorization.md#results-and-evidence",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "run-identity",
+      "heading": "Run identity",
+      "id": "route:docs/experiments/enterprise-authorization.md#run-identity",
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
@@ -2586,6 +2628,18 @@
       "anchor": "the-composed-decision-was-not-scored",
       "heading": "The composed decision was not scored",
       "id": "route:docs/experiments/enterprise-authorization.md#the-composed-decision-was-not-scored",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "what-the-run-does-not-support",
+      "heading": "What the run does not support",
+      "id": "route:docs/experiments/enterprise-authorization.md#what-the-run-does-not-support",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "what-the-run-supports",
+      "heading": "What the run supports",
+      "id": "route:docs/experiments/enterprise-authorization.md#what-the-run-supports",
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
