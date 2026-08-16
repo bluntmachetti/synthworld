@@ -296,9 +296,12 @@ or JSON.
 | `EnterpriseArtifactManifestV1` | `schema_version` (`1.0.0`), `visibility`, `artifacts` | `visibility` is the literal `public` or `evaluator`. This is the per-tree `manifest.json` used by every export in the tranche. |
 | `EnterpriseIdentityAccessCompileConfigV1` | `budget`, `outer_safety` | Both default, so the whole config is optional. `EnterpriseIdentityAccessCompileBudgetV1` has 30 fields; `EnterpriseCompileOuterSafetyV1` has 5. Each is user-settable downward and hard-capped, raising `compile_budget_hard_ceiling:<field>` or `outer_safety_hard_ceiling:<field>`. |
 | `EnterprisePrivateCompilationReceiptV1` | `schema_version` (`1.0.0`), `publication_consent`, `blueprint_semantic_digest`, `source_artifact_set_digest` | Lets an operator publish digests of a private blueprint and source-file set. `publication_consent` is `Literal[True]`; the builder refuses without it. |
+| `EnterpriseCompilerProvenanceV1` | compiler/selector versions, seed, three artifact digests, `entries` | **Operator-only.** Maps each canonical topology and directory-policy source row to compiled object kind/ID references. `source_path` is a JSON Pointer into the validated canonical import, not a raw source line. |
 
 `EnterpriseIdentityAccessCompileResultV1` is a frozen dataclass holding the public universe and
 the evaluator binding truth. It is an in-memory split and **is never serialized as one file**.
+Compiler provenance is a separately constructed operator artifact and is never included in that
+public/evaluator split.
 
 **Public vs evaluator truth.** `export_enterprise_identity_access_compile_result` writes exactly
 four files and refuses to run if the output root already exists:
@@ -400,15 +403,15 @@ CLI entry points are `synthworld scaffold-enterprise-access`,
 `synthworld.enterprise` is re-exported from the top-level `synthworld` package; import it
 explicitly.
 
-**No benchmark family consumes an operator-compiled universe.** `compile-enterprise-access`
-compiles an operator blueprint and writes the four-file split, and that is where it stops. Each
-of the enterprise `generate-*` commands — `generate-enterprise-agentic`,
-`generate-contextual-access`, and `generate-continuous-assurance` — builds a built-in reference
-pack from the shipped reference sources rather than from anything you compiled; the
-enterprise-agentic and identity-fabric reference builders additionally call an internal
-`_require_frozen_*_inputs` guard that raises unless the universe and corpus bytes hash to the
-pinned reference digests. Compiling your own organisation's structure and then benchmarking
-against it is not a supported path today.
+**Operator-compiled authorization is a supported Python workflow.** The curated
+consumer namespace can compile an authored universe, corpus, directory/RBAC,
+ABAC, ReBAC, composition, public submission, and composed report. The
+`EnterpriseCompilerProvenanceV1` operator artifact maps canonical logical source
+locations to compiled IDs without relying on output order. This does not change
+the fixed reference families: `generate-enterprise-agentic`,
+`generate-contextual-access`, and `generate-continuous-assurance` still build
+their own versioned reference packs and do not consume an arbitrary operator
+universe.
 
 ### Pinned standards profile ledger
 
@@ -547,22 +550,27 @@ single mechanism's internal conflict in by adding that mechanism to both the all
 denying set, so a conflict row cannot distinguish an internal disagreement from a genuine
 cross-mechanism one.
 
-The composed access state is **not scored**. There is no evaluate or perfect-prediction function
-and no metrics module in the authorization package; `CompiledEnterpriseAccessStateV1` is truth
-output only, consumed by the downstream packs.
+`EnterpriseAuthorizationEvaluationScopeV1` publicly declares the scoreable
+dimensions for every frozen cell. `EnterpriseAuthorizationPredictionV1` binds a
+system submission to the universe, corpus, composition, kernel, scope, and
+deterministic adapter/system/policy metadata. `evaluate_enterprise_authorization`
+scores effective decision, final decision, exact mechanism outcome/inventory,
+conflict, binding, lifecycle, and runtime-gate behavior independently. It emits no
+aggregate.
 
 ### Artifact boundary
 
-There are **three independent export roots**, not one shared tree. Each exporter refuses to run if
+There are **four independent export roots**, not one shared tree. Each exporter refuses to run if
 its root already exists, each writes its own `public/` and `evaluator/` subdirectory, and each
 subdirectory gets its own `manifest.json`. The loaders require the directory to contain *exactly*
 the expected files plus `manifest.json`, so the three roots cannot be merged into one directory.
 
 | Export root | `public/` | `evaluator/` |
 |---|---|---|
+| `export_enterprise_identity_access_compile_result` | `identity-access-universe.json`, `manifest.json` | `canonical-binding-truth.json`, `manifest.json` |
 | `export_enterprise_evaluation_corpus` | `evaluation-corpus.json`, `manifest.json` | `evaluation-case-inventory.json`, `manifest.json` |
 | `export_enterprise_directory_rbac` | `directory-rbac-kernel.json`, `manifest.json` | `directory-rbac-truth.json`, `manifest.json` |
-| `export_enterprise_authorization` | `abac-state.json`, `abac-intent.json`, `rebac-state.json`, `rebac-intent.json`, `authorization-composition.json`, `authorization-kernel.json`, `manifest.json` | `abac-truth.json`, `rebac-truth.json`, `compiled-access-state.json`, `manifest.json` |
+| `export_enterprise_authorization` | `abac-state.json`, `abac-intent.json`, `rebac-state.json`, `rebac-intent.json`, `authorization-composition.json`, `authorization-evaluation-scope.json`, `authorization-kernel.json`, `manifest.json` | `abac-truth.json`, `rebac-truth.json`, `compiled-access-state.json`, `manifest.json` |
 
 So the ABAC and ReBAC *policy* — facts, tuples, and rules, in both the actual and the intended
 layer — is product-safe, while every `Compiled*TruthV1` and the compiled access state is
@@ -592,12 +600,14 @@ own envelope; see that section.
 Counted from the reference pipeline: the directory/RBAC oracle emits **19** metrics across the
 families `birthright`, `intent`, `rbac`, `activation`, `activation_safety`, `ssd`, `dsd`,
 `sprawl`, `birthright_breadth`, `redundancy`, and `accumulation`; ABAC emits **2**; ReBAC emits
-**2**. **There is no aggregate or composite score anywhere in these four packages**, by design.
+**2**. The composed evaluator adds independent composed, mechanism, conflict,
+binding, lifecycle, and runtime-gate metrics but still emits **no aggregate score**.
 Missing predictions score as incorrect rather than erroring, so partial submissions are legal;
 unknown prediction IDs are rejected.
 
-There is no CLI for this layer. Directory/RBAC, ABAC, ReBAC, and the composed access state are
-Python API only.
+There is no CLI for this layer. Directory/RBAC, ABAC, ReBAC, submission, and
+composed scoring are Python API only through the curated
+`synthworld.enterprise.consumer` namespace.
 
 ## Standards projections
 

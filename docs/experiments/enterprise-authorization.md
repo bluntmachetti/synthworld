@@ -326,8 +326,9 @@ The experiment produced four focused requirements:
   frozen Phase 2 run.
 - [#138](https://github.com/bluntmachetti/synthworld/issues/138) tracks
   discriminating tenant, scope, binding and temporal counterfactuals.
-- [#139](https://github.com/bluntmachetti/synthworld/issues/139) tracks the released
-  consumer API, digest helpers and supported end-to-end workflow.
+- [#139](https://github.com/bluntmachetti/synthworld/issues/139) added the released
+  consumer API, digest helpers and supported end-to-end workflow after the frozen
+  Phase 2 run.
 - [#140](https://github.com/bluntmachetti/synthworld/issues/140) tracks publication
   of an isolated, reproducible adapter lab after the contracts are stable.
 

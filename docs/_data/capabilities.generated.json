@@ -2741,6 +2741,54 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/guides/enterprise-authorization-python.md",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "1-author-and-validate-the-topology",
+      "heading": "1. Author and validate the topology",
+      "id": "route:docs/guides/enterprise-authorization-python.md#1-author-and-validate-the-topology",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "2-compile-the-world-corpus-and-authorization-artifacts",
+      "heading": "2. Compile the world, corpus, and authorization artifacts",
+      "id": "route:docs/guides/enterprise-authorization-python.md#2-compile-the-world-corpus-and-authorization-artifacts",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "3-run-the-system-with-public-artifacts-only",
+      "heading": "3. Run the system with public artifacts only",
+      "id": "route:docs/guides/enterprise-authorization-python.md#3-run-the-system-with-public-artifacts-only",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "4-score-in-a-separate-evaluator-process",
+      "heading": "4. Score in a separate evaluator process",
+      "id": "route:docs/guides/enterprise-authorization-python.md#4-score-in-a-separate-evaluator-process",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "build-and-score-an-enterprise-authorization-experiment",
+      "heading": "Build and score an enterprise authorization experiment",
+      "id": "route:docs/guides/enterprise-authorization-python.md#build-and-score-an-enterprise-authorization-experiment",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "input-and-reproducibility-rules",
+      "heading": "Input and reproducibility rules",
+      "id": "route:docs/guides/enterprise-authorization-python.md#input-and-reproducibility-rules",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "rendering-boundary",
+      "heading": "Rendering boundary",
+      "id": "route:docs/guides/enterprise-authorization-python.md#rendering-boundary",
+      "path": "docs/guides/enterprise-authorization-python.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/guides/enterprise-identity-planning.md",
       "path": "docs/guides/enterprise-identity-planning.md"
     },
@@ -11646,6 +11694,14 @@
       "kind": "schema",
       "name": "enterprise-canonical-binding-truth.schema.json",
       "source": "enterprise-identity-access-contract/schemas/enterprise-canonical-binding-truth.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-compiler-provenance.schema.json",
+      "kind": "schema",
+      "name": "enterprise-compiler-provenance.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-compiler-provenance.schema.json",
       "visibility": "public"
     },
     {

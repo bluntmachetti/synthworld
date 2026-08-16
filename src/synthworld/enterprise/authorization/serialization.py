@@ -14,6 +14,9 @@ from synthworld.enterprise.abac.models import (
     EnterpriseAbacIntentOverlayV1,
     EnterpriseAbacStateOverlayV1,
 )
+from synthworld.enterprise.authorization.metrics import (
+    EnterpriseAuthorizationEvaluationScopeV1,
+)
 from synthworld.enterprise.authorization.models import (
     CompiledEnterpriseAccessStateV1,
     EnterpriseAuthorizationCompositionV1,
@@ -34,6 +37,7 @@ PUBLIC_AUTHORIZATION_FILES = {
     "abac-intent.json",
     "abac-state.json",
     "authorization-composition.json",
+    "authorization-evaluation-scope.json",
     "authorization-kernel.json",
     "rebac-intent.json",
     "rebac-state.json",
@@ -57,6 +61,7 @@ class EnterpriseAuthorizationPublicArtifactsV1:
     rebac_state: EnterpriseRebacStateOverlayV1
     rebac_intent: EnterpriseRebacIntentOverlayV1
     composition: EnterpriseAuthorizationCompositionV1
+    evaluation_scope: EnterpriseAuthorizationEvaluationScopeV1
     kernel: EnterpriseAuthorizationKernelV1
 
 
@@ -81,6 +86,7 @@ def export_enterprise_authorization(
         "abac-intent.json": public.abac_intent,
         "abac-state.json": public.abac_state,
         "authorization-composition.json": public.composition,
+        "authorization-evaluation-scope.json": public.evaluation_scope,
         "authorization-kernel.json": public.kernel,
         "rebac-intent.json": public.rebac_intent,
         "rebac-state.json": public.rebac_state,
@@ -104,6 +110,9 @@ def load_public_enterprise_authorization(
         "abac-intent.json": EnterpriseAbacIntentOverlayV1,
         "abac-state.json": EnterpriseAbacStateOverlayV1,
         "authorization-composition.json": EnterpriseAuthorizationCompositionV1,
+        "authorization-evaluation-scope.json": (
+            EnterpriseAuthorizationEvaluationScopeV1
+        ),
         "authorization-kernel.json": EnterpriseAuthorizationKernelV1,
         "rebac-intent.json": EnterpriseRebacIntentOverlayV1,
         "rebac-state.json": EnterpriseRebacStateOverlayV1,
@@ -117,6 +126,10 @@ def load_public_enterprise_authorization(
         composition=_as(
             loaded["authorization-composition.json"],
             EnterpriseAuthorizationCompositionV1,
+        ),
+        evaluation_scope=_as(
+            loaded["authorization-evaluation-scope.json"],
+            EnterpriseAuthorizationEvaluationScopeV1,
         ),
         kernel=_as(
             loaded["authorization-kernel.json"], EnterpriseAuthorizationKernelV1
@@ -181,6 +194,7 @@ def _validate_public_bindings(
         artifacts.rebac_state.evaluation_corpus_digest,
         artifacts.rebac_intent.evaluation_corpus_digest,
         artifacts.composition.evaluation_corpus_digest,
+        artifacts.evaluation_scope.evaluation_corpus_digest,
         artifacts.kernel.evaluation_corpus_digest,
     }
     if len(universe_digests) != 1 or len(corpus_digests) != 1:
@@ -192,6 +206,18 @@ def _validate_public_bindings(
     ):
         raise EnterpriseAuthorizationArtifactError(
             "authorization kernel composition binding differs"
+        )
+    if artifacts.evaluation_scope.authorization_kernel_digest != synthetic_digest(
+        canonical_json_bytes(artifacts.kernel)
+    ):
+        raise EnterpriseAuthorizationArtifactError(
+            "authorization scope kernel binding differs"
+        )
+    if {item.cell_id for item in artifacts.evaluation_scope.cells} != {
+        item.cell_id for item in artifacts.kernel.cells
+    }:
+        raise EnterpriseAuthorizationArtifactError(
+            "authorization scope cell inventory differs"
         )
 
 

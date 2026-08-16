@@ -6968,6 +6968,14 @@
         },
         {
           "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/enterprise-compiler-provenance.schema.json",
+          "kind": "schema",
+          "name": "enterprise-compiler-provenance.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/enterprise-compiler-provenance.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
           "id": "schema:enterprise-identity-access-contract/schemas/enterprise-directory-rbac-intent.schema.json",
           "kind": "schema",
           "name": "enterprise-directory-rbac-intent.schema.json",
@@ -9047,8 +9055,8 @@
     }
   ],
   "input_digests": {
-    "curated_sha256": "d4c023791ab85f417f455a8b6e06cd15a9265c7ecfdf0ebc846281dcab655309",
-    "generated_sha256": "138b2aeb51985318dedb3457b6d34574dd717aa1cd7010711b4a0e585360556c"
+    "curated_sha256": "16aebd33f9bac7138d7746f04ab3c702505d84f918bced912f8fa2c6335626ef",
+    "generated_sha256": "92e7bf16902a2af0b6e6c275e9f091daa62dab55aaac7eae8468fe0e09fd5bd6"
   },
   "schema_version": "1.0.0"
 }

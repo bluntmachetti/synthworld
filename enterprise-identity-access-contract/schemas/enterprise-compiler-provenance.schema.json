@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "EnterpriseCompiledObjectKind": {
+      "description": "Closed compiled-record vocabulary for compiler provenance v1.",
+      "enum": [
+        "tenant",
+        "organisation",
+        "unit",
+        "principal",
+        "group",
+        "role",
+        "authorization_target",
+        "permission",
+        "account",
+        "access_atom",
+        "account_observation",
+        "membership_edge",
+        "group_nesting_edge",
+        "group_role_assignment",
+        "subject_role_assignment",
+        "role_hierarchy_edge",
+        "role_grant",
+        "direct_entitlement"
+      ],
+      "title": "EnterpriseCompiledObjectKind",
+      "type": "string"
+    },
+    "EnterpriseCompiledObjectReferenceV1": {
+      "additionalProperties": false,
+      "description": "One opaque compiled record produced from an authored source row.",
+      "properties": {
+        "action": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "object_kind": {
+          "$ref": "#/$defs/EnterpriseCompiledObjectKind"
+        },
+        "slot": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Slot"
+        },
+        "stable_id": {
+          "minLength": 1,
+          "title": "Stable Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_kind",
+        "stable_id"
+      ],
+      "title": "EnterpriseCompiledObjectReferenceV1",
+      "type": "object"
+    },
+    "EnterpriseCompilerProvenanceEntryV1": {
+      "additionalProperties": false,
+      "description": "Canonical source location and the records it produced.",
+      "properties": {
+        "compiled_objects": {
+          "items": {
+            "$ref": "#/$defs/EnterpriseCompiledObjectReferenceV1"
+          },
+          "minItems": 1,
+          "title": "Compiled Objects",
+          "type": "array"
+        },
+        "logical_key": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Logical Key",
+          "type": "array"
+        },
+        "source_kind": {
+          "$ref": "#/$defs/EnterpriseCompilerSourceKind"
+        },
+        "source_path": {
+          "pattern": "^/(blueprint|iam_universe_extension|directory_rbac_state)/",
+          "title": "Source Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_kind",
+        "logical_key",
+        "source_path",
+        "compiled_objects"
+      ],
+      "title": "EnterpriseCompilerProvenanceEntryV1",
+      "type": "object"
+    },
+    "EnterpriseCompilerSourceKind": {
+      "description": "Closed authored-row vocabulary for compiler provenance v1.",
+      "enum": [
+        "tenant",
+        "organisation",
+        "unit",
+        "population",
+        "group",
+        "role",
+        "resource_set",
+        "principal_access_rule",
+        "account_allocation",
+        "account_access_rule",
+        "account_observation",
+        "membership_rule",
+        "group_nesting",
+        "group_role_assignment",
+        "population_role_assignment",
+        "role_hierarchy",
+        "role_grant",
+        "direct_entitlement"
+      ],
+      "title": "EnterpriseCompilerSourceKind",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Private/operator artifact linking canonical authored rows to outputs.",
+  "properties": {
+    "compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Compiler Version",
+      "type": "string"
+    },
+    "directory_rbac_compiler_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Directory Rbac Compiler Version",
+      "type": "string"
+    },
+    "directory_rbac_kernel_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseCompilerProvenanceEntryV1"
+      },
+      "minItems": 1,
+      "title": "Entries",
+      "type": "array"
+    },
+    "public_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "selector_algorithm_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Selector Algorithm Version",
+      "type": "string"
+    },
+    "source_import_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    }
+  },
+  "required": [
+    "seed",
+    "source_import_digest",
+    "public_universe_digest",
+    "directory_rbac_kernel_digest",
+    "entries"
+  ],
+  "title": "EnterpriseCompilerProvenanceV1",
+  "type": "object"
+}

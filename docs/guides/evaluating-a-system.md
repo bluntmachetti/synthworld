@@ -92,6 +92,10 @@ The adapter must replay public events in their declared order and query the syst
 at each action event. See [Agent authority](https://bluntmachetti.github.io/synthworld/guides/agent-authority/)
 for the temporal, topology, policy-decision-point, and provenance boundaries.
 
+The composed enterprise authorization surface is Python-only. Its complete
+released-package flow, including public artifact custody and submission digests,
+is in [Build and score an enterprise authorization experiment](https://bluntmachetti.github.io/synthworld/guides/enterprise-authorization-python/).
+
 Run the evaluator only after the system output is durably available. Do not expose evaluator truth to the adapter merely because a frozen reference fixture is publicly inspectable.
 
 **Interpret metrics independently.** A `null` metric is not zero; it means the prediction set did not make that metric meaningful under the task's documented empty behavior. Do not hide weak dimensions behind an aggregate. Interpret every metric using its own denominator, support, polarity, scoring version, and empty behavior.
