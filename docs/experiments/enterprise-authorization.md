@@ -96,12 +96,16 @@ an evaluator mount and give evaluator access only to a separate scorer.
 
 ## Contract work before Phase 3
 
-The experiment produced four focused requirements:
+The experiment produced four focused requirements. The first two are implemented
+on the unreleased development line; Phase 3 must still wait for the consumer API
+and isolated lab work:
 
 - [#137](https://github.com/bluntmachetti/synthworld/issues/137) adds a publicly
   constructible composed-decision submission and independent scoring.
 - [#138](https://github.com/bluntmachetti/synthworld/issues/138) adds
-  discriminating tenant, scope, binding and temporal counterfactuals.
+  discriminating tenant, scope, binding, temporal, clearance and composed
+  authority counterfactuals with hidden pair labels and explicit discriminating
+  denominators.
 - [#139](https://github.com/bluntmachetti/synthworld/issues/139) stabilizes the
   released consumer API, digest helpers and supported end-to-end workflow.
 - [#140](https://github.com/bluntmachetti/synthworld/issues/140) publishes an

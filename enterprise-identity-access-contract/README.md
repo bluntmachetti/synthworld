@@ -237,6 +237,46 @@ constraint truth. Those dimensions remain absent until a separately typed public
 evidence and denominator contract makes a candidate answer independently
 observable; evaluator truth alone never creates a metric.
 
+## Adversarial authorization profile
+
+`enterprise-authorization-adversarial-1.0.0` is an independently versioned,
+generated reference profile for discriminating enterprise authorization
+mechanisms. It does not change the frozen enterprise universe, corpus,
+composition, or golden artifacts. Its public contract describes principals,
+credential identity evidence, resources, persistent authority grants, a bounded
+vendor-neutral policy, and candidate action attempts. Action attempts remain
+well-formed even when they cross tenant, exceed scope, fall outside a half-open
+grant interval, exceed clearance, or present a credential for a different
+principal.
+
+The public tenant policy expresses same-tenant and different-tenant comparisons
+as generic operators. It never enumerates target or attempt identifiers to
+define a negative cohort. RBAC and ReBAC authority are combined before tenant,
+scope, time, clearance, and credential-binding gates are applied. This is a
+benchmark policy contract, not executable vendor policy or a production PDP.
+
+The evaluator artifact separately retains canonical credential bindings,
+expected decisions, mechanism-ignored decisions, pair membership, mechanism and
+case labels, and identifier probes. Public attempt identifiers are deterministic
+opaque UUID5 values; they do not encode verdicts, mechanisms, categories, or
+pair position. The system submission contains only its resolved principal,
+binding status, and final decision for each public attempt.
+
+The reference pack has fourteen attempts in seven hidden single-factor pairs.
+It covers tenant isolation, scope attenuation, temporal validity,
+classification/clearance, two inverse credential-binding cases, and RBAC/ReBAC
+authority composition. Every pair changes the expected verdict when its named
+mechanism is ignored. Reports keep each mechanism independent, publish both the
+total scenario count and the smaller discriminating denominator, and add
+separate binding-resolution, binding-status, temporal-transition, and
+identifier-independence metrics. They emit no aggregate score.
+
+Seven intentionally weak baselines ignore tenant, scope, credential binding,
+time, clearance, ReBAC authority, or the facts in favour of identifier/order
+memorization. Each fails its dedicated metric. Generate the canonical public,
+evaluator, perfect-prediction, and metrics examples with
+`enterprise-identity-access-contract/tools/generate_contract.py`.
+
 ## Identity-fabric smoke benchmark
 
 The independently versioned `identity_fabric` package is the first bounded

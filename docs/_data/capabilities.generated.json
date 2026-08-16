@@ -3153,6 +3153,12 @@
       "path": "enterprise-identity-access-contract/README.md"
     },
     {
+      "anchor": "adversarial-authorization-profile",
+      "heading": "Adversarial authorization profile",
+      "id": "route:enterprise-identity-access-contract/README.md#adversarial-authorization-profile",
+      "path": "enterprise-identity-access-contract/README.md"
+    },
+    {
       "anchor": "bounded-authorization-families",
       "heading": "Bounded authorization families",
       "id": "route:enterprise-identity-access-contract/README.md#bounded-authorization-families",
@@ -8575,6 +8581,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.AdversarialAuthorizationMechanism",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.common",
+      "kind": "python_export",
+      "name": "AdversarialAuthorizationMechanism",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.AuthorizationEvaluationProfileV1",
       "implementation_module": "synthworld.enterprise.authorization.models",
       "kind": "python_export",
@@ -8629,6 +8644,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+      "implementation_module": "synthworld.enterprise",
+      "kind": "python_export",
+      "name": "ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.EnterpriseAbacIntentOverlayV1",
       "implementation_module": "synthworld.enterprise.abac.models",
       "kind": "python_export",
@@ -8660,6 +8684,42 @@
       "implementation_module": "synthworld.enterprise.abac.models",
       "kind": "python_export",
       "name": "EnterpriseAbacStateOverlayV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationEvaluatorV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationEvaluatorV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationMetricsV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationMetricsV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationPredictionV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationPublicV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationPublicV1",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -9106,6 +9166,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.AdversarialAuthorizationMechanism",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.common",
+      "kind": "python_export",
+      "name": "AdversarialAuthorizationMechanism",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.AuthorizationCellProfileV1",
       "implementation_module": "synthworld.enterprise.authorization.models",
       "kind": "python_export",
@@ -9137,6 +9206,51 @@
       "implementation_module": "synthworld.enterprise.authorization.models",
       "kind": "python_export",
       "name": "CompiledEnterpriseAccessStateV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+      "implementation_module": "synthworld.enterprise.authorization",
+      "kind": "python_export",
+      "name": "ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationEvaluatorV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationEvaluatorV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationMetricsV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationMetricsV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationPredictionV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationPublicV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationPublicV1",
       "source": "src/synthworld/enterprise/authorization/__init__.py",
       "visibility": "subpackage"
     },
@@ -9250,6 +9364,339 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialActionAttemptV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialActionAttemptV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialAttemptPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialAttemptPredictionV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialAttemptTruthV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialAttemptTruthV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthorityGrantV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialAuthorityGrantV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthoritySource",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.common",
+      "kind": "python_export",
+      "name": "AdversarialAuthoritySource",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthorizationBaseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "AdversarialAuthorizationBaseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthorizationMechanism",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.common",
+      "kind": "python_export",
+      "name": "AdversarialAuthorizationMechanism",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialCaseCategory",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.common",
+      "kind": "python_export",
+      "name": "AdversarialCaseCategory",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialCohortSummaryV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialCohortSummaryV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialCounterfactualPairTruthV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialCounterfactualPairTruthV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialCredentialBindingTruthV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialCredentialBindingTruthV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialCredentialEvidenceV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialCredentialEvidenceV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialPrincipalV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialPrincipalV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialResourceV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialResourceV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AdversarialTenantRuleV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "AdversarialTenantRuleV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.AuthorityCombinationPolicy",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.common",
+      "kind": "python_export",
+      "name": "AuthorityCombinationPolicy",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial",
+      "kind": "python_export",
+      "name": "ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationEvaluatorV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationEvaluatorV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationMetricsV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationMetricsV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationPolicyV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationPolicyV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationPredictionV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationPublicV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.models",
+      "kind": "python_export",
+      "name": "EnterpriseAdversarialAuthorizationPublicV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.ReferenceEnterpriseAdversarialAuthorizationV1",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.reference",
+      "kind": "python_export",
+      "name": "ReferenceEnterpriseAdversarialAuthorizationV1",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.TenantComparisonOperator",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.common",
+      "kind": "python_export",
+      "name": "TenantComparisonOperator",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.binding_blind_authorization_baseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "binding_blind_authorization_baseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.clearance_blind_authorization_baseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "clearance_blind_authorization_baseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.evaluate_adversarial_attempt",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.reference",
+      "kind": "python_export",
+      "name": "evaluate_adversarial_attempt",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.evaluate_enterprise_adversarial_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.metrics",
+      "kind": "python_export",
+      "name": "evaluate_enterprise_adversarial_authorization",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.identifier_memorization_baseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "identifier_memorization_baseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.perfect_enterprise_adversarial_authorization_prediction",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.metrics",
+      "kind": "python_export",
+      "name": "perfect_enterprise_adversarial_authorization_prediction",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.rbac_only_authorization_baseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "rbac_only_authorization_baseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.reference_enterprise_adversarial_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.reference",
+      "kind": "python_export",
+      "name": "reference_enterprise_adversarial_authorization",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.resolve_adversarial_credential",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.reference",
+      "kind": "python_export",
+      "name": "resolve_adversarial_credential",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.scope_blind_authorization_baseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "scope_blind_authorization_baseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.tenant_blind_authorization_baseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "tenant_blind_authorization_baseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.time_blind_authorization_baseline",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.baselines",
+      "kind": "python_export",
+      "name": "time_blind_authorization_baseline",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.adversarial.validate_adversarial_authorization_artifacts",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.reference",
+      "kind": "python_export",
+      "name": "validate_adversarial_authorization_artifacts",
+      "source": "src/synthworld/enterprise/authorization/adversarial/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.compile_enterprise_access_state",
       "implementation_module": "synthworld.enterprise.authorization.compiler",
       "kind": "python_export",
@@ -9272,6 +9719,15 @@
       "implementation_module": "synthworld.enterprise.authorization.compiler",
       "kind": "python_export",
       "name": "compose_enterprise_authorization",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.evaluate_enterprise_adversarial_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.metrics",
+      "kind": "python_export",
+      "name": "evaluate_enterprise_adversarial_authorization",
       "source": "src/synthworld/enterprise/authorization/__init__.py",
       "visibility": "subpackage"
     },
@@ -9313,10 +9769,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.perfect_enterprise_adversarial_authorization_prediction",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.metrics",
+      "kind": "python_export",
+      "name": "perfect_enterprise_adversarial_authorization_prediction",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.perfect_enterprise_authorization_prediction",
       "implementation_module": "synthworld.enterprise.authorization.metrics",
       "kind": "python_export",
       "name": "perfect_enterprise_authorization_prediction",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.reference_enterprise_adversarial_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.reference",
+      "kind": "python_export",
+      "name": "reference_enterprise_adversarial_authorization",
       "source": "src/synthworld/enterprise/authorization/__init__.py",
       "visibility": "subpackage"
     },
@@ -9443,6 +9917,15 @@
       "implementation_module": "synthworld.enterprise.abac.metrics",
       "kind": "python_export",
       "name": "evaluate_enterprise_abac",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.evaluate_enterprise_adversarial_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.metrics",
+      "kind": "python_export",
+      "name": "evaluate_enterprise_adversarial_authorization",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -9830,6 +10313,15 @@
       "implementation_module": "synthworld.enterprise.parsers",
       "kind": "python_export",
       "name": "parse_enterprise_identity_access_yaml",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.perfect_enterprise_adversarial_authorization_prediction",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.metrics",
+      "kind": "python_export",
+      "name": "perfect_enterprise_adversarial_authorization_prediction",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -10317,6 +10809,15 @@
       "kind": "python_export",
       "name": "perfect_enterprise_rebac_prediction",
       "source": "src/synthworld/enterprise/rebac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.reference_enterprise_adversarial_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.adversarial.reference",
+      "kind": "python_export",
+      "name": "reference_enterprise_adversarial_authorization",
+      "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
     {
@@ -11488,6 +11989,38 @@
       "kind": "schema",
       "name": "enterprise-abac-state.schema.json",
       "source": "enterprise-identity-access-contract/schemas/enterprise-abac-state.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-evaluator.schema.json",
+      "kind": "schema",
+      "name": "enterprise-adversarial-authorization-evaluator.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-evaluator.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-metrics.schema.json",
+      "kind": "schema",
+      "name": "enterprise-adversarial-authorization-metrics.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-metrics.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-prediction.schema.json",
+      "kind": "schema",
+      "name": "enterprise-adversarial-authorization-prediction.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-prediction.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-public.schema.json",
+      "kind": "schema",
+      "name": "enterprise-adversarial-authorization-public.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-public.schema.json",
       "visibility": "public"
     },
     {

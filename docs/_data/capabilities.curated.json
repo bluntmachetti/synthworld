@@ -1074,6 +1074,93 @@
       "title": "Enterprise identity and access authoring"
     },
     {
+      "id": "enterprise-adversarial-authorization",
+      "interfaces": {
+        "cli": {
+          "coverage": "none",
+          "subset_note": null,
+          "surface_ids": []
+        },
+        "python": {
+          "coverage": "full",
+          "subset_note": null,
+          "surface_ids": [
+            "python:synthworld.enterprise.AdversarialAuthorizationMechanism",
+            "python:synthworld.enterprise.ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+            "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationEvaluatorV1",
+            "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationMetricsV1",
+            "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationPredictionV1",
+            "python:synthworld.enterprise.EnterpriseAdversarialAuthorizationPublicV1",
+            "python:synthworld.enterprise.authorization.AdversarialAuthorizationMechanism",
+            "python:synthworld.enterprise.authorization.ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+            "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationEvaluatorV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationMetricsV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationPredictionV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAdversarialAuthorizationPublicV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialActionAttemptV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialAttemptPredictionV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialAttemptTruthV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthorityGrantV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthoritySource",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthorizationBaseline",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialAuthorizationMechanism",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialCaseCategory",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialCohortSummaryV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialCounterfactualPairTruthV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialCredentialBindingTruthV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialCredentialEvidenceV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialPrincipalV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialResourceV1",
+            "python:synthworld.enterprise.authorization.adversarial.AdversarialTenantRuleV1",
+            "python:synthworld.enterprise.authorization.adversarial.AuthorityCombinationPolicy",
+            "python:synthworld.enterprise.authorization.adversarial.ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+            "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationEvaluatorV1",
+            "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationMetricsV1",
+            "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationPolicyV1",
+            "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationPredictionV1",
+            "python:synthworld.enterprise.authorization.adversarial.EnterpriseAdversarialAuthorizationPublicV1",
+            "python:synthworld.enterprise.authorization.adversarial.ReferenceEnterpriseAdversarialAuthorizationV1",
+            "python:synthworld.enterprise.authorization.adversarial.TenantComparisonOperator",
+            "python:synthworld.enterprise.authorization.adversarial.binding_blind_authorization_baseline",
+            "python:synthworld.enterprise.authorization.adversarial.clearance_blind_authorization_baseline",
+            "python:synthworld.enterprise.authorization.adversarial.evaluate_adversarial_attempt",
+            "python:synthworld.enterprise.authorization.adversarial.evaluate_enterprise_adversarial_authorization",
+            "python:synthworld.enterprise.authorization.adversarial.identifier_memorization_baseline",
+            "python:synthworld.enterprise.authorization.adversarial.perfect_enterprise_adversarial_authorization_prediction",
+            "python:synthworld.enterprise.authorization.adversarial.rbac_only_authorization_baseline",
+            "python:synthworld.enterprise.authorization.adversarial.reference_enterprise_adversarial_authorization",
+            "python:synthworld.enterprise.authorization.adversarial.resolve_adversarial_credential",
+            "python:synthworld.enterprise.authorization.adversarial.scope_blind_authorization_baseline",
+            "python:synthworld.enterprise.authorization.adversarial.tenant_blind_authorization_baseline",
+            "python:synthworld.enterprise.authorization.adversarial.time_blind_authorization_baseline",
+            "python:synthworld.enterprise.authorization.adversarial.validate_adversarial_authorization_artifacts",
+            "python:synthworld.enterprise.authorization.evaluate_enterprise_adversarial_authorization",
+            "python:synthworld.enterprise.authorization.perfect_enterprise_adversarial_authorization_prediction",
+            "python:synthworld.enterprise.authorization.reference_enterprise_adversarial_authorization",
+            "python:synthworld.enterprise.evaluate_enterprise_adversarial_authorization",
+            "python:synthworld.enterprise.perfect_enterprise_adversarial_authorization_prediction",
+            "python:synthworld.enterprise.reference_enterprise_adversarial_authorization"
+          ]
+        }
+      },
+      "journey_route": "route:enterprise-identity-access-contract/README.md#adversarial-authorization-profile",
+      "maturity": "preview",
+      "notes": "This generated profile is a vendor-neutral benchmark and scorer. It is not a production policy engine, PDP, identity provider, or external-system adapter.",
+      "related_surface_ids": [
+        "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-evaluator.schema.json",
+        "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-metrics.schema.json",
+        "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-prediction.schema.json",
+        "schema:enterprise-identity-access-contract/schemas/enterprise-adversarial-authorization-public.schema.json"
+      ],
+      "roadmap_routes": [
+        "route:ROADMAP.md#phase-4--portfolio-and-ai-system-integrations"
+      ],
+      "since": "unreleased",
+      "summary": "Generate and score hidden single-factor enterprise authorization counterfactuals.",
+      "support": "Supported through the importable adversarial authorization Python API.",
+      "title": "Adversarial enterprise authorization"
+    },
+    {
       "id": "enterprise-authorization-scoring",
       "interfaces": {
         "cli": {
