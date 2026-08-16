@@ -1031,6 +1031,7 @@
         "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-evaluation-profile.schema.json",
         "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-kernel.schema.json",
         "schema:enterprise-identity-access-contract/schemas/enterprise-canonical-binding-truth.schema.json",
+        "schema:enterprise-identity-access-contract/schemas/enterprise-compiler-provenance.schema.json",
         "schema:enterprise-identity-access-contract/schemas/enterprise-directory-rbac-intent.schema.json",
         "schema:enterprise-identity-access-contract/schemas/enterprise-directory-rbac-kernel.schema.json",
         "schema:enterprise-identity-access-contract/schemas/enterprise-directory-rbac-metrics.schema.json",
