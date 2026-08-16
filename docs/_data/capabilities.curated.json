@@ -1074,6 +1074,58 @@
       "title": "Enterprise identity and access authoring"
     },
     {
+      "id": "enterprise-authorization-scoring",
+      "interfaces": {
+        "cli": {
+          "coverage": "none",
+          "subset_note": null,
+          "surface_ids": []
+        },
+        "python": {
+          "coverage": "full",
+          "subset_note": null,
+          "surface_ids": [
+            "python:synthworld.enterprise.AuthorizationScoredDimension",
+            "python:synthworld.enterprise.EnterpriseAuthorizationCellPredictionV1",
+            "python:synthworld.enterprise.EnterpriseAuthorizationEvaluatedSystemV1",
+            "python:synthworld.enterprise.EnterpriseAuthorizationEvaluationScopeV1",
+            "python:synthworld.enterprise.EnterpriseAuthorizationExecutionMetadataV1",
+            "python:synthworld.enterprise.EnterpriseAuthorizationMechanismPredictionV1",
+            "python:synthworld.enterprise.EnterpriseAuthorizationMetricsV1",
+            "python:synthworld.enterprise.EnterpriseAuthorizationPredictionV1",
+            "python:synthworld.enterprise.EnterpriseAuthorizationScopeCellV1",
+            "python:synthworld.enterprise.authorization.AuthorizationScoredDimension",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationCellPredictionV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluatedSystemV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluationScopeV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationExecutionMetadataV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationMechanismPredictionV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationMetricsV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationPredictionV1",
+            "python:synthworld.enterprise.authorization.EnterpriseAuthorizationScopeCellV1",
+            "python:synthworld.enterprise.authorization.evaluate_enterprise_authorization",
+            "python:synthworld.enterprise.authorization.perfect_enterprise_authorization_prediction",
+            "python:synthworld.enterprise.evaluate_enterprise_authorization"
+          ]
+        }
+      },
+      "journey_route": "route:enterprise-identity-access-contract/README.md#fixed-composition-and-artifact-boundary",
+      "maturity": "preview",
+      "notes": "This is a Python-only, vendor-neutral submission and scoring contract. It does not make an external authorization engine part of the oracle.",
+      "related_surface_ids": [
+        "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-evaluation-scope.schema.json",
+        "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-metrics.schema.json",
+        "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-prediction.schema.json"
+      ],
+      "roadmap_routes": [
+        "route:ROADMAP.md#phase-4--portfolio-and-ai-system-integrations"
+      ],
+      "since": "unreleased",
+      "summary": "Submit and independently score composed enterprise authorization decisions.",
+      "support": "Supported through the importable enterprise authorization Python API.",
+      "title": "Enterprise authorization scoring"
+    },
+    {
       "id": "enterprise-identity-fabric",
       "interfaces": {
         "cli": {

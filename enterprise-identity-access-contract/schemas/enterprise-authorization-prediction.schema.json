@@ -1,0 +1,292 @@
+{
+  "$defs": {
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "BindingStatus": {
+      "enum": [
+        "not_applicable",
+        "matches_canonical",
+        "missing",
+        "mismatch"
+      ],
+      "title": "BindingStatus",
+      "type": "string"
+    },
+    "EnterpriseAuthorizationCellPredictionV1": {
+      "additionalProperties": false,
+      "description": "One public-cell keyed observation from the system under test.",
+      "properties": {
+        "binding_status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BindingStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "cell_id": {
+          "minLength": 1,
+          "title": "Cell Id",
+          "type": "string"
+        },
+        "effective_decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AuthorizationDecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "final_decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AuthorizationDecision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "lifecycle_status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LifecycleStatus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mechanism_outcomes": {
+          "$ref": "#/$defs/EnterpriseAuthorizationMechanismPredictionV1"
+        },
+        "policy_conflict": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Policy Conflict"
+        }
+      },
+      "required": [
+        "cell_id",
+        "mechanism_outcomes"
+      ],
+      "title": "EnterpriseAuthorizationCellPredictionV1",
+      "type": "object"
+    },
+    "EnterpriseAuthorizationExecutionMetadataV1": {
+      "additionalProperties": false,
+      "description": "Deterministic product and adapter identity supplied with one prediction.",
+      "properties": {
+        "adapter_name": {
+          "minLength": 1,
+          "title": "Adapter Name",
+          "type": "string"
+        },
+        "adapter_version": {
+          "minLength": 1,
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "policy_name": {
+          "minLength": 1,
+          "title": "Policy Name",
+          "type": "string"
+        },
+        "policy_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Policy Sha256",
+          "type": "string"
+        },
+        "policy_version": {
+          "minLength": 1,
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "synthworld_package_version": {
+          "minLength": 1,
+          "title": "Synthworld Package Version",
+          "type": "string"
+        },
+        "system_name": {
+          "minLength": 1,
+          "title": "System Name",
+          "type": "string"
+        },
+        "system_version": {
+          "minLength": 1,
+          "title": "System Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "synthworld_package_version",
+        "adapter_name",
+        "adapter_version",
+        "system_name",
+        "system_version",
+        "policy_name",
+        "policy_version",
+        "policy_sha256"
+      ],
+      "title": "EnterpriseAuthorizationExecutionMetadataV1",
+      "type": "object"
+    },
+    "EnterpriseAuthorizationMechanismPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "abac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rbac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rebac": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MechanismOutcome"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "EnterpriseAuthorizationMechanismPredictionV1",
+      "type": "object"
+    },
+    "LifecycleStatus": {
+      "enum": [
+        "not_applicable",
+        "active",
+        "inactive",
+        "not_yet_valid",
+        "expired"
+      ],
+      "title": "LifecycleStatus",
+      "type": "string"
+    },
+    "MechanismOutcome": {
+      "description": "Native outcome retained before benchmark default-deny normalization.",
+      "enum": [
+        "allow",
+        "deny",
+        "not_applicable",
+        "unknown"
+      ],
+      "title": "MechanismOutcome",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Digest-bound composed authorization submission with exact cell coverage.",
+  "properties": {
+    "authorization_kernel_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "cells": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationCellPredictionV1"
+      },
+      "minItems": 1,
+      "title": "Cells",
+      "type": "array"
+    },
+    "composition_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_scope_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "execution": {
+      "$ref": "#/$defs/EnterpriseAuthorizationExecutionMetadataV1"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "composition_digest",
+    "authorization_kernel_digest",
+    "evaluation_scope_digest",
+    "execution",
+    "cells"
+  ],
+  "title": "EnterpriseAuthorizationPredictionV1",
+  "type": "object"
+}

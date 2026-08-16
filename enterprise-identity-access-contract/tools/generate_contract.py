@@ -32,6 +32,14 @@ from synthworld.enterprise.abac.models import (
     EnterpriseAbacIntentOverlayV1,
     EnterpriseAbacStateOverlayV1,
 )
+from synthworld.enterprise.authorization.metrics import (
+    EnterpriseAuthorizationEvaluationScopeV1,
+    EnterpriseAuthorizationExecutionMetadataV1,
+    EnterpriseAuthorizationMetricsV1,
+    EnterpriseAuthorizationPredictionV1,
+    evaluate_enterprise_authorization,
+    perfect_enterprise_authorization_prediction,
+)
 from synthworld.enterprise.authorization.models import (
     AuthorizationEvaluationProfileV1,
     CompiledEnterpriseAccessStateV1,
@@ -41,7 +49,7 @@ from synthworld.enterprise.authorization.models import (
 from synthworld.enterprise.authorization.reference import (
     reference_enterprise_authorization_inputs,
 )
-from synthworld.enterprise.canonical import canonical_json_bytes
+from synthworld.enterprise.canonical import canonical_json_bytes, synthetic_digest
 from synthworld.enterprise.conformance.models import (
     AuthorizationConformanceVectorV1,
     PolicyCoverageManifestV1,
@@ -186,6 +194,13 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     ),
     "enterprise-authorization-kernel.schema.json": EnterpriseAuthorizationKernelV1,
     "compiled-enterprise-access-state.schema.json": CompiledEnterpriseAccessStateV1,
+    "enterprise-authorization-evaluation-scope.schema.json": (
+        EnterpriseAuthorizationEvaluationScopeV1
+    ),
+    "enterprise-authorization-prediction.schema.json": (
+        EnterpriseAuthorizationPredictionV1
+    ),
+    "enterprise-authorization-metrics.schema.json": EnterpriseAuthorizationMetricsV1,
     "projection-mapping-profile.schema.json": ProjectionMappingProfileV1,
     "projection-support-matrix.schema.json": ProjectionSupportMatrixV1,
     "projection-fidelity-metrics.schema.json": ProjectionFidelityMetricsV1,
@@ -272,6 +287,36 @@ def expected_files() -> dict[Path, bytes]:
     )
     files[EXAMPLE_DIR / "enterprise-authorization-evaluation-profile.json"] = (
         _json_bytes(reference_authorization.evaluation_profile.model_dump(mode="json"))
+    )
+    files[EXAMPLE_DIR / "enterprise-authorization-evaluation-scope.json"] = (
+        canonical_json_bytes(reference_authorization.evaluation_scope)
+    )
+    authorization_prediction = perfect_enterprise_authorization_prediction(
+        reference_authorization.access_state,
+        scope=reference_authorization.evaluation_scope,
+        execution=EnterpriseAuthorizationExecutionMetadataV1(
+            synthworld_package_version="development",
+            adapter_name="reference-adapter",
+            adapter_version="1.0.0",
+            system_name="reference-authorizer",
+            system_version="1.0.0",
+            policy_name="reference-composition",
+            policy_version="1.0.0",
+            policy_sha256=synthetic_digest(
+                canonical_json_bytes(reference_authorization.composition)
+            ).value,
+        ),
+    )
+    authorization_metrics = evaluate_enterprise_authorization(
+        scope=reference_authorization.evaluation_scope,
+        truth=reference_authorization.access_state,
+        predictions=authorization_prediction,
+    )
+    files[EXAMPLE_DIR / "enterprise-authorization-prediction.json"] = (
+        canonical_json_bytes(authorization_prediction)
+    )
+    files[EXAMPLE_DIR / "enterprise-authorization-metrics.json"] = canonical_json_bytes(
+        authorization_metrics
     )
     reference_identity_fabric = reference_enterprise_identity_fabric()
     perfect_identity_fabric_prediction = perfect_enterprise_identity_fabric_prediction(

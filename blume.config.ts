@@ -89,6 +89,7 @@ export default defineConfig({
           collapsed: true,
           items: [
             "/experiments",
+            "/experiments/enterprise-authorization",
             "/roadmap",
             "/ROADMAP",
             "/support",

@@ -1,0 +1,242 @@
+{
+  "$defs": {
+    "EnterpriseAuthorizationEvaluatedSystemV1": {
+      "additionalProperties": false,
+      "description": "Evaluator-retained copy of the submitted product and policy identity.",
+      "properties": {
+        "adapter_name": {
+          "minLength": 1,
+          "title": "Adapter Name",
+          "type": "string"
+        },
+        "adapter_version": {
+          "minLength": 1,
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "policy_name": {
+          "minLength": 1,
+          "title": "Policy Name",
+          "type": "string"
+        },
+        "policy_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Policy Sha256",
+          "type": "string"
+        },
+        "policy_version": {
+          "minLength": 1,
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "synthworld_package_version": {
+          "minLength": 1,
+          "title": "Synthworld Package Version",
+          "type": "string"
+        },
+        "system_name": {
+          "minLength": 1,
+          "title": "System Name",
+          "type": "string"
+        },
+        "system_version": {
+          "minLength": 1,
+          "title": "System Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "synthworld_package_version",
+        "adapter_name",
+        "adapter_version",
+        "system_name",
+        "system_version",
+        "policy_name",
+        "policy_version",
+        "policy_sha256"
+      ],
+      "title": "EnterpriseAuthorizationEvaluatedSystemV1",
+      "type": "object"
+    },
+    "EnterpriseAuthorizationMetricV1": {
+      "additionalProperties": false,
+      "properties": {
+        "denominator": {
+          "minimum": 0,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "denominator_meaning": {
+          "minLength": 1,
+          "title": "Denominator Meaning",
+          "type": "string"
+        },
+        "empty_behaviour": {
+          "$ref": "#/$defs/MetricEmptyBehaviour"
+        },
+        "family": {
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "numerator": {
+          "minimum": 0,
+          "title": "Numerator",
+          "type": "integer"
+        },
+        "support": {
+          "minimum": 0,
+          "title": "Support",
+          "type": "integer"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "family",
+        "name",
+        "numerator",
+        "denominator",
+        "support",
+        "denominator_meaning",
+        "empty_behaviour",
+        "value"
+      ],
+      "title": "EnterpriseAuthorizationMetricV1",
+      "type": "object"
+    },
+    "MetricEmptyBehaviour": {
+      "enum": [
+        "nonempty",
+        "null_if_empty"
+      ],
+      "title": "MetricEmptyBehaviour",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Independent composed and per-mechanism metrics; never an aggregate.",
+  "properties": {
+    "access_state_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "access_state_schema_version": {
+      "minLength": 1,
+      "title": "Access State Schema Version",
+      "type": "string"
+    },
+    "authorization_kernel_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "composition_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluated_system": {
+      "$ref": "#/$defs/EnterpriseAuthorizationEvaluatedSystemV1"
+    },
+    "evaluation_corpus_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_scope_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "evaluation_scope_schema_version": {
+      "minLength": 1,
+      "title": "Evaluation Scope Schema Version",
+      "type": "string"
+    },
+    "identity_access_universe_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "metrics": {
+      "items": {
+        "$ref": "#/$defs/EnterpriseAuthorizationMetricV1"
+      },
+      "title": "Metrics",
+      "type": "array"
+    },
+    "prediction_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "prediction_schema_version": {
+      "minLength": 1,
+      "title": "Prediction Schema Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "evaluation_scope_schema_version",
+    "access_state_schema_version",
+    "prediction_schema_version",
+    "identity_access_universe_digest",
+    "evaluation_corpus_digest",
+    "composition_digest",
+    "authorization_kernel_digest",
+    "evaluation_scope_digest",
+    "access_state_digest",
+    "prediction_digest",
+    "evaluated_system",
+    "metrics"
+  ],
+  "title": "EnterpriseAuthorizationMetricsV1",
+  "type": "object"
+}

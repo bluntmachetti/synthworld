@@ -405,6 +405,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "added-10",
+      "heading": "Added",
+      "id": "route:CHANGELOG.md#added-10",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "added-2",
       "heading": "Added",
       "id": "route:CHANGELOG.md#added-2",
@@ -2513,6 +2519,78 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/experiments/enterprise-authorization.md",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "contract-work-before-phase-3",
+      "heading": "Contract work before Phase 3",
+      "id": "route:docs/experiments/enterprise-authorization.md#contract-work-before-phase-3",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "enterprise-authorization-with-topaz",
+      "heading": "Enterprise authorization with Topaz",
+      "id": "route:docs/experiments/enterprise-authorization.md#enterprise-authorization-with-topaz",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "evidence-status",
+      "heading": "Evidence status",
+      "id": "route:docs/experiments/enterprise-authorization.md#evidence-status",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "isolation-was-auditable-not-enforced",
+      "heading": "Isolation was auditable, not enforced",
+      "id": "route:docs/experiments/enterprise-authorization.md#isolation-was-auditable-not-enforced",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "material-limitations-found-by-phase-2",
+      "heading": "Material limitations found by Phase 2",
+      "id": "route:docs/experiments/enterprise-authorization.md#material-limitations-found-by-phase-2",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "phase-1-directory-feasibility",
+      "heading": "Phase 1: directory feasibility",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-1-directory-feasibility",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "phase-2-authorization-feasibility",
+      "heading": "Phase 2: authorization feasibility",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-2-authorization-feasibility",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "public-policy-could-reveal-the-negative-cohort",
+      "heading": "Public policy could reveal the negative cohort",
+      "id": "route:docs/experiments/enterprise-authorization.md#public-policy-could-reveal-the-negative-cohort",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "some-submitted-metrics-were-not-publicly-solvable",
+      "heading": "Some submitted metrics were not publicly solvable",
+      "id": "route:docs/experiments/enterprise-authorization.md#some-submitted-metrics-were-not-publicly-solvable",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "the-binding-cohort-did-not-test-binding",
+      "heading": "The binding cohort did not test binding",
+      "id": "route:docs/experiments/enterprise-authorization.md#the-binding-cohort-did-not-test-binding",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "the-composed-decision-was-not-scored",
+      "heading": "The composed decision was not scored",
+      "id": "route:docs/experiments/enterprise-authorization.md#the-composed-decision-was-not-scored",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/experiments/index.md",
       "path": "docs/experiments/index.md"
     },
@@ -2520,6 +2598,12 @@
       "anchor": "experiments",
       "heading": "Experiments",
       "id": "route:docs/experiments/index.md#experiments",
+      "path": "docs/experiments/index.md"
+    },
+    {
+      "anchor": "recorded-experiments",
+      "heading": "Recorded experiments",
+      "id": "route:docs/experiments/index.md#recorded-experiments",
       "path": "docs/experiments/index.md"
     },
     {
@@ -8500,6 +8584,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.AuthorizationScoredDimension",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "AuthorizationScoredDimension",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.CompiledEnterpriseAbacTruthV1",
       "implementation_module": "synthworld.enterprise.abac.models",
       "kind": "python_export",
@@ -8572,6 +8665,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationCellPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationCellPredictionV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.EnterpriseAuthorizationCompositionV1",
       "implementation_module": "synthworld.enterprise.authorization.models",
       "kind": "python_export",
@@ -8581,10 +8683,73 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationEvaluatedSystemV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationEvaluatedSystemV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationEvaluationScopeV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationEvaluationScopeV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationExecutionMetadataV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationExecutionMetadataV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.EnterpriseAuthorizationKernelV1",
       "implementation_module": "synthworld.enterprise.authorization.models",
       "kind": "python_export",
       "name": "EnterpriseAuthorizationKernelV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationMechanismPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationMechanismPredictionV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationMetricsV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationMetricsV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationPredictionV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationScopeCellV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationScopeCellV1",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -8959,10 +9124,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.AuthorizationScoredDimension",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "AuthorizationScoredDimension",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.CompiledEnterpriseAccessStateV1",
       "implementation_module": "synthworld.enterprise.authorization.models",
       "kind": "python_export",
       "name": "CompiledEnterpriseAccessStateV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationCellPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationCellPredictionV1",
       "source": "src/synthworld/enterprise/authorization/__init__.py",
       "visibility": "subpackage"
     },
@@ -8977,10 +9160,37 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluatedSystemV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationEvaluatedSystemV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluationScopeV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationEvaluationScopeV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluatorArtifactsV1",
       "implementation_module": "synthworld.enterprise.authorization.serialization",
       "kind": "python_export",
       "name": "EnterpriseAuthorizationEvaluatorArtifactsV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationExecutionMetadataV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationExecutionMetadataV1",
       "source": "src/synthworld/enterprise/authorization/__init__.py",
       "visibility": "subpackage"
     },
@@ -8995,10 +9205,46 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationMechanismPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationMechanismPredictionV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationMetricsV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationMetricsV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationPredictionV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationPredictionV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationPublicArtifactsV1",
       "implementation_module": "synthworld.enterprise.authorization.serialization",
       "kind": "python_export",
       "name": "EnterpriseAuthorizationPublicArtifactsV1",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationScopeCellV1",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationScopeCellV1",
       "source": "src/synthworld/enterprise/authorization/__init__.py",
       "visibility": "subpackage"
     },
@@ -9031,6 +9277,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.evaluate_enterprise_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "evaluate_enterprise_authorization",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.export_enterprise_authorization",
       "implementation_module": "synthworld.enterprise.authorization.serialization",
       "kind": "python_export",
@@ -9053,6 +9308,15 @@
       "implementation_module": "synthworld.enterprise.authorization.serialization",
       "kind": "python_export",
       "name": "load_public_enterprise_authorization",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.perfect_enterprise_authorization_prediction",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "perfect_enterprise_authorization_prediction",
       "source": "src/synthworld/enterprise/authorization/__init__.py",
       "visibility": "subpackage"
     },
@@ -9179,6 +9443,15 @@
       "implementation_module": "synthworld.enterprise.abac.metrics",
       "kind": "python_export",
       "name": "evaluate_enterprise_abac",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.evaluate_enterprise_authorization",
+      "implementation_module": "synthworld.enterprise.authorization.metrics",
+      "kind": "python_export",
+      "name": "evaluate_enterprise_authorization",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -11283,10 +11556,34 @@
     },
     {
       "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-evaluation-scope.schema.json",
+      "kind": "schema",
+      "name": "enterprise-authorization-evaluation-scope.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-evaluation-scope.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
       "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-kernel.schema.json",
       "kind": "schema",
       "name": "enterprise-authorization-kernel.schema.json",
       "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-kernel.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-metrics.schema.json",
+      "kind": "schema",
+      "name": "enterprise-authorization-metrics.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-metrics.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-prediction.schema.json",
+      "kind": "schema",
+      "name": "enterprise-authorization-prediction.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-prediction.schema.json",
       "visibility": "public"
     },
     {

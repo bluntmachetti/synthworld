@@ -199,6 +199,44 @@ contains ABAC/ReBAC component truth and compiled aggregate access state. Both
 trees have exact canonical inventories and digest-bound manifests; loaders reject
 extra, missing, non-regular, noncanonical, stale, or cross-bound artifacts.
 
+`EnterpriseAuthorizationEvaluationScopeV1` is a separately typed public
+denominator contract. It binds the corpus and authorization kernel and declares,
+per public cell ID, which effective, final, conflict, binding and lifecycle
+dimensions have sufficient public evidence to be scored. The evaluator rejects a
+scope with missing, extra, duplicate or cross-artifact cells. It never infers a
+denominator from evaluator truth alone.
+
+`EnterpriseAuthorizationPredictionV1` is the separately versioned system-output
+contract for the composed access state. It binds the public universe, corpus,
+composition, authorization kernel and evaluation-scope digest and requires exactly
+one observation for every public cell ID. Each row retains the mechanism outcomes
+reported by the system, the pre-runtime-gate effective decision, the enforced final
+decision, conflict detection and any reported binding/lifecycle status. The
+submission also records deterministic package, adapter, system and policy identity;
+it contains no timestamp or host-derived value. The evaluator retains that
+operator-owned identity without a synthetic marker inside the otherwise synthetic
+metrics report. It records the submitter's claim and is not an attestation that the
+named system, adapter, or policy produced the observations.
+
+`evaluate_enterprise_authorization` rejects missing, duplicate, unknown or
+cross-artifact cells and reports independent denominators for effective and final
+decisions, per-mechanism outcomes, mechanism inventory, conflicts,
+binding/lifecycle status and runtime-gate effects. It emits no aggregate. A missing
+binding or lifecycle observation is a valid abstention and scores as incorrect only
+where the public scope declares that dimension eligible. The current public
+reference deliberately gives binding a zero denominator because it has observed
+bindings but no independent public evidence of the canonical subject. It also has
+no cell whose runtime gate alone changes an allow to deny, so its runtime-gate
+denominator is zero. Discriminating counterfactual cases belong to the separately
+versioned adversarial profile rather than a rewrite of this frozen composition
+contract.
+
+The composed report intentionally does not score evaluator-only intended
+decisions, canonical binding paths, ABAC predicate truth identifiers, or SSD/DSD
+constraint truth. Those dimensions remain absent until a separately typed public
+evidence and denominator contract makes a candidate answer independently
+observable; evaluator truth alone never creates a metric.
+
 ## Identity-fabric smoke benchmark
 
 The independently versioned `identity_fabric` package is the first bounded

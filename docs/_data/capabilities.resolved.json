@@ -7240,6 +7240,247 @@
       "title": "Enterprise identity and access authoring"
     },
     {
+      "id": "enterprise-authorization-scoring",
+      "interfaces": {
+        "cli": {
+          "coverage": "none",
+          "subset_note": null,
+          "surfaces": []
+        },
+        "python": {
+          "coverage": "full",
+          "subset_note": null,
+          "surfaces": [
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.AuthorizationScoredDimension",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "AuthorizationScoredDimension",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationCellPredictionV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationCellPredictionV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationEvaluatedSystemV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationEvaluatedSystemV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationEvaluationScopeV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationEvaluationScopeV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationExecutionMetadataV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationExecutionMetadataV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationMechanismPredictionV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationMechanismPredictionV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationMetricsV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationMetricsV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationPredictionV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationPredictionV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationScopeCellV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationScopeCellV1",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.AuthorizationScoredDimension",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "AuthorizationScoredDimension",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationCellPredictionV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationCellPredictionV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluatedSystemV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationEvaluatedSystemV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluationScopeV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationEvaluationScopeV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationExecutionMetadataV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationExecutionMetadataV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationMechanismPredictionV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationMechanismPredictionV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationMetricsV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationMetricsV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationPredictionV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationPredictionV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationScopeCellV1",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationScopeCellV1",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.evaluate_enterprise_authorization",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "evaluate_enterprise_authorization",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.perfect_enterprise_authorization_prediction",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "perfect_enterprise_authorization_prediction",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.evaluate_enterprise_authorization",
+              "implementation_module": "synthworld.enterprise.authorization.metrics",
+              "kind": "python_export",
+              "name": "evaluate_enterprise_authorization",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            }
+          ]
+        }
+      },
+      "journey_route": "route:enterprise-identity-access-contract/README.md#fixed-composition-and-artifact-boundary",
+      "maturity": "preview",
+      "notes": "This is a Python-only, vendor-neutral submission and scoring contract. It does not make an external authorization engine part of the oracle.",
+      "related_surfaces": [
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-evaluation-scope.schema.json",
+          "kind": "schema",
+          "name": "enterprise-authorization-evaluation-scope.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-evaluation-scope.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-metrics.schema.json",
+          "kind": "schema",
+          "name": "enterprise-authorization-metrics.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-metrics.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-prediction.schema.json",
+          "kind": "schema",
+          "name": "enterprise-authorization-prediction.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-prediction.schema.json",
+          "visibility": "public"
+        }
+      ],
+      "roadmap_routes": [
+        "route:ROADMAP.md#phase-4--portfolio-and-ai-system-integrations"
+      ],
+      "since": "unreleased",
+      "summary": "Submit and independently score composed enterprise authorization decisions.",
+      "support": "Supported through the importable enterprise authorization Python API.",
+      "title": "Enterprise authorization scoring"
+    },
+    {
       "id": "enterprise-identity-fabric",
       "interfaces": {
         "cli": {
@@ -8806,8 +9047,8 @@
     }
   ],
   "input_digests": {
-    "curated_sha256": "4bd97b1d4ddb9b36b575aa5761b648ca3aebc83891710f800dd42e94f5212a2c",
-    "generated_sha256": "5c2a46f531475f1b04b671f6a77a4aba6f783e620388e6627fc9845bae95b3d3"
+    "curated_sha256": "d4c023791ab85f417f455a8b6e06cd15a9265c7ecfdf0ebc846281dcab655309",
+    "generated_sha256": "ec6d15c50ed3be494bb28301a93de0509c56d359c112c6f7c5f1f7b6ade218c5"
   },
   "schema_version": "1.0.0"
 }
