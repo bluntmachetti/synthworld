@@ -1,0 +1,103 @@
+title: "[Experiment result] "
+labels:
+  - "experiment:self-reported"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a result produced with SynthWorld. This category is a registry of
+        community self-reports, not a leaderboard or an endorsement programme.
+
+        The author owns and supports the experiment. SynthWorld maintainers do
+        not promise to inspect, reproduce, repair, host, rank, or endorse it.
+        Discussion text, links, and attachments are mutable and are therefore
+        not authoritative evidence. Publish durable artifacts under your own
+        control and provide SHA-256 digests here.
+
+        **Never post real personal data, credentials, secrets, access tokens, or
+        identifiers that could be mistaken for a real person's.**
+
+  - type: input
+    id: system-under-test
+    attributes:
+      label: System under test
+      description: Name the authorization, identity, agent, or other system exercised.
+      placeholder: Topaz 0.33.16, OPA 1.x, AuthZEN implementation, or another system
+    validations:
+      required: true
+
+  - type: input
+    id: synthworld-version
+    attributes:
+      label: SynthWorld version
+      description: Give the exact released package version or immutable source revision.
+      placeholder: idcognito-synthworld==0.16.0
+    validations:
+      required: true
+
+  - type: input
+    id: benchmark
+    attributes:
+      label: Benchmark and schema versions
+      description: Identify every benchmark pack and contract version used.
+      placeholder: enterprise-adversarial-authorization 1.0.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Explicit inputs
+      description: Record topology, seed, configuration, policy, adapter, and relevant environment versions.
+    validations:
+      required: true
+
+  - type: textarea
+    id: results
+    attributes:
+      label: Results with denominators
+      description: Report each result with its numerator, denominator, and denominator meaning. Do not invent an aggregate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Durable evidence and SHA-256 digests
+      description: Link an author-controlled release or archive and list the digest of every referenced artifact. Attachments here remain non-authoritative.
+      placeholder: |
+        Reproduction kit: https://example.invalid/release/artifact.zip
+        SHA-256: 0123456789abcdef...
+        Sealed submission SHA-256: 0123456789abcdef...
+    validations:
+      required: true
+
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Public/evaluator boundary
+      description: Explain when evaluator artifacts became available and what prevented the system under test from reading them.
+    validations:
+      required: true
+
+  - type: textarea
+    id: limitations
+    attributes:
+      label: Limitations and unsupported claims
+      description: State unexercised dimensions, confounders, missing evidence, and conclusions the result does not support.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Author acknowledgement
+      options:
+        - label: I own and support this experiment; SynthWorld maintainers are not responsible for reproducing or maintaining it.
+          required: true
+        - label: This is a self-reported result and inclusion does not imply review, verification, endorsement, certification, or ranking.
+          required: true
+        - label: Shared artifacts contain only safely fictional data, preserve required synthetic markers, and contain no credentials or secrets.
+          required: true
+        - label: I have verified the listed artifact digests and have the right to publish the linked material.
+          required: true

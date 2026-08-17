@@ -14,8 +14,10 @@ The concrete Phase 2 question was:
 
 Phase 1 answered the narrower question of whether released relationship data could
 be transported into and queried from a Topaz directory. Phase 2 exercised a live
-authorization policy and the released mechanism scorers. Neither phase tested
-continued authorization across changing runtime boundaries.
+authorization policy and the released mechanism scorers. Phase 3 used the 0.16.0
+contracts to enforce the evaluator mount boundary, score composed decisions and
+exercise discriminating adversarial cases. None of the phases establishes general
+Topaz or authorization correctness.
 
 ## Experiment boundary
 
@@ -45,7 +47,7 @@ fictional organization topology
 |---|---|---|---|
 | Phase 1 | Historical exploratory run; not frozen or independently reproducible | `idcognito-synthworld==0.15.0` | Public enterprise-access tuples loaded into a Topaz directory and queried through the directory check API |
 | Phase 2 | Locally frozen and clean-clone verified; evidence archives published with SynthWorld 0.16.0; no independent reproduction recorded yet | `idcognito-synthworld==0.15.0` | A generated enterprise identity/access world, projected policy, live authorization decisions, blinded submissions and released scorers |
-| Phase 3 | Ready for a fresh isolated-lab experiment | `idcognito-synthworld==0.16.0` | Enforced evaluator isolation and scored composed authorization decisions with discriminating adversarial cases |
+| Phase 3 | Frozen, clean-room reproduced and published in an immutable attested release | `idcognito-synthworld==0.16.0` | Enforced evaluator isolation, sealed scoring, composed authorization and discriminating adversarial cases |
 
 The Phase 2 source-only baseline is locally tagged
 `phase2-baseline-0.15.0`. A clean local clone completed all 32 validation checks
@@ -196,7 +198,69 @@ families have different denominators.
 - Portability of the Britannia-specific topology mapper to arbitrary organization
   YAML files.
 
+## Phase 3: frozen isolated reference experiment
+
+Phase 3 is published as the immutable, GitHub-attested release
+[`enterprise-authorization-topaz-0.16.0-1`](https://github.com/bluntmachetti/synthworld/releases/tag/enterprise-authorization-topaz-0.16.0-1).
+It is a frozen and unsupported evidence record, not a maintained adapter repository.
+Its release metadata binds the archive digests to the exact experiment source
+commit and tree.
+
+### Run identity
+
+| Field | Recorded value |
+|---|---|
+| Experiment identifier | `enterprise-authorization-topaz-0.16.0-1` |
+| Experiment source commit | `e7f3952f07ddc0545b6db1e680fbd64bfb4278be` |
+| Experiment source tree | `8f0046779909be3cb12e0e1149a241adc0845cbd` |
+| SynthWorld package | `idcognito-synthworld==0.16.0` |
+| Experiment seed | `20260816` |
+| Topology SHA-256 | `29ea8dd155ceed277eedf3f7261f0ba6844ff5a3e6c5a9c70164ae78b80871d1` |
+| Topaz runtime | `0.33.16`, commit `81b8405`, `linux/amd64` |
+| Topaz image digest | `sha256:835868c04bdd7129127ea43642ffff7363d0bd26d5e1a37631fa881431054360` |
+| Combined normalized submission SHA-256 | `7a605095fbb44b36abd575ded120026f67d5af4f73650f45f9b288fd3d6b79e4` |
+| Validation | 40 of 40 checks passed |
+
+### Enforced capability boundary
+
+The benchmark-owner container generated separately typed public and evaluator
+artifacts. Projector and runner capabilities received public paths but no evaluator
+mount or evaluator credential. The runner recorded raw Topaz responses, normalized
+them into typed submissions and sealed the complete public, policy, adapter,
+package, product and result evidence. Only the offline scorer received the
+evaluator tree, and it verified every seal binding before loading truth.
+
+A deliberate regression mounted the evaluator tree into a runner capability. The
+isolation probe rejected that process. This protects against accidental leakage
+through the supported Compose workflow; it is not an anti-cheating claim against a
+host administrator or Docker-daemon operator.
+
+### Results and controls
+
+| Measurement | Result | Denominator meaning |
+|---|---:|---|
+| Objects loaded and read back | 1,699 / 1,699 | Complete Topaz object projection |
+| Relations loaded and read back | 5,879 / 5,879 | Complete Topaz relation projection |
+| Britannia decisions normalized | 3,209 / 3,209 | Public Britannia evaluation cells |
+| Adversarial decisions normalized | 14 / 14 | Released adversarial action attempts |
+| Validation checks | 40 / 40 | Declared structural, integrity, isolation and presentation checks |
+| Authorization negative controls | 9 / 9 | Deliberately faulty policies or prediction dimensions |
+| Seal-refusal controls | 4 / 4 | Unsealed, mutated, cross-artifact and version-mismatched submissions |
+
+The exercised composed effective/final, RBAC, ABAC, conflict, lifecycle,
+runtime-gate and adversarial dimensions each scored 1.0 at their stated
+denominators. The report computes no aggregate. It separately reports empty or
+unexercised ReBAC dimensions, evaluator-keyed fields that a public consumer cannot
+submit and world properties that are not system scores.
+
+The reproduction ZIP was executed from a fresh extraction before publication and
+passed all 40 checks. The deterministic archives were also built twice and compared
+byte-for-byte. Operational timing is recorded but excluded from deterministic
+submission identity.
+
 ## Reproduction materials
+
+### Historical Phase 1 and Phase 2 assets
 
 The SynthWorld 0.16.0 GitHub release publishes the following retained experiment
 assets. The ZIPs were built from the Phase 1 and Phase 2 work conducted against
@@ -210,44 +274,63 @@ SynthWorld 0.15.0; they are historical evidence, not regenerated 0.16.0 results.
 | [`SHA256SUMS`](https://github.com/bluntmachetti/synthworld/releases/download/v0.16.0/SHA256SUMS) | 277 | `bfdc21794eaadd9e1e8183994282922c834429c498dafe3caaa8d0eaebf5c9a6` | Verify the three ZIP files | No |
 | [`ASSET-METADATA.json`](https://github.com/bluntmachetti/synthworld/releases/download/v0.16.0/ASSET-METADATA.json) | 766 | `ad91ef11105e2ecb47fc208cfc71e316778bfe03f4d9a231fea9e2a6426c6cb8` | Machine-readable release-asset sizes and digests | No |
 
-The signed v0.16.0 source tag anchors the sizes and digests in this page. Verify
-downloads against those values: release hosting is not itself an integrity proof.
-A GitHub-generated source archive is not sufficient because the Phase 2 repository
-intentionally ignores generated evidence, so those files would be absent.
+The v0.16.0 release predates repository release immutability and is not retroactively
+protected by that setting. Verify its downloads against the recorded checksums. A
+GitHub-generated source archive is not sufficient because the Phase 2 repository
+intentionally ignored generated evidence, so those files would be absent.
 
-Every archive must remain understandable after it is detached from this page. Its
-root should contain:
+### Phase 3 immutable assets
+
+The Phase 3 release is immutable. GitHub locks its tag and assets and publishes a
+release attestation. `gh release verify enterprise-authorization-topaz-0.16.0-1`
+verifies that attestation; `gh release verify-asset` verifies an individual local
+download.
+
+| Release asset | Bytes | SHA-256 | Intended use | Evaluator truth included |
+|---|---:|---|---|---|
+| [`enterprise-authorization-topaz-reproduction-kit-0.16.0-1.zip`](https://github.com/bluntmachetti/synthworld/releases/download/enterprise-authorization-topaz-0.16.0-1/enterprise-authorization-topaz-reproduction-kit-0.16.0-1.zip) | 180,762 | `16071b56892d39542817b72401991adde38f878184c7dbb7b274662b24aa4b5f` | Reproduce the experiment from source, explicit inputs and pinned dependencies | No pre-generated evaluator artifacts |
+| [`enterprise-authorization-topaz-reference-run-0.16.0-1.zip`](https://github.com/bluntmachetti/synthworld/releases/download/enterprise-authorization-topaz-0.16.0-1/enterprise-authorization-topaz-reference-run-0.16.0-1.zip) | 19,145,023 | `202d1377f1f07bed57b82fc829f56082f23ffe2af626f5a8aeb39093ed0bddbe` | Audit the retained public inputs, separate evaluator truth, Topaz responses, sealed submissions, reports, controls and HTML projection | Yes, in a physically separate tree |
+| [`ASSET-METADATA.json`](https://github.com/bluntmachetti/synthworld/releases/download/enterprise-authorization-topaz-0.16.0-1/ASSET-METADATA.json) | 1,140 | `39b775d8ab57b0ea1b37123b3aab27b88a7dac1b993c532a68fcf84b11aa2606` | Bind experiment identity, source revision, versions, asset digests and result counts | No |
+| [`SHA256SUMS`](https://github.com/bluntmachetti/synthworld/releases/download/enterprise-authorization-topaz-0.16.0-1/SHA256SUMS) | 337 | `d1a1728eca3304cd64e3f5e2cdccbd0fe23f28307e072e3e4fc0e4a09878db73` | Verify every custom Phase 3 asset | No |
+
+Each Phase 3 archive remains understandable after it is detached from this page.
+Its root contains:
 
 ```text
 README.md
-EXPERIMENT-ID.json
-MANIFEST.json
-RUN-RECEIPT.json        # required for a retained reference run
+EXPERIMENT-METADATA.json
+FILE-MANIFEST.json
 SHA256SUMS
 LICENSE
-prompts/
-provenance/
 docs/
-inputs/
+01-source/
+02-synthworld-public/   # reference-run archive only
+03-topaz-input/         # reference-run archive only
+04-topaz-results/       # reference-run archive only
+05-submission/          # reference-run archive only
+06-evaluator/           # reference-run archive only; physically separate
+07-reports/             # reference-run archive only
+viz/                    # reference-run archive only
 ```
 
-The embedded README must repeat the experiment question, evidence status, exact
-version, prerequisites, commands, directory map, supported claims and limitations,
-and link back to this canonical evidence record. `MANIFEST.json` should classify
-each file as source, public input, system output or evaluator evidence.
+The embedded README repeats the evidence status, exact versions, prerequisites,
+commands, directory map, supported claims and limitations. `FILE-MANIFEST.json`
+classifies each payload file as experiment source, public input, system input,
+system output, sealed submission, evaluator evidence, evaluation report or public
+presentation.
 
 The shortest verified reproduction path is:
 
 ```bash
 sha256sum -c SHA256SUMS
-unzip phase2-reproduction-kit.zip
-cd phase2-reproduction-kit
-./bin/run_all.sh
+unzip enterprise-authorization-topaz-reproduction-kit-0.16.0-1.zip
+cd enterprise-authorization-topaz-reproduction-kit-0.16.0-1
+bin/run_lab.sh
 ```
 
-The published README must specify required ports, approximate disk use and the
-tested Docker, Compose, Python and `uv` versions. A complete fresh-run stdout/stderr
-log and machine-readable run receipt should be retained with the reference run.
+The embedded README records the dependency and isolation boundaries. Topaz has no
+published host port. First execution needs network access to fetch digest-pinned
+images and hash-pinned packages; reruns can operate from the retained local cache.
 
 ## Reproducing versus adapting
 
@@ -255,8 +338,8 @@ An exact reproduction keeps the topology bytes, seed, configuration, policy,
 dependency lock and container digest unchanged. Its result is comparable only after
 the input, public-artifact, submission and report digests have been checked.
 
-A related experiment must receive a new identifier and must not overwrite the Phase
-2 baseline. Its report should describe every changed input, mapping decision and
+A related experiment must receive a new identifier and must not overwrite a frozen
+baseline. Its report should describe every changed input, mapping decision and
 policy assumption; regenerate all checksums; construct discriminating positive and
 negative cases; keep public inputs and evaluator truth separately typed and
 serialized; and report every metric with its denominator.
@@ -271,8 +354,7 @@ submission and score it separately.
 An admission-only versus continued-runtime-authorization study inspired by changing
 providers, credentials, destinations, delegated authority or capabilities should be
 a new experiment series. It should define the protected execution transitions and
-mutations explicitly rather than retrofitting Phase 2 or silently redefining the
-already planned Phase 3.
+mutations explicitly rather than retrofitting or silently redefining a frozen run.
 
 ## Material limitations found by Phase 2
 
@@ -315,26 +397,44 @@ but it was a cross-check rather than the decision path.
 Public and evaluator artifacts were physically separate and submissions were sealed
 before scoring, but evaluator truth existed on the same host while the system under
 test ran. The supported process did not read it; the filesystem did not make such a
-read impossible. Phase 3 must run the system under test without an evaluator mount
-and give evaluator access only to a separate scorer.
+read impossible. Phase 3 corrected that limitation by running the system under test
+without an evaluator mount and giving evaluator access only to a separate scorer.
 
-## Contract work before Phase 3
+## Phase 3 contract delivery
 
-The experiment produced four focused requirements. SynthWorld 0.16.0 implements
-the first three; Phase 3 still requires the isolated lab work:
+The earlier experiment produced four focused requirements. SynthWorld 0.16.0 and
+the frozen Phase 3 experiment completed them without adding Topaz runtime behaviour
+to the core package:
 
 - [#137](https://github.com/bluntmachetti/synthworld/issues/137) added a publicly
   constructible composed-decision submission and independent scoring after the
   frozen Phase 2 run.
-- [#138](https://github.com/bluntmachetti/synthworld/issues/138) adds
+- [#138](https://github.com/bluntmachetti/synthworld/issues/138) added
   discriminating tenant, scope, binding, temporal, clearance and composed
   authority counterfactuals with hidden pair labels and explicit discriminating
   denominators.
 - [#139](https://github.com/bluntmachetti/synthworld/issues/139) added the released
   consumer API, digest helpers and supported end-to-end workflow after the frozen
   Phase 2 run.
-- [#140](https://github.com/bluntmachetti/synthworld/issues/140) tracks publication
-  of the fresh isolated, reproducible adapter lab against the released contracts.
+- [#140](https://github.com/bluntmachetti/synthworld/issues/140) delivered the
+  isolated experiment as immutable release evidence rather than creating an
+  ongoing adapter-lab maintenance commitment.
 
-Phase 3 should start in a fresh experiment directory against a released package. It
-must not retrofit Phase 2 or silently reinterpret its results.
+The experiment implementation is frozen. Future adapters and experiments remain
+owned by their authors and consume SynthWorld through its public contracts.
+
+## Community result submissions
+
+The
+[Experiment results](https://github.com/bluntmachetti/synthworld/discussions/categories/experiment-results)
+Discussion category indexes community-authored experiments. It is not a public
+leaderboard or an evidence store. Each entry is labelled `experiment:self-reported`
+by default and must identify exact versions, inputs, denominators, durable artifact
+links, SHA-256 digests, the public/evaluator boundary and limitations.
+
+Discussion posts, links and attachments are mutable and therefore non-authoritative.
+Authors own and support their experiments. SynthWorld maintainers do not promise to
+inspect, reproduce, repair, host, rank or endorse submissions. A maintainer may
+voluntarily apply `experiment:schema-checked` after structural validation or
+`experiment:maintainer-reproduced` after reproducing the exact sealed artifact;
+neither status is a product certification.

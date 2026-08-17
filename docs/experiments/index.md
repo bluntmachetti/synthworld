@@ -11,9 +11,15 @@ level. Remote API data is not required to render these pages.
 ## Recorded experiments
 
 - [Enterprise authorization with Topaz](enterprise-authorization.md) records the
-  Phase 1 directory prototype, the locally frozen Phase 2 authorization run, its
-  limitations, and the contract work required before Phase 3.
+  Phase 1 directory prototype, the frozen Phase 2 authorization run, and the
+  immutable Phase 3 isolated reference experiment with its limitations and
+  reproducible release assets.
 
 An entry here is an evidence record, not an endorsement of a system under test.
 The entry must distinguish a published, independently reproducible experiment
 from a locally frozen baseline or a historical exploratory run.
+
+Community authors can list their own work in the
+[Experiment results](https://github.com/bluntmachetti/synthworld/discussions/categories/experiment-results)
+Discussion category. Listings are mutable self-reports, not evidence hosted or
+validated by SynthWorld.
