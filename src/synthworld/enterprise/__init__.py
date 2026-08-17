@@ -10,9 +10,15 @@ from synthworld.enterprise.abac import (
     evaluate_enterprise_abac,
 )
 from synthworld.enterprise.authorization import (
+    ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES,
+    AdversarialAuthorizationMechanism,
     AuthorizationEvaluationProfileV1,
     AuthorizationScoredDimension,
     CompiledEnterpriseAccessStateV1,
+    EnterpriseAdversarialAuthorizationEvaluatorV1,
+    EnterpriseAdversarialAuthorizationMetricsV1,
+    EnterpriseAdversarialAuthorizationPredictionV1,
+    EnterpriseAdversarialAuthorizationPublicV1,
     EnterpriseAuthorizationCellPredictionV1,
     EnterpriseAuthorizationCompositionV1,
     EnterpriseAuthorizationEvaluatedSystemV1,
@@ -26,10 +32,13 @@ from synthworld.enterprise.authorization import (
     compile_enterprise_access_state,
     compile_enterprise_authorization_kernel,
     compose_enterprise_authorization,
+    evaluate_enterprise_adversarial_authorization,
     evaluate_enterprise_authorization,
     export_enterprise_authorization,
     load_evaluator_enterprise_authorization,
     load_public_enterprise_authorization,
+    perfect_enterprise_adversarial_authorization_prediction,
+    reference_enterprise_adversarial_authorization,
 )
 from synthworld.enterprise.compiler import (
     EnterpriseCompileError,
@@ -111,6 +120,8 @@ from synthworld.enterprise.validation import (
 )
 
 __all__ = [
+    "ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+    "AdversarialAuthorizationMechanism",
     "AuthorizationEvaluationProfileV1",
     "AuthorizationScoredDimension",
     "CompiledEnterpriseAbacTruthV1",
@@ -121,6 +132,10 @@ __all__ = [
     "EnterpriseAbacMetricsV1",
     "EnterpriseAbacPredictionV1",
     "EnterpriseAbacStateOverlayV1",
+    "EnterpriseAdversarialAuthorizationEvaluatorV1",
+    "EnterpriseAdversarialAuthorizationMetricsV1",
+    "EnterpriseAdversarialAuthorizationPredictionV1",
+    "EnterpriseAdversarialAuthorizationPublicV1",
     "EnterpriseAuthorizationCellPredictionV1",
     "EnterpriseAuthorizationCompositionV1",
     "EnterpriseAuthorizationEvaluatedSystemV1",
@@ -171,6 +186,7 @@ __all__ = [
     "compile_enterprise_rebac_truth",
     "compose_enterprise_authorization",
     "evaluate_enterprise_abac",
+    "evaluate_enterprise_adversarial_authorization",
     "evaluate_enterprise_authorization",
     "evaluate_enterprise_directory_rbac",
     "evaluate_enterprise_identity_fabric",
@@ -195,7 +211,9 @@ __all__ = [
     "parse_enterprise_identity_access_csv",
     "parse_enterprise_identity_access_json",
     "parse_enterprise_identity_access_yaml",
+    "perfect_enterprise_adversarial_authorization_prediction",
     "project_enterprise_identity_fabric_public",
+    "reference_enterprise_adversarial_authorization",
     "standards_profile_ledger_v1",
     "validate_enterprise_identity_access",
 ]

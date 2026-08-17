@@ -1,0 +1,443 @@
+{
+  "$defs": {
+    "AdversarialActionAttemptV1": {
+      "additionalProperties": false,
+      "description": "A candidate action; cross-tenant attempts remain structurally valid.",
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "attempt_id": {
+          "minLength": 1,
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "credential_id": {
+          "minLength": 1,
+          "title": "Credential Id",
+          "type": "string"
+        },
+        "presented_principal_id": {
+          "minLength": 1,
+          "title": "Presented Principal Id",
+          "type": "string"
+        },
+        "requested_scope": {
+          "minLength": 1,
+          "title": "Requested Scope",
+          "type": "string"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "presented_principal_id",
+        "credential_id",
+        "resource_id",
+        "action",
+        "requested_scope",
+        "tick"
+      ],
+      "title": "AdversarialActionAttemptV1",
+      "type": "object"
+    },
+    "AdversarialAuthorityGrantV1": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "minLength": 1,
+          "title": "Action",
+          "type": "string"
+        },
+        "allowed_scopes": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Scopes",
+          "type": "array"
+        },
+        "grant_id": {
+          "minLength": 1,
+          "title": "Grant Id",
+          "type": "string"
+        },
+        "principal_id": {
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "resource_kind": {
+          "minLength": 1,
+          "title": "Resource Kind",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/AdversarialAuthoritySource"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "valid_from_tick": {
+          "minimum": 0,
+          "title": "Valid From Tick",
+          "type": "integer"
+        },
+        "valid_until_tick": {
+          "exclusiveMinimum": 0,
+          "title": "Valid Until Tick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "grant_id",
+        "principal_id",
+        "resource_kind",
+        "action",
+        "allowed_scopes",
+        "valid_from_tick",
+        "valid_until_tick",
+        "source"
+      ],
+      "title": "AdversarialAuthorityGrantV1",
+      "type": "object"
+    },
+    "AdversarialAuthoritySource": {
+      "enum": [
+        "rbac",
+        "rebac"
+      ],
+      "title": "AdversarialAuthoritySource",
+      "type": "string"
+    },
+    "AdversarialCredentialEvidenceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "credential_id": {
+          "minLength": 1,
+          "title": "Credential Id",
+          "type": "string"
+        },
+        "device_owner_alias": {
+          "minLength": 1,
+          "title": "Device Owner Alias",
+          "type": "string"
+        },
+        "issuer_subject_alias": {
+          "minLength": 1,
+          "title": "Issuer Subject Alias",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "credential_id",
+        "issuer_subject_alias",
+        "device_owner_alias"
+      ],
+      "title": "AdversarialCredentialEvidenceV1",
+      "type": "object"
+    },
+    "AdversarialPrincipalV1": {
+      "additionalProperties": false,
+      "properties": {
+        "clearance": {
+          "$ref": "#/$defs/InformationClassification"
+        },
+        "directory_alias": {
+          "minLength": 1,
+          "title": "Directory Alias",
+          "type": "string"
+        },
+        "principal_id": {
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "principal_id",
+        "tenant_id",
+        "directory_alias",
+        "clearance"
+      ],
+      "title": "AdversarialPrincipalV1",
+      "type": "object"
+    },
+    "AdversarialResourceV1": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "$ref": "#/$defs/InformationClassification"
+        },
+        "resource_id": {
+          "minLength": 1,
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "resource_kind": {
+          "minLength": 1,
+          "title": "Resource Kind",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "resource_id",
+        "tenant_id",
+        "resource_kind",
+        "classification"
+      ],
+      "title": "AdversarialResourceV1",
+      "type": "object"
+    },
+    "AdversarialTenantRuleV1": {
+      "additionalProperties": false,
+      "properties": {
+        "effect": {
+          "$ref": "#/$defs/RuleEffect"
+        },
+        "operator": {
+          "$ref": "#/$defs/TenantComparisonOperator"
+        },
+        "rule_id": {
+          "minLength": 1,
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rule_id",
+        "operator",
+        "effect"
+      ],
+      "title": "AdversarialTenantRuleV1",
+      "type": "object"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "EnterpriseAdversarialAuthorizationPolicyV1": {
+      "additionalProperties": false,
+      "description": "Bounded public policy semantics without vendor policy syntax.",
+      "properties": {
+        "authority_combination": {
+          "const": "rbac_or_rebac",
+          "default": "rbac_or_rebac",
+          "title": "Authority Combination",
+          "type": "string"
+        },
+        "binding_evaluation": {
+          "const": "credential_evidence_resolves_principal",
+          "default": "credential_evidence_resolves_principal",
+          "title": "Binding Evaluation",
+          "type": "string"
+        },
+        "clearance_evaluation": {
+          "const": "principal_at_least_resource",
+          "default": "principal_at_least_resource",
+          "title": "Clearance Evaluation",
+          "type": "string"
+        },
+        "default_tenant_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "scope_evaluation": {
+          "const": "requested_scope_must_be_granted",
+          "default": "requested_scope_must_be_granted",
+          "title": "Scope Evaluation",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "tenant_rules": {
+          "items": {
+            "$ref": "#/$defs/AdversarialTenantRuleV1"
+          },
+          "minItems": 1,
+          "title": "Tenant Rules",
+          "type": "array"
+        },
+        "time_evaluation": {
+          "const": "half_open_grant_interval",
+          "default": "half_open_grant_interval",
+          "title": "Time Evaluation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "default_tenant_decision",
+        "tenant_rules"
+      ],
+      "title": "EnterpriseAdversarialAuthorizationPolicyV1",
+      "type": "object"
+    },
+    "InformationClassification": {
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted"
+      ],
+      "title": "InformationClassification",
+      "type": "string"
+    },
+    "RuleEffect": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "RuleEffect",
+      "type": "string"
+    },
+    "TenantComparisonOperator": {
+      "enum": [
+        "equals",
+        "not_equals"
+      ],
+      "title": "TenantComparisonOperator",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Public facts and attempts, without counterfactual labels or verdicts.",
+  "properties": {
+    "attempts": {
+      "items": {
+        "$ref": "#/$defs/AdversarialActionAttemptV1"
+      },
+      "minItems": 1,
+      "title": "Attempts",
+      "type": "array"
+    },
+    "credentials": {
+      "items": {
+        "$ref": "#/$defs/AdversarialCredentialEvidenceV1"
+      },
+      "minItems": 1,
+      "title": "Credentials",
+      "type": "array"
+    },
+    "grants": {
+      "items": {
+        "$ref": "#/$defs/AdversarialAuthorityGrantV1"
+      },
+      "minItems": 1,
+      "title": "Grants",
+      "type": "array"
+    },
+    "policy": {
+      "$ref": "#/$defs/EnterpriseAdversarialAuthorizationPolicyV1"
+    },
+    "principals": {
+      "items": {
+        "$ref": "#/$defs/AdversarialPrincipalV1"
+      },
+      "minItems": 1,
+      "title": "Principals",
+      "type": "array"
+    },
+    "profile_version": {
+      "const": "enterprise-authorization-adversarial-1.0.0",
+      "default": "enterprise-authorization-adversarial-1.0.0",
+      "title": "Profile Version",
+      "type": "string"
+    },
+    "resources": {
+      "items": {
+        "$ref": "#/$defs/AdversarialResourceV1"
+      },
+      "minItems": 1,
+      "title": "Resources",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "seed",
+    "policy",
+    "principals",
+    "credentials",
+    "resources",
+    "grants",
+    "attempts"
+  ],
+  "title": "EnterpriseAdversarialAuthorizationPublicV1",
+  "type": "object"
+}

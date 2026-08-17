@@ -32,6 +32,19 @@ from synthworld.enterprise.abac.models import (
     EnterpriseAbacIntentOverlayV1,
     EnterpriseAbacStateOverlayV1,
 )
+from synthworld.enterprise.authorization.adversarial.metrics import (
+    evaluate_enterprise_adversarial_authorization,
+    perfect_enterprise_adversarial_authorization_prediction,
+)
+from synthworld.enterprise.authorization.adversarial.models import (
+    EnterpriseAdversarialAuthorizationEvaluatorV1,
+    EnterpriseAdversarialAuthorizationMetricsV1,
+    EnterpriseAdversarialAuthorizationPredictionV1,
+    EnterpriseAdversarialAuthorizationPublicV1,
+)
+from synthworld.enterprise.authorization.adversarial.reference import (
+    reference_enterprise_adversarial_authorization,
+)
 from synthworld.enterprise.authorization.metrics import (
     EnterpriseAuthorizationEvaluationScopeV1,
     EnterpriseAuthorizationExecutionMetadataV1,
@@ -203,6 +216,18 @@ SCHEMAS: dict[str, type[BaseModel]] = {
         EnterpriseAuthorizationPredictionV1
     ),
     "enterprise-authorization-metrics.schema.json": EnterpriseAuthorizationMetricsV1,
+    "enterprise-adversarial-authorization-public.schema.json": (
+        EnterpriseAdversarialAuthorizationPublicV1
+    ),
+    "enterprise-adversarial-authorization-evaluator.schema.json": (
+        EnterpriseAdversarialAuthorizationEvaluatorV1
+    ),
+    "enterprise-adversarial-authorization-prediction.schema.json": (
+        EnterpriseAdversarialAuthorizationPredictionV1
+    ),
+    "enterprise-adversarial-authorization-metrics.schema.json": (
+        EnterpriseAdversarialAuthorizationMetricsV1
+    ),
     "projection-mapping-profile.schema.json": ProjectionMappingProfileV1,
     "projection-support-matrix.schema.json": ProjectionSupportMatrixV1,
     "projection-fidelity-metrics.schema.json": ProjectionFidelityMetricsV1,
@@ -319,6 +344,27 @@ def expected_files() -> dict[Path, bytes]:
     )
     files[EXAMPLE_DIR / "enterprise-authorization-metrics.json"] = canonical_json_bytes(
         authorization_metrics
+    )
+    reference_adversarial = reference_enterprise_adversarial_authorization()
+    adversarial_prediction = perfect_enterprise_adversarial_authorization_prediction(
+        reference_adversarial.evaluator
+    )
+    adversarial_metrics = evaluate_enterprise_adversarial_authorization(
+        public=reference_adversarial.public,
+        evaluator=reference_adversarial.evaluator,
+        prediction=adversarial_prediction,
+    )
+    files[EXAMPLE_DIR / "enterprise-adversarial-authorization-public.json"] = (
+        canonical_json_bytes(reference_adversarial.public)
+    )
+    files[EXAMPLE_DIR / "enterprise-adversarial-authorization-evaluator.json"] = (
+        canonical_json_bytes(reference_adversarial.evaluator)
+    )
+    files[EXAMPLE_DIR / "enterprise-adversarial-authorization-prediction.json"] = (
+        canonical_json_bytes(adversarial_prediction)
+    )
+    files[EXAMPLE_DIR / "enterprise-adversarial-authorization-metrics.json"] = (
+        canonical_json_bytes(adversarial_metrics)
     )
     reference_identity_fabric = reference_enterprise_identity_fabric()
     perfect_identity_fabric_prediction = perfect_enterprise_identity_fabric_prediction(

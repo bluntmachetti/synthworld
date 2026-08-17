@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "AdversarialAttemptPredictionV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "minLength": 1,
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "binding_status": {
+          "$ref": "#/$defs/BindingStatus"
+        },
+        "decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "resolved_principal_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolved Principal Id"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "binding_status",
+        "decision"
+      ],
+      "title": "AdversarialAttemptPredictionV1",
+      "type": "object"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "BindingStatus": {
+      "enum": [
+        "not_applicable",
+        "matches_canonical",
+        "missing",
+        "mismatch"
+      ],
+      "title": "BindingStatus",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attempts": {
+      "items": {
+        "$ref": "#/$defs/AdversarialAttemptPredictionV1"
+      },
+      "minItems": 1,
+      "title": "Attempts",
+      "type": "array"
+    },
+    "public_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "public_digest",
+    "attempts"
+  ],
+  "title": "EnterpriseAdversarialAuthorizationPredictionV1",
+  "type": "object"
+}

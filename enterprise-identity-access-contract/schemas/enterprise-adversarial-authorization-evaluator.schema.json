@@ -1,0 +1,254 @@
+{
+  "$defs": {
+    "AdversarialAttemptTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_id": {
+          "minLength": 1,
+          "title": "Attempt Id",
+          "type": "string"
+        },
+        "binding_status": {
+          "$ref": "#/$defs/BindingStatus"
+        },
+        "category": {
+          "$ref": "#/$defs/AdversarialCaseCategory"
+        },
+        "expected_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "identifier_probe": {
+          "title": "Identifier Probe",
+          "type": "boolean"
+        },
+        "mechanism": {
+          "$ref": "#/$defs/AdversarialAuthorizationMechanism"
+        },
+        "mechanism_ignored_decision": {
+          "$ref": "#/$defs/AuthorizationDecision"
+        },
+        "pair_id": {
+          "minLength": 1,
+          "title": "Pair Id",
+          "type": "string"
+        },
+        "resolved_principal_id": {
+          "minLength": 1,
+          "title": "Resolved Principal Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "attempt_id",
+        "pair_id",
+        "mechanism",
+        "category",
+        "resolved_principal_id",
+        "binding_status",
+        "expected_decision",
+        "mechanism_ignored_decision",
+        "identifier_probe"
+      ],
+      "title": "AdversarialAttemptTruthV1",
+      "type": "object"
+    },
+    "AdversarialAuthorizationMechanism": {
+      "enum": [
+        "tenant",
+        "scope",
+        "binding",
+        "time",
+        "clearance",
+        "composition"
+      ],
+      "title": "AdversarialAuthorizationMechanism",
+      "type": "string"
+    },
+    "AdversarialCaseCategory": {
+      "enum": [
+        "single_factor",
+        "interaction"
+      ],
+      "title": "AdversarialCaseCategory",
+      "type": "string"
+    },
+    "AdversarialCounterfactualPairTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/AdversarialCaseCategory"
+        },
+        "expected_transition": {
+          "title": "Expected Transition",
+          "type": "boolean"
+        },
+        "from_attempt_id": {
+          "minLength": 1,
+          "title": "From Attempt Id",
+          "type": "string"
+        },
+        "mechanism": {
+          "$ref": "#/$defs/AdversarialAuthorizationMechanism"
+        },
+        "pair_id": {
+          "minLength": 1,
+          "title": "Pair Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "to_attempt_id": {
+          "minLength": 1,
+          "title": "To Attempt Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pair_id",
+        "mechanism",
+        "category",
+        "from_attempt_id",
+        "to_attempt_id",
+        "expected_transition"
+      ],
+      "title": "AdversarialCounterfactualPairTruthV1",
+      "type": "object"
+    },
+    "AdversarialCredentialBindingTruthV1": {
+      "additionalProperties": false,
+      "properties": {
+        "credential_id": {
+          "minLength": 1,
+          "title": "Credential Id",
+          "type": "string"
+        },
+        "principal_id": {
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "credential_id",
+        "principal_id"
+      ],
+      "title": "AdversarialCredentialBindingTruthV1",
+      "type": "object"
+    },
+    "AuthorizationDecision": {
+      "enum": [
+        "allow",
+        "deny"
+      ],
+      "title": "AuthorizationDecision",
+      "type": "string"
+    },
+    "BindingStatus": {
+      "enum": [
+        "not_applicable",
+        "matches_canonical",
+        "missing",
+        "mismatch"
+      ],
+      "title": "BindingStatus",
+      "type": "string"
+    },
+    "SyntheticDigestV1": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "default": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "synthetic": {
+          "const": true,
+          "default": true,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "SyntheticDigestV1",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Hidden bindings, pair labels, mechanisms, and expected decisions.",
+  "properties": {
+    "canonical_bindings": {
+      "items": {
+        "$ref": "#/$defs/AdversarialCredentialBindingTruthV1"
+      },
+      "title": "Canonical Bindings",
+      "type": "array"
+    },
+    "cases": {
+      "items": {
+        "$ref": "#/$defs/AdversarialAttemptTruthV1"
+      },
+      "title": "Cases",
+      "type": "array"
+    },
+    "pairs": {
+      "items": {
+        "$ref": "#/$defs/AdversarialCounterfactualPairTruthV1"
+      },
+      "title": "Pairs",
+      "type": "array"
+    },
+    "profile_version": {
+      "const": "enterprise-authorization-adversarial-1.0.0",
+      "default": "enterprise-authorization-adversarial-1.0.0",
+      "title": "Profile Version",
+      "type": "string"
+    },
+    "public_digest": {
+      "$ref": "#/$defs/SyntheticDigestV1"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "synthetic": {
+      "const": true,
+      "default": true,
+      "title": "Synthetic",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "public_digest",
+    "canonical_bindings",
+    "cases",
+    "pairs"
+  ],
+  "title": "EnterpriseAdversarialAuthorizationEvaluatorV1",
+  "type": "object"
+}

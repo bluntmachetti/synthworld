@@ -1,5 +1,16 @@
 """Fixed three-family enterprise authorization composition."""
 
+from synthworld.enterprise.authorization.adversarial import (
+    ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES,
+    AdversarialAuthorizationMechanism,
+    EnterpriseAdversarialAuthorizationEvaluatorV1,
+    EnterpriseAdversarialAuthorizationMetricsV1,
+    EnterpriseAdversarialAuthorizationPredictionV1,
+    EnterpriseAdversarialAuthorizationPublicV1,
+    evaluate_enterprise_adversarial_authorization,
+    perfect_enterprise_adversarial_authorization_prediction,
+    reference_enterprise_adversarial_authorization,
+)
 from synthworld.enterprise.authorization.compiler import (
     compile_enterprise_access_state,
     compile_enterprise_authorization_kernel,
@@ -34,10 +45,16 @@ from synthworld.enterprise.authorization.serialization import (
 )
 
 __all__ = [
+    "ENTERPRISE_ADVERSARIAL_AUTHORIZATION_BASELINES",
+    "AdversarialAuthorizationMechanism",
     "AuthorizationCellProfileV1",
     "AuthorizationEvaluationProfileV1",
     "AuthorizationScoredDimension",
     "CompiledEnterpriseAccessStateV1",
+    "EnterpriseAdversarialAuthorizationEvaluatorV1",
+    "EnterpriseAdversarialAuthorizationMetricsV1",
+    "EnterpriseAdversarialAuthorizationPredictionV1",
+    "EnterpriseAdversarialAuthorizationPublicV1",
     "EnterpriseAuthorizationCellPredictionV1",
     "EnterpriseAuthorizationCompositionV1",
     "EnterpriseAuthorizationEvaluatedSystemV1",
@@ -53,9 +70,12 @@ __all__ = [
     "compile_enterprise_access_state",
     "compile_enterprise_authorization_kernel",
     "compose_enterprise_authorization",
+    "evaluate_enterprise_adversarial_authorization",
     "evaluate_enterprise_authorization",
     "export_enterprise_authorization",
     "load_evaluator_enterprise_authorization",
     "load_public_enterprise_authorization",
+    "perfect_enterprise_adversarial_authorization_prediction",
     "perfect_enterprise_authorization_prediction",
+    "reference_enterprise_adversarial_authorization",
 ]

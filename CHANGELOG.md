@@ -27,6 +27,15 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   outcomes. Exact public cell inventories, artifact and schema bindings,
   deterministic system/policy metadata, and per-metric denominators are
   enforced without changing existing `1.0.0` schemas or golden bytes.
+- **Discriminating adversarial enterprise authorization cases (#138).** A new
+  independently versioned reference profile adds hidden single-factor pairs for
+  tenant, scope, credential binding, time, clearance, and RBAC/ReBAC authority
+  composition. Its public policy supports generic tenant inequality without
+  enumerating negative target IDs, candidate action attempts remain separate
+  from persistent grants, and opaque attempt IDs reveal no pair or verdict
+  labels. Independent metrics report total cohorts and discriminating
+  denominators; seven weak baselines fail their dedicated dimensions without
+  changing frozen schemas or golden artifacts.
 
 ## [0.15.0] - 2026-08-15
 
