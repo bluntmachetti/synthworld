@@ -416,6 +416,22 @@ def test_artifact_validation_recomputes_every_answer_key_field() -> None:
                 )
             ),
         )
+    probe_index = next(
+        index for index, item in enumerate(evaluator.cases) if item.identifier_probe
+    )
+    changed_probe = evaluator.cases[probe_index].model_copy(
+        update={"identifier_probe": False}
+    )
+    changed_probe_cases = (
+        *evaluator.cases[:probe_index],
+        changed_probe,
+        *evaluator.cases[probe_index + 1 :],
+    )
+    with pytest.raises(ValueError, match="adversarial_case_identifier_probe_mismatch"):
+        validate_adversarial_authorization_artifacts(
+            public,
+            evaluator.model_copy(update={"cases": changed_probe_cases}),
+        )
     changed_pair = evaluator.pairs[0].model_copy(
         update={"expected_transition": not evaluator.pairs[0].expected_transition}
     )
@@ -436,6 +452,64 @@ def test_artifact_validation_recomputes_every_answer_key_field() -> None:
         for item in evaluator.cases
         if item.mechanism is AdversarialAuthorizationMechanism.BINDING
     )
+    same_verdict_groups = tuple(
+        tuple(item for item in binding_cases if item.expected_decision is decision)
+        for decision in (AuthorizationDecision.ALLOW, AuthorizationDecision.DENY)
+    )
+    same_verdict_pairs = tuple(
+        pair.model_copy(
+            update={
+                "from_attempt_id": endpoints[0].attempt_id,
+                "to_attempt_id": endpoints[1].attempt_id,
+                "expected_transition": False,
+            }
+        )
+        for pair, endpoints in zip(
+            binding_pairs,
+            same_verdict_groups,
+            strict=True,
+        )
+    )
+    same_verdict_pair_by_attempt = {
+        attempt_id: pair
+        for pair in same_verdict_pairs
+        for attempt_id in (pair.from_attempt_id, pair.to_attempt_id)
+    }
+    same_verdict_cases = tuple(
+        item.model_copy(
+            update={
+                "pair_id": same_verdict_pair_by_attempt[item.attempt_id].pair_id,
+                "identifier_probe": (
+                    item.attempt_id
+                    == same_verdict_pair_by_attempt[item.attempt_id].to_attempt_id
+                ),
+            }
+        )
+        if item.attempt_id in same_verdict_pair_by_attempt
+        else item
+        for item in evaluator.cases
+    )
+    changed_same_verdict_pairs = tuple(
+        next(
+            (
+                changed
+                for changed in same_verdict_pairs
+                if changed.pair_id == item.pair_id
+            ),
+            item,
+        )
+        for item in evaluator.pairs
+    )
+    with pytest.raises(ValueError, match="adversarial_pair_transition_required"):
+        validate_adversarial_authorization_artifacts(
+            public,
+            evaluator.model_copy(
+                update={
+                    "cases": same_verdict_cases,
+                    "pairs": changed_same_verdict_pairs,
+                }
+            ),
+        )
     nondiscriminating = tuple(
         item
         for item in binding_cases
@@ -459,14 +533,22 @@ def test_artifact_validation_recomputes_every_answer_key_field() -> None:
             strict=True,
         )
     )
-    pair_id_by_attempt = {
-        attempt_id: pair.pair_id
+    remapped_pair_by_attempt = {
+        attempt_id: pair
         for pair in remapped_pairs
         for attempt_id in (pair.from_attempt_id, pair.to_attempt_id)
     }
     changed_cases = tuple(
-        item.model_copy(update={"pair_id": pair_id_by_attempt[item.attempt_id]})
-        if item.attempt_id in pair_id_by_attempt
+        item.model_copy(
+            update={
+                "pair_id": remapped_pair_by_attempt[item.attempt_id].pair_id,
+                "identifier_probe": (
+                    item.attempt_id
+                    == remapped_pair_by_attempt[item.attempt_id].to_attempt_id
+                ),
+            }
+        )
+        if item.attempt_id in remapped_pair_by_attempt
         else item
         for item in evaluator.cases
     )

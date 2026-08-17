@@ -623,6 +623,11 @@ def validate_adversarial_authorization_artifacts(
         raise ValueError("adversarial_case_not_in_declared_pair")
     for item in evaluator.cases:
         attempt = attempt_by_id[item.attempt_id]
+        expected_identifier_probe = (
+            item.attempt_id == pair_by_id[item.pair_id].to_attempt_id
+        )
+        if item.identifier_probe is not expected_identifier_probe:
+            raise ValueError("adversarial_case_identifier_probe_mismatch")
         expected_binding_status = (
             BindingStatus.MATCHES_CANONICAL
             if attempt.presented_principal_id == item.resolved_principal_id
@@ -654,15 +659,15 @@ def validate_adversarial_authorization_artifacts(
         ):
             raise ValueError("adversarial_case_ignored_decision_mismatch")
     cases_by_attempt = {item.attempt_id: item for item in evaluator.cases}
-    if any(
-        item.expected_transition
-        is not (
-            cases_by_attempt[item.from_attempt_id].expected_decision
-            is not cases_by_attempt[item.to_attempt_id].expected_decision
+    for pair in evaluator.pairs:
+        expected_transition = (
+            cases_by_attempt[pair.from_attempt_id].expected_decision
+            is not cases_by_attempt[pair.to_attempt_id].expected_decision
         )
-        for item in evaluator.pairs
-    ):
-        raise ValueError("adversarial_pair_transition_mismatch")
+        if not expected_transition:
+            raise ValueError("adversarial_pair_transition_required")
+        if pair.expected_transition is not expected_transition:
+            raise ValueError("adversarial_pair_transition_mismatch")
     if any(
         not any(
             cases_by_attempt[attempt_id].expected_decision
