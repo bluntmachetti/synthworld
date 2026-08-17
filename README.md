@@ -188,7 +188,7 @@ side out of the adapter path even though the frozen reference truth is publicly
 inspectable. See the full [Asteria Agentic v1 guide](https://github.com/bluntmachetti/synthworld/blob/main/AGENTIC_BENCHMARK.md).
 
 For a configurable generated enterprise-agentic smoke world, explicitly select the
-generated profile. Artifact-root validation and evaluation are previewed on main for
+generated profile. Artifact-root validation and evaluation are available since
 0.15.0:
 
 ```bash

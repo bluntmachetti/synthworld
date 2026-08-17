@@ -44,15 +44,16 @@ fictional organization topology
 | Phase | Evidence level | Package | What was exercised |
 |---|---|---|---|
 | Phase 1 | Historical exploratory run; not frozen or independently reproducible | `idcognito-synthworld==0.15.0` | Public enterprise-access tuples loaded into a Topaz directory and queried through the directory check API |
-| Phase 2 | Source-controlled and clean-clone verified locally; no published remote or independent reproduction | `idcognito-synthworld==0.15.0` | A generated enterprise identity/access world, projected policy, live authorization decisions, blinded submissions and released scorers |
-| Phase 3 | Planned | A future release containing the required benchmark contracts | Enforced evaluator isolation and scored composed authorization decisions with discriminating adversarial cases |
+| Phase 2 | Locally frozen and clean-clone verified; evidence archives published with SynthWorld 0.16.0; no independent reproduction recorded yet | `idcognito-synthworld==0.15.0` | A generated enterprise identity/access world, projected policy, live authorization decisions, blinded submissions and released scorers |
+| Phase 3 | Ready for a fresh isolated-lab experiment | `idcognito-synthworld==0.16.0` | Enforced evaluator isolation and scored composed authorization decisions with discriminating adversarial cases |
 
 The Phase 2 source-only baseline is locally tagged
 `phase2-baseline-0.15.0`. A clean local clone completed all 32 validation checks
 and reproduced submission digest
 `89099e3b55226cd6bd378f6dc7a2153aed3ee8d0e6e7fe3f9781d5be25a69f05`.
-The tag is not externally fetchable yet, so these details identify the evidence
-but do not make it independently reproducible.
+The experiment Git tag is not hosted as a separately fetchable remote. The release
+archives below preserve the source and retained evidence, making the record
+independently downloadable but not yet independently reproduced.
 
 ## Phase 1: directory feasibility
 
@@ -197,22 +198,22 @@ families have different denominators.
 
 ## Reproduction materials
 
-No externally downloadable package exists yet. Until the repository, immutable
-release assets and their checksums are published, Phase 2 remains a locally frozen
-baseline. Publication should provide the following assets rather than committing
-binary archives to the SynthWorld repository:
+The SynthWorld 0.16.0 GitHub release publishes the following retained experiment
+assets. The ZIPs were built from the Phase 1 and Phase 2 work conducted against
+SynthWorld 0.15.0; they are historical evidence, not regenerated 0.16.0 results.
 
-| Planned asset | Intended use | Evaluator truth included |
-|---|---|---|
-| `phase1-historical-kit.zip` | Audit the exploratory directory prototype and its original context | Yes, in a physically separate tree |
-| `phase2-reproduction-kit.zip` | Conduct a clean run from the frozen source and explicit inputs | No pre-generated evaluator artifacts |
-| `phase2-reference-run.zip` | Audit the retained known-good inputs, outputs, sealed submissions and scores | Yes, in a physically separate tree |
-| `SHA256SUMS` | Verify every custom release asset | No |
+| Release asset | Bytes | SHA-256 | Intended use | Evaluator truth included |
+|---|---:|---|---|---|
+| [`phase1-historical-kit.zip`](https://github.com/bluntmachetti/synthworld/releases/download/v0.16.0/phase1-historical-kit.zip) | 244,962 | `443b708cf95c4de41149ea8753d9e41fe3505217fcc4826fb15890410fb93f92` | Audit the exploratory directory prototype and its original context | Yes, in a physically separate tree |
+| [`phase2-reproduction-kit.zip`](https://github.com/bluntmachetti/synthworld/releases/download/v0.16.0/phase2-reproduction-kit.zip) | 213,386 | `4d870eeeae18527bd604359a5592844b9abe98bcbab01c29b084b539a0ff8921` | Conduct a clean run from the frozen source and explicit inputs | No pre-generated evaluator artifacts |
+| [`phase2-reference-run.zip`](https://github.com/bluntmachetti/synthworld/releases/download/v0.16.0/phase2-reference-run.zip) | 18,124,673 | `f973b7dc0829c79cd2a6d6bce02eef97064119872bea6652423c89f3520c8fae` | Audit the retained known-good inputs, outputs, sealed submissions and scores | Yes, in a physically separate tree |
+| [`SHA256SUMS`](https://github.com/bluntmachetti/synthworld/releases/download/v0.16.0/SHA256SUMS) | 277 | `bfdc21794eaadd9e1e8183994282922c834429c498dafe3caaa8d0eaebf5c9a6` | Verify the three ZIP files | No |
+| [`ASSET-METADATA.json`](https://github.com/bluntmachetti/synthworld/releases/download/v0.16.0/ASSET-METADATA.json) | 766 | `ad91ef11105e2ecb47fc208cfc71e316778bfe03f4d9a231fea9e2a6426c6cb8` | Machine-readable release-asset sizes and digests | No |
 
-The experiment page must publish the version, byte size, SHA-256 and immutable
-download link for each asset. A GitHub-generated source archive is not sufficient:
-the Phase 2 repository intentionally ignores generated evidence, so those files
-would be absent.
+The signed v0.16.0 source tag anchors the sizes and digests in this page. Verify
+downloads against those values: release hosting is not itself an integrity proof.
+A GitHub-generated source archive is not sufficient because the Phase 2 repository
+intentionally ignores generated evidence, so those files would be absent.
 
 Every archive must remain understandable after it is detached from this page. Its
 root should contain:
@@ -235,7 +236,7 @@ version, prerequisites, commands, directory map, supported claims and limitation
 and link back to this canonical evidence record. `MANIFEST.json` should classify
 each file as source, public input, system output or evaluator evidence.
 
-After publication, the shortest verified reproduction path should be equivalent to:
+The shortest verified reproduction path is:
 
 ```bash
 sha256sum -c SHA256SUMS
@@ -319,8 +320,8 @@ and give evaluator access only to a separate scorer.
 
 ## Contract work before Phase 3
 
-The experiment produced four focused requirements. Three are implemented on the
-unreleased development line; Phase 3 must still wait for the isolated lab work:
+The experiment produced four focused requirements. SynthWorld 0.16.0 implements
+the first three; Phase 3 still requires the isolated lab work:
 
 - [#137](https://github.com/bluntmachetti/synthworld/issues/137) added a publicly
   constructible composed-decision submission and independent scoring after the
@@ -333,7 +334,7 @@ unreleased development line; Phase 3 must still wait for the isolated lab work:
   consumer API, digest helpers and supported end-to-end workflow after the frozen
   Phase 2 run.
 - [#140](https://github.com/bluntmachetti/synthworld/issues/140) tracks publication
-  of an isolated, reproducible adapter lab after the contracts are stable.
+  of the fresh isolated, reproducible adapter lab against the released contracts.
 
 Phase 3 should start in a fresh experiment directory against a released package. It
 must not retrofit Phase 2 or silently reinterpret its results.

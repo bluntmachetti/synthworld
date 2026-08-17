@@ -3,7 +3,7 @@
 This is the supported released-package path from an authored organisation to a
 composed authorization report. The identity import has CLI support; corpus,
 RBAC/ABAC/ReBAC compilation, composition, submission construction, and scoring
-are Python-only in this release. Import those contracts from the curated
+are Python-only in 0.16.0. Import those contracts from the curated
 `synthworld.enterprise.consumer` namespace.
 
 SynthWorld generates deterministic benchmark data and evaluates observations. It
