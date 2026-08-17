@@ -9,6 +9,8 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-08-17
+
 ### Added
 
 - **Stable enterprise authorization consumer API (#139).** A curated
@@ -36,6 +38,12 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   labels. Independent metrics report total cohorts and discriminating
   denominators; seven weak baselines fail their dedicated dimensions without
   changing frozen schemas or golden artifacts.
+- **Published Phase 1 and Phase 2 enterprise authorization evidence.** The
+  GitHub release carries checksum-bound historical, reproduction, and reference
+  archives from the Topaz experiment conducted against SynthWorld 0.15.0. The
+  signed release source records the expected digests and the documentation states
+  which archives contain evaluator evidence. These retained artifacts do not
+  retroactively rescore the experiment with the new 0.16.0 contracts.
 
 ## [0.15.0] - 2026-08-15
 
@@ -593,7 +601,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/bluntmachetti/synthworld/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bluntmachetti/synthworld/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/bluntmachetti/synthworld/compare/v0.12.0...v0.13.0

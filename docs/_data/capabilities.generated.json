@@ -7,9 +7,14 @@
         "target": "synthworld.cli:main"
       }
     ],
-    "version": "0.15.0"
+    "version": "0.16.0"
   },
   "releases": [
+    {
+      "heading": "[0.16.0] - 2026-08-17",
+      "id": "changelog:0.16.0",
+      "version": "0.16.0"
+    },
     {
       "heading": "[0.15.0] - 2026-08-15",
       "id": "changelog:0.15.0",
@@ -366,6 +371,12 @@
       "anchor": "0150---2026-08-15",
       "heading": "[0.15.0] - 2026-08-15",
       "id": "route:CHANGELOG.md#0150---2026-08-15",
+      "path": "CHANGELOG.md"
+    },
+    {
+      "anchor": "0160---2026-08-17",
+      "heading": "[0.16.0] - 2026-08-17",
+      "id": "route:CHANGELOG.md#0160---2026-08-17",
       "path": "CHANGELOG.md"
     },
     {

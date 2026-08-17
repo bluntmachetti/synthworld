@@ -4803,7 +4803,7 @@
       "roadmap_routes": [
         "route:ROADMAP.md#phase-4--portfolio-and-ai-system-integrations"
       ],
-      "since": "unreleased",
+      "since": "0.16.0",
       "summary": "Generate and score hidden single-factor enterprise authorization counterfactuals.",
       "support": "Supported through the importable adversarial authorization Python API.",
       "title": "Adversarial enterprise authorization"
@@ -8038,7 +8038,7 @@
       "roadmap_routes": [
         "route:ROADMAP.md#phase-4--portfolio-and-ai-system-integrations"
       ],
-      "since": "unreleased",
+      "since": "0.16.0",
       "summary": "Submit and independently score composed enterprise authorization decisions.",
       "support": "Supported through the importable enterprise authorization Python API.",
       "title": "Enterprise authorization scoring"
@@ -9610,8 +9610,8 @@
     }
   ],
   "input_digests": {
-    "curated_sha256": "d560e7047fec8b2da87361454ea9f14ffaf9d4e7556c8ce7ca2f7aaa5acc59d6",
-    "generated_sha256": "60a09e73bcfa101accd6169fa9b0e7f54a2e59f5e2636873554fb4900af71823"
+    "curated_sha256": "b4024a2b909ea7e155b6a5ba251ea0f5210584e97041f21ee148019eb157fc29",
+    "generated_sha256": "5519fea931098af271cdd4a3acd9c973c6e1ff31acec2e63e446c31b3ba84baf"
   },
   "schema_version": "1.0.0"
 }
