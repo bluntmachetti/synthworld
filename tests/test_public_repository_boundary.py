@@ -32,6 +32,10 @@ _TEXT_SUFFIXES = frozenset(
 )
 _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
     {
+        # The experiment-results form requests an exact released package version
+        # for provenance; it contains no consumer integration code or private
+        # symbols. Reviewed with the Phase 3 publication record on 2026-08-17.
+        Path(".github/DISCUSSION_TEMPLATE/experiment-results.yml"),
         Path(".github/DISCUSSION_TEMPLATE/q-a.yml"),
         Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
         Path(".github/workflows/release.yml"),
