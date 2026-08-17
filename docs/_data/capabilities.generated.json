@@ -2534,9 +2534,15 @@
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
-      "anchor": "contract-work-before-phase-3",
-      "heading": "Contract work before Phase 3",
-      "id": "route:docs/experiments/enterprise-authorization.md#contract-work-before-phase-3",
+      "anchor": "community-result-submissions",
+      "heading": "Community result submissions",
+      "id": "route:docs/experiments/enterprise-authorization.md#community-result-submissions",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "enforced-capability-boundary",
+      "heading": "Enforced capability boundary",
+      "id": "route:docs/experiments/enterprise-authorization.md#enforced-capability-boundary",
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
@@ -2555,6 +2561,12 @@
       "anchor": "experiment-boundary",
       "heading": "Experiment boundary",
       "id": "route:docs/experiments/enterprise-authorization.md#experiment-boundary",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "historical-phase-1-and-phase-2-assets",
+      "heading": "Historical Phase 1 and Phase 2 assets",
+      "id": "route:docs/experiments/enterprise-authorization.md#historical-phase-1-and-phase-2-assets",
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
@@ -2594,6 +2606,24 @@
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
+      "anchor": "phase-3-contract-delivery",
+      "heading": "Phase 3 contract delivery",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-3-contract-delivery",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "phase-3-frozen-isolated-reference-experiment",
+      "heading": "Phase 3: frozen isolated reference experiment",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-3-frozen-isolated-reference-experiment",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "phase-3-immutable-assets",
+      "heading": "Phase 3 immutable assets",
+      "id": "route:docs/experiments/enterprise-authorization.md#phase-3-immutable-assets",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
       "anchor": "public-policy-could-reveal-the-negative-cohort",
       "heading": "Public policy could reveal the negative cohort",
       "id": "route:docs/experiments/enterprise-authorization.md#public-policy-could-reveal-the-negative-cohort",
@@ -2612,6 +2642,12 @@
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
+      "anchor": "results-and-controls",
+      "heading": "Results and controls",
+      "id": "route:docs/experiments/enterprise-authorization.md#results-and-controls",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
       "anchor": "results-and-evidence",
       "heading": "Results and evidence",
       "id": "route:docs/experiments/enterprise-authorization.md#results-and-evidence",
@@ -2621,6 +2657,12 @@
       "anchor": "run-identity",
       "heading": "Run identity",
       "id": "route:docs/experiments/enterprise-authorization.md#run-identity",
+      "path": "docs/experiments/enterprise-authorization.md"
+    },
+    {
+      "anchor": "run-identity-1",
+      "heading": "Run identity",
+      "id": "route:docs/experiments/enterprise-authorization.md#run-identity-1",
       "path": "docs/experiments/enterprise-authorization.md"
     },
     {
