@@ -422,6 +422,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "added-11",
+      "heading": "Added",
+      "id": "route:CHANGELOG.md#added-11",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "added-2",
       "heading": "Added",
       "id": "route:CHANGELOG.md#added-2",
@@ -2432,6 +2438,12 @@
       "path": "docs/concepts/explorer-v01.md"
     },
     {
+      "anchor": "deliberate-limitations",
+      "heading": "Deliberate limitations",
+      "id": "route:docs/concepts/explorer-v01.md#deliberate-limitations",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
       "anchor": "deterministic-layout-inputs",
       "heading": "Deterministic layout inputs",
       "id": "route:docs/concepts/explorer-v01.md#deterministic-layout-inputs",
@@ -2456,9 +2468,9 @@
       "path": "docs/concepts/explorer-v01.md"
     },
     {
-      "anchor": "renderer-packaging-decision",
-      "heading": "Renderer packaging decision",
-      "id": "route:docs/concepts/explorer-v01.md#renderer-packaging-decision",
+      "anchor": "packaged-renderer",
+      "heading": "Packaged renderer",
+      "id": "route:docs/concepts/explorer-v01.md#packaged-renderer",
       "path": "docs/concepts/explorer-v01.md"
     },
     {
@@ -2762,9 +2774,9 @@
       "path": "docs/guides/agent-authority.md"
     },
     {
-      "anchor": "explorer-v01-preview",
-      "heading": "Explorer v0.1 preview",
-      "id": "route:docs/guides/agent-authority.md#explorer-v01-preview",
+      "anchor": "explorer-v01",
+      "heading": "Explorer v0.1",
+      "id": "route:docs/guides/agent-authority.md#explorer-v01",
       "path": "docs/guides/agent-authority.md"
     },
     {
@@ -3119,6 +3131,12 @@
       "anchor": "cli-reference",
       "heading": "CLI reference",
       "id": "route:docs/reference/cli.md#cli-reference",
+      "path": "docs/reference/cli.md"
+    },
+    {
+      "anchor": "render-the-published-asteria-authority-world",
+      "heading": "Render the published Asteria authority world",
+      "id": "route:docs/reference/cli.md#render-the-published-asteria-authority-world",
       "path": "docs/reference/cli.md"
     },
     {
@@ -3867,6 +3885,14 @@
       "id": "cli:synthworld validate-enterprise-access",
       "kind": "cli_command",
       "name": "synthworld validate-enterprise-access",
+      "source": "src/synthworld/cli.py",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "cli:synthworld visualize",
+      "kind": "cli_command",
+      "name": "synthworld visualize",
       "source": "src/synthworld/cli.py",
       "visibility": "public"
     },
@@ -6976,6 +7002,15 @@
       "implementation_module": "synthworld.agentic.c08_v2.generator",
       "kind": "python_export",
       "name": "generate_c08_asteria_v2",
+      "source": "src/synthworld/agentic/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.load_agentic_benchmark",
+      "implementation_module": "synthworld.agentic.serialization",
+      "kind": "python_export",
+      "name": "load_agentic_benchmark",
       "source": "src/synthworld/agentic/__init__.py",
       "visibility": "subpackage"
     },
@@ -11220,6 +11255,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerRenderError",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "ExplorerRenderError",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.ExplorerSourceV1",
       "implementation_module": "synthworld.explorer.models",
       "kind": "python_export",
@@ -11256,6 +11300,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.canonical_json_bytes",
       "implementation_module": "synthworld.explorer.serialization",
       "kind": "python_export",
@@ -11274,10 +11327,46 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.load_asteria_agent_authority_layout",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "load_asteria_agent_authority_layout",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.project_asteria_agent_authority_evaluator_v1",
+      "implementation_module": "synthworld.explorer.asteria",
+      "kind": "python_export",
+      "name": "project_asteria_agent_authority_evaluator_v1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.project_asteria_agent_authority_v1",
       "implementation_module": "synthworld.explorer.asteria",
       "kind": "python_export",
       "name": "project_asteria_agent_authority_v1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.render_asteria_agent_authority_package",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "render_asteria_agent_authority_package",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.render_explorer_html",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "render_explorer_html",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },
@@ -11296,6 +11385,15 @@
       "implementation_module": "synthworld.explorer.validation",
       "kind": "python_export",
       "name": "validate_layout_manifest",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.write_asteria_agent_authority_html",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "write_asteria_agent_authority_html",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },

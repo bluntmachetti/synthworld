@@ -173,11 +173,13 @@ not establish live evidence retention, enforcement, deployment, or EADS
 compatibility. Candidate registration and packaging are not external publication
 approval. See [C08 v2 offline evidence-completeness candidates](../../AGENTIC_BENCHMARK.md#c08-v2-offline-evidence-completeness-candidates).
 
-The preview Explorer v0.1 Python API can project the published Asteria v1 public
-package into deterministic graph and timeline records. This is a projection-only
-data API: its typed evaluator overlay and layout manifest remain separate artifacts,
-and it emits no HTML. Neither the interactive renderer nor the packaged viewer has
-shipped, and there is no `synthworld visualize` CLI command.
+Explorer v0.1 can render the published Asteria v1 package as a deterministic,
+self-contained authority graph with timeline replay. Its public command reads only
+the public package; evaluator annotations require the separate cross-bound
+evaluator package and produce visibly watermarked HTML. This renderer is deliberately
+Asteria-specific. It does not yet accept the generated enterprise-agentic smoke
+world or a compiled enterprise identity/access universe; that requires the separate
+adapter tracked in issue #149.
 
 ### Generated enterprise-agentic composition
 

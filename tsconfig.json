@@ -4,5 +4,10 @@
     ".blume/.astro/types.d.ts",
     ".blume/src/env.d.ts",
     "**/*"
+  ],
+  "exclude": [
+    "src/synthworld/explorer/assets/**",
+    "tools/build_explorer_assets.mjs",
+    "tools/explorer/**"
   ]
 }

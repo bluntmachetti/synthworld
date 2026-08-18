@@ -17,6 +17,34 @@ directory/RBAC, ABAC, ReBAC, composition, prediction, and scoring use the
 documented `synthworld.enterprise.consumer` Python API. See
 [Build and score an enterprise authorization experiment](../guides/enterprise-authorization-python.md).
 
+## Render the published Asteria authority world
+
+Create a deterministic, self-contained public HTML view from a generated or
+reproduced Asteria Agentic v1 public package:
+
+```bash
+synthworld generate-agentic --output asteria-agentic-v1
+synthworld visualize \
+  --public-package asteria-agentic-v1/public \
+  --view agent-authority \
+  --output asteria-public.html
+```
+
+Reference truth is opt-in and must come from the separately verified evaluator
+tree:
+
+```bash
+synthworld visualize \
+  --public-package asteria-agentic-v1/public \
+  --evaluator-package asteria-agentic-v1/evaluator \
+  --view agent-authority \
+  --output asteria-evaluator.html
+```
+
+Evaluator output is visibly watermarked. The command accepts only the published
+Asteria v1 artifact-set digest and refuses to overwrite an existing file. It does
+not render generated enterprise-agentic or enterprise authorization packages.
+
 `generate-enterprise-agentic` preserves its fixed-reference default. Select the
 new generated smoke profile explicitly:
 

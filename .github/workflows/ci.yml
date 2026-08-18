@@ -118,6 +118,29 @@ jobs:
           BASE_REF: ${{ github.event_name == 'push' && github.event.before || github.event.pull_request.base.sha }}
         run: uv run python tools/generate_benchmark_registry.py --check --require-tags --base-ref "$BASE_REF"
 
+  explorer-assets:
+    name: Explorer asset reproducibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Install Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          uv sync --locked --all-groups
+      - name: Verify committed Explorer assets
+        run: make explorer-assets-check
+
   quality:
     name: Python ${{ matrix.python-version }} full gates
     runs-on: ubuntu-latest

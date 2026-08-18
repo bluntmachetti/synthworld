@@ -249,8 +249,17 @@ def load_golden_agentic_benchmark() -> AgenticBenchmark:
     """Load and checksum-verify the packaged Asteria Agentic v1 fixture."""
 
     root = _packaged_agentic_root()
-    public_root = root.joinpath("public")
-    evaluator_root = root.joinpath("evaluator")
+    return load_agentic_benchmark(
+        public_root=root.joinpath("public"),
+        evaluator_root=root.joinpath("evaluator"),
+    )
+
+
+def load_agentic_benchmark(
+    *, public_root: Traversable, evaluator_root: Traversable
+) -> AgenticBenchmark:
+    """Load one explicitly separated, checksum-bound Asteria benchmark package."""
+
     # Both verifications run before any deserialization, and the evaluator check
     # cross-binds its recorded public digest to the public manifest. Do not reorder
     # these into load_public_agentic_bundle: that would deserialize the public tree
@@ -499,5 +508,7 @@ __all__ = [
     "agentic_public_artifacts",
     "artifact_set_digest",
     "export_agentic_benchmark",
+    "load_agentic_benchmark",
     "load_golden_agentic_benchmark",
+    "load_public_agentic_bundle",
 ]

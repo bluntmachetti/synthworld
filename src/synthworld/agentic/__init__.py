@@ -65,6 +65,7 @@ from synthworld.agentic.relationships import (
 from synthworld.agentic.replay import materialize_agentic_world
 from synthworld.agentic.serialization import (
     export_agentic_benchmark,
+    load_agentic_benchmark,
     load_golden_agentic_benchmark,
     load_public_agentic_bundle,
 )
@@ -119,6 +120,7 @@ __all__ = [
     "export_agentic_benchmark",
     "generate_asteria_agentic_v1",
     "generate_c08_asteria_v2",
+    "load_agentic_benchmark",
     "load_c08_bundle",
     "load_c08_evaluator_artifacts",
     "load_c08_public_artifacts",

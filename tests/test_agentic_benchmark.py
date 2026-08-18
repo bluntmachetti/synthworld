@@ -34,6 +34,7 @@ from synthworld.agentic.serialization import (
     agentic_public_artifacts,
     artifact_set_digest,
     export_agentic_benchmark,
+    load_agentic_benchmark,
 )
 
 
@@ -311,6 +312,20 @@ def test_exported_artifacts_are_checksum_verified(
     events.write_bytes(events.read_bytes() + b"\n")
     with pytest.raises(AgenticArtifactError, match="checksum"):
         serialization.load_golden_agentic_benchmark()
+
+
+def test_complete_loader_reads_explicit_separate_export_roots(tmp_path: Path) -> None:
+    benchmark = generate_asteria_agentic_v1()
+    root = tmp_path / "asteria-agentic-v1"
+    export_agentic_benchmark(root, benchmark)
+
+    assert (
+        load_agentic_benchmark(
+            public_root=root / "public",
+            evaluator_root=root / "evaluator",
+        )
+        == benchmark
+    )
 
 
 def test_frozen_loader_rejects_incomplete_evaluator_and_nonobject_manifests(
