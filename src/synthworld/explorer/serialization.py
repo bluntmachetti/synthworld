@@ -6,11 +6,15 @@ import json
 from synthworld.explorer.models import (
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutManifestV1,
+    ExplorerLayoutManifestV2,
     ExplorerPublicProjectionV1,
 )
 
 type ExplorerArtifact = (
-    ExplorerPublicProjectionV1 | ExplorerEvaluatorOverlayV1 | ExplorerLayoutManifestV1
+    ExplorerPublicProjectionV1
+    | ExplorerEvaluatorOverlayV1
+    | ExplorerLayoutManifestV1
+    | ExplorerLayoutManifestV2
 )
 
 

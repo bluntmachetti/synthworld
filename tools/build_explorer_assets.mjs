@@ -120,9 +120,13 @@ const canonical = (value) => {
 };
 const canonicalBytes = (value) => Buffer.from(`${JSON.stringify(canonical(value))}\n`, "utf8");
 const layoutCandidate = canonicalBytes({
-  schema_version: "1.0.0",
+  schema_version: "2.0.0",
   digest_algorithm: "sha256",
   public_projection_digest: projectionDigest,
+  world_seed: projection.source.seed,
+  world_schema_version: projection.source.world_schema_version,
+  visualisation_profile: "agent-authority",
+  visualisation_profile_version: "1.0.0",
   options: {
     engine: "elk",
     engine_version: elkPackage.version,
@@ -143,8 +147,8 @@ const layoutCanonicalizer = spawnSync(
     "-c",
     [
       "import sys",
-      "from synthworld.explorer import ExplorerLayoutManifestV1, canonical_json_bytes",
-      "layout = ExplorerLayoutManifestV1.model_validate_json(sys.stdin.buffer.read())",
+      "from synthworld.explorer import ExplorerLayoutManifestV2, canonical_json_bytes",
+      "layout = ExplorerLayoutManifestV2.model_validate_json(sys.stdin.buffer.read())",
       "sys.stdout.buffer.write(canonical_json_bytes(layout))",
     ].join("; "),
   ],

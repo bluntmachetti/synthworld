@@ -16,8 +16,10 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   deterministic, self-contained HTML with an interactive authority graph, chain
   inspection, and timeline replay. Cytoscape and build-time ELK versions are pinned,
   generated assets and layout coordinates are checksum-bound, no runtime network
-  resources are loaded, and dependency notices ship in the wheel. Evaluator truth
-  requires a separately verified evaluator package and produces prominently
+  resources are loaded, and dependency notices ship in the wheel. The new layout
+  `2.0.0` contract explicitly records world seed, world schema version, and
+  visualisation profile identity while preserving layout `1.0.0` unchanged. Evaluator
+  truth requires a separately verified evaluator package and produces prominently
   watermarked output; public HTML contains no evaluator overlay. Generated
   enterprise-agentic and enterprise authorization adapters remain separate work.
 

@@ -14,7 +14,7 @@ from synthworld.cli import main
 from synthworld.explorer import (
     EVALUATOR_WATERMARK,
     PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST,
-    ExplorerLayoutManifestV1,
+    ExplorerLayoutManifestV2,
     ExplorerPublicProjectionV1,
     ExplorerRenderError,
     load_asteria_agent_authority_layout,
@@ -70,6 +70,10 @@ def test_packaged_explorer_assets_are_bound_and_layout_is_canonical() -> None:
         },
     ]
     assert layout.options.engine_version == "0.12.0"
+    assert layout.world_seed == _published_projection().source.seed
+    assert layout.world_schema_version == "1.0.0"
+    assert layout.visualisation_profile == "agent-authority"
+    assert layout.visualisation_profile_version == "1.0.0"
     assert (
         canonical_json_bytes(layout) == assets["asteria-agent-authority-v1.layout.json"]
     )
@@ -165,7 +169,7 @@ def test_layout_loader_rejects_invalid_and_noncanonical_json(
     with pytest.raises(ExplorerRenderError, match="layout asset is invalid"):
         load_asteria_agent_authority_layout()
 
-    layout = ExplorerLayoutManifestV1.model_validate_json(
+    layout = ExplorerLayoutManifestV2.model_validate_json(
         assets["asteria-agent-authority-v1.layout.json"]
     )
     noncanonical = json.dumps(layout.model_dump(mode="json"), indent=2).encode()

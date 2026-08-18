@@ -11138,10 +11138,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_LAYOUT_SCHEMA_VERSION_V2",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_LAYOUT_SCHEMA_VERSION_V2",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.EXPLORER_PROJECTION_SCHEMA_VERSION",
       "implementation_module": "synthworld.explorer",
       "kind": "python_export",
       "name": "EXPLORER_PROJECTION_SCHEMA_VERSION",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_VISUALISATION_PROFILE_VERSION",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_VISUALISATION_PROFILE_VERSION",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },
@@ -11205,6 +11223,15 @@
       "implementation_module": "synthworld.explorer.models",
       "kind": "python_export",
       "name": "ExplorerLayoutManifestV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerLayoutManifestV2",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerLayoutManifestV2",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },

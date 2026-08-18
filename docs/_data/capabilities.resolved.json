@@ -8300,10 +8300,28 @@
             },
             {
               "assignment_required": true,
+              "id": "python:synthworld.explorer.EXPLORER_LAYOUT_SCHEMA_VERSION_V2",
+              "implementation_module": "synthworld.explorer",
+              "kind": "python_export",
+              "name": "EXPLORER_LAYOUT_SCHEMA_VERSION_V2",
+              "source": "src/synthworld/explorer/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
               "id": "python:synthworld.explorer.EXPLORER_PROJECTION_SCHEMA_VERSION",
               "implementation_module": "synthworld.explorer",
               "kind": "python_export",
               "name": "EXPLORER_PROJECTION_SCHEMA_VERSION",
+              "source": "src/synthworld/explorer/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.explorer.EXPLORER_VISUALISATION_PROFILE_VERSION",
+              "implementation_module": "synthworld.explorer",
+              "kind": "python_export",
+              "name": "EXPLORER_VISUALISATION_PROFILE_VERSION",
               "source": "src/synthworld/explorer/__init__.py",
               "visibility": "subpackage"
             },
@@ -8367,6 +8385,15 @@
               "implementation_module": "synthworld.explorer.models",
               "kind": "python_export",
               "name": "ExplorerLayoutManifestV1",
+              "source": "src/synthworld/explorer/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.explorer.ExplorerLayoutManifestV2",
+              "implementation_module": "synthworld.explorer.models",
+              "kind": "python_export",
+              "name": "ExplorerLayoutManifestV2",
               "source": "src/synthworld/explorer/__init__.py",
               "visibility": "subpackage"
             },
@@ -9691,8 +9718,8 @@
     }
   ],
   "input_digests": {
-    "curated_sha256": "967d60330949783492d3eee4aff91e13ccc4067957bb9b06fa5218c355322736",
-    "generated_sha256": "d45acb7ff963eb15a048ec160f5f4da7880f3d0977ec8faad42120387b1f2cb3"
+    "curated_sha256": "c195b797d6bef7882923a5ba0a14db2923b991f402d73cfb583e02654b2bc73c",
+    "generated_sha256": "ed950817eda88a7be217a6bf32bdd25e05db34e2f908f8856c9a0fd5f0fd1c69"
   },
   "schema_version": "1.0.0"
 }

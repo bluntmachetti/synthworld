@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from synthworld.explorer.models import (
+    EXPLORER_VISUALISATION_PROFILE_VERSION,
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutManifestV1,
+    ExplorerLayoutManifestV2,
     ExplorerPublicProjectionV1,
     ExplorerTimelineEventKind,
 )
@@ -36,12 +38,27 @@ def validate_evaluator_overlay(
 
 def validate_layout_manifest(
     projection: ExplorerPublicProjectionV1,
-    layout: ExplorerLayoutManifestV1,
+    layout: ExplorerLayoutManifestV1 | ExplorerLayoutManifestV2,
 ) -> None:
     """Require one coordinate for every node in the bound public projection."""
 
     if layout.public_projection_digest != explorer_digest(projection):
         raise ValueError("Layout manifest does not bind this public projection")
+    if isinstance(layout, ExplorerLayoutManifestV2):
+        layout_identity = (
+            layout.world_seed,
+            layout.world_schema_version,
+            layout.visualisation_profile,
+            layout.visualisation_profile_version,
+        )
+        projection_identity = (
+            projection.source.seed,
+            projection.source.world_schema_version,
+            "agent-authority",
+            EXPLORER_VISUALISATION_PROFILE_VERSION,
+        )
+        if layout_identity != projection_identity:
+            raise ValueError("Layout manifest identity does not match the projection")
     projection_node_ids = {node.id for node in projection.nodes}
     coordinate_node_ids = {item.node_id for item in layout.coordinates}
     if coordinate_node_ids != projection_node_ids:

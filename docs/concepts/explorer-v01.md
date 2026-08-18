@@ -32,13 +32,15 @@ world navigation remain deferred until issue #27 fixes those package contracts.
 
 ## Artifact boundary
 
-Explorer has three independently serialized `1.0.0` contracts:
+Explorer keeps its released public projection, evaluator overlay, and layout v1
+contracts independently versioned. The packaged renderer uses layout manifest
+`2.0.0`; layout `1.0.0` remains unchanged for compatibility.
 
 | Artifact | Visibility | Binding |
 | --- | --- | --- |
 | Public projection | public | published benchmark identity and public artifact-set SHA-256 |
 | Evaluator overlay | evaluator | public projection SHA-256 and evaluator artifact-set SHA-256 |
-| Layout manifest | public or evaluator renderer | public projection SHA-256 and pinned layout inputs |
+| Layout manifest `2.0.0` | public or evaluator renderer | public projection SHA-256, explicit world/profile identity, and pinned layout inputs |
 
 The public projection is constructed field by field from `AgenticPublicBundle`.
 It cannot carry expected decisions, canonical bindings, case labels, authority
@@ -74,6 +76,8 @@ LF line endings, and exactly one trailing newline. Digests cover those exact byt
 The layout manifest records all inputs that can alter coordinates:
 
 - public projection digest;
+- world seed and world schema version;
+- visualisation profile and visualisation-profile version;
 - layout engine and exact engine version;
 - algorithm and direction;
 - node and layer spacing;
@@ -83,9 +87,10 @@ The layout manifest records all inputs that can alter coordinates:
 
 The renderer must not accept filesystem order, locale, host state, wall-clock time,
 or evaluator answers as layout inputs.
-The layout's public-projection digest transitively binds the projection profile,
-world seed, world schema version, and published benchmark identity recorded in the
-projection source.
+The layout repeats the projection's world seed and world schema version plus the
+visualisation profile and profile version. Validation compares those explicit values
+and also verifies the public-projection digest, which binds the complete projection
+source and published benchmark identity.
 Layout validation requires exactly one coordinate per bound projection node.
 Evaluator validation requires every annotation to bind a public action event and a
 known projection node, edge, or timeline event.

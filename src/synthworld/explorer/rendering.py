@@ -17,7 +17,7 @@ from synthworld.explorer.asteria import (
 )
 from synthworld.explorer.models import (
     ExplorerEvaluatorOverlayV1,
-    ExplorerLayoutManifestV1,
+    ExplorerLayoutManifestV2,
     ExplorerPublicProjectionV1,
 )
 from synthworld.explorer.serialization import canonical_json_bytes
@@ -72,13 +72,13 @@ def _asset_bytes() -> tuple[dict[str, bytes], dict[str, Any]]:
     return loaded, manifest
 
 
-def load_asteria_agent_authority_layout() -> ExplorerLayoutManifestV1:
+def load_asteria_agent_authority_layout() -> ExplorerLayoutManifestV2:
     """Load and verify the pinned ELK layout for published Asteria v1."""
 
     assets, _ = _asset_bytes()
     payload = assets["asteria-agent-authority-v1.layout.json"]
     try:
-        layout = ExplorerLayoutManifestV1.model_validate_json(payload)
+        layout = ExplorerLayoutManifestV2.model_validate_json(payload)
     except ValueError as error:
         raise ExplorerRenderError("Explorer layout asset is invalid") from error
     if canonical_json_bytes(layout) != payload:
@@ -90,7 +90,7 @@ def _safe_json(
     artifact: (
         ExplorerPublicProjectionV1
         | ExplorerEvaluatorOverlayV1
-        | ExplorerLayoutManifestV1
+        | ExplorerLayoutManifestV2
     ),
 ) -> str:
     serialized = canonical_json_bytes(artifact).decode("utf-8").strip()
