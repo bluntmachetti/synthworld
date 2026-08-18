@@ -92,7 +92,8 @@ Every metric retains its own denominator; no aggregate score is computed.
 | Conflict resolution | 71 / 71 | Cells containing a policy conflict |
 | Policy-conflict detection | 649 / 649 | Public evaluation cells |
 | Lifecycle-status classification | 649 / 649 | Public evaluation cells |
-| Mechanism outcome and inventory | 1,298 / 1,298 | Two independent mechanism metrics over 649 cells each |
+| Mechanism outcome | 649 / 649 | Public evaluation cells with expected per-mechanism outcomes |
+| Mechanism inventory | 649 / 649 | Public evaluation cells with expected mechanism inventories |
 | Policy and adapter negative controls | 20 / 20 | Deliberately faulty policies or prediction dimensions detected |
 | Request-binding mutation controls | 16 / 16 | Altered AuthZEN-style request fields refused |
 | Seal and replay controls | 20 / 20 | Untampered submissions accepted and invalid variants refused as required |
