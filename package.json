@@ -14,7 +14,8 @@
     "docs:check": "npm run docs:prepare && blume check --strict && blume validate && blume build && blume audit --verbose && node tools/audit_docs_dist.mjs && node tools/audit_docs_headings.mjs",
     "docs:preview": "npm run docs:prepare && blume preview",
     "explorer:build": "node tools/build_explorer_assets.mjs --write",
-    "explorer:check": "node tools/build_explorer_assets.mjs --check"
+    "explorer:check": "npm run explorer:test && node tools/build_explorer_assets.mjs --check",
+    "explorer:test": "node --test tools/explorer/replay.test.mjs"
   },
   "dependencies": {
     "blume": "1.4.0"

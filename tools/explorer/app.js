@@ -1,5 +1,7 @@
 import cytoscape from "cytoscape";
 
+import { applyReplayState, indexRevocations } from "./replay.mjs";
+
 const parseData = (id) => JSON.parse(document.getElementById(id).textContent);
 const projection = parseData("synthworld-projection");
 const layout = parseData("synthworld-layout");
@@ -127,7 +129,12 @@ const cy = cytoscape({
     },
     {
       selector: ".revoked",
-      style: { "background-color": "#a4aaa8", "line-color": "#a4aaa8", opacity: 0.28 },
+      style: {
+        "background-color": "#a4aaa8",
+        "line-color": "#a4aaa8",
+        opacity: 0.28,
+        "target-arrow-color": "#a4aaa8",
+      },
     },
     {
       selector: ".event-focus",
@@ -196,30 +203,23 @@ cy.on("tap", "node, edge", (event) => inspect(event.target));
 const slider = document.getElementById("synthworld-timeline-slider");
 const timelineLabel = document.getElementById("synthworld-timeline-label");
 const eventButtons = document.getElementById("synthworld-event-buttons");
-const revokedAt = new Map();
-for (const event of projection.timeline) {
-  if (event.kind === "delegation_revoked") {
-    for (const nodeId of event.related_node_ids) revokedAt.set(nodeId, event.source_event_index);
-  }
-}
+const { nodeRevokedAt, edgeRevokedAt } = indexRevocations(
+  projection.timeline,
+  projection.edges,
+);
 
 const setTick = (tick) => {
   const selectedEvent = projection.timeline.find((event) => event.source_event_index === tick);
   cy.batch(() => {
-    cy.elements().removeClass("future event-focus revoked");
-    cy.nodes().forEach((node) => {
-      const first = firstNodeEvent.get(node.id()) ?? 0;
-      node.toggleClass("future", first > tick);
-      node.toggleClass("revoked", (revokedAt.get(node.id()) ?? Number.POSITIVE_INFINITY) <= tick);
+    applyReplayState({
+      cy,
+      edgeRevokedAt,
+      firstEdgeEvent,
+      firstNodeEvent,
+      nodeRevokedAt,
+      selectedEvent,
+      tick,
     });
-    cy.edges().forEach((edge) => {
-      const first = firstEdgeEvent.get(edge.id()) ?? 0;
-      edge.toggleClass("future", first > tick);
-    });
-    if (selectedEvent) {
-      for (const id of selectedEvent.related_node_ids) cy.getElementById(id).addClass("event-focus");
-      for (const id of selectedEvent.related_edge_ids) cy.getElementById(id).addClass("event-focus");
-    }
   });
   timelineLabel.textContent = selectedEvent
     ? `tick ${String(tick).padStart(2, "0")} / ${selectedEvent.kind.replaceAll("_", " ")}`
