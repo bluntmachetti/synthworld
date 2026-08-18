@@ -427,8 +427,10 @@ enterprise authorization score.
 
 ## Rendering boundary
 
-The released `synthworld.explorer` surface provides projection data contracts and
-the Asteria projector. It does not ship an HTML renderer or enterprise identity
-world viewer. Any SVG/HTML topology page produced by a Topaz or other lab is an
-experiment-owned visualization, not a SynthWorld rendering feature or benchmark
-artifact.
+The released `synthworld.explorer` surface includes a self-contained HTML renderer,
+but it accepts only the checksum-verified published Asteria Agentic v1 package. It
+does not yet provide an Explorer adapter for this generated enterprise authorization
+universe. Any SVG/HTML topology page produced by a Topaz or other enterprise lab
+remains an experiment-owned visualization, not a SynthWorld render or benchmark
+artifact. Issue #149 tracks the required generated-world adapter without widening
+the frozen Asteria projection contract.

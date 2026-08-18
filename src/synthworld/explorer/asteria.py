@@ -7,6 +7,7 @@ from synthworld.agentic.models import (
     ASTERIA_WORLD_ID,
     ASTERIA_WORLD_VERSION,
     ActionAttempted,
+    AgenticEvaluatorBundle,
     AgenticPublicBundle,
     AuditPerformed,
     CredentialIssued,
@@ -18,6 +19,8 @@ from synthworld.agentic.models import (
 from synthworld.explorer.models import (
     ExplorerEdgeKind,
     ExplorerEdgeV1,
+    ExplorerEvaluatorAnnotationV1,
+    ExplorerEvaluatorOverlayV1,
     ExplorerNodeKind,
     ExplorerNodeV1,
     ExplorerPropertyV1,
@@ -45,6 +48,119 @@ def _properties(
         ExplorerPropertyV1(key=key, value=value)
         for key, value in entries
         if value is not None and value != ()
+    )
+
+
+def project_asteria_agent_authority_evaluator_v1(
+    projection: ExplorerPublicProjectionV1,
+    evaluator: AgenticEvaluatorBundle,
+    *,
+    evaluator_artifact_set_digest: str,
+) -> ExplorerEvaluatorOverlayV1:
+    """Project Asteria evaluator truth without merging it into public records."""
+
+    if (
+        projection.source.world_id != evaluator.world_id
+        or projection.source.world_schema_version != evaluator.world_version
+        or projection.source.seed != evaluator.seed
+    ):
+        raise ValueError("Asteria evaluator identity does not match the projection")
+    action_nodes = {
+        node.source_id: node.id
+        for node in projection.nodes
+        if node.kind is ExplorerNodeKind.ACTION_ATTEMPT
+    }
+    bindings = {item.action_event_id: item for item in evaluator.bindings}
+    truths = {item.action_event_id: item for item in evaluator.authority_truth}
+    cases = {item.action_event_id: item for item in evaluator.cases}
+    expected_ids = set(action_nodes)
+    if (
+        set(bindings) != expected_ids
+        or set(truths) != expected_ids
+        or set(cases) != expected_ids
+    ):
+        raise ValueError(
+            "Asteria evaluator action inventory differs from the projection"
+        )
+
+    annotations: list[ExplorerEvaluatorAnnotationV1] = []
+    for action_event_id in sorted(expected_ids):
+        target_id = action_nodes[action_event_id]
+        binding = bindings[action_event_id]
+        truth = truths[action_event_id]
+        case = cases[action_event_id]
+        action_failures = (
+            ", ".join(item.value for item in truth.failure_reasons_at_action) or "none"
+        )
+        audit_failures = (
+            ", ".join(item.value for item in truth.failure_reasons_at_audit) or "none"
+        )
+        annotations.extend(
+            (
+                ExplorerEvaluatorAnnotationV1(
+                    id=_framed_identifier("annotation", action_event_id, "authority"),
+                    source_action_event_id=action_event_id,
+                    target_id=target_id,
+                    kind="authority_decision",
+                    label="Expected authority decision",
+                    value=(
+                        f"at action: {truth.decision_at_action.value}; "
+                        f"at audit: {truth.decision_at_audit.value}"
+                    ),
+                    properties=_properties(
+                        ("expected_policy_version", truth.expected_policy_version),
+                        ("expected_side_effect", truth.expected_side_effect),
+                        (
+                            "reconstructable_at_audit",
+                            str(truth.reconstructable_at_audit).lower(),
+                        ),
+                    ),
+                ),
+                ExplorerEvaluatorAnnotationV1(
+                    id=_framed_identifier("annotation", action_event_id, "failures"),
+                    source_action_event_id=action_event_id,
+                    target_id=target_id,
+                    kind="failure_reason",
+                    label="Expected failure reasons",
+                    value=(f"at action: {action_failures}; at audit: {audit_failures}"),
+                    properties=_properties(
+                        ("delegation_chain_ids", truth.delegation_chain_ids),
+                        ("required_evidence_refs", truth.required_evidence_refs),
+                    ),
+                ),
+                ExplorerEvaluatorAnnotationV1(
+                    id=_framed_identifier("annotation", action_event_id, "binding"),
+                    source_action_event_id=action_event_id,
+                    target_id=target_id,
+                    kind="canonical_binding",
+                    label="Canonical identity binding",
+                    value="Evaluator-only identity roles",
+                    properties=_properties(
+                        ("originating_principal_id", binding.originating_principal_id),
+                        ("logical_agent_id", binding.logical_agent_id),
+                        ("runtime_id", binding.runtime_id),
+                        ("runtime_principal_id", binding.runtime_principal_id),
+                        ("credential_subject_id", binding.credential_subject_id),
+                        ("attributed_actor_id", binding.attributed_actor_id),
+                        ("accountable_owner_chain", binding.accountable_owner_chain),
+                    ),
+                ),
+                ExplorerEvaluatorAnnotationV1(
+                    id=_framed_identifier("annotation", action_event_id, "case"),
+                    source_action_event_id=action_event_id,
+                    target_id=target_id,
+                    kind="case_kind",
+                    label="Evaluator case",
+                    value=case.kind.value,
+                ),
+            )
+        )
+    from synthworld.explorer.serialization import explorer_digest
+
+    return ExplorerEvaluatorOverlayV1(
+        public_projection_digest=explorer_digest(projection),
+        evaluator_artifact_set_digest=evaluator_artifact_set_digest,
+        annotations=tuple(annotations),
     )
 
 

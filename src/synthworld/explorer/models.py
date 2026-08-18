@@ -12,6 +12,8 @@ from synthworld.models import SyntheticModel
 EXPLORER_PROJECTION_SCHEMA_VERSION: Final = "1.0.0"
 EXPLORER_EVALUATOR_SCHEMA_VERSION: Final = "1.0.0"
 EXPLORER_LAYOUT_SCHEMA_VERSION: Final = "1.0.0"
+EXPLORER_LAYOUT_SCHEMA_VERSION_V2: Final = "2.0.0"
+EXPLORER_VISUALISATION_PROFILE_VERSION: Final = "1.0.0"
 EVALUATOR_WATERMARK: Final = "EVALUATOR VIEW - CONTAINS REFERENCE TRUTH"
 
 
@@ -343,6 +345,33 @@ class ExplorerLayoutManifestV1(SyntheticModel):
     schema_version: Literal["1.0.0"] = EXPLORER_LAYOUT_SCHEMA_VERSION
     digest_algorithm: Literal["sha256"] = "sha256"
     public_projection_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    options: ExplorerLayoutOptionsV1
+    viewport: ExplorerViewportV1
+    coordinate_precision: int = Field(default=3, ge=0, le=6)
+    coordinates: tuple[ExplorerCoordinateV1, ...]
+
+    @field_validator("coordinates")
+    @classmethod
+    def sort_coordinates(
+        cls, value: tuple[ExplorerCoordinateV1, ...]
+    ) -> tuple[ExplorerCoordinateV1, ...]:
+        node_ids = tuple(item.node_id for item in value)
+        _require_unique(node_ids, "Explorer layout node IDs")
+        return tuple(sorted(value, key=lambda item: item.node_id))
+
+
+class ExplorerLayoutManifestV2(SyntheticModel):
+    """Layout inputs with explicit world and visualisation-profile identity."""
+
+    schema_version: Literal["2.0.0"] = EXPLORER_LAYOUT_SCHEMA_VERSION_V2
+    digest_algorithm: Literal["sha256"] = "sha256"
+    public_projection_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    world_seed: int
+    world_schema_version: str = Field(min_length=1)
+    visualisation_profile: Literal["agent-authority"] = "agent-authority"
+    visualisation_profile_version: Literal["1.0.0"] = (
+        EXPLORER_VISUALISATION_PROFILE_VERSION
+    )
     options: ExplorerLayoutOptionsV1
     viewport: ExplorerViewportV1
     coordinate_precision: int = Field(default=3, ge=0, le=6)

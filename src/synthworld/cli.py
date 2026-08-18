@@ -107,6 +107,10 @@ from synthworld.evaluation import (
     evaluate_relationship_inference,
     evaluate_risk_calibration,
 )
+from synthworld.explorer import (
+    ExplorerRenderError,
+    write_asteria_agent_authority_html,
+)
 from synthworld.exposure_generator import generate_exposure_corpus
 from synthworld.extraction_generator import (
     generate_extraction_benchmark,
@@ -229,6 +233,28 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{len(result.public_universe.principals)} principals, "
             f"{len(result.public_universe.accounts)} account slots, "
             f"{len(result.public_universe.access_atoms)} access atoms -> "
+            f"{args.output}"
+        )
+        return 0
+
+    if args.command == "visualize":
+        try:
+            write_asteria_agent_authority_html(
+                args.output,
+                public_package=args.public_package,
+                evaluator_package=args.evaluator_package,
+            )
+        except (
+            AgenticArtifactError,
+            ExplorerRenderError,
+            OSError,
+            ValidationError,
+        ) as error:
+            print(f"visualize: {error}", file=sys.stderr)
+            return 1
+        visibility = "evaluator" if args.evaluator_package is not None else "public"
+        print(
+            f"SynthWorld Explorer ready: agent-authority ({visibility}) -> "
             f"{args.output}"
         )
         return 0
@@ -865,6 +891,15 @@ def _parser() -> argparse.ArgumentParser:
     compile_enterprise.add_argument("--input", type=Path, required=True)
     compile_enterprise.add_argument("--seed", type=int, required=True)
     compile_enterprise.add_argument("--output", type=Path, required=True)
+
+    visualize = subparsers.add_parser(
+        "visualize",
+        help="render a verified benchmark package as self-contained HTML",
+    )
+    visualize.add_argument("--public-package", type=Path, required=True)
+    visualize.add_argument("--evaluator-package", type=Path)
+    visualize.add_argument("--view", choices=("agent-authority",), required=True)
+    visualize.add_argument("--output", type=Path, required=True)
 
     households = subparsers.add_parser(
         "generate-households",

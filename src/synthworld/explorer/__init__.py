@@ -1,11 +1,16 @@
 """Versioned, deterministic projections for SynthWorld visualisation."""
 
-from synthworld.explorer.asteria import project_asteria_agent_authority_v1
+from synthworld.explorer.asteria import (
+    project_asteria_agent_authority_evaluator_v1,
+    project_asteria_agent_authority_v1,
+)
 from synthworld.explorer.models import (
     EVALUATOR_WATERMARK,
     EXPLORER_EVALUATOR_SCHEMA_VERSION,
     EXPLORER_LAYOUT_SCHEMA_VERSION,
+    EXPLORER_LAYOUT_SCHEMA_VERSION_V2,
     EXPLORER_PROJECTION_SCHEMA_VERSION,
+    EXPLORER_VISUALISATION_PROFILE_VERSION,
     ExplorerCoordinateV1,
     ExplorerEdgeKind,
     ExplorerEdgeV1,
@@ -13,6 +18,7 @@ from synthworld.explorer.models import (
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutDirection,
     ExplorerLayoutManifestV1,
+    ExplorerLayoutManifestV2,
     ExplorerLayoutOptionsV1,
     ExplorerNodeKind,
     ExplorerNodeV1,
@@ -22,6 +28,14 @@ from synthworld.explorer.models import (
     ExplorerTimelineEventKind,
     ExplorerTimelineEventV1,
     ExplorerViewportV1,
+)
+from synthworld.explorer.rendering import (
+    PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST,
+    ExplorerRenderError,
+    load_asteria_agent_authority_layout,
+    render_asteria_agent_authority_package,
+    render_explorer_html,
+    write_asteria_agent_authority_html,
 )
 from synthworld.explorer.serialization import canonical_json_bytes, explorer_digest
 from synthworld.explorer.validation import (
@@ -33,7 +47,10 @@ __all__ = [
     "EVALUATOR_WATERMARK",
     "EXPLORER_EVALUATOR_SCHEMA_VERSION",
     "EXPLORER_LAYOUT_SCHEMA_VERSION",
+    "EXPLORER_LAYOUT_SCHEMA_VERSION_V2",
     "EXPLORER_PROJECTION_SCHEMA_VERSION",
+    "EXPLORER_VISUALISATION_PROFILE_VERSION",
+    "PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST",
     "ExplorerCoordinateV1",
     "ExplorerEdgeKind",
     "ExplorerEdgeV1",
@@ -41,18 +58,25 @@ __all__ = [
     "ExplorerEvaluatorOverlayV1",
     "ExplorerLayoutDirection",
     "ExplorerLayoutManifestV1",
+    "ExplorerLayoutManifestV2",
     "ExplorerLayoutOptionsV1",
     "ExplorerNodeKind",
     "ExplorerNodeV1",
     "ExplorerPropertyV1",
     "ExplorerPublicProjectionV1",
+    "ExplorerRenderError",
     "ExplorerSourceV1",
     "ExplorerTimelineEventKind",
     "ExplorerTimelineEventV1",
     "ExplorerViewportV1",
     "canonical_json_bytes",
     "explorer_digest",
+    "load_asteria_agent_authority_layout",
+    "project_asteria_agent_authority_evaluator_v1",
     "project_asteria_agent_authority_v1",
+    "render_asteria_agent_authority_package",
+    "render_explorer_html",
     "validate_evaluator_overlay",
     "validate_layout_manifest",
+    "write_asteria_agent_authority_html",
 ]

@@ -1,0 +1,65 @@
+:root {
+  color-scheme: light;
+  --ink: #102a31;
+  --paper: #f7f3e8;
+  --panel: #fffdf6;
+  --teal: #147d7e;
+  --coral: #e2583e;
+  --gold: #d4a72c;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: radial-gradient(circle at 90% 0%, #dbe8df 0, transparent 34%), var(--paper);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  padding: 24px;
+}
+button, input { font: inherit; }
+.shell { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); min-height: calc(100vh - 48px); }
+.masthead { border-top: 8px solid var(--ink); display: flex; justify-content: space-between; gap: 24px; min-width: 0; padding-top: 16px; }
+.eyebrow, .kind, .status, .facts, footer, button, .timeline-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.eyebrow { color: var(--coral); font-size: 12px; font-weight: 800; }
+h1 { font-size: clamp(42px, 6vw, 76px); font-weight: 500; line-height: .94; margin: 10px 0 16px; }
+h1 em { color: var(--teal); font-weight: 500; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.facts span { background: var(--ink); color: white; font-size: 11px; padding: 10px 12px; }
+.facts strong { color: #ffd55b; font-size: 16px; margin-right: 5px; }
+.status { align-self: start; background: var(--panel); border: 1px solid var(--ink); box-shadow: 5px 5px 0 var(--ink); font-size: 10px; line-height: 1.8; min-width: 180px; padding: 14px; }
+.watermark { background: #8f251e; color: white; font: 800 12px ui-monospace, monospace; letter-spacing: .08em; padding: 12px; text-align: center; }
+.workspace { background: var(--panel); border: 1px solid var(--ink); display: grid; grid-template-columns: minmax(0, 1fr) 300px; min-height: 560px; min-width: 0; }
+.graph-wrap { min-width: 0; overflow: hidden; position: relative; }
+#synthworld-graph { height: 100%; min-height: 560px; width: 100%; }
+.graph-controls { display: flex; gap: 8px; left: 12px; position: absolute; top: 12px; z-index: 2; }
+button { background: var(--panel); border: 1px solid var(--ink); color: var(--ink); cursor: pointer; font-size: 9px; padding: 8px 10px; }
+button:hover, button[aria-current] { background: var(--ink); color: white; }
+.inspector { background: var(--panel); border-left: 1px solid var(--ink); overflow: auto; padding: 22px; position: relative; z-index: 3; }
+.inspector h2 { border-bottom: 2px solid var(--ink); font-size: 26px; font-weight: 500; margin: 0 0 14px; padding-bottom: 10px; }
+.kind { color: var(--coral); font-size: 10px; }
+dl { display: grid; font: 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; grid-template-columns: minmax(80px, .8fr) minmax(0, 1.2fr); margin: 18px 0; overflow-wrap: anywhere; }
+dt { color: #667777; padding: 5px 8px 5px 0; }
+dd { border-bottom: 1px solid #d8ded7; margin: 0; padding: 5px 0; }
+.truth article { border-left: 4px solid var(--coral); margin: 12px 0; padding-left: 12px; }
+.truth h4 { font-size: 13px; margin: 0; }
+.truth p { font: 11px/1.5 ui-monospace, monospace; }
+.timeline { background: var(--panel); border: 1px solid var(--ink); min-width: 0; padding: 18px; }
+.timeline-head { align-items: center; display: flex; gap: 18px; justify-content: space-between; }
+.timeline h2 { font-size: 22px; font-weight: 500; margin: 0; }
+.timeline-label { color: var(--coral); font-size: 10px; }
+input[type="range"] { accent-color: var(--coral); margin: 16px 0; width: 100%; }
+.event-buttons { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 8px; }
+.event-buttons button { flex: 0 0 auto; }
+footer { display: flex; font-size: 9px; justify-content: space-between; opacity: .72; }
+.notices { font: 10px/1.5 ui-monospace, monospace; margin-top: 12px; overflow-wrap: anywhere; white-space: pre-wrap; }
+details { min-width: 0; }
+@media (max-width: 900px) {
+  body { padding: 12px; }
+  .workspace { grid-template-columns: 1fr; }
+  .inspector { border-left: 0; border-top: 1px solid var(--ink); max-height: 360px; }
+  .masthead { flex-direction: column; }
+}

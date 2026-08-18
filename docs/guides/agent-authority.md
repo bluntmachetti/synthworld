@@ -142,15 +142,14 @@ leaderboard, or claim about deployed enforcement. `standard` and `longitudinal`
 generated tiers remain follow-up work in issue #27; the existing 1.0 event union is
 not being widened to imply those lifecycle semantics.
 
-## Explorer v0.1 preview
+## Explorer v0.1
 
-Version 0.15.0 ships a projection-only `synthworld.explorer` Python API. It can
-project the published Asteria Agentic v1 public package into deterministic nodes,
-relationships, and a replayable public event timeline. It also defines separately
-typed evaluator-overlay and layout-manifest contracts, with digest binding that
-prevents either artifact from silently attaching to a different public projection.
-The projector returns data records; it does not render HTML or provide an
-interactive viewer.
+The `synthworld.explorer` Python API projects the published Asteria Agentic v1
+package into deterministic nodes, relationships, and a replayable public event
+timeline. A packaged renderer now turns that exact projection into a self-contained
+interactive HTML file. Separately typed evaluator-overlay and layout-manifest
+contracts prevent either artifact from silently attaching to a different public
+projection.
 
 Available now:
 
@@ -159,17 +158,18 @@ Available now:
   attempts;
 - stable, domain-separated UUID5 graph identities and answer-independent ordering;
 - UTC timeline validation, acyclic compound-node validation, and exact layout-node
-  coverage checks; and
-- physically separate evaluator annotations carrying a mandatory evaluator-view
+  coverage checks;
+- a `synthworld visualize` command with offline Cytoscape rendering, a pinned ELK
+  layout, graph inspection, and event replay;
+- public-only rendering from the public package; and
+- physically separate evaluator rendering carrying a mandatory evaluator-view
   watermark.
 
 Not yet available:
 
-- the `synthworld visualize` command;
-- the packaged interactive Cytoscape/ELK renderer;
 - Explorer adapters for candidate C08 v2 or generated `enterprise_agentic` worlds;
   and
 - large-world filtering, tier comparison, or generated longitudinal navigation.
 
 See [Explorer v0.1 contract and packaging decision](../concepts/explorer-v01.md)
-for the exact boundary and deferred renderer design.
+for commands, package bindings, and the exact boundary.
