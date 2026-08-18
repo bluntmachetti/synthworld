@@ -106,6 +106,7 @@
             "python:synthworld.agentic.evaluate_agentic_trace",
             "python:synthworld.agentic.export_agentic_benchmark",
             "python:synthworld.agentic.generate_asteria_agentic_v1",
+            "python:synthworld.agentic.load_agentic_benchmark",
             "python:synthworld.agentic.load_golden_agentic_benchmark",
             "python:synthworld.agentic.load_public_agentic_bundle",
             "python:synthworld.agentic.materialize_agentic_world",
@@ -1307,9 +1308,11 @@
       "id": "explorer-v01",
       "interfaces": {
         "cli": {
-          "coverage": "none",
+          "coverage": "full",
           "subset_note": null,
-          "surface_ids": []
+          "surface_ids": [
+            "cli:synthworld visualize"
+          ]
         },
         "python": {
           "coverage": "full",
@@ -1318,7 +1321,10 @@
             "python:synthworld.explorer.EVALUATOR_WATERMARK",
             "python:synthworld.explorer.EXPLORER_EVALUATOR_SCHEMA_VERSION",
             "python:synthworld.explorer.EXPLORER_LAYOUT_SCHEMA_VERSION",
+            "python:synthworld.explorer.EXPLORER_LAYOUT_SCHEMA_VERSION_V2",
             "python:synthworld.explorer.EXPLORER_PROJECTION_SCHEMA_VERSION",
+            "python:synthworld.explorer.EXPLORER_VISUALISATION_PROFILE_VERSION",
+            "python:synthworld.explorer.PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST",
             "python:synthworld.explorer.ExplorerCoordinateV1",
             "python:synthworld.explorer.ExplorerEdgeKind",
             "python:synthworld.explorer.ExplorerEdgeV1",
@@ -1326,34 +1332,41 @@
             "python:synthworld.explorer.ExplorerEvaluatorOverlayV1",
             "python:synthworld.explorer.ExplorerLayoutDirection",
             "python:synthworld.explorer.ExplorerLayoutManifestV1",
+            "python:synthworld.explorer.ExplorerLayoutManifestV2",
             "python:synthworld.explorer.ExplorerLayoutOptionsV1",
             "python:synthworld.explorer.ExplorerNodeKind",
             "python:synthworld.explorer.ExplorerNodeV1",
             "python:synthworld.explorer.ExplorerPropertyV1",
             "python:synthworld.explorer.ExplorerPublicProjectionV1",
+            "python:synthworld.explorer.ExplorerRenderError",
             "python:synthworld.explorer.ExplorerSourceV1",
             "python:synthworld.explorer.ExplorerTimelineEventKind",
             "python:synthworld.explorer.ExplorerTimelineEventV1",
             "python:synthworld.explorer.ExplorerViewportV1",
             "python:synthworld.explorer.canonical_json_bytes",
             "python:synthworld.explorer.explorer_digest",
+            "python:synthworld.explorer.load_asteria_agent_authority_layout",
+            "python:synthworld.explorer.project_asteria_agent_authority_evaluator_v1",
             "python:synthworld.explorer.project_asteria_agent_authority_v1",
+            "python:synthworld.explorer.render_asteria_agent_authority_package",
+            "python:synthworld.explorer.render_explorer_html",
             "python:synthworld.explorer.validate_evaluator_overlay",
-            "python:synthworld.explorer.validate_layout_manifest"
+            "python:synthworld.explorer.validate_layout_manifest",
+            "python:synthworld.explorer.write_asteria_agent_authority_html"
           ]
         }
       },
       "journey_route": "route:docs/concepts/explorer-v01.md#explorer-v01-contract-and-packaging-decision",
       "maturity": "preview",
-      "notes": "Version 0.15.0 ships projection contracts and the published Asteria v1 projector only. It does not ship an HTML renderer, packaged viewer, or visualization CLI; generated-scale worlds also remain deferred.",
+      "notes": "The packaged renderer and CLI accept only the checksum-verified published Asteria Agentic v1 public tree. Evaluator rendering requires its separate, cross-bound evaluator tree and is visibly watermarked. Generated enterprise-agentic worlds remain deferred to a separate adapter.",
       "related_surface_ids": [],
       "roadmap_routes": [
         "route:ROADMAP.md#ai-agents-and-non-human-identities"
       ],
       "since": "0.15.0",
-      "summary": "Project the published Asteria Agentic v1 package into deterministic graph and timeline records for external renderers.",
-      "support": "Preview Python contracts and an Asteria v1 projector with evaluator overlays and deterministic layout binding; no renderer or CLI.",
-      "title": "Explorer v0.1 projection contracts"
+      "summary": "Render the published Asteria Agentic v1 package as a deterministic, self-contained authority graph with timeline replay.",
+      "support": "Preview projection contracts plus a packaged Asteria v1 HTML renderer and visualization CLI; public and evaluator views remain physically separate.",
+      "title": "Explorer v0.1"
     },
     {
       "id": "extraction-benchmark",

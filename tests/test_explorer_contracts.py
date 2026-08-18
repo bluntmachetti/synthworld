@@ -16,6 +16,7 @@ from synthworld.explorer import (
     ExplorerEvaluatorAnnotationV1,
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutManifestV1,
+    ExplorerLayoutManifestV2,
     ExplorerLayoutOptionsV1,
     ExplorerNodeKind,
     ExplorerPropertyV1,
@@ -470,6 +471,37 @@ def test_layout_contract_pins_engine_viewport_precision_and_coordinates() -> Non
             options=ExplorerLayoutOptionsV1(engine_version="0.9.3"),
             viewport=ExplorerViewportV1(width=1440, height=900),
             coordinates=(coordinates[0], coordinates[0]),
+        )
+
+
+def test_layout_v2_carries_and_validates_explicit_projection_identity() -> None:
+    projection = _projection()
+    layout = ExplorerLayoutManifestV2(
+        public_projection_digest=explorer_digest(projection),
+        world_seed=projection.source.seed,
+        world_schema_version=projection.source.world_schema_version,
+        options=ExplorerLayoutOptionsV1(engine_version="0.9.3"),
+        viewport=ExplorerViewportV1(width=1440, height=900),
+        coordinates=tuple(
+            ExplorerCoordinateV1(
+                node_id=node.id,
+                x=float(index),
+                y=float(index),
+                width=180.0,
+                height=56.0,
+            )
+            for index, node in enumerate(projection.nodes)
+        ),
+    )
+
+    assert layout.schema_version == "2.0.0"
+    assert layout.visualisation_profile == "agent-authority"
+    assert layout.visualisation_profile_version == "1.0.0"
+    validate_layout_manifest(projection, layout)
+    with pytest.raises(ValueError, match="identity does not match"):
+        validate_layout_manifest(
+            projection,
+            layout.model_copy(update={"world_seed": projection.source.seed + 1}),
         )
 
 
