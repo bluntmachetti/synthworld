@@ -27,6 +27,14 @@ Do not generalize one generator's seed behavior to another SynthWorld surface. R
 
 [Enterprise identity/access contract](../../enterprise-identity-access-contract/README.md)
 
+Persistent access declarations and observed account bindings are intentionally
+tenant-local. A cross-tenant reference in either surface is malformed input, not a
+scoreable denied case. To test a cross-tenant authorization guard, keep the compiled
+access atom structurally valid and express the evaluated subject/resource tenant
+divergence in the cell's public ABAC facts and policy. The bounded enterprise contract
+does not model a persistent federated cross-tenant grant; a consumer must not bypass
+validation to manufacture one.
+
 **Authorization and benchmark surfaces.** The repository contains directory/RBAC, ABAC, ReBAC, identity-fabric, enterprise-agentic, contextual-access, authority-governance, and continuous-assurance surfaces with different APIs and maturity levels. Do not infer that every family has the same CLI or accepts an arbitrary compiled universe.
 
 Some tasks expose command-line generation/evaluation; others are Python-only. Use the [CLI reference](../reference/cli.md), the relevant contract README, and the generated [capability catalogue](/benchmarks/catalogue) for the current boundary.

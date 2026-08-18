@@ -491,6 +491,13 @@ is computed from intended against effective and never from final: intended allow
 `DerivationMechanism` is `direct_entitlement` or `role`. All validity intervals are half-open
 `[valid_from_tick, valid_until_tick)`.
 
+For an account subject, actual RBAC derivation resolves memberships and roles through the
+principal named by the **observed** account binding in the public directory kernel. Canonical
+binding truth does not rewrite that effective subject: it is evaluator-only input to the
+separate `binding_status` gate. A misbound account can therefore derive the observed
+principal's authority before `final_decision` denies on `mismatch`. For a principal subject,
+the binding and lifecycle gates are `not_applicable`.
+
 Two facts about the overlays are easy to get wrong. `ApprovedExceptionReason` (`business_need`,
 `emergency`, `migration`, `remediation_pending`) is validated and carried but the compiler never
 reads it; only the validity window affects any decision, and no metric is keyed on it. Approved
@@ -521,6 +528,11 @@ and no executable policy text. Three-valued combination is explicit: under `all`
 gives `false`, else any `unknown` gives `unknown`; under `any`, any `true` gives `true`, else any
 `unknown` gives `unknown`. Rule combination is deny-overrides, and a conflict flag is set only
 when both allow and deny are present.
+
+`attribute_key` is not a globally unique fact discriminator. In particular,
+`SubjectTenantIdFactV1` and `ResourceTenantIdFactV1` both use `tenant_id`; their `category` and
+discriminated-union `kind` values distinguish them. Consumers must key facts by `kind`, or by a
+tuple that includes `category`, rather than by `attribute_key` alone.
 
 ReBAC is equally closed and **has no userset or rewrite engine**. There are four relations
 (`member_of`, `owns`, `manages`, `collaborates_on`) and exactly three path templates

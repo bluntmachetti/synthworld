@@ -396,6 +396,14 @@ with Path("report.json").open("xb") as output:
     output.write(sw.canonical_enterprise_model_bytes(report))
 ```
 
+`load_evaluator_enterprise_authorization(root)` validates the evaluator artifacts
+against the public artifacts and therefore requires both the `public/` and
+`evaluator/` subtrees beneath the supplied root. An evaluator deliverable may duplicate
+the public bytes for this purpose. That layout is an integrity requirement, not
+permission for the system under test to read evaluator data: mount only the public
+deliverable into the product or adapter, and make the complete root available only to
+the isolated scorer.
+
 Interpret every metric independently using its denominator. There is no aggregate
 enterprise authorization score.
 
