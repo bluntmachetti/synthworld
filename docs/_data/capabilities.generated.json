@@ -2456,6 +2456,12 @@
       "path": "docs/concepts/explorer-v01.md"
     },
     {
+      "anchor": "generated-enterprise-agentic-adapter",
+      "heading": "Generated enterprise-agentic adapter",
+      "id": "route:docs/concepts/explorer-v01.md#generated-enterprise-agentic-adapter",
+      "path": "docs/concepts/explorer-v01.md"
+    },
+    {
       "anchor": "identity-normalization-and-collisions",
       "heading": "Identity, normalization, and collisions",
       "id": "route:docs/concepts/explorer-v01.md#identity-normalization-and-collisions",
@@ -3131,6 +3137,12 @@
       "anchor": "cli-reference",
       "heading": "CLI reference",
       "id": "route:docs/reference/cli.md#cli-reference",
+      "path": "docs/reference/cli.md"
+    },
+    {
+      "anchor": "render-a-generated-enterprise-agentic-world",
+      "heading": "Render a generated enterprise-agentic world",
+      "id": "route:docs/reference/cli.md#render-a-generated-enterprise-agentic-world",
       "path": "docs/reference/cli.md"
     },
     {
@@ -6818,6 +6830,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_public_artifact_set_sha256",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "generated_enterprise_agentic_public_artifact_set_sha256",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_public_artifacts",
       "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
       "kind": "python_export",
@@ -6867,6 +6888,24 @@
       "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
       "kind": "python_export",
       "name": "load_generated_enterprise_agentic_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_generated_enterprise_agentic_public_tree",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "load_generated_enterprise_agentic_public_tree",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_generated_enterprise_agentic_trees",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "load_generated_enterprise_agentic_trees",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -11120,6 +11159,51 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_ENTERPRISE_GENERATED_LAYOUT_SCHEMA_VERSION",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_ENTERPRISE_GENERATED_LAYOUT_SCHEMA_VERSION",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_ENTERPRISE_GENERATED_PROFILE",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_ENTERPRISE_GENERATED_PROFILE",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_ENTERPRISE_GENERATED_PROJECTION_SCHEMA_VERSION",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_ENTERPRISE_GENERATED_PROJECTION_SCHEMA_VERSION",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE_VERSION",
+      "implementation_module": "synthworld.explorer",
+      "kind": "python_export",
+      "name": "EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE_VERSION",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.EXPLORER_EVALUATOR_SCHEMA_VERSION",
       "implementation_module": "synthworld.explorer",
       "kind": "python_export",
@@ -11187,6 +11271,42 @@
       "implementation_module": "synthworld.explorer.models",
       "kind": "python_export",
       "name": "ExplorerEdgeV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEnterpriseGeneratedLayoutOptionsV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEnterpriseGeneratedLayoutOptionsV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEnterpriseGeneratedLayoutV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEnterpriseGeneratedLayoutV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEnterpriseGeneratedProjectionV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEnterpriseGeneratedProjectionV1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.ExplorerEnterpriseGeneratedSourceV1",
+      "implementation_module": "synthworld.explorer.models",
+      "kind": "python_export",
+      "name": "ExplorerEnterpriseGeneratedSourceV1",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },
@@ -11345,10 +11465,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.compute_generated_enterprise_agentic_layout",
+      "implementation_module": "synthworld.explorer.enterprise_generated",
+      "kind": "python_export",
+      "name": "compute_generated_enterprise_agentic_layout",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.explorer_digest",
       "implementation_module": "synthworld.explorer.serialization",
       "kind": "python_export",
       "name": "explorer_digest",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.is_supported_generated_projection",
+      "implementation_module": "synthworld.explorer.enterprise_generated",
+      "kind": "python_export",
+      "name": "is_supported_generated_projection",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },
@@ -11381,6 +11519,24 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.project_generated_enterprise_agentic_evaluator_v1",
+      "implementation_module": "synthworld.explorer.enterprise_generated",
+      "kind": "python_export",
+      "name": "project_generated_enterprise_agentic_evaluator_v1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.project_generated_enterprise_agentic_v1",
+      "implementation_module": "synthworld.explorer.enterprise_generated",
+      "kind": "python_export",
+      "name": "project_generated_enterprise_agentic_v1",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.render_asteria_agent_authority_package",
       "implementation_module": "synthworld.explorer.rendering",
       "kind": "python_export",
@@ -11399,10 +11555,37 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.explorer.render_generated_enterprise_agentic_html",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "render_generated_enterprise_agentic_html",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.render_generated_enterprise_agentic_package",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "render_generated_enterprise_agentic_package",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.explorer.validate_evaluator_overlay",
       "implementation_module": "synthworld.explorer.validation",
       "kind": "python_export",
       "name": "validate_evaluator_overlay",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.validate_generated_layout",
+      "implementation_module": "synthworld.explorer.validation",
+      "kind": "python_export",
+      "name": "validate_generated_layout",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },
@@ -11421,6 +11604,15 @@
       "implementation_module": "synthworld.explorer.rendering",
       "kind": "python_export",
       "name": "write_asteria_agent_authority_html",
+      "source": "src/synthworld/explorer/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.explorer.write_generated_enterprise_agentic_html",
+      "implementation_module": "synthworld.explorer.rendering",
+      "kind": "python_export",
+      "name": "write_generated_enterprise_agentic_html",
       "source": "src/synthworld/explorer/__init__.py",
       "visibility": "subpackage"
     },

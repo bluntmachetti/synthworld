@@ -110,6 +110,7 @@ from synthworld.evaluation import (
 from synthworld.explorer import (
     ExplorerRenderError,
     write_asteria_agent_authority_html,
+    write_generated_enterprise_agentic_html,
 )
 from synthworld.exposure_generator import generate_exposure_corpus
 from synthworld.extraction_generator import (
@@ -239,13 +240,21 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if args.command == "visualize":
         try:
-            write_asteria_agent_authority_html(
-                args.output,
-                public_package=args.public_package,
-                evaluator_package=args.evaluator_package,
-            )
+            if args.package_profile == "generated-enterprise-agentic":
+                write_generated_enterprise_agentic_html(
+                    args.output,
+                    public_package=args.public_package,
+                    evaluator_package=args.evaluator_package,
+                )
+            else:
+                write_asteria_agent_authority_html(
+                    args.output,
+                    public_package=args.public_package,
+                    evaluator_package=args.evaluator_package,
+                )
         except (
             AgenticArtifactError,
+            EnterpriseAgenticArtifactError,
             ExplorerRenderError,
             OSError,
             ValidationError,
@@ -899,6 +908,12 @@ def _parser() -> argparse.ArgumentParser:
     visualize.add_argument("--public-package", type=Path, required=True)
     visualize.add_argument("--evaluator-package", type=Path)
     visualize.add_argument("--view", choices=("agent-authority",), required=True)
+    visualize.add_argument(
+        "--package-profile",
+        choices=("asteria", "generated-enterprise-agentic"),
+        default="asteria",
+        help="which released package contract the input directories follow",
+    )
     visualize.add_argument("--output", type=Path, required=True)
 
     households = subparsers.add_parser(

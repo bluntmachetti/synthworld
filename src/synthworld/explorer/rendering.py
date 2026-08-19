@@ -7,6 +7,14 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
+from synthworld.agentic.enterprise.generated_models import (
+    EnterpriseAgenticGeneratedPublicV1,
+)
+from synthworld.agentic.enterprise.generated_serialization import (
+    generated_enterprise_agentic_artifact_checksums,
+    load_generated_enterprise_agentic_public_tree,
+    load_generated_enterprise_agentic_trees,
+)
 from synthworld.agentic.serialization import (
     load_agentic_benchmark,
     load_public_agentic_bundle,
@@ -15,7 +23,15 @@ from synthworld.explorer.asteria import (
     project_asteria_agent_authority_evaluator_v1,
     project_asteria_agent_authority_v1,
 )
+from synthworld.explorer.enterprise_generated import (
+    compute_generated_enterprise_agentic_layout,
+    is_supported_generated_projection,
+    project_generated_enterprise_agentic_evaluator_v1,
+    project_generated_enterprise_agentic_v1,
+)
 from synthworld.explorer.models import (
+    ExplorerEnterpriseGeneratedLayoutV1,
+    ExplorerEnterpriseGeneratedProjectionV1,
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutManifestV2,
     ExplorerPublicProjectionV1,
@@ -23,6 +39,7 @@ from synthworld.explorer.models import (
 from synthworld.explorer.serialization import canonical_json_bytes
 from synthworld.explorer.validation import (
     validate_evaluator_overlay,
+    validate_generated_layout,
     validate_layout_manifest,
 )
 
@@ -89,38 +106,28 @@ def load_asteria_agent_authority_layout() -> ExplorerLayoutManifestV2:
 def _safe_json(
     artifact: (
         ExplorerPublicProjectionV1
+        | ExplorerEnterpriseGeneratedProjectionV1
         | ExplorerEvaluatorOverlayV1
         | ExplorerLayoutManifestV2
+        | ExplorerEnterpriseGeneratedLayoutV1
     ),
 ) -> str:
     serialized = canonical_json_bytes(artifact).decode("utf-8").strip()
     return serialized.replace("<", "\\u003c")
 
 
-def render_explorer_html(
-    projection: ExplorerPublicProjectionV1,
+def _render_html(
+    projection: ExplorerPublicProjectionV1 | ExplorerEnterpriseGeneratedProjectionV1,
+    layout: ExplorerLayoutManifestV2 | ExplorerEnterpriseGeneratedLayoutV1,
+    overlay: ExplorerEvaluatorOverlayV1 | None,
     *,
-    overlay: ExplorerEvaluatorOverlayV1 | None = None,
+    title: str,
+    heading: str,
+    graph_label: str,
+    status: str,
+    coordinate_note: str,
 ) -> bytes:
-    """Render deterministic, self-contained Explorer HTML from verified contracts."""
-
-    if (
-        projection.profile != "agent-authority-v1"
-        or projection.source.public_artifact_set_digest
-        != PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST
-    ):
-        raise ExplorerRenderError(
-            "Explorer v0.1 renders only the published Asteria Agentic v1 package"
-        )
     assets, asset_manifest = _asset_bytes()
-    layout = load_asteria_agent_authority_layout()
-    try:
-        validate_layout_manifest(projection, layout)
-        if overlay is not None:
-            validate_evaluator_overlay(projection, overlay)
-    except ValueError as error:
-        raise ExplorerRenderError(str(error)) from error
-
     css = assets["explorer.css"].decode("utf-8")
     script = assets["explorer.bundle.js"].decode("utf-8")
     if "</style" in css.lower() or "</script" in script.lower():
@@ -160,7 +167,7 @@ def render_explorer_html(
 <meta
   name="synthworld-public-projection-sha256"
   content="{layout.public_projection_digest}">
-<title>Asteria agent authority - SynthWorld Explorer</title>
+<title>{title}</title>
 <style>{css}</style>
 </head>
 <body>
@@ -169,7 +176,7 @@ def render_explorer_html(
 <header class="masthead">
   <section>
     <div class="eyebrow">SynthWorld Explorer / {visibility_label}</div>
-    <h1>Asteria <em>authority map</em></h1>
+    <h1>{heading}</h1>
     <div class="facts">
       <span><strong>{len(projection.nodes)}</strong> nodes</span>
       <span><strong>{len(projection.edges)}</strong> relations</span>
@@ -178,7 +185,7 @@ def render_explorer_html(
     </div>
   </section>
   <aside class="status">
-    published world<br>agent authority v1<br>deterministic preset
+    {status}
   </aside>
 </header>
 <section class="workspace">
@@ -190,7 +197,7 @@ def render_explorer_html(
     <div
       id="synthworld-graph"
       role="img"
-      aria-label="Interactive graph of Asteria agent authority"></div>
+      aria-label="{graph_label}"></div>
   </div>
   <aside class="inspector">
     <div class="eyebrow">Inspect the chain</div>
@@ -216,7 +223,7 @@ def render_explorer_html(
 </section>
 <footer>
   <span>{footer_label}</span>
-  <span>stable UUID5 identities / pinned ELK coordinates</span>
+  <span>{coordinate_note}</span>
 </footer>
 <details>
   <summary>Third-party notices ({html.escape(dependencies)})</summary>
@@ -232,6 +239,73 @@ def render_explorer_html(
 </html>
 """
     return rendered.encode("utf-8")
+
+
+def render_explorer_html(
+    projection: ExplorerPublicProjectionV1,
+    *,
+    overlay: ExplorerEvaluatorOverlayV1 | None = None,
+) -> bytes:
+    """Render deterministic, self-contained Explorer HTML from verified contracts."""
+
+    if (
+        projection.profile != "agent-authority-v1"
+        or projection.source.public_artifact_set_digest
+        != PUBLISHED_ASTERIA_PUBLIC_ARTIFACT_SET_DIGEST
+    ):
+        raise ExplorerRenderError(
+            "Explorer v0.1 renders only the published Asteria Agentic v1 package"
+        )
+    layout = load_asteria_agent_authority_layout()
+    try:
+        validate_layout_manifest(projection, layout)
+        if overlay is not None:
+            validate_evaluator_overlay(projection, overlay)
+    except ValueError as error:
+        raise ExplorerRenderError(str(error)) from error
+    return _render_html(
+        projection,
+        layout,
+        overlay,
+        title="Asteria agent authority - SynthWorld Explorer",
+        heading="Asteria <em>authority map</em>",
+        graph_label="Interactive graph of Asteria agent authority",
+        status="published world<br>agent authority v1<br>deterministic preset",
+        coordinate_note="stable UUID5 identities / pinned ELK coordinates",
+    )
+
+
+def render_generated_enterprise_agentic_html(
+    projection: ExplorerEnterpriseGeneratedProjectionV1,
+    *,
+    overlay: ExplorerEvaluatorOverlayV1 | None = None,
+) -> bytes:
+    """Render one generated enterprise-agentic projection with the shared shell."""
+
+    if not is_supported_generated_projection(projection):
+        raise ExplorerRenderError(
+            "Explorer renders only the released generated enterprise-agentic "
+            "smoke profile"
+        )
+    layout = compute_generated_enterprise_agentic_layout(projection)
+    try:
+        validate_generated_layout(projection, layout)
+        if overlay is not None:
+            validate_evaluator_overlay(projection, overlay)
+    except ValueError as error:
+        raise ExplorerRenderError(str(error)) from error
+    return _render_html(
+        projection,
+        layout,
+        overlay,
+        title="Generated enterprise agent authority - SynthWorld Explorer",
+        heading="Generated enterprise <em>authority map</em>",
+        graph_label="Interactive graph of generated enterprise agent authority",
+        status=(
+            "generated world<br>enterprise-agentic-generated v1<br>deterministic preset"
+        ),
+        coordinate_note="stable UUID5 identities / deterministic grid coordinates",
+    )
 
 
 def render_asteria_agent_authority_package(
@@ -296,6 +370,36 @@ def render_asteria_agent_authority_package(
     return render_explorer_html(projection, overlay=overlay)
 
 
+def render_generated_enterprise_agentic_package(
+    *,
+    public_package: Path,
+    evaluator_package: Path | None = None,
+) -> bytes:
+    """Verify generated package trees and render the supported generated view."""
+
+    if evaluator_package is None:
+        public = load_generated_enterprise_agentic_public_tree(public_package)
+        projection = project_generated_enterprise_agentic_v1(public)
+        return render_generated_enterprise_agentic_html(projection)
+    generated = load_generated_enterprise_agentic_trees(
+        public_tree=public_package,
+        evaluator_tree=evaluator_package,
+    )
+    public = EnterpriseAgenticGeneratedPublicV1(
+        config=generated.config,
+        identity=generated.identity,
+        benchmark=generated.public,
+    )
+    projection = project_generated_enterprise_agentic_v1(public)
+    checksums = dict(generated_enterprise_agentic_artifact_checksums(generated))
+    overlay = project_generated_enterprise_agentic_evaluator_v1(
+        projection,
+        generated.evaluator,
+        evaluator_artifact_set_digest=checksums["evaluator"],
+    )
+    return render_generated_enterprise_agentic_html(projection, overlay=overlay)
+
+
 def write_asteria_agent_authority_html(
     output: Path,
     *,
@@ -305,6 +409,22 @@ def write_asteria_agent_authority_html(
     """Write one new self-contained HTML file without overwriting existing data."""
 
     payload = render_asteria_agent_authority_package(
+        public_package=public_package,
+        evaluator_package=evaluator_package,
+    )
+    with output.open("xb") as destination:
+        destination.write(payload)
+
+
+def write_generated_enterprise_agentic_html(
+    output: Path,
+    *,
+    public_package: Path,
+    evaluator_package: Path | None = None,
+) -> None:
+    """Write one new self-contained HTML file without overwriting existing data."""
+
+    payload = render_generated_enterprise_agentic_package(
         public_package=public_package,
         evaluator_package=evaluator_package,
     )

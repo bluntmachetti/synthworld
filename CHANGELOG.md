@@ -11,6 +11,21 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
+- **Generated enterprise-agentic Explorer adapter (#149).** The `synthworld
+  visualize` command now renders a verified released generated
+  enterprise-agentic smoke package as deterministic, self-contained HTML when
+  selected explicitly with `--package-profile generated-enterprise-agentic`. An
+  independently versioned `enterprise-agentic-generated-v1` projection records
+  the generated configuration digest, world identity, tier, and public
+  artifact-set digest; a new `1.0.0` generated layout contract computes a
+  deterministic kind-layered grid from the projection alone, so no frozen
+  `1.0.0` Explorer or Asteria contract widens in place and published Asteria
+  HTML bytes are unchanged. The public path consumes only the verified public
+  tree; evaluator truth requires the separate evaluator tree, is digest-bound
+  through the reused overlay contract, and renders visibly watermarked.
+  Unsupported generated tiers or package versions fail explicitly, and the
+  shared #52 renderer, assets, and interaction are reused without a second
+  viewer implementation.
 - **Packaged Asteria Explorer renderer (#52).** The `synthworld visualize` command
   now renders the checksum-verified published Asteria Agentic v1 public package as
   deterministic, self-contained HTML with an interactive authority graph, chain

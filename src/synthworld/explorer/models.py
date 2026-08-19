@@ -15,6 +15,13 @@ EXPLORER_LAYOUT_SCHEMA_VERSION: Final = "1.0.0"
 EXPLORER_LAYOUT_SCHEMA_VERSION_V2: Final = "2.0.0"
 EXPLORER_VISUALISATION_PROFILE_VERSION: Final = "1.0.0"
 EVALUATOR_WATERMARK: Final = "EVALUATOR VIEW - CONTAINS REFERENCE TRUTH"
+EXPLORER_ENTERPRISE_GENERATED_PROJECTION_SCHEMA_VERSION: Final = "1.0.0"
+EXPLORER_ENTERPRISE_GENERATED_PROFILE: Final = "enterprise-agentic-generated-v1"
+EXPLORER_ENTERPRISE_GENERATED_LAYOUT_SCHEMA_VERSION: Final = "1.0.0"
+EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE: Final = (
+    "enterprise-agentic-generated-agent-authority"
+)
+EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE_VERSION: Final = "1.0.0"
 
 
 class ExplorerNodeKind(StrEnum):
@@ -187,6 +194,54 @@ def _require_unique(values: tuple[str, ...], description: str) -> None:
         raise ValueError(f"{description} must be unique")
 
 
+def _require_closed_projection_graph(
+    nodes: tuple[ExplorerNodeV1, ...],
+    edges: tuple[ExplorerEdgeV1, ...],
+    timeline: tuple[ExplorerTimelineEventV1, ...],
+) -> None:
+    node_ids = tuple(item.id for item in nodes)
+    edge_ids = tuple(item.id for item in edges)
+    _require_unique(node_ids, "Explorer node IDs")
+    _require_unique(edge_ids, "Explorer edge IDs")
+    _require_unique(
+        tuple(event.source_event_id for event in timeline),
+        "Explorer timeline source event IDs",
+    )
+    known_nodes = set(node_ids)
+    known_edges = set(edge_ids)
+    parents = {node.id: node.parent_node_id for node in nodes}
+    for node in nodes:
+        if node.parent_node_id is not None and node.parent_node_id not in known_nodes:
+            raise ValueError("Explorer node references an unknown parent")
+    for node_id in node_ids:
+        visited: set[str] = set()
+        cursor = node_id
+        while (parent := parents[cursor]) is not None:
+            if parent == node_id or parent in visited:
+                raise ValueError("Explorer node parents must be acyclic")
+            visited.add(cursor)
+            cursor = parent
+    for edge in edges:
+        if (
+            edge.source_node_id not in known_nodes
+            or edge.target_node_id not in known_nodes
+        ):
+            raise ValueError("Explorer edge references an unknown node")
+    previous_index = 0
+    previous_time: datetime | None = None
+    for event in timeline:
+        if event.source_event_index <= previous_index:
+            raise ValueError("Explorer timeline indices must be strictly increasing")
+        if previous_time is not None and event.occurred_at <= previous_time:
+            raise ValueError("Explorer timeline times must be strictly increasing")
+        if not set(event.related_node_ids) <= known_nodes:
+            raise ValueError("Explorer event references an unknown node")
+        if not set(event.related_edge_ids) <= known_edges:
+            raise ValueError("Explorer event references an unknown edge")
+        previous_index = event.source_event_index
+        previous_time = event.occurred_at
+
+
 class ExplorerPublicProjectionV1(SyntheticModel):
     schema_version: Literal["1.0.0"] = EXPLORER_PROJECTION_SCHEMA_VERSION
     profile: Literal["agent-authority-v1"] = "agent-authority-v1"
@@ -219,52 +274,77 @@ class ExplorerPublicProjectionV1(SyntheticModel):
 
     @model_validator(mode="after")
     def require_closed_graph(self) -> Self:
-        node_ids = tuple(item.id for item in self.nodes)
-        edge_ids = tuple(item.id for item in self.edges)
-        _require_unique(node_ids, "Explorer node IDs")
-        _require_unique(edge_ids, "Explorer edge IDs")
-        _require_unique(
-            tuple(event.source_event_id for event in self.timeline),
-            "Explorer timeline source event IDs",
-        )
-        known_nodes = set(node_ids)
-        known_edges = set(edge_ids)
-        parents = {node.id: node.parent_node_id for node in self.nodes}
-        for node in self.nodes:
-            if (
-                node.parent_node_id is not None
-                and node.parent_node_id not in known_nodes
-            ):
-                raise ValueError("Explorer node references an unknown parent")
-        for node_id in node_ids:
-            visited: set[str] = set()
-            cursor = node_id
-            while (parent := parents[cursor]) is not None:
-                if parent == node_id or parent in visited:
-                    raise ValueError("Explorer node parents must be acyclic")
-                visited.add(cursor)
-                cursor = parent
-        for edge in self.edges:
-            if (
-                edge.source_node_id not in known_nodes
-                or edge.target_node_id not in known_nodes
-            ):
-                raise ValueError("Explorer edge references an unknown node")
-        previous_index = 0
-        previous_time: datetime | None = None
-        for event in self.timeline:
-            if event.source_event_index <= previous_index:
-                raise ValueError(
-                    "Explorer timeline indices must be strictly increasing"
-                )
-            if previous_time is not None and event.occurred_at <= previous_time:
-                raise ValueError("Explorer timeline times must be strictly increasing")
-            if not set(event.related_node_ids) <= known_nodes:
-                raise ValueError("Explorer event references an unknown node")
-            if not set(event.related_edge_ids) <= known_edges:
-                raise ValueError("Explorer event references an unknown edge")
-            previous_index = event.source_event_index
-            previous_time = event.occurred_at
+        _require_closed_projection_graph(self.nodes, self.edges, self.timeline)
+        return self
+
+
+class ExplorerEnterpriseGeneratedSourceV1(SyntheticModel):
+    """Generated enterprise-agentic package identity behind a projection."""
+
+    schema_version: Literal["1.0.0"] = (
+        EXPLORER_ENTERPRISE_GENERATED_PROJECTION_SCHEMA_VERSION
+    )
+    benchmark_id: Literal["enterprise-agentic-generated"] = (
+        "enterprise-agentic-generated"
+    )
+    profile_version: str = Field(min_length=1)
+    generator_version: str = Field(min_length=1)
+    canonical_serialization_version: str = Field(min_length=1)
+    event_schedule_version: str = Field(min_length=1)
+    tier: str = Field(min_length=1)
+    seed: int = Field(ge=0)
+    configuration_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    world_id: str = Field(min_length=1)
+    world_version: str = Field(min_length=1)
+    world_schema_version: str = Field(min_length=1)
+    lifecycle: Literal["generated"] = "generated"
+    digest_algorithm: Literal["sha256"] = "sha256"
+    public_artifact_set_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class ExplorerEnterpriseGeneratedProjectionV1(SyntheticModel):
+    """Public agent-authority projection of one generated enterprise world.
+
+    Independently versioned from ``ExplorerPublicProjectionV1`` so the frozen
+    Asteria ``agent-authority-v1`` profile literal never widens in place.
+    """
+
+    schema_version: Literal["1.0.0"] = (
+        EXPLORER_ENTERPRISE_GENERATED_PROJECTION_SCHEMA_VERSION
+    )
+    profile: Literal["enterprise-agentic-generated-v1"] = (
+        EXPLORER_ENTERPRISE_GENERATED_PROFILE
+    )
+    visibility: Literal["public"] = "public"
+    source: ExplorerEnterpriseGeneratedSourceV1
+    nodes: tuple[ExplorerNodeV1, ...]
+    edges: tuple[ExplorerEdgeV1, ...]
+    timeline: tuple[ExplorerTimelineEventV1, ...]
+
+    @field_validator("nodes")
+    @classmethod
+    def sort_nodes(
+        cls, value: tuple[ExplorerNodeV1, ...]
+    ) -> tuple[ExplorerNodeV1, ...]:
+        return tuple(sorted(value, key=lambda item: item.id))
+
+    @field_validator("edges")
+    @classmethod
+    def sort_edges(
+        cls, value: tuple[ExplorerEdgeV1, ...]
+    ) -> tuple[ExplorerEdgeV1, ...]:
+        return tuple(sorted(value, key=lambda item: item.id))
+
+    @field_validator("timeline")
+    @classmethod
+    def sort_timeline(
+        cls, value: tuple[ExplorerTimelineEventV1, ...]
+    ) -> tuple[ExplorerTimelineEventV1, ...]:
+        return tuple(sorted(value, key=lambda item: item.source_event_index))
+
+    @model_validator(mode="after")
+    def require_closed_graph(self) -> Self:
+        _require_closed_projection_graph(self.nodes, self.edges, self.timeline)
         return self
 
 
@@ -355,9 +435,60 @@ class ExplorerLayoutManifestV1(SyntheticModel):
     def sort_coordinates(
         cls, value: tuple[ExplorerCoordinateV1, ...]
     ) -> tuple[ExplorerCoordinateV1, ...]:
-        node_ids = tuple(item.node_id for item in value)
-        _require_unique(node_ids, "Explorer layout node IDs")
-        return tuple(sorted(value, key=lambda item: item.node_id))
+        return _sorted_unique_coordinates(value)
+
+
+def _sorted_unique_coordinates(
+    value: tuple[ExplorerCoordinateV1, ...],
+) -> tuple[ExplorerCoordinateV1, ...]:
+    node_ids = tuple(item.node_id for item in value)
+    _require_unique(node_ids, "Explorer layout node IDs")
+    return tuple(sorted(value, key=lambda item: item.node_id))
+
+
+class ExplorerEnterpriseGeneratedLayoutOptionsV1(SyntheticModel):
+    """Deterministic in-package layout inputs for generated worlds.
+
+    Generated packages have no build-time pinned coordinates, so the layout
+    engine is a pure-Python grid computed from the projection alone.
+    """
+
+    engine: Literal["synthworld-grid"] = "synthworld-grid"
+    engine_version: Literal["1.0.0"] = "1.0.0"
+    algorithm: Literal["kind-layered"] = "kind-layered"
+    direction: ExplorerLayoutDirection = ExplorerLayoutDirection.RIGHT
+    node_spacing: int = Field(default=40, ge=0)
+    layer_spacing: int = Field(default=80, ge=0)
+
+
+class ExplorerEnterpriseGeneratedLayoutV1(SyntheticModel):
+    """Layout manifest for the generated enterprise-agentic projection."""
+
+    schema_version: Literal["1.0.0"] = (
+        EXPLORER_ENTERPRISE_GENERATED_LAYOUT_SCHEMA_VERSION
+    )
+    digest_algorithm: Literal["sha256"] = "sha256"
+    public_projection_digest: str = Field(pattern=r"^[0-9a-f]{64}$")
+    world_id: str = Field(min_length=1)
+    world_seed: int = Field(ge=0)
+    world_schema_version: str = Field(min_length=1)
+    visualisation_profile: Literal["enterprise-agentic-generated-agent-authority"] = (
+        EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE
+    )
+    visualisation_profile_version: Literal["1.0.0"] = (
+        EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE_VERSION
+    )
+    options: ExplorerEnterpriseGeneratedLayoutOptionsV1
+    viewport: ExplorerViewportV1
+    coordinate_precision: int = Field(default=3, ge=0, le=6)
+    coordinates: tuple[ExplorerCoordinateV1, ...]
+
+    @field_validator("coordinates")
+    @classmethod
+    def sort_coordinates(
+        cls, value: tuple[ExplorerCoordinateV1, ...]
+    ) -> tuple[ExplorerCoordinateV1, ...]:
+        return _sorted_unique_coordinates(value)
 
 
 class ExplorerLayoutManifestV2(SyntheticModel):
@@ -382,6 +513,4 @@ class ExplorerLayoutManifestV2(SyntheticModel):
     def sort_coordinates(
         cls, value: tuple[ExplorerCoordinateV1, ...]
     ) -> tuple[ExplorerCoordinateV1, ...]:
-        node_ids = tuple(item.node_id for item in value)
-        _require_unique(node_ids, "Explorer layout node IDs")
-        return tuple(sorted(value, key=lambda item: item.node_id))
+        return _sorted_unique_coordinates(value)
