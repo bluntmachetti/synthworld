@@ -45,23 +45,33 @@ _EVALUATOR_BASE_PATHS = {_EVALUATOR_TRUTH_PATH}
 _EVALUATOR_TREE_PATHS = {_MANIFEST_PATH, *_EVALUATOR_BASE_PATHS}
 
 
-def _public_base_artifacts(
+def _public_tree_artifacts(
     public: EnterpriseAgenticGeneratedPublicV1,
 ) -> dict[str, bytes]:
-    return {
+    artifacts = {
         _PUBLIC_INPUT_PATH: canonical_json_bytes(public),
         _PUBLIC_SCENARIO_PATH: canonical_json_bytes(public.benchmark.scenario),
         _PUBLIC_TOOL_SCHEMA_PATH: canonical_json_value_bytes(_tool_schema()),
     }
+    manifest = EnterpriseAgenticGeneratedPublicManifestV1(
+        artifact_set_sha256=generated_enterprise_agentic_artifact_set_sha256(artifacts),
+        artifacts=_descriptors(artifacts),
+    )
+    return {"manifest.json": canonical_json_bytes(manifest), **artifacts}
 
 
 def generated_enterprise_agentic_public_artifact_set_sha256(
     public: EnterpriseAgenticGeneratedPublicV1,
 ) -> str:
-    """Return the manifest-recorded digest of the public base artifact set."""
+    """Return the complete public-tree digest, including its manifest.
+
+    This is the digest the evaluator manifest, evaluator truth artifact, and
+    evaluation receipts use as ``public_artifact_set_sha256``, so a projection
+    recording it can be correlated with every published cross-binding.
+    """
 
     return generated_enterprise_agentic_artifact_set_sha256(
-        _public_base_artifacts(public)
+        _public_tree_artifacts(public)
     )
 
 
@@ -70,17 +80,13 @@ def generated_enterprise_agentic_public_artifacts(
 ) -> dict[str, bytes]:
     """Return an oracle-free, self-checksummed public artifact tree."""
 
-    public = EnterpriseAgenticGeneratedPublicV1(
-        config=generated.config,
-        identity=generated.identity,
-        benchmark=generated.public,
+    return _public_tree_artifacts(
+        EnterpriseAgenticGeneratedPublicV1(
+            config=generated.config,
+            identity=generated.identity,
+            benchmark=generated.public,
+        )
     )
-    artifacts = _public_base_artifacts(public)
-    manifest = EnterpriseAgenticGeneratedPublicManifestV1(
-        artifact_set_sha256=generated_enterprise_agentic_artifact_set_sha256(artifacts),
-        artifacts=_descriptors(artifacts),
-    )
-    return {"manifest.json": canonical_json_bytes(manifest), **artifacts}
 
 
 def generated_enterprise_agentic_evaluator_artifacts(

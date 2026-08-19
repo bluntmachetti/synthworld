@@ -289,6 +289,15 @@ def test_generated_evaluator_overlay_binds_package_digests(
     assert checksums["evaluator"].encode() in evaluator_html
     assert evaluator_manifest["artifact_set_sha256"] == checksums["evaluator"]
 
+    projection = project_generated_enterprise_agentic_v1(
+        _public_model(generated_benchmark)
+    )
+    assert projection.source.public_artifact_set_sha256 == checksums["public"]
+    assert (
+        evaluator_manifest["public_artifact_set_sha256"]
+        == projection.source.public_artifact_set_sha256
+    )
+
 
 def test_generated_renderer_rejects_unsupported_or_unbound_inputs(
     generated_benchmark: EnterpriseAgenticGeneratedBenchmarkV1,
