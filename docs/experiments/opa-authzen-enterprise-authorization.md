@@ -3,8 +3,9 @@
 This frozen external-consumer experiment asks whether one authorization policy can
 consume released SynthWorld 0.16.0 artifacts through an AuthZEN-style request
 boundary and preserve the scoreable authorization behaviour across two fictional
-organizations. Britannia is the calibration topology; Aurelia is the unseen
-generalization topology.
+organizations. Britannia is the calibration topology. Aurelia uses a different
+input schema that the mapping algorithm was not written against, but these two
+author-related inputs are not a representative generalization sample.
 
 The experiment is recorded in
 [Discussion #147](https://github.com/bluntmachetti/synthworld/discussions/147) and
@@ -31,10 +32,11 @@ Britannia and Aurelia topology YAML
     -> isolated offline SynthWorld scoring
 ```
 
-The projector, adapter, OPA process, and system-under-test runner received only the
-public artifact tree. The offline scorer was the only capability with an evaluator
-mount. A deliberate regression exposed evaluator paths to both the projector and
-runner; the isolation checker rejected both configurations.
+The projector received only the split public deliverable and wrote the derived
+policy and request inputs used by OPA, the adapter, and the system-under-test
+runner. None of those capabilities had an evaluator mount; the offline scorer was
+the only evaluator reader. A deliberate regression exposed evaluator paths to both
+the projector and runner; the isolation checker rejected both configurations.
 
 ## Run identity
 
@@ -68,8 +70,13 @@ Each request bound the subject identifier and type, action name, resource identi
 and type, evaluation tick, profile, and topology lane to the selected public cell.
 Sixteen fixed-cell-ID mutation controls changed those values independently and were
 all refused. The runner retained raw requests and responses, normalized them into
-typed submissions, and sealed each topology's complete input, policy, adapter,
-package, product, and result evidence before scoring.
+typed submissions, and sealed each topology's public inputs, policy, adapter,
+package and product identities, raw results, and submission before scoring. The
+isolation checker ran separately and its retained evidence is present in the
+reference ZIP, but it was not seal-bound: a missing `controls` mount caused both
+published seals to record `isolation_evidence: null`. The recorded isolation result
+is therefore independently auditable rather than cryptographically chained into
+the submission seal.
 
 The reproduction workflow uses Docker Compose, digest-pinned images, and a
 hash-pinned Python lock. The two complete deterministic runs compared 175 files
@@ -97,6 +104,12 @@ Every metric retains its own denominator; no aggregate score is computed.
 | Policy and adapter negative controls | 20 / 20 | Deliberately faulty policies or prediction dimensions detected |
 | Request-binding mutation controls | 16 / 16 | Altered AuthZEN-style request fields refused |
 | Seal and replay controls | 20 / 20 | Untampered submissions accepted and invalid variants refused as required |
+
+The baseline was iteratively improved while aggregate metrics were visible, and
+one author wrote both the scenario overlay and the OPA policy. The near-perfect
+figures therefore support that the released contracts were learnable and internally
+self-consistent in this experiment; they are not a blind first-attempt or
+independent-implementation result.
 
 Britannia contributed 324 cells and the single final-decision error; Aurelia
 contributed 325 cells and reproduced every effective and final decision. The
@@ -126,6 +139,8 @@ checksums:
 ```bash
 gh release verify enterprise-authorization-opa-authzen-0.16.0-2 \
   --repo bluntmachetti/synthworld
+gh release download enterprise-authorization-opa-authzen-0.16.0-2 \
+  --repo bluntmachetti/synthworld
 sha256sum -c SHA256SUMS
 unzip enterprise-authorization-opa-authzen-0.16.0-2-reproduction-kit.zip
 cd enterprise-authorization-opa-authzen-0.16.0-2-reproduction-kit
@@ -142,14 +157,23 @@ byte-identity comparison using the retained local cache.
   around the published decision-request model.
 - A comparison among authorization strategies. It exercises one policy; the
   negative controls are intentionally broken variants, not alternatives.
+- A blind first attempt. Three policy defects were corrected after aggregate metrics
+  exposed them; no case labels, per-case verdicts, canonical identities, ownership
+  truth, or expected outcomes were supplied to the policy.
+- Independent interpretation by benchmark and policy authors. One author wrote both
+  the scenario overlay and the OPA policy, so a symmetric misunderstanding could
+  remain invisible even though the negative controls prove that the metrics move.
 - Individual person-to-agent accountability. The topology mapping establishes
   team-level responsibility but does not model an explicit person assignment for
   every agent.
-- Arbitrary topology portability. Britannia and Aurelia use the same mapping
-  method, but two successful inputs do not prove that every organization YAML is
-  representable.
-- A SynthWorld rendering feature. The released package has no HTML renderer, and
-  this experiment did not substitute an experiment-owned viewer.
+- Arbitrary topology portability. Aurelia shows that the mapping algorithm survived
+  a schema it was not written against, but both topology documents share an authoring
+  style and vocabulary and cannot represent a generalization sample.
+- A SynthWorld rendering feature. SynthWorld 0.16.0 had no HTML renderer for these
+  enterprise artifact types, and this experiment did not substitute an
+  experiment-owned viewer.
+- A seal-bound isolation proof. The isolation checker passed and its evidence ships
+  separately, but the published seals contain a null isolation-evidence field.
 - A maintenance commitment. Experiment authors own future adaptations, policies,
   infrastructure, and support.
 
