@@ -48,6 +48,11 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         # explicitly excludes consumer integration code. Reviewed with the Phase 2
         # freeze and composed-scoring contract on 2026-08-16.
         Path("docs/experiments/enterprise-authorization.md"),
+        # The OPA/AuthZEN evidence page names the released distribution solely to
+        # bind a frozen external experiment to its public dependency. It contains
+        # no consumer integration code or private symbols. Reviewed with the
+        # two-topology experiment publication on 2026-08-17.
+        Path("docs/experiments/opa-authzen-enterprise-authorization.md"),
         # The enterprise authorization guide and isolated-wheel check name only the
         # released distribution while enforcing the public API boundary. Reviewed
         # with the enterprise consumer API in PR #143 on 2026-08-16.

@@ -14,6 +14,9 @@ level. Remote API data is not required to render these pages.
   Phase 1 directory prototype, the frozen Phase 2 authorization run, and the
   immutable Phase 3 isolated reference experiment with its limitations and
   reproducible release assets.
+- [Enterprise authorization with OPA and an AuthZEN-style adapter](opa-authzen-enterprise-authorization.md)
+  records a separate two-topology external-consumer experiment, its enforced
+  evaluator boundary, discriminating controls, limitations, and immutable assets.
 
 An entry here is an evidence record, not an endorsement of a system under test.
 The entry must distinguish a published, independently reproducible experiment
