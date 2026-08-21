@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -13,16 +14,23 @@ from synthworld.agentic.enterprise import (
     EnterpriseAgenticArtifactError,
     EnterpriseAgenticEvaluationError,
     EnterpriseAgenticGenerationConfigV1,
+    EnterpriseAgenticGenerationConfigV2,
+    EnterpriseAgenticScaleTierV2,
+    default_enterprise_agentic_generation_config_v2,
     enterprise_agentic_trace_from_jsonl,
     evaluate_enterprise_agentic_prediction,
     evaluate_generated_enterprise_agentic_trace,
     export_enterprise_agentic_benchmark,
     export_generated_enterprise_agentic_benchmark,
+    export_generated_enterprise_agentic_public_benchmark,
+    export_generated_enterprise_agentic_scale_benchmark,
+    export_generated_enterprise_agentic_scale_public_benchmark,
+    generate_enterprise_agentic_scale_world,
     generate_enterprise_agentic_world,
+    load_any_generated_enterprise_agentic_benchmark,
+    load_any_generated_enterprise_agentic_public,
     load_evaluator_enterprise_agentic_benchmark,
-    load_generated_enterprise_agentic_benchmark,
     load_public_enterprise_agentic_benchmark,
-    load_public_generated_enterprise_agentic_benchmark,
     reference_enterprise_agentic,
     validate_enterprise_agentic_trace_jsonl,
 )
@@ -346,7 +354,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         if args.task == "generated-enterprise-agentic-trace":
             try:
-                generated_public = load_public_generated_enterprise_agentic_benchmark(
+                generated_public = load_any_generated_enterprise_agentic_public(
                     args.benchmark_root
                 )
                 generated_validation = validate_trace_jsonl(
@@ -474,7 +482,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "--benchmark-root is required for generated "
                         "enterprise-agentic evaluation"
                     )
-                generated = load_generated_enterprise_agentic_benchmark(
+                generated = load_any_generated_enterprise_agentic_benchmark(
                     args.benchmark_root
                 )
                 report = evaluate_generated_enterprise_agentic_trace(
@@ -604,22 +612,85 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "generate-enterprise-agentic":
         if args.profile == "generated":
             try:
-                generated = generate_enterprise_agentic_world(
-                    EnterpriseAgenticGenerationConfigV1(
-                        seed=args.seed,
-                        tier=args.tier,
-                    )
+                config_payload = (
+                    json.loads(args.config.read_text(encoding="utf-8-sig"))
+                    if args.config is not None
+                    else None
                 )
-                export_generated_enterprise_agentic_benchmark(args.output, generated)
-            except (OSError, ValidationError) as error:
+                if config_payload is not None and not isinstance(config_payload, dict):
+                    raise TypeError(
+                        "generated enterprise-agentic config must be a JSON object"
+                    )
+                if args.tier == "smoke":
+                    if config_payload is None:
+                        smoke_config = EnterpriseAgenticGenerationConfigV1(
+                            seed=args.seed,
+                            tier=args.tier,
+                        )
+                    else:
+                        config_payload["seed"] = args.seed
+                        config_payload["tier"] = args.tier
+                        smoke_config = (
+                            EnterpriseAgenticGenerationConfigV1.model_validate(
+                                config_payload
+                            )
+                        )
+                    generated = generate_enterprise_agentic_world(smoke_config)
+                    if args.public_only:
+                        export_generated_enterprise_agentic_public_benchmark(
+                            args.output, generated
+                        )
+                    else:
+                        export_generated_enterprise_agentic_benchmark(
+                            args.output, generated
+                        )
+                else:
+                    tier = EnterpriseAgenticScaleTierV2(args.tier)
+                    if config_payload is None:
+                        scale_config = default_enterprise_agentic_generation_config_v2(
+                            tier, seed=args.seed
+                        )
+                    else:
+                        config_payload["seed"] = args.seed
+                        config_payload["tier"] = tier
+                        scale_config = (
+                            EnterpriseAgenticGenerationConfigV2.model_validate(
+                                config_payload
+                            )
+                        )
+                    scale_generated = generate_enterprise_agentic_scale_world(
+                        scale_config
+                    )
+                    if args.public_only:
+                        export_generated_enterprise_agentic_scale_public_benchmark(
+                            args.output, scale_generated
+                        )
+                    else:
+                        export_generated_enterprise_agentic_scale_benchmark(
+                            args.output, scale_generated
+                        )
+            except (
+                json.JSONDecodeError,
+                OSError,
+                TypeError,
+                ValidationError,
+            ) as error:
                 print(str(error), file=sys.stderr)
                 return 1
+            selected_generated = generated if args.tier == "smoke" else scale_generated
             print(
-                "Generated enterprise-agentic smoke world ready: "
-                f"{len(generated.public.snapshot.principals)} principals, "
-                f"{len(generated.evaluator.authority_truth)} actions -> {args.output}"
+                f"Generated enterprise-agentic {args.tier} world ready: "
+                f"{len(selected_generated.public.snapshot.principals)} principals, "
+                f"{len(selected_generated.evaluator.authority_truth)} actions "
+                f"-> {args.output}"
             )
             return 0
+        if args.tier != "smoke" or args.config is not None or args.public_only:
+            print(
+                "scale tiers, --config, and --public-only require --profile generated",
+                file=sys.stderr,
+            )
+            return 1
         enterprise_agentic = reference_enterprise_agentic(seed=args.seed)
         try:
             export_enterprise_agentic_benchmark(
@@ -1032,8 +1103,10 @@ def _parser() -> argparse.ArgumentParser:
         "--profile", choices=("fixed", "generated"), default="fixed"
     )
     generate_enterprise_agentic.add_argument(
-        "--tier", choices=("smoke",), default="smoke"
+        "--tier", choices=("smoke", "standard", "longitudinal"), default="smoke"
     )
+    generate_enterprise_agentic.add_argument("--config", type=Path)
+    generate_enterprise_agentic.add_argument("--public-only", action="store_true")
     generate_enterprise_agentic.add_argument("--output", type=Path, required=True)
 
     generate_contextual_access = subparsers.add_parser(

@@ -46,8 +46,8 @@ accepts only the published Asteria v1 artifact-set digest and refuses to
 overwrite an existing file. It does not render enterprise authorization
 packages.
 
-`generate-enterprise-agentic` preserves its fixed-reference default. Select the
-new generated smoke profile explicitly:
+`generate-enterprise-agentic` preserves its fixed-reference default. Select a
+generated tier explicitly:
 
 ```bash
 synthworld generate-enterprise-agentic \
@@ -57,10 +57,14 @@ synthworld generate-enterprise-agentic \
   --output generated-enterprise-agentic
 ```
 
-Only `smoke` is implemented for generated scale in this version. The command
-writes separate `public/` and `evaluator/` trees and refuses to replace an existing
-output root. Use `EnterpriseAgenticGenerationConfigV1` directly when topology
-counts must differ from the documented smoke defaults.
+The generated choices are `smoke`, `standard`, and `longitudinal`. Smoke retains
+the released `EnterpriseAgenticGenerationConfigV1` contract. Standard and
+longitudinal use the independently versioned
+`EnterpriseAgenticGenerationConfigV2` family. The command writes separate
+`public/` and `evaluator/` trees and refuses to replace an existing output root.
+Pass a complete JSON configuration with `--config`; explicit `--tier` and `--seed`
+values override those two resolved fields. `--public-only` writes no evaluator
+directory. See [Generate enterprise-agentic scale tiers](../guides/enterprise-agentic-scale.md).
 
 ## Render a generated enterprise-agentic world
 

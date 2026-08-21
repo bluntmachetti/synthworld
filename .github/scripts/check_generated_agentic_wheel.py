@@ -154,6 +154,58 @@ def main() -> None:
         ):
             raise RuntimeError("generated evaluator omitted authorization accuracy")
 
+        standard_root = temporary / "standard"
+        _run(
+            "generate-enterprise-agentic",
+            "--profile",
+            "generated",
+            "--tier",
+            "standard",
+            "--seed",
+            "17",
+            "--output",
+            str(standard_root),
+        )
+        standard_document = json.loads(
+            (standard_root / "public" / "public-input.json").read_text(encoding="utf-8")
+        )
+        standard_trace = temporary / "standard-all-deny.jsonl"
+        standard_trace.write_text(
+            "".join(
+                json.dumps(
+                    {"event_id": event_id, "decision": "deny"},
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+                + "\n"
+                for event_id in standard_document["benchmark"]["scenario"][
+                    "action_event_ids"
+                ]
+            ),
+            encoding="utf-8",
+        )
+        _run(
+            "validate",
+            "generated-enterprise-agentic-trace",
+            "--benchmark-root",
+            str(standard_root),
+            "--predictions",
+            str(standard_trace),
+        )
+        standard_evaluation = _run(
+            "evaluate",
+            "generated-enterprise-agentic",
+            "--benchmark-root",
+            str(standard_root),
+            "--predictions",
+            str(standard_trace),
+        )
+        standard_report = json.loads(standard_evaluation.stdout)
+        if standard_report["checksum_scheme"] != (
+            "sha256-generated-enterprise-agentic-v2"
+        ):
+            raise RuntimeError("standard evaluator reported the wrong checksum scheme")
+
 
 if __name__ == "__main__":
     main()

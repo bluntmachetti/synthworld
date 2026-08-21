@@ -154,6 +154,22 @@ def export_generated_enterprise_agentic_benchmark(
             target.write_bytes(payload)
 
 
+def export_generated_enterprise_agentic_public_benchmark(
+    root: Path,
+    generated: EnterpriseAgenticGeneratedBenchmarkV1,
+) -> None:
+    """Write only the V1 public tree without constructing evaluator paths."""
+
+    if root.exists():
+        raise FileExistsError("generated enterprise-agentic output already exists")
+    for relative_path, payload in generated_enterprise_agentic_public_artifacts(
+        generated
+    ).items():
+        target = root / "public" / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(payload)
+
+
 def load_public_generated_enterprise_agentic_benchmark(
     root: Path,
 ) -> EnterpriseAgenticGeneratedPublicV1:
@@ -487,6 +503,7 @@ def _tool_schema() -> dict[str, object]:
 
 __all__ = [
     "export_generated_enterprise_agentic_benchmark",
+    "export_generated_enterprise_agentic_public_benchmark",
     "generated_enterprise_agentic_artifact_checksums",
     "generated_enterprise_agentic_artifact_set_sha256",
     "generated_enterprise_agentic_evaluator_artifacts",

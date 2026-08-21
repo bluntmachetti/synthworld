@@ -9,8 +9,24 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-08-21
+
 ### Added
 
+- **Generated enterprise-agentic standard and longitudinal tiers (#27).** A new
+  independently versioned V2 configuration and artifact family adds deterministic
+  multi-organisation standard scale plus a 180-day longitudinal schedule covering
+  repeated credential rotation, joiner/mover/leaver changes, suspension, policy
+  activation, agent offboarding with active credentials, revocation propagation,
+  evidence retention, and audit-time scoring. The released smoke V1 and frozen
+  Asteria/C08 contracts remain unchanged. Public topology, opaque credential-handle,
+  and lifecycle projections stay physically separated from evaluator-only case
+  labels and truth; generic
+  loaders, CLI config/public-only export, derived denominated integrity metrics,
+  end-to-end observed-action scoring, and an external digest-bound runtime/memory
+  receipt complete the generated-scale path. Stress remains explicitly deferred to
+  generic scale issue #3 and generated tiers remain workloads rather than vendor
+  leaderboard claims or mandatory package fixtures.
 - **Enterprise agentic identity policy pilot.** A repository example now compares
   experiment-owned RBAC, ABAC, ReBAC, and default-deny combined policy views over
   one generated enterprise-agentic smoke world. The policy runner consumes only
@@ -640,7 +656,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/bluntmachetti/synthworld/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bluntmachetti/synthworld/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bluntmachetti/synthworld/compare/v0.13.0...v0.14.0

@@ -187,9 +187,9 @@ Give only the generated `public/` tree to the system under test. Keep the evalua
 side out of the adapter path even though the frozen reference truth is publicly
 inspectable. See the full [Asteria Agentic v1 guide](https://github.com/bluntmachetti/synthworld/blob/main/AGENTIC_BENCHMARK.md).
 
-For a configurable generated enterprise-agentic smoke world, explicitly select the
-generated profile. Artifact-root validation and evaluation are available since
-0.15.0:
+For configurable generated enterprise-agentic worlds, explicitly select the
+generated profile. Smoke preserves its released V1 contract; standard and
+longitudinal use a separate V2 scale/lifecycle family:
 
 ```bash
 synthworld generate-enterprise-agentic \
@@ -214,12 +214,13 @@ synthworld evaluate generated-enterprise-agentic \
 ```
 
 This is a deterministic benchmark-data generator, not an IAM product, policy
-engine, agent framework, hosted simulator, or vendor leaderboard. Standard and
-longitudinal generated tiers remain tracked by issue #27. A reference organisation
-topology can inform the supported count configuration; 0.15.0 does not import its
-named entities or relationships. See the
+engine, agent framework, hosted simulator, or vendor leaderboard. A reference
+organisation topology can inform the supported count configuration; SynthWorld does
+not import its named entities or relationships. See the
 [agent-authority guide](https://bluntmachetti.github.io/synthworld/guides/agent-authority/)
-for the replay, decision-only SUT, and provenance boundaries.
+for the replay, decision-only SUT, and provenance boundaries, and the
+[scale-tier guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-agentic-scale/)
+for configuration, lifecycle, metrics, and measured runtime/memory characteristics.
 
 ## Verify every claim
 

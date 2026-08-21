@@ -17,6 +17,8 @@ import shutil
 import subprocess
 import sys
 import tomllib
+import types
+import typing
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, NoReturn
@@ -389,7 +391,9 @@ def discover_python_exports(
                     fail(f"{module_name}.__all__ exports missing name: {name}")
                 surface_id = f"python:{module_name}.{name}"
                 implementation_module = getattr(value, "__module__", module_name)
-                if not isinstance(implementation_module, str):
+                if typing.get_origin(value) in {types.UnionType, typing.Union}:
+                    implementation_module = "typing"
+                elif not isinstance(implementation_module, str):
                     implementation_module = module_name
                 elif implementation_module.startswith("pathlib._"):
                     implementation_module = "pathlib"

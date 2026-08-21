@@ -20,10 +20,11 @@ See [Enterprise Identity Planning](https://bluntmachetti.github.io/synthworld/gu
 separate reference world relates to today's human enterprise compiler and the
 generated enterprise-agentic work under issue #27.
 
-## Generated enterprise-agentic smoke world
+## Generated enterprise-agentic worlds
 
-> **Available in 0.15.0.** Generation, public-only artifact validation, and
-> complete-root evaluation are available through the Python and CLI surfaces below.
+> **Smoke available since 0.15.0; standard and longitudinal since 0.17.0.**
+> Smoke V1 remains compatible. Standard and longitudinal V2 add scale and
+> lifecycle semantics without changing it.
 
 The first configurable generated slice is separate from both frozen Asteria and
 the fixed-universe enterprise-agentic reference pack:
@@ -43,6 +44,14 @@ capability, wrong runtime binding, expired credentials, valid-then-revoked acces
 incorrect attribution, and post-revocation access. Counts are defaults in a
 validated Python configuration model, not an unversioned promise hidden behind the
 tier name.
+
+The separately versioned V2 family adds `standard` and `longitudinal`. Standard
+defaults to two organisations, 250 humans, 36 logical agents, 72 runtimes, 36
+resources, and 23 cases. Longitudinal runs the same default topology over 180
+virtual days and adds repeated rotation, joiner/mover/leaver, suspension, policy
+change, offboarding, revocation propagation, retention loss, and 31 cases. See
+[Generate enterprise-agentic scale tiers](https://bluntmachetti.github.io/synthworld/guides/enterprise-agentic-scale/)
+for the configuration, contract, metric, and measured resource details.
 
 ```python
 from pathlib import Path
@@ -125,9 +134,9 @@ synthworld evaluate generated-enterprise-agentic \
 ```
 
 An external organisation YAML can be used as a sizing brief for the supported
-topology counts. Version 0.15.0 does not import named organisations, departments,
-people, or relationships from that file: SynthWorld creates its own safely fictional
-graph. Exact topology import would require a new versioned input contract.
+topology counts. SynthWorld does not import named organisations, departments,
+people, or relationships from that file: it creates its own safely fictional graph.
+Exact topology import would require a new versioned input contract.
 
 Generated manifests prove internal consistency. The public-only loader does not
 establish who created a tree. For a reproducible lab, retain the exact package or
@@ -136,11 +145,12 @@ digests, trace bytes, adapter and policy digests, and observable system version.
 This is still an offline ground-truth evaluation unless separately captured
 execution evidence supports a stronger lab claim.
 
-This slice is an implementation-neutral deterministic benchmark generator. It is
+This family is an implementation-neutral deterministic benchmark generator. It is
 not an IAM product, policy engine, agent runtime, hosted simulator, vendor
-leaderboard, or claim about deployed enforcement. `standard` and `longitudinal`
-generated tiers remain follow-up work in issue #27; the existing 1.0 event union is
-not being widened to imply those lifecycle semantics.
+leaderboard, or claim about deployed enforcement. The base `1.0.0` event union and
+generated smoke V1 literals remain unchanged; V2 carries longitudinal lifecycle
+events in a separate typed stream. Stress scale remains explicitly deferred to the
+generic profile work in issue #3.
 
 For a complete team exercise that runs experiment-owned RBAC, ABAC, ReBAC, and
 combined views over one generated world and produces separate public and evaluator
