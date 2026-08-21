@@ -52,6 +52,20 @@ See [`AGENTIC_BENCHMARK.md`](../AGENTIC_BENCHMARK.md) for the public package
 layout and the independent identity, authority, temporal, attribution,
 ownership, provenance, and side-effect metrics.
 
+## Enterprise agentic identity policy pilot
+
+[`enterprise_agentic_identity_pilot/`](enterprise_agentic_identity_pilot/) runs
+four experiment-owned RBAC, ABAC, ReBAC, and combined policy views over one
+generated enterprise-agentic smoke world. Its three commands preserve the trust
+boundary: generation writes separate public and evaluator trees, the policy runner
+receives only the public package, and a separate scorer produces watermarked
+comparison and evaluator Explorer HTML.
+
+The pilot is a deterministic offline design exercise. It is not an adapter for an
+arbitrary `compile-enterprise-access` universe and does not demonstrate production
+policy enforcement. See the [pilot guide](enterprise_agentic_identity_pilot/README.md)
+for the exact commands, artifact paths, policy roles, and result limitations.
+
 ## Fictional EADS-shaped fixture adapter
 
 [`eads_adapter/`](eads_adapter/) is a repository-only adapter for fictional,

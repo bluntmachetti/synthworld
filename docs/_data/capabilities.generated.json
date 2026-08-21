@@ -2860,6 +2860,84 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "1-generate-one-shared-world",
+      "heading": "1. Generate one shared world",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#1-generate-one-shared-world",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "2-generate-the-public-projection-and-evaluator-overlay",
+      "heading": "2. Generate the public projection and evaluator overlay",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#2-generate-the-public-projection-and-evaluator-overlay",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "3-run-the-policy-views-from-public-data-only",
+      "heading": "3. Run the policy views from public data only",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#3-run-the-policy-views-from-public-data-only",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "4-score-in-the-evaluator-boundary",
+      "heading": "4. Score in the evaluator boundary",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#4-score-in-the-evaluator-boundary",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "5-interpret-the-smoke-result",
+      "heading": "5. Interpret the smoke result",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#5-interpret-the-smoke-result",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "export-the-projection-contracts-as-json",
+      "heading": "Export the projection contracts as JSON",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#export-the-projection-contracts-as-json",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "preserve-the-process-boundaries",
+      "heading": "Preserve the process boundaries",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#preserve-the-process-boundaries",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "render-self-contained-html",
+      "heading": "Render self-contained HTML",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#render-self-contained-html",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "reproducibility-and-acceptance-checklist",
+      "heading": "Reproducibility and acceptance checklist",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#reproducibility-and-acceptance-checklist",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "run-an-enterprise-agentic-identity-experiment",
+      "heading": "Run an enterprise agentic identity experiment",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#run-an-enterprise-agentic-identity-experiment",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "scope-and-current-limitations",
+      "heading": "Scope and current limitations",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#scope-and-current-limitations",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "state-the-question-before-generating-data",
+      "heading": "State the question before generating data",
+      "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#state-the-question-before-generating-data",
+      "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/guides/enterprise-authorization-python.md",
       "path": "docs/guides/enterprise-authorization-python.md"
     },
@@ -3458,6 +3536,12 @@
       "path": "examples/README.md"
     },
     {
+      "anchor": "enterprise-agentic-identity-policy-pilot",
+      "heading": "Enterprise agentic identity policy pilot",
+      "id": "route:examples/README.md#enterprise-agentic-identity-policy-pilot",
+      "path": "examples/README.md"
+    },
+    {
       "anchor": "examples",
       "heading": "Examples",
       "id": "route:examples/README.md#examples",
@@ -3528,6 +3612,54 @@
       "heading": "Supported scope",
       "id": "route:examples/eads_adapter/README.md#supported-scope",
       "path": "examples/eads_adapter/README.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "1-generate-one-world",
+      "heading": "1. Generate one world",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#1-generate-one-world",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "2-run-policies-with-only-the-public-package",
+      "heading": "2. Run policies with only the public package",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#2-run-policies-with-only-the-public-package",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "3-score-in-the-evaluator-process",
+      "heading": "3. Score in the evaluator process",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#3-score-in-the-evaluator-process",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "enterprise-agentic-identity-policy-pilot",
+      "heading": "Enterprise agentic identity policy pilot",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#enterprise-agentic-identity-policy-pilot",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "policy-roles",
+      "heading": "Policy roles",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#policy-roles",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "run-the-three-process-boundaries",
+      "heading": "Run the three process boundaries",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#run-the-three-process-boundaries",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "what-the-results-do-and-do-not-show",
+      "heading": "What the results do and do not show",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#what-the-results-do-and-do-not-show",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
     },
     {
       "anchor": "",

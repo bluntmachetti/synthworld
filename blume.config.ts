@@ -27,6 +27,7 @@ export default defineConfig({
             "/guides/identity-resolution",
             "/guides/privacy-exposure",
             "/guides/agent-authority",
+            "/guides/enterprise-agentic-identity-experiment",
             "/guides/enterprise-access",
             "/guides/enterprise-authorization-python",
             "/guides/enterprise-identity-planning",

@@ -15,6 +15,7 @@ The detailed documentation surface is the Blume site under `docs/`. Root files r
 | Entity resolution and ambiguity | `docs/guides/identity-resolution.md` |
 | Extraction, risk, exposure, broker, search | `docs/guides/privacy-exposure.md` |
 | Agent authority | `docs/guides/agent-authority.md`, `AGENTIC_BENCHMARK.md`, and the agent-authority contract |
+| Enterprise agentic identity experiment | `docs/guides/enterprise-agentic-identity-experiment.md` |
 | Enterprise Identity Planning | `docs/guides/enterprise-identity-planning.md` |
 | Enterprise identity/access | `docs/guides/enterprise-access.md` and the enterprise contract |
 | Standards-shaped projections | `docs/reference/standards-profiles.md` and the enterprise contract |

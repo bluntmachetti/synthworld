@@ -105,3 +105,7 @@ synthworld evaluate generated-enterprise-agentic \
 Validation checks structure and action-event coverage; it does not claim the
 reported observations are correct. The generated benchmark guide defines the
 required event replay and public/evaluator separation.
+
+See [Run an enterprise agentic identity experiment](../guides/enterprise-agentic-identity-experiment.md)
+for an end-to-end RBAC/ABAC/ReBAC pilot and explicit public projection, layout,
+evaluator-overlay, and HTML generation steps.
