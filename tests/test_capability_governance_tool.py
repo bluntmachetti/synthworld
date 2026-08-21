@@ -902,6 +902,11 @@ def test_python_export_discovery_handles_import_and_module_anomalies(
     surfaces = tool.discover_python_exports(tmp_path, ("src/synthworld/__init__.py",))
     assert surfaces[0]["implementation_module"] == "pathlib"
 
+    module = type("Module", (), {"__all__": ("value",), "value": int | str})()
+    monkeypatch.setattr(importlib, "import_module", lambda name: module)
+    surfaces = tool.discover_python_exports(tmp_path, ("src/synthworld/__init__.py",))
+    assert surfaces[0]["implementation_module"] == "typing"
+
 
 def test_contract_discovery_ignores_noncontract_schema() -> None:
     assert (

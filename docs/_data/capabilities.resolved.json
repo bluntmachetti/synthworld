@@ -5161,7 +5161,7 @@
             {
               "assignment_required": true,
               "id": "python:synthworld.agentic.enterprise.GeneratedEnterpriseAgenticBenchmark",
-              "implementation_module": "types",
+              "implementation_module": "typing",
               "kind": "python_export",
               "name": "GeneratedEnterpriseAgenticBenchmark",
               "source": "src/synthworld/agentic/enterprise/__init__.py",
@@ -5170,7 +5170,7 @@
             {
               "assignment_required": true,
               "id": "python:synthworld.agentic.enterprise.GeneratedEnterpriseAgenticPublic",
-              "implementation_module": "types",
+              "implementation_module": "typing",
               "kind": "python_export",
               "name": "GeneratedEnterpriseAgenticPublic",
               "source": "src/synthworld/agentic/enterprise/__init__.py",
@@ -10178,7 +10178,7 @@
   ],
   "input_digests": {
     "curated_sha256": "19d73a59ee6c2313c8f6cab4b1736a69847f7ba00274b9a9dca6e9fc64cacba6",
-    "generated_sha256": "27f3f85e7d4d4aac58d844a34e34fe69a860278eea55fd380f1988a6d79ae7a7"
+    "generated_sha256": "23e7577d7905c1309012b4afd1ea6a64901a0d0af855e3af4eb210bd864cceb0"
   },
   "schema_version": "1.0.0"
 }

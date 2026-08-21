@@ -6644,7 +6644,7 @@
     {
       "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.GeneratedEnterpriseAgenticBenchmark",
-      "implementation_module": "types",
+      "implementation_module": "typing",
       "kind": "python_export",
       "name": "GeneratedEnterpriseAgenticBenchmark",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
@@ -6653,7 +6653,7 @@
     {
       "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.GeneratedEnterpriseAgenticPublic",
-      "implementation_module": "types",
+      "implementation_module": "typing",
       "kind": "python_export",
       "name": "GeneratedEnterpriseAgenticPublic",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
