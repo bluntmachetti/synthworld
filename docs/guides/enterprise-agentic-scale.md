@@ -145,4 +145,4 @@ digest. Three-iteration medians were:
 
 These are environment-specific observations, not deterministic promises. Each row
 binds its resolved configuration and complete public artifact-set digest in
-[`enterprise-agentic-tier-performance.json`](../_data/enterprise-agentic-tier-performance.json).
+[`enterprise-agentic-tier-performance.json`](https://github.com/bluntmachetti/synthworld/blob/main/docs/_data/enterprise-agentic-tier-performance.json).

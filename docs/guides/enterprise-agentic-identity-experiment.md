@@ -146,7 +146,8 @@ That command writes `generated-enterprise-agentic/public/` and
 fixed to the released smoke V1 package because its Explorer and comparison layout
 are deliberately small. The generator also provides separately versioned standard
 and longitudinal V2 tiers; use the
-[scale-tier guide](enterprise-agentic-scale.md) for those evaluation workflows.
+[scale-tier guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-agentic-scale/)
+for those evaluation workflows.
 
 ## 2. Generate the public projection and evaluator overlay
 

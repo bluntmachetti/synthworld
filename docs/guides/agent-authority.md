@@ -50,8 +50,8 @@ defaults to two organisations, 250 humans, 36 logical agents, 72 runtimes, 36
 resources, and 23 cases. Longitudinal runs the same default topology over 180
 virtual days and adds repeated rotation, joiner/mover/leaver, suspension, policy
 change, offboarding, revocation propagation, retention loss, and 31 cases. See
-[Generate enterprise-agentic scale tiers](enterprise-agentic-scale.md) for the
-configuration, contract, metric, and measured resource details.
+[Generate enterprise-agentic scale tiers](https://bluntmachetti.github.io/synthworld/guides/enterprise-agentic-scale/)
+for the configuration, contract, metric, and measured resource details.
 
 ```python
 from pathlib import Path
