@@ -2728,6 +2728,54 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "enterprise-authorization-with-opa-and-an-authzen-style-adapter",
+      "heading": "Enterprise authorization with OPA and an AuthZEN-style adapter",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#enterprise-authorization-with-opa-and-an-authzen-style-adapter",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "experiment-boundary",
+      "heading": "Experiment boundary",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#experiment-boundary",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "frozen-assets",
+      "heading": "Frozen assets",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#frozen-assets",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "method",
+      "heading": "Method",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#method",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "results",
+      "heading": "Results",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#results",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "run-identity",
+      "heading": "Run identity",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#run-identity",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "what-this-experiment-does-not-establish",
+      "heading": "What this experiment does not establish",
+      "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#what-this-experiment-does-not-establish",
+      "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/getting-started.md",
       "path": "docs/getting-started.md"
     },
