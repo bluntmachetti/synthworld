@@ -1,8 +1,8 @@
 # Run an enterprise agentic identity experiment
 
-> **Preview on main.** The policy pilot example and generated Explorer adapter
-> described here are current-main behavior. Run them from a repository checkout;
-> use the documentation at a signed release tag for released behavior.
+> **Available in 0.17.0.** The policy pilot example is distributed in the source
+> release, while the generated Explorer adapter is available from the installed
+> package. Use the documentation at the signed release tag for released behavior.
 
 Use this guide to compare RBAC, ABAC, ReBAC, and a default-deny combination over
 one deterministic enterprise-agentic world. The workflow generates the world
@@ -90,7 +90,7 @@ root. The public Explorer page is suitable for world inspection; the evaluator
 Explorer page and policy comparison page contain reference truth and require
 evaluator custody.
 
-Run the commands below from a current-main repository checkout after
+Run the commands below from a v0.17.0 source checkout after
 `uv sync --locked --all-groups`. Every output path must be absent because the
 generator, pilot, and Explorer writers refuse to overwrite existing data.
 
@@ -142,8 +142,11 @@ uv run synthworld generate-enterprise-agentic \
 ```
 
 That command writes `generated-enterprise-agentic/public/` and
-`generated-enterprise-agentic/evaluator/` directly. Only `smoke` is implemented
-for this generated profile.
+`generated-enterprise-agentic/evaluator/` directly. This teaching pilot remains
+fixed to the released smoke V1 package because its Explorer and comparison layout
+are deliberately small. The generator also provides separately versioned standard
+and longitudinal V2 tiers; use the
+[scale-tier guide](enterprise-agentic-scale.md) for those evaluation workflows.
 
 ## 2. Generate the public projection and evaluator overlay
 
@@ -393,8 +396,10 @@ as a follow-up when adapting the pattern to a selective production role model.
 - The fixed-reference `enterprise-agentic` package and arbitrary compiled
   enterprise authorization packages are not inputs to this Explorer profile.
 - Explorer is an offline inspection aid, not a policy engine, hosted simulator, or
-  evaluator report. Only the released generated `smoke` profile is supported;
-  standard, longitudinal, and large-world navigation remain out of scope.
+  evaluator report. This pilot and its Explorer projection support the released
+  generated `smoke` profile; standard/longitudinal evaluation is available through
+  the artifact and trace APIs, while large-world Explorer navigation remains out of
+  scope.
 - Decision-only traces evaluate authorization decisions. They do not prove
   identity resolution, attribution, ownership reconstruction, evidence retention,
   provenance, security, availability, performance, interoperability, or live

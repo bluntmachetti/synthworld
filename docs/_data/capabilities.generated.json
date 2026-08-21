@@ -7,9 +7,14 @@
         "target": "synthworld.cli:main"
       }
     ],
-    "version": "0.16.0"
+    "version": "0.17.0"
   },
   "releases": [
+    {
+      "heading": "[0.17.0] - 2026-08-21",
+      "id": "changelog:0.17.0",
+      "version": "0.17.0"
+    },
     {
       "heading": "[0.16.0] - 2026-08-17",
       "id": "changelog:0.16.0",
@@ -377,6 +382,12 @@
       "anchor": "0160---2026-08-17",
       "heading": "[0.16.0] - 2026-08-17",
       "id": "route:CHANGELOG.md#0160---2026-08-17",
+      "path": "CHANGELOG.md"
+    },
+    {
+      "anchor": "0170---2026-08-21",
+      "heading": "[0.17.0] - 2026-08-21",
+      "id": "route:CHANGELOG.md#0170---2026-08-21",
       "path": "CHANGELOG.md"
     },
     {
@@ -800,9 +811,9 @@
       "path": "DATA_DICTIONARY.md"
     },
     {
-      "anchor": "generated-enterprise-agentic-smoke-profile",
-      "heading": "Generated enterprise-agentic smoke profile",
-      "id": "route:DATA_DICTIONARY.md#generated-enterprise-agentic-smoke-profile",
+      "anchor": "generated-enterprise-agentic-profiles",
+      "heading": "Generated enterprise-agentic profiles",
+      "id": "route:DATA_DICTIONARY.md#generated-enterprise-agentic-profiles",
       "path": "DATA_DICTIONARY.md"
     },
     {
@@ -2834,9 +2845,9 @@
       "path": "docs/guides/agent-authority.md"
     },
     {
-      "anchor": "generated-enterprise-agentic-smoke-world",
-      "heading": "Generated enterprise-agentic smoke world",
-      "id": "route:docs/guides/agent-authority.md#generated-enterprise-agentic-smoke-world",
+      "anchor": "generated-enterprise-agentic-worlds",
+      "heading": "Generated enterprise-agentic worlds",
+      "id": "route:docs/guides/agent-authority.md#generated-enterprise-agentic-worlds",
       "path": "docs/guides/agent-authority.md"
     },
     {
@@ -2940,6 +2951,54 @@
       "heading": "State the question before generating data",
       "id": "route:docs/guides/enterprise-agentic-identity-experiment.md#state-the-question-before-generating-data",
       "path": "docs/guides/enterprise-agentic-identity-experiment.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/enterprise-agentic-scale.md",
+      "path": "docs/guides/enterprise-agentic-scale.md"
+    },
+    {
+      "anchor": "configuration-surface",
+      "heading": "Configuration surface",
+      "id": "route:docs/guides/enterprise-agentic-scale.md#configuration-surface",
+      "path": "docs/guides/enterprise-agentic-scale.md"
+    },
+    {
+      "anchor": "determinism-integrity-and-metrics",
+      "heading": "Determinism, integrity, and metrics",
+      "id": "route:docs/guides/enterprise-agentic-scale.md#determinism-integrity-and-metrics",
+      "path": "docs/guides/enterprise-agentic-scale.md"
+    },
+    {
+      "anchor": "generate-and-consume-a-tier",
+      "heading": "Generate and consume a tier",
+      "id": "route:docs/guides/enterprise-agentic-scale.md#generate-and-consume-a-tier",
+      "path": "docs/guides/enterprise-agentic-scale.md"
+    },
+    {
+      "anchor": "generate-enterprise-agentic-scale-tiers",
+      "heading": "Generate enterprise-agentic scale tiers",
+      "id": "route:docs/guides/enterprise-agentic-scale.md#generate-enterprise-agentic-scale-tiers",
+      "path": "docs/guides/enterprise-agentic-scale.md"
+    },
+    {
+      "anchor": "longitudinal-event-boundary",
+      "heading": "Longitudinal event boundary",
+      "id": "route:docs/guides/enterprise-agentic-scale.md#longitudinal-event-boundary",
+      "path": "docs/guides/enterprise-agentic-scale.md"
+    },
+    {
+      "anchor": "runtime-and-memory-receipt",
+      "heading": "Runtime and memory receipt",
+      "id": "route:docs/guides/enterprise-agentic-scale.md#runtime-and-memory-receipt",
+      "path": "docs/guides/enterprise-agentic-scale.md"
+    },
+    {
+      "anchor": "tier-and-contract-ladder",
+      "heading": "Tier and contract ladder",
+      "id": "route:docs/guides/enterprise-agentic-scale.md#tier-and-contract-ladder",
+      "path": "docs/guides/enterprise-agentic-scale.md"
     },
     {
       "anchor": "",
@@ -6332,6 +6391,33 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticAuthorityTopologyV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticAuthorityTopologyV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticCredentialProfileV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticCredentialProfileV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticCredentialTopologyV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticCredentialTopologyV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticEvaluationError",
       "implementation_module": "synthworld.agentic.enterprise.errors",
       "kind": "python_export",
@@ -6359,10 +6445,37 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticGeneratedBenchmarkV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticGeneratedBenchmarkV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticGenerationConfigV1",
       "implementation_module": "synthworld.agentic.enterprise.generated_models",
       "kind": "python_export",
       "name": "EnterpriseAgenticGenerationConfigV1",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticGenerationConfigV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticGenerationConfigV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticGenerationLimitsV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticGenerationLimitsV2",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -6386,10 +6499,46 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticIntegrityMetricsV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticIntegrityMetricsV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticLifecycleCaseKindV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticLifecycleCaseKindV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticLongitudinalScheduleV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticLongitudinalScheduleV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticMetricsV1",
       "implementation_module": "synthworld.agentic.enterprise.models",
       "kind": "python_export",
       "name": "EnterpriseAgenticMetricsV1",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticPerformanceReceiptV1",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticPerformanceReceiptV1",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -6431,6 +6580,33 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticScaleTierV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticScaleTierV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticScaleTopologyV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticScaleTopologyV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticScenarioPrevalenceV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticScenarioPrevalenceV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticSmokeTopologyV1",
       "implementation_module": "synthworld.agentic.enterprise.generated_models",
       "kind": "python_export",
@@ -6440,10 +6616,46 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticTierMeasurementV1",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticTierMeasurementV1",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticTopologyMetadataV2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_models",
+      "kind": "python_export",
+      "name": "EnterpriseAgenticTopologyMetadataV2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.EnterpriseAgenticTraceRowV1",
       "implementation_module": "synthworld.agentic.enterprise.models",
       "kind": "python_export",
       "name": "EnterpriseAgenticTraceRowV1",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.GeneratedEnterpriseAgenticBenchmark",
+      "implementation_module": "types",
+      "kind": "python_export",
+      "name": "GeneratedEnterpriseAgenticBenchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.GeneratedEnterpriseAgenticPublic",
+      "implementation_module": "types",
+      "kind": "python_export",
+      "name": "GeneratedEnterpriseAgenticPublic",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -6899,10 +7111,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.default_enterprise_agentic_generation_config_v2",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale",
+      "kind": "python_export",
+      "name": "default_enterprise_agentic_generation_config_v2",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.derive_enterprise_agentic_integrity_metrics",
       "implementation_module": "synthworld.agentic.enterprise.generated",
       "kind": "python_export",
       "name": "derive_enterprise_agentic_integrity_metrics",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.derive_enterprise_agentic_scale_integrity_metrics",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale",
+      "kind": "python_export",
+      "name": "derive_enterprise_agentic_scale_integrity_metrics",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -6980,10 +7210,46 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.export_generated_enterprise_agentic_public_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
+      "kind": "python_export",
+      "name": "export_generated_enterprise_agentic_public_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.export_generated_enterprise_agentic_scale_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "export_generated_enterprise_agentic_scale_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.export_generated_enterprise_agentic_scale_public_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "export_generated_enterprise_agentic_scale_public_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.generate_c08_reference",
       "implementation_module": "synthworld.agentic.enterprise.c08_v2.reference",
       "kind": "python_export",
       "name": "generate_c08_reference",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generate_enterprise_agentic_scale_world",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale",
+      "kind": "python_export",
+      "name": "generate_enterprise_agentic_scale_world",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -7029,6 +7295,51 @@
       "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
       "kind": "python_export",
       "name": "generated_enterprise_agentic_public_artifacts",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_scale_artifact_checksums",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "generated_enterprise_agentic_scale_artifact_checksums",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_scale_evaluator_artifacts",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "generated_enterprise_agentic_scale_evaluator_artifacts",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.generated_enterprise_agentic_scale_public_artifacts",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "generated_enterprise_agentic_scale_public_artifacts",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_any_generated_enterprise_agentic_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_dispatch",
+      "kind": "python_export",
+      "name": "load_any_generated_enterprise_agentic_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_any_generated_enterprise_agentic_public",
+      "implementation_module": "synthworld.agentic.enterprise.generated_dispatch",
+      "kind": "python_export",
+      "name": "load_any_generated_enterprise_agentic_public",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -7088,6 +7399,24 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_generated_enterprise_agentic_scale_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "load_generated_enterprise_agentic_scale_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_generated_enterprise_agentic_scale_public_tree",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "load_generated_enterprise_agentic_scale_public_tree",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.agentic.enterprise.load_generated_enterprise_agentic_trees",
       "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
       "kind": "python_export",
@@ -7110,6 +7439,15 @@
       "implementation_module": "synthworld.agentic.enterprise.generated_serialization",
       "kind": "python_export",
       "name": "load_public_generated_enterprise_agentic_benchmark",
+      "source": "src/synthworld/agentic/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.agentic.enterprise.load_public_generated_enterprise_agentic_scale_benchmark",
+      "implementation_module": "synthworld.agentic.enterprise.generated_scale_serialization",
+      "kind": "python_export",
+      "name": "load_public_generated_enterprise_agentic_scale_benchmark",
       "source": "src/synthworld/agentic/enterprise/__init__.py",
       "visibility": "subpackage"
     },

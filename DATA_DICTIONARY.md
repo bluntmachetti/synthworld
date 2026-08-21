@@ -848,7 +848,7 @@ with a different public digest and different case IDs from the committed contrac
 case count stays 20, so the difference is silent unless digests are compared. Pass
 `--seed 20260804` to reproduce the shipped pack.
 
-### Generated enterprise-agentic smoke profile
+### Generated enterprise-agentic profiles
 
 `synthworld generate-enterprise-agentic --profile generated --tier smoke` selects an
 independently versioned generated family. It does not widen the fixed contracts above.
@@ -872,12 +872,31 @@ valid-then-revoked, incorrect attribution, and post-revocation behavior. One del
 attenuated child, and discarded delegation evidence makes the revoked path non-reconstructable
 at audit.
 
-The generated package contains `public/public-input.json`, a separate scenario and tool schema,
+The generated smoke package contains `public/public-input.json`, a separate scenario and tool schema,
 and `public/manifest.json`; evaluator output contains `evaluator/truth.json` and its manifest.
 The evaluator payload and manifest bind the digest of the complete public tree. Generated worlds
-are outputs, not committed golden fixtures. `standard` and `longitudinal` are not representable
-in this schema version and remain issue #27 work; runtime and memory measurements are external
-receipts keyed to artifact digests, not host state embedded in benchmark bytes.
+are outputs, not committed golden fixtures. Standard and longitudinal are intentionally not
+representable in V1.
+
+`EnterpriseAgenticGenerationConfigV2` and
+`enterprise-agentic-generated-2.0.0` add standard and longitudinal without
+widening V1. The V2 topology config covers organisations, departments, teams,
+four human population kinds, agents, runtimes, and resources. Separate authority,
+credential, prevalence, lifecycle-schedule, and limit records bind every resolved
+generation input.
+
+| Record | Key fields | Meaning |
+|---|---|---|
+| `EnterpriseAgenticScaleIdentityV2` | profile/generator/serialisation/schedule versions, `tier`, `seed`, config digest, `world_id` | Deterministic V2 benchmark identity. |
+| `EnterpriseAgenticTopologyMetadataV2` | teams, population profiles, resource profiles, opaque credential profiles, isolated tenants | Public graph metadata that extends the unchanged base snapshot without exposing credential material. Credential profiles distinguish workload, shared-workload, and lifecycle-control handles. |
+| `EnterpriseAgenticLifecycleEventV2` | `sequence_index`, UTC time, related base event, discriminated payload | Public rotation, status, principal, policy, and propagation schedule outside the frozen base event union. |
+| `EnterpriseAgenticLifecycleCaseV2` | action event, V2 lifecycle case kind | **Evaluator-only.** Specific scale/lifecycle cohort label. |
+| `EnterpriseAgenticIntegrityMetricsV2` | derived counts and eight supported distributions | Topology, population, lifecycle, case, graph, delegation-depth/branching, and binding observations with denominators. |
+
+V2 public trees additionally duplicate and checksum-bind `topology.json` and
+`lifecycle-events.json`. Generic loaders dispatch only on the declared V1 or V2
+profile and then enforce that profile's exact inventory. Runtime and memory remain
+in a separate receipt keyed to configuration and public artifact-set digests.
 
 `load_public_generated_enterprise_agentic_benchmark` verifies only the public inventory,
 canonical bytes, manifest, scenario, tool schema, configuration, and identity; it does not inspect
