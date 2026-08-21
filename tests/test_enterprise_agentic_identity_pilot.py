@@ -14,7 +14,7 @@ from examples.enterprise_agentic_identity_pilot import policies as pilot_policie
 from examples.enterprise_agentic_identity_pilot.__main__ import main as pilot_main
 from examples.enterprise_agentic_identity_pilot.policies import build_policy_traces
 from examples.enterprise_agentic_identity_pilot.rendering import EVALUATOR_WATERMARK
-from synthworld.agentic import trace_submission_from_jsonl
+from synthworld.agentic import trace_submission_from_jsonl, trace_submission_to_jsonl
 from synthworld.agentic.enterprise import (
     EnterpriseAgenticGenerationConfigV1,
     evaluate_generated_enterprise_agentic_trace,
@@ -30,6 +30,7 @@ from synthworld.agentic.enterprise.generated_models import (
 )
 from synthworld.agentic.models import ActionAttempted, Decision
 from synthworld.agentic.replay import materialize_agentic_world
+from synthworld.enterprise.canonical import canonical_json_value_bytes
 
 
 @pytest.fixture(scope="module")
@@ -497,3 +498,72 @@ def test_score_rejects_submissions_from_a_different_self_consistent_public_tree(
             ]
         )
     assert not rejected_results.exists()
+
+
+def test_score_validates_all_strategies_before_writing_and_can_retry(
+    tmp_path: Path,
+    pilot_benchmark: EnterpriseAgenticGeneratedBenchmarkV1,
+) -> None:
+    benchmark_root = tmp_path / "benchmark"
+    export_generated_enterprise_agentic_benchmark(benchmark_root, pilot_benchmark)
+    submissions = tmp_path / "submissions"
+    assert (
+        pilot_main(
+            [
+                "run-policies",
+                "--public-package",
+                str(benchmark_root / "public"),
+                "--output",
+                str(submissions),
+            ]
+        )
+        == 0
+    )
+
+    combined_path = submissions / "combined.jsonl"
+    manifest_path = submissions / "manifest.json"
+    original_combined = combined_path.read_bytes()
+    original_manifest = manifest_path.read_bytes()
+    combined = trace_submission_from_jsonl(original_combined.decode("utf-8"))
+    incomplete_combined = combined.model_copy(update={"rows": combined.rows[:-1]})
+    incomplete_payload = trace_submission_to_jsonl(incomplete_combined).encode("utf-8")
+    combined_path.write_bytes(incomplete_payload)
+    manifest = json.loads(original_manifest)
+    combined_entry = next(
+        entry for entry in manifest["strategies"] if entry["name"] == "combined"
+    )
+    combined_entry["sha256"] = hashlib.sha256(incomplete_payload).hexdigest()
+    manifest_path.write_bytes(canonical_json_value_bytes(manifest))
+
+    results = tmp_path / "results"
+    with pytest.raises(ValueError, match="must cover every action exactly once"):
+        pilot_main(
+            [
+                "score",
+                "--benchmark-root",
+                str(benchmark_root),
+                "--submissions",
+                str(submissions),
+                "--output",
+                str(results),
+            ]
+        )
+    assert not results.exists()
+
+    combined_path.write_bytes(original_combined)
+    manifest_path.write_bytes(original_manifest)
+    assert (
+        pilot_main(
+            [
+                "score",
+                "--benchmark-root",
+                str(benchmark_root),
+                "--submissions",
+                str(submissions),
+                "--output",
+                str(results),
+            ]
+        )
+        == 0
+    )
+    assert (results / "manifest.json").is_file()

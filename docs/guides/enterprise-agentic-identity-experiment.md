@@ -14,6 +14,45 @@ are experiment-owned Python views over the generated public event stream. They a
 not SynthWorld enterprise authorization contracts, a production policy decision
 point, or an agentic overlay applied to an imported organisation.
 
+## Starting from your organisation
+
+Start by reducing the organisation to an approved, sanitised structural blueprint:
+organisational units, fictional population counts, role categories, permission
+shapes, and resource classes. Create and validate the operator-private YAML before
+compiling a deterministic fictional enterprise universe:
+
+```bash
+uv run synthworld scaffold-enterprise-access \
+  --format yaml \
+  --output topology.yaml
+
+uv run synthworld validate-enterprise-access \
+  --input topology.yaml
+
+uv run synthworld compile-enterprise-access \
+  --input topology.yaml \
+  --seed 20260821 \
+  --output compiled-enterprise
+```
+
+An organisation-approved LLM may help translate a sanitised structural description
+into the blueprint or review it. Do not provide production identities, credentials,
+secrets, raw directory or IAM exports, or other sensitive source records. Retain an
+assumptions record beside `topology.yaml` covering abstractions, omissions,
+fictional substitutions, source and tool versions, and human review decisions.
+
+`validate-enterprise-access` establishes structural validity, not semantic
+correctness, completeness, privacy, or fitness of the proposed access model. A
+qualified reviewer must still confirm that the blueprint expresses the intended
+organisation and policy assumptions.
+
+The resulting `compiled-enterprise` universe and the generated smoke pilot below
+remain separate workflows. SynthWorld does not automatically apply an agentic
+overlay to the compiled universe, and the generated projection and HTML in this
+guide are not derived from `compiled-enterprise`. Use the
+[enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/)
+when the compiled universe itself is the subject of an experiment.
+
 ## State the question before generating data
 
 A useful hypothesis for the released smoke slice is:

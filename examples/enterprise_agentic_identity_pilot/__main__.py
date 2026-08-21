@@ -215,7 +215,7 @@ def _score(args: argparse.Namespace) -> int:
         expected_benchmark_identity=generated.identity.model_dump(mode="json"),
         expected_public_artifact_set_sha256=benchmark_checksums["public"],
     )
-    reports: list[tuple[str, EvaluationReport]] = []
+    evaluated_reports: list[tuple[str, EvaluationReport, bytes]] = []
     report_digests: dict[str, str] = {}
     for name in _STRATEGIES:
         submission = trace_submission_from_jsonl(
@@ -223,15 +223,21 @@ def _score(args: argparse.Namespace) -> int:
         )
         report = evaluate_generated_enterprise_agentic_trace(submission, generated)
         payload = canonical_json_bytes(report)
-        _write_new(output / "reports" / f"{name}.json", payload)
         report_digests[name] = _sha256(payload)
-        reports.append((name, report))
+        evaluated_reports.append((name, report, payload))
+
+    # Do not materialise a result tree until every strategy has parsed and scored.
+    # A late invalid trace must leave the absent output path reusable for a retry.
+    for name, _report, payload in evaluated_reports:
+        _write_new(output / "reports" / f"{name}.json", payload)
 
     comparison_html = output / "policy-comparison.html"
     write_evaluator_report_html(
         comparison_html,
         world_summary=_world_summary_from_generated(generated),
-        strategy_reports=tuple(reports),
+        strategy_reports=tuple(
+            (name, report) for name, report, _payload in evaluated_reports
+        ),
     )
     evaluator_html = output / "world-evaluator.html"
     write_generated_enterprise_agentic_html(
