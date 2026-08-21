@@ -45,19 +45,12 @@ _EVALUATOR_BASE_PATHS = {_EVALUATOR_TRUTH_PATH}
 _EVALUATOR_TREE_PATHS = {_MANIFEST_PATH, *_EVALUATOR_BASE_PATHS}
 
 
-def generated_enterprise_agentic_public_artifacts(
-    generated: EnterpriseAgenticGeneratedBenchmarkV1,
+def _public_tree_artifacts(
+    public: EnterpriseAgenticGeneratedPublicV1,
 ) -> dict[str, bytes]:
-    """Return an oracle-free, self-checksummed public artifact tree."""
-
-    public = EnterpriseAgenticGeneratedPublicV1(
-        config=generated.config,
-        identity=generated.identity,
-        benchmark=generated.public,
-    )
     artifacts = {
         _PUBLIC_INPUT_PATH: canonical_json_bytes(public),
-        _PUBLIC_SCENARIO_PATH: canonical_json_bytes(generated.public.scenario),
+        _PUBLIC_SCENARIO_PATH: canonical_json_bytes(public.benchmark.scenario),
         _PUBLIC_TOOL_SCHEMA_PATH: canonical_json_value_bytes(_tool_schema()),
     }
     manifest = EnterpriseAgenticGeneratedPublicManifestV1(
@@ -65,6 +58,35 @@ def generated_enterprise_agentic_public_artifacts(
         artifacts=_descriptors(artifacts),
     )
     return {"manifest.json": canonical_json_bytes(manifest), **artifacts}
+
+
+def generated_enterprise_agentic_public_artifact_set_sha256(
+    public: EnterpriseAgenticGeneratedPublicV1,
+) -> str:
+    """Return the complete public-tree digest, including its manifest.
+
+    This is the digest the evaluator manifest, evaluator truth artifact, and
+    evaluation receipts use as ``public_artifact_set_sha256``, so a projection
+    recording it can be correlated with every published cross-binding.
+    """
+
+    return generated_enterprise_agentic_artifact_set_sha256(
+        _public_tree_artifacts(public)
+    )
+
+
+def generated_enterprise_agentic_public_artifacts(
+    generated: EnterpriseAgenticGeneratedBenchmarkV1,
+) -> dict[str, bytes]:
+    """Return an oracle-free, self-checksummed public artifact tree."""
+
+    return _public_tree_artifacts(
+        EnterpriseAgenticGeneratedPublicV1(
+            config=generated.config,
+            identity=generated.identity,
+            benchmark=generated.public,
+        )
+    )
 
 
 def generated_enterprise_agentic_evaluator_artifacts(
@@ -142,7 +164,15 @@ def load_public_generated_enterprise_agentic_benchmark(
     deterministic generator conformance is enforced by the complete loader.
     """
 
-    return _load_public_artifacts(_read_exact_tree(root / "public", _PUBLIC_TREE_PATHS))
+    return load_generated_enterprise_agentic_public_tree(root / "public")
+
+
+def load_generated_enterprise_agentic_public_tree(
+    public_tree: Path,
+) -> EnterpriseAgenticGeneratedPublicV1:
+    """Load one public tree directly, with the same public-only guarantees."""
+
+    return _load_public_artifacts(_read_exact_tree(public_tree, _PUBLIC_TREE_PATHS))
 
 
 def _load_public_artifacts(
@@ -194,9 +224,22 @@ def load_generated_enterprise_agentic_benchmark(
         expected_files=set(),
         expected_directories={"public", "evaluator"},
     )
-    public_artifacts = _read_exact_tree(root / "public", _PUBLIC_TREE_PATHS)
+    return load_generated_enterprise_agentic_trees(
+        public_tree=root / "public",
+        evaluator_tree=root / "evaluator",
+    )
+
+
+def load_generated_enterprise_agentic_trees(
+    *,
+    public_tree: Path,
+    evaluator_tree: Path,
+) -> EnterpriseAgenticGeneratedBenchmarkV1:
+    """Load explicit public and evaluator trees with full generator conformance."""
+
+    public_artifacts = _read_exact_tree(public_tree, _PUBLIC_TREE_PATHS)
     public = _load_public_artifacts(public_artifacts)
-    evaluator_artifacts = _read_exact_tree(root / "evaluator", _EVALUATOR_TREE_PATHS)
+    evaluator_artifacts = _read_exact_tree(evaluator_tree, _EVALUATOR_TREE_PATHS)
     evaluator_base = {
         path: evaluator_artifacts[path] for path in sorted(_EVALUATOR_BASE_PATHS)
     }
@@ -447,7 +490,10 @@ __all__ = [
     "generated_enterprise_agentic_artifact_checksums",
     "generated_enterprise_agentic_artifact_set_sha256",
     "generated_enterprise_agentic_evaluator_artifacts",
+    "generated_enterprise_agentic_public_artifact_set_sha256",
     "generated_enterprise_agentic_public_artifacts",
     "load_generated_enterprise_agentic_benchmark",
+    "load_generated_enterprise_agentic_public_tree",
+    "load_generated_enterprise_agentic_trees",
     "load_public_generated_enterprise_agentic_benchmark",
 ]

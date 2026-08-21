@@ -41,9 +41,10 @@ synthworld visualize \
   --output asteria-evaluator.html
 ```
 
-Evaluator output is visibly watermarked. The command accepts only the published
-Asteria v1 artifact-set digest and refuses to overwrite an existing file. It does
-not render generated enterprise-agentic or enterprise authorization packages.
+Evaluator output is visibly watermarked. The default `--package-profile asteria`
+accepts only the published Asteria v1 artifact-set digest and refuses to
+overwrite an existing file. It does not render enterprise authorization
+packages.
 
 `generate-enterprise-agentic` preserves its fixed-reference default. Select the
 new generated smoke profile explicitly:
@@ -60,6 +61,27 @@ Only `smoke` is implemented for generated scale in this version. The command
 writes separate `public/` and `evaluator/` trees and refuses to replace an existing
 output root. Use `EnterpriseAgenticGenerationConfigV1` directly when topology
 counts must differ from the documented smoke defaults.
+
+## Render a generated enterprise-agentic world
+
+Select the generated package contract explicitly to render a verified generated
+public tree with the same shared Explorer renderer:
+
+```bash
+synthworld visualize \
+  --public-package generated-enterprise-agentic/public \
+  --view agent-authority \
+  --package-profile generated-enterprise-agentic \
+  --output generated-public.html
+```
+
+The public command reads only the public tree and never opens evaluator truth.
+Passing `--evaluator-package generated-enterprise-agentic/evaluator` as well
+verifies both trees, their digest cross-binding, and declared generator
+conformance before producing watermarked evaluator output. Unsupported generated
+tiers or package versions fail explicitly rather than rendering a partial view.
+Layout coordinates are computed deterministically from the projection alone, so
+the same verified package always produces the same HTML bytes.
 
 The fixed and generated enterprise-agentic submissions are deliberately separate
 CLI tasks because they use different trace contracts. Reload and check a generated

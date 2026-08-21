@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from synthworld.explorer.models import (
+    EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE,
+    EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE_VERSION,
     EXPLORER_VISUALISATION_PROFILE_VERSION,
+    ExplorerEnterpriseGeneratedLayoutV1,
+    ExplorerEnterpriseGeneratedProjectionV1,
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutManifestV1,
     ExplorerLayoutManifestV2,
@@ -12,7 +16,7 @@ from synthworld.explorer.serialization import explorer_digest
 
 
 def validate_evaluator_overlay(
-    projection: ExplorerPublicProjectionV1,
+    projection: ExplorerPublicProjectionV1 | ExplorerEnterpriseGeneratedProjectionV1,
     overlay: ExplorerEvaluatorOverlayV1,
 ) -> None:
     """Validate evaluator bindings without merging truth into public data."""
@@ -59,6 +63,44 @@ def validate_layout_manifest(
         )
         if layout_identity != projection_identity:
             raise ValueError("Layout manifest identity does not match the projection")
+    _require_full_coordinate_coverage(projection, layout)
+
+
+def validate_generated_layout(
+    projection: ExplorerEnterpriseGeneratedProjectionV1,
+    layout: ExplorerEnterpriseGeneratedLayoutV1,
+) -> None:
+    """Require generated layout identity and one coordinate per bound node."""
+
+    if layout.public_projection_digest != explorer_digest(projection):
+        raise ValueError("Layout manifest does not bind this public projection")
+    layout_identity = (
+        layout.world_id,
+        layout.world_seed,
+        layout.world_schema_version,
+        layout.visualisation_profile,
+        layout.visualisation_profile_version,
+    )
+    projection_identity = (
+        projection.source.world_id,
+        projection.source.seed,
+        projection.source.world_schema_version,
+        EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE,
+        EXPLORER_ENTERPRISE_GENERATED_VISUALISATION_PROFILE_VERSION,
+    )
+    if layout_identity != projection_identity:
+        raise ValueError("Layout manifest identity does not match the projection")
+    _require_full_coordinate_coverage(projection, layout)
+
+
+def _require_full_coordinate_coverage(
+    projection: ExplorerPublicProjectionV1 | ExplorerEnterpriseGeneratedProjectionV1,
+    layout: (
+        ExplorerLayoutManifestV1
+        | ExplorerLayoutManifestV2
+        | ExplorerEnterpriseGeneratedLayoutV1
+    ),
+) -> None:
     projection_node_ids = {node.id for node in projection.nodes}
     coordinate_node_ids = {item.node_id for item in layout.coordinates}
     if coordinate_node_ids != projection_node_ids:

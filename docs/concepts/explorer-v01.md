@@ -1,18 +1,21 @@
 # Explorer v0.1 contract and packaging decision
 
-Status: packaged Asteria renderer available; generated-world adapter deferred to
-issue #149.
+Status: packaged Asteria renderer available; the generated enterprise-agentic
+smoke adapter from issue #149 is available as a separately versioned profile.
 
 Explorer v0.1 is a deterministic projection contract and renderer boundary for
 benchmark packages that SynthWorld already publishes. It is not a general graph
-browser, an authorization engine, or a generated-world interface for the planned
-`enterprise_agentic` tiers.
+browser, an authorization engine, or an arbitrary generated-world interface. Its
+generated-world support is bounded to the released `enterprise_agentic` smoke
+contract; standard and longitudinal tiers are not supported.
 
-The package ships the Python projection contracts introduced in 0.15.0 and a
-checksum-verified renderer for the published Asteria Agentic v1 package. The
-renderer produces one deterministic, self-contained HTML file. It does not accept
-arbitrary topology files, generated enterprise-agentic packages, or experiment
-visualizations.
+The package ships the Asteria projection contracts introduced in 0.15.0, the
+independently versioned generated-smoke contracts, and a checksum-verified renderer
+for the published Asteria Agentic v1 package and verified generated
+enterprise-agentic smoke packages. The renderer produces one deterministic,
+self-contained HTML file. It does not accept arbitrary topology files,
+fixed-reference enterprise-agentic packages, unsupported generated tiers, or
+experiment visualizations.
 
 ## Immediate scope
 
@@ -26,21 +29,35 @@ artifact set of the published `asteria-agentic-v1` benchmark. Its view includes:
 - the public event timeline needed to replay grants, actions, revocation, evidence
   disposal, and audit activity.
 
-Candidate C08 v2 and `enterprise_agentic` packages are not Explorer v0.1 inputs.
-Large-world controls, generated tiers, tier comparisons, and longitudinal generated
-world navigation remain deferred until issue #27 fixes those package contracts.
+The second supported profile is `enterprise-agentic-generated-v1`, projected
+from a verified released generated enterprise-agentic public package (smoke
+tier). It reuses the same node, edge, and timeline contracts and the same
+shared renderer; only its independently versioned source record, profile
+literal, and computed layout differ. Candidate C08 v2 and fixed-reference
+`enterprise_agentic` packages are not Explorer inputs. Large-world controls,
+standard and longitudinal generated tiers, and tier comparisons remain outside the
+released generated smoke contract and Explorer v0.1.
 
 ## Artifact boundary
 
-Explorer keeps its released public projection, evaluator overlay, and layout v1
-contracts independently versioned. The packaged renderer uses layout manifest
-`2.0.0`; layout `1.0.0` remains unchanged for compatibility.
+Explorer keeps its released Asteria public projection, evaluator overlay, and layout
+v1 contracts independently versioned. The packaged Asteria renderer uses layout
+manifest `2.0.0`; layout `1.0.0` remains unchanged for compatibility. The generated
+projection and generated layout are separate `1.0.0` contracts.
 
 | Artifact | Visibility | Binding |
 | --- | --- | --- |
 | Public projection | public | published benchmark identity and public artifact-set SHA-256 |
 | Evaluator overlay | evaluator | public projection SHA-256 and evaluator artifact-set SHA-256 |
 | Layout manifest `2.0.0` | public or evaluator renderer | public projection SHA-256, explicit world/profile identity, and pinned layout inputs |
+| Generated projection `1.0.0` | public | generated configuration SHA-256, world identity, and public artifact-set SHA-256 |
+| Generated layout `1.0.0` | public or evaluator renderer | public projection SHA-256 plus explicit world/profile identity, computed deterministically at render time |
+
+The generated enterprise-agentic profile does not widen the frozen
+`agent-authority-v1` projection, evaluator, or layout literals in place; it is an
+independent `1.0.0` contract with its own source record. The shared evaluator
+overlay contract is reused unchanged for generated worlds because its digest
+bindings are already world-agnostic.
 
 The public projection is constructed field by field from `AgenticPublicBundle`.
 It cannot carry expected decisions, canonical bindings, case labels, authority
@@ -97,12 +114,14 @@ known projection node, edge, or timeline event.
 
 ## Packaged renderer
 
-The renderer uses Cytoscape 3.34.1 in the browser and a committed layout generated
-by ELK.js 0.12.0. Exact npm dependencies are locked; the generated CSS, JavaScript,
-layout manifest, and dependency notices are checksum-bound package assets. The
-HTML does not load JavaScript, CSS, fonts, layout code, or data from a CDN or other
-network origin. Its content-security policy disables connections, and the layout
-is validated against the exact public projection digest before rendering.
+The shared browser renderer uses Cytoscape 3.34.1. For Asteria, it uses a committed
+layout generated by ELK.js 0.12.0. Exact npm dependencies are locked; the generated
+CSS, JavaScript, Asteria layout manifest, and dependency notices are checksum-bound
+package assets. Generated enterprise-agentic worlds use the deterministic Python
+grid described below, not a second browser renderer. The HTML does not load
+JavaScript, CSS, fonts, layout code, or data from a CDN or other network origin. Its
+content-security policy disables connections, and each layout is validated against
+the exact public projection digest before rendering.
 
 The CLI binds to verified package directories rather than ambiguous standalone
 JSON:
@@ -132,18 +151,58 @@ The command refuses to replace an existing output file.
 
 The rendered page supports graph pan/zoom, node and edge inspection, event-timeline
 replay, revocation state, and evaluator annotations when explicitly enabled. The
-coordinates are pinned build artifacts: the browser never recomputes layout from
-host state or evaluator truth.
+Asteria coordinates are pinned build artifacts; generated coordinates are computed
+deterministically in Python before rendering. In both profiles the browser receives
+preset coordinates and never recomputes layout from host state or evaluator truth.
+
+## Generated enterprise-agentic adapter
+
+Generated worlds vary by seed and topology, so their coordinates cannot be
+committed build assets. The `enterprise-agentic-generated-v1` adapter instead
+computes a deterministic kind-layered grid in Python from the projection alone
+and records the engine, spacing, viewport, and per-node coordinates in the
+independently versioned generated layout contract. The browser still receives
+preset coordinates and never recomputes layout.
+
+```console
+synthworld visualize \
+  --public-package generated-enterprise-agentic/public \
+  --view agent-authority \
+  --package-profile generated-enterprise-agentic \
+  --output generated-public.html
+```
+
+The public command consumes only the verified public tree - no repository
+examples, private topology source, or evaluator access. Evaluator truth requires
+the separate evaluator tree, verifies both inventories, digest cross-binding,
+and declared generator conformance, and produces the same prominent watermark.
+Unsupported generated tiers or package versions fail explicitly.
+
+Four surfaces stay distinct and must not be conflated:
+
+- **Topology import** (`scaffold/validate/compile-enterprise-access`) authors a
+  private fictional identity/access universe; it is never a rendering input.
+- **Generated benchmark artifacts** (`generate-enterprise-agentic --profile
+  generated`) are the checksum-bound public and evaluator trees.
+- **Visualization** (`visualize --package-profile generated-enterprise-agentic`)
+  projects and renders the verified public tree, with evaluator truth as a
+  separately loaded, digest-bound, watermarked overlay.
+- **Authorization evaluation** (`validate`/`evaluate
+  generated-enterprise-agentic`) scores observed-action traces; the Explorer
+  never imports its verdicts into public output.
 
 ## Deliberate limitations
 
-- Only the published `asteria-agentic-v1` public artifact-set digest is accepted.
+- The Asteria profile accepts only the published `asteria-agentic-v1` public
+  artifact-set digest; the generated profile accepts only verified released
+  generated smoke packages.
 - The legacy core identity world remains a deterministic smoke surface whose path
   topology carries no structural signal. It is not an Explorer v0.1 input, and a
   chain-shaped rendering of it would not be evidence of meaningful organisation
   structure.
-- The generated enterprise-agentic smoke package is not silently coerced into this
-  view; issue #149 owns its separately versioned adapter.
+- The generated enterprise-agentic smoke package is not silently coerced into the
+  Asteria view; its separately versioned profile is selected explicitly with
+  `--package-profile generated-enterprise-agentic`.
 - The HTML is a local inspection aid, not a hosted service, policy engine, agent
   runtime, or evaluator report.
 - The npm toolchain is needed only to reproduce or verify committed renderer assets;

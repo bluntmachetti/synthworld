@@ -4,6 +4,8 @@ import hashlib
 import json
 
 from synthworld.explorer.models import (
+    ExplorerEnterpriseGeneratedLayoutV1,
+    ExplorerEnterpriseGeneratedProjectionV1,
     ExplorerEvaluatorOverlayV1,
     ExplorerLayoutManifestV1,
     ExplorerLayoutManifestV2,
@@ -12,9 +14,11 @@ from synthworld.explorer.models import (
 
 type ExplorerArtifact = (
     ExplorerPublicProjectionV1
+    | ExplorerEnterpriseGeneratedProjectionV1
     | ExplorerEvaluatorOverlayV1
     | ExplorerLayoutManifestV1
     | ExplorerLayoutManifestV2
+    | ExplorerEnterpriseGeneratedLayoutV1
 )
 
 
