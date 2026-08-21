@@ -18,6 +18,7 @@ from synthworld.agentic.enterprise.generated_models import (
     EnterpriseAgenticGeneratedBenchmarkV1,
     EnterpriseAgenticGeneratedPublicV1,
 )
+from synthworld.agentic.models import PrincipalKind
 from synthworld.cli import main
 from synthworld.explorer import (
     EVALUATOR_WATERMARK,
@@ -118,6 +119,11 @@ def test_generated_projection_is_deterministic_and_answer_independent(
     ):
         assert forbidden not in serialized
 
+    without_first_event = projection.model_dump(mode="python")
+    without_first_event["timeline"] = without_first_event["timeline"][1:]
+    with pytest.raises(ValueError, match="timeline indices must be contiguous"):
+        ExplorerEnterpriseGeneratedProjectionV1.model_validate(without_first_event)
+
 
 def test_generated_projection_covers_required_entities_and_relationships(
     generated_benchmark: EnterpriseAgenticGeneratedBenchmarkV1,
@@ -150,6 +156,59 @@ def test_generated_projection_covers_required_entities_and_relationships(
         ExplorerEdgeKind.PRESENTS,
         ExplorerEdgeKind.ATTEMPTS,
     } <= edge_kinds
+
+    nodes_by_id = {node.id: node for node in projection.nodes}
+    ownership_sources_by_target: dict[str, list[str]] = {}
+    for edge in projection.edges:
+        if edge.kind is ExplorerEdgeKind.OWNS:
+            ownership_sources_by_target.setdefault(edge.target_node_id, []).append(
+                edge.source_node_id
+            )
+
+    logical_agents = tuple(
+        node for node in projection.nodes if node.kind is ExplorerNodeKind.LOGICAL_AGENT
+    )
+    assert logical_agents
+    for agent in logical_agents:
+        direct_owner_ids = ownership_sources_by_target.get(agent.id, [])
+        assert len(direct_owner_ids) == 1, agent.source_id
+        owner = nodes_by_id[direct_owner_ids[0]]
+        assert owner.kind is ExplorerNodeKind.PRINCIPAL
+        owner_properties = {item.key: item.value for item in owner.properties}
+        assert owner_properties["principal_kind"] in {
+            PrincipalKind.HUMAN.value,
+            PrincipalKind.ORGANISATION.value,
+        }
+
+        seen: set[str] = set()
+        accountable_principal = owner
+        while True:
+            assert accountable_principal.id not in seen, agent.source_id
+            seen.add(accountable_principal.id)
+            principal_properties = {
+                item.key: item.value for item in accountable_principal.properties
+            }
+            if (
+                principal_properties["principal_kind"]
+                == PrincipalKind.ORGANISATION.value
+            ):
+                break
+            parent_owner_ids = ownership_sources_by_target.get(
+                accountable_principal.id, []
+            )
+            assert len(parent_owner_ids) == 1, agent.source_id
+            accountable_principal = nodes_by_id[parent_owner_ids[0]]
+            assert accountable_principal.kind is ExplorerNodeKind.PRINCIPAL
+
+        organisation_node_id = accountable_principal.parent_node_id
+        assert organisation_node_id is not None, agent.source_id
+        assert nodes_by_id[organisation_node_id].kind is ExplorerNodeKind.ORGANISATION
+        assert any(
+            edge.kind is ExplorerEdgeKind.CONTAINS
+            and edge.source_node_id == organisation_node_id
+            and edge.target_node_id == accountable_principal.id
+            for edge in projection.edges
+        )
     assert projection.timeline
 
 

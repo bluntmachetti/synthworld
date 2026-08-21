@@ -345,6 +345,11 @@ class ExplorerEnterpriseGeneratedProjectionV1(SyntheticModel):
     @model_validator(mode="after")
     def require_closed_graph(self) -> Self:
         _require_closed_projection_graph(self.nodes, self.edges, self.timeline)
+        event_indices = tuple(item.source_event_index for item in self.timeline)
+        if event_indices != tuple(range(1, len(event_indices) + 1)):
+            raise ValueError(
+                "Generated Explorer timeline indices must be contiguous from one"
+            )
         return self
 
 

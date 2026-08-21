@@ -36,7 +36,8 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   visualisation profile identity while preserving layout `1.0.0` unchanged. Evaluator
   truth requires a separately verified evaluator package and produces prominently
   watermarked output; public HTML contains no evaluator overlay. Generated
-  enterprise-agentic and enterprise authorization adapters remain separate work.
+  enterprise-agentic support is supplied by the separately versioned adapter
+  described above; enterprise authorization packages remain outside Explorer.
 
 ## [0.16.0] - 2026-08-17
 

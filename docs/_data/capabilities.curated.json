@@ -1384,8 +1384,8 @@
         "route:ROADMAP.md#ai-agents-and-non-human-identities"
       ],
       "since": "0.15.0",
-      "summary": "Render the published Asteria Agentic v1 package as a deterministic, self-contained authority graph with timeline replay.",
-      "support": "Preview projection contracts plus a packaged Asteria v1 HTML renderer and visualization CLI; public and evaluator views remain physically separate.",
+      "summary": "Render published Asteria Agentic v1 and verified generated enterprise-agentic smoke packages as deterministic, self-contained authority graphs with timeline replay.",
+      "support": "Preview projection contracts plus a shared packaged HTML renderer and visualization CLI for Asteria v1 and generated enterprise-agentic smoke packages; public and evaluator views remain physically separate.",
       "title": "Explorer v0.1"
     },
     {

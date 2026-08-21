@@ -21,6 +21,37 @@ def _run(*arguments: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+def _assert_generated_public_html(payload: bytes) -> None:
+    if not payload.startswith(b"<!doctype html>\n"):
+        raise RuntimeError("generated visualization did not emit an HTML document")
+    for required in (
+        b"connect-src 'none'",
+        b"Generated enterprise agent authority",
+        b"public projection only",
+        b"<style>",
+        b"<script",
+    ):
+        if required not in payload:
+            raise RuntimeError(
+                f"generated public HTML omitted required marker {required!r}"
+            )
+    for forbidden in (
+        b'<script src="http',
+        b'<link href="http',
+        b'id="synthworld-evaluator-overlay"',
+        b"EVALUATOR VIEW - CONTAINS REFERENCE TRUTH",
+        b"authority_truth",
+        b"canonical_binding",
+        b"case_kind",
+        b"expected_decision",
+        b"failure_reason",
+    ):
+        if forbidden in payload:
+            raise RuntimeError(
+                f"generated public HTML contains forbidden marker {forbidden!r}"
+            )
+
+
 def main() -> None:
     with tempfile.TemporaryDirectory() as temporary_directory:
         temporary = Path(temporary_directory)
@@ -43,6 +74,41 @@ def main() -> None:
             raise RuntimeError(
                 "public-only adapter root unexpectedly has evaluator data"
             )
+        first_html = temporary / "generated-public-first.html"
+        first_render = _run(
+            "visualize",
+            "--public-package",
+            str(public_only_root / "public"),
+            "--view",
+            "agent-authority",
+            "--package-profile",
+            "generated-enterprise-agentic",
+            "--output",
+            str(first_html),
+        )
+        if "agent-authority (public)" not in first_render.stdout:
+            raise RuntimeError("generated visualization did not report public output")
+        if (public_only_root / "evaluator").exists():
+            raise RuntimeError("public visualization created an evaluator sibling")
+
+        second_html = temporary / "generated-public-second.html"
+        _run(
+            "visualize",
+            "--public-package",
+            str(public_only_root / "public"),
+            "--view",
+            "agent-authority",
+            "--package-profile",
+            "generated-enterprise-agentic",
+            "--output",
+            str(second_html),
+        )
+        first_payload = first_html.read_bytes()
+        second_payload = second_html.read_bytes()
+        if first_payload != second_payload:
+            raise RuntimeError("generated public HTML is not deterministic")
+        _assert_generated_public_html(first_payload)
+
         public_document = json.loads(
             (public_only_root / "public" / "public-input.json").read_text(
                 encoding="utf-8"
