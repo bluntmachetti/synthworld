@@ -142,14 +142,21 @@ leaderboard, or claim about deployed enforcement. `standard` and `longitudinal`
 generated tiers remain follow-up work in issue #27; the existing 1.0 event union is
 not being widened to imply those lifecycle semantics.
 
+For a complete team exercise that runs experiment-owned RBAC, ABAC, ReBAC, and
+combined views over one generated world and produces separate public and evaluator
+HTML, follow
+[Run an enterprise agentic identity experiment](https://bluntmachetti.github.io/synthworld/guides/enterprise-agentic-identity-experiment/).
+
 ## Explorer v0.1
 
-The `synthworld.explorer` Python API projects the published Asteria Agentic v1
-package into deterministic nodes, relationships, and a replayable public event
-timeline. A packaged renderer now turns that exact projection into a self-contained
-interactive HTML file. Separately typed evaluator-overlay and layout-manifest
-contracts prevent either artifact from silently attaching to a different public
-projection.
+The `synthworld.explorer` Python API projects both the published Asteria Agentic v1
+package and verified generated enterprise-agentic smoke packages into deterministic
+nodes, relationships, and a replayable public event timeline. The generated package
+uses its own explicit `enterprise-agentic-generated-v1` projection profile rather
+than widening the frozen Asteria contract. A packaged renderer turns either
+supported projection into a self-contained interactive HTML file. Separately typed
+evaluator-overlay and layout-manifest contracts prevent either artifact from
+silently attaching to a different public projection.
 
 Available now:
 
@@ -159,17 +166,38 @@ Available now:
 - stable, domain-separated UUID5 graph identities and answer-independent ordering;
 - UTC timeline validation, acyclic compound-node validation, and exact layout-node
   coverage checks;
-- a `synthworld visualize` command with offline Cytoscape rendering, a pinned ELK
-  layout, graph inspection, and event replay;
+- a `synthworld visualize` command with offline Cytoscape rendering, graph
+  inspection, and event replay;
+- a pinned ELK layout for Asteria and a deterministic projection-only grid for
+  generated smoke worlds;
 - public-only rendering from the public package; and
 - physically separate evaluator rendering carrying a mandatory evaluator-view
   watermark.
 
+Render a generated public package by selecting its package contract explicitly:
+
+```bash
+synthworld visualize \
+  --public-package generated-enterprise-agentic/public \
+  --view agent-authority \
+  --package-profile generated-enterprise-agentic \
+  --output generated-public.html
+```
+
+Add `--evaluator-package generated-enterprise-agentic/evaluator` and choose a
+different output path only when a visibly watermarked reference-truth view is
+required. The public command never opens the evaluator tree.
+
 Not yet available:
 
-- Explorer adapters for candidate C08 v2 or generated `enterprise_agentic` worlds;
-  and
+- Explorer adapters for candidate C08 v2 or the fixed-reference
+  `enterprise-agentic` authorization package;
+- rendering of an arbitrary universe produced by `compile-enterprise-access`; and
 - large-world filtering, tier comparison, or generated longitudinal navigation.
+
+The generated smoke renderer does not imply that a compiled enterprise
+identity/access universe can be given an automatic agentic overlay or rendered by
+Explorer. Those remain separate package contracts and workflows.
 
 See [Explorer v0.1 contract and packaging decision](../concepts/explorer-v01.md)
 for commands, package bindings, and the exact boundary.

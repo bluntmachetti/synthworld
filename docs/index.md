@@ -36,6 +36,7 @@ explicit seed + config + schema version + event schedule
 | Build connected identity fixtures | [Identity worlds](guides/identity-worlds.md) |
 | Evaluate matching or privacy behavior | [Identity resolution](guides/identity-resolution.md) or [privacy exposure](guides/privacy-exposure.md) |
 | Test agent delegation and audit evidence | [Agent authority](guides/agent-authority.md) |
+| Compare RBAC, ABAC, and ReBAC on one agentic world | [Enterprise agentic identity experiment](guides/enterprise-agentic-identity-experiment.md) |
 | Compile enterprise identity and access truth | [Enterprise access](guides/enterprise-access.md) |
 | Build and score an enterprise authorization experiment | [Enterprise authorization](guides/enterprise-authorization-python.md) |
 | Plan an enterprise identity and authorization journey | [Enterprise Identity Planning](guides/enterprise-identity-planning.md) |

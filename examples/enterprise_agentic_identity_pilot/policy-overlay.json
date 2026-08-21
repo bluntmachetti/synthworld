@@ -1,0 +1,43 @@
+{
+  "default_decision": "deny",
+  "experiment_owned": true,
+  "proposal_version": "1.0.0",
+  "strategies": {
+    "abac": {
+      "purpose": "Runtime and request-context guard",
+      "requires": [
+        "claimed agent, runtime, and resource share an organisation",
+        "runtime belongs to the claimed logical agent",
+        "credential is active and bound to the runtime principal",
+        "action is read",
+        "scope is tenant:primary",
+        "purpose is enterprise-agentic-evaluation",
+        "policy version is current"
+      ]
+    },
+    "combined": {
+      "purpose": "Recommended default-deny composition",
+      "requires": [
+        "RBAC coarse entitlement",
+        "ReBAC active delegated-authority path",
+        "ABAC runtime and request-context guard"
+      ]
+    },
+    "rbac": {
+      "purpose": "Coarse provisioning entitlement ceiling",
+      "requires": [
+        "every generated logical agent is assigned agent_reader",
+        "role grants read on managed resources"
+      ]
+    },
+    "rebac": {
+      "purpose": "Active delegated authority",
+      "requires": [
+        "originator delegates a covering capability to the agent",
+        "agent runs as the claimed runtime",
+        "delegation is active and not revoked"
+      ]
+    }
+  },
+  "synthetic": true
+}

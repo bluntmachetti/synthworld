@@ -173,13 +173,17 @@ not establish live evidence retention, enforcement, deployment, or EADS
 compatibility. Candidate registration and packaging are not external publication
 approval. See [C08 v2 offline evidence-completeness candidates](../../AGENTIC_BENCHMARK.md#c08-v2-offline-evidence-completeness-candidates).
 
-Explorer v0.1 can render the published Asteria v1 package as a deterministic,
-self-contained authority graph with timeline replay. Its public command reads only
-the public package; evaluator annotations require the separate cross-bound
-evaluator package and produce visibly watermarked HTML. This renderer is deliberately
-Asteria-specific. It does not yet accept the generated enterprise-agentic smoke
-world or a compiled enterprise identity/access universe; that requires the separate
-adapter tracked in issue #149.
+Explorer v0.1 can render both the published Asteria v1 package and a verified
+generated enterprise-agentic smoke package as deterministic, self-contained
+authority graphs with timeline replay. The generated package must be selected with
+the separate `generated-enterprise-agentic` package profile. In both profiles, the
+public command reads only the public package; evaluator annotations require the
+separate cross-bound evaluator package and produce visibly watermarked HTML.
+
+This support does not extend to the fixed-reference `enterprise-agentic`
+authorization package or to a universe produced by `compile-enterprise-access`.
+The generated smoke package is an independently versioned world, not an automatic
+agentic overlay over an arbitrary compiled enterprise universe.
 
 ### Generated enterprise-agentic composition
 
@@ -191,9 +195,15 @@ and derived integrity metrics establish the first vertical under
 [#27](https://github.com/bluntmachetti/synthworld/issues/27).
 
 The current slice is not yet automatic composition from an arbitrary compiled
-enterprise universe. `standard` and `longitudinal` topology/event contracts, scale
-measurements, and explicit benchmark-root evaluator loading remain follow-up work.
-Planning tools must not infer those capabilities from the smoke API.
+enterprise universe. Public-only artifact-root validation and complete-root
+evaluation are available for the generated smoke package, but `standard` and
+`longitudinal` topology/event contracts and scale measurements remain follow-up
+work. Planning tools must not infer those broader capabilities from the smoke API.
+
+Use
+[Run an enterprise agentic identity experiment](https://bluntmachetti.github.io/synthworld/guides/enterprise-agentic-identity-experiment/)
+for a reproducible generated-world pilot, including experiment-owned policy
+views, public/evaluator projection artifacts, and self-contained HTML.
 
 Face B compiled-universe work and C15/C16 authority-binding and principal-intent
 contracts are also design dependencies. Do not infer those capabilities from the
@@ -276,8 +286,9 @@ offline score does not prove live enforcement.
 | Separate agent-authority reference evaluation | **Available now** | Asteria Agentic v1 |
 | Configured generated agentic smoke world | **Available** | `EnterpriseAgenticGenerationConfigV1` and `--profile generated` |
 | Imported topology to generated multi-tier agentic world | **Planned** | Remaining issue #27 contracts |
-| Deterministic Asteria Explorer projection contracts | **Available now** | Projection-only Python API with separate public, evaluator-overlay, and layout contracts; no HTML renderer |
-| Interactive Explorer HTML and CLI | **Planned** | [SynthWorld Explorer #52](https://github.com/bluntmachetti/synthworld/issues/52) |
+| Asteria Explorer HTML | **Available now** | Verified Asteria package, pinned layout, and separate evaluator overlay |
+| Generated smoke Explorer HTML | **Available now** | Explicit `generated-enterprise-agentic` package profile and deterministic grid |
+| Fixed-reference authorization or compiled-topology Explorer HTML | **Planned** | Neither package is an input to the released renderer |
 
 Continue with the [benchmark catalogue](/benchmarks/catalogue) for governed
 lifecycle status and [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/) for the

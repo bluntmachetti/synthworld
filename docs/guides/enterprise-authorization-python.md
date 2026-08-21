@@ -428,9 +428,16 @@ enterprise authorization score.
 ## Rendering boundary
 
 The released `synthworld.explorer` surface includes a self-contained HTML renderer,
-but it accepts only the checksum-verified published Asteria Agentic v1 package. It
-does not yet provide an Explorer adapter for this generated enterprise authorization
-universe. Any SVG/HTML topology page produced by a Topaz or other enterprise lab
-remains an experiment-owned visualization, not a SynthWorld render or benchmark
-artifact. Issue #149 tracks the required generated-world adapter without widening
-the frozen Asteria projection contract.
+but its inputs are bounded to the checksum-verified published Asteria Agentic v1
+package and verified generated enterprise-agentic smoke packages selected with the
+explicit `generated-enterprise-agentic` package profile. That generated adapter
+consumes the independently versioned generated smoke contract; it is not an adapter
+for the enterprise authorization artifacts built in this guide.
+
+Explorer does not render an arbitrary universe produced by
+`compile-enterprise-access`, this guide's RBAC/ABAC/ReBAC authorization bundle, or
+the fixed-reference `enterprise-agentic` authorization package. Any SVG/HTML
+topology page produced by a Topaz or other enterprise lab remains an
+experiment-owned visualization, not a SynthWorld render or benchmark artifact. See
+the [Explorer v0.1 contract](../concepts/explorer-v01.md) for the supported package
+profiles and exact public/evaluator boundary.

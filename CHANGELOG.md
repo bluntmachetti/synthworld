@@ -11,6 +11,15 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ### Added
 
+- **Enterprise agentic identity policy pilot.** A repository example now compares
+  experiment-owned RBAC, ABAC, ReBAC, and default-deny combined policy views over
+  one generated enterprise-agentic smoke world. The policy runner consumes only
+  the verified public tree and writes digest-bound decision traces; a separate
+  scorer verifies the matching evaluator tree and emits independent metrics plus
+  deterministic, visibly watermarked comparison HTML. A new end-to-end guide
+  covers generation, public projection and layout JSON, the evaluator overlay,
+  Explorer HTML, replay, scoring, reproducibility, and the boundary between this
+  teaching pilot and SynthWorld authorization contracts or production enforcement.
 - **Generated enterprise-agentic Explorer adapter (#149).** The `synthworld
   visualize` command now renders a verified released generated
   enterprise-agentic smoke package as deterministic, self-contained HTML when

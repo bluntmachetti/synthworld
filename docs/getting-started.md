@@ -48,6 +48,7 @@ list of every contract-specific evaluator.
 - [Identity resolution](guides/identity-resolution.md)
 - [Privacy exposure](guides/privacy-exposure.md)
 - [Agent authority](guides/agent-authority.md)
+- [Enterprise agentic identity experiment](guides/enterprise-agentic-identity-experiment.md)
 - [Enterprise access](guides/enterprise-access.md)
 - [Enterprise Identity Planning](guides/enterprise-identity-planning.md)
 - [Evaluating a system](guides/evaluating-a-system.md)

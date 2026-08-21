@@ -722,7 +722,7 @@
           ]
         }
       },
-      "journey_route": "route:USER_GUIDE.md#use-case-13-enterprise-authorization-benchmarks",
+      "journey_route": "route:docs/guides/enterprise-agentic-identity-experiment.md#run-an-enterprise-agentic-identity-experiment",
       "maturity": "preview",
       "notes": "The importable enterprise-agentic package API is catalogued separately from top-level synthworld exports. The configurable generated family currently implements only its independently versioned smoke profile; fixed reference artifacts remain unchanged.",
       "related_surface_ids": [
