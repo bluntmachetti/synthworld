@@ -58,6 +58,10 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         # with the enterprise consumer API in PR #143 on 2026-08-16.
         Path(".github/scripts/check_enterprise_consumer_wheel.py"),
         Path("docs/guides/enterprise-authorization-python.md"),
+        # The development-pipeline guide names the released distribution and
+        # documents only public adapter/evaluator boundaries. It contains no
+        # consumer integration code or private symbols. Reviewed 2026-08-22.
+        Path("docs/guides/development-pipelines.md"),
         # The worked broker adapter names the consumer once, in its module docstring,
         # to say whose integration pattern it demonstrates - reviewed 2026-08-04 with
         # PR #95, which is the review this allowlist exists to force.
