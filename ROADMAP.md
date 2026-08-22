@@ -28,9 +28,13 @@ Broker lifecycle evaluation is shipped; broader longitudinal product behavior re
 
 ### AI agents and non-human identities
 
-Frozen agent-authority conformance surfaces and a configurable generated smoke
-vertical are shipped. Standard and longitudinal generated agent/NHI tiers remain
-tracked under #27 and #6.
+Frozen agent-authority conformance surfaces and the configurable generated
+enterprise-agentic tiers are shipped: smoke retains its V1 contract, while standard
+and longitudinal use the independently versioned V2 scale and lifecycle contract.
+The generation and evaluation paths being available does not make the governed
+`enterprise-agentic` benchmark family published; its registry lifecycle remains
+authoritative. Stress-scale worlds, broader deterministic composition, and
+large-world Explorer workflows remain separate future work.
 
 ## Phase 4 — Portfolio and AI-system integrations
 

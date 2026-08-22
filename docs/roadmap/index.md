@@ -6,23 +6,27 @@ This is a navigation view, not a release promise. The canonical repository direc
 
 - Complete the documentation ownership transition so the Blume site is the detailed user surface and root files stay concise.
 - Preserve frozen benchmark bytes while enforcing publication, provenance, and evaluator-boundary controls.
-- Stabilise the generated enterprise-agentic smoke vertical without claiming
-  arbitrary compiled-universe composition (#27).
+- Validate the shipped generated enterprise-agentic smoke, standard, and
+  longitudinal tiers through reproducible external-adapter workflows without
+  claiming arbitrary compiled-universe composition or published-benchmark status.
 - Keep C08 v2 benchmark artifacts in their governed candidate state until explicit publication gates are satisfied.
 
 ## Next
 
-- Extend the configurable generated enterprise-agentic smoke world with standard
-  and independently versioned longitudinal tiers while preserving frozen Asteria
-  reference artifacts (#27, #6).
 - Deepen deterministic graph and temporal profiles for lifecycle, authority, and longitudinal evaluation (#3, #2).
-- Add the interactive Explorer renderer and CLI on the shipped v0.1 projection contracts; defer generated-scale navigation until #27 defines those worlds.
+- Extend Explorer beyond its shipped Asteria and generated-smoke projections with
+  large-world filtering, tier comparison, and longitudinal navigation against the
+  V2 generated contract.
+- Improve reproducible consumption of external-adapter results and evidence
+  receipts while keeping offline evaluation distinct from live-lab claims.
 - Continue adversarial evidence and relationship hardening without silently changing existing frozen benchmark identities.
 
 The [Enterprise Identity Planning guide](../guides/enterprise-identity-planning.md)
-records the current journey. Generated enterprise-agentic smoke is available;
-standard and longitudinal tiers remain issue #27. Large-world Explorer controls
-follow that generated contract rather than preceding it.
+records the current journey. Generated enterprise-agentic smoke, standard, and
+longitudinal paths are available; standard and longitudinal use the separately
+versioned V2 contract introduced in 0.17.0. The governed benchmark family remains a
+candidate, and Explorer currently supports Asteria and generated smoke rather than
+the larger V2 tiers.
 
 ## Later
 
