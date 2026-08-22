@@ -51,6 +51,7 @@ list of every contract-specific evaluator.
 - [Enterprise agentic identity experiment](guides/enterprise-agentic-identity-experiment.md)
 - [Enterprise access](guides/enterprise-access.md)
 - [Enterprise Identity Planning](guides/enterprise-identity-planning.md)
+- [Development pipelines](guides/development-pipelines.md)
 - [Evaluating a system](guides/evaluating-a-system.md)
 
 The legacy [user guide](../USER_GUIDE.md) remains only as a compatibility index

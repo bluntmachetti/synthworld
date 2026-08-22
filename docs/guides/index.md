@@ -10,6 +10,7 @@ Choose a journey rather than a package module:
 - [Run an enterprise agentic identity experiment](enterprise-agentic-identity-experiment.md)
 - [Compile enterprise identity/access truth](enterprise-access.md)
 - [Build and score enterprise authorization](enterprise-authorization-python.md)
+- [Test identity and authorization in development pipelines](development-pipelines.md)
 - [Plan with a fictional Enterprise Identity universe](enterprise-identity-planning.md)
 - [Connect and evaluate a system](evaluating-a-system.md)
 
