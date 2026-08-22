@@ -29,6 +29,7 @@ annotated or evaluator bundles and must not be treated as product input.
 | Test agent delegation, authority, and audit evidence | [Agent authority guide](https://bluntmachetti.github.io/synthworld/guides/agent-authority/) |
 | Build or evaluate enterprise identity/access worlds | [Enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/) |
 | Build and score an enterprise authorization experiment | [Enterprise authorization guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-authorization-python/) |
+| Add identity and authorization checks to CI | [Development pipeline guide](https://bluntmachetti.github.io/synthworld/guides/development-pipelines/) |
 | Connect a product or model to a SynthWorld scorer | [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/) |
 | Check current benchmark maturity and publication state | [Benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) |
 

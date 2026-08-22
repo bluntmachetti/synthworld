@@ -2859,6 +2859,96 @@
     {
       "anchor": "",
       "heading": "",
+      "id": "route:docs/guides/development-pipelines.md",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "1-generate-the-benchmark",
+      "heading": "1. Generate the benchmark",
+      "id": "route:docs/guides/development-pipelines.md#1-generate-the-benchmark",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "2-run-the-project-adapter",
+      "heading": "2. Run the project adapter",
+      "id": "route:docs/guides/development-pipelines.md#2-run-the-project-adapter",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "3-validate-without-evaluator-truth",
+      "heading": "3. Validate without evaluator truth",
+      "id": "route:docs/guides/development-pipelines.md#3-validate-without-evaluator-truth",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "4-score-in-the-evaluator-stage",
+      "heading": "4. Score in the evaluator stage",
+      "id": "route:docs/guides/development-pipelines.md#4-score-in-the-evaluator-stage",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "5-apply-project-owned-gates",
+      "heading": "5. Apply project-owned gates",
+      "id": "route:docs/guides/development-pipelines.md#5-apply-project-owned-gates",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "choose-a-pipeline",
+      "heading": "Choose a pipeline",
+      "id": "route:docs/guides/development-pipelines.md#choose-a-pipeline",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "interpret-the-result-narrowly",
+      "heading": "Interpret the result narrowly",
+      "id": "route:docs/guides/development-pipelines.md#interpret-the-result-narrowly",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "pin-the-reproducibility-inputs",
+      "heading": "Pin the reproducibility inputs",
+      "id": "route:docs/guides/development-pipelines.md#pin-the-reproducibility-inputs",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "pipeline-1-fast-authorization-regression",
+      "heading": "Pipeline 1: fast authorization regression",
+      "id": "route:docs/guides/development-pipelines.md#pipeline-1-fast-authorization-regression",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "pipeline-2-test-an-authored-authorization-model",
+      "heading": "Pipeline 2: test an authored authorization model",
+      "id": "route:docs/guides/development-pipelines.md#pipeline-2-test-an-authored-authorization-model",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "pipeline-3-test-identity-and-governance-rules",
+      "heading": "Pipeline 3: test identity and governance rules",
+      "id": "route:docs/guides/development-pipelines.md#pipeline-3-test-identity-and-governance-rules",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "standards-shaped-adapter-tests",
+      "heading": "Standards-shaped adapter tests",
+      "id": "route:docs/guides/development-pipelines.md#standards-shaped-adapter-tests",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "test-identity-and-authorization-in-development-pipelines",
+      "heading": "Test identity and authorization in development pipelines",
+      "id": "route:docs/guides/development-pipelines.md#test-identity-and-authorization-in-development-pipelines",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "what-should-fail-the-pipeline",
+      "heading": "What should fail the pipeline",
+      "id": "route:docs/guides/development-pipelines.md#what-should-fail-the-pipeline",
+      "path": "docs/guides/development-pipelines.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
       "id": "route:docs/guides/enterprise-access.md",
       "path": "docs/guides/enterprise-access.md"
     },

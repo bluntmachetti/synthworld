@@ -11,6 +11,7 @@ The detailed documentation surface is the Blume site under `docs/`. Root files r
 | Documentation entry and goal routing | `docs/index.md` |
 | Installation and first run | `docs/getting-started.md` |
 | General evaluation workflow | `docs/guides/evaluating-a-system.md` |
+| Development pipeline integration | `docs/guides/development-pipelines.md` |
 | Core/generated identity worlds | `docs/guides/identity-worlds.md` plus `BENCHMARKS.md` |
 | Entity resolution and ambiguity | `docs/guides/identity-resolution.md` |
 | Extraction, risk, exposure, broker, search | `docs/guides/privacy-exposure.md` |

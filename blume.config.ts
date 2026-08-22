@@ -30,6 +30,7 @@ export default defineConfig({
             "/guides/enterprise-agentic-identity-experiment",
             "/guides/enterprise-access",
             "/guides/enterprise-authorization-python",
+            "/guides/development-pipelines",
             "/guides/enterprise-identity-planning",
             "/guides/evaluating-a-system",
           ],

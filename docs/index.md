@@ -39,6 +39,7 @@ explicit seed + config + schema version + event schedule
 | Compare RBAC, ABAC, and ReBAC on one agentic world | [Enterprise agentic identity experiment](guides/enterprise-agentic-identity-experiment.md) |
 | Compile enterprise identity and access truth | [Enterprise access](guides/enterprise-access.md) |
 | Build and score an enterprise authorization experiment | [Enterprise authorization](guides/enterprise-authorization-python.md) |
+| Add identity and authorization checks to CI | [Development pipelines](guides/development-pipelines.md) |
 | Plan an enterprise identity and authorization journey | [Enterprise Identity Planning](guides/enterprise-identity-planning.md) |
 | Connect a system to an evaluator | [Evaluating a system](guides/evaluating-a-system.md) |
 | Understand benchmark contracts and boundaries | [Concepts](concepts/index.md) |
