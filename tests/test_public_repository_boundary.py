@@ -53,6 +53,11 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         # no consumer integration code or private symbols. Reviewed with the
         # two-topology experiment publication on 2026-08-17.
         Path("docs/experiments/opa-authzen-enterprise-authorization.md"),
+        # This local external-consumer evidence page names only the released
+        # distribution and records experiment-owned detector/downstream results.
+        # It contains no consumer integration code or private symbols. Reviewed
+        # with the corrected agent-spy evidence record on 2026-08-24.
+        Path("docs/experiments/pii-detection-identity-resolution.md"),
         # The enterprise authorization guide and isolated-wheel check name only the
         # released distribution while enforcing the public API boundary. Reviewed
         # with the enterprise consumer API in PR #143 on 2026-08-16.

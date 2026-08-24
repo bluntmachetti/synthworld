@@ -9,6 +9,16 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+### Added
+
+- **Agent-spy PII-to-identity evidence.** The experiments catalogue now records
+  the corrected, locally frozen external-consumer study of detector-error
+  propagation into identity resolution, relationship inference, and exposure
+  assessment over SynthWorld 0.17.0. The evidence page preserves the run identity,
+  independent metric denominators, isolation and determinism checks, limitations,
+  and local-only artifact status without presenting the result as a SynthWorld
+  benchmark, product claim, or independently reproducible release.
+
 ## [0.17.0] - 2026-08-21
 
 ### Added

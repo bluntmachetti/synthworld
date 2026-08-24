@@ -439,6 +439,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "added-12",
+      "heading": "Added",
+      "id": "route:CHANGELOG.md#added-12",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "added-2",
       "heading": "Added",
       "id": "route:CHANGELOG.md#added-2",
@@ -2789,6 +2795,96 @@
       "heading": "What this experiment does not establish",
       "id": "route:docs/experiments/opa-authzen-enterprise-authorization.md#what-this-experiment-does-not-establish",
       "path": "docs/experiments/opa-authzen-enterprise-authorization.md"
+    },
+    {
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "detection-and-resolution",
+      "heading": "Detection and resolution",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#detection-and-resolution",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "error-attribution",
+      "heading": "Error attribution",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#error-attribution",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "evidence-status",
+      "heading": "Evidence status",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#evidence-status",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "experiment-boundary",
+      "heading": "Experiment boundary",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#experiment-boundary",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "exposure-assessment",
+      "heading": "Exposure assessment",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#exposure-assessment",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "external-mapped-label-slices",
+      "heading": "External mapped-label slices",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#external-mapped-label-slices",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "from-pii-spans-to-identity-resolution",
+      "heading": "From PII spans to identity resolution",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#from-pii-spans-to-identity-resolution",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "integrity-and-reproducibility",
+      "heading": "Integrity and reproducibility",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#integrity-and-reproducibility",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "method",
+      "heading": "Method",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#method",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "relationship-inference",
+      "heading": "Relationship inference",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#relationship-inference",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "results",
+      "heading": "Results",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#results",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "run-identity",
+      "heading": "Run identity",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#run-identity",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "what-this-experiment-does-not-establish",
+      "heading": "What this experiment does not establish",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#what-this-experiment-does-not-establish",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
+    },
+    {
+      "anchor": "what-this-experiment-supports",
+      "heading": "What this experiment supports",
+      "id": "route:docs/experiments/pii-detection-identity-resolution.md#what-this-experiment-supports",
+      "path": "docs/experiments/pii-detection-identity-resolution.md"
     },
     {
       "anchor": "",
