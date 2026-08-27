@@ -156,6 +156,20 @@ _UNICODE_NAMES = (
     ("François", "Francois", "Brontë", "Bronte"),
     ("Šimon", "Simon", "Núñez", "Nunez"),
 )
+_ATOMIC_LATIN_TRANSLITERATION = str.maketrans(
+    {
+        "ø": "o",
+        "Ø": "O",
+        "ł": "l",
+        "Ł": "L",
+        "đ": "d",
+        "Đ": "D",
+        "æ": "ae",
+        "Æ": "AE",
+        "ß": "ss",
+        "ẞ": "SS",
+    }
+)
 #: The key that reproduces the published packs. Named rather than spelled `b""` at
 #: call sites, so choosing to generate an invertible pack is a visible decision.
 UNKEYED: bytes = b""
@@ -830,7 +844,8 @@ def _values(record: PublicIdentityRecord) -> dict[_K, str]:
 
 
 def _ascii_fold(value: str) -> str:
-    return normalize("NFKD", value).encode("ascii", "ignore").decode().casefold()
+    translated = value.translate(_ATOMIC_LATIN_TRANSLITERATION)
+    return normalize("NFKD", translated).encode("ascii", "ignore").decode().casefold()
 
 
 def _attribute_collision_key(

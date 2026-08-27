@@ -257,9 +257,9 @@ def _projected() -> list[tuple[ScenarioKind, dict[K, Relation]]]:
     def folds_together(left: str, right: str) -> bool:
         # Transliteration is planted deliberately: `Sørensen` and `Sorensen` are one
         # surname, and reading that as FAR is a projection bug rather than a parameter
-        # problem. `synthworld.ambiguity_variants._ascii_fold` cannot be reused here
-        # because it drops these letters entirely - NFKD leaves them atomic, so
-        # `ascii/ignore` deletes them and `Sørensen` becomes `srensen`. That is #78.
+        # problem. Keep this independent transcription instead of reusing the variant
+        # validator: the grammar projection must establish the relation from public
+        # evidence without sharing the implementation under test.
         atomic = str.maketrans(
             {"ø": "o", "Ø": "O", "ł": "l", "Ł": "L", "đ": "d", "æ": "ae"}
         )

@@ -57,6 +57,7 @@ from synthworld.enterprise.authorization.models import (
     AuthorizationEvaluationProfileV1,
     CompiledEnterpriseAccessStateV1,
     EnterpriseAuthorizationCompositionV1,
+    EnterpriseAuthorizationCompositionV2,
     EnterpriseAuthorizationKernelV1,
 )
 from synthworld.enterprise.authorization.reference import (
@@ -124,7 +125,9 @@ from synthworld.enterprise.rbac.metrics import (
 )
 from synthworld.enterprise.rbac.models import (
     CompiledEnterpriseDirectoryRbacTruthV1,
+    CompiledEnterpriseDirectoryRbacTruthV2,
     EnterpriseDirectoryRbacIntentOverlayV1,
+    EnterpriseDirectoryRbacIntentOverlayV2,
     EnterpriseDirectoryRbacKernelV1,
     EnterpriseRbacSessionStateInputV1,
 )
@@ -180,12 +183,18 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "enterprise-directory-rbac-intent.schema.json": (
         EnterpriseDirectoryRbacIntentOverlayV1
     ),
+    "enterprise-directory-rbac-intent-v2.schema.json": (
+        EnterpriseDirectoryRbacIntentOverlayV2
+    ),
     "enterprise-rbac-session-state-input.schema.json": (
         EnterpriseRbacSessionStateInputV1
     ),
     "enterprise-directory-rbac-kernel.schema.json": EnterpriseDirectoryRbacKernelV1,
     "compiled-enterprise-directory-rbac-truth.schema.json": (
         CompiledEnterpriseDirectoryRbacTruthV1
+    ),
+    "compiled-enterprise-directory-rbac-truth-v2.schema.json": (
+        CompiledEnterpriseDirectoryRbacTruthV2
     ),
     "enterprise-directory-rbac-prediction.schema.json": (
         EnterpriseDirectoryRbacPredictionV1
@@ -203,6 +212,9 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "enterprise-rebac-metrics.schema.json": EnterpriseRebacMetricsV1,
     "enterprise-authorization-composition.schema.json": (
         EnterpriseAuthorizationCompositionV1
+    ),
+    "enterprise-authorization-composition-v2.schema.json": (
+        EnterpriseAuthorizationCompositionV2
     ),
     "enterprise-authorization-evaluation-profile.schema.json": (
         AuthorizationEvaluationProfileV1

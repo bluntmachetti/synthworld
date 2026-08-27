@@ -15,6 +15,7 @@ from synthworld.enterprise.authorization.compiler import (
     compile_enterprise_access_state,
     compile_enterprise_authorization_kernel,
     compose_enterprise_authorization,
+    compose_enterprise_authorization_v2,
 )
 from synthworld.enterprise.authorization.metrics import (
     AuthorizationScoredDimension,
@@ -34,6 +35,7 @@ from synthworld.enterprise.authorization.models import (
     AuthorizationEvaluationProfileV1,
     CompiledEnterpriseAccessStateV1,
     EnterpriseAuthorizationCompositionV1,
+    EnterpriseAuthorizationCompositionV2,
     EnterpriseAuthorizationKernelV1,
 )
 from synthworld.enterprise.authorization.serialization import (
@@ -57,6 +59,7 @@ __all__ = [
     "EnterpriseAdversarialAuthorizationPublicV1",
     "EnterpriseAuthorizationCellPredictionV1",
     "EnterpriseAuthorizationCompositionV1",
+    "EnterpriseAuthorizationCompositionV2",
     "EnterpriseAuthorizationEvaluatedSystemV1",
     "EnterpriseAuthorizationEvaluationScopeV1",
     "EnterpriseAuthorizationEvaluatorArtifactsV1",
@@ -70,6 +73,7 @@ __all__ = [
     "compile_enterprise_access_state",
     "compile_enterprise_authorization_kernel",
     "compose_enterprise_authorization",
+    "compose_enterprise_authorization_v2",
     "evaluate_enterprise_adversarial_authorization",
     "evaluate_enterprise_authorization",
     "export_enterprise_authorization",

@@ -12,9 +12,12 @@ from uuid import UUID
 import pytest
 from pydantic import ValidationError
 
-from synthworld.ambiguity import PairDisposition, PublicAmbiguityTask
+from synthworld.ambiguity import PairDisposition, PairPrediction, PublicAmbiguityTask
 from synthworld.ambiguity_metrics import AmbiguityDispositionMetrics
-from synthworld.ambiguity_partition import AmbiguityMembershipMetrics
+from synthworld.ambiguity_partition import (
+    AmbiguityMembershipMetrics,
+    derive_ambiguity_pair_predictions,
+)
 from synthworld.ambiguity_serialization import (
     DispositionTruth,
     MembershipTruth,
@@ -173,6 +176,8 @@ def _build_with_runner(
     disposition_loader: Callable[[], DispositionTruth] = (
         load_golden_ambiguity_disposition_truth
     ),
+    pair_normalizer: Callable[[bytes, PublicAmbiguityTask], AmbiguityPairSubmission]
+    | None = None,
 ) -> RunReceiptManifest:
     public = load_golden_ambiguity_public_task()
     return build_ambiguity_run_receipt(
@@ -183,7 +188,24 @@ def _build_with_runner(
         adapter=reference_product.adapt_public_ambiguity,
         runner=runner,
         normalizer=reference_product.normalize_reference_output,
+        pair_normalizer=pair_normalizer,
         metadata=_fixed_metadata(public),
+    )
+
+
+def _explicit_pair_normalizer(
+    raw_output: bytes,
+    public: PublicAmbiguityTask,
+) -> AmbiguityPairSubmission:
+    partition = reference_product.normalize_reference_output(raw_output, public)
+    predictions = derive_ambiguity_pair_predictions(partition, public=public)
+    return AmbiguityPairSubmission(
+        predictions=(
+            predictions[0].model_copy(
+                update={"disposition": PairDisposition.INSUFFICIENT}
+            ),
+            *predictions[1:],
+        )
     )
 
 
@@ -270,15 +292,145 @@ def test_product_stage_sees_only_input_and_output_and_truth_loads_late(
         assert not (root / DISPOSITION_TRUTH_PATH).exists()
         return load_golden_ambiguity_disposition_truth()
 
+    def pairs(
+        output: bytes,
+        public: PublicAmbiguityTask,
+    ) -> AmbiguityPairSubmission:
+        events.append("pairs")
+        return _explicit_pair_normalizer(output, public)
+
     _build_with_runner(
         root,
         runner,
         membership_loader=memberships,
         disposition_loader=dispositions,
+        pair_normalizer=pairs,
     )
 
-    assert events == ["product", "memberships", "dispositions"]
+    assert events == ["product", "pairs", "memberships", "dispositions", "pairs"]
     assert (root / PRODUCT_OUTPUT_PATH).read_bytes() == raw_output
+
+
+def test_explicit_pair_submission_preserves_abstention_and_replays(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "explicit-pairs"
+    _build_with_runner(
+        root,
+        reference_product.run_reference_product,
+        pair_normalizer=_explicit_pair_normalizer,
+    )
+    submission = AmbiguityPairSubmission.model_validate_json(
+        (root / SUBMISSION_PAIRS_PATH).read_bytes()
+    )
+    dispositions = {item.disposition for item in submission.predictions}
+    report = AmbiguityDispositionMetrics.model_validate_json(
+        (root / DISPOSITION_EVALUATION_PATH).read_bytes()
+    )
+
+    assert dispositions == {
+        PairDisposition.MERGE,
+        PairDisposition.SEPARATE,
+        PairDisposition.INSUFFICIENT,
+    }
+    assert report.abstained_count == 1
+    assert report.coverage < 1.0
+    assert validate_ambiguity_run_receipt(
+        root,
+        adapter=reference_product.adapt_public_ambiguity,
+        normalizer=reference_product.normalize_reference_output,
+        pair_normalizer=_explicit_pair_normalizer,
+    )
+    with pytest.raises(ReceiptIntegrityError, match="explicit normalized output"):
+        validate_ambiguity_run_receipt(
+            root,
+            adapter=reference_product.adapt_public_ambiguity,
+            normalizer=reference_product.normalize_reference_output,
+        )
+
+    def incomplete_pairs(
+        output: bytes,
+        public: PublicAmbiguityTask,
+    ) -> AmbiguityPairSubmission:
+        valid = _explicit_pair_normalizer(output, public)
+        return AmbiguityPairSubmission(predictions=valid.predictions[:-1])
+
+    with pytest.raises(ReceiptIntegrityError, match="valid pair submission"):
+        validate_ambiguity_run_receipt(
+            root,
+            adapter=reference_product.adapt_public_ambiguity,
+            normalizer=reference_product.normalize_reference_output,
+            pair_normalizer=incomplete_pairs,
+        )
+
+
+@pytest.mark.parametrize(
+    "failure",
+    ["missing", "duplicate", "reversed", "self", "unknown", "order"],
+)
+def test_explicit_pair_submission_rejects_invalid_public_coverage_before_truth(
+    tmp_path: Path,
+    failure: str,
+) -> None:
+    truth_calls = 0
+
+    def truth() -> MembershipTruth:
+        nonlocal truth_calls
+        truth_calls += 1
+        return load_golden_ambiguity_membership_truth()
+
+    def invalid_pairs(
+        output: bytes,
+        public: PublicAmbiguityTask,
+    ) -> AmbiguityPairSubmission:
+        valid = _explicit_pair_normalizer(output, public)
+        first = valid.predictions[0]
+        if failure == "missing":
+            predictions = valid.predictions[:-1]
+        elif failure == "duplicate":
+            predictions = (first, first, *valid.predictions[2:])
+        elif failure == "reversed":
+            predictions = (
+                first.model_copy(
+                    update={
+                        "left_record_id": first.right_record_id,
+                        "right_record_id": first.left_record_id,
+                    }
+                ),
+                *valid.predictions[1:],
+            )
+        elif failure == "self":
+            predictions = (
+                first.model_copy(update={"right_record_id": first.left_record_id}),
+                *valid.predictions[1:],
+            )
+        elif failure == "unknown":
+            predictions = (
+                PairPrediction(
+                    left_record_id=UUID(int=0),
+                    right_record_id=first.right_record_id,
+                    disposition=first.disposition,
+                ),
+                *valid.predictions[1:],
+            )
+        else:
+            predictions = (
+                valid.predictions[1],
+                valid.predictions[0],
+                *valid.predictions[2:],
+            )
+        return AmbiguityPairSubmission(predictions=predictions)
+
+    with pytest.raises(ValueError):
+        _build_with_runner(
+            tmp_path / failure,
+            reference_product.run_reference_product,
+            membership_loader=truth,
+            pair_normalizer=invalid_pairs,
+        )
+    assert truth_calls == 0
+    assert not (tmp_path / failure / SUBMISSION_CLUSTERS_PATH).exists()
+    assert not (tmp_path / failure / SUBMISSION_PAIRS_PATH).exists()
 
 
 def test_noncanonical_source_is_rejected_before_creating_a_run(tmp_path: Path) -> None:

@@ -63,6 +63,7 @@ from synthworld.enterprise.authorization.compiler import (
     compile_enterprise_access_state,
     compile_enterprise_authorization_kernel,
     compose_enterprise_authorization,
+    compose_enterprise_authorization_v2,
 )
 from synthworld.enterprise.authorization.metrics import (
     AuthorizationScoredDimension,
@@ -82,6 +83,7 @@ from synthworld.enterprise.authorization.models import (
     AuthorizationEvaluationProfileV1,
     CompiledEnterpriseAccessStateV1,
     EnterpriseAuthorizationCompositionV1,
+    EnterpriseAuthorizationCompositionV2,
     EnterpriseAuthorizationKernelV1,
 )
 from synthworld.enterprise.authorization.serialization import (
@@ -189,6 +191,7 @@ from synthworld.enterprise.rbac.common import (
 )
 from synthworld.enterprise.rbac.compiler import (
     compile_enterprise_directory_rbac_truth,
+    compile_enterprise_directory_rbac_truth_v2,
 )
 from synthworld.enterprise.rbac.corpus import compile_enterprise_evaluation_corpus
 from synthworld.enterprise.rbac.corpus_models import (
@@ -225,10 +228,13 @@ from synthworld.enterprise.rbac.models import (
     BirthrightPredicateV1,
     BirthrightRuleV1,
     CompiledEnterpriseDirectoryRbacTruthV1,
+    CompiledEnterpriseDirectoryRbacTruthV2,
     DynamicSodConstraintV1,
     EnterpriseDirectoryRbacIntentOverlayV1,
+    EnterpriseDirectoryRbacIntentOverlayV2,
     EnterpriseDirectoryRbacKernelV1,
     EnterpriseRbacSessionStateInputV1,
+    IntendedDirectEntitlementV2,
     IntendedGroupNestingV1,
     IntendedGroupRoleAssignmentV1,
     IntendedRoleGrantV1,
@@ -247,10 +253,14 @@ from synthworld.enterprise.rbac.models import (
 from synthworld.enterprise.rbac.serialization import (
     EnterpriseRbacArtifactError,
     export_enterprise_directory_rbac,
+    export_enterprise_directory_rbac_v2,
     export_enterprise_evaluation_corpus,
     load_evaluator_enterprise_case_inventory,
     load_evaluator_enterprise_directory_rbac_truth,
+    load_evaluator_enterprise_directory_rbac_truth_v2,
+    load_public_enterprise_directory_rbac_intent_v2,
     load_public_enterprise_directory_rbac_kernel,
+    load_public_enterprise_directory_rbac_kernel_v2,
     load_public_enterprise_evaluation_corpus,
 )
 from synthworld.enterprise.rebac.common import RebacRelation, RebacTemplateKind
@@ -334,6 +344,7 @@ __all__ = [
     "CompiledEnterpriseAbacTruthV1",
     "CompiledEnterpriseAccessStateV1",
     "CompiledEnterpriseDirectoryRbacTruthV1",
+    "CompiledEnterpriseDirectoryRbacTruthV2",
     "CompiledEnterpriseRebacTruthV1",
     "CountSelectorV1",
     "DerivationMechanism",
@@ -355,6 +366,7 @@ __all__ = [
     "EnterpriseAuthorizationArtifactError",
     "EnterpriseAuthorizationCellPredictionV1",
     "EnterpriseAuthorizationCompositionV1",
+    "EnterpriseAuthorizationCompositionV2",
     "EnterpriseAuthorizationEvaluatedSystemV1",
     "EnterpriseAuthorizationEvaluationScopeV1",
     "EnterpriseAuthorizationEvaluatorArtifactsV1",
@@ -376,6 +388,7 @@ __all__ = [
     "EnterpriseCompilerSourceKind",
     "EnterpriseContextTemplateV1",
     "EnterpriseDirectoryRbacIntentOverlayV1",
+    "EnterpriseDirectoryRbacIntentOverlayV2",
     "EnterpriseDirectoryRbacKernelV1",
     "EnterpriseDirectoryRbacMetricsV1",
     "EnterpriseDirectoryRbacPredictionV1",
@@ -412,6 +425,7 @@ __all__ = [
     "GroupRoleAssignmentV1",
     "GroupTemplateV1",
     "InformationClassification",
+    "IntendedDirectEntitlementV2",
     "IntendedGroupNestingV1",
     "IntendedGroupRoleAssignmentV1",
     "IntendedRoleGrantV1",
@@ -480,10 +494,12 @@ __all__ = [
     "compile_enterprise_authorization_kernel",
     "compile_enterprise_directory_rbac_kernel",
     "compile_enterprise_directory_rbac_truth",
+    "compile_enterprise_directory_rbac_truth_v2",
     "compile_enterprise_evaluation_corpus",
     "compile_enterprise_identity_access_universe",
     "compile_enterprise_rebac_truth",
     "compose_enterprise_authorization",
+    "compose_enterprise_authorization_v2",
     "digest_enterprise_artifact",
     "digest_enterprise_model",
     "evaluate_enterprise_abac",
@@ -492,6 +508,7 @@ __all__ = [
     "evaluate_enterprise_rebac",
     "export_enterprise_authorization",
     "export_enterprise_directory_rbac",
+    "export_enterprise_directory_rbac_v2",
     "export_enterprise_evaluation_corpus",
     "export_enterprise_identity_access_compile_result",
     "load_enterprise_identity_access_import",
@@ -499,8 +516,11 @@ __all__ = [
     "load_evaluator_enterprise_canonical_binding_truth",
     "load_evaluator_enterprise_case_inventory",
     "load_evaluator_enterprise_directory_rbac_truth",
+    "load_evaluator_enterprise_directory_rbac_truth_v2",
     "load_public_enterprise_authorization",
+    "load_public_enterprise_directory_rbac_intent_v2",
     "load_public_enterprise_directory_rbac_kernel",
+    "load_public_enterprise_directory_rbac_kernel_v2",
     "load_public_enterprise_evaluation_corpus",
     "load_public_enterprise_identity_access_universe",
     "parse_enterprise_identity_access_csv",

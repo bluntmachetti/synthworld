@@ -472,8 +472,11 @@ Corpus constants: `ENTERPRISE_CORPUS_CONFIG_SCHEMA_VERSION`, `ENTERPRISE_CORPUS_
 |---|---|---|
 | `EnterpriseDirectoryRbacKernelV1` | `schema_version`, `compiler_version`, `identity_access_universe_digest`, `directory_rbac_state_input_digest`, `compile_config_digest`, plus eight state tuples | **Public** observed/actual directory state: `account_observations`, `memberships`, `group_nesting`, `group_role_assignments`, `subject_role_assignments`, `role_hierarchy`, `role_grants`, `direct_entitlements`. |
 | `EnterpriseDirectoryRbacIntentOverlayV1` | `schema_version`, `identity_access_universe_digest`, `evaluation_corpus_digest` | Declared intent: `birthright_rules`, `approved_exceptions`, six `intended_*` relation tuples, `ssd_constraints`, `dsd_constraints`. All default empty. |
+| `EnterpriseDirectoryRbacIntentOverlayV2` | the V1 fields plus `intended_direct_entitlements` | **Public, operator-authored policy input.** Independently versioned as `2.0.0`; each direct-intent row names an existing subject and permission, a half-open validity window, and a revision. It does not modify the frozen V1 schema. |
+| `IntendedDirectEntitlementV2` | `entitlement_id`, `subject_id`, `permission_id`, `valid_from_tick`, `valid_until_tick`, `revision_id` | An approval declaration for direct authority. It is distinct from the kernel's observed `DirectoryDirectEntitlementV1`: the former contributes only to intended authority, while the latter contributes only to effective authority. |
 | `EnterpriseRbacSessionStateInputV1` | `schema_version`, `evaluation_corpus_digest` | Observed role-activation sessions. A `rejected` session may not carry activated roles. |
 | `CompiledEnterpriseDirectoryRbacTruthV1` | `schema_version`, `compiler_version`, plus fourteen truth collections | **Evaluator-only.** Membership paths, authorized role paths and sets, actual and intended derivation paths, birthright predicate/eligibility/assignment rows, approved exceptions, SSD and DSD evaluations, activation decisions, observed sessions, and per-cell truth. |
+| `CompiledEnterpriseDirectoryRbacTruthV2` | the V1 truth fields with `schema_version` and `compiler_version` `2.0.0` | **Evaluator-only.** Compiled from the V2 intent surface; active intended direct entitlements emit intended `direct_entitlement` derivations and participate in intended/effective reconciliation. |
 | `DirectoryRbacCellTruthV1` | `birthright_decision`, `intended_decision`, `effective_decision`, `final_decision`, `reconciliation`, `binding_status`, `lifecycle_status`, plus the supporting ID tuples | The four-decision algebra per cell. |
 | `EnterpriseDirectoryRbacMetricsV1` | `schema_version`, `directory_rbac_truth_digest`, `metrics` | The scored report. |
 | `EnterpriseDirectoryRbacPredictionV1` | `schema_version` | The scorer input. |
@@ -508,6 +511,16 @@ in `effective_path_ids`. Separately — and note that **two distinct classes are
 against any employment attribute. `EmploymentType` has only `employee`, `contractor`, `supplier`,
 and `partner`, so `service`, `workload`, and `agent` principals can never satisfy it. The
 identically named ABAC predicate is a separate class; this quirk is not a statement about it.
+
+Directory/RBAC V2 is an opt-in contract transition, not an in-place V1 extension. Migrate by
+constructing `EnterpriseDirectoryRbacIntentOverlayV2` from the operator-authored V1 policy,
+adding independently approved `intended_direct_entitlements`, compiling with
+`compile_enterprise_directory_rbac_truth_v2`, and exporting with
+`export_enterprise_directory_rbac_v2`. The V2 public tree contains the intent and the existing
+kernel as separate canonical files; the compiled V2 truth remains in the evaluator tree. A
+kernel direct entitlement without a matching active intended row remains `excessive`; a matching
+row changes intended authority and reconciliation but never changes effective authority. V1
+consumers may remain on the V1 compiler and serialization paths with byte-identical semantics.
 
 ### ABAC and ReBAC overlays
 
@@ -548,6 +561,7 @@ Overlapping revisions are hard errors in both packages, not last-write-wins.
 | Record | Key fields | Meaning |
 |---|---|---|
 | `EnterpriseAuthorizationCompositionV1` | `identity_access_universe_digest`, `evaluation_corpus_digest`, `directory_rbac`, `abac`, `rebac` | **Public.** Typed schema-version and digest references only; it never inlines a component payload. `directory_rbac` is required, `abac` and `rebac` default to null. |
+| `EnterpriseAuthorizationCompositionV2` | `identity_access_universe_digest`, `evaluation_corpus_digest`, `directory_rbac`, `abac`, `rebac` | **Public.** Independently versioned composition whose directory/RBAC reference is fixed to truth schema `2.0.0`; optional ABAC and ReBAC references remain fixed to `1.0.0`. It does not widen or reinterpret the frozen V1 composition. |
 | `AuthorizationEvaluationProfileV1` | `evaluation_corpus_digest`, `cells` | **Public.** Binds one closed profile to every frozen cell exactly once. |
 | `EnterpriseAuthorizationKernelV1` | universe/corpus/composition/profile digests, `cells` | **Public.** The cell/profile kernel. |
 | `CompiledEnterpriseAccessStateV1` | eight bound digests, `policy_conflicts`, `cells` | **Evaluator-only.** Per-cell `MechanismOutcomeSetV1`, aggregate access state, and `PolicyConflictTruthV1` rows. |
@@ -569,6 +583,14 @@ deterministic adapter/system/policy metadata. `evaluate_enterprise_authorization
 scores effective decision, final decision, exact mechanism outcome/inventory,
 conflict, binding, lifecycle, and runtime-gate behavior independently. It emits no
 aggregate.
+
+`compose_enterprise_authorization_v2` is the version-aware bridge from
+`CompiledEnterpriseDirectoryRbacTruthV2` into the existing aggregate kernel and
+access-state compilers. Those compilers accept either composition/truth pair and
+still require the component schema version and canonical digest to match exactly;
+mixing a V1 composition with V2 truth, or the reverse, is rejected. The V2
+composition has its own JSON Schema and leaves the frozen V1 composition schema
+and reference version unchanged.
 
 ### Artifact boundary
 
@@ -616,6 +638,13 @@ families `birthright`, `intent`, `rbac`, `activation`, `activation_safety`, `ssd
 binding, lifecycle, and runtime-gate metrics but still emits **no aggregate score**.
 Missing predictions score as incorrect rather than erroring, so partial submissions are legal;
 unknown prediction IDs are rejected.
+
+For composed binding and lifecycle metrics, scope selection and gate applicability are
+distinct filters. `binding_status_accuracy` and `lifecycle_status_accuracy` count every
+scope-selected cell, including cells whose canonical status is `not_applicable`.
+`applicable_binding_status_accuracy` and `applicable_lifecycle_status_accuracy` count
+only the independently selected subset whose corresponding canonical gate applies. An
+empty applicable subset has denominator and support zero with a null value.
 
 There is no CLI for this layer. Directory/RBAC, ABAC, ReBAC, submission, and
 composed scoring are Python API only through the curated
@@ -1171,8 +1200,10 @@ this pack, which consumes it as a source family.
 Three invariants are enforced rather than documented. A failed execution is unevaluated and an
 evaluated run succeeded — the manifest rejects any other pairing. A managed-service component
 cannot claim `exact` replayability and must supply a non-empty replayability limitation. And a
-`live_lab_conformance` claim is rejected when every system under test is a reference component,
-because a reference-only run is offline by construction.
+`live_lab_conformance` claim requires at least one non-reference system whose configuration or
+version was actually observed. Reference-only and wholly opaque managed-service declarations
+are insufficient. This is a provenance-strength gate, not proof that a live endpoint was
+contacted; that stronger claim requires execution-bound endpoint or transcript evidence.
 
 `validate_manifest_dispatched` accepts exactly schema versions `1.0.0` and `2.0.0` and raises on
 anything else. Receipt-v2 records deliberately use a separate base class and **never serialize
@@ -1183,6 +1214,13 @@ Scoring-version bindings: `AGENT_AUTHORITY_SCORING_VERSION` `1.0.0` and
 `AGENT_AUTHORITY_SCORING_VERSION_V2` `2.0.0`; `CONTEXTUAL_RUN_SCORING_VERSION` `1.0.0` under the
 role `contextual_access`; `CONTEXTUAL_PRODUCT_INPUT_SCHEMA_VERSION` `1.0.0`;
 `AMBIGUITY_PAIR_SUBMISSION_SCHEMA_VERSION` `1.0.0`.
+
+Ambiguity receipts always retain both a complete cluster submission and a pair
+submission. Without a pair normalizer, the pair decisions are derived from cluster
+co-membership and can only be `merge` or `separate`. A supplied `pair_normalizer`
+instead preserves explicit `merge`, `separate`, and `insufficient` decisions. Both
+normalizers consume only raw product output and public input; both submissions must be
+serialized before either truth loader runs, and replay reruns both normalizers.
 
 The contextual finalizer enforces product-before-truth ordering: it replays the run plan, public
 input, adapter output, component inventory, provenance, and every staged artifact digest

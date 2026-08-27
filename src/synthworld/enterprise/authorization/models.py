@@ -9,6 +9,7 @@ from pydantic import Field, ValidationInfo, field_validator, model_validator
 from synthworld.enterprise.authorization_common import (
     ENTERPRISE_AUTHORIZATION_COMPILER_VERSION,
     ENTERPRISE_AUTHORIZATION_COMPOSITION_SCHEMA_VERSION,
+    ENTERPRISE_AUTHORIZATION_COMPOSITION_SCHEMA_VERSION_V2,
     ENTERPRISE_AUTHORIZATION_KERNEL_SCHEMA_VERSION,
     ENTERPRISE_AUTHORIZATION_PROFILE_SCHEMA_VERSION,
     ENTERPRISE_COMPILED_ACCESS_STATE_SCHEMA_VERSION,
@@ -37,6 +38,12 @@ class DirectoryRbacComponentReferenceV1(SyntheticModel):
     component_digest: SyntheticDigestV1
 
 
+class DirectoryRbacComponentReferenceV2(SyntheticModel):
+    family: Literal["directory_rbac"] = "directory_rbac"
+    component_schema_version: Literal["2.0.0"] = "2.0.0"
+    component_digest: SyntheticDigestV1
+
+
 class AbacComponentReferenceV1(SyntheticModel):
     family: Literal["abac"] = "abac"
     component_schema_version: Literal["1.0.0"] = "1.0.0"
@@ -56,6 +63,19 @@ class EnterpriseAuthorizationCompositionV1(SyntheticModel):
     identity_access_universe_digest: SyntheticDigestV1
     evaluation_corpus_digest: SyntheticDigestV1
     directory_rbac: DirectoryRbacComponentReferenceV1
+    abac: AbacComponentReferenceV1 | None = None
+    rebac: RebacComponentReferenceV1 | None = None
+
+
+class EnterpriseAuthorizationCompositionV2(SyntheticModel):
+    """Public composition binding an independently versioned RBAC V2 truth."""
+
+    schema_version: Literal["2.0.0"] = (
+        ENTERPRISE_AUTHORIZATION_COMPOSITION_SCHEMA_VERSION_V2
+    )
+    identity_access_universe_digest: SyntheticDigestV1
+    evaluation_corpus_digest: SyntheticDigestV1
+    directory_rbac: DirectoryRbacComponentReferenceV2
     abac: AbacComponentReferenceV1 | None = None
     rebac: RebacComponentReferenceV1 | None = None
 
@@ -204,4 +224,4 @@ class CompiledEnterpriseAccessStateV1(SyntheticModel):
         )
 
 
-__all__ = [name for name in globals() if name.endswith("V1")]
+__all__ = [name for name in globals() if name.endswith(("V1", "V2"))]

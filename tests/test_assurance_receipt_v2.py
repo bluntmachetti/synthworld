@@ -333,10 +333,33 @@ def test_manifest_v2_pairs_claims_statuses_and_scoring(v2_receipt: Path) -> None
 
     _reject(
         manifest,
-        "deployed system",
+        "observable deployed system",
         evidence_claim=EvidenceClaimV2.LIVE_LAB_CONFORMANCE,
         systems_under_test=(_reference_system(),),
     )
+    opaque_managed = ManagedServiceComponentProvenanceV2.model_validate(_managed_base())
+    _reject(
+        manifest,
+        "observable deployed system",
+        evidence_claim=EvidenceClaimV2.LIVE_LAB_CONFORMANCE,
+        systems_under_test=(_reference_system(), opaque_managed),
+    )
+    observed_managed = ManagedServiceComponentProvenanceV2.model_validate(
+        _managed_base()
+        | {
+            "configuration_observability": ConfigurationObservabilityV2.OBSERVED,
+            "configuration_digest": DigestV2(value="4" * 64),
+            "configuration_evidence_refs": ("evidence:configuration",),
+            "configuration_capture_limitation": None,
+        }
+    )
+    observable_live = manifest.model_copy(
+        update={
+            "evidence_claim": EvidenceClaimV2.LIVE_LAB_CONFORMANCE,
+            "systems_under_test": (_reference_system(), observed_managed),
+        }
+    )
+    RunReceiptManifestV2.model_validate(observable_live.model_dump(mode="json"))
     offline = manifest.model_copy(
         update={
             "evidence_claim": EvidenceClaimV2.CANONICAL_CONFORMANCE,

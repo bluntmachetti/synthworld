@@ -149,6 +149,27 @@ is indexed by the already frozen atom IDs, so adding an unrelated rule does not
 cause an implicit cell-product scan. Derivation, SoD, serialized-record, and
 canonical-byte limits remain independently enforced.
 
+Directory/RBAC intent V2 is an opt-in compatibility boundary for approved direct
+authority. `EnterpriseDirectoryRbacIntentOverlayV2` adds immutable
+`intended_direct_entitlements` rows over existing subjects and permissions, with
+the same half-open integer-tick validity convention. These are operator-authored
+policy declarations: they contribute an intended `direct_entitlement` derivation
+but never create effective authority. The kernel's `direct_entitlements` remain
+observed state and contribute effective authority but never, by themselves,
+prove intent. Matching active rows therefore reconcile as approved access;
+removing or changing the intended row leaves effective authority unchanged and
+reconciles it as excessive.
+
+To migrate, parse or construct `EnterpriseDirectoryRbacIntentOverlayV2`, compile
+with `compile_enterprise_directory_rbac_truth_v2`, and use the V2 export/load
+functions. The public export contains canonical
+`directory-rbac-intent-v2.json` and `directory-rbac-kernel.json`; evaluator truth
+is physically separate as `directory-rbac-truth-v2.json`. The schemas are
+`schemas/enterprise-directory-rbac-intent-v2.schema.json` and
+`schemas/compiled-enterprise-directory-rbac-truth-v2.schema.json`, both version
+`2.0.0`. The original V1 models, schemas, compiler entry point, artifacts, and
+checksums remain unchanged for consumers that do not migrate.
+
 ## Bounded authorization families
 
 PR4 adds ABAC and ReBAC as independently versioned state/intent overlays over
@@ -200,6 +221,14 @@ no ambient lookup, preserves each mechanism's raw
 selected guard algebra, and then applies account binding and lifecycle as
 unconditional final-deny gates. Intended, effective, and final decisions and
 pre-combination conflicts remain separate evaluator records.
+
+Directory/RBAC truth `2.0.0` uses the independent
+`EnterpriseAuthorizationCompositionV2` contract and
+`compose_enterprise_authorization_v2` entry point. Its directory/RBAC component
+reference is fixed to `2.0.0`, while optional ABAC and ReBAC references remain
+`1.0.0`. The aggregate kernel and access-state compilers accept a matched V1 or
+V2 composition/truth pair and reject cross-version pairs. This adds a usable V2
+composition path without modifying the frozen V1 composition schema.
 
 Authorization export is physically split. The public tree contains ABAC/ReBAC
 state and intent, composition, evaluation scope, and the cell/profile kernel. The
