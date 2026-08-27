@@ -36,7 +36,14 @@ The public task is serialized separately from both truth artifacts.
 
 Only after the partition is valid should you derive decisions for the selected public pairs with `derive_ambiguity_pair_predictions`. That derivation consumes no truth: records in one cluster become `merge`; records in different clusters become `separate`.
 
-A forced partition cannot express `insufficient`. If your product natively produces three-valued pair decisions, preserve that distinction in the interface you evaluate rather than treating every different-cluster pair as an evidence-backed separation.
+A forced partition cannot express `insufficient`. If your product natively produces
+three-valued pair decisions, pass a `pair_normalizer` to
+`build_ambiguity_run_receipt` and `validate_ambiguity_run_receipt`. It must derive an
+`AmbiguityPairSubmission` from raw product output and public input only, covering
+every public task pair exactly once in public order. The receipt then scores evidence
+disposition from that explicit submission while retaining the complete partition for
+membership scoring. Omitting `pair_normalizer` preserves the cluster-derived
+`merge`/`separate` behavior and existing receipt bytes.
 
 Do not reconstruct the full partition from the selected pairs. A false merge between scenarios can be absent from the pair projection while remaining visible in complete-partition metrics.
 

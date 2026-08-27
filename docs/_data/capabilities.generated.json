@@ -7945,6 +7945,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.assurance.PairOutputNormalizer",
+      "implementation_module": "collections.abc",
+      "kind": "python_export",
+      "name": "PairOutputNormalizer",
+      "source": "src/synthworld/assurance/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.assurance.ReferenceComponentProvenanceV2",
       "implementation_module": "synthworld.assurance.models_v2",
       "kind": "python_export",
@@ -8003,6 +8012,15 @@
       "implementation_module": "synthworld.assurance.ambiguity",
       "kind": "python_export",
       "name": "build_reference_ambiguity_run_receipt",
+      "source": "src/synthworld/assurance/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.assurance.validate_ambiguity_pair_submission",
+      "implementation_module": "synthworld.assurance.ambiguity",
+      "kind": "python_export",
+      "name": "validate_ambiguity_pair_submission",
       "source": "src/synthworld/assurance/__init__.py",
       "visibility": "subpackage"
     },
@@ -9574,6 +9592,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.CompiledEnterpriseDirectoryRbacTruthV2",
+      "implementation_module": "synthworld.enterprise.rbac.models",
+      "kind": "python_export",
+      "name": "CompiledEnterpriseDirectoryRbacTruthV2",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.CompiledEnterpriseRebacTruthV1",
       "implementation_module": "synthworld.enterprise.rebac.models",
       "kind": "python_export",
@@ -9776,6 +9803,15 @@
       "implementation_module": "synthworld.enterprise.rbac.models",
       "kind": "python_export",
       "name": "EnterpriseDirectoryRbacIntentOverlayV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseDirectoryRbacIntentOverlayV2",
+      "implementation_module": "synthworld.enterprise.rbac.models",
+      "kind": "python_export",
+      "name": "EnterpriseDirectoryRbacIntentOverlayV2",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -9992,6 +10028,15 @@
       "implementation_module": "synthworld.enterprise.rebac.models",
       "kind": "python_export",
       "name": "EnterpriseRebacStateOverlayV1",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.IntendedDirectEntitlementV2",
+      "implementation_module": "synthworld.enterprise.rbac.models",
+      "kind": "python_export",
+      "name": "IntendedDirectEntitlementV2",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -10780,6 +10825,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.compile_enterprise_directory_rbac_truth_v2",
+      "implementation_module": "synthworld.enterprise.rbac.compiler",
+      "kind": "python_export",
+      "name": "compile_enterprise_directory_rbac_truth_v2",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.compile_enterprise_evaluation_corpus",
       "implementation_module": "synthworld.enterprise.rbac.corpus",
       "kind": "python_export",
@@ -10919,6 +10973,15 @@
       "implementation_module": "synthworld.enterprise.rbac.serialization",
       "kind": "python_export",
       "name": "export_enterprise_directory_rbac",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.export_enterprise_directory_rbac_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "export_enterprise_directory_rbac_v2",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -11167,6 +11230,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.load_evaluator_enterprise_directory_rbac_truth_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "load_evaluator_enterprise_directory_rbac_truth_v2",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.load_evaluator_enterprise_identity_fabric",
       "implementation_module": "synthworld.enterprise.identity_fabric.serialization",
       "kind": "python_export",
@@ -11185,10 +11257,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.load_public_enterprise_directory_rbac_intent_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "load_public_enterprise_directory_rbac_intent_v2",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.load_public_enterprise_directory_rbac_kernel",
       "implementation_module": "synthworld.enterprise.rbac.serialization",
       "kind": "python_export",
       "name": "load_public_enterprise_directory_rbac_kernel",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.load_public_enterprise_directory_rbac_kernel_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "load_public_enterprise_directory_rbac_kernel_v2",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -11491,10 +11581,28 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.CompiledEnterpriseDirectoryRbacTruthV2",
+      "implementation_module": "synthworld.enterprise.rbac.models",
+      "kind": "python_export",
+      "name": "CompiledEnterpriseDirectoryRbacTruthV2",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.rbac.EnterpriseDirectoryRbacIntentOverlayV1",
       "implementation_module": "synthworld.enterprise.rbac.models",
       "kind": "python_export",
       "name": "EnterpriseDirectoryRbacIntentOverlayV1",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.EnterpriseDirectoryRbacIntentOverlayV2",
+      "implementation_module": "synthworld.enterprise.rbac.models",
+      "kind": "python_export",
+      "name": "EnterpriseDirectoryRbacIntentOverlayV2",
       "source": "src/synthworld/enterprise/rbac/__init__.py",
       "visibility": "subpackage"
     },
@@ -11572,6 +11680,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.IntendedDirectEntitlementV2",
+      "implementation_module": "synthworld.enterprise.rbac.models",
+      "kind": "python_export",
+      "name": "IntendedDirectEntitlementV2",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.rbac.compile_enterprise_directory_rbac_kernel",
       "implementation_module": "synthworld.enterprise.rbac.kernel",
       "kind": "python_export",
@@ -11585,6 +11702,15 @@
       "implementation_module": "synthworld.enterprise.rbac.compiler",
       "kind": "python_export",
       "name": "compile_enterprise_directory_rbac_truth",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.compile_enterprise_directory_rbac_truth_v2",
+      "implementation_module": "synthworld.enterprise.rbac.compiler",
+      "kind": "python_export",
+      "name": "compile_enterprise_directory_rbac_truth_v2",
       "source": "src/synthworld/enterprise/rbac/__init__.py",
       "visibility": "subpackage"
     },
@@ -11617,6 +11743,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.export_enterprise_directory_rbac_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "export_enterprise_directory_rbac_v2",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.rbac.export_enterprise_evaluation_corpus",
       "implementation_module": "synthworld.enterprise.rbac.serialization",
       "kind": "python_export",
@@ -11644,10 +11779,37 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.load_evaluator_enterprise_directory_rbac_truth_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "load_evaluator_enterprise_directory_rbac_truth_v2",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.load_public_enterprise_directory_rbac_intent_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "load_public_enterprise_directory_rbac_intent_v2",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.rbac.load_public_enterprise_directory_rbac_kernel",
       "implementation_module": "synthworld.enterprise.rbac.serialization",
       "kind": "python_export",
       "name": "load_public_enterprise_directory_rbac_kernel",
+      "source": "src/synthworld/enterprise/rbac/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.rbac.load_public_enterprise_directory_rbac_kernel_v2",
+      "implementation_module": "synthworld.enterprise.rbac.serialization",
+      "kind": "python_export",
+      "name": "load_public_enterprise_directory_rbac_kernel_v2",
       "source": "src/synthworld/enterprise/rbac/__init__.py",
       "visibility": "subpackage"
     },
@@ -13127,6 +13289,14 @@
     },
     {
       "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/compiled-enterprise-directory-rbac-truth-v2.schema.json",
+      "kind": "schema",
+      "name": "compiled-enterprise-directory-rbac-truth-v2.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/compiled-enterprise-directory-rbac-truth-v2.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
       "id": "schema:enterprise-identity-access-contract/schemas/compiled-enterprise-directory-rbac-truth.schema.json",
       "kind": "schema",
       "name": "compiled-enterprise-directory-rbac-truth.schema.json",
@@ -13315,6 +13485,14 @@
       "kind": "schema",
       "name": "enterprise-compiler-provenance.schema.json",
       "source": "enterprise-identity-access-contract/schemas/enterprise-compiler-provenance.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-directory-rbac-intent-v2.schema.json",
+      "kind": "schema",
+      "name": "enterprise-directory-rbac-intent-v2.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-directory-rbac-intent-v2.schema.json",
       "visibility": "public"
     },
     {

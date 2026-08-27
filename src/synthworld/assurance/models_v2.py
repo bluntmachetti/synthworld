@@ -395,17 +395,31 @@ def validate_evidence_claim_support(
 ) -> None:
     """Reject evidence claims that the systems under test cannot support.
 
-    A live-lab conformance claim requires at least one deployed system
-    (self-hosted or managed service); reference-only runs are offline by
-    construction and cannot support it.
+    A live-lab conformance claim requires at least one deployed system whose
+    configuration or version was observed. Reference-only runs and declarations
+    containing only wholly opaque managed services cannot support it. This is a
+    provenance-strength gate, not cryptographic proof that a live endpoint was
+    contacted during the run.
     """
 
-    if evidence_claim is EvidenceClaimV2.LIVE_LAB_CONFORMANCE and all(
-        isinstance(system, ReferenceComponentProvenanceV2)
+    if evidence_claim is not EvidenceClaimV2.LIVE_LAB_CONFORMANCE:
+        return
+    observable_deployed = any(
+        isinstance(system, SelfHostedComponentProvenanceV2)
+        or (
+            isinstance(system, ManagedServiceComponentProvenanceV2)
+            and (
+                system.configuration_observability
+                is not ConfigurationObservabilityV2.NOT_EXPOSED
+                or system.version_observability is VersionObservabilityV2.OBSERVED
+            )
+        )
         for system in systems_under_test
-    ):
+    )
+    if not observable_deployed:
         raise ValueError(
-            "live lab conformance requires at least one deployed system under test"
+            "live lab conformance requires at least one observable deployed system "
+            "under test"
         )
 
 

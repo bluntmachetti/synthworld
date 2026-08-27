@@ -40,12 +40,14 @@ from synthworld.ambiguity_serialization import (
     load_golden_ambiguity_benchmark,
 )
 from synthworld.ambiguity_variants import (
+    _UNICODE_NAMES,
     FIXED_REALIZATION,
     REALIZATIONS,
     UNKEYED,
     AmbiguityVariantError,
     AmbiguityVariantMetadata,
     ScenarioRealization,
+    _ascii_fold,
     _substitution_plan,
     _unicode_name,
     ambiguity_variant_metadata,
@@ -60,6 +62,40 @@ from synthworld.connection import (
 from synthworld.connection_generator import _CONNECTION_NAMESPACE
 
 _VARIANT_SEEDS = (1, 2, 3)
+
+
+@pytest.mark.parametrize(
+    ("unicode_value", "ascii_value"),
+    [
+        ("Sørensen", "Sorensen"),
+        ("Łukasz", "Lukasz"),
+        ("Æsir", "Aesir"),
+        ("Đorđe", "Dorde"),
+    ],
+)
+def test_ascii_fold_transliterates_atomic_latin_letters(
+    unicode_value: str,
+    ascii_value: str,
+) -> None:
+    assert _ascii_fold(unicode_value) == _ascii_fold(ascii_value)
+
+
+def test_every_authored_unicode_pair_folds_together() -> None:
+    for unicode_given, ascii_given, unicode_family, ascii_family in _UNICODE_NAMES:
+        assert _ascii_fold(unicode_given) == _ascii_fold(ascii_given)
+        assert _ascii_fold(unicode_family) == _ascii_fold(ascii_family)
+
+    drafts = tuple(
+        item for item in _drafts() if item.scenario is ScenarioKind.UNICODE_VARIANT
+    )
+    assert len(drafts) == 2
+    left, right = drafts
+    assert _ascii_fold(left.display_name) == _ascii_fold(right.display_name)
+    left_attributes = {item.kind: item.value for item in left.attributes}
+    right_attributes = {item.kind: item.value for item in right.attributes}
+    assert _ascii_fold(
+        left_attributes[PublicIdentityAttributeKind.FAMILY_NAME]
+    ) == _ascii_fold(right_attributes[PublicIdentityAttributeKind.FAMILY_NAME])
 
 
 def test_the_frozen_artifacts_match_regeneration() -> None:

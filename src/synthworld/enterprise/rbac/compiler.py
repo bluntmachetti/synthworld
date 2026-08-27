@@ -58,14 +58,17 @@ from synthworld.enterprise.rbac.models import (
     BirthrightPredicateV1,
     BirthrightRuleV1,
     CompiledEnterpriseDirectoryRbacTruthV1,
+    CompiledEnterpriseDirectoryRbacTruthV2,
     DirectoryDirectEntitlementV1,
     DirectoryRbacCellTruthV1,
     DsdConstraintTruthV1,
     DynamicSodConstraintV1,
     EmploymentTypeIsV1,
     EnterpriseDirectoryRbacIntentOverlayV1,
+    EnterpriseDirectoryRbacIntentOverlayV2,
     EnterpriseDirectoryRbacKernelV1,
     EnterpriseRbacSessionStateInputV1,
+    IntendedDirectEntitlementV2,
     MembershipPathTruthV1,
     ObservedSessionTruthV1,
     PrincipalKindIsV1,
@@ -79,6 +82,9 @@ from synthworld.enterprise.validation import dag_max_depth
 
 ENTERPRISE_DIRECTORY_RBAC_TRUTH_RECORD_NAMESPACE_V1 = UUID(
     "a23e5b3e-5d4c-5011-8110-0d54ae876a71"
+)
+_DirectoryRbacIntent = (
+    EnterpriseDirectoryRbacIntentOverlayV1 | EnterpriseDirectoryRbacIntentOverlayV2
 )
 
 
@@ -130,6 +136,62 @@ def compile_enterprise_directory_rbac_truth(
     compile_config: EnterpriseIdentityAccessCompileConfigV1 | None = None,
 ) -> CompiledEnterpriseDirectoryRbacTruthV1:
     """Compile explainable B/I/E/F truth without adding an atom or cell."""
+
+    return cast(
+        CompiledEnterpriseDirectoryRbacTruthV1,
+        _compile_enterprise_directory_rbac_truth(
+            universe=universe,
+            canonical_binding_truth=canonical_binding_truth,
+            corpus=corpus,
+            directory_rbac_kernel=directory_rbac_kernel,
+            session_state=session_state,
+            directory_rbac_intent=directory_rbac_intent,
+            compile_config=compile_config,
+            truth_model=CompiledEnterpriseDirectoryRbacTruthV1,
+        ),
+    )
+
+
+def compile_enterprise_directory_rbac_truth_v2(
+    *,
+    universe: EnterpriseIdentityAccessUniverseV1,
+    canonical_binding_truth: EnterpriseCanonicalBindingTruthV1,
+    corpus: EnterpriseEvaluationCorpusV1,
+    directory_rbac_kernel: EnterpriseDirectoryRbacKernelV1,
+    session_state: EnterpriseRbacSessionStateInputV1,
+    directory_rbac_intent: EnterpriseDirectoryRbacIntentOverlayV2,
+    compile_config: EnterpriseIdentityAccessCompileConfigV1 | None = None,
+) -> CompiledEnterpriseDirectoryRbacTruthV2:
+    """Compile V2 truth with independently declared intended direct authority."""
+
+    return cast(
+        CompiledEnterpriseDirectoryRbacTruthV2,
+        _compile_enterprise_directory_rbac_truth(
+            universe=universe,
+            canonical_binding_truth=canonical_binding_truth,
+            corpus=corpus,
+            directory_rbac_kernel=directory_rbac_kernel,
+            session_state=session_state,
+            directory_rbac_intent=directory_rbac_intent,
+            compile_config=compile_config,
+            truth_model=CompiledEnterpriseDirectoryRbacTruthV2,
+        ),
+    )
+
+
+def _compile_enterprise_directory_rbac_truth(
+    *,
+    universe: EnterpriseIdentityAccessUniverseV1,
+    canonical_binding_truth: EnterpriseCanonicalBindingTruthV1,
+    corpus: EnterpriseEvaluationCorpusV1,
+    directory_rbac_kernel: EnterpriseDirectoryRbacKernelV1,
+    session_state: EnterpriseRbacSessionStateInputV1,
+    directory_rbac_intent: _DirectoryRbacIntent,
+    compile_config: EnterpriseIdentityAccessCompileConfigV1 | None,
+    truth_model: type[CompiledEnterpriseDirectoryRbacTruthV1]
+    | type[CompiledEnterpriseDirectoryRbacTruthV2],
+) -> CompiledEnterpriseDirectoryRbacTruthV1 | CompiledEnterpriseDirectoryRbacTruthV2:
+    """Shared implementation behind the independently versioned entry points."""
 
     selected_config = compile_config or EnterpriseIdentityAccessCompileConfigV1()
     digests = _validate_bindings(
@@ -217,7 +279,7 @@ def compile_enterprise_directory_rbac_truth(
         config=selected_config,
         max_total_derivations=remaining_derivations,
     )
-    truth = CompiledEnterpriseDirectoryRbacTruthV1(
+    truth = truth_model(
         identity_access_universe_digest=digests.universe,
         canonical_binding_truth_digest=digests.binding,
         evaluation_corpus_digest=digests.corpus,
@@ -260,7 +322,7 @@ def _validate_bindings(
     corpus: EnterpriseEvaluationCorpusV1,
     kernel: EnterpriseDirectoryRbacKernelV1,
     session_state: EnterpriseRbacSessionStateInputV1,
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     compile_config: EnterpriseIdentityAccessCompileConfigV1,
 ) -> _InputDigests:
     universe_digest = synthetic_digest(canonical_json_bytes(universe))
@@ -510,7 +572,7 @@ def _birthright_target(
 
 
 def _validate_intent_references(
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     kernel: EnterpriseDirectoryRbacKernelV1,
     corpus: EnterpriseEvaluationCorpusV1,
     indexes: _UniverseIndexes,
@@ -588,6 +650,21 @@ def _validate_intent_references(
                 "approved_exception_subject_mismatch",
                 "approved exception atoms must belong to its subject",
             )
+    if isinstance(intent, EnterpriseDirectoryRbacIntentOverlayV2):
+        for entitlement in intent.intended_direct_entitlements:
+            subject = indexes.subjects.get(entitlement.subject_id)
+            permission = indexes.permissions.get(entitlement.permission_id)
+            if subject is None or permission is None:
+                raise EnterpriseCompileError(
+                    "unknown_intended_direct_entitlement_reference",
+                    "intended direct-entitlement subject or permission does not "
+                    "resolve",
+                )
+            if subject.tenant_id != _tenant_id(permission, indexes):
+                raise EnterpriseCompileError(
+                    "cross_tenant_intended_direct_entitlement",
+                    "intended direct-entitlement subject and permission cross tenants",
+                )
     intended_relation_count = _validate_intended_relations(intent, indexes, config)
     _check_directory_rbac_semantic_budget(
         kernel=kernel,
@@ -601,7 +678,7 @@ def _validate_intent_references(
 
 
 def _validate_intended_relations(
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     indexes: _UniverseIndexes,
     config: EnterpriseIdentityAccessCompileConfigV1,
 ) -> int:
@@ -650,6 +727,8 @@ def _validate_intended_relations(
         ),
     )
     relation_count = sum(len(records) for records, _resolver in relation_specs)
+    if isinstance(intent, EnterpriseDirectoryRbacIntentOverlayV2):
+        relation_count += len(intent.intended_direct_entitlements)
     for records, resolver in relation_specs:
         for record in records:
             left, right = resolver(record)
@@ -714,7 +793,7 @@ def _require_intended_graph_depth(
 def _check_directory_rbac_semantic_budget(
     *,
     kernel: EnterpriseDirectoryRbacKernelV1,
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     corpus: EnterpriseEvaluationCorpusV1,
     indexes: _UniverseIndexes,
     intended_relation_count: int,
@@ -769,7 +848,7 @@ def _check_directory_rbac_semantic_budget(
 
 
 def _validate_sod_constraints(
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     indexes: _UniverseIndexes,
     corpus: EnterpriseEvaluationCorpusV1,
     config: EnterpriseIdentityAccessCompileConfigV1,
@@ -1034,7 +1113,7 @@ def _compile_actual_role_facts(
 
 
 def _compile_intended_role_facts(
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     indexes: _UniverseIndexes,
     profiles: Mapping[str, _SubjectProfile],
     config: EnterpriseIdentityAccessCompileConfigV1,
@@ -1218,7 +1297,7 @@ def _authorized_path(
 
 
 def _compile_ssd_truth(
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     role_sets: tuple[AuthorizedRoleSetTruthV1, ...],
     indexes: _UniverseIndexes,
     intent_digest: str,
@@ -1255,7 +1334,7 @@ def _compile_ssd_truth(
 def _compile_session_truth(
     corpus: EnterpriseEvaluationCorpusV1,
     session_state: EnterpriseRbacSessionStateInputV1,
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     role_facts: _RoleFacts,
     indexes: _UniverseIndexes,
     intent_digest: str,
@@ -1349,7 +1428,7 @@ def _compile_session_truth(
 
 def _compile_birthright_eligibility(
     corpus: EnterpriseEvaluationCorpusV1,
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     indexes: _UniverseIndexes,
     profiles: Mapping[str, _SubjectProfile],
     intent_digest: str,
@@ -1442,7 +1521,7 @@ def _compile_cells(
     *,
     corpus: EnterpriseEvaluationCorpusV1,
     kernel: EnterpriseDirectoryRbacKernelV1,
-    intent: EnterpriseDirectoryRbacIntentOverlayV1,
+    intent: _DirectoryRbacIntent,
     indexes: _UniverseIndexes,
     actual_roles: _RoleFacts,
     intended_roles: _RoleFacts,
@@ -1487,8 +1566,21 @@ def _compile_cells(
     direct_by_subject_permission: dict[
         tuple[str, str], list[DirectoryDirectEntitlementV1]
     ] = defaultdict(list)
-    for item in kernel.direct_entitlements:
-        direct_by_subject_permission[(item.subject_id, item.permission_id)].append(item)
+    for actual_entitlement in kernel.direct_entitlements:
+        direct_by_subject_permission[
+            (actual_entitlement.subject_id, actual_entitlement.permission_id)
+        ].append(actual_entitlement)
+    intended_direct_by_subject_permission: dict[
+        tuple[str, str], list[IntendedDirectEntitlementV2]
+    ] = defaultdict(list)
+    if isinstance(intent, EnterpriseDirectoryRbacIntentOverlayV2):
+        for intended_entitlement in intent.intended_direct_entitlements:
+            intended_direct_by_subject_permission[
+                (
+                    intended_entitlement.subject_id,
+                    intended_entitlement.permission_id,
+                )
+            ].append(intended_entitlement)
     actual_derivations: list[AccessDerivationPathTruthV1] = []
     intended_derivations: list[AccessDerivationPathTruthV1] = []
     cell_rows: list[DirectoryRbacCellTruthV1] = []
@@ -1547,6 +1639,9 @@ def _compile_cells(
             role_paths=intended_paths_by_subject.get(atom.subject_id, ()),
             role_dag_paths=intended_roles.role_dag_paths,
             grants=intended_grants,
+            direct_entitlements=intended_direct_by_subject_permission[
+                (atom.subject_id, permission.permission_id)
+            ],
             activation=(
                 activation_by_session.get(cell.session_state_id)
                 if cell.session_state_id is not None
@@ -1795,6 +1890,7 @@ def _intended_cell_paths(
     role_paths: tuple[AuthorizedRolePathTruthV1, ...],
     role_dag_paths: Mapping[str, tuple[tuple[str, ...], ...]],
     grants: Mapping[str, tuple[tuple[str, str], ...]],
+    direct_entitlements: list[IntendedDirectEntitlementV2],
     activation: ActivationDecisionTruthV1 | None,
     universe_digest: str,
     intent_digest: str,
@@ -1811,6 +1907,32 @@ def _intended_cell_paths(
     else:
         usable_roles = set()
     result: list[AccessDerivationPathTruthV1] = []
+    for entitlement in direct_entitlements:
+        if _active(
+            cell.tick,
+            entitlement.valid_from_tick,
+            entitlement.valid_until_tick,
+        ):
+            source_id = _intent_id(
+                intent_digest,
+                "intended-direct-entitlement",
+                entitlement.entitlement_id,
+            )
+            _append_bounded_cell_path(
+                result,
+                _access_path(
+                    universe_digest,
+                    cell=cell,
+                    atom=atom,
+                    permission=permission,
+                    mechanism=DerivationMechanism.DIRECT_ENTITLEMENT,
+                    membership_path=(),
+                    role_path=(),
+                    source_id=source_id,
+                ),
+                prior_paths=prior_paths,
+                max_paths=max_paths,
+            )
     for proof in role_paths:
         if usable_roles is None:
             if any(
@@ -2000,7 +2122,8 @@ def _require_known_ids(
 
 
 def _check_truth_outer_safety(
-    truth: CompiledEnterpriseDirectoryRbacTruthV1,
+    truth: CompiledEnterpriseDirectoryRbacTruthV1
+    | CompiledEnterpriseDirectoryRbacTruthV2,
     config: EnterpriseIdentityAccessCompileConfigV1,
 ) -> None:
     records = 1 + sum(
@@ -2045,4 +2168,7 @@ def _intent_id(intent_digest: str, kind: str, *logical_parts: str) -> str:
     return _truth_id(intent_digest, kind, *logical_parts)
 
 
-__all__ = ["compile_enterprise_directory_rbac_truth"]
+__all__ = [
+    "compile_enterprise_directory_rbac_truth",
+    "compile_enterprise_directory_rbac_truth_v2",
+]

@@ -118,7 +118,10 @@ timestamp before the external deployment has actually finished.
 Receipt v2 distinguishes self-hosted, reference, and managed-service provenance.
 Managed services explicitly say whether configuration and version data is observed,
 partial, or not exposed; missing SaaS internals are never represented by fabricated
-digests. Real plans, provenance, and observations deliberately omit
+digests. A `live_lab_conformance` claim requires at least one non-reference component
+with observed configuration or version provenance; a wholly opaque managed-service
+declaration cannot unlock it. The claim still records attributable provenance rather
+than cryptographically proving that an endpoint was contacted. Real plans, provenance, and observations deliberately omit
 `synthetic: true`. Generated stimuli, fictional secret handles, truth, and reports
 retain the recursive marker.
 

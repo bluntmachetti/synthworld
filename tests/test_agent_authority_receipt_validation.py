@@ -517,7 +517,7 @@ def test_metadata_rejects_live_claims_without_deployed_systems() -> None:
     document = metadata.model_dump(mode="json")
     document["evidence_claim"] = EvidenceClaimV2.LIVE_LAB_CONFORMANCE.value
     document["systems_under_test"] = [_reference_only_system().model_dump(mode="json")]
-    with pytest.raises(ValidationError, match="deployed system"):
+    with pytest.raises(ValidationError, match="observable deployed system"):
         AgentAuthorityRunMetadataV1.model_validate(document)
 
     document["evidence_claim"] = EvidenceClaimV2.CANONICAL_CONFORMANCE.value

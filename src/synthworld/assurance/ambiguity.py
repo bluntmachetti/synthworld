@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -103,6 +104,9 @@ class AmbiguityPairSubmission(SyntheticModel):
     predictions: tuple[PairPrediction, ...] = Field(min_length=1)
 
 
+PairOutputNormalizer = Callable[[bytes, PublicAmbiguityTask], AmbiguityPairSubmission]
+
+
 class AmbiguityRunMetadata(SyntheticModel):
     """Consumer-neutral metadata supplied by a concrete product overlay."""
 
@@ -133,6 +137,43 @@ def canonicalize_partition(
         )
     )
     return EntityResolutionPrediction(clusters=clusters)
+
+
+def validate_ambiguity_pair_submission(
+    submission: AmbiguityPairSubmission,
+    *,
+    public: PublicAmbiguityTask,
+) -> None:
+    """Validate an explicit pair submission using public input only."""
+
+    public_record_ids = {item.id for item in public.corpus.identity_records}
+    public_keys = tuple(
+        (item.left_record_id, item.right_record_id) for item in public.pairs_to_decide
+    )
+    submitted_keys: list[tuple[UUID, UUID]] = []
+    for prediction in submission.predictions:
+        key = (prediction.left_record_id, prediction.right_record_id)
+        if prediction.left_record_id == prediction.right_record_id:
+            raise ValueError("ambiguity pair submission contains a self pair")
+        if not set(key) <= public_record_ids:
+            raise ValueError(
+                "ambiguity pair submission references an unknown public record"
+            )
+        if prediction.left_record_id > prediction.right_record_id:
+            raise ValueError(
+                "ambiguity pair submission records must use canonical orientation"
+            )
+        submitted_keys.append(key)
+    if len(submitted_keys) != len(set(submitted_keys)):
+        raise ValueError("ambiguity pair submission contains a duplicate pair")
+    if set(submitted_keys) != set(public_keys):
+        raise ValueError(
+            "ambiguity pair submission must cover exactly the public task pairs"
+        )
+    if tuple(submitted_keys) != public_keys:
+        raise ValueError(
+            "ambiguity pair submission must follow the public task pair order"
+        )
 
 
 def _artifact_specs(metadata: AmbiguityRunMetadata) -> tuple[ArtifactSpec, ...]:
@@ -242,6 +283,7 @@ def build_ambiguity_run_receipt(
     adapter: PublicAdapter,
     runner: ProductRunner,
     normalizer: OutputNormalizer,
+    pair_normalizer: PairOutputNormalizer | None = None,
     metadata: AmbiguityRunMetadata,
 ) -> RunReceiptManifest:
     """Execute product first, normalize completely, then load each truth separately."""
@@ -264,9 +306,14 @@ def build_ambiguity_run_receipt(
     raw_output = (root / PRODUCT_OUTPUT_PATH).read_bytes()
     partition = canonicalize_partition(normalizer(raw_output, public))
     validate_ambiguity_partition(partition, public=public)
-    pairs = AmbiguityPairSubmission(
-        predictions=derive_ambiguity_pair_predictions(partition, public=public)
+    pairs = (
+        pair_normalizer(raw_output, public)
+        if pair_normalizer is not None
+        else AmbiguityPairSubmission(
+            predictions=derive_ambiguity_pair_predictions(partition, public=public)
+        )
     )
+    validate_ambiguity_pair_submission(pairs, public=public)
     write_canonical_model(root / SUBMISSION_CLUSTERS_PATH, partition)
     write_canonical_model(root / SUBMISSION_PAIRS_PATH, pairs)
 
@@ -321,6 +368,7 @@ def build_ambiguity_run_receipt(
         root,
         adapter=adapter,
         normalizer=normalizer,
+        pair_normalizer=pair_normalizer,
     )
 
 
@@ -344,6 +392,7 @@ def validate_ambiguity_run_receipt(
     *,
     adapter: PublicAdapter,
     normalizer: OutputNormalizer,
+    pair_normalizer: PairOutputNormalizer | None = None,
 ) -> RunReceiptManifest:
     """Replay all public transforms and both independent evaluations."""
 
@@ -416,12 +465,26 @@ def validate_ambiguity_run_receipt(
         ) from error
     if partition != expected_partition:
         raise ReceiptIntegrityError("cluster submission differs from normalized output")
-    expected_pairs = AmbiguityPairSubmission(
-        predictions=derive_ambiguity_pair_predictions(partition, public=public)
-    )
+    try:
+        expected_pairs = (
+            pair_normalizer(raw_output, public)
+            if pair_normalizer is not None
+            else AmbiguityPairSubmission(
+                predictions=derive_ambiguity_pair_predictions(
+                    partition,
+                    public=public,
+                )
+            )
+        )
+        validate_ambiguity_pair_submission(expected_pairs, public=public)
+    except ValueError as error:
+        raise ReceiptIntegrityError(
+            "raw product output cannot form a valid pair submission"
+        ) from error
     if pairs != expected_pairs:
         raise ReceiptIntegrityError(
-            "pair submission differs from public-only projection"
+            "pair submission differs from public-only projection or explicit "
+            "normalized output"
         )
 
     try:
@@ -518,8 +581,10 @@ __all__ = [
     "DispositionTruthLoader",
     "MembershipTruthLoader",
     "OutputNormalizer",
+    "PairOutputNormalizer",
     "build_ambiguity_run_receipt",
     "build_reference_ambiguity_run_receipt",
     "canonicalize_partition",
+    "validate_ambiguity_pair_submission",
     "validate_ambiguity_run_receipt",
 ]

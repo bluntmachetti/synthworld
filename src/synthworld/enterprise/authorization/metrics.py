@@ -306,7 +306,27 @@ def evaluate_enterprise_authorization(
                 matches=lambda expected, observed: (
                     observed.binding_status is expected.binding_status
                 ),
-                denominator_meaning="aggregate cells with an applicable binding gate",
+                denominator_meaning=(
+                    "scope-selected binding-status cells, including not_applicable"
+                ),
+            ),
+            _accuracy(
+                family="binding",
+                name="applicable_binding_status_accuracy",
+                truth=tuple(
+                    item
+                    for item in truth.cells
+                    if AuthorizationScoredDimension.BINDING_STATUS
+                    in dimensions_by_cell[item.cell_id]
+                    and item.binding_status is not BindingStatus.NOT_APPLICABLE
+                ),
+                predictions=prediction_by_cell,
+                matches=lambda expected, observed: (
+                    observed.binding_status is expected.binding_status
+                ),
+                denominator_meaning=(
+                    "scope-selected binding-status cells whose gate is applicable"
+                ),
             ),
             _accuracy(
                 family="lifecycle",
@@ -321,7 +341,27 @@ def evaluate_enterprise_authorization(
                 matches=lambda expected, observed: (
                     observed.lifecycle_status is expected.lifecycle_status
                 ),
-                denominator_meaning="aggregate cells with an applicable lifecycle gate",
+                denominator_meaning=(
+                    "scope-selected lifecycle-status cells, including not_applicable"
+                ),
+            ),
+            _accuracy(
+                family="lifecycle",
+                name="applicable_lifecycle_status_accuracy",
+                truth=tuple(
+                    item
+                    for item in truth.cells
+                    if AuthorizationScoredDimension.LIFECYCLE_STATUS
+                    in dimensions_by_cell[item.cell_id]
+                    and item.lifecycle_status is not LifecycleStatus.NOT_APPLICABLE
+                ),
+                predictions=prediction_by_cell,
+                matches=lambda expected, observed: (
+                    observed.lifecycle_status is expected.lifecycle_status
+                ),
+                denominator_meaning=(
+                    "scope-selected lifecycle-status cells whose gate is applicable"
+                ),
             ),
             _accuracy(
                 family="runtime_gate",

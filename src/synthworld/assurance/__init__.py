@@ -3,8 +3,10 @@
 from synthworld.assurance.ambiguity import (
     AmbiguityPairSubmission,
     AmbiguityRunMetadata,
+    PairOutputNormalizer,
     build_ambiguity_run_receipt,
     build_reference_ambiguity_run_receipt,
+    validate_ambiguity_pair_submission,
     validate_ambiguity_run_receipt,
 )
 from synthworld.assurance.models import (
@@ -29,6 +31,7 @@ __all__ = [
     "EvidenceClaim",
     "EvidenceClaimV2",
     "ManagedServiceComponentProvenanceV2",
+    "PairOutputNormalizer",
     "ReferenceComponentProvenanceV2",
     "RunReceiptManifest",
     "RunReceiptManifestV2",
@@ -36,6 +39,7 @@ __all__ = [
     "SystemUnderTestProvenance",
     "build_ambiguity_run_receipt",
     "build_reference_ambiguity_run_receipt",
+    "validate_ambiguity_pair_submission",
     "validate_ambiguity_run_receipt",
     "validate_manifest_dispatched",
 ]

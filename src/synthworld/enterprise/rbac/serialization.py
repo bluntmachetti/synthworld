@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import stat
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 from pydantic import BaseModel, ValidationError
 
@@ -20,13 +20,17 @@ from synthworld.enterprise.rbac.corpus_models import (
 )
 from synthworld.enterprise.rbac.models import (
     CompiledEnterpriseDirectoryRbacTruthV1,
+    CompiledEnterpriseDirectoryRbacTruthV2,
+    EnterpriseDirectoryRbacIntentOverlayV2,
     EnterpriseDirectoryRbacKernelV1,
 )
 
 PUBLIC_CORPUS_PATH = "public/evaluation-corpus.json"
 EVALUATOR_CASES_PATH = "evaluator/evaluation-case-inventory.json"
 PUBLIC_RBAC_KERNEL_PATH = "public/directory-rbac-kernel.json"
+PUBLIC_RBAC_INTENT_V2_PATH = "public/directory-rbac-intent-v2.json"
 EVALUATOR_RBAC_TRUTH_PATH = "evaluator/directory-rbac-truth.json"
+EVALUATOR_RBAC_TRUTH_V2_PATH = "evaluator/directory-rbac-truth-v2.json"
 MANIFEST_NAME = "manifest.json"
 
 
@@ -101,6 +105,30 @@ def export_enterprise_directory_rbac(
     )
 
 
+def export_enterprise_directory_rbac_v2(
+    root: Path,
+    *,
+    kernel: EnterpriseDirectoryRbacKernelV1,
+    intent: EnterpriseDirectoryRbacIntentOverlayV2,
+    truth: CompiledEnterpriseDirectoryRbacTruthV2,
+) -> None:
+    """Export V2 public policy input separately from evaluator-only truth."""
+
+    if root.exists():
+        raise EnterpriseRbacArtifactError(
+            "enterprise RBAC artifact root already exists"
+        )
+    public_models: tuple[tuple[str, BaseModel], ...] = (
+        ("directory-rbac-intent-v2.json", intent),
+        ("directory-rbac-kernel.json", kernel),
+    )
+    evaluator_models: tuple[tuple[str, BaseModel], ...] = (
+        ("directory-rbac-truth-v2.json", truth),
+    )
+    _export_models(root / "public", "public", public_models)
+    _export_models(root / "evaluator", "evaluator", evaluator_models)
+
+
 def load_public_enterprise_directory_rbac_kernel(
     root: Path,
 ) -> EnterpriseDirectoryRbacKernelV1:
@@ -110,6 +138,20 @@ def load_public_enterprise_directory_rbac_kernel(
         model=EnterpriseDirectoryRbacKernelV1,
         visibility="public",
     )
+
+
+def load_public_enterprise_directory_rbac_kernel_v2(
+    root: Path,
+) -> EnterpriseDirectoryRbacKernelV1:
+    kernel, _intent = _load_public_directory_rbac_v2(root)
+    return kernel
+
+
+def load_public_enterprise_directory_rbac_intent_v2(
+    root: Path,
+) -> EnterpriseDirectoryRbacIntentOverlayV2:
+    _kernel, intent = _load_public_directory_rbac_v2(root)
+    return intent
 
 
 def load_evaluator_enterprise_directory_rbac_truth(
@@ -130,6 +172,111 @@ def load_evaluator_enterprise_directory_rbac_truth(
     ):
         raise EnterpriseRbacArtifactError("directory/RBAC truth kernel binding differs")
     return truth
+
+
+def load_evaluator_enterprise_directory_rbac_truth_v2(
+    root: Path,
+) -> CompiledEnterpriseDirectoryRbacTruthV2:
+    truth = cast(
+        CompiledEnterpriseDirectoryRbacTruthV2,
+        _load_models(
+            root / "evaluator",
+            visibility="evaluator",
+            models=(
+                (
+                    "directory-rbac-truth-v2.json",
+                    CompiledEnterpriseDirectoryRbacTruthV2,
+                ),
+            ),
+        )[0],
+    )
+    kernel, intent = _load_public_directory_rbac_v2(root)
+    if (
+        truth.directory_rbac_kernel_digest
+        != synthetic_digest(canonical_json_bytes(kernel))
+        or truth.directory_rbac_intent_digest
+        != synthetic_digest(canonical_json_bytes(intent))
+        or truth.identity_access_universe_digest
+        != kernel.identity_access_universe_digest
+        or truth.identity_access_universe_digest
+        != intent.identity_access_universe_digest
+    ):
+        raise EnterpriseRbacArtifactError(
+            "directory/RBAC V2 truth public binding differs"
+        )
+    return truth
+
+
+def _load_public_directory_rbac_v2(
+    root: Path,
+) -> tuple[EnterpriseDirectoryRbacKernelV1, EnterpriseDirectoryRbacIntentOverlayV2]:
+    loaded = _load_models(
+        root / "public",
+        visibility="public",
+        models=(
+            ("directory-rbac-intent-v2.json", EnterpriseDirectoryRbacIntentOverlayV2),
+            ("directory-rbac-kernel.json", EnterpriseDirectoryRbacKernelV1),
+        ),
+    )
+    intent, kernel = loaded
+    return cast(EnterpriseDirectoryRbacKernelV1, kernel), cast(
+        EnterpriseDirectoryRbacIntentOverlayV2, intent
+    )
+
+
+def _export_models(
+    directory: Path,
+    visibility: Literal["public", "evaluator"],
+    models: tuple[tuple[str, BaseModel], ...],
+) -> None:
+    artifacts: list[EnterpriseArtifactDescriptorV1] = []
+    for name, model in models:
+        payload = canonical_json_bytes(model)
+        _write_new(directory / name, payload)
+        artifacts.append(_descriptor(name, model, payload))
+    manifest = EnterpriseArtifactManifestV1(
+        visibility=visibility,
+        artifacts=tuple(artifacts),
+    )
+    _write_new(directory / MANIFEST_NAME, canonical_json_bytes(manifest))
+
+
+def _load_models(
+    directory: Path,
+    *,
+    visibility: Literal["public", "evaluator"],
+    models: tuple[tuple[str, type[BaseModel]], ...],
+) -> tuple[BaseModel, ...]:
+    names = {name for name, _model in models}
+    _require_exact_files(directory, {*names, MANIFEST_NAME})
+    manifest = _read_canonical(directory / MANIFEST_NAME, EnterpriseArtifactManifestV1)
+    if manifest.visibility != visibility:
+        raise EnterpriseRbacArtifactError("artifact manifest visibility differs")
+    descriptors = {item.path: item for item in manifest.artifacts}
+    if set(descriptors) != names:
+        raise EnterpriseRbacArtifactError("artifact manifest inventory differs")
+    loaded: list[BaseModel] = []
+    for name, model in models:
+        artifact = _read_canonical(directory / name, model)
+        payload = canonical_json_bytes(artifact)
+        if descriptors[name] != _descriptor(name, artifact, payload):
+            raise EnterpriseRbacArtifactError("artifact manifest binding differs")
+        loaded.append(artifact)
+    return tuple(loaded)
+
+
+def _descriptor(
+    name: str,
+    model: BaseModel,
+    payload: bytes,
+) -> EnterpriseArtifactDescriptorV1:
+    schema_version = model.model_dump().get("schema_version")
+    return EnterpriseArtifactDescriptorV1(
+        path=name,
+        schema_version=str(schema_version),
+        digest=synthetic_digest(payload),
+        byte_size=len(payload),
+    )
 
 
 def _export_pair(
@@ -257,13 +404,19 @@ def _write_new(path: Path, payload: bytes) -> None:
 __all__ = [
     "EVALUATOR_CASES_PATH",
     "EVALUATOR_RBAC_TRUTH_PATH",
+    "EVALUATOR_RBAC_TRUTH_V2_PATH",
     "PUBLIC_CORPUS_PATH",
+    "PUBLIC_RBAC_INTENT_V2_PATH",
     "PUBLIC_RBAC_KERNEL_PATH",
     "EnterpriseRbacArtifactError",
     "export_enterprise_directory_rbac",
+    "export_enterprise_directory_rbac_v2",
     "export_enterprise_evaluation_corpus",
     "load_evaluator_enterprise_case_inventory",
     "load_evaluator_enterprise_directory_rbac_truth",
+    "load_evaluator_enterprise_directory_rbac_truth_v2",
+    "load_public_enterprise_directory_rbac_intent_v2",
     "load_public_enterprise_directory_rbac_kernel",
+    "load_public_enterprise_directory_rbac_kernel_v2",
     "load_public_enterprise_evaluation_corpus",
 ]

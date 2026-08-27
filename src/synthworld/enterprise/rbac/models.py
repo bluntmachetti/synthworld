@@ -17,9 +17,12 @@ from synthworld.enterprise.models import (
 )
 from synthworld.enterprise.rbac.common import (
     ENTERPRISE_DIRECTORY_RBAC_COMPILER_VERSION,
+    ENTERPRISE_DIRECTORY_RBAC_COMPILER_VERSION_V2,
     ENTERPRISE_DIRECTORY_RBAC_INTENT_SCHEMA_VERSION,
+    ENTERPRISE_DIRECTORY_RBAC_INTENT_SCHEMA_VERSION_V2,
     ENTERPRISE_DIRECTORY_RBAC_KERNEL_SCHEMA_VERSION,
     ENTERPRISE_DIRECTORY_RBAC_TRUTH_SCHEMA_VERSION,
+    ENTERPRISE_DIRECTORY_RBAC_TRUTH_SCHEMA_VERSION_V2,
     ENTERPRISE_RBAC_SESSION_STATE_SCHEMA_VERSION,
     ActivationOutcome,
     ApprovedExceptionReason,
@@ -211,6 +214,26 @@ class IntendedRoleGrantV1(EnterpriseOperatorModel):
     permission_id: str = Field(min_length=1)
 
 
+class IntendedDirectEntitlementV2(EnterpriseOperatorModel):
+    """Operator-authored approval for direct subject authority."""
+
+    entitlement_id: LogicalKey
+    subject_id: str = Field(min_length=1)
+    permission_id: str = Field(min_length=1)
+    valid_from_tick: int = Field(ge=0)
+    valid_until_tick: int | None = Field(default=None, ge=0)
+    revision_id: LogicalKey
+
+    @model_validator(mode="after")
+    def valid_interval(self) -> Self:
+        if (
+            self.valid_until_tick is not None
+            and self.valid_until_tick <= self.valid_from_tick
+        ):
+            raise ValueError("intended_direct_entitlement_validity_interval_invalid")
+        return self
+
+
 class StaticSodConstraintV1(EnterpriseOperatorModel):
     constraint_id: LogicalKey
     tenant_id: str = Field(min_length=1)
@@ -361,6 +384,161 @@ class EnterpriseDirectoryRbacIntentOverlayV1(EnterpriseOperatorModel):
             keys=tuple((item.role_id, item.permission_id) for item in value),
             description="intended_role_grant",
         )
+
+    @field_validator("ssd_constraints")
+    @classmethod
+    def canonical_ssd(
+        cls, value: tuple[StaticSodConstraintV1, ...]
+    ) -> tuple[StaticSodConstraintV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.constraint_id,) for item in value),
+            description="ssd_constraint_id",
+        )
+
+    @field_validator("dsd_constraints")
+    @classmethod
+    def canonical_dsd(
+        cls, value: tuple[DynamicSodConstraintV1, ...]
+    ) -> tuple[DynamicSodConstraintV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.constraint_id,) for item in value),
+            description="dsd_constraint_id",
+        )
+
+
+class EnterpriseDirectoryRbacIntentOverlayV2(EnterpriseOperatorModel):
+    """V2 intent adds approved direct authority without widening V1."""
+
+    schema_version: Literal["2.0.0"] = (
+        ENTERPRISE_DIRECTORY_RBAC_INTENT_SCHEMA_VERSION_V2
+    )
+    identity_access_universe_digest: SyntheticDigestV1
+    evaluation_corpus_digest: SyntheticDigestV1
+    birthright_rules: tuple[BirthrightRuleV1, ...] = ()
+    approved_exceptions: tuple[ApprovedAccessExceptionV1, ...] = ()
+    intended_memberships: tuple[IntendedSubjectGroupMembershipV1, ...] = ()
+    intended_group_nesting: tuple[IntendedGroupNestingV1, ...] = ()
+    intended_group_role_assignments: tuple[IntendedGroupRoleAssignmentV1, ...] = ()
+    intended_subject_role_assignments: tuple[IntendedSubjectRoleAssignmentV1, ...] = ()
+    intended_role_hierarchy: tuple[IntendedRoleHierarchyV1, ...] = ()
+    intended_role_grants: tuple[IntendedRoleGrantV1, ...] = ()
+    intended_direct_entitlements: tuple[IntendedDirectEntitlementV2, ...] = ()
+    ssd_constraints: tuple[StaticSodConstraintV1, ...] = ()
+    dsd_constraints: tuple[DynamicSodConstraintV1, ...] = ()
+
+    @field_validator("birthright_rules")
+    @classmethod
+    def canonical_birthright_rules(
+        cls, value: tuple[BirthrightRuleV1, ...]
+    ) -> tuple[BirthrightRuleV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.rule_id,) for item in value),
+            description="birthright_rule_id",
+        )
+
+    @field_validator("approved_exceptions")
+    @classmethod
+    def canonical_exceptions(
+        cls, value: tuple[ApprovedAccessExceptionV1, ...]
+    ) -> tuple[ApprovedAccessExceptionV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.exception_id,) for item in value),
+            description="approved_exception_id",
+        )
+
+    @field_validator("intended_memberships")
+    @classmethod
+    def canonical_memberships(
+        cls, value: tuple[IntendedSubjectGroupMembershipV1, ...]
+    ) -> tuple[IntendedSubjectGroupMembershipV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.subject_id, item.group_id) for item in value),
+            description="intended_membership",
+        )
+
+    @field_validator("intended_group_nesting")
+    @classmethod
+    def canonical_group_nesting(
+        cls, value: tuple[IntendedGroupNestingV1, ...]
+    ) -> tuple[IntendedGroupNestingV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.child_group_id, item.parent_group_id) for item in value),
+            description="intended_group_nesting",
+        )
+
+    @field_validator("intended_group_role_assignments")
+    @classmethod
+    def canonical_group_roles(
+        cls, value: tuple[IntendedGroupRoleAssignmentV1, ...]
+    ) -> tuple[IntendedGroupRoleAssignmentV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.group_id, item.role_id) for item in value),
+            description="intended_group_role_assignment",
+        )
+
+    @field_validator("intended_subject_role_assignments")
+    @classmethod
+    def canonical_subject_roles(
+        cls, value: tuple[IntendedSubjectRoleAssignmentV1, ...]
+    ) -> tuple[IntendedSubjectRoleAssignmentV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.subject_id, item.role_id) for item in value),
+            description="intended_subject_role_assignment",
+        )
+
+    @field_validator("intended_role_hierarchy")
+    @classmethod
+    def canonical_role_hierarchy(
+        cls, value: tuple[IntendedRoleHierarchyV1, ...]
+    ) -> tuple[IntendedRoleHierarchyV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.senior_role_id, item.junior_role_id) for item in value),
+            description="intended_role_hierarchy",
+        )
+
+    @field_validator("intended_role_grants")
+    @classmethod
+    def canonical_role_grants(
+        cls, value: tuple[IntendedRoleGrantV1, ...]
+    ) -> tuple[IntendedRoleGrantV1, ...]:
+        return canonical_operator_records(
+            value,
+            keys=tuple((item.role_id, item.permission_id) for item in value),
+            description="intended_role_grant",
+        )
+
+    @field_validator("intended_direct_entitlements")
+    @classmethod
+    def canonical_direct_entitlements(
+        cls,
+        value: tuple[IntendedDirectEntitlementV2, ...],
+    ) -> tuple[IntendedDirectEntitlementV2, ...]:
+        ordered = canonical_operator_records(
+            value,
+            keys=tuple((item.entitlement_id,) for item in value),
+            description="intended_direct_entitlement_id",
+        )
+        semantic_keys = tuple(
+            (
+                item.subject_id,
+                item.permission_id,
+                str(item.valid_from_tick),
+                str(item.valid_until_tick),
+            )
+            for item in ordered
+        )
+        if len(semantic_keys) != len(set(semantic_keys)):
+            raise ValueError("duplicate_intended_direct_entitlement_scope")
+        return ordered
 
     @field_validator("ssd_constraints")
     @classmethod
@@ -785,6 +963,49 @@ class CompiledEnterpriseDirectoryRbacTruthV1(SyntheticModel):
         )
 
 
+class CompiledEnterpriseDirectoryRbacTruthV2(SyntheticModel):
+    """V2 truth binds the V2 direct-entitlement-aware compiler surface."""
+
+    schema_version: Literal["2.0.0"] = ENTERPRISE_DIRECTORY_RBAC_TRUTH_SCHEMA_VERSION_V2
+    compiler_version: Literal["2.0.0"] = ENTERPRISE_DIRECTORY_RBAC_COMPILER_VERSION_V2
+    identity_access_universe_digest: SyntheticDigestV1
+    canonical_binding_truth_digest: SyntheticDigestV1
+    evaluation_corpus_digest: SyntheticDigestV1
+    directory_rbac_kernel_digest: SyntheticDigestV1
+    directory_rbac_intent_digest: SyntheticDigestV1
+    rbac_session_state_digest: SyntheticDigestV1
+    membership_paths: tuple[MembershipPathTruthV1, ...]
+    authorized_role_paths: tuple[AuthorizedRolePathTruthV1, ...]
+    authorized_role_sets: tuple[AuthorizedRoleSetTruthV1, ...]
+    access_derivation_paths: tuple[AccessDerivationPathTruthV1, ...]
+    intended_derivation_paths: tuple[AccessDerivationPathTruthV1, ...]
+    birthright_predicates: tuple[BirthrightPredicateTruthV1, ...]
+    birthright_eligibility: tuple[BirthrightEligibilityTruthV1, ...]
+    birthright_assignments: tuple[BirthrightAssignmentTruthV1, ...]
+    approved_exceptions: tuple[ApprovedExceptionTruthV1, ...]
+    ssd_evaluations: tuple[SsdConstraintTruthV1, ...]
+    dsd_evaluations: tuple[DsdConstraintTruthV1, ...]
+    activation_decisions: tuple[ActivationDecisionTruthV1, ...]
+    observed_sessions: tuple[ObservedSessionTruthV1, ...]
+    cells: tuple[DirectoryRbacCellTruthV1, ...]
+
+    @field_validator(*_TRUTH_KEY_FIELDS)
+    @classmethod
+    def canonical_truth_records(
+        cls, value: tuple[SyntheticModel, ...], info: ValidationInfo
+    ) -> tuple[SyntheticModel, ...]:
+        field_name = cast(str, info.field_name)
+        key_fields = _TRUTH_KEY_FIELDS[field_name]
+        return canonical_synthetic_records(
+            value,
+            keys=tuple(
+                tuple(str(getattr(item, field)) for field in key_fields)
+                for item in value
+            ),
+            description=field_name,
+        )
+
+
 __all__ = [name for name in globals() if name.startswith("Enterprise")]
 __all__ += [
     "AccountKindIsV1",
@@ -801,10 +1022,12 @@ __all__ += [
     "BirthrightPredicateV1",
     "BirthrightRuleV1",
     "CompiledEnterpriseDirectoryRbacTruthV1",
+    "CompiledEnterpriseDirectoryRbacTruthV2",
     "DirectoryRbacCellTruthV1",
     "DsdConstraintTruthV1",
     "DynamicSodConstraintV1",
     "EmploymentTypeIsV1",
+    "IntendedDirectEntitlementV2",
     "IntendedGroupNestingV1",
     "IntendedGroupRoleAssignmentV1",
     "IntendedRoleGrantV1",

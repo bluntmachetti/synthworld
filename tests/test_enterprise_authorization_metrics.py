@@ -27,7 +27,11 @@ from synthworld.enterprise.authorization.reference import (
 )
 from synthworld.enterprise.authorization_common import MechanismOutcome
 from synthworld.enterprise.canonical import canonical_json_bytes, synthetic_digest
-from synthworld.enterprise.rbac.common import AuthorizationDecision, BindingStatus
+from synthworld.enterprise.rbac.common import (
+    AuthorizationDecision,
+    BindingStatus,
+    LifecycleStatus,
+)
 
 
 def _execution() -> EnterpriseAuthorizationExecutionMetadataV1:
@@ -136,11 +140,13 @@ def test_perfect_composed_prediction_reports_independent_metrics_and_bindings() 
 
     assert set(values) == {
         "abac.abac_outcome_accuracy",
+        "binding.applicable_binding_status_accuracy",
         "binding.binding_status_accuracy",
         "composed.effective_decision_accuracy",
         "composed.final_decision_accuracy",
         "conflict.conflict_resolution_accuracy",
         "conflict.policy_conflict_detection_accuracy",
+        "lifecycle.applicable_lifecycle_status_accuracy",
         "lifecycle.lifecycle_status_accuracy",
         "mechanism.mechanism_outcome_exact_match_rate",
         "mechanism.profile_mechanism_inventory_exact_match_rate",
@@ -154,10 +160,12 @@ def test_perfect_composed_prediction_reports_independent_metrics_and_bindings() 
         if name
         not in {
             "binding.binding_status_accuracy",
+            "binding.applicable_binding_status_accuracy",
             "runtime_gate.runtime_gate_decision_accuracy",
         }
     )
     assert values["binding.binding_status_accuracy"] is None
+    assert values["binding.applicable_binding_status_accuracy"] is None
     assert values["runtime_gate.runtime_gate_decision_accuracy"] is None
     metric_by_name = {f"{item.family}.{item.name}": item for item in report.metrics}
     assert metric_by_name["composed.final_decision_accuracy"].denominator == 14
@@ -184,6 +192,102 @@ def test_perfect_composed_prediction_reports_independent_metrics_and_bindings() 
         for marker in ("intended", "path", "predicate", "ssd", "dsd")
     )
     assert canonical_json_bytes(_evaluate(prediction)) == canonical_json_bytes(report)
+
+
+def test_gate_metrics_separate_scope_selection_from_applicability() -> None:
+    reference = reference_enterprise_authorization_inputs()
+    applicable_binding = next(
+        item
+        for item in reference.access_state.cells
+        if item.binding_status is not BindingStatus.NOT_APPLICABLE
+    )
+    not_applicable_binding = next(
+        item
+        for item in reference.access_state.cells
+        if item.binding_status is BindingStatus.NOT_APPLICABLE
+    )
+    applicable_lifecycle = next(
+        item
+        for item in reference.access_state.cells
+        if item.lifecycle_status is not LifecycleStatus.NOT_APPLICABLE
+    )
+    not_applicable_lifecycle = next(
+        item
+        for item in reference.access_state.cells
+        if item.lifecycle_status is LifecycleStatus.NOT_APPLICABLE
+    )
+    scope = reference.evaluation_scope
+    for cell_id, dimension in (
+        (applicable_binding.cell_id, AuthorizationScoredDimension.BINDING_STATUS),
+        (
+            not_applicable_binding.cell_id,
+            AuthorizationScoredDimension.BINDING_STATUS,
+        ),
+        (
+            not_applicable_lifecycle.cell_id,
+            AuthorizationScoredDimension.LIFECYCLE_STATUS,
+        ),
+    ):
+        scope = _scope_with_dimension(scope, cell_id, dimension)
+    prediction = perfect_enterprise_authorization_prediction(
+        reference.access_state,
+        scope=scope,
+        execution=_execution(),
+    )
+
+    report = _evaluate(prediction, scope=scope)
+    metrics = {f"{item.family}.{item.name}": item for item in report.metrics}
+    binding_all = metrics["binding.binding_status_accuracy"]
+    binding_applicable = metrics["binding.applicable_binding_status_accuracy"]
+    lifecycle_all = metrics["lifecycle.lifecycle_status_accuracy"]
+    lifecycle_applicable = metrics["lifecycle.applicable_lifecycle_status_accuracy"]
+
+    assert binding_all.denominator == 2
+    assert binding_applicable.denominator == 1
+    assert binding_all.denominator_meaning.endswith("including not_applicable")
+    assert binding_applicable.denominator_meaning.endswith("gate is applicable")
+    assert lifecycle_all.denominator == 6
+    assert lifecycle_applicable.denominator == 5
+
+    wrong_binding = _replace_cell(
+        prediction,
+        applicable_binding.cell_id,
+        lambda item: item.model_copy(update={"binding_status": None}),
+    )
+    wrong_binding_metrics = _metrics(_evaluate(wrong_binding, scope=scope))
+    assert wrong_binding_metrics["binding.binding_status_accuracy"] == 0.5
+    assert wrong_binding_metrics["binding.applicable_binding_status_accuracy"] == 0.0
+
+    wrong_lifecycle = _replace_cell(
+        prediction,
+        applicable_lifecycle.cell_id,
+        lambda item: item.model_copy(update={"lifecycle_status": None}),
+    )
+    wrong_lifecycle_metrics = _metrics(_evaluate(wrong_lifecycle, scope=scope))
+    assert wrong_lifecycle_metrics["lifecycle.lifecycle_status_accuracy"] == 5 / 6
+    assert (
+        wrong_lifecycle_metrics["lifecycle.applicable_lifecycle_status_accuracy"] == 0.8
+    )
+
+    binding_only_not_applicable = _scope_with_dimension(
+        reference.evaluation_scope,
+        not_applicable_binding.cell_id,
+        AuthorizationScoredDimension.BINDING_STATUS,
+    )
+    binding_only_prediction = perfect_enterprise_authorization_prediction(
+        reference.access_state,
+        scope=binding_only_not_applicable,
+        execution=_execution(),
+    )
+    empty_applicable = {
+        f"{item.family}.{item.name}": item
+        for item in _evaluate(
+            binding_only_prediction,
+            scope=binding_only_not_applicable,
+        ).metrics
+    }["binding.applicable_binding_status_accuracy"]
+    assert empty_applicable.denominator == 0
+    assert empty_applicable.value is None
 
 
 def test_evaluated_system_preserves_operator_owned_metadata() -> None:
