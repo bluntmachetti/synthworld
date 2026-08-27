@@ -222,6 +222,14 @@ selected guard algebra, and then applies account binding and lifecycle as
 unconditional final-deny gates. Intended, effective, and final decisions and
 pre-combination conflicts remain separate evaluator records.
 
+Directory/RBAC truth `2.0.0` uses the independent
+`EnterpriseAuthorizationCompositionV2` contract and
+`compose_enterprise_authorization_v2` entry point. Its directory/RBAC component
+reference is fixed to `2.0.0`, while optional ABAC and ReBAC references remain
+`1.0.0`. The aggregate kernel and access-state compilers accept a matched V1 or
+V2 composition/truth pair and reject cross-version pairs. This adds a usable V2
+composition path without modifying the frozen V1 composition schema.
+
 Authorization export is physically split. The public tree contains ABAC/ReBAC
 state and intent, composition, evaluation scope, and the cell/profile kernel. The
 evaluator tree

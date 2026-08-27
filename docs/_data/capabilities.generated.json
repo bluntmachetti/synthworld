@@ -9709,6 +9709,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.EnterpriseAuthorizationCompositionV2",
+      "implementation_module": "synthworld.enterprise.authorization.models",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationCompositionV2",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.EnterpriseAuthorizationEvaluatedSystemV1",
       "implementation_module": "synthworld.enterprise.authorization.metrics",
       "kind": "python_export",
@@ -10258,6 +10267,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationCompositionV2",
+      "implementation_module": "synthworld.enterprise.authorization.models",
+      "kind": "python_export",
+      "name": "EnterpriseAuthorizationCompositionV2",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluatedSystemV1",
       "implementation_module": "synthworld.enterprise.authorization.metrics",
       "kind": "python_export",
@@ -10708,6 +10726,15 @@
     },
     {
       "assignment_required": true,
+      "id": "python:synthworld.enterprise.authorization.compose_enterprise_authorization_v2",
+      "implementation_module": "synthworld.enterprise.authorization.compiler",
+      "kind": "python_export",
+      "name": "compose_enterprise_authorization_v2",
+      "source": "src/synthworld/enterprise/authorization/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
       "id": "python:synthworld.enterprise.authorization.evaluate_enterprise_adversarial_authorization",
       "implementation_module": "synthworld.enterprise.authorization.adversarial.metrics",
       "kind": "python_export",
@@ -10874,6 +10901,15 @@
       "implementation_module": "synthworld.enterprise.authorization.compiler",
       "kind": "python_export",
       "name": "compose_enterprise_authorization",
+      "source": "src/synthworld/enterprise/__init__.py",
+      "visibility": "subpackage"
+    },
+    {
+      "assignment_required": true,
+      "id": "python:synthworld.enterprise.compose_enterprise_authorization_v2",
+      "implementation_module": "synthworld.enterprise.authorization.compiler",
+      "kind": "python_export",
+      "name": "compose_enterprise_authorization_v2",
       "source": "src/synthworld/enterprise/__init__.py",
       "visibility": "subpackage"
     },
@@ -13421,6 +13457,14 @@
       "kind": "schema",
       "name": "enterprise-agentic-truth.schema.json",
       "source": "enterprise-identity-access-contract/schemas/enterprise-agentic-truth.schema.json",
+      "visibility": "public"
+    },
+    {
+      "assignment_required": true,
+      "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-composition-v2.schema.json",
+      "kind": "schema",
+      "name": "enterprise-authorization-composition-v2.schema.json",
+      "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-composition-v2.schema.json",
       "visibility": "public"
     },
     {

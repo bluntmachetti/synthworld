@@ -200,6 +200,7 @@ def load_evaluator_enterprise_directory_rbac_truth_v2(
         != kernel.identity_access_universe_digest
         or truth.identity_access_universe_digest
         != intent.identity_access_universe_digest
+        or truth.evaluation_corpus_digest != intent.evaluation_corpus_digest
     ):
         raise EnterpriseRbacArtifactError(
             "directory/RBAC V2 truth public binding differs"
@@ -219,9 +220,16 @@ def _load_public_directory_rbac_v2(
         ),
     )
     intent, kernel = loaded
-    return cast(EnterpriseDirectoryRbacKernelV1, kernel), cast(
-        EnterpriseDirectoryRbacIntentOverlayV2, intent
-    )
+    typed_kernel = cast(EnterpriseDirectoryRbacKernelV1, kernel)
+    typed_intent = cast(EnterpriseDirectoryRbacIntentOverlayV2, intent)
+    if (
+        typed_kernel.identity_access_universe_digest
+        != typed_intent.identity_access_universe_digest
+    ):
+        raise EnterpriseRbacArtifactError(
+            "directory/RBAC V2 public universe binding differs"
+        )
+    return typed_kernel, typed_intent
 
 
 def _export_models(

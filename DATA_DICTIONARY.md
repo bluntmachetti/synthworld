@@ -561,6 +561,7 @@ Overlapping revisions are hard errors in both packages, not last-write-wins.
 | Record | Key fields | Meaning |
 |---|---|---|
 | `EnterpriseAuthorizationCompositionV1` | `identity_access_universe_digest`, `evaluation_corpus_digest`, `directory_rbac`, `abac`, `rebac` | **Public.** Typed schema-version and digest references only; it never inlines a component payload. `directory_rbac` is required, `abac` and `rebac` default to null. |
+| `EnterpriseAuthorizationCompositionV2` | `identity_access_universe_digest`, `evaluation_corpus_digest`, `directory_rbac`, `abac`, `rebac` | **Public.** Independently versioned composition whose directory/RBAC reference is fixed to truth schema `2.0.0`; optional ABAC and ReBAC references remain fixed to `1.0.0`. It does not widen or reinterpret the frozen V1 composition. |
 | `AuthorizationEvaluationProfileV1` | `evaluation_corpus_digest`, `cells` | **Public.** Binds one closed profile to every frozen cell exactly once. |
 | `EnterpriseAuthorizationKernelV1` | universe/corpus/composition/profile digests, `cells` | **Public.** The cell/profile kernel. |
 | `CompiledEnterpriseAccessStateV1` | eight bound digests, `policy_conflicts`, `cells` | **Evaluator-only.** Per-cell `MechanismOutcomeSetV1`, aggregate access state, and `PolicyConflictTruthV1` rows. |
@@ -582,6 +583,14 @@ deterministic adapter/system/policy metadata. `evaluate_enterprise_authorization
 scores effective decision, final decision, exact mechanism outcome/inventory,
 conflict, binding, lifecycle, and runtime-gate behavior independently. It emits no
 aggregate.
+
+`compose_enterprise_authorization_v2` is the version-aware bridge from
+`CompiledEnterpriseDirectoryRbacTruthV2` into the existing aggregate kernel and
+access-state compilers. Those compilers accept either composition/truth pair and
+still require the component schema version and canonical digest to match exactly;
+mixing a V1 composition with V2 truth, or the reverse, is rejected. The V2
+composition has its own JSON Schema and leaves the frozen V1 composition schema
+and reference version unchanged.
 
 ### Artifact boundary
 

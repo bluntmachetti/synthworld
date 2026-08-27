@@ -17,7 +17,9 @@ from synthworld.enterprise.authorization.models import (
     CompiledEnterpriseAccessCellV1,
     CompiledEnterpriseAccessStateV1,
     DirectoryRbacComponentReferenceV1,
+    DirectoryRbacComponentReferenceV2,
     EnterpriseAuthorizationCompositionV1,
+    EnterpriseAuthorizationCompositionV2,
     EnterpriseAuthorizationKernelV1,
     MechanismOutcomeSetV1,
     PolicyConflictTruthV1,
@@ -47,6 +49,7 @@ from synthworld.enterprise.rbac.common import (
 from synthworld.enterprise.rbac.corpus_models import EnterpriseEvaluationCorpusV1
 from synthworld.enterprise.rbac.models import (
     CompiledEnterpriseDirectoryRbacTruthV1,
+    CompiledEnterpriseDirectoryRbacTruthV2,
     DirectoryRbacCellTruthV1,
 )
 from synthworld.enterprise.rebac.models import (
@@ -77,6 +80,56 @@ def compose_enterprise_authorization(
 ) -> EnterpriseAuthorizationCompositionV1:
     """Create fixed typed digest references; never retain inline payloads."""
 
+    abac_reference, rebac_reference = _component_references(
+        directory_rbac_truth, abac_truth, rebac_truth
+    )
+    return EnterpriseAuthorizationCompositionV1(
+        identity_access_universe_digest=(
+            directory_rbac_truth.identity_access_universe_digest
+        ),
+        evaluation_corpus_digest=directory_rbac_truth.evaluation_corpus_digest,
+        directory_rbac=DirectoryRbacComponentReferenceV1(
+            component_digest=synthetic_digest(
+                canonical_json_bytes(directory_rbac_truth)
+            )
+        ),
+        abac=abac_reference,
+        rebac=rebac_reference,
+    )
+
+
+def compose_enterprise_authorization_v2(
+    *,
+    directory_rbac_truth: CompiledEnterpriseDirectoryRbacTruthV2,
+    abac_truth: CompiledEnterpriseAbacTruthV1 | None = None,
+    rebac_truth: CompiledEnterpriseRebacTruthV1 | None = None,
+) -> EnterpriseAuthorizationCompositionV2:
+    """Create a V2 composition without widening the frozen V1 contract."""
+
+    abac_reference, rebac_reference = _component_references(
+        directory_rbac_truth, abac_truth, rebac_truth
+    )
+    return EnterpriseAuthorizationCompositionV2(
+        identity_access_universe_digest=(
+            directory_rbac_truth.identity_access_universe_digest
+        ),
+        evaluation_corpus_digest=directory_rbac_truth.evaluation_corpus_digest,
+        directory_rbac=DirectoryRbacComponentReferenceV2(
+            component_digest=synthetic_digest(
+                canonical_json_bytes(directory_rbac_truth)
+            )
+        ),
+        abac=abac_reference,
+        rebac=rebac_reference,
+    )
+
+
+def _component_references(
+    directory_rbac_truth: CompiledEnterpriseDirectoryRbacTruthV1
+    | CompiledEnterpriseDirectoryRbacTruthV2,
+    abac_truth: CompiledEnterpriseAbacTruthV1 | None,
+    rebac_truth: CompiledEnterpriseRebacTruthV1 | None,
+) -> tuple[AbacComponentReferenceV1 | None, RebacComponentReferenceV1 | None]:
     for label, component in (("abac", abac_truth), ("rebac", rebac_truth)):
         if component is None:
             continue
@@ -96,24 +149,15 @@ def compose_enterprise_authorization(
                 f"composition_{label}_corpus_digest_mismatch",
                 f"{label.upper()} truth does not bind the RBAC corpus",
             )
-    return EnterpriseAuthorizationCompositionV1(
-        identity_access_universe_digest=(
-            directory_rbac_truth.identity_access_universe_digest
-        ),
-        evaluation_corpus_digest=directory_rbac_truth.evaluation_corpus_digest,
-        directory_rbac=DirectoryRbacComponentReferenceV1(
-            component_digest=synthetic_digest(
-                canonical_json_bytes(directory_rbac_truth)
-            )
-        ),
-        abac=(
+    return (
+        (
             AbacComponentReferenceV1(
                 component_digest=synthetic_digest(canonical_json_bytes(abac_truth))
             )
             if abac_truth is not None
             else None
         ),
-        rebac=(
+        (
             RebacComponentReferenceV1(
                 component_digest=synthetic_digest(canonical_json_bytes(rebac_truth))
             )
@@ -127,7 +171,8 @@ def compile_enterprise_authorization_kernel(
     *,
     universe: EnterpriseIdentityAccessUniverseV1,
     corpus: EnterpriseEvaluationCorpusV1,
-    composition: EnterpriseAuthorizationCompositionV1,
+    composition: EnterpriseAuthorizationCompositionV1
+    | EnterpriseAuthorizationCompositionV2,
     evaluation_profile: AuthorizationEvaluationProfileV1,
 ) -> EnterpriseAuthorizationKernelV1:
     """Bind one closed evaluation profile to every existing corpus cell."""
@@ -177,8 +222,10 @@ def compile_enterprise_access_state(
     universe: EnterpriseIdentityAccessUniverseV1,
     canonical_binding_truth: EnterpriseCanonicalBindingTruthV1,
     corpus: EnterpriseEvaluationCorpusV1,
-    composition: EnterpriseAuthorizationCompositionV1,
-    directory_rbac_truth: CompiledEnterpriseDirectoryRbacTruthV1,
+    composition: EnterpriseAuthorizationCompositionV1
+    | EnterpriseAuthorizationCompositionV2,
+    directory_rbac_truth: CompiledEnterpriseDirectoryRbacTruthV1
+    | CompiledEnterpriseDirectoryRbacTruthV2,
     evaluation_profile: AuthorizationEvaluationProfileV1,
     abac_truth: CompiledEnterpriseAbacTruthV1 | None = None,
     rebac_truth: CompiledEnterpriseRebacTruthV1 | None = None,
@@ -313,8 +360,10 @@ def _verify_payloads(
     universe: EnterpriseIdentityAccessUniverseV1,
     binding: EnterpriseCanonicalBindingTruthV1,
     corpus: EnterpriseEvaluationCorpusV1,
-    composition: EnterpriseAuthorizationCompositionV1,
-    rbac: CompiledEnterpriseDirectoryRbacTruthV1,
+    composition: EnterpriseAuthorizationCompositionV1
+    | EnterpriseAuthorizationCompositionV2,
+    rbac: CompiledEnterpriseDirectoryRbacTruthV1
+    | CompiledEnterpriseDirectoryRbacTruthV2,
     abac: CompiledEnterpriseAbacTruthV1 | None,
     rebac: CompiledEnterpriseRebacTruthV1 | None,
 ) -> _PayloadDigests:
@@ -402,7 +451,8 @@ def _require_reference(
 
 def _require_profile_components(
     profile: AuthorizationEvaluationProfileKind,
-    composition: EnterpriseAuthorizationCompositionV1,
+    composition: EnterpriseAuthorizationCompositionV1
+    | EnterpriseAuthorizationCompositionV2,
 ) -> None:
     needs_abac = profile in {
         AuthorizationEvaluationProfileKind.ABAC,
@@ -566,4 +616,5 @@ __all__ = [
     "compile_enterprise_access_state",
     "compile_enterprise_authorization_kernel",
     "compose_enterprise_authorization",
+    "compose_enterprise_authorization_v2",
 ]

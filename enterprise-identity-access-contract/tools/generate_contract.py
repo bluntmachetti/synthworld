@@ -57,6 +57,7 @@ from synthworld.enterprise.authorization.models import (
     AuthorizationEvaluationProfileV1,
     CompiledEnterpriseAccessStateV1,
     EnterpriseAuthorizationCompositionV1,
+    EnterpriseAuthorizationCompositionV2,
     EnterpriseAuthorizationKernelV1,
 )
 from synthworld.enterprise.authorization.reference import (
@@ -211,6 +212,9 @@ SCHEMAS: dict[str, type[BaseModel]] = {
     "enterprise-rebac-metrics.schema.json": EnterpriseRebacMetricsV1,
     "enterprise-authorization-composition.schema.json": (
         EnterpriseAuthorizationCompositionV1
+    ),
+    "enterprise-authorization-composition-v2.schema.json": (
+        EnterpriseAuthorizationCompositionV2
     ),
     "enterprise-authorization-evaluation-profile.schema.json": (
         AuthorizationEvaluationProfileV1

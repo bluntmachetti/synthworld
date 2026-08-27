@@ -9,6 +9,19 @@ import pytest
 from jsonschema import Draft202012Validator
 from pydantic import BaseModel, ValidationError
 
+from synthworld.enterprise.authorization.compiler import (
+    compile_enterprise_access_state,
+    compose_enterprise_authorization_v2,
+)
+from synthworld.enterprise.authorization.models import (
+    AuthorizationCellProfileV1,
+    AuthorizationEvaluationProfileV1,
+    CompiledEnterpriseAccessStateV1,
+    EnterpriseAuthorizationCompositionV2,
+)
+from synthworld.enterprise.authorization_common import (
+    AuthorizationEvaluationProfileKind,
+)
 from synthworld.enterprise.canonical import canonical_json_bytes, synthetic_digest
 from synthworld.enterprise.compiler import EnterpriseCompileError
 from synthworld.enterprise.models import EnterpriseArtifactManifestV1
@@ -188,6 +201,51 @@ def test_v2_direct_intent_changes_reconciliation_not_effective_authority() -> No
         CompiledEnterpriseDirectoryRbacTruthV2.model_validate_json(json.dumps(document))
 
 
+def test_v2_truth_reaches_composed_authorization_without_widening_v1() -> None:
+    reference = reference_enterprise_rbac_inputs()
+    empty_truth = _compile_v2(reference, _v2_intent(reference))
+    cell_id, direct = _excessive_direct_target(reference, empty_truth)
+    approved_truth = _compile_v2(reference, _v2_intent(reference, (direct,)))
+    corpus = reference.corpus_result.public_corpus
+    profile = AuthorizationEvaluationProfileV1(
+        evaluation_corpus_digest=synthetic_digest(canonical_json_bytes(corpus)),
+        cells=tuple(
+            AuthorizationCellProfileV1(
+                cell_id=item.cell_id,
+                profile=AuthorizationEvaluationProfileKind.RBAC,
+            )
+            for item in corpus.evaluation_cells
+        ),
+    )
+
+    def compose_and_compile(
+        truth: CompiledEnterpriseDirectoryRbacTruthV2,
+    ) -> tuple[EnterpriseAuthorizationCompositionV2, CompiledEnterpriseAccessStateV1]:
+        composition = compose_enterprise_authorization_v2(directory_rbac_truth=truth)
+        access_state = compile_enterprise_access_state(
+            universe=reference.universe_result.public_universe,
+            canonical_binding_truth=(
+                reference.universe_result.evaluator_canonical_binding_truth
+            ),
+            corpus=corpus,
+            composition=composition,
+            directory_rbac_truth=truth,
+            evaluation_profile=profile,
+        )
+        return composition, access_state
+
+    before_composition, before = compose_and_compile(empty_truth)
+    approved_composition, approved = compose_and_compile(approved_truth)
+    before_cell = next(item for item in before.cells if item.cell_id == cell_id)
+    approved_cell = next(item for item in approved.cells if item.cell_id == cell_id)
+
+    assert before_composition.schema_version == "2.0.0"
+    assert approved_composition.directory_rbac.component_schema_version == "2.0.0"
+    assert before_cell.reconciliation is ReconciliationOutcome.EXCESSIVE
+    assert approved_cell.reconciliation is ReconciliationOutcome.ALIGNED_ALLOW
+    assert approved_cell.effective_decision is before_cell.effective_decision
+
+
 def test_v2_model_is_independent_strict_canonical_and_validates_windows() -> None:
     reference = reference_enterprise_rbac_inputs()
     empty = _v2_intent(reference)
@@ -357,6 +415,9 @@ def test_v2_artifacts_are_exact_split_canonical_and_schema_valid(
     schema_models = {
         "enterprise-directory-rbac-intent-v2": intent,
         "compiled-enterprise-directory-rbac-truth-v2": truth,
+        "enterprise-authorization-composition-v2": (
+            compose_enterprise_authorization_v2(directory_rbac_truth=truth)
+        ),
     }
     for stem, model in schema_models.items():
         schema = json.loads(
@@ -385,6 +446,8 @@ def test_v2_artifacts_are_exact_split_canonical_and_schema_valid(
         ("inventory", "inventory differs"),
         ("descriptor", "manifest binding differs"),
         ("truth_binding", "truth public binding differs"),
+        ("truth_corpus_binding", "truth public binding differs"),
+        ("public_universe_binding", "public universe binding differs"),
     ],
 )
 def test_v2_artifact_loaders_reject_manifest_and_public_binding_corruption(
@@ -403,9 +466,15 @@ def test_v2_artifact_loaders_reject_manifest_and_public_binding_corruption(
         truth=truth,
     )
 
-    if corruption == "truth_binding":
+    if corruption in {"truth_binding", "truth_corpus_binding"}:
         invalid_truth = truth.model_copy(
-            update={"directory_rbac_intent_digest": synthetic_digest(b"other\n")}
+            update={
+                (
+                    "directory_rbac_intent_digest"
+                    if corruption == "truth_binding"
+                    else "evaluation_corpus_digest"
+                ): synthetic_digest(b"other\n")
+            }
         )
         _rewrite_model_and_descriptor(
             root,
@@ -415,6 +484,21 @@ def test_v2_artifact_loaders_reject_manifest_and_public_binding_corruption(
         )
         with pytest.raises(EnterpriseRbacArtifactError, match=message):
             load_evaluator_enterprise_directory_rbac_truth_v2(root)
+        return
+    if corruption == "public_universe_binding":
+        invalid_kernel = reference.kernel.model_copy(
+            update={"identity_access_universe_digest": synthetic_digest(b"other\n")}
+        )
+        _rewrite_model_and_descriptor(
+            root,
+            visibility="public",
+            name="directory-rbac-kernel.json",
+            model=invalid_kernel,
+        )
+        with pytest.raises(EnterpriseRbacArtifactError, match=message):
+            load_public_enterprise_directory_rbac_kernel_v2(root)
+        with pytest.raises(EnterpriseRbacArtifactError, match=message):
+            load_public_enterprise_directory_rbac_intent_v2(root)
         return
     else:
         manifest_path = root / "public" / "manifest.json"

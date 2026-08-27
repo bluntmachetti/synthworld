@@ -6382,6 +6382,15 @@
             },
             {
               "assignment_required": true,
+              "id": "python:synthworld.enterprise.EnterpriseAuthorizationCompositionV2",
+              "implementation_module": "synthworld.enterprise.authorization.models",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationCompositionV2",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
               "id": "python:synthworld.enterprise.EnterpriseAuthorizationKernelV1",
               "implementation_module": "synthworld.enterprise.authorization.models",
               "kind": "python_export",
@@ -6796,6 +6805,15 @@
             },
             {
               "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationCompositionV2",
+              "implementation_module": "synthworld.enterprise.authorization.models",
+              "kind": "python_export",
+              "name": "EnterpriseAuthorizationCompositionV2",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
               "id": "python:synthworld.enterprise.authorization.EnterpriseAuthorizationEvaluatorArtifactsV1",
               "implementation_module": "synthworld.enterprise.authorization.serialization",
               "kind": "python_export",
@@ -6845,6 +6863,15 @@
               "implementation_module": "synthworld.enterprise.authorization.compiler",
               "kind": "python_export",
               "name": "compose_enterprise_authorization",
+              "source": "src/synthworld/enterprise/authorization/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.authorization.compose_enterprise_authorization_v2",
+              "implementation_module": "synthworld.enterprise.authorization.compiler",
+              "kind": "python_export",
+              "name": "compose_enterprise_authorization_v2",
               "source": "src/synthworld/enterprise/authorization/__init__.py",
               "visibility": "subpackage"
             },
@@ -6971,6 +6998,15 @@
               "implementation_module": "synthworld.enterprise.authorization.compiler",
               "kind": "python_export",
               "name": "compose_enterprise_authorization",
+              "source": "src/synthworld/enterprise/__init__.py",
+              "visibility": "subpackage"
+            },
+            {
+              "assignment_required": true,
+              "id": "python:synthworld.enterprise.compose_enterprise_authorization_v2",
+              "implementation_module": "synthworld.enterprise.authorization.compiler",
+              "kind": "python_export",
+              "name": "compose_enterprise_authorization_v2",
               "source": "src/synthworld/enterprise/__init__.py",
               "visibility": "subpackage"
             },
@@ -7954,6 +7990,14 @@
           "kind": "schema",
           "name": "enterprise-abac-state.schema.json",
           "source": "enterprise-identity-access-contract/schemas/enterprise-abac-state.schema.json",
+          "visibility": "public"
+        },
+        {
+          "assignment_required": true,
+          "id": "schema:enterprise-identity-access-contract/schemas/enterprise-authorization-composition-v2.schema.json",
+          "kind": "schema",
+          "name": "enterprise-authorization-composition-v2.schema.json",
+          "source": "enterprise-identity-access-contract/schemas/enterprise-authorization-composition-v2.schema.json",
           "visibility": "public"
         },
         {
@@ -10355,8 +10399,8 @@
     }
   ],
   "input_digests": {
-    "curated_sha256": "eb6912cdec7d9e70e47da574a38d99121fdc867751185d3fe21517414c58f727",
-    "generated_sha256": "f9757b9bd17a0391a9e2231654b72d4df4eba17a4ee47b53a923618faeebad91"
+    "curated_sha256": "328c92ee970b92b2f3717aab94c3c0ddee9b63b0576deb08c8a820a183b051fd",
+    "generated_sha256": "58ab9cdc3970ef3151e771419059c65c00952e33f32ee8db357ff41e80bd55ab"
   },
   "schema_version": "1.0.0"
 }
