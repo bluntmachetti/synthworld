@@ -39,6 +39,11 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         Path(".github/DISCUSSION_TEMPLATE/q-a.yml"),
         Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
         Path(".github/workflows/release.yml"),
+        # Release-readiness validation and its fixtures name only the public
+        # distribution to reject stale install pins; no consumer integration.
+        # Reviewed for PR #160 on 2026-10-02.
+        Path(".github/scripts/validate_release_ready.py"),
+        Path("tests/test_release_workflow.py"),
         Path("CHANGELOG.md"),
         # Public package installation and PyPI links only. Reviewed as part of the
         # additive plain-Markdown documentation migration on 2026-08-08.
