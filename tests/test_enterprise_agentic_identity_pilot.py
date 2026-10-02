@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import subprocess
 from dataclasses import replace
 from pathlib import Path
 
@@ -326,6 +327,9 @@ def test_full_cli_keeps_reference_truth_in_deterministic_evaluator_outputs(
     )
     assert EVALUATOR_WATERMARK in comparison
     assert EVALUATOR_WATERMARK in evaluator_world
+    assert comparison == (
+        Path(__file__).parents[1] / "public/demo-report.html"
+    ).read_text(encoding="utf-8")
     assert "authorization_decision_accuracy" in comparison
     assert "least_privilege_accuracy" in comparison
     assert "temporal_validity_accuracy" in comparison
@@ -567,3 +571,105 @@ def test_score_validates_all_strategies_before_writing_and_can_retry(
         == 0
     )
     assert (results / "manifest.json").is_file()
+
+
+def test_omitting_delegation_check_exposes_revocation_failure(
+    pilot_benchmark: EnterpriseAgenticGeneratedBenchmarkV1,
+) -> None:
+    baseline = dict(build_policy_traces(pilot_benchmark.public))
+    broken = dict(
+        build_policy_traces(pilot_benchmark.public, omit_delegation_check=True)
+    )
+    assert baseline["abac"] == broken["abac"]
+    assert baseline["rbac"] == broken["rbac"]
+    assert baseline["rebac"] == broken["rebac"]
+    cases = {
+        case.kind.value: case.action_event_id
+        for case in pilot_benchmark.evaluator.cases
+    }
+    event_id = cases["post_revocation_action"]
+    correct = {row.event_id: row for row in baseline["combined"].rows}
+    faulty = {row.event_id: row for row in broken["combined"].rows}
+    assert correct[event_id].decision is Decision.DENY
+    assert faulty[event_id].decision is Decision.ALLOW
+    metrics = {
+        metric.name: metric
+        for metric in evaluate_generated_enterprise_agentic_trace(
+            broken["combined"], pilot_benchmark
+        ).metrics
+    }
+    assert metrics["authorization_decision_accuracy"].value == pytest.approx(6 / 7)
+    assert metrics["excess_authority_rate"].value == pytest.approx(1 / 4)
+
+
+def test_demo_runs_all_stages_and_refuses_overwrite(tmp_path: Path) -> None:
+    output = tmp_path / "demo"
+    assert pilot_main(["run", "--output", str(output), "--omit-delegation-check"]) == 0
+    manifest = json.loads((output / "submissions/manifest.json").read_bytes())
+    assert manifest["omit_delegation_check"] is True
+    report = (output / "results/policy-comparison.html").read_text(encoding="utf-8")
+    assert "omitted (deliberate defect)" in report
+    assert "allow (FAIL)" in report
+    assert "Not measured:" in report
+    assert "post revocation action" in report
+    assert "Combined (deliberate defect)" in report
+    assert "Proposed composition" not in report
+    assert "RBAC, ReBAC and ABAC must all allow" not in report
+    assert "entire ReBAC" in report
+    result_manifest = json.loads((output / "results/manifest.json").read_bytes())
+    assert result_manifest["source"]["declared_omit_delegation_check"] is True
+    with pytest.raises(FileExistsError):
+        pilot_main(["run", "--output", str(output)])
+
+
+def test_observation_summary_does_not_present_missing_fields_as_verified() -> None:
+    from synthworld.agentic.models import AgenticTraceSubmission, ObservedActionTrace
+    from synthworld.cli import _agentic_observation_summary
+
+    trace = AgenticTraceSubmission(
+        rows=(
+            ObservedActionTrace(event_id="empty"),
+            ObservedActionTrace(event_id="observed", decision=Decision.DENY),
+        )
+    )
+    summary = _agentic_observation_summary(trace_submission_to_jsonl(trace))
+    assert "Action-time decisions: 1/2 reported" in summary
+    assert "Principal identities: 0/2 reported" in summary
+    assert "unmeasured capabilities" in summary
+    assert "not independently verified" in summary
+
+
+def test_demo_failure_explains_retained_artifacts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def fail(*args: object, **kwargs: object) -> None:
+        raise subprocess.CalledProcessError(7, ["generate"])
+
+    monkeypatch.setattr(subprocess, "run", fail)
+    output = tmp_path / "failed"
+    assert pilot_main(["run", "--output", str(output)]) == 1
+    assert output.is_dir()
+    error = capsys.readouterr().err
+    assert "stage generate failed (exit 7)" in error
+    assert "new output directory" in error
+
+
+def test_summary_covers_every_optional_observation_field() -> None:
+    from synthworld.agentic.models import AgenticTraceSubmission, ObservedActionTrace
+    from synthworld.cli import _agentic_observation_summary
+
+    row = ObservedActionTrace(
+        event_id="empty", evidence_refs=(), reconstructable_from_retained_evidence=False
+    )
+    summary = _agentic_observation_summary(
+        trace_submission_to_jsonl(AgenticTraceSubmission(rows=(row,)))
+    )
+    assert "Evidence-reference lists: 1/1 reported" in summary
+    assert "Evidence reconstructability: 1/1 reported" in summary
+    assert "Accountable owner chains: 0/1 reported" in summary
+    optional = set(ObservedActionTrace.model_fields) - {
+        "schema_version",
+        "synthetic",
+        "event_id",
+    }
+    assert summary.count("/1 reported") == len(optional)

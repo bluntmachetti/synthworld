@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "idcognito-synthworld"
-version = "0.17.0"
-description = "Deterministic synthetic identity graphs for privacy-system evaluation"
+version = "0.18.0"
+description = "Connected synthetic identity worlds for identity, privacy, and access testing"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
@@ -40,7 +40,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/bluntmachetti/synthworld"
+Homepage = "https://bluntmachetti.github.io/synthworld/"
+Documentation = "https://bluntmachetti.github.io/synthworld/"
 Repository = "https://github.com/bluntmachetti/synthworld"
 Issues = "https://github.com/bluntmachetti/synthworld/issues"
 Changelog = "https://github.com/bluntmachetti/synthworld/blob/main/CHANGELOG.md"
@@ -63,12 +64,20 @@ dev = [
 
 [project.scripts]
 synthworld = "synthworld.cli:main"
+synthworld-demo = "synthworld_demo.__main__:main"
 
 [tool.hatch.build]
 exclude = ["/.local-assurance"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/synthworld"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"examples/enterprise_agentic_identity_pilot/__init__.py" = "synthworld_demo/__init__.py"
+"examples/enterprise_agentic_identity_pilot/__main__.py" = "synthworld_demo/__main__.py"
+"examples/enterprise_agentic_identity_pilot/policies.py" = "synthworld_demo/policies.py"
+"examples/enterprise_agentic_identity_pilot/rendering.py" = "synthworld_demo/rendering.py"
+"examples/enterprise_agentic_identity_pilot/policy-overlay.json" = "synthworld_demo/policy-overlay.json"
 
 [tool.hatch.build.targets.sdist.force-include]
 "LICENSE" = "LICENSE"

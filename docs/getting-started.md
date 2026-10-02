@@ -1,58 +1,52 @@
-# Getting Started
+# Getting started
 
-> These instructions track current `main`. Use a matching release tag for released
-> behavior.
+Choose the result you need. Generating synthetic identities does not require
+learning the agent-authorisation workflow.
 
-SynthWorld requires Python 3.12 or newer. The distribution is
-`idcognito-synthworld`; the import package and command are `synthworld`.
+## Generate connected synthetic identities
 
-## Install
-
-```bash
-pip install idcognito-synthworld
-synthworld --help
-```
-
-For repository development, use the locked environment:
+Use Python 3.12 or newer, preferably in a virtual environment:
 
 ```bash
-uv sync --locked --all-groups
+python -m venv .venv
+# Activate the environment using the command for your operating system.
+pip install idcognito-synthworld==0.17.0
+synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
-## Create a deterministic world
+On macOS/Linux, activate with `source .venv/bin/activate`. On Windows PowerShell,
+use `.venv\Scripts\Activate.ps1` before running `pip`.
 
-```bash
-synthworld generate \
-  --seed 20260719 \
-  --persona-count 10 \
-  --output world.json
-```
+You now have ten fictional personas and their connected relationships in
+`world.json`. Continue with [identity worlds](guides/identity-worlds.md) to inspect
+the data and check reproducibility. For matching or privacy evaluation, use
+[identity resolution](guides/identity-resolution.md) or
+[privacy and exposure](guides/privacy-exposure.md).
 
-Repeat the command with the same explicit inputs to reproduce the artifact. Do not
-replace the seed with wall-clock time when reproducibility matters.
+## Test agent authorisation
 
-## Run the foundational walkthrough
+Start with the [complete demo](guides/agent-authorisation-quickstart.md). It provides
+a browser preview and runs generation, teaching policies, and scoring without an
+unwritten adapter or a pre-existing trace file. The packaged command is new in the
+unreleased 0.18.0 candidate; the guide distinguishes the source preview from the
+post-release installation path.
+
+After the demo, follow [agent authority](guides/agent-authority.md) to understand the
+trace contract, then [development pipelines](guides/development-pipelines.md) for
+integration. Connecting your real system is separate from running the demo.
+
+## Develop or run repository examples
 
 From a repository checkout:
 
 ```bash
+uv sync --locked --all-groups
 uv run python examples/evaluate_all.py --predictions-dir predictions
 ```
 
-This demonstrates five foundational public-input adapters. It is not an exhaustive
-list of every contract-specific evaluator.
+That walkthrough demonstrates five foundational public-input adapters, including
+extraction and identity resolution. It is not an exhaustive evaluator inventory.
 
-## Choose the next guide
-
-- [Identity worlds](guides/identity-worlds.md)
-- [Identity resolution](guides/identity-resolution.md)
-- [Privacy exposure](guides/privacy-exposure.md)
-- [Agent authority](guides/agent-authority.md)
-- [Enterprise agentic identity experiment](guides/enterprise-agentic-identity-experiment.md)
-- [Enterprise access](guides/enterprise-access.md)
-- [Enterprise Identity Planning](guides/enterprise-identity-planning.md)
-- [Development pipelines](guides/development-pipelines.md)
-- [Evaluating a system](guides/evaluating-a-system.md)
-
-The legacy [user guide](../USER_GUIDE.md) remains only as a compatibility index
-for historical repository anchors. These canonical pages own the detailed guidance.
+Reference pages describe current main unless they state a released version. Pin the
+package version used by your integration. The legacy [user guide](../USER_GUIDE.md)
+remains a compatibility index for historical links.

@@ -1,105 +1,71 @@
-# SynthWorld documentation
+# Connected synthetic identities. Repeatable tests.
 
-> **Current-main documentation.** These pages describe the repository's current
-> `main` branch and may include changes not yet released. For a released contract,
-> use the matching signed Git tag, release notes, and packaged artifacts.
+SynthWorld builds connected fictional identity worlds for testing identity,
+privacy, and access systems. Generate useful fixtures, or test whether an agent
+still has authority after credentials and delegations change.
 
-SynthWorld generates deterministic, safely fictional identity worlds and separates
-product-facing observations from evaluator truth so identity, privacy, access, and
-agent systems can be tested reproducibly.
+## Choose your starting point
 
-## Mental model
+- **[Generate synthetic identity data](guides/identity-worlds.md)** — linked fictional
+  personas and relationships for identity matching, privacy tools, and connected
+  data workflows. Start with a repeatable seed; add evidence and ambiguity when
+  you need them.
+- **[Test agent authorisation](guides/agent-authorisation-quickstart.md)** — seven
+  concrete action cases for delegated access and agent lifecycle decisions.
+  Compare teaching policies, remove a delegation check, and inspect the failure.
 
-```text
-explicit seed + config + schema version + event schedule
-                         |
-                         v
-             deterministic identity world
-                    /            \
-                   v              v
-          public product input   evaluator truth
-                   |              |
-                   v              |
-             system under test    |
-                   |              |
-                   +---- prediction/trace
-                                  |
-                                  v
-                       independent metrics
-```
+Both paths work locally. Synthetic identity generation needs no policy engine,
+agent runtime, or authorisation setup. Python 3.12 or newer is required.
 
-## Choose your goal
-
-| Goal | Start here |
-|---|---|
-| Install and create a first world | [Getting Started](getting-started.md) |
-| Build connected identity fixtures | [Identity worlds](guides/identity-worlds.md) |
-| Evaluate matching or privacy behavior | [Identity resolution](guides/identity-resolution.md) or [privacy exposure](guides/privacy-exposure.md) |
-| Test agent delegation and audit evidence | [Agent authority](guides/agent-authority.md) |
-| Compare RBAC, ABAC, and ReBAC on one agentic world | [Enterprise agentic identity experiment](guides/enterprise-agentic-identity-experiment.md) |
-| Compile enterprise identity and access truth | [Enterprise access](guides/enterprise-access.md) |
-| Build and score an enterprise authorization experiment | [Enterprise authorization](guides/enterprise-authorization-python.md) |
-| Add identity and authorization checks to CI | [Development pipelines](guides/development-pipelines.md) |
-| Plan an enterprise identity and authorization journey | [Enterprise Identity Planning](guides/enterprise-identity-planning.md) |
-| Connect a system to an evaluator | [Evaluating a system](guides/evaluating-a-system.md) |
-| Understand benchmark contracts and boundaries | [Concepts](concepts/index.md) |
-
-## Five-minute quickstart
+## Start with connected identity data
 
 ```bash
-pip install idcognito-synthworld
+pip install idcognito-synthworld==0.17.0
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
-`world.json` is fictional and repeatable for the same explicit inputs. Continue with
-[Getting Started](getting-started.md) before using a benchmark scorer.
+The same version, seed, and configuration reproduce the same bytes. These are
+fictional fixtures, not anonymised records from real people.
 
-## Capability and benchmark status
+Continue to [identity worlds](guides/identity-worlds.md),
+[identity resolution](guides/identity-resolution.md), or
+[privacy and exposure](guides/privacy-exposure.md).
 
-Capability maturity and benchmark publication are different axes. The documentation
-build consumes drift-checked resolved capability and benchmark registries and emits a
-public allowlisted catalogue:
+## See an authorisation failure before integrating anything
 
-- [Capability reference](reference/capabilities.md)
-- [Benchmark publication reference](reference/benchmarks.md)
-- [Generated registry catalogue](/benchmarks/catalogue)
+A valid credential does not guarantee an active delegation. The
+[agent-authorisation quickstart](guides/agent-authorisation-quickstart.md) shows a
+post-revocation request that a credential-only check allows, and how adding the
+delegation check changes the outcome. You can inspect the result in your browser
+before installing the demo.
 
-A benchmark being packaged or published does not imply that every related capability
-is mature, and capability maturity does not authorize external publication.
+The comparison uses local teaching policies. It does not contact your production
+system or prove that an execution path enforces its decisions.
 
-## Featured benchmarks
+## Go further
 
-- [Generated benchmark inventory](../BENCHMARKS.md)
-- [Asteria Agentic v1](../AGENTIC_BENCHMARK.md)
-- [Published frozen tables on Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks)
+- [Getting started](getting-started.md): installation and both first-use paths.
+- [Agent authority](guides/agent-authority.md): generated lifecycle worlds and trace contracts.
+- [Enterprise access](guides/enterprise-access.md): authored organisation models.
+- [Enterprise authorisation](guides/enterprise-authorization-python.md): compose and score a policy experiment.
+- [Experiments](experiments/index.md): retained results and reproduction instructions.
+- [Benchmark catalogue](/benchmarks/catalogue): available families and their publication state.
+- [Metrics](reference/metrics.md): what a score measures and how to interpret missing evidence.
 
-## Current focus
+## Versions and evidence
 
-The project is preserving frozen benchmark bytes while improving user journeys,
-publication controls, generated enterprise/agent depth, and evidence-binding
-contracts. Candidate benchmark artifacts remain candidates until their explicit
-publication gates are satisfied.
+The identity commands above are available in release 0.17.0. The packaged demo is
+prepared for 0.18.0; its quickstart labels the release status and provides a source
+preview path until publication. Other reference pages track current main and may
+include unreleased functionality.
 
-See the [roadmap view](roadmap/index.md) for Now/Next/Later framing and the generated
-registries for current maturity/publication state.
+Where a benchmark provides public inputs, those inputs are physically separated
+from expected answers. Published reference truth is inspectable; this prevents
+accidental answer leakage, not deliberate cheating. Frozen conformance fixtures
+are not evidence of real-world generalisation.
 
-## Navigate
-
-| Destination | Link |
-|---|---|
-| Home | This page |
-| Getting Started | [Install and first evaluation](getting-started.md) |
-| Guides | [Journey guides](guides/index.md) |
-| Benchmarks | [Benchmark reference](reference/benchmarks.md) |
-| Experiments | [Reproducible experiments](experiments/index.md) |
-| Roadmap | [Now/Next/Later](roadmap/index.md) |
-| Support | [Help and contribution routes](support/index.md) |
-| Reference | [Technical reference](reference/index.md) |
-
-## Project links
-
-- [Source](https://github.com/bluntmachetti/synthworld)
-- [PyPI](https://pypi.org/project/idcognito-synthworld/)
-- [Releases](https://github.com/bluntmachetti/synthworld/releases)
-- [Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks)
-- [GitHub Discussions](https://github.com/bluntmachetti/synthworld/discussions)
+[Source](https://github.com/bluntmachetti/synthworld) ·
+[PyPI](https://pypi.org/project/idcognito-synthworld/) ·
+[Releases](https://github.com/bluntmachetti/synthworld/releases) ·
+[Hugging Face](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks) ·
+[Support](support/index.md)

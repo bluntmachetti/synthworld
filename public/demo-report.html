@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; connect-src 'none'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Enterprise agentic identity policy pilot</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --background: #f5f7fb;
+  --surface: #ffffff;
+  --surface-muted: #eef2f7;
+  --foreground: #172033;
+  --muted: #586579;
+  --border: #cfd7e3;
+  --accent: #3157b7;
+  --accent-soft: #e7edff;
+  --danger: #8f1d2c;
+  --danger-soft: #fde8eb;
+  --track: #dfe5ee;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #111827;
+    --surface: #182235;
+    --surface-muted: #202d43;
+    --foreground: #eef3fb;
+    --muted: #b4bfd0;
+    --border: #3c4b62;
+    --accent: #8aabff;
+    --accent-soft: #24375e;
+    --danger: #ff9aa8;
+    --danger-soft: #4d2029;
+    --track: #344258;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  line-height: 1.5;
+}
+.watermark {
+  padding: 0.85rem 1rem;
+  background: var(--danger);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+.shell {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+}
+h1, h2, h3 { line-height: 1.2; }
+h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 3.1rem); }
+h2 { margin: 0 0 1rem; font-size: 1.45rem; }
+h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+p { margin: 0; }
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.hero { display: grid; gap: 1rem; margin-bottom: 2rem; }
+.lede { max-width: 78ch; color: var(--muted); }
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.identity strong { color: var(--foreground); }
+section { margin-top: 2.25rem; }
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+.summary-item {
+  padding: 0.9rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+}
+.summary-item dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.summary-item dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.architecture {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.architecture article {
+  position: relative;
+  padding: 1rem;
+  background: var(--surface);
+  border-top: 0.3rem solid var(--accent);
+}
+.architecture article:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -0.68rem;
+  top: 50%;
+  z-index: 1;
+  color: var(--accent);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.architecture p { color: var(--muted); font-size: 0.9rem; }
+.architecture .combined { background: var(--accent-soft); }
+.architecture-note { margin-top: 0.85rem; color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  font-size: 0.9rem;
+}
+caption { padding: 0 0 0.75rem; color: var(--muted); text-align: left; }
+th, td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--surface-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+tbody tr:last-child td { border-bottom: 0; }
+tr.combined-row { background: var(--accent-soft); }
+.strategy { font-weight: 700; white-space: nowrap; }
+.recommended {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--accent);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.metric-name { min-width: 14rem; }
+.score { min-width: 8rem; }
+.score-value {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+.score-track {
+  display: block;
+  width: 7rem;
+  height: 0.42rem;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.score-fill { display: block; height: 100%; background: var(--accent); }
+.undefined { color: var(--muted); }
+.support {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.meaning { min-width: 19rem; color: var(--muted); }
+.interpretation { margin-top: 0.85rem; color: var(--muted); }
+details {
+  margin-top: 2.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+summary { cursor: pointer; font-weight: 700; }
+.bindings {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.45rem 1rem;
+  margin: 1rem 0 0;
+}
+.binding-row { display: contents; }
+.bindings dt { color: var(--muted); }
+.bindings dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+footer {
+  margin-top: 2.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+@media (max-width: 760px) {
+  .architecture { grid-template-columns: 1fr; }
+  .architecture article:not(:last-child)::after {
+    content: "↓";
+    right: 50%;
+    top: auto;
+    bottom: -1.05rem;
+  }
+}
+@media print {
+  :root { color-scheme: light; }
+  body { background: #ffffff; }
+  .shell { width: 100%; }
+  .table-wrap { overflow: visible; }
+  details { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="watermark" role="note">EVALUATOR VIEW - CONTAINS REFERENCE TRUTH</div>
+<main class="shell">
+  <header class="hero">
+    <div class="eyebrow">SynthWorld / experiment-owned policy comparison</div>
+    <h1>Enterprise agentic identity pilot</h1>
+    <p class="lede">
+      A deterministic offline comparison of authorization strategies over one
+      synthetic public identity world and its separately evaluated authority truth.
+      This report is not a policy engine, deployment result, vendor comparison, or
+      SynthWorld Explorer artifact.
+    </p>
+    <div class="identity">
+      <span><strong>Task:</strong> agentic_authority</span>
+      <span><strong>Benchmark:</strong> enterprise-agentic-generated-1.0.0</span>
+      <span><strong>Seed:</strong> 20260821</span>
+      <span><strong>Scoring:</strong> 0.3.0</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="world-heading">
+    <h2 id="world-heading">Public world inventory</h2>
+    <dl class="summary-grid"><div class="summary-item"><dt>Action Cases</dt><dd>7</dd></div><div class="summary-item"><dt>Combined Delegation Check</dt><dd>enabled</dd></div><div class="summary-item"><dt>Departments</dt><dd>4</dd></div><div class="summary-item"><dt>Events</dt><dd>33</dd></div><div class="summary-item"><dt>Logical Agents</dt><dd>5</dd></div><div class="summary-item"><dt>Organisations</dt><dd>1</dd></div><div class="summary-item"><dt>Principals</dt><dd>39</dd></div><div class="summary-item"><dt>Resources</dt><dd>6</dd></div><div class="summary-item"><dt>Seed</dt><dd>20260821</dd></div><div class="summary-item"><dt>World Id</dt><dd>3952053e-e6db-557c-8667-eb203314472b</dd></div></dl>
+  </section>
+
+  <section aria-labelledby="architecture-heading">
+    <h2 id="architecture-heading">Policy architecture</h2>
+    <div class="architecture">
+      <article>
+        <h3>RBAC ceiling</h3>
+        <p>
+          Coarse job-function entitlement establishes whether the agent is eligible
+          for the action.
+        </p>
+      </article>
+      <article>
+        <h3>ReBAC authority path</h3>
+        <p>
+          An active, resource-covering delegated relationship must connect the
+          originator, agent and target.
+        </p>
+      </article>
+      <article>
+        <h3>ABAC guard</h3>
+        <p>
+          Tenant, runtime, credential, purpose, scope, action and policy-version
+          context must remain valid.
+        </p>
+      </article>
+      <article class="combined">
+        <h3>Combined decision</h3>
+        <p>
+          Default deny. RBAC, ReBAC and ABAC must all allow; downstream lifecycle and revocation checks still apply.
+        </p>
+      </article>
+    </div>
+    <p class="architecture-note">
+      Human-owner authority is not unioned into agent authority. The combined strategy is the proposed least-authority composition, not an automatically recommended production policy.
+    </p>
+  </section>
+
+  <section aria-labelledby="metrics-heading">
+    <h2 id="metrics-heading">Strategy evaluation</h2>
+    <div class="table-wrap">
+      <table>
+        <caption>
+          Independent metrics from the evaluator. Every value retains its
+          scorer-provided support and denominator meaning; no aggregate score is
+          calculated.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Strategy</th>
+            <th scope="col">Metric</th>
+            <th scope="col">Value</th>
+            <th scope="col">Support</th>
+            <th scope="col">Support / denominator meaning</th>
+          </tr>
+        </thead>
+        <tbody><tr><th class="strategy" scope="row">rbac</th><td class="metric-name"><code>authorization_decision_accuracy</code></td><td class="score"><span class="score-value">0.5714</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:57.1429%"></span></span></td><td class="support">7</td><td class="meaning">scored action events</td></tr><tr><th class="strategy" scope="row">rbac</th><td class="metric-name"><code>authorization_decision_precision</code></td><td class="score"><span class="score-value">0.5000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:50.0000%"></span></span></td><td class="support">6</td><td class="meaning">actions the trace allowed at action time</td></tr><tr><th class="strategy" scope="row">rbac</th><td class="metric-name"><code>authorization_decision_recall</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">3</td><td class="meaning">actions truth allows at action time</td></tr><tr><th class="strategy" scope="row">rbac</th><td class="metric-name"><code>least_privilege_accuracy</code></td><td class="score"><span class="score-value">0.2500</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:25.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr><th class="strategy" scope="row">rbac</th><td class="metric-name"><code>excess_authority_rate</code></td><td class="score"><span class="score-value">0.7500</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:75.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr><th class="strategy" scope="row">rbac</th><td class="metric-name"><code>temporal_validity_accuracy</code></td><td class="score"><span class="score-value">0.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:0.0000%"></span></span></td><td class="support">2</td><td class="meaning">action events labelled valid_then_revoked, post_revocation_action or invalid_then_later_granted</td></tr><tr><th class="strategy" scope="row">abac</th><td class="metric-name"><code>authorization_decision_accuracy</code></td><td class="score"><span class="score-value">0.8571</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:85.7143%"></span></span></td><td class="support">7</td><td class="meaning">scored action events</td></tr><tr><th class="strategy" scope="row">abac</th><td class="metric-name"><code>authorization_decision_precision</code></td><td class="score"><span class="score-value">0.7500</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:75.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions the trace allowed at action time</td></tr><tr><th class="strategy" scope="row">abac</th><td class="metric-name"><code>authorization_decision_recall</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">3</td><td class="meaning">actions truth allows at action time</td></tr><tr><th class="strategy" scope="row">abac</th><td class="metric-name"><code>least_privilege_accuracy</code></td><td class="score"><span class="score-value">0.7500</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:75.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr><th class="strategy" scope="row">abac</th><td class="metric-name"><code>excess_authority_rate</code></td><td class="score"><span class="score-value">0.2500</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:25.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr><th class="strategy" scope="row">abac</th><td class="metric-name"><code>temporal_validity_accuracy</code></td><td class="score"><span class="score-value">0.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:0.0000%"></span></span></td><td class="support">2</td><td class="meaning">action events labelled valid_then_revoked, post_revocation_action or invalid_then_later_granted</td></tr><tr><th class="strategy" scope="row">rebac</th><td class="metric-name"><code>authorization_decision_accuracy</code></td><td class="score"><span class="score-value">0.7143</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:71.4286%"></span></span></td><td class="support">7</td><td class="meaning">scored action events</td></tr><tr><th class="strategy" scope="row">rebac</th><td class="metric-name"><code>authorization_decision_precision</code></td><td class="score"><span class="score-value">0.6000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:60.0000%"></span></span></td><td class="support">5</td><td class="meaning">actions the trace allowed at action time</td></tr><tr><th class="strategy" scope="row">rebac</th><td class="metric-name"><code>authorization_decision_recall</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">3</td><td class="meaning">actions truth allows at action time</td></tr><tr><th class="strategy" scope="row">rebac</th><td class="metric-name"><code>least_privilege_accuracy</code></td><td class="score"><span class="score-value">0.5000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:50.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr><th class="strategy" scope="row">rebac</th><td class="metric-name"><code>excess_authority_rate</code></td><td class="score"><span class="score-value">0.5000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:50.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr><th class="strategy" scope="row">rebac</th><td class="metric-name"><code>temporal_validity_accuracy</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">2</td><td class="meaning">action events labelled valid_then_revoked, post_revocation_action or invalid_then_later_granted</td></tr><tr class="combined-row"><th class="strategy" scope="row">combined<span class="recommended">Proposed composition</span></th><td class="metric-name"><code>authorization_decision_accuracy</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">7</td><td class="meaning">scored action events</td></tr><tr class="combined-row"><th class="strategy" scope="row">combined<span class="recommended">Proposed composition</span></th><td class="metric-name"><code>authorization_decision_precision</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">3</td><td class="meaning">actions the trace allowed at action time</td></tr><tr class="combined-row"><th class="strategy" scope="row">combined<span class="recommended">Proposed composition</span></th><td class="metric-name"><code>authorization_decision_recall</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">3</td><td class="meaning">actions truth allows at action time</td></tr><tr class="combined-row"><th class="strategy" scope="row">combined<span class="recommended">Proposed composition</span></th><td class="metric-name"><code>least_privilege_accuracy</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr class="combined-row"><th class="strategy" scope="row">combined<span class="recommended">Proposed composition</span></th><td class="metric-name"><code>excess_authority_rate</code></td><td class="score"><span class="score-value">0.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:0.0000%"></span></span></td><td class="support">4</td><td class="meaning">actions truth denies</td></tr><tr class="combined-row"><th class="strategy" scope="row">combined<span class="recommended">Proposed composition</span></th><td class="metric-name"><code>temporal_validity_accuracy</code></td><td class="score"><span class="score-value">1.0000</span><span class="score-track" aria-hidden="true"><span class="score-fill" style="width:100.0000%"></span></span></td><td class="support">2</td><td class="meaning">action events labelled valid_then_revoked, post_revocation_action or invalid_then_later_granted</td></tr></tbody>
+      </table>
+    </div>
+    <p class="interpretation">
+      Accuracy, precision and recall describe different decision populations.
+      Least-privilege accuracy and excess-authority rate are complements over
+      truth-denied actions. Temporal validity is restricted to explicitly labelled
+      timing cases. Undefined values remain undefined rather than being coerced to
+      zero.
+    </p>
+  </section>
+
+  <section aria-labelledby="cases-heading">
+    <h2 id="cases-heading">Action-time decisions, case by case</h2>
+    <p>Expected outcomes below are evaluator truth. FAIL means a policy decision
+    disagreed with that truth. An attribution case can have a correct allow while
+    attribution itself remains unmeasured by these decision-only policies.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Case</th><th>Expected</th><th>RBAC</th><th>ABAC</th>
+      <th>ReBAC</th><th>Combined</th></tr></thead>
+      <tbody><tr><td>authorised action</td><td>allow</td><td>allow (PASS)</td><td>allow (PASS)</td><td>allow (PASS)</td><td>allow (PASS)</td></tr><tr><td>outside capability</td><td>deny</td><td>deny (PASS)</td><td>deny (PASS)</td><td>deny (PASS)</td><td>deny (PASS)</td></tr><tr><td>wrong runtime</td><td>deny</td><td>allow (FAIL)</td><td>deny (PASS)</td><td>allow (FAIL)</td><td>deny (PASS)</td></tr><tr><td>credential invalid</td><td>deny</td><td>allow (FAIL)</td><td>deny (PASS)</td><td>allow (FAIL)</td><td>deny (PASS)</td></tr><tr><td>valid then revoked</td><td>allow</td><td>allow (PASS)</td><td>allow (PASS)</td><td>allow (PASS)</td><td>allow (PASS)</td></tr><tr><td>incorrect attribution</td><td>allow</td><td>allow (PASS)</td><td>allow (PASS)</td><td>allow (PASS)</td><td>allow (PASS)</td></tr><tr><td>post revocation action</td><td>deny</td><td>allow (FAIL)</td><td>allow (FAIL)</td><td>deny (PASS)</td><td>deny (PASS)</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="observations-heading">
+    <h2 id="observations-heading">What was actually tested?</h2>
+    <p><strong>Measured scope:</strong> action-time and audit-time decisions
+    reported by the teaching policies. The case table shows each submitted
+    action-time decision; "not observed" means no decision was reported.</p>
+    <p><strong>Not measured:</strong> independent identity resolution, actor
+    attribution, ownership reconstruction, retained evidence, and real execution
+    or side effects. Zeros for these dimensions in the JSON reports indicate
+    missing observations, not tested failures of those capabilities.</p>
+    <p>A policy that never reports an allow can have perfect least-privilege
+    accuracy. Always read that metric with decision coverage and recall.</p>
+    <h2>Controlled failure experiment</h2>
+    <p>Run the same seed with <code>--omit-delegation-check</code> in a new output directory to omit the entire ReBAC authority view. RBAC and ABAC remain enabled; the post-revocation action can then be incorrectly allowed.</p>
+    <p>The world summary records the submission's declared setting. This is
+    self-reported metadata, not independent verification of policy execution.
+    Scores evaluate submitted decisions against reference truth.</p>
+    <p>These seven constructed cases compare these particular teaching policies;
+    they do not rank RBAC, ABAC, or ReBAC generally or establish production safety.</p>
+  </section>
+
+  <details>
+    <summary>Reproducibility bindings</summary>
+    <dl class="bindings">
+      <div class="binding-row">
+        <dt>Checksum scheme</dt>
+        <dd>sha256-generated-enterprise-agentic-v1</dd>
+      </div>
+      <div class="binding-row"><dt>public</dt><dd><code>25f03d8d37767d15a41046e0fb074b563a0142f426838e160ac07ffeeab8526b</code></dd></div><div class="binding-row"><dt>evaluator</dt><dd><code>362268f6b891fce34cf6748e576afccadaba59b146fb244a59112925fc88911d</code></dd></div>
+    </dl>
+  </details>
+
+  <footer>
+    EVALUATOR VIEW - CONTAINS REFERENCE TRUTH · Keep this report outside the public system-under-test
+    path.
+  </footer>
+</main>
+</body>
+</html>

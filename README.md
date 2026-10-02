@@ -1,49 +1,50 @@
 # SynthWorld
 
-[![CI](https://github.com/bluntmachetti/synthworld/actions/workflows/ci.yml/badge.svg)](https://github.com/bluntmachetti/synthworld/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/idcognito-synthworld?cacheSeconds=3600)](https://pypi.org/project/idcognito-synthworld/)
-[![Python versions](https://img.shields.io/pypi/pyversions/idcognito-synthworld?cacheSeconds=3600)](https://pypi.org/project/idcognito-synthworld/)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/bluntmachetti/synthworld/blob/main/LICENSE)
-[![Coverage: 100% enforced](https://img.shields.io/badge/coverage-100%25_enforced-brightgreen)](https://github.com/bluntmachetti/synthworld/blob/main/Makefile)
+Connected synthetic identity worlds for testing identity, privacy, and access systems.
 
-**Deterministic synthetic identity worlds with adversarial evidence and ground-truth answer keys.**
+Generate fictional identities and relationships for your tests, or exercise agent
+access decisions across delegation, credential, and lifecycle changes.
 
-SynthWorld creates safely fictional, connected test worlds for evaluating identity,
-privacy, access, and agent systems. Where a benchmark provides a product-safe
-projection, public observations are serialized separately from evaluator truth so a
-system can be tested without feeding it its own answers. Other commands emit
-annotated or evaluator bundles and must not be treated as product input.
+## Choose your starting point
 
-> **SynthWorld is not an anonymisation tool.** It does not transform sensitive real
-> data into a safe dataset, and it is not an IAM product, policy engine, or runtime
-> enforcement service.
-
-## Choose what you want to do
-
-| Goal | Start here |
+| Generate synthetic identity data | Test agent authorisation |
 |---|---|
-| Install and create a first deterministic world | [Getting Started](https://bluntmachetti.github.io/synthworld/getting-started/) |
-| Inspect published frozen benchmark tables | [Hugging Face dataset](https://huggingface.co/datasets/Bluntmachetti7/synthworld-benchmarks) |
-| Evaluate identity resolution and ambiguity | [Identity resolution guide](https://bluntmachetti.github.io/synthworld/guides/identity-resolution/) |
-| Evaluate privacy, extraction, exposure, or broker behavior | [Privacy and exposure guide](https://bluntmachetti.github.io/synthworld/guides/privacy-exposure/) |
-| Test agent delegation, authority, and audit evidence | [Agent authority guide](https://bluntmachetti.github.io/synthworld/guides/agent-authority/) |
-| Build or evaluate enterprise identity/access worlds | [Enterprise access guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-access/) |
-| Build and score an enterprise authorization experiment | [Enterprise authorization guide](https://bluntmachetti.github.io/synthworld/guides/enterprise-authorization-python/) |
-| Add identity and authorization checks to CI | [Development pipeline guide](https://bluntmachetti.github.io/synthworld/guides/development-pipelines/) |
-| Connect a product or model to a SynthWorld scorer | [Evaluating a system](https://bluntmachetti.github.io/synthworld/guides/evaluating-a-system/) |
-| Check current benchmark maturity and publication state | [Benchmark catalogue](https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/) |
+| Create repeatable connected fixtures for matching, privacy, and graph workflows. | Inspect concrete access failures and compare teaching policies before connecting your system. |
+| [Identity quickstart](https://bluntmachetti.github.io/synthworld/guides/identity-worlds/) | [Agent demo and report](https://bluntmachetti.github.io/synthworld/guides/agent-authorisation-quickstart/) |
 
-## Featured: agent authority
+Identity generation is available in release 0.17.0 and needs no policy engine:
 
-Identity resolution tells you **who acted**. Agent-authority evaluation asks whether
-the action was within delegated authority **at the time it occurred**, whether the
-runtime and credential bindings were correct, and whether retained evidence can
-still reconstruct the decision later.
+```bash
+pip install idcognito-synthworld==0.17.0
+synthworld generate --seed 20260719 --persona-count 10 --output world.json
+```
 
-[Asteria Agentic v1](https://github.com/bluntmachetti/synthworld/blob/main/AGENTIC_BENCHMARK.md)
-is the frozen, inspectable conformance fixture for that workflow. It keeps public
-action evidence separate from authority, attribution, temporal, and provenance
-truth.
+The packaged agent demo is new in the unreleased 0.18.0 candidate. From this
+source checkout, run the complete teaching exercise:
+
+```bash
+uv sync --locked --all-groups
+uv run python -m examples.enterprise_agentic_identity_pilot run --output authority-demo
+```
+
+For the installed 0.18.0 package, after publication, use
+`synthworld-demo run --output authority-demo` instead of the source-checkout command.
+
+Open `authority-demo/results/policy-comparison.html`. Rerun in a new directory
+with `--omit-delegation-check` to omit the combined ReBAC authority view and allow a
+post-revocation action. This uses local teaching policies, not a deployed IAM system.
+
+The `--omit-delegation-check` teaching flag omits the combined policy's **entire
+ReBAC authority view**, including active delegation, relationship, and coverage
+checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
+execution attestation. Scoring accepts externally edited, correctly bound traces
+and evaluates their decisions rather than rerunning the teaching policy. Retain
+the result manifest and referenced submission manifest alongside metric JSON to
+identify the declared mode and exact submitted bytes.
+
+SynthWorld creates fictional data; it does not anonymise sensitive real records.
+For evaluations, give the system only the task's documented public inputs and keep
+expected answers in the evaluator process.
 
 ## Why SynthWorld
 

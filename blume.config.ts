@@ -3,7 +3,7 @@ import { defineConfig } from "blume";
 export default defineConfig({
   title: "SynthWorld",
   description:
-    "Deterministic synthetic identity data and ground-truth benchmarks.",
+    "Connected synthetic identity worlds for identity, privacy, and access testing.",
   content: {
     sources: [{ type: "filesystem", root: ".blume-content" }],
   },
@@ -24,6 +24,7 @@ export default defineConfig({
           items: [
             "/guides",
             "/guides/identity-worlds",
+            "/guides/agent-authorisation-quickstart",
             "/guides/identity-resolution",
             "/guides/privacy-exposure",
             "/guides/agent-authority",

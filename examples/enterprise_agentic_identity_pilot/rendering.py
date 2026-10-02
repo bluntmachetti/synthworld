@@ -103,6 +103,7 @@ def canonical_evaluator_report_summary_bytes(
 
 def render_evaluator_report_html(
     *,
+    case_rows: Sequence[tuple[str, ...]] = (),
     world_summary: Mapping[str, int | str],
     strategy_reports: Sequence[tuple[str, EvaluationReport]],
 ) -> bytes:
@@ -117,8 +118,33 @@ def render_evaluator_report_html(
         "</div>"
         for key, value in world
     )
+    faulty_combined = (
+        world_summary.get("combined_delegation_check") == "omitted (deliberate defect)"
+    )
+    combined_description = (
+        "Deliberate defect: only RBAC and ABAC must allow. The entire ReBAC "
+        "authority view is omitted, including active delegation and coverage checks."
+        if faulty_combined
+        else "Default deny. RBAC, ReBAC and ABAC must all allow; downstream lifecycle "
+        "and revocation checks still apply."
+    )
+    composition_note = (
+        "The combined strategy in this report is deliberately defective."
+        if faulty_combined
+        else "The combined strategy is the proposed least-authority composition, "
+        "not an automatically recommended production policy."
+    )
+    combined_heading = "Combined (deliberate defect)" if faulty_combined else "Combined"
+    experiment_instruction = (
+        "This run declares the entire ReBAC authority view omitted. Rerun without "
+        "<code>--omit-delegation-check</code> in a new output directory to restore it."
+        if faulty_combined
+        else "Run the same seed with <code>--omit-delegation-check</code> in a new "
+        "output directory to omit the entire ReBAC authority view. RBAC and ABAC "
+        "remain enabled; the post-revocation action can then be incorrectly allowed."
+    )
     metric_rows = "".join(
-        _metric_row(strategy, metric)
+        _metric_row(strategy, metric, faulty_combined=faulty_combined)
         for strategy in strategies
         for metric in strategy.metrics
     )
@@ -132,6 +158,10 @@ def render_evaluator_report_html(
         "default-src 'none'; img-src data:; style-src 'unsafe-inline'; "
         "script-src 'none'; connect-src 'none'; font-src 'none'; "
         "object-src 'none'; base-uri 'none'; form-action 'none'"
+    )
+    case_table = "".join(
+        "<tr>" + "".join(f"<td>{_escape(cell)}</td>" for cell in row) + "</tr>"
+        for row in case_rows
     )
     document = f"""<!doctype html>
 <html lang="en">
@@ -412,15 +442,12 @@ footer {{
       <article class="combined">
         <h3>Combined decision</h3>
         <p>
-          Default deny. RBAC, ReBAC and ABAC must all allow; downstream lifecycle
-          and revocation checks still apply.
+          {combined_description}
         </p>
       </article>
     </div>
     <p class="architecture-note">
-      Human-owner authority is not unioned into agent authority. The combined
-      strategy is highlighted as the proposed least-authority composition, not as
-      an automatically recommended production policy.
+      Human-owner authority is not unioned into agent authority. {composition_note}
     </p>
   </section>
 
@@ -454,6 +481,38 @@ footer {{
     </p>
   </section>
 
+  <section aria-labelledby="cases-heading">
+    <h2 id="cases-heading">Action-time decisions, case by case</h2>
+    <p>Expected outcomes below are evaluator truth. FAIL means a policy decision
+    disagreed with that truth. An attribution case can have a correct allow while
+    attribution itself remains unmeasured by these decision-only policies.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Case</th><th>Expected</th><th>RBAC</th><th>ABAC</th>
+      <th>ReBAC</th><th>{combined_heading}</th></tr></thead>
+      <tbody>{case_table}</tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="observations-heading">
+    <h2 id="observations-heading">What was actually tested?</h2>
+    <p><strong>Measured scope:</strong> action-time and audit-time decisions
+    reported by the teaching policies. The case table shows each submitted
+    action-time decision; "not observed" means no decision was reported.</p>
+    <p><strong>Not measured:</strong> independent identity resolution, actor
+    attribution, ownership reconstruction, retained evidence, and real execution
+    or side effects. Zeros for these dimensions in the JSON reports indicate
+    missing observations, not tested failures of those capabilities.</p>
+    <p>A policy that never reports an allow can have perfect least-privilege
+    accuracy. Always read that metric with decision coverage and recall.</p>
+    <h2>Controlled failure experiment</h2>
+    <p>{experiment_instruction}</p>
+    <p>The world summary records the submission's declared setting. This is
+    self-reported metadata, not independent verification of policy execution.
+    Scores evaluate submitted decisions against reference truth.</p>
+    <p>These seven constructed cases compare these particular teaching policies;
+    they do not rank RBAC, ABAC, or ReBAC generally or establish production safety.</p>
+  </section>
+
   <details>
     <summary>Reproducibility bindings</summary>
     <dl class="bindings">
@@ -479,12 +538,14 @@ footer {{
 def write_evaluator_report_html(
     output: Path,
     *,
+    case_rows: Sequence[tuple[str, ...]] = (),
     world_summary: Mapping[str, int | str],
     strategy_reports: Sequence[tuple[str, EvaluationReport]],
 ) -> None:
     """Write a new evaluator report without replacing an existing file."""
 
     payload = render_evaluator_report_html(
+        case_rows=case_rows,
         world_summary=world_summary,
         strategy_reports=strategy_reports,
     )
@@ -556,12 +617,13 @@ def _validated_inputs(
     return tuple(world), tuple(strategies)
 
 
-def _metric_row(strategy: _StrategyResult, metric: TaskMetric) -> str:
+def _metric_row(
+    strategy: _StrategyResult, metric: TaskMetric, *, faulty_combined: bool = False
+) -> str:
     row_class = ' class="combined-row"' if strategy.combined else ""
+    badge = "Deliberate defect" if faulty_combined else "Proposed composition"
     recommendation = (
-        '<span class="recommended">Proposed composition</span>'
-        if strategy.combined
-        else ""
+        f'<span class="recommended">{badge}</span>' if strategy.combined else ""
     )
     if metric.value is None:
         score = '<span class="score-value undefined">undefined</span>'

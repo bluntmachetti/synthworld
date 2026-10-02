@@ -46,6 +46,7 @@ package:
 	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python .github/scripts/check_enterprise_consumer_wheel.py
 	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python -c "from synthworld.continuous_assurance import evaluate_continuous_assurance_prediction, perfect_continuous_assurance_prediction, reference_continuous_assurance; b=reference_continuous_assurance(); r=evaluate_continuous_assurance_prediction(public=b.public,evaluator=b.evaluator,prediction=perfect_continuous_assurance_prediction(b.evaluator)); assert len(b.public.cases)==8 and len(r.metrics)==16"
 	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python .github/scripts/check_generated_agentic_wheel.py
+	$(UV) run --isolated --no-project --no-cache --with ./$(WHEEL) python .github/scripts/check_demo_wheel.py
 
 test:
 	$(UV) run pytest

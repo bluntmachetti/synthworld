@@ -6,6 +6,7 @@
     "**/*"
   ],
   "exclude": [
+    "dist/**",
     "src/synthworld/explorer/assets/**",
     "tools/build_explorer_assets.mjs",
     "tools/explorer/**"

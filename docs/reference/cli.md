@@ -113,3 +113,13 @@ required event replay and public/evaluator separation.
 See [Run an enterprise agentic identity experiment](../guides/enterprise-agentic-identity-experiment.md)
 for an end-to-end RBAC/ABAC/ReBAC pilot and explicit public projection, layout,
 evaluator-overlay, and HTML generation steps.
+
+### Agentic observation summaries
+
+For `evaluate agentic` and `evaluate generated-enterprise-agentic`, `--summary`
+prefixes the metric table with non-null counts for every optional trace field.
+The denominator is submitted rows, not independently verified observations.
+Empty lists and explicit `false` values count as reported. Missing capabilities
+remain unmeasured even when their metric value is zero. The least-privilege
+warning is general interpretation guidance. JSON output and scoring contracts
+remain unchanged; retain the trace to interpret missing observations.

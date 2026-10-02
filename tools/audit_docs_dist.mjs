@@ -137,6 +137,7 @@ if (!outputRootIsDirectory) {
 for (const requiredPath of [
   join(outputRoot, "index.html"),
   join(outputRoot, "blume-search.json"),
+  join(outputRoot, "demo-report.html"),
   join(outputRoot, "changelog", "CHANGELOG", "index.html"),
 ]) {
   try {
@@ -186,6 +187,12 @@ for (const path of outputFiles) {
   }
 
   if (extension === ".html") {
+    if (
+      renderedPath === "guides/agent-authorisation-quickstart/index.html" &&
+      !text.includes(`href="${deploymentBase}/demo-report.html"`)
+    ) {
+      fail("agent quickstart must link to the sample report under the deployment base");
+    }
     for (const [label, pattern] of forbiddenSurfacePatterns) {
       if (pattern.test(text)) {
         fail(`${label} found in ${renderedPath}`);

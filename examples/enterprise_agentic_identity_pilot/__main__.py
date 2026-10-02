@@ -5,14 +5,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
+import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import cast
 
-from examples.enterprise_agentic_identity_pilot.policies import build_policy_traces
-from examples.enterprise_agentic_identity_pilot.rendering import (
-    write_evaluator_report_html,
-)
 from synthworld.agentic import trace_submission_from_jsonl, trace_submission_to_jsonl
 from synthworld.agentic.enterprise import (
     EnterpriseAgenticGeneratedBenchmarkV1,
@@ -31,6 +29,9 @@ from synthworld.enterprise.canonical import (
 )
 from synthworld.evaluation import EvaluationReport
 from synthworld.explorer import write_generated_enterprise_agentic_html
+
+from .policies import build_policy_traces
+from .rendering import write_evaluator_report_html
 
 DEFAULT_SEED = 20_260_821
 _STRATEGIES = ("rbac", "abac", "rebac", "combined")
@@ -77,6 +78,7 @@ def _verified_submission_payloads(
         raise ValueError("submission manifest must use canonical JSON")
     if set(manifest_value) != {
         "benchmark_identity",
+        "omit_delegation_check",
         "derived_from_public_only",
         "policy_sources",
         "public_artifact_set_sha256",
@@ -84,6 +86,8 @@ def _verified_submission_payloads(
         "synthetic",
     }:
         raise ValueError("submission manifest has an unexpected field inventory")
+    if type(manifest_value.get("omit_delegation_check")) is not bool:
+        raise ValueError("submission must record a boolean delegation-check setting")
     if manifest_value.get("derived_from_public_only") is not True:
         raise ValueError("submission manifest must declare public-only derivation")
     if manifest_value.get("synthetic") is not True:
@@ -175,7 +179,9 @@ def _run_policies(args: argparse.Namespace) -> int:
         raise FileExistsError(f"submission output already exists: {output}")
     public = load_generated_enterprise_agentic_public_tree(public_package)
     digests: dict[str, str] = {}
-    for name, submission in build_policy_traces(public.benchmark):
+    for name, submission in build_policy_traces(
+        public.benchmark, omit_delegation_check=args.omit_delegation_check
+    ):
         payload = trace_submission_to_jsonl(submission).encode("utf-8")
         _write_new(output / f"{name}.jsonl", payload)
         digests[name] = _sha256(payload)
@@ -185,6 +191,7 @@ def _run_policies(args: argparse.Namespace) -> int:
             {
                 "benchmark_identity": public.identity.model_dump(mode="json"),
                 "derived_from_public_only": True,
+                "omit_delegation_check": args.omit_delegation_check,
                 "policy_sources": _policy_source_binding(),
                 "public_artifact_set_sha256": (
                     generated_enterprise_agentic_public_artifact_set_sha256(public)
@@ -215,12 +222,19 @@ def _score(args: argparse.Namespace) -> int:
         expected_benchmark_identity=generated.identity.model_dump(mode="json"),
         expected_public_artifact_set_sha256=benchmark_checksums["public"],
     )
+    decisions: dict[str, dict[str, str]] = {}
     evaluated_reports: list[tuple[str, EvaluationReport, bytes]] = []
     report_digests: dict[str, str] = {}
     for name in _STRATEGIES:
         submission = trace_submission_from_jsonl(
             submission_payloads[name].decode("utf-8")
         )
+        decisions[name] = {
+            row.event_id: row.decision.value
+            if row.decision is not None
+            else "not observed"
+            for row in submission.rows
+        }
         report = evaluate_generated_enterprise_agentic_trace(submission, generated)
         payload = canonical_json_bytes(report)
         report_digests[name] = _sha256(payload)
@@ -231,10 +245,34 @@ def _score(args: argparse.Namespace) -> int:
     for name, _report, payload in evaluated_reports:
         _write_new(output / "reports" / f"{name}.json", payload)
 
+    submission_settings = json.loads(submission_manifest_payload)
+    truth = {row.action_event_id: row for row in generated.evaluator.authority_truth}
+    case_rows = []
+    for case in generated.evaluator.cases:
+        expected = truth[case.action_event_id].decision_at_action.value
+        observed = [decisions[name][case.action_event_id] for name in _STRATEGIES]
+        case_rows.append(
+            (
+                case.kind.value.replace("_", " "),
+                expected,
+                *(
+                    f"{value} ({'PASS' if value == expected else 'FAIL'})"
+                    for value in observed
+                ),
+            )
+        )
     comparison_html = output / "policy-comparison.html"
     write_evaluator_report_html(
         comparison_html,
-        world_summary=_world_summary_from_generated(generated),
+        case_rows=case_rows,
+        world_summary={
+            **_world_summary_from_generated(generated),
+            "combined_delegation_check": (
+                "omitted (deliberate defect)"
+                if submission_settings["omit_delegation_check"]
+                else "enabled"
+            ),
+        },
         strategy_reports=tuple(
             (name, report) for name, report, _payload in evaluated_reports
         ),
@@ -270,6 +308,9 @@ def _score(args: argparse.Namespace) -> int:
                     "policy_sources": _policy_source_binding(),
                     "public_artifact_set_sha256": benchmark_checksums["public"],
                     "submission_manifest_sha256": _sha256(submission_manifest_payload),
+                    "declared_omit_delegation_check": submission_settings[
+                        "omit_delegation_check"
+                    ],
                 },
                 "submissions": [
                     {"name": name, "sha256": _sha256(submission_payloads[name])}
@@ -283,6 +324,47 @@ def _score(args: argparse.Namespace) -> int:
     return 0
 
 
+def _demo(args: argparse.Namespace) -> int:
+    output = cast(Path, args.output).resolve()
+    output.mkdir(parents=True, exist_ok=False)
+    prefix = [sys.executable, "-m", __package__]
+    stages = [
+        ["generate", "--seed", str(args.seed), "--output", str(output / "world")],
+        [
+            "run-policies",
+            "--public-package",
+            str(output / "world/benchmark/public"),
+            "--output",
+            str(output / "submissions"),
+        ],
+        [
+            "score",
+            "--benchmark-root",
+            str(output / "world/benchmark"),
+            "--submissions",
+            str(output / "submissions"),
+            "--output",
+            str(output / "results"),
+        ],
+    ]
+    if args.omit_delegation_check:
+        stages[1].append("--omit-delegation-check")
+    for stage in stages:
+        try:
+            subprocess.run(prefix + stage, check=True)  # noqa: S603 - fixed module, argument list
+        except subprocess.CalledProcessError as error:
+            print(
+                f"Demo stage {stage[0]} failed (exit {error.returncode}). "
+                f"Partial artifacts are retained at {output}; inspect them and "
+                "choose a new output directory for a retry.",
+                file=sys.stderr,
+            )
+            return 1
+    print(f"Open {output / 'results/policy-comparison.html'}")
+    print("Teaching policies only; no production system was contacted.")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
@@ -291,6 +373,16 @@ def build_parser() -> argparse.ArgumentParser:
         )
     )
     commands = parser.add_subparsers(dest="command", required=True)
+
+    demo = commands.add_parser("run", help="generate, run teaching policies, and score")
+    demo.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    demo.add_argument("--output", type=Path, required=True)
+    demo.add_argument(
+        "--omit-delegation-check",
+        action="store_true",
+        help="omit the entire combined ReBAC authority view (including delegation)",
+    )
+    demo.set_defaults(handler=_demo)
 
     generate = commands.add_parser("generate", help="generate the split world")
     generate.add_argument("--seed", type=int, default=DEFAULT_SEED)
@@ -302,6 +394,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--public-package", type=Path, required=True)
     run.add_argument("--output", type=Path, required=True)
+    run.add_argument(
+        "--omit-delegation-check",
+        action="store_true",
+        help="omit the entire combined ReBAC authority view (including delegation)",
+    )
     run.set_defaults(handler=_run_policies)
 
     score = commands.add_parser(

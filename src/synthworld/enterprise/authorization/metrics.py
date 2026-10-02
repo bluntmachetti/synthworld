@@ -204,7 +204,7 @@ def evaluate_enterprise_authorization(
             matches=lambda expected, observed: (
                 observed.effective_decision is expected.effective_decision
             ),
-            denominator_meaning="all aggregate enterprise authorization cells",
+            denominator_meaning="scope-selected cells for effective_decision",
             nonempty=True,
         ),
         _accuracy(
@@ -219,7 +219,7 @@ def evaluate_enterprise_authorization(
             matches=lambda expected, observed: (
                 observed.final_decision is expected.final_decision
             ),
-            denominator_meaning="all aggregate enterprise authorization cells",
+            denominator_meaning="scope-selected cells for final_decision",
             nonempty=True,
         ),
         _accuracy(
@@ -272,7 +272,7 @@ def evaluate_enterprise_authorization(
                     observed.policy_conflict
                     is conflict_by_cell[expected.cell_id].actual_conflict
                 ),
-                denominator_meaning="all aggregate enterprise authorization cells",
+                denominator_meaning="scope-selected cells for policy_conflict",
                 nonempty=True,
             ),
             _accuracy(
@@ -291,7 +291,10 @@ def evaluate_enterprise_authorization(
                 matches=lambda expected, observed: (
                     observed.effective_decision is expected.effective_decision
                 ),
-                denominator_meaning="aggregate cells with an actual policy conflict",
+                denominator_meaning=(
+                    "cells with an actual policy conflict and both policy_conflict "
+                    "and effective_decision in scope"
+                ),
             ),
             _accuracy(
                 family="binding",
@@ -306,7 +309,9 @@ def evaluate_enterprise_authorization(
                 matches=lambda expected, observed: (
                     observed.binding_status is expected.binding_status
                 ),
-                denominator_meaning="aggregate cells with an applicable binding gate",
+                denominator_meaning=(
+                    "scope-selected cells, including not_applicable binding status"
+                ),
             ),
             _accuracy(
                 family="lifecycle",
@@ -321,7 +326,9 @@ def evaluate_enterprise_authorization(
                 matches=lambda expected, observed: (
                     observed.lifecycle_status is expected.lifecycle_status
                 ),
-                denominator_meaning="aggregate cells with an applicable lifecycle gate",
+                denominator_meaning=(
+                    "scope-selected cells, including not_applicable lifecycle status"
+                ),
             ),
             _accuracy(
                 family="runtime_gate",
@@ -338,8 +345,8 @@ def evaluate_enterprise_authorization(
                     observed.final_decision is expected.final_decision
                 ),
                 denominator_meaning=(
-                    "aggregate cells whose binding or lifecycle gate changes the "
-                    "decision"
+                    "final_decision scope-selected cells whose binding or lifecycle "
+                    "gate changes the decision"
                 ),
             ),
         )

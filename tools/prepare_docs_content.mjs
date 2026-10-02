@@ -82,6 +82,9 @@ function rewriteTarget(source, rawTarget) {
   const path = suffixAt === -1 ? target : target.slice(0, suffixAt);
   const suffix = suffixAt === -1 ? "" : target.slice(suffixAt);
   if (path === deploymentBase || path.startsWith(`${deploymentBase}/`)) {
+    // Public HTML assets are files, not Blume routes. Relative route rewriting
+    // drops the deployment base when a guide is served without a trailing slash.
+    if (path.endsWith(".html")) return rawTarget;
     const route = path.slice(deploymentBase.length).replace(/^\//u, "");
     return relativeRoute(source, route, suffix);
   }

@@ -23,7 +23,12 @@ def test_readme_is_a_front_door_not_the_detailed_manual() -> None:
     text = README.read_text(encoding="utf-8")
 
     assert "https://bluntmachetti.github.io/synthworld/" in text
-    assert "## Choose what you want to do" in text
+    assert "## Choose your starting point" in text
+    assert "https://bluntmachetti.github.io/synthworld/guides/identity-worlds/" in text
+    assert (
+        "https://bluntmachetti.github.io/synthworld/guides/agent-authorisation-quickstart/"
+        in text
+    )
     assert "## Current benchmark families" in text
     assert "## Enterprise identity and access" in text
     assert "https://bluntmachetti.github.io/synthworld/benchmarks/catalogue/" in text
@@ -52,7 +57,7 @@ def test_site_state_no_longer_describes_prerequisites_as_pending() -> None:
 
     assert "being integrated by the prerequisite governance work" not in home
     assert "renderer and dark-preview infrastructure only after" not in roadmap
-    assert "generated registry catalogue" in home.lower()
+    assert "](/benchmarks/catalogue)" in home
 
 
 def test_migration_tracker_is_now_an_ownership_record() -> None:

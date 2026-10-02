@@ -9,8 +9,17 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
+## [0.18.0] - Unreleased
+
 ### Added
 
+- Two first-use journeys: connected synthetic identity generation and an agent
+  authorisation demonstration with a browser-viewable sample report.
+- A packaged `synthworld-demo` teaching CLI. Generation, public-only policy
+  execution, and scoring run in separate processes. A deliberate omitted
+  delegation check exposes the post-revocation failure without changing the world.
+- Case-by-case decision reporting and an explicit description of unmeasured
+  identity, provenance, and execution capabilities.
 - **Agent-spy PII-to-identity evidence.** The experiments catalogue now records
   the corrected, locally frozen external-consumer study of detector-error
   propagation into identity resolution, relationship inference, and exposure
@@ -18,6 +27,25 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   independent metric denominators, isolation and determinism checks, limitations,
   and local-only artifact status without presenting the result as a SynthWorld
   benchmark, product claim, or independently reproducible release.
+
+### Changed
+
+- Package and documentation positioning now covers identity, privacy, and access
+  testing while retaining the original identity quickstart and interfaces.
+- Enterprise denominator descriptions now identify their scope-selected cohorts,
+  including `not_applicable` binding/lifecycle statuses. Scoring arithmetic is unchanged.
+- Documented the declaration-only limit of the existing live-lab claim gate.
+- Remeasured the external scale performance receipt against the candidate's lock
+  file; generated public artifact digests remain identical.
+- Agentic evaluation `--summary` now reports non-null observation counts for every
+  optional trace field. JSON report schemas and scoring arithmetic are unchanged.
+- Faulty-demo reports label the omitted ReBAC authority view explicitly. Result
+  manifests retain the declared setting without claiming execution attestation.
+- Release publication checks reject undated release notes and candidate install
+  instructions before uploading a distribution.
+
+No frozen benchmark bytes or generation contracts changed. The generated enterprise
+metrics example changes only denominator-description strings.
 
 ## [0.17.0] - 2026-08-21
 
@@ -667,6 +695,7 @@ squashed; internal 0.x iterations are not part of this repository.
   secret scan.
 
 [Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...HEAD
+[0.18.0]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...HEAD
 [0.17.0]: https://github.com/bluntmachetti/synthworld/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bluntmachetti/synthworld/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...v0.15.0
