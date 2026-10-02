@@ -51,9 +51,9 @@ create an operating-system sandbox. For a real integration, isolate the public
 runner with separate jobs or mounts as described in the
 [pipeline guide](https://bluntmachetti.github.io/synthworld/guides/development-pipelines/).
 
-## Remove one check and see the failure
+## Omit the authority view and see the failure
 
-Use the same seed and omit the combined policy's delegation check:
+Use the same seed and omit the combined policy's ReBAC authority view:
 
 ```bash
 synthworld-demo run --omit-delegation-check --output authority-demo-broken
@@ -100,3 +100,11 @@ A maintained external-engine integration is a separate next milestone.
 
 If you wanted fictional identity data rather than policy tests, start with
 [synthetic identity worlds](https://bluntmachetti.github.io/synthworld/guides/identity-worlds/).
+
+The `--omit-delegation-check` teaching flag omits the combined policy's **entire
+ReBAC authority view**, including active delegation, relationship, and coverage
+checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
+execution attestation. Scoring accepts externally edited, correctly bound traces
+and evaluates their decisions rather than rerunning the teaching policy. Retain
+the result manifest and referenced submission manifest alongside metric JSON to
+identify the declared mode and exact submitted bytes.

@@ -1322,6 +1322,18 @@ def _agentic_observation_summary(text: str) -> str:
         ("Principal identities", "originating_principal_id"),
         ("Actor attribution", "attributed_actor_id"),
         ("Evidence-reference lists", "evidence_refs"),
+        ("Timestamps", "timestamp"),
+        ("Logical agents", "logical_agent_id"),
+        ("Runtime principals", "runtime_principal_id"),
+        ("Credential subjects", "credential_subject_id"),
+        ("Resources", "resource_id"),
+        ("Actions", "action"),
+        ("Requested scopes", "requested_scope"),
+        ("Side effects", "side_effect"),
+        ("Policy versions", "policy_version"),
+        ("Delegation chains", "delegation_chain_ids"),
+        ("Accountable owner chains", "accountable_owner_chain"),
+        ("Evidence reconstructability", "reconstructable_from_retained_evidence"),
     )
     counts = [
         f"{label}: {sum(getattr(row, field) is not None for row in rows)}"

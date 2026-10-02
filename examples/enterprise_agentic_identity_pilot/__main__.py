@@ -308,6 +308,9 @@ def _score(args: argparse.Namespace) -> int:
                     "policy_sources": _policy_source_binding(),
                     "public_artifact_set_sha256": benchmark_checksums["public"],
                     "submission_manifest_sha256": _sha256(submission_manifest_payload),
+                    "declared_omit_delegation_check": submission_settings[
+                        "omit_delegation_check"
+                    ],
                 },
                 "submissions": [
                     {"name": name, "sha256": _sha256(submission_payloads[name])}
@@ -347,7 +350,16 @@ def _demo(args: argparse.Namespace) -> int:
     if args.omit_delegation_check:
         stages[1].append("--omit-delegation-check")
     for stage in stages:
-        subprocess.run(prefix + stage, check=True)  # noqa: S603 - fixed module, argument list
+        try:
+            subprocess.run(prefix + stage, check=True)  # noqa: S603 - fixed module, argument list
+        except subprocess.CalledProcessError as error:
+            print(
+                f"Demo stage {stage[0]} failed (exit {error.returncode}). "
+                f"Partial artifacts are retained at {output}; inspect them and "
+                "choose a new output directory for a retry.",
+                file=sys.stderr,
+            )
+            return 1
     print(f"Open {output / 'results/policy-comparison.html'}")
     print("Teaching policies only; no production system was contacted.")
     return 0
@@ -368,7 +380,7 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument(
         "--omit-delegation-check",
         action="store_true",
-        help="deliberately remove the combined policy's delegation check",
+        help="omit the entire combined ReBAC authority view (including delegation)",
     )
     demo.set_defaults(handler=_demo)
 
@@ -385,7 +397,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument(
         "--omit-delegation-check",
         action="store_true",
-        help="deliberately remove the combined policy delegation check",
+        help="omit the entire combined ReBAC authority view (including delegation)",
     )
     run.set_defaults(handler=_run_policies)
 

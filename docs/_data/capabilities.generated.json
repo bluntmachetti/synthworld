@@ -580,6 +580,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "unreleased",
+      "heading": "[Unreleased]",
+      "id": "route:CHANGELOG.md#unreleased",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "",
       "heading": "",
       "id": "route:CODE_OF_CONDUCT.md",
@@ -2956,9 +2962,9 @@
       "path": "docs/guides/agent-authorisation-quickstart.md"
     },
     {
-      "anchor": "remove-one-check-and-see-the-failure",
-      "heading": "Remove one check and see the failure",
-      "id": "route:docs/guides/agent-authorisation-quickstart.md#remove-one-check-and-see-the-failure",
+      "anchor": "omit-the-authority-view-and-see-the-failure",
+      "heading": "Omit the authority view and see the failure",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md#omit-the-authority-view-and-see-the-failure",
       "path": "docs/guides/agent-authorisation-quickstart.md"
     },
     {
@@ -3556,6 +3562,12 @@
       "path": "docs/reference/cli.md"
     },
     {
+      "anchor": "agentic-observation-summaries",
+      "heading": "Agentic observation summaries",
+      "id": "route:docs/reference/cli.md#agentic-observation-summaries",
+      "path": "docs/reference/cli.md"
+    },
+    {
       "anchor": "cli-reference",
       "heading": "CLI reference",
       "id": "route:docs/reference/cli.md#cli-reference",
@@ -3592,9 +3604,9 @@
       "path": "docs/reference/metrics.md"
     },
     {
-      "anchor": "enterprise-binding-and-lifecycle-cohorts",
-      "heading": "Enterprise binding and lifecycle cohorts",
-      "id": "route:docs/reference/metrics.md#enterprise-binding-and-lifecycle-cohorts",
+      "anchor": "enterprise-scope-selected-cohorts",
+      "heading": "Enterprise scope-selected cohorts",
+      "id": "route:docs/reference/metrics.md#enterprise-scope-selected-cohorts",
       "path": "docs/reference/metrics.md"
     },
     {

@@ -27,7 +27,7 @@ allows nothing. This is not evidence of a working integration. Inspect submitted
 decisions and recall as well as incorrect allows. Validation checks the trace
 structure; it does not establish that useful observations were captured.
 
-## Enterprise binding and lifecycle cohorts
+## Enterprise scope-selected cohorts
 
 `binding_status_accuracy` and `lifecycle_status_accuracy` include every cell
 selected for that dimension, including `not_applicable` statuses. They are not
@@ -36,6 +36,13 @@ those cohorts as applicable gates; 0.18.0 corrects the description without chang
 numerators, denominators, or scoring rules. Reports archived from previous versions
 retain their original wording. Do not compare these rates with an applicable-only
 rate without explicitly restricting and recording the evaluation scope.
+
+`effective_decision_accuracy`, `final_decision_accuracy`, and
+`policy_conflict_detection_accuracy` each use the cells selected for that dimension.
+Conflict resolution additionally requires an actual conflict and both conflict
+and effective-decision dimensions in scope. Runtime-gate accuracy requires
+final-decision scope and a gate that changes the effective decision. These
+cohorts can have different denominators; none means every aggregate cell by default.
 
 ## Live-lab claims
 

@@ -348,7 +348,7 @@ def _combined_allows(context: _PolicyContext) -> bool:
 
 
 def _combined_without_delegation(context: _PolicyContext) -> bool:
-    """Deliberate teaching defect: valid credentials without active delegation."""
+    """Deliberate teaching defect: omit the entire ReBAC authority view."""
 
     return _rbac_allows(context) and _abac_allows(context)
 

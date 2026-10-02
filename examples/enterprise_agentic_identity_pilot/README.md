@@ -172,3 +172,11 @@ This pilot is intentionally bounded:
 
 Retain the seed, package version or wheel digest, generated manifests, policy and
 submission bytes, and evaluator results when sharing the experiment.
+
+The `--omit-delegation-check` teaching flag omits the combined policy's **entire
+ReBAC authority view**, including active delegation, relationship, and coverage
+checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
+execution attestation. Scoring accepts externally edited, correctly bound traces
+and evaluates their decisions rather than rerunning the teaching policy. Retain
+the result manifest and referenced submission manifest alongside metric JSON to
+identify the declared mode and exact submitted bytes.

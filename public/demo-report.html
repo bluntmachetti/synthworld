@@ -277,15 +277,12 @@ footer {
       <article class="combined">
         <h3>Combined decision</h3>
         <p>
-          Default deny. RBAC, ReBAC and ABAC must all allow; downstream lifecycle
-          and revocation checks still apply.
+          Default deny. RBAC, ReBAC and ABAC must all allow; downstream lifecycle and revocation checks still apply.
         </p>
       </article>
     </div>
     <p class="architecture-note">
-      Human-owner authority is not unioned into agent authority. The combined
-      strategy is highlighted as the proposed least-authority composition, not as
-      an automatically recommended production policy.
+      Human-owner authority is not unioned into agent authority. The combined strategy is the proposed least-authority composition, not an automatically recommended production policy.
     </p>
   </section>
 
@@ -342,12 +339,11 @@ footer {
     missing observations, not tested failures of those capabilities.</p>
     <p>A policy that never reports an allow can have perfect least-privilege
     accuracy. Always read that metric with decision coverage and recall.</p>
-    <h2>Try a controlled failure</h2>
-    <p>Run the same seed with <code>--omit-delegation-check</code>. The combined
-    policy will still check the reader role and credential attributes, but will
-    stop checking active delegation. The post-revocation action can then be
-    incorrectly allowed. Rerun without that flag in a new output directory to
-    restore the check. The world summary records which setting produced this report.</p>
+    <h2>Controlled failure experiment</h2>
+    <p>Run the same seed with <code>--omit-delegation-check</code> in a new output directory to omit the entire ReBAC authority view. RBAC and ABAC remain enabled; the post-revocation action can then be incorrectly allowed.</p>
+    <p>The world summary records the submission's declared setting. This is
+    self-reported metadata, not independent verification of policy execution.
+    Scores evaluate submitted decisions against reference truth.</p>
     <p>These seven constructed cases compare these particular teaching policies;
     they do not rank RBAC, ABAC, or ReBAC generally or establish production safety.</p>
   </section>

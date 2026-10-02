@@ -1,8 +1,10 @@
 """Regression tests for release artifact provenance."""
 
+import runpy
 from pathlib import Path
 from typing import Any, cast
 
+import pytest
 import yaml
 
 ROOT = Path(__file__).parents[1]
@@ -59,3 +61,49 @@ def test_release_is_complete_before_immutable_publication() -> None:
     assert "dist/*" in create_source
     assert publish_index == create_index + 1
     assert "--draft=false" in publish_source
+
+
+def test_release_documentation_gate_rejects_candidate_and_stale_instructions(
+    tmp_path: Path,
+) -> None:
+    validate = runpy.run_path(str(ROOT / ".github/scripts/validate_release_ready.py"))[
+        "validate_release_ready"
+    ]
+    (tmp_path / "pyproject.toml").write_text('[project]\nversion = "0.18.0"\n')
+    changelog = tmp_path / "CHANGELOG.md"
+    changelog.write_text("## [0.18.0] - Unreleased\n")
+    with pytest.raises(ValueError, match="date the"):
+        validate(tmp_path)
+    changelog.write_text("## [0.18.0] - 2026-10-02\n")
+    quickstart = tmp_path / "docs/guides/agent-authorisation-quickstart.md"
+    quickstart.parent.mkdir(parents=True)
+    ready = (
+        "pip install idcognito-synthworld==0.18.0\nsynthworld-demo run --output demo\n"
+    )
+    quickstart.write_text(ready)
+    readme = tmp_path / "README.md"
+    readme.write_text("unreleased candidate")
+    with pytest.raises(ValueError, match="candidate instructions"):
+        validate(tmp_path)
+    readme.write_text(ready.replace("0.18.0", "0.17.0"))
+    with pytest.raises(ValueError, match="stale package pins"):
+        validate(tmp_path)
+    readme.write_text("pip install idcognito-synthworld")
+    with pytest.raises(ValueError, match="installed demo"):
+        validate(tmp_path)
+    readme.write_text(ready)
+    validate(tmp_path)
+    quickstart.write_text("not yet published")
+    with pytest.raises(ValueError, match="candidate instructions"):
+        validate(tmp_path)
+    workflow = yaml.safe_load(RELEASE_WORKFLOW.read_text(encoding="utf-8"))
+    steps = workflow["jobs"]["build"]["steps"]
+    gate = next(
+        i
+        for i, step in enumerate(steps)
+        if "validate_release_ready.py" in step.get("run", "")
+    )
+    upload = next(
+        i for i, step in enumerate(steps) if step.get("uses") == UPLOAD_ARTIFACT_V7
+    )
+    assert gate < upload

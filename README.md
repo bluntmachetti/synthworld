@@ -27,9 +27,20 @@ uv sync --locked --all-groups
 uv run python -m examples.enterprise_agentic_identity_pilot run --output authority-demo
 ```
 
+For the installed 0.18.0 package, after publication, use
+`synthworld-demo run --output authority-demo` instead of the source-checkout command.
+
 Open `authority-demo/results/policy-comparison.html`. Rerun in a new directory
 with `--omit-delegation-check` to see the combined policy incorrectly allow a
 post-revocation action. This uses local teaching policies, not a deployed IAM system.
+
+The `--omit-delegation-check` teaching flag omits the combined policy's **entire
+ReBAC authority view**, including active delegation, relationship, and coverage
+checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
+execution attestation. Scoring accepts externally edited, correctly bound traces
+and evaluates their decisions rather than rerunning the teaching policy. Retain
+the result manifest and referenced submission manifest alongside metric JSON to
+identify the declared mode and exact submitted bytes.
 
 SynthWorld creates fictional data; it does not anonymise sensitive real records.
 For evaluations, give the system only the task's documented public inputs and keep

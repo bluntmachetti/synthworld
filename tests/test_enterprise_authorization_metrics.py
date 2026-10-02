@@ -608,6 +608,15 @@ def test_status_descriptions_match_scope_selected_cohorts() -> None:
     reference = reference_enterprise_authorization_inputs()
     report = _evaluate(_prediction())
     for name, dimension in (
+        (
+            "effective_decision_accuracy",
+            AuthorizationScoredDimension.EFFECTIVE_DECISION,
+        ),
+        ("final_decision_accuracy", AuthorizationScoredDimension.FINAL_DECISION),
+        (
+            "policy_conflict_detection_accuracy",
+            AuthorizationScoredDimension.POLICY_CONFLICT,
+        ),
         ("binding_status_accuracy", AuthorizationScoredDimension.BINDING_STATUS),
         ("lifecycle_status_accuracy", AuthorizationScoredDimension.LIFECYCLE_STATUS),
     ):
@@ -619,4 +628,8 @@ def test_status_descriptions_match_scope_selected_cohorts() -> None:
         assert metric.denominator == selected
         assert metric.numerator == selected
         assert "scope-selected" in metric.denominator_meaning
-        assert "not_applicable" in metric.denominator_meaning
+        if dimension in {
+            AuthorizationScoredDimension.BINDING_STATUS,
+            AuthorizationScoredDimension.LIFECYCLE_STATUS,
+        }:
+            assert "not_applicable" in metric.denominator_meaning

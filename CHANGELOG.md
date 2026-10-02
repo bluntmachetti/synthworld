@@ -7,6 +7,8 @@ The data contracts (core-world, exposure, extraction, connection, risk, agentic,
 ambiguity, search, temporal, and broker schemas) are versioned independently of the
 package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
+## [Unreleased]
+
 ## [0.18.0] - Unreleased
 
 ### Added
@@ -30,13 +32,20 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 - Package and documentation positioning now covers identity, privacy, and access
   testing while retaining the original identity quickstart and interfaces.
-- Enterprise binding/lifecycle denominator descriptions now correctly identify all
-  scope-selected cells, including `not_applicable`. Scoring arithmetic is unchanged.
+- Enterprise denominator descriptions now identify their scope-selected cohorts,
+  including `not_applicable` binding/lifecycle statuses. Scoring arithmetic is unchanged.
 - Documented the declaration-only limit of the existing live-lab claim gate.
 - Remeasured the external scale performance receipt against the candidate's lock
   file; generated public artifact digests remain identical.
 
-No frozen benchmark bytes, generation contracts, or existing CLI commands changed.
+- Agentic evaluation `--summary` now reports non-null observation counts for every
+  optional trace field. JSON report schemas and scoring arithmetic are unchanged.
+- Faulty-demo reports label the omitted ReBAC authority view explicitly. Result
+  manifests retain the declared setting without claiming execution attestation.
+- Release publication checks reject undated release notes and candidate install
+  instructions before uploading a distribution.
+
+No frozen benchmark bytes or generation contracts changed.
 
 ## [0.17.0] - 2026-08-21
 
@@ -686,6 +695,7 @@ squashed; internal 0.x iterations are not part of this repository.
   secret scan.
 
 [Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...HEAD
+[0.18.0]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...HEAD
 [0.17.0]: https://github.com/bluntmachetti/synthworld/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bluntmachetti/synthworld/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...v0.15.0
