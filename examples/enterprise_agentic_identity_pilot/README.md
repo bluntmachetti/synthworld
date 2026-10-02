@@ -13,7 +13,7 @@ reference truth.
 
 ## Run the complete demo
 
-From a checkout of the unreleased 0.18.0 candidate:
+From a checkout of SynthWorld 0.18.0:
 
 ```bash
 uv run python -m examples.enterprise_agentic_identity_pilot run --output authority-demo
@@ -24,8 +24,8 @@ Open `authority-demo/results/policy-comparison.html`, then compare the broken
 run. Omitting the ReBAC authority view makes the combined policy incorrectly allow
 the post-revocation action. The generated public world stays identical.
 
-The candidate wheel also provides `synthworld-demo run --output authority-demo`;
-this command is not available in the published 0.17.0 release. See the
+The 0.18.0 wheel also provides `synthworld-demo run --output authority-demo`.
+See the
 [quickstart](../../docs/guides/agent-authorisation-quickstart.md) for installation
 and the limits of this seven-case teaching example.
 

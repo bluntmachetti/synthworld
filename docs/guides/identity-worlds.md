@@ -8,7 +8,7 @@ imports, and privacy or matching workflows. No agent or policy engine is needed.
 With Python 3.12 or newer:
 
 ```bash
-pip install idcognito-synthworld==0.17.0
+pip install idcognito-synthworld==0.18.0
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 

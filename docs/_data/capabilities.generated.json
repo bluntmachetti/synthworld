@@ -15,7 +15,7 @@
   },
   "releases": [
     {
-      "heading": "[0.18.0] - Unreleased",
+      "heading": "[0.18.0] - 2026-10-02",
       "id": "changelog:0.18.0",
       "version": "0.18.0"
     },
@@ -400,9 +400,9 @@
       "path": "CHANGELOG.md"
     },
     {
-      "anchor": "0180---unreleased",
-      "heading": "[0.18.0] - Unreleased",
-      "id": "route:CHANGELOG.md#0180---unreleased",
+      "anchor": "0180---2026-10-02",
+      "heading": "[0.18.0] - 2026-10-02",
+      "id": "route:CHANGELOG.md#0180---2026-10-02",
       "path": "CHANGELOG.md"
     },
     {

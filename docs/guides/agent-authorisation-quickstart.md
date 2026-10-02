@@ -26,16 +26,8 @@ not rank RBAC, ABAC, and ReBAC as general approaches.
 
 ## Run the demo
 
-**Release status: 0.18.0 candidate, not yet published.** The `synthworld-demo`
-command is new in this candidate and is not present in 0.17.0. To preview from this
-change's source checkout:
-
-```bash
-uv sync --locked --all-groups
-uv run python -m examples.enterprise_agentic_identity_pilot run --output authority-demo
-```
-
-After 0.18.0 is published, the installed-package path is:
+The `synthworld-demo` command requires SynthWorld 0.18.0 or newer and Python
+3.12 or newer. Install the pinned package in a virtual environment:
 
 ```bash
 pip install idcognito-synthworld==0.18.0
@@ -67,7 +59,8 @@ identify the declared mode and exact submitted bytes.
 synthworld-demo run --omit-delegation-check --output authority-demo-broken
 ```
 
-For a source preview, replace `synthworld-demo` with
+To run from a source checkout, first use `uv sync --locked --all-groups`, then
+replace `synthworld-demo` with
 `uv run python -m examples.enterprise_agentic_identity_pilot`.
 
 Open the second comparison report. Find **post revocation action**: the expected
