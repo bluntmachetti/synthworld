@@ -40,7 +40,7 @@ does not enforce isolation by itself.
 | A standards-shaped product boundary | SCIM, OpenFGA, or AuthZEN projection | Python plus a project transport adapter |
 
 The generated enterprise-agentic and enterprise authorization families are preview
-capabilities on current `main`. Pin the package version and contracts used by a
+capabilities in 0.18.0. Pin the package version and contracts used by a
 pipeline rather than following an unbounded latest release.
 
 ## Pin the reproducibility inputs
@@ -48,7 +48,7 @@ pipeline rather than following an unbounded latest release.
 Use Python 3.12 or newer and pin the distribution in the consuming project:
 
 ```text
-idcognito-synthworld==0.17.0
+idcognito-synthworld==0.18.0
 ```
 
 Retain these inputs with every result:

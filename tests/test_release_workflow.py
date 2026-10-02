@@ -104,6 +104,8 @@ def test_release_documentation_gate_rejects_candidate_and_stale_instructions(
         "docs/index.md",
         "docs/getting-started.md",
         "docs/guides/identity-worlds.md",
+        "docs/guides/development-pipelines.md",
+        ".github/DISCUSSION_TEMPLATE/experiment-results.yml",
         "examples/enterprise_agentic_identity_pilot/README.md",
     )
     for name in other_docs:
