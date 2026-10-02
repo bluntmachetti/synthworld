@@ -10,7 +10,7 @@ Use Python 3.12 or newer, preferably in a virtual environment:
 ```bash
 python -m venv .venv
 # Activate the environment using the command for your operating system.
-pip install idcognito-synthworld==0.17.0
+pip install idcognito-synthworld==0.18.0
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
@@ -27,9 +27,9 @@ the data and check reproducibility. For matching or privacy evaluation, use
 
 Start with the [complete demo](guides/agent-authorisation-quickstart.md). It provides
 a browser preview and runs generation, teaching policies, and scoring without an
-unwritten adapter or a pre-existing trace file. The packaged command is new in the
-unreleased 0.18.0 candidate; the guide distinguishes the source preview from the
-post-release installation path.
+unwritten adapter or a pre-existing trace file. The packaged `synthworld-demo`
+command is included in 0.18.0; the guide covers installation and source-checkout
+usage.
 
 After the demo, follow [agent authority](guides/agent-authority.md) to understand the
 trace contract, then [development pipelines](guides/development-pipelines.md) for

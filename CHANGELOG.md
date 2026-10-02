@@ -9,7 +9,7 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
 ## [Unreleased]
 
-## [0.18.0] - Unreleased
+## [0.18.0] - 2026-10-02
 
 ### Added
 
@@ -35,7 +35,7 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 - Enterprise denominator descriptions now identify their scope-selected cohorts,
   including `not_applicable` binding/lifecycle statuses. Scoring arithmetic is unchanged.
 - Documented the declaration-only limit of the existing live-lab claim gate.
-- Remeasured the external scale performance receipt against the candidate's lock
+- Remeasured the external scale performance receipt against the release's lock
   file; generated public artifact digests remain identical.
 - Agentic evaluation `--summary` now reports non-null observation counts for every
   optional trace field. JSON report schemas and scoring arithmetic are unchanged.
@@ -694,8 +694,8 @@ squashed; internal 0.x iterations are not part of this repository.
   gate for unexplained skips, CI on Python 3.12 and 3.14, and a full-history
   secret scan.
 
-[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...HEAD
-[0.18.0]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...HEAD
+[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.18.0...HEAD
+[0.18.0]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/bluntmachetti/synthworld/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/bluntmachetti/synthworld/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/bluntmachetti/synthworld/compare/v0.14.0...v0.15.0

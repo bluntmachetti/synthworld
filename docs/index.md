@@ -12,7 +12,7 @@ still has authority after credentials and delegations change.
   you need them.
 - **[Test agent authorisation](guides/agent-authorisation-quickstart.md)** — seven
   concrete action cases for delegated access and agent lifecycle decisions.
-  Compare teaching policies, remove a delegation check, and inspect the failure.
+  Compare teaching policies, omit the ReBAC authority view, and inspect the failure.
 
 Both paths work locally. Synthetic identity generation needs no policy engine,
 agent runtime, or authorisation setup. Python 3.12 or newer is required.
@@ -20,7 +20,7 @@ agent runtime, or authorisation setup. Python 3.12 or newer is required.
 ## Start with connected identity data
 
 ```bash
-pip install idcognito-synthworld==0.17.0
+pip install idcognito-synthworld==0.18.0
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
@@ -54,10 +54,9 @@ system or prove that an execution path enforces its decisions.
 
 ## Versions and evidence
 
-The identity commands above are available in release 0.17.0. The packaged demo is
-prepared for 0.18.0; its quickstart labels the release status and provides a source
-preview path until publication. Other reference pages track current main and may
-include unreleased functionality.
+Both first-use paths above target SynthWorld 0.18.0. Pin the package version for
+repeatable integrations. Other reference pages track current main unless they
+state a specific released version; check each capability's availability.
 
 Where a benchmark provides public inputs, those inputs are physically separated
 from expected answers. Published reference truth is inspectable; this prevents

@@ -12,23 +12,19 @@ access decisions across delegation, credential, and lifecycle changes.
 | Create repeatable connected fixtures for matching, privacy, and graph workflows. | Inspect concrete access failures and compare teaching policies before connecting your system. |
 | [Identity quickstart](https://bluntmachetti.github.io/synthworld/guides/identity-worlds/) | [Agent demo and report](https://bluntmachetti.github.io/synthworld/guides/agent-authorisation-quickstart/) |
 
-Identity generation is available in release 0.17.0 and needs no policy engine:
+Generate connected synthetic identities with 0.18.0; no policy engine is needed:
 
 ```bash
-pip install idcognito-synthworld==0.17.0
+pip install idcognito-synthworld==0.18.0
 synthworld generate --seed 20260719 --persona-count 10 --output world.json
 ```
 
-The packaged agent demo is new in the unreleased 0.18.0 candidate. From this
-source checkout, run the complete teaching exercise:
+The packaged agent demo is new in 0.18.0. With the package installed, run the
+complete teaching exercise:
 
 ```bash
-uv sync --locked --all-groups
-uv run python -m examples.enterprise_agentic_identity_pilot run --output authority-demo
+synthworld-demo run --output authority-demo
 ```
-
-For the installed 0.18.0 package, after publication, use
-`synthworld-demo run --output authority-demo` instead of the source-checkout command.
 
 Open `authority-demo/results/policy-comparison.html`. Rerun in a new directory
 with `--omit-delegation-check` to omit the combined ReBAC authority view and allow a

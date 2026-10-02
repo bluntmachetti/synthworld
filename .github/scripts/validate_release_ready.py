@@ -37,6 +37,8 @@ def validate_release_ready(root: Path) -> None:
         "docs/index.md",
         "docs/getting-started.md",
         "docs/guides/identity-worlds.md",
+        "docs/guides/development-pipelines.md",
+        ".github/DISCUSSION_TEMPLATE/experiment-results.yml",
         "examples/enterprise_agentic_identity_pilot/README.md",
     ):
         text = (root / name).read_text(encoding="utf-8")
