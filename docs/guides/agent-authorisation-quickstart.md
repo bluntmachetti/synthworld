@@ -53,7 +53,15 @@ runner with separate jobs or mounts as described in the
 
 ## Omit the authority view and see the failure
 
-Use the same seed and omit the combined policy's ReBAC authority view:
+Use the same seed for the following comparison.
+
+The `--omit-delegation-check` teaching flag omits the combined policy's **entire
+ReBAC authority view**, including active delegation, relationship, and coverage
+checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
+execution attestation. Scoring accepts externally edited, correctly bound traces
+and evaluates their decisions rather than rerunning the teaching policy. Retain
+the result manifest and referenced submission manifest alongside metric JSON to
+identify the declared mode and exact submitted bytes.
 
 ```bash
 synthworld-demo run --omit-delegation-check --output authority-demo-broken
@@ -64,13 +72,14 @@ For a source preview, replace `synthworld-demo` with
 
 Open the second comparison report. Find **post revocation action**: the expected
 decision is deny, but the modified combined policy allows it. Its role and
-credential checks still pass; the missing active-delegation check causes the
+credential checks still pass; the omitted ReBAC authority view causes the
 incorrect allow. Combined action accuracy falls from 7/7 to 6/7. The report also
 shows the effect on audit-time temporal validity.
 
-Restore the check by rerunning without the flag in a third, new output directory.
-The package, seed, and world remain the same; the deliberately omitted policy
-check is recorded in the submission manifest and report.
+Restore the authority view by rerunning without the flag in a third, new output
+directory.
+The package, seed, and world remain the same; the deliberately omitted authority
+view is declared in the submission manifest and report.
 
 ## Know what you measured
 
@@ -100,11 +109,3 @@ A maintained external-engine integration is a separate next milestone.
 
 If you wanted fictional identity data rather than policy tests, start with
 [synthetic identity worlds](https://bluntmachetti.github.io/synthworld/guides/identity-worlds/).
-
-The `--omit-delegation-check` teaching flag omits the combined policy's **entire
-ReBAC authority view**, including active delegation, relationship, and coverage
-checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
-execution attestation. Scoring accepts externally edited, correctly bound traces
-and evaluates their decisions rather than rerunning the teaching policy. Retain
-the result manifest and referenced submission manifest alongside metric JSON to
-identify the declared mode and exact submitted bytes.

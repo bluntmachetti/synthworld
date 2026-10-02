@@ -37,7 +37,6 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 - Documented the declaration-only limit of the existing live-lab claim gate.
 - Remeasured the external scale performance receipt against the candidate's lock
   file; generated public artifact digests remain identical.
-
 - Agentic evaluation `--summary` now reports non-null observation counts for every
   optional trace field. JSON report schemas and scoring arithmetic are unchanged.
 - Faulty-demo reports label the omitted ReBAC authority view explicitly. Result
@@ -45,7 +44,8 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 - Release publication checks reject undated release notes and candidate install
   instructions before uploading a distribution.
 
-No frozen benchmark bytes or generation contracts changed.
+No frozen benchmark bytes or generation contracts changed. The generated enterprise
+metrics example changes only denominator-description strings.
 
 ## [0.17.0] - 2026-08-21
 

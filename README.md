@@ -31,7 +31,7 @@ For the installed 0.18.0 package, after publication, use
 `synthworld-demo run --output authority-demo` instead of the source-checkout command.
 
 Open `authority-demo/results/policy-comparison.html`. Rerun in a new directory
-with `--omit-delegation-check` to see the combined policy incorrectly allow a
+with `--omit-delegation-check` to omit the combined ReBAC authority view and allow a
 post-revocation action. This uses local teaching policies, not a deployed IAM system.
 
 The `--omit-delegation-check` teaching flag omits the combined policy's **entire

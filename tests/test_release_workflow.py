@@ -74,7 +74,15 @@ def test_release_documentation_gate_rejects_candidate_and_stale_instructions(
     changelog.write_text("## [0.18.0] - Unreleased\n")
     with pytest.raises(ValueError, match="date the"):
         validate(tmp_path)
-    changelog.write_text("## [0.18.0] - 2026-10-02\n")
+    dated = "## [0.18.0] - 2026-10-02\n"
+    changelog.write_text(dated)
+    with pytest.raises(ValueError, match="changelog links"):
+        validate(tmp_path)
+    links = (
+        "[0.18.0]: https://github.com/bluntmachetti/synthworld/compare/v0.17.0...v0.18.0\n"
+        "[Unreleased]: https://github.com/bluntmachetti/synthworld/compare/v0.18.0...HEAD\n"
+    )
+    changelog.write_text(dated + links)
     quickstart = tmp_path / "docs/guides/agent-authorisation-quickstart.md"
     quickstart.parent.mkdir(parents=True)
     ready = (
@@ -92,7 +100,23 @@ def test_release_documentation_gate_rejects_candidate_and_stale_instructions(
     with pytest.raises(ValueError, match="installed demo"):
         validate(tmp_path)
     readme.write_text(ready)
+    other_docs = (
+        "docs/index.md",
+        "docs/getting-started.md",
+        "docs/guides/identity-worlds.md",
+        "examples/enterprise_agentic_identity_pilot/README.md",
+    )
+    for name in other_docs:
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("Installation guide")
     validate(tmp_path)
+    for name in other_docs:
+        path = tmp_path / name
+        path.write_text("source preview until publication")
+        with pytest.raises(ValueError, match="candidate instructions"):
+            validate(tmp_path)
+        path.write_text("Installation guide")
     quickstart.write_text("not yet published")
     with pytest.raises(ValueError, match="candidate instructions"):
         validate(tmp_path)

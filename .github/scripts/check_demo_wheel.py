@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import sysconfig
 import tempfile
 from pathlib import Path
 
@@ -15,6 +16,10 @@ if "site-packages" not in str(synthworld_demo.__file__):
 executable = shutil.which("synthworld-demo")
 if executable is None:
     raise RuntimeError("installed synthworld-demo entry point is missing")
+if Path(executable).parent.resolve() != Path(sysconfig.get_path("scripts")).resolve():
+    raise RuntimeError(
+        "demo entry point must belong to the installed-wheel environment"
+    )
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     for name, extra in (("baseline", []), ("broken", ["--omit-delegation-check"])):

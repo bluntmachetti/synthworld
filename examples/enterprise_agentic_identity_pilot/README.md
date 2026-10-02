@@ -21,7 +21,7 @@ uv run python -m examples.enterprise_agentic_identity_pilot run --output authori
 ```
 
 Open `authority-demo/results/policy-comparison.html`, then compare the broken
-run. Omitting the delegation check makes the combined policy incorrectly allow
+run. Omitting the ReBAC authority view makes the combined policy incorrectly allow
 the post-revocation action. The generated public world stays identical.
 
 The candidate wheel also provides `synthworld-demo run --output authority-demo`;
@@ -32,6 +32,14 @@ and the limits of this seven-case teaching example.
 The shortcut launches the following stages as separate processes. It is not an
 operating-system sandbox; use the public-only mount described below when testing
 an external adapter.
+
+The `--omit-delegation-check` teaching flag omits the combined policy's **entire
+ReBAC authority view**, including active delegation, relationship, and coverage
+checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
+execution attestation. Scoring accepts externally edited, correctly bound traces
+and evaluates their decisions rather than rerunning the teaching policy. Retain
+the result manifest and referenced submission manifest alongside metric JSON to
+identify the declared mode and exact submitted bytes.
 
 ## Run the three process boundaries
 
@@ -172,11 +180,3 @@ This pilot is intentionally bounded:
 
 Retain the seed, package version or wheel digest, generated manifests, policy and
 submission bytes, and evaluator results when sharing the experiment.
-
-The `--omit-delegation-check` teaching flag omits the combined policy's **entire
-ReBAC authority view**, including active delegation, relationship, and coverage
-checks; RBAC and ABAC remain enabled. The manifest setting is a declaration, not
-execution attestation. Scoring accepts externally edited, correctly bound traces
-and evaluates their decisions rather than rerunning the teaching policy. Retain
-the result manifest and referenced submission manifest alongside metric JSON to
-identify the declared mode and exact submitted bytes.
