@@ -135,13 +135,13 @@ uv run python tools/measure_enterprise_agentic_scale.py \
   --output enterprise-agentic-tier-performance.json
 ```
 
-The repository receipt records Python 3.12.12 on Linux with the locked dependency
+The repository receipt records Python 3.13.11 on Linux with the locked dependency
 digest. Three-iteration medians were:
 
 | Tier | Generate | Serialise | Replay | Score | Peak traced memory |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `standard` | 2.894 s | 0.035 s | 0.056 s | 0.048 s | 5,465,472 bytes |
-| `longitudinal` | 4.043 s | 0.037 s | 0.061 s | 0.048 s | 5,480,891 bytes |
+| `standard` | 3.318 s | 0.042 s | 0.077 s | 0.069 s | 5,459,684 bytes |
+| `longitudinal` | 4.749 s | 0.046 s | 0.081 s | 0.084 s | 5,474,688 bytes |
 
 These are environment-specific observations, not deterministic promises. Each row
 binds its resolved configuration and complete public artifact-set digest in

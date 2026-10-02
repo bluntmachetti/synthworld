@@ -460,12 +460,6 @@
       "path": "CHANGELOG.md"
     },
     {
-      "anchor": "added-13",
-      "heading": "Added",
-      "id": "route:CHANGELOG.md#added-13",
-      "path": "CHANGELOG.md"
-    },
-    {
       "anchor": "added-2",
       "heading": "Added",
       "id": "route:CHANGELOG.md#added-2",
@@ -583,12 +577,6 @@
       "anchor": "security",
       "heading": "Security",
       "id": "route:CHANGELOG.md#security",
-      "path": "CHANGELOG.md"
-    },
-    {
-      "anchor": "unreleased",
-      "heading": "[Unreleased]",
-      "id": "route:CHANGELOG.md#unreleased",
       "path": "CHANGELOG.md"
     },
     {

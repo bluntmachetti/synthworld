@@ -18,6 +18,13 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
   delegation check exposes the post-revocation failure without changing the world.
 - Case-by-case decision reporting and an explicit description of unmeasured
   identity, provenance, and execution capabilities.
+- **Agent-spy PII-to-identity evidence.** The experiments catalogue now records
+  the corrected, locally frozen external-consumer study of detector-error
+  propagation into identity resolution, relationship inference, and exposure
+  assessment over SynthWorld 0.17.0. The evidence page preserves the run identity,
+  independent metric denominators, isolation and determinism checks, limitations,
+  and local-only artifact status without presenting the result as a SynthWorld
+  benchmark, product claim, or independently reproducible release.
 
 ### Changed
 
@@ -26,20 +33,10 @@ package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 - Enterprise binding/lifecycle denominator descriptions now correctly identify all
   scope-selected cells, including `not_applicable`. Scoring arithmetic is unchanged.
 - Documented the declaration-only limit of the existing live-lab claim gate.
+- Remeasured the external scale performance receipt against the candidate's lock
+  file; generated public artifact digests remain identical.
 
 No frozen benchmark bytes, generation contracts, or existing CLI commands changed.
-
-## [Unreleased]
-
-### Added
-
-- **Agent-spy PII-to-identity evidence.** The experiments catalogue now records
-  the corrected, locally frozen external-consumer study of detector-error
-  propagation into identity resolution, relationship inference, and exposure
-  assessment over SynthWorld 0.17.0. The evidence page preserves the run identity,
-  independent metric denominators, isolation and determinism checks, limitations,
-  and local-only artifact status without presenting the result as a SynthWorld
-  benchmark, product claim, or independently reproducible release.
 
 ## [0.17.0] - 2026-08-21
 
