@@ -593,6 +593,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 1
 
         if args.summary:
+            if args.task in {"agentic", "generated-enterprise-agentic"}:
+                print(_agentic_observation_summary(text))
             print(_metric_table(report))
         else:
             print(report.model_dump_json(indent=2))
@@ -1310,6 +1312,33 @@ def _validation_summary(
             f"{code.ljust(widths[2])}  {subject}{item.message}"
         )
     return "\n".join(lines)
+
+
+def _agentic_observation_summary(text: str) -> str:
+    rows = trace_submission_from_jsonl(text).rows
+    fields = (
+        ("Action-time decisions", "decision"),
+        ("Audit-time decisions", "decision_at_audit"),
+        ("Principal identities", "originating_principal_id"),
+        ("Actor attribution", "attributed_actor_id"),
+        ("Evidence-reference lists", "evidence_refs"),
+    )
+    counts = [
+        f"{label}: {sum(getattr(row, field) is not None for row in rows)}"
+        f"/{len(rows)} reported"
+        for label, field in fields
+    ]
+    return "\n".join(
+        [
+            "Observation coverage "
+            "(reported fields, not independently verified evidence):",
+            *counts,
+            "Absent observations are unmeasured capabilities, "
+            "even when scored as zero.",
+            "An empty adapter can have perfect least-privilege accuracy; "
+            "check decisions and recall.",
+        ]
+    )
 
 
 def _metric_table(report: EvaluationReport) -> str:

@@ -73,6 +73,8 @@ type _Policy = Callable[[_PolicyContext], bool]
 
 def build_policy_traces(
     public: AgenticPublicBundle,
+    *,
+    omit_delegation_check: bool = False,
 ) -> tuple[tuple[str, AgenticTraceSubmission], ...]:
     """Run every public-only policy in one stable, presentation-ready order."""
 
@@ -80,7 +82,12 @@ def build_policy_traces(
         (PolicyStrategy.RBAC.value, build_rbac_trace(public)),
         (PolicyStrategy.ABAC.value, build_abac_trace(public)),
         (PolicyStrategy.REBAC.value, build_rebac_trace(public)),
-        (PolicyStrategy.COMBINED.value, build_combined_trace(public)),
+        (
+            PolicyStrategy.COMBINED.value,
+            _build_trace(public, _combined_without_delegation)
+            if omit_delegation_check
+            else build_combined_trace(public),
+        ),
     )
 
 
@@ -338,6 +345,12 @@ def _rebac_allows(context: _PolicyContext) -> bool:
 
 def _combined_allows(context: _PolicyContext) -> bool:
     return _rbac_allows(context) and _rebac_allows(context) and _abac_allows(context)
+
+
+def _combined_without_delegation(context: _PolicyContext) -> bool:
+    """Deliberate teaching defect: valid credentials without active delegation."""
+
+    return _rbac_allows(context) and _abac_allows(context)
 
 
 def _decision(allowed: bool) -> Decision:

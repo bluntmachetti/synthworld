@@ -11,6 +11,28 @@ The policies are teaching examples, not the independently versioned
 The generated benchmark remains the source of identity, authority events, and
 reference truth.
 
+## Run the complete demo
+
+From a checkout of the unreleased 0.18.0 candidate:
+
+```bash
+uv run python -m examples.enterprise_agentic_identity_pilot run --output authority-demo
+uv run python -m examples.enterprise_agentic_identity_pilot run --output authority-demo-broken --omit-delegation-check
+```
+
+Open `authority-demo/results/policy-comparison.html`, then compare the broken
+run. Omitting the delegation check makes the combined policy incorrectly allow
+the post-revocation action. The generated public world stays identical.
+
+The candidate wheel also provides `synthworld-demo run --output authority-demo`;
+this command is not available in the published 0.17.0 release. See the
+[quickstart](../../docs/guides/agent-authorisation-quickstart.md) for installation
+and the limits of this seven-case teaching example.
+
+The shortcut launches the following stages as separate processes. It is not an
+operating-system sandbox; use the public-only mount described below when testing
+an external adapter.
+
 ## Run the three process boundaries
 
 Run these commands from the repository root. Each output path must be absent; the

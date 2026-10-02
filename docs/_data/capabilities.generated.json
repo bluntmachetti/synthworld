@@ -5,11 +5,20 @@
       {
         "name": "synthworld",
         "target": "synthworld.cli:main"
+      },
+      {
+        "name": "synthworld-demo",
+        "target": "synthworld_demo.__main__:main"
       }
     ],
-    "version": "0.17.0"
+    "version": "0.18.0"
   },
   "releases": [
+    {
+      "heading": "[0.18.0] - Unreleased",
+      "id": "changelog:0.18.0",
+      "version": "0.18.0"
+    },
     {
       "heading": "[0.17.0] - 2026-08-21",
       "id": "changelog:0.17.0",
@@ -391,6 +400,12 @@
       "path": "CHANGELOG.md"
     },
     {
+      "anchor": "0180---unreleased",
+      "heading": "[0.18.0] - Unreleased",
+      "id": "route:CHANGELOG.md#0180---unreleased",
+      "path": "CHANGELOG.md"
+    },
+    {
       "anchor": "060---2026-07-20",
       "heading": "[0.6.0] - 2026-07-20",
       "id": "route:CHANGELOG.md#060---2026-07-20",
@@ -442,6 +457,12 @@
       "anchor": "added-12",
       "heading": "Added",
       "id": "route:CHANGELOG.md#added-12",
+      "path": "CHANGELOG.md"
+    },
+    {
+      "anchor": "added-13",
+      "heading": "Added",
+      "id": "route:CHANGELOG.md#added-13",
       "path": "CHANGELOG.md"
     },
     {
@@ -544,6 +565,12 @@
       "anchor": "changed-8",
       "heading": "Changed",
       "id": "route:CHANGELOG.md#changed-8",
+      "path": "CHANGELOG.md"
+    },
+    {
+      "anchor": "changed-9",
+      "heading": "Changed",
+      "id": "route:CHANGELOG.md#changed-9",
       "path": "CHANGELOG.md"
     },
     {
@@ -1075,9 +1102,9 @@
       "path": "README.md"
     },
     {
-      "anchor": "choose-what-you-want-to-do",
-      "heading": "Choose what you want to do",
-      "id": "route:README.md#choose-what-you-want-to-do",
+      "anchor": "choose-your-starting-point",
+      "heading": "Choose your starting point",
+      "id": "route:README.md#choose-your-starting-point",
       "path": "README.md"
     },
     {
@@ -1102,12 +1129,6 @@
       "anchor": "evaluate-a-system",
       "heading": "Evaluate a system",
       "id": "route:README.md#evaluate-a-system",
-      "path": "README.md"
-    },
-    {
-      "anchor": "featured-agent-authority",
-      "heading": "Featured: agent authority",
-      "id": "route:README.md#featured-agent-authority",
       "path": "README.md"
     },
     {
@@ -2893,34 +2914,70 @@
       "path": "docs/getting-started.md"
     },
     {
-      "anchor": "choose-the-next-guide",
-      "heading": "Choose the next guide",
-      "id": "route:docs/getting-started.md#choose-the-next-guide",
+      "anchor": "develop-or-run-repository-examples",
+      "heading": "Develop or run repository examples",
+      "id": "route:docs/getting-started.md#develop-or-run-repository-examples",
       "path": "docs/getting-started.md"
     },
     {
-      "anchor": "create-a-deterministic-world",
-      "heading": "Create a deterministic world",
-      "id": "route:docs/getting-started.md#create-a-deterministic-world",
+      "anchor": "generate-connected-synthetic-identities",
+      "heading": "Generate connected synthetic identities",
+      "id": "route:docs/getting-started.md#generate-connected-synthetic-identities",
       "path": "docs/getting-started.md"
     },
     {
       "anchor": "getting-started",
-      "heading": "Getting Started",
+      "heading": "Getting started",
       "id": "route:docs/getting-started.md#getting-started",
       "path": "docs/getting-started.md"
     },
     {
-      "anchor": "install",
-      "heading": "Install",
-      "id": "route:docs/getting-started.md#install",
+      "anchor": "test-agent-authorisation",
+      "heading": "Test agent authorisation",
+      "id": "route:docs/getting-started.md#test-agent-authorisation",
       "path": "docs/getting-started.md"
     },
     {
-      "anchor": "run-the-foundational-walkthrough",
-      "heading": "Run the foundational walkthrough",
-      "id": "route:docs/getting-started.md#run-the-foundational-walkthrough",
-      "path": "docs/getting-started.md"
+      "anchor": "",
+      "heading": "",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md",
+      "path": "docs/guides/agent-authorisation-quickstart.md"
+    },
+    {
+      "anchor": "catch-an-agent-authorisation-failure",
+      "heading": "Catch an agent authorisation failure",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md#catch-an-agent-authorisation-failure",
+      "path": "docs/guides/agent-authorisation-quickstart.md"
+    },
+    {
+      "anchor": "connect-your-own-system-next",
+      "heading": "Connect your own system next",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md#connect-your-own-system-next",
+      "path": "docs/guides/agent-authorisation-quickstart.md"
+    },
+    {
+      "anchor": "inspect-the-result-first",
+      "heading": "Inspect the result first",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md#inspect-the-result-first",
+      "path": "docs/guides/agent-authorisation-quickstart.md"
+    },
+    {
+      "anchor": "know-what-you-measured",
+      "heading": "Know what you measured",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md#know-what-you-measured",
+      "path": "docs/guides/agent-authorisation-quickstart.md"
+    },
+    {
+      "anchor": "remove-one-check-and-see-the-failure",
+      "heading": "Remove one check and see the failure",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md#remove-one-check-and-see-the-failure",
+      "path": "docs/guides/agent-authorisation-quickstart.md"
+    },
+    {
+      "anchor": "run-the-demo",
+      "heading": "Run the demo",
+      "id": "route:docs/guides/agent-authorisation-quickstart.md#run-the-demo",
+      "path": "docs/guides/agent-authorisation-quickstart.md"
     },
     {
       "anchor": "",
@@ -3367,9 +3424,27 @@
       "path": "docs/guides/identity-worlds.md"
     },
     {
-      "anchor": "identity-worlds",
-      "heading": "Identity worlds",
-      "id": "route:docs/guides/identity-worlds.md#identity-worlds",
+      "anchor": "check-that-your-fixture-repeats",
+      "heading": "Check that your fixture repeats",
+      "id": "route:docs/guides/identity-worlds.md#check-that-your-fixture-repeats",
+      "path": "docs/guides/identity-worlds.md"
+    },
+    {
+      "anchor": "choose-what-to-test-next",
+      "heading": "Choose what to test next",
+      "id": "route:docs/guides/identity-worlds.md#choose-what-to-test-next",
+      "path": "docs/guides/identity-worlds.md"
+    },
+    {
+      "anchor": "generate-a-first-world",
+      "heading": "Generate a first world",
+      "id": "route:docs/guides/identity-worlds.md#generate-a-first-world",
+      "path": "docs/guides/identity-worlds.md"
+    },
+    {
+      "anchor": "generate-connected-synthetic-identity-data",
+      "heading": "Generate connected synthetic identity data",
+      "id": "route:docs/guides/identity-worlds.md#generate-connected-synthetic-identity-data",
       "path": "docs/guides/identity-worlds.md"
     },
     {
@@ -3403,57 +3478,39 @@
       "path": "docs/index.md"
     },
     {
-      "anchor": "capability-and-benchmark-status",
-      "heading": "Capability and benchmark status",
-      "id": "route:docs/index.md#capability-and-benchmark-status",
+      "anchor": "choose-your-starting-point",
+      "heading": "Choose your starting point",
+      "id": "route:docs/index.md#choose-your-starting-point",
       "path": "docs/index.md"
     },
     {
-      "anchor": "choose-your-goal",
-      "heading": "Choose your goal",
-      "id": "route:docs/index.md#choose-your-goal",
+      "anchor": "connected-synthetic-identities-repeatable-tests",
+      "heading": "Connected synthetic identities. Repeatable tests.",
+      "id": "route:docs/index.md#connected-synthetic-identities-repeatable-tests",
       "path": "docs/index.md"
     },
     {
-      "anchor": "current-focus",
-      "heading": "Current focus",
-      "id": "route:docs/index.md#current-focus",
+      "anchor": "go-further",
+      "heading": "Go further",
+      "id": "route:docs/index.md#go-further",
       "path": "docs/index.md"
     },
     {
-      "anchor": "featured-benchmarks",
-      "heading": "Featured benchmarks",
-      "id": "route:docs/index.md#featured-benchmarks",
+      "anchor": "see-an-authorisation-failure-before-integrating-anything",
+      "heading": "See an authorisation failure before integrating anything",
+      "id": "route:docs/index.md#see-an-authorisation-failure-before-integrating-anything",
       "path": "docs/index.md"
     },
     {
-      "anchor": "five-minute-quickstart",
-      "heading": "Five-minute quickstart",
-      "id": "route:docs/index.md#five-minute-quickstart",
+      "anchor": "start-with-connected-identity-data",
+      "heading": "Start with connected identity data",
+      "id": "route:docs/index.md#start-with-connected-identity-data",
       "path": "docs/index.md"
     },
     {
-      "anchor": "mental-model",
-      "heading": "Mental model",
-      "id": "route:docs/index.md#mental-model",
-      "path": "docs/index.md"
-    },
-    {
-      "anchor": "navigate",
-      "heading": "Navigate",
-      "id": "route:docs/index.md#navigate",
-      "path": "docs/index.md"
-    },
-    {
-      "anchor": "project-links",
-      "heading": "Project links",
-      "id": "route:docs/index.md#project-links",
-      "path": "docs/index.md"
-    },
-    {
-      "anchor": "synthworld-documentation",
-      "heading": "SynthWorld documentation",
-      "id": "route:docs/index.md#synthworld-documentation",
+      "anchor": "versions-and-evidence",
+      "heading": "Versions and evidence",
+      "id": "route:docs/index.md#versions-and-evidence",
       "path": "docs/index.md"
     },
     {
@@ -3547,9 +3604,27 @@
       "path": "docs/reference/metrics.md"
     },
     {
+      "anchor": "enterprise-binding-and-lifecycle-cohorts",
+      "heading": "Enterprise binding and lifecycle cohorts",
+      "id": "route:docs/reference/metrics.md#enterprise-binding-and-lifecycle-cohorts",
+      "path": "docs/reference/metrics.md"
+    },
+    {
+      "anchor": "live-lab-claims",
+      "heading": "Live-lab claims",
+      "id": "route:docs/reference/metrics.md#live-lab-claims",
+      "path": "docs/reference/metrics.md"
+    },
+    {
       "anchor": "metrics",
       "heading": "Metrics",
       "id": "route:docs/reference/metrics.md#metrics",
+      "path": "docs/reference/metrics.md"
+    },
+    {
+      "anchor": "missing-observations-are-not-evidence-of-success",
+      "heading": "Missing observations are not evidence of success",
+      "id": "route:docs/reference/metrics.md#missing-observations-are-not-evidence-of-success",
       "path": "docs/reference/metrics.md"
     },
     {
@@ -3898,6 +3973,12 @@
       "anchor": "policy-roles",
       "heading": "Policy roles",
       "id": "route:examples/enterprise_agentic_identity_pilot/README.md#policy-roles",
+      "path": "examples/enterprise_agentic_identity_pilot/README.md"
+    },
+    {
+      "anchor": "run-the-complete-demo",
+      "heading": "Run the complete demo",
+      "id": "route:examples/enterprise_agentic_identity_pilot/README.md#run-the-complete-demo",
       "path": "examples/enterprise_agentic_identity_pilot/README.md"
     },
     {

@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "docs/**"
+      - "public/**"
       - "AGENTIC_BENCHMARK.md"
       - "BENCHMARKS.md"
       - "CHANGELOG.md"

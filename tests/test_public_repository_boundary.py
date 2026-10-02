@@ -43,6 +43,9 @@ _ALLOWED_CONSUMER_REFERENCE_PATHS = frozenset(
         # Public package installation and PyPI links only. Reviewed as part of the
         # additive plain-Markdown documentation migration on 2026-08-08.
         Path("docs/getting-started.md"),
+        # Public installation instructions only; no private consumer integration.
+        Path("docs/guides/identity-worlds.md"),
+        Path("docs/guides/agent-authorisation-quickstart.md"),
         Path("docs/index.md"),
         # The experiment evidence page identifies the released public package and
         # explicitly excludes consumer integration code. Reviewed with the Phase 2

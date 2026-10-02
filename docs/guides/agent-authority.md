@@ -1,5 +1,9 @@
 # Agent authority
 
+New here? Start with the [complete agent-authorisation demo](https://bluntmachetti.github.io/synthworld/guides/agent-authorisation-quickstart/).
+It creates its own traces and report. The commands below are integration reference:
+`observed-actions.jsonl` must come from your system or an adapter.
+
 Asteria Agentic v1 evaluates whether reported agent actions match delegated
 authority at action time and whether audit evidence reconstructs that decision.
 

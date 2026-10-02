@@ -57,6 +57,9 @@ class SerializationConventionV2(ReceiptModelV2):
     raw_product_output_preserved: Literal[True] = True
 
 
+# LIVE_LAB_CONFORMANCE admits opaque managed-service declarations. It is not
+# proof of contact or execution. See docs/reference/metrics.md and issue #98.
+# Keep the frozen schema and validator unchanged; consumers inspect the evidence.
 class EvidenceClaimV2(StrEnum):
     CANONICAL_CONFORMANCE = "canonical_conformance"
     VARIANT_ROBUSTNESS = "variant_robustness"

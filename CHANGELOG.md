@@ -7,6 +7,28 @@ The data contracts (core-world, exposure, extraction, connection, risk, agentic,
 ambiguity, search, temporal, and broker schemas) are versioned independently of the
 package; see [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
 
+## [0.18.0] - Unreleased
+
+### Added
+
+- Two first-use journeys: connected synthetic identity generation and an agent
+  authorisation demonstration with a browser-viewable sample report.
+- A packaged `synthworld-demo` teaching CLI. Generation, public-only policy
+  execution, and scoring run in separate processes. A deliberate omitted
+  delegation check exposes the post-revocation failure without changing the world.
+- Case-by-case decision reporting and an explicit description of unmeasured
+  identity, provenance, and execution capabilities.
+
+### Changed
+
+- Package and documentation positioning now covers identity, privacy, and access
+  testing while retaining the original identity quickstart and interfaces.
+- Enterprise binding/lifecycle denominator descriptions now correctly identify all
+  scope-selected cells, including `not_applicable`. Scoring arithmetic is unchanged.
+- Documented the declaration-only limit of the existing live-lab claim gate.
+
+No frozen benchmark bytes, generation contracts, or existing CLI commands changed.
+
 ## [Unreleased]
 
 ### Added

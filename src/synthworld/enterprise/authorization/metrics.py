@@ -306,7 +306,9 @@ def evaluate_enterprise_authorization(
                 matches=lambda expected, observed: (
                     observed.binding_status is expected.binding_status
                 ),
-                denominator_meaning="aggregate cells with an applicable binding gate",
+                denominator_meaning=(
+                    "scope-selected cells, including not_applicable binding status"
+                ),
             ),
             _accuracy(
                 family="lifecycle",
@@ -321,7 +323,9 @@ def evaluate_enterprise_authorization(
                 matches=lambda expected, observed: (
                     observed.lifecycle_status is expected.lifecycle_status
                 ),
-                denominator_meaning="aggregate cells with an applicable lifecycle gate",
+                denominator_meaning=(
+                    "scope-selected cells, including not_applicable lifecycle status"
+                ),
             ),
             _accuracy(
                 family="runtime_gate",

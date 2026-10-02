@@ -103,6 +103,7 @@ def canonical_evaluator_report_summary_bytes(
 
 def render_evaluator_report_html(
     *,
+    case_rows: Sequence[tuple[str, ...]] = (),
     world_summary: Mapping[str, int | str],
     strategy_reports: Sequence[tuple[str, EvaluationReport]],
 ) -> bytes:
@@ -132,6 +133,10 @@ def render_evaluator_report_html(
         "default-src 'none'; img-src data:; style-src 'unsafe-inline'; "
         "script-src 'none'; connect-src 'none'; font-src 'none'; "
         "object-src 'none'; base-uri 'none'; form-action 'none'"
+    )
+    case_table = "".join(
+        "<tr>" + "".join(f"<td>{_escape(cell)}</td>" for cell in row) + "</tr>"
+        for row in case_rows
     )
     document = f"""<!doctype html>
 <html lang="en">
@@ -454,6 +459,39 @@ footer {{
     </p>
   </section>
 
+  <section aria-labelledby="cases-heading">
+    <h2 id="cases-heading">Action-time decisions, case by case</h2>
+    <p>Expected outcomes below are evaluator truth. FAIL means a policy decision
+    disagreed with that truth. An attribution case can have a correct allow while
+    attribution itself remains unmeasured by these decision-only policies.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Case</th><th>Expected</th><th>RBAC</th><th>ABAC</th>
+      <th>ReBAC</th><th>Combined</th></tr></thead>
+      <tbody>{case_table}</tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="observations-heading">
+    <h2 id="observations-heading">What was actually tested?</h2>
+    <p><strong>Measured scope:</strong> action-time and audit-time decisions
+    reported by the teaching policies. The case table shows each submitted
+    action-time decision; "not observed" means no decision was reported.</p>
+    <p><strong>Not measured:</strong> independent identity resolution, actor
+    attribution, ownership reconstruction, retained evidence, and real execution
+    or side effects. Zeros for these dimensions in the JSON reports indicate
+    missing observations, not tested failures of those capabilities.</p>
+    <p>A policy that never reports an allow can have perfect least-privilege
+    accuracy. Always read that metric with decision coverage and recall.</p>
+    <h2>Try a controlled failure</h2>
+    <p>Run the same seed with <code>--omit-delegation-check</code>. The combined
+    policy will still check the reader role and credential attributes, but will
+    stop checking active delegation. The post-revocation action can then be
+    incorrectly allowed. Rerun without that flag in a new output directory to
+    restore the check. The world summary records which setting produced this report.</p>
+    <p>These seven constructed cases compare these particular teaching policies;
+    they do not rank RBAC, ABAC, or ReBAC generally or establish production safety.</p>
+  </section>
+
   <details>
     <summary>Reproducibility bindings</summary>
     <dl class="bindings">
@@ -479,12 +517,14 @@ footer {{
 def write_evaluator_report_html(
     output: Path,
     *,
+    case_rows: Sequence[tuple[str, ...]] = (),
     world_summary: Mapping[str, int | str],
     strategy_reports: Sequence[tuple[str, EvaluationReport]],
 ) -> None:
     """Write a new evaluator report without replacing an existing file."""
 
     payload = render_evaluator_report_html(
+        case_rows=case_rows,
         world_summary=world_summary,
         strategy_reports=strategy_reports,
     )
