@@ -30,6 +30,15 @@ def _write_minimal_dist(root: Path) -> Path:
         encoding="utf-8",
     )
     (dist / "blume-search.json").write_text("[]\n", encoding="utf-8")
+    (dist / "demo-report.html").write_text(
+        "<p>EVALUATOR VIEW - CONTAINS REFERENCE TRUTH</p>\n", encoding="utf-8"
+    )
+    quickstart = dist / "guides" / "agent-authorisation-quickstart"
+    quickstart.mkdir(parents=True)
+    (quickstart / "index.html").write_text(
+        '<a href="/synthworld/demo-report.html">Sample report</a>\n',
+        encoding="utf-8",
+    )
     (dist / "changelog" / "CHANGELOG" / "index.html").write_text(
         '<a href="/synthworld/">SynthWorld</a>\n',
         encoding="utf-8",
@@ -74,6 +83,28 @@ def test_symlink_is_rejected(tmp_path: Path) -> None:
 
     assert result.returncode != 0
     assert "unsupported symbolic link" in result.stderr
+
+
+def test_sample_report_link_must_preserve_deployment_base(tmp_path: Path) -> None:
+    dist = _write_minimal_dist(tmp_path)
+    (dist / "guides" / "agent-authorisation-quickstart" / "index.html").write_text(
+        '<a href="../../demo-report.html">Sample report</a>\n', encoding="utf-8"
+    )
+
+    result = _audit(tmp_path)
+
+    assert result.returncode != 0
+    assert "sample report under the deployment base" in result.stderr
+
+
+def test_missing_sample_report_is_rejected(tmp_path: Path) -> None:
+    dist = _write_minimal_dist(tmp_path)
+    (dist / "demo-report.html").unlink()
+
+    result = _audit(tmp_path)
+
+    assert result.returncode != 0
+    assert "required docs output is missing: demo-report.html" in result.stderr
 
 
 def test_source_map_is_rejected(tmp_path: Path) -> None:
